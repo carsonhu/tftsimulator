@@ -120,6 +120,7 @@ class Champion(object):
 
         self.first_takedown = 5  # time of first takedown
         self.num_traits = 0
+        self.stage = 2 # 2, 3, 4, 5, 6
 
         # Divinicorp buffs
         self.divines = {"Morgana": False,
@@ -156,6 +157,7 @@ class Champion(object):
                      self.castTime,
                      self.first_takedown,
                      self.num_traits,
+                     self.stage,
                      self.categoryFive,
                      self.num_targets,
                      self.num_extra_targets)

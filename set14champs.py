@@ -26,7 +26,7 @@ class Kogmaw(Champion):
         self.default_traits = ['Boombot', 'Rapidfire']
         self.buff_duration = 5
         self.manalockDuration = 5
-        self.aspd_bonus = [50, 50, 50]
+        self.aspd_bonus = [55, 55, 55]
         self.items = [buffs.KogUlt()]
         self.castTime = 0
 
@@ -48,7 +48,7 @@ class Kogmaw(Champion):
 class Kindred(Champion):
     def __init__(self, level):
         hp= 500
-        atk = 45
+        atk = 48
         curMana = 0
         fullMana = 50
         aspd = .7
@@ -107,7 +107,7 @@ class Seraphine(Champion):
     canFourStar = False
     def __init__(self, level):
         hp= 500
-        atk = 35
+        atk = 30
         curMana = 0
         fullMana = 60
         aspd = .7
@@ -120,7 +120,7 @@ class Seraphine(Champion):
         self.canFourStar = False
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [240, 360, 550]
+        apScale = [250, 375, 585]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -135,7 +135,7 @@ class Zyra(Champion):
     def __init__(self, level):
         hp= 500
         atk = 30
-        curMana = 10
+        curMana = 0
         fullMana = 60
         aspd = .7
         armor = 15
@@ -146,11 +146,11 @@ class Zyra(Champion):
         self.canFourStar = False
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [250, 375, 585]
+        apScale = [260, 390, 600]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [120, 180, 270]
+        apScale = [130, 195, 300]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -239,9 +239,9 @@ class TwistedFate(Champion):
 class Vayne(Champion):
     def __init__(self, level):
         hp= 550
-        atk = 50
-        curMana = 0
-        fullMana = 60
+        atk = 53
+        curMana = 40
+        fullMana = 80
         aspd = .7
         armor = 20
         mr = 20
@@ -253,12 +253,12 @@ class Vayne(Champion):
         self.castTime = 0
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [.55, .55, .55]
+        adScale = [.5, .5, .5]
         return adScale[level - 1] * AD
 
     def thirdAbilityScaling(self, level, AD, AP):
         apScale = [10, 15, 25]
-        adScale = [1.65, 1.65, 1.65]
+        adScale = [1.6, 1.6, 1.6]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
@@ -284,7 +284,7 @@ class Veigar(Champion):
         self.true_bonus = .4 if self.level == 3 else .25
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [315, 420, 605]
+        apScale = [320, 420, 560]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
@@ -307,7 +307,7 @@ class Draven(Champion):
     # unconfirmed: is spell 1 auto or 0
     def __init__(self, level):
         hp= 700
-        atk = 52
+        atk = 53
         curMana = 30
         fullMana = 120
         aspd = .75
@@ -430,7 +430,7 @@ class Varus(Champion):
         atk = 35
         curMana = 15
         fullMana = 75
-        aspd = .7
+        aspd = .75
         armor = 25
         mr = 25
         super().__init__('Varus', hp, atk, curMana, fullMana, aspd, armor, mr, level)
@@ -498,7 +498,7 @@ class Xayah(Champion):
     # TODO: How many autos is her ult?
     def __init__(self, level):
         hp= 800
-        atk = 63
+        atk = 60
         curMana = 25
         fullMana = 75
         aspd = .8
@@ -547,7 +547,7 @@ class Zeri(Champion):
         self.duration = [5, 5, 10]
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [.5, .5, 2]
+        adScale = [.4, .4, 2]
         return adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
@@ -610,7 +610,7 @@ class Annie(Champion):
         self.amp_level = 0  # amp_level gets modified by AMP
         self.castTime = 1
         self.num_targets = 2
-        self.notes = "# targets is for tibbers"
+        self.notes = "# targets is for tibbers; doesn't account for tibbers dmg so don't trust this at all"
 
     def abilityScaling(self, level, AD, AP):
         apScale = [175, 265, 790]
@@ -642,7 +642,7 @@ class Brand(Champion):
         hp= 800
         atk = 35
         curMana = 25
-        fullMana = 75
+        fullMana = 70
         aspd = .7
         armor = 30
         mr = 30
@@ -718,11 +718,11 @@ class Ziggs(Champion):
         self.notes = "Num targets is for center, extra targets is for further away"
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [240, 360, 1500]
+        apScale = [250, 375, 1500]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [100, 150, 750]
+        apScale = [130, 200, 900]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):

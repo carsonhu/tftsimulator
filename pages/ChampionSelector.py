@@ -46,12 +46,12 @@ with st.sidebar:
         'number of extra targets', min_value=1, max_value=max(3, champ.num_extra_targets+1), value=champ.num_extra_targets)
         champ.num_extra_targets = targets
 
-
     with st.popover("Extra options"):
         class_utilities.first_takedown("Takedown", champ)
         class_utilities.num_traits("Num traits", champ)
         class_utilities.bonus_stats("Bonus Stats", champ)
-
+    stage = class_utilities.stage_selector()
+    champ.stage = stage
 
     st.header("Global Items")
 

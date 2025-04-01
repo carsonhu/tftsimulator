@@ -10,10 +10,7 @@ offensive_craftables = ['Rabadons', 'Bloodthirster', 'HextechGunblade', 'Guinsoo
                         'DynamoEmblem', 'TechieEmblem']
 
 artifacts = ['InfinityForce', 'Fishbones', 'RFC', 'Mittens', 'GamblersBlade',
-             'WitsEndStage2', 'WitsEndStage3', 'WitsEndStage4',
-             'WitsEndStage5', 'WitsEndStage6', 'LichBaneStage2',
-             'LichBaneStage3', 'LichBaneStage4', 'LichBaneStage5',
-             'LichBaneStage6', 'GoldCollector']
+             'WitsEnd', 'LichBane', 'GoldCollector']
 
 radiants = ['RadiantGuardbreaker', 'RadiantShiv', 'RadiantBlue',
             'RadiantArchangels', 'RadiantRunaansHurricane', 'RadiantGuinsoosRageblade',
@@ -227,14 +224,14 @@ class Adaptive(Item):
 
 class RunaansHurricane(Item):
     def __init__(self):
-        super().__init__("Runaan's Hurricane", aspd=10, ad=25, has_radiant=True, phases="preAttack")
+        super().__init__("Runaan's Hurricane", aspd=10, ad=20, has_radiant=True, phases="preAttack")
 
     def performAbility(self, phase, time, champion, input_=0):
-        baseDmg = champion.atk.stat * .6
+        baseDmg = champion.atk.stat * .5
         if len(champion.opponents) > 1:
             champion.doDamage(champion.opponents[1], [], 0, baseDmg, baseDmg,'physical', time)
             if champion.categoryFive:
-                champion.doDamage(champion.opponents[1], [], 0, baseDmg * .85, baseDmg * .85, 'physical', time)              
+                champion.doDamage(champion.opponents[1], [], 0, baseDmg * .85, baseDmg * .75, 'physical', time)              
 
         return 0
 
@@ -407,133 +404,35 @@ class GoldCollector(Item):
     def performAbility(self, phase, time, champion, input_):
         return 0
 
-class UnleashedToxinsI(Item):
-    def __init__(self):
-        super().__init__("Unleashed Toxins I", ap=15, mana=10, phases=["preAbility", "preCombat"])
-        self.dmg = 100
-        self.missiles = 3
-
-    def performAbility(self, phase, time, champion, input_=0):
-            if phase == "preCombat":
-                champion.manaPerAttack.addStat(5)
-            elif phase == "preAbility":
-                champion.doDamage(champion.opponents[0], [], 0, self.dmg * self.missiles,
-                                  self.dmg * self.missiles, 'magical', time)
-            return 0    
-
-class UnleashedToxinsII(Item):
-    def __init__(self):
-        super().__init__("Unleashed Toxins II", ap=25, mana=15, phases=["preAbility", "preCombat"])
-        self.dmg = 175
-        self.missiles = 3
-
-    def performAbility(self, phase, time, champion, input_=0):
-            if phase == "preCombat":
-                champion.manaPerAttack.addStat(5)
-            elif phase == "preAbility":
-                champion.doDamage(champion.opponents[0], [], 0, self.dmg * self.missiles,
-                                  self.dmg * self.missiles, 'magical', time)
-            return 0    
-
-class UnleashedToxinsIII(Item):
-    def __init__(self):
-        super().__init__("Unleashed ToxinsIII", ap=30, mana=30, phases=["preAbility", "preCombat"])
-        self.dmg = 250
-        self.missiles = 5
-        self.bonus_dmg = 150
-
-    def performAbility(self, phase, time, champion, input_=0):
-            if phase == "preCombat":
-                champion.manaPerAttack.addStat(10)
-            elif phase == "preAbility":
-                champion.doDamage(champion.opponents[0], [], 0, self.dmg * self.missiles,
-                                  self.dmg * self.missiles, 'magical', time)
-                champion.doDamage(champion.opponents[0], [], 0, self.bonus_dmg * 8,
-                                  self.bonus_dmg * 8, 'magical', time)
-            return 0    
 
 class LichBane(Item):
-    def __init__(self, stage):
-        super().__init__("Lich Bane (Stage {})".format(stage), ap=30, aspd=30, phases=["preAbility", "preAttack"])
+    def __init__(self):
+        super().__init__("Lich Bane", ap=30, aspd=30, phases=["preAbility", "preAttack"])
         self.dmg = {2: 200, 3: 270, 4: 340, 5: 410, 6: 480}
         self.enhancedAuto = False
-        self.stage = stage
 
     def performAbility(self, phase, time, champion, input_=0):
             if phase == "preAbility":
                 self.enhancedAuto = True
             elif phase == "preAttack":
                 if self.enhancedAuto:
-                    champion.doDamage(champion.opponents[0], [], 0, self.dmg[self.stage],
-                                      self.dmg[self.stage], 'magical', time)
+                    dmg = self.dmg[champion.stage]
+                    champion.doDamage(champion.opponents[0], [], 0, dmg,
+                                      dmg, 'magical', time)
                     self.enhancedAuto = False
             return 0    
 
-class LichBaneStage2(LichBane):
-    def __init__(self):
-        super().__init__(2)
-        
-class LichBaneStage3(LichBane):
-    def __init__(self):
-        super().__init__(3)
 
-class LichBaneStage4(LichBane):
+class WitsEnd(Item):
     def __init__(self):
-        super().__init__(4)
-
-class LichBaneStage5(LichBane):
-    def __init__(self):
-        super().__init__(5)
-
-class LichBaneStage6(LichBane):
-    def __init__(self):
-        super().__init__(6)
-
-class WitsEndStage2(Item):
-    def __init__(self):
-        super().__init__("Wit's End (Stage 2)", aspd=30, mr=30, phases="preAttack")
+        super().__init__("Wit's End", aspd=30, mr=30, phases="preAttack")
+        self.dmg = {2: 42, 3: 60, 4: 75, 5: 90, 6: 100}
 
     def performAbility(self, phase, time, champion, input_=0):
-        baseDmg = 42
+        baseDmg = self.dmg[champion.stage]
         champion.doDamage(champion.opponents[0], [], 0, baseDmg, baseDmg,'magical', time)
         return 0        
-
-class WitsEndStage3(Item):
-    def __init__(self):
-        super().__init__("Wit's End (Stage 3)", aspd=30, mr=30, phases="preAttack")
-
-    def performAbility(self, phase, time, champion, input_=0):
-        baseDmg = 60
-        champion.doDamage(champion.opponents[0], [], 0, baseDmg, baseDmg,'magical', time)
-        return 0    
-
-class WitsEndStage4(Item):
-    def __init__(self):
-        super().__init__("Wit's End (Stage 4)", aspd=30, mr=30, phases="preAttack")
-
-    def performAbility(self, phase, time, champion, input_=0):
-        baseDmg = 75
-        champion.doDamage(champion.opponents[0], [], 0, baseDmg, baseDmg,'magical', time)
-        return 0            
-
-class WitsEndStage5(Item):
-    def __init__(self):
-        super().__init__("Wit's End (Stage 5)", aspd=30, mr=30, phases="preAttack")
-
-    def performAbility(self, phase, time, champion, input_=0):
-        baseDmg = 90
-        champion.doDamage(champion.opponents[0], [], 0, baseDmg, baseDmg,'magical', time)
-        return 0            
-
-class WitsEndStage6(Item):
-    def __init__(self):
-        super().__init__("Wit's End (Stage 6+)", aspd=30, mr=30, phases="preAttack")
-
-    def performAbility(self, phase, time, champion, input_=0):
-        baseDmg = 100
-        champion.doDamage(champion.opponents[0], [], 0, baseDmg, baseDmg,'magical', time)
-        return 0            
-
+   
 
 ### RADIANTS
 class RadiantGuardbreaker(Item):
@@ -593,10 +492,10 @@ class RadiantArchangels(Item):
 
 class RadiantRunaansHurricane(Item):
     def __init__(self):
-        super().__init__("Radiant Runaan's", aspd=20, ad=50, phases="preAttack")
+        super().__init__("Radiant Runaan's", aspd=20, ad=40, phases="preAttack")
 
     def performAbility(self, phase, time, champion, input_=0):
-        baseDmg = champion.atk.stat * 1.1
+        baseDmg = champion.atk.stat * 1
         if len(champion.opponents) > 1:
             champion.doDamage(champion.opponents[1], [], 0, baseDmg, baseDmg,'physical', time)
         return 0

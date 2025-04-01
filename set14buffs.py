@@ -30,7 +30,8 @@ augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
             'CalculatedEnhancement', 'GlassCannonI',
             'GlassCannonII', 'FlurryOfBlows', 'MacesWill', 'Backup',
             'CategoryFive', 'Moonlight', 'PiercingLotusI',
-            'PiercingLotusII', 'BlueBatteryIII']
+            'PiercingLotusII', 'BlueBatteryIII', 'FinalAscension',
+            'CyberneticUplinkII', 'CyberneticUplinkIII']
 
 stat_buffs =['ASBuff']
 
@@ -89,7 +90,7 @@ class Rapidfire(Buff):
     def __init__(self, level, params):
         super().__init__("Rapidfire " + str(level), level, params,
                          phases=["preCombat", "preAttack"])
-        self.scaling = {0: 0, 2: 4, 4: 10, 6: 22}
+        self.scaling = {0: 0, 2: 4, 4: 10, 6: 24}
         self.base_scaling = 10
         self.stacks = 0
         self.maxStacks = 10
@@ -109,7 +110,7 @@ class Syndicate(Buff):
     def __init__(self, level, params):
         super().__init__("Syndicate " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {3: .05, 5: .2, 7: .3}
+        self.scaling = {3: .05, 5: .15, 7: .2}
         self.is_kingpin = 0
         self.extraBuff(params)
 
@@ -197,7 +198,7 @@ class Cypher(Buff):
     def __init__(self, level, params):
         super().__init__("Cypher " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {3: 25, 4: 35, 5: 45}
+        self.scaling = {3: 30, 4: 45, 5: 55}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.atk.addStat(self.scaling[self.level])
@@ -211,7 +212,7 @@ class AnimaSquad(Buff):
     def __init__(self, level, params):
         super().__init__("Anima Squad " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {3: .05, 5: .1, 7: .15}
+        self.scaling = {3: .05, 5: .12, 7: .2}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.addStat(self.scaling[self.level])
@@ -224,7 +225,7 @@ class Divinicorp(Buff):
     def __init__(self, level, params):
         super().__init__("Divinicorp " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {1: 1, 2: 1.1, 3: 1.2, 4: 1.5, 5: 1.75, 6: 2, 7: 2.25}
+        self.scaling = {1: 1, 2: 1.1, 3: 1.25, 4: 1.45, 5: 1.65, 6: 1.9, 7: 2.15}
 
         # divincorp base
         self.ad_base = 8
@@ -264,7 +265,7 @@ class Cyberboss(Buff):
     def __init__(self, level, params):
         super().__init__("Cyberboss " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {2: 15, 3: 25, 4: 30}
+        self.scaling = {2: 20, 3: 30, 4: 40}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.ap.addStat(self.scaling[self.level])
@@ -334,7 +335,7 @@ class Techie(Buff):
         super().__init__("Techie " + str(level), level, params,
                          phases=["preCombat"])
         self.base_scaling = 0
-        self.scaling = {2: 15, 4: 45, 6: 80, 8: 110}
+        self.scaling = {2: 20, 4: 50, 6: 85, 8: 125}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.ap.addStat(self.base_scaling)
@@ -771,7 +772,7 @@ class BadLuckProtection(Buff):
         if champion.canCrit or champion.canSpellCrit or champion.crit.base > 0:
             champion.canCrit = False
             champion.canSpellCrit = False
-            champion.atk.addStat(champion.crit.stat * 80)
+            champion.atk.addStat(champion.crit.stat * 100)
             champion.crit.base = 0
             champion.crit.add = 0
 
@@ -784,7 +785,7 @@ class FinalAscension(Buff):
     def __init__(self, level=1, params=0):
         super().__init__("Final Ascension", level, params, phases=["preCombat", "onUpdate"])
         self.initialDmgBonus = 0.15
-        self.dmgBonus = 0.3
+        self.dmgBonus = 0.35
         self.nextBonus = 15
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -810,6 +811,38 @@ class ClockworkAccelerator(Buff):
             if time >= self.nextBonus:
                 self.nextBonus += 3
                 champion.aspd.addStat(self.asBonus)
+        return 0
+
+
+class CyberneticUplinkII(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Cybernetic Uplink II", level, params, phases=["onUpdate"])
+        self.manaBonus = 2.5
+        self.nextBonus = 1
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate":
+            if time >= self.nextBonus:
+                champion.addMana(self.manaBonus)
+                self.nextBonus += 1
+        return 0
+
+
+class CyberneticUplinkIII(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Cybernetic Uplink III", level, params, phases=["onUpdate"])
+        self.manaBonus = 3.5
+        self.nextBonus = 1
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate":
+            if time >= self.nextBonus:
+                champion.addMana(self.manaBonus)
+                self.nextBonus += 1
         return 0
 
 
