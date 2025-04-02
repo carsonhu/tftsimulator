@@ -508,6 +508,7 @@ class RadiantGuardbreaker(Item):
         champion.dmgMultiplier.add += .5
         return 0
 
+
 class RadiantShiv(Item):
     def __init__(self):
         super().__init__("Radiant Shiv", ap=50, aspd=20, mana=15, phases=["preAttack"])
@@ -527,6 +528,7 @@ class RadiantShiv(Item):
                 champion.doDamage(opponent, [], 0, baseDmg, baseDmg,'magical', time)
                 opponent.applyStatus(status.MRReduction("MR"), champion, time, 5, .7)
         return 0
+
 
 class RadiantBlue(Item):
     def __init__(self):
@@ -574,12 +576,14 @@ class RadiantGuinsoosRageblade(Item):
             champion.aspd.addStat(10)
         return 0
 
+
 class RadiantHoJ(Item):
     def __init__(self):
         super().__init__("Radiant HoJ", mana=10, crit=40, ad=70, ap=70, omnivamp=.20, phases=None)
 
     def performAbility(self, phase, time, champion, input_=0):
         return 0
+
 
 class RadiantLastWhisper(Item):
     def __init__(self):
@@ -590,6 +594,7 @@ class RadiantLastWhisper(Item):
         for opponent in champion.opponents:
             opponent.armor.mult = .7
         return 0
+
 
 class RadiantGS(Item):
     # needs reworking
@@ -603,6 +608,7 @@ class RadiantGS(Item):
             champion.dmgMultiplier.add += .6
         return 0
 
+
 class RadiantRabadons(Item):
     def __init__(self):
         super().__init__("Radiant Rab", ap=80, phases="preCombat")
@@ -610,6 +616,7 @@ class RadiantRabadons(Item):
         # input_ is target
         champion.dmgMultiplier.add += .5
         return 0
+
 
 class RadiantJeweledGauntlet(Item):
     def __init__(self):
@@ -620,6 +627,7 @@ class RadiantJeweledGauntlet(Item):
             champion.critDmg.add += 0.1
         champion.canSpellCrit = True
         return 0
+
 
 class RadiantNashors(Item):
     def __init__(self):
@@ -645,6 +653,7 @@ class RadiantNashors(Item):
                 champion.aspd.addStat(self.aspdBoost * -1)
         return 0
 
+
 class RadiantShojin(Item):
     def __init__(self):
         super().__init__("Radiant Spear of Shojin", ad=35, mana=20, ap=35, phases=["preCombat"])
@@ -653,6 +662,7 @@ class RadiantShojin(Item):
     def performAbility(self, phase, time, champion, input_=0):
         champion.manaPerAttack.add += 10
         return 0
+
 
 class RadiantInfinityEdge(Item):
     def __init__(self):
@@ -664,6 +674,7 @@ class RadiantInfinityEdge(Item):
         champion.canSpellCrit = True
         return 0
 
+
 class RadiantDeathblade(Item):
     def __init__(self):
         super().__init__("Radiant DB", ad=105, phases="preCombat")
@@ -671,6 +682,7 @@ class RadiantDeathblade(Item):
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += .2
         return 0
+
 
 class RadiantQSS(Item):
     def __init__(self):
@@ -696,12 +708,14 @@ class RadiantRed(Item):
         # champion.critDmg.add += 0.1
         return 0
 
+
 class RadiantMorellos(Item):
     def __init__(self):
         super().__init__("RadiantMorellos (no burn yet)", aspd=25, ap=50, phases=None)
 
     def performAbility(self, phase, time, champion, input_=0):
         return 0
+
 
 class RadiantAdaptive(Item):
     def __init__(self):
@@ -721,6 +735,7 @@ class RadiantAdaptive(Item):
         elif phase == "postAbility":
             self.nextMana += champion.castTime
         return 0
+
 
 class RadiantTitans(Item):
     def __init__(self):
