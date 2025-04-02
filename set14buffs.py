@@ -9,6 +9,7 @@ import status
 import random
 import ast
 
+
 def get_classes_from_file(file_path):
     with open(file_path, "r") as file:
         file_content = file.read()
@@ -19,6 +20,7 @@ def get_classes_from_file(file_path):
     # Extract all class definitions
     classes = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
     return classes
+
 
 class_buffs = ['Rapidfire', 'Techie', 'StreetDemon', 'Marksman',
                'Strategist', 'Cypher', 'Slayer', 'Syndicate',
@@ -34,7 +36,7 @@ augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
             'CyberneticUplinkII', 'CyberneticUplinkIII', 'SpeedKills',
             'StandUnitedI', 'Ascension']
 
-stat_buffs =['ASBuff']
+stat_buffs = ['ASBuff']
 
 no_buff = ['NoBuff']
 
@@ -85,6 +87,7 @@ class NoBuff(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         return 0
 
+
 class Rapidfire(Buff):
     levels = [0, 2, 4, 6]
     
@@ -104,6 +107,7 @@ class Rapidfire(Buff):
                 self.stacks += 1
                 champion.aspd.addStat(self.scaling[self.level])
         return 0
+
 
 class Syndicate(Buff):
     levels = [0, 3, 5, 7]
@@ -129,6 +133,7 @@ class Syndicate(Buff):
 
     def extraBuff(self, is_kingpin):
         self.is_kingpin = is_kingpin
+
 
 class StreetDemon(Buff):
     levels = [0, 3, 5, 7, 10]
@@ -156,6 +161,7 @@ class StreetDemon(Buff):
     def extraBuff(self, is_streetdemon):
         self.is_streetdemon = is_streetdemon
 
+
 class Strategist(Buff):
     levels = [0, 2, 3, 4, 5]
 
@@ -181,6 +187,7 @@ class Strategist(Buff):
     def extraBuff(self, is_strategist):
         self.is_strategist = is_strategist
 
+
 class AMP(Buff):
     levels = [0, 2, 3, 4, 5]
 
@@ -192,6 +199,7 @@ class AMP(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         champion.amp_level = self.scaling[self.level]
         return 0
+
 
 class Cypher(Buff):
     levels = [0, 3, 4, 5]
@@ -342,6 +350,7 @@ class Executioner(Buff):
         champion.crit.addStat(self.critChanceScaling[self.level] * .5)
         return 0
 
+
 class Techie(Buff):
     levels = [0, 2, 4, 6, 8]
 
@@ -355,6 +364,7 @@ class Techie(Buff):
         champion.ap.addStat(self.base_scaling)
         champion.ap.addStat(self.scaling[self.level])
         return 0
+
 
 class Marksman(Buff):
     levels = [0, 2, 4]
@@ -435,7 +445,7 @@ class KogUlt(Buff):
             champion.multiTargetSpell(champion.opponents,
                                       champion.items, time,
                                       1, champion.abilityScaling,
-                                      'physical')     
+                                      'physical')
         return 0
 
 
@@ -531,11 +541,13 @@ class YuumiUlt(Buff):
 
 class ASBuff(Buff):
     levels = [1]
+
     def __init__(self, level, params):
         # params is number of stacks
         super().__init__("Attack Speed " + str(level), level, params, phases=["preCombat"])
         self.as_buff = 0
         self.extraBuff(params)
+    
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(self.as_buff)
         return 0
@@ -546,10 +558,12 @@ class ASBuff(Buff):
                 "Min": 0,
                 "Max": 100,
                 "Default": 0}
+    
     def extraBuff(self, as_buff):
         self.as_buff = as_buff
 
 # AUGMENTS
+
 
 class BlueBatteryIII(Buff):
     # crazy bug that i gotta fix: naming it 'blue' fucks things up with blue
@@ -564,6 +578,7 @@ class BlueBatteryIII(Buff):
         elif phase == "postAbility":
             champion.addMana(5)
         return 0
+
 
 class JeweledLotusII(Buff):
     levels = [1]

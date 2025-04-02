@@ -18,8 +18,8 @@ class Kogmaw(Champion):
     def __init__(self, level):
         hp = 500
         atk = 50
-        curMana = 15
-        fullMana = 75
+        curMana = 0
+        fullMana = 40
         aspd = .7
         armor = 15
         mr = 15
@@ -27,7 +27,7 @@ class Kogmaw(Champion):
         self.default_traits = ['Boombot', 'Rapidfire']
         self.buff_duration = 5
         self.manalockDuration = 5
-        self.aspd_bonus = [55, 55, 55, 55]
+        self.aspd_bonus = [50, 50, 50, 50]
         self.items = [buffs.KogUlt()]
         self.castTime = 0
 
@@ -41,9 +41,9 @@ class Kogmaw(Champion):
 
     def performAbility(self, opponents, items, time):
         self.applyStatus(status.ASModifier("Kogmaw"),
-            self, time, self.buff_duration, self.aspd_bonus[self.level-1])
+                         self, time, self.buff_duration, self.aspd_bonus[self.level-1])
         self.applyStatus(status.UltActivator("Kog ult"),
-            self, time, self.buff_duration)
+                         self, time, self.buff_duration)
 
 
 class Kindred(Champion):
@@ -89,20 +89,20 @@ class Nidalee(Champion):
         self.ultActive = False
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [210, 315, 475]
+        apScale = [200, 300, 455]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [80, 120, 180]
+        apScale = [75, 115, 170]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(opponents, items,
-                time, 1, self.abilityScaling, 'magical')
+                              time, 1, self.abilityScaling, 'magical')
 
         num_targets = 2 + self.amp_level
         self.multiTargetSpell(opponents, items,
-                time, num_targets, self.extraAbilityScaling, 'magical')
+                              time, num_targets, self.extraAbilityScaling, 'magical')
 
 
 class Seraphine(Champion):
@@ -195,10 +195,8 @@ class Jhin(Champion):
 
 
 class Leblanc(Champion):
-    # Cast times verified 12/7/24
-    # Patch 14.23
     def __init__(self, level):
-        hp= 550
+        hp = 550
         atk = 40
         curMana = 0
         fullMana = 50
@@ -208,9 +206,8 @@ class Leblanc(Champion):
         super().__init__('Leblanc', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['Cypher', 'Strategist']
         self.castTime = 1
-        # sigil_amount = [5, 5, 7]
         self.sigils = 5
-        self.notes = "Cast time set to increase by .09 with every missile."
+        self.notes = "Cast time doesnt increase with more sigils"
 
     def abilityScaling(self, level, AD, AP):
         apScale = [65, 95, 145]
@@ -223,7 +220,7 @@ class Leblanc(Champion):
 
 class TwistedFate(Champion):
     def __init__(self, level):
-        hp= 600
+        hp = 600
         atk = 35
         curMana = 10
         fullMana = 70
@@ -250,7 +247,7 @@ class TwistedFate(Champion):
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(opponents, items,
-                time, 2, self.abilityScaling, 'magical')
+                              time, 2, self.abilityScaling, 'magical')
 
         if self.is_kingpin:
             if self.red_card:
@@ -273,7 +270,7 @@ class TwistedFate(Champion):
 
 class Vayne(Champion):
     def __init__(self, level):
-        hp= 550
+        hp = 550
         atk = 53
         curMana = 40
         fullMana = 80
@@ -286,6 +283,7 @@ class Vayne(Champion):
         self.ultAutos = 0
         self.manalockDuration = 15
         self.castTime = 0
+        self.notes = "ult gives her 50\% as for 3 autos"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [.5, .5, .5]
@@ -304,7 +302,7 @@ class Vayne(Champion):
 
 class Veigar(Champion):
     def __init__(self, level):
-        hp= 550
+        hp = 550
         atk = 35
         curMana = 0
         fullMana = 40
@@ -328,14 +326,14 @@ class Veigar(Champion):
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(opponents, items,
-                time, 1, self.abilityScaling, 'magical')
+                              time, 1, self.abilityScaling, 'magical')
         self.multiTargetSpell(opponents, items,
-                time, 1, lambda x, y, z: self.true_bonus * self.abilityScaling(x, y, z), 'true')
+                              time, 1, lambda x, y, z: self.true_bonus * self.abilityScaling(x, y, z), 'true')
         if self.cyberboss_upgrade:
             self.multiTargetSpell(opponents, items,
-                    time, self.num_targets, self.extraAbilityScaling, 'magical')
+                                  time, self.num_targets, self.extraAbilityScaling, 'magical')
             self.multiTargetSpell(opponents, items,
-                    time, self.num_targets, lambda x, y, z: self.true_bonus * self.extraAbilityScaling(x, y, z), 'true')
+                                  time, self.num_targets, lambda x, y, z: self.true_bonus * self.extraAbilityScaling(x, y, z), 'true')
 
 
 class Draven(Champion):
@@ -354,7 +352,6 @@ class Draven(Champion):
         self.num_targets = 3
         self.dmg_falloff = .8
         self.notes = "Draven will hit each target twice"
-
 
     def abilityScaling(self, level, AD, AP):
         adScale = [3.7, 3.7, 3.9]
@@ -383,7 +380,7 @@ class Senna(Champion):
         self.castTime = 1
         self.num_targets = 2
         self.items = [buffs.SennaUlt()]
-        self.notes = "Passive will hit 1 other target, does not need IE to crit"
+        self.notes = "Passive will hit 1 other target. currently bugged; passive doesnt need ie to crit but not reflected in sims"
 
     def autoScaling(self, level, AD, AP):
         adScale = [.4, .4, .4]
@@ -403,7 +400,7 @@ class Senna(Champion):
 
 class Jinx(Champion):
     def __init__(self, level):
-        hp= 650
+        hp = 650
         atk = 55
         curMana = 0
         fullMana = 50
@@ -431,7 +428,7 @@ class Jinx(Champion):
 
 class Elise(Champion):
     def __init__(self, level):
-        hp= 700
+        hp = 700
         atk = 40
         curMana = 0
         fullMana = 55
@@ -470,7 +467,7 @@ class Varus(Champion):
         armor = 25
         mr = 25
         super().__init__('Varus', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Executioner']
+        self.default_traits = ['Exotech', 'Executioner']
         self.castTime = 1
 
 
@@ -720,26 +717,26 @@ class Yuumi(Champion):
         self.notes = "Every other cast will be marked"
 
     def abilityScaling(self, level, AD, AP):
-        mult = 1.7 if self.marked else 1
+        mult = 1.75 if self.marked else 1
         apScale = [95, 145, 220]
         return apScale[level - 1] * AP * mult
 
     def secondaryAbilityScaling(self, level, AD, AP):
-        mult = 1.7 if self.marked else 1
+        mult = 1.75 if self.marked else 1
         apScale = [55, 85, 125]
         return apScale[level - 1] * AP * mult
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(opponents, items,
-                time, 1, self.abilityScaling, 'magical')
+                              time, 1, self.abilityScaling, 'magical')
         self.multiTargetSpell(opponents, items,
-                time, 1, self.secondaryAbilityScaling, 'magical')
+                              time, 1, self.secondaryAbilityScaling, 'magical')
         self.marked = not self.marked
 
 
 class Vex(Champion):
     def __init__(self, level):
-        hp= 800
+        hp = 800
         atk = 30
         curMana = 0
         fullMana = 30
@@ -766,17 +763,17 @@ class Vex(Champion):
     def performAbility(self, opponents, items, time):
         self.convert_true = True
         self.multiTargetSpell(opponents, items,
-                time, 1, self.abilityScaling, 'magical')
+                              time, 1, self.abilityScaling, 'magical')
         if self.num_targets > 1:
             self.multiTargetSpell(opponents, items,
-                    time, self.num_targets - 1, self.extraAbilityScaling, 'magical')
-        self.convert_true = False    
-
+                                  time, self.num_targets - 1,
+                                  self.extraAbilityScaling, 'magical')
+        self.convert_true = False
 
 
 class Ziggs(Champion):
     def __init__(self, level):
-        hp= 850
+        hp = 850
         atk = 40
         curMana = 20
         fullMana = 70
@@ -801,265 +798,12 @@ class Ziggs(Champion):
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(opponents, items,
-                time, self.num_targets, self.abilityScaling, 'magical')
+                              time, self.num_targets,
+                              self.abilityScaling, 'magical')
         if self.cyberboss_upgrade:
             self.multiTargetSpell(opponents, items,
-                time, self.num_extra_targets, self.extraAbilityScaling, 'magical')
-
-
-class Tristana(Champion):
-    def __init__(self, level):
-        hp= 500
-        atk = 42
-        curMana = 20
-        fullMana = 60
-        aspd = .7
-        armor = 20
-        mr = 20
-        super().__init__('Tristana', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['EmissaryTrist', 'Artillerist']
-        self.castTime = .75
-        self.notes = "Open 'Extra options' to increase her AD from passivev"
-
-    def abilityScaling(self, level, AD, AP):
-        adScale = [5.25, 5.25, 5.25]
-        apScale = [50, 75, 115]
-        return apScale[level - 1] * AP + adScale[level - 1] * AD
-
-    def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(opponents, items,
-                time, 1, self.abilityScaling, 'physical', 1)
-
-class Corki(Champion):
-    def __init__(self, level):
-        hp= 850
-        atk = 70
-        curMana = 0
-        fullMana = 60
-        aspd = .75
-        armor = 30
-        mr = 30
-        super().__init__('Corki', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Artillerist']
-        self.castTime = 4
-        self.notes = "Currently Artillerist isn't working properly on Corki. No armor shred"
-        self.num_reg_missiles = [18, 18, 30]
-        self.num_big_missiles = [3, 3, 5]
-
-    def abilityScaling(self, level, AD, AP):
-        adScale = [.35, .35, .35]
-        apScale = [6, 9, 36]
-        return (apScale[level - 1] * AP + adScale[level - 1] * AD) * self.num_reg_missiles[self.level - 1]
-
-    def bigAbilityScaling(self, level, AD, AP):
-        adScale = [.35, .35, .35]
-        apScale = [6, 9, 36]
-        return (apScale[level - 1] * AP + adScale[level - 1] * AD) * self.num_big_missiles[self.level - 1] * 7
-
-    def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(opponents, items,
-                time, 1, self.abilityScaling, 'physical', 4)
-        self.multiTargetSpell(opponents, items,
-                time, 1, self.bigAbilityScaling, 'physical')
- 
-
-class Maddie(Champion):
-    def __init__(self, level):
-        hp= 500
-        atk = 50
-        curMana = 20
-        fullMana = 120
-        aspd = .7
-        armor = 15
-        mr = 15
-        super().__init__('Maddie', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Enforcer', 'Sniper']
-        self.castTime = 1.2
-
-    def abilityScaling(self, level, AD, AP):
-        adScale = [1.25, 1.25, 1.4]
-        apScale = [10, 15, 25]
-        return apScale[level - 1] * AP + adScale[level - 1] * AD
-
-    def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(opponents, items,
-                    time, 6, self.abilityScaling, 'physical', 2)
-
-class Ezreal(Champion):
-    def __init__(self, level):
-        hp= 700
-        atk = 60
-        curMana = 0
-        fullMana = 60
-        aspd = .75
-        armor = 25
-        mr = 25
-        super().__init__('Ezreal', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Rebel', 'Artillerist']
-        self.castTime = 1.5
-        self.num_targets = 2
-
-    def abilityScaling(self, level, AD, AP):
-        adScale = [1.35, 1.35, 1.35]
-        apScale = [20, 30, 50]
-        return apScale[level - 1] * AP + adScale[level - 1] * AD
-
-    def secondaryAbilityScaling(self, level, AD, AP):
-        return .7 * self.abilityScaling(level, AD, AP)
-
-    def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(opponents, items,
-                time, self.num_targets, self.abilityScaling, 'physical', 1)
-        self.multiTargetSpell(opponents, items,
-                time, 1, self.secondaryAbilityScaling, 'physical', 1)
-
-class Renata(Champion):
-    def __init__(self, level):
-        hp= 600
-        atk = 35    
-        curMana = 20
-        fullMana = 80   
-        aspd = .7
-        armor = 20
-        mr = 20
-        super().__init__('Renata', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Visionary']
-        self.num_targets = 2
-        self.castTime = 1
-
-    def abilityScaling(self, level, AD, AP):
-        apScale = [310, 465, 700]
-        return apScale[level - 1] * AP
-
-    def extraAbilityScaling(self, level, AD, AP):
-        apScale = [130, 195, 290]
-        return apScale[level - 1] * AP
-
-    def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(opponents, items,
-                time, 1, self.abilityScaling, 'magical')
-        if self.num_targets > 1:
-            self.multiTargetSpell(opponents, items,
-                    time, self.num_targets - 1, self.extraAbilityScaling, 'magical')
-
-class Morgana(Champion):
-    def __init__(self, level):
-        hp= 500
-        atk = 30
-        curMana = 0
-        fullMana = 40
-        aspd = .7
-        armor = 20
-        mr = 20
-        super().__init__('Morgana', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Visionary']
-        self.castTime = 1
-        self.notes = "Damage is instant here; sims on morg will be \
-                      misleading since her targets will die before \
-                      she gets full DoT value anyways."
-
-    def abilityScaling(self, level, AD, AP):
-        apScale = [530, 800, 1500]
-        return apScale[level - 1] * AP
-
-    def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(opponents, items,
-                time, 1, self.abilityScaling, 'magical')
-
-
-
-class Silco(Champion):
-    def __init__(self, level):
-        hp= 800
-        atk = 40
-        curMana = 30
-        fullMana = 80
-        aspd = .75
-        armor = 30
-        mr = 30
-        super().__init__('Silco', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Dominator']
-        self.num_attacks = 5
-        self.num_monstrosities = [4, 4, 8]
-        self.castTime = 1.3
-        self.notes = "Damage is instant here"
-
-    def abilityScaling(self, level, AD, AP):
-        apScale = [140, 200, 1000]
-        return apScale[level - 1] * AP
-
-    def monsterAbilityScaling(self, level, AD, AP):
-        apScale = [38, 58, 100]
-        return apScale[level - 1] * AP * self.num_attacks
-
-    def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(opponents, items,
-                time, 1, self.abilityScaling, 'magical')
-        for m in range(self.num_monstrosities[self.level - 1]):
-            self.multiTargetSpell(opponents, items,
-                time, 1, self.monsterAbilityScaling, 'magical')
-
-class Powder(Champion):
-    def __init__(self, level):
-        hp= 500
-        atk = 30
-        curMana = 40
-        fullMana = 120
-        aspd = .75
-        armor = 15
-        mr = 15
-        super().__init__('Powder', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Family', 'Visionary']
-        self.castTime = 2
-        self.num_targets = 4
-        self.damage_falloff = [.75, .75, .75]
-        self.notes = "1 target at epicenter, 1 target 2 hexes away, the rest 1 hex away"
-
-    def abilityScaling(self, level, AD, AP):
-        apScale = [420, 550, 735]
-        return apScale[level - 1] * AP
-
-    def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(opponents, items,
-            time, 1, self.abilityScaling, 'magical')
-        if self.num_targets > 2:
-            self.multiTargetSpell(opponents, items,
-                time, self.num_targets - 2, lambda x, y, z: self.damage_falloff[x - 1]**1 * self.abilityScaling(x, y, z), 'magical')
-        if self.num_targets > 1:
-            self.multiTargetSpell(opponents, items,
-                time, 1, lambda x, y, z: self.damage_falloff[x - 1]**2 * self.abilityScaling(x, y, z), 'magical')
-        
-class Twitch(Champion):
-    def __init__(self, level):
-        hp= 800
-        atk = 70
-        curMana = 0
-        fullMana = 40
-        aspd = .75
-        armor = 30
-        mr = 30
-        super().__init__('Twitch', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['ExperimentTwitch', 'Sniper']
-
-        # ultAmped: for dragon
-        self.ultAutos = 0
-        self.aspd_bonus = 75
-        self.castTime = 0
-        self.ultActive = False
-        self.manalockDuration = 15 # idk what it is
-        self.items = [buffs.TwitchUlt()]
-        self.notes = ""
-        self.num_targets = 2
-
-    def abilityScaling(self, level, AD, AP):
-        adScale = [1.4, 1.4, 3]
-        apScale = [18, 25, 120]
-        return adScale[level - 1] * AD + apScale[level-1] * AP
-
-    def performAbility(self, opponents, items, time):
-        self.ultActive = True
-        self.aspd.addStat(self.aspd_bonus)
-        self.ultAutos = 8
+                                  time, self.num_extra_targets,
+                                  self.extraAbilityScaling, 'magical')
 
 
 class ZeroResistance(Champion):
@@ -1073,8 +817,10 @@ class ZeroResistance(Champion):
         mr = 0
         super().__init__('Tank', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.castTime = 0.5
+
     def performAbility(self, opponents, items, time):
         return 0
+
 
 class DummyTank(Champion):
     def __init__(self, level):
@@ -1087,8 +833,10 @@ class DummyTank(Champion):
         mr = 100
         super().__init__('Tank', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.castTime = 0.5
+
     def performAbility(self, opponents, items, time):
         return 0
+
 
 class SuperDummyTank(Champion):
     def __init__(self, level):
@@ -1101,6 +849,7 @@ class SuperDummyTank(Champion):
         mr = 200
         super().__init__('Tank', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.castTime = 0.5
+        
     def performAbility(self, opponents, items, time):
         return 0
 
