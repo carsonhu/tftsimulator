@@ -403,12 +403,12 @@ class VayneUlt(Buff):
                 champion.multiTargetSpell(champion.opponents,
                                           champion.items, time,
                                           1, champion.abilityScaling,
-                                          'physical')                                                
+                                          'true')                                                
             elif champion.ultAutos == 1:
                 champion.multiTargetSpell(champion.opponents,
                                           champion.items, time,
                                           1, champion.thirdAbilityScaling,
-                                          'physical')       
+                                          'true')
             champion.ultAutos -= 1
             if champion.ultAutos == 0:
                 champion.aspd.addStat(-50)     
