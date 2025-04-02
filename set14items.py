@@ -20,13 +20,15 @@ radiants = ['RadiantGuardbreaker', 'RadiantShiv', 'RadiantBlue',
             'RadiantHoJ', 'RadiantRed', 'RadiantMorellos', 'RadiantQSS',
             'RadiantAdaptive']
 
+exotech = ['Holobow', 'PulseStabilizer', 'HyperFangs']
+
 no_item = ['NoItem']
 
 
 class Item(object):
     def __init__(self, name, hp=0, ad=0, ap=0, 
                  aspd=0, armor=0, mr=0, crit=0,
-                 dodge=0, mana=0, has_radiant=False, item_type='Craftable', phases=None):
+                 dodge=0, mana=0, omnivamp=0, has_radiant=False, item_type='Craftable', phases=None):
         self.name = name
         self.hp = hp
         self.ad = ad
@@ -37,6 +39,7 @@ class Item(object):
         self.crit = crit
         self.dodge = dodge
         self.mana = mana
+        self.omnivamp = omnivamp
         self.has_radiant = has_radiant
         self.phases = phases
 
@@ -69,11 +72,11 @@ class Rabadons(Item):
 
 class Bloodthirster(Item):
     def __init__(self):
-        super().__init__("Bloodthirster", ad=15, ap=15, phases=None)
+        super().__init__("Bloodthirster", ad=15, ap=15, omnivamp=.20, phases=None)
 
 class HextechGunblade(Item):
     def __init__(self):
-        super().__init__("Gunblade", ad=20, ap=20, phases=None)
+        super().__init__("Gunblade", ad=20, ap=20, omnivamp=.15, phases=None)
 
 class GuinsoosRageblade(Item):
     def __init__(self):
@@ -105,7 +108,7 @@ class Warmogs(Item):
 
 class HoJ(Item):
     def __init__(self):
-        super().__init__("Hand of Justice", mana=10, crit=20, ad=24, ap=24, has_radiant=True, phases=None)
+        super().__init__("Hand of Justice", mana=10, crit=20, ad=30, ap=30, omnivamp=.24, has_radiant=True, phases=None)
 
     def performAbility(self, phase, time, champion, input_=0):
         return 0
@@ -434,6 +437,68 @@ class WitsEnd(Item):
         return 0        
    
 
+### EXOTECH
+
+class PulseStabilizer(Item):
+    def __init__(self):
+        super().__init__("Pulse Stabilizer", crit=35, ad=35, phases="postPreCombat")
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.canSpellCrit:
+            champion.critDmg.add += 0.1
+        champion.canSpellCrit = True
+        return 0    
+
+
+class Holobow(Item):
+    def __init__(self):
+        super().__init__("Holobow", aspd=15, ap=20, mana=15, phases=["onCrit", "postAbility"])
+        self.buff_duration = 5
+        self.crit_value = .4
+
+    def performAbility(self, phase, time, champion, input_=0):
+        # it's an autoattack
+        if phase == "onCrit" and not input_:
+            champion.addMana(2)
+        elif phase == "postAbility":
+            champion.applyStatus(status.CritModifier("Holobow"),
+                             self, time, self.buff_duration, self.crit_value)
+        return 0    
+
+
+class HyperFangs(Item):
+    # usually these sorts of thigns dont count shiv/runaans
+    def __init__(self):
+        super().__init__("Hyper Fangs", ap=20, ad=30, omnivamp=.15, phases=["PostOnDealDamage", "onUpdate"])
+        self.dmg_counter = 0
+        self.next_dmg = 4
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "PostOnDealDamage":
+            self.dmg_counter += input_[0] * .25
+        elif phase == "onUpdate":
+            if time > self.next_dmg:
+                champion.doDamage(opponent=champion.opponents[0],
+                                  items=[],
+                                  critChance=0,
+                                  damageIfCrit=0,
+                                  damage=self.dmg_counter,
+                                  dtype='physical',
+                                  time=time,
+                                  is_spell=True)
+                champion.doDamage(opponent=champion.opponents[1],
+                                  items=[],
+                                  critChance=0,
+                                  damageIfCrit=0,
+                                  damage=self.dmg_counter,
+                                  dtype='physical',
+                                  time=time,
+                                  is_spell=True)
+                self.next_dmg += 4
+                self.dmg_counter = 0
+        return 0    
+
+
 ### RADIANTS
 class RadiantGuardbreaker(Item):
     def __init__(self):
@@ -511,7 +576,7 @@ class RadiantGuinsoosRageblade(Item):
 
 class RadiantHoJ(Item):
     def __init__(self):
-        super().__init__("Radiant HoJ", mana=10, crit=40, ad=50, ap=50, phases=None)
+        super().__init__("Radiant HoJ", mana=10, crit=40, ad=70, ap=70, omnivamp=.20, phases=None)
 
     def performAbility(self, phase, time, champion, input_=0):
         return 0

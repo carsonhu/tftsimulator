@@ -23,7 +23,7 @@ def get_classes_from_file(file_path):
 class_buffs = ['Rapidfire', 'Techie', 'StreetDemon', 'Marksman',
                'Strategist', 'Cypher', 'Slayer', 'Syndicate',
                'Executioner', 'AMP', 'Dynamo', 'AnimaSquad',
-               'Cyberboss', 'Divinicorp']
+               'Cyberboss', 'Divinicorp', 'Exotech']
 
 augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
             'BlazingSoulI', 'BlazingSoulII', 'BadLuckProtection',
@@ -31,7 +31,8 @@ augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
             'GlassCannonII', 'FlurryOfBlows', 'MacesWill', 'Backup',
             'CategoryFive', 'Moonlight', 'PiercingLotusI',
             'PiercingLotusII', 'BlueBatteryIII', 'FinalAscension',
-            'CyberneticUplinkII', 'CyberneticUplinkIII']
+            'CyberneticUplinkII', 'CyberneticUplinkIII', 'SpeedKills',
+            'StandUnitedI', 'Ascension']
 
 stat_buffs =['ASBuff']
 
@@ -273,6 +274,19 @@ class Cyberboss(Buff):
         return 0
 
 
+class Exotech(Buff):
+    levels = [0, 3, 5, 7]
+
+    def __init__(self, level, params):
+        super().__init__("Exotech " + str(level), level, params,
+                         phases=["preCombat"])
+        self.scaling = {3: 2, 5: 4, 7: 8}
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(self.scaling[self.level] * champion.item_count)
+        return 0
+
+
 class Dynamo(Buff):
     levels = [0, 2, 3, 4]
 
@@ -319,8 +333,8 @@ class Executioner(Buff):
 
     def __init__(self, level, params):
         super().__init__("Executioner " + str(level), level, params, phases=["preCombat"])
-        self.critChanceScaling = {2: .25, 3: .35, 4: .45, 5: .55}
-        self.critDmgScaling = {2: .08, 3: .15, 4: .2, 5: .25}
+        self.critChanceScaling = {2: .25, 3: .35, 4: .45, 5: .5}
+        self.critDmgScaling = {2: .05, 3: .15, 4: .15, 5: .15}
 
     def performAbility(self, phase, time, champion, input=0):
         champion.canSpellCrit = True
@@ -423,6 +437,28 @@ class KogUlt(Buff):
                                       1, champion.abilityScaling,
                                       'physical')     
         return 0
+
+
+class VexUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Retribution", level, params, phases=["PostOnDealDamage"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        # input is damage dealt
+        if champion.convert_true:
+            dmg = input_[0] * champion.omnivamp.stat
+            # technically awkward: all dmg will be redirected towards main opponent
+            champion.doDamage(opponent=champion.opponents[0],
+                              items=[],
+                              critChance=0,
+                              damageIfCrit=0,
+                              damage=dmg,
+                              dtype='true',
+                              time=time)
+        return 0
+
 
 class SennaUlt(Buff):
     levels = [1]
@@ -554,43 +590,6 @@ class JeweledLotusIII(Buff):
         if phase == "preCombat":
             champion.canSpellCrit = True
             champion.crit.addStat(.45)
-        return 0
-
-
-class BlossomingLotusI(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        # vayne bolts inflicts status "Silver Bolts"
-        super().__init__("Blossoming Lotus I", level, params, phases=["preCombat", "onUpdate"])
-        self.critBonus = 0.05
-        self.nextBonus = 3
-
-    def performAbility(self, phase, time, champion, input_=0):
-        if phase == "preCombat":
-            champion.canSpellCrit = True
-        elif phase == "onUpdate":
-            if time >= self.nextBonus:
-                self.nextBonus += 3
-                champion.crit.addStat(self.critBonus)
-        return 0
-
-
-class BlossomingLotusII(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        super().__init__("Blossoming Lotus II", level, params, phases=["preCombat", "onUpdate"])
-        self.critBonus = 0.1
-        self.nextBonus = 3
-
-    def performAbility(self, phase, time, champion, input_=0):
-        if phase == "preCombat":
-            champion.canSpellCrit = True
-        elif phase == "onUpdate":
-            if time >= self.nextBonus:
-                self.nextBonus += 3
-                champion.crit.addStat(self.critBonus)
         return 0
 
 
@@ -738,6 +737,34 @@ class Backup(Buff):
         return 0
 
 
+class StandUnitedI(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Stand United", level, params, phases=["preCombat"])
+        self.scaling = 1.5
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.atk.addStat(champion.num_traits * self.scaling)
+        champion.ap.addStat(champion.num_traits * self.scaling)
+        return 0
+
+
+class SpeedKills(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Speed Kills", level, params, phases=["postPreCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        for item in champion.items:
+            if "Rapidfire" in item.name:
+                item.stacks = 2
+                item.maxStacks = 15
+                break
+        return 0
+
+
 class BlazingSoulI(Buff):
     levels = [1]
 
@@ -776,6 +803,34 @@ class BadLuckProtection(Buff):
             champion.crit.base = 0
             champion.crit.add = 0
 
+        return 0
+
+
+class Ascension(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Ascension", level, params, phases=["onUpdate"])
+        self.dmgBonus = 0.6
+        self.nextBonus = 15
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate":
+            if time >= self.nextBonus:
+                self.nextBonus += 99999
+                champion.dmgMultiplier.addStat(self.dmgBonus)
+        return 0
+
+
+class ScopedWeaponsII(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("ScopedWeaponsII", level, params, phases=["preCombat"])
+        self.scaling = 18
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(self.scaling)
         return 0
 
 

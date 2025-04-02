@@ -98,6 +98,7 @@ class Champion(object):
         self.dmgMultiplier = Stat(1, 1, 0)
         self.crit = Stat(.25, 1, 0)
         self.critDmg = Stat(1.4, 1, 0)
+        self.omnivamp = Stat(0, 1, 0)
 
         # currently unused
         self.armorPierce = Stat(0, 1, 0)
@@ -132,7 +133,9 @@ class Champion(object):
         
         self.num_targets = 0
         self.num_extra_targets = 0
+        self.item_count = 0  # number of craftables
 
+        self.critCounter = 0
         self.numAttacks = 0
         self.numCasts = 0
 
@@ -152,6 +155,7 @@ class Champion(object):
                      self.dmgMultiplier.stat,
                      self.crit.stat,
                      self.critDmg.stat,
+                     self.omnivamp.stat,
                      self.canCrit,
                      self.canSpellCrit,
                      self.castTime,
@@ -160,7 +164,8 @@ class Champion(object):
                      self.stage,
                      self.categoryFive,
                      self.num_targets,
-                     self.num_extra_targets)
+                     self.num_extra_targets,
+                     self.item_count)
         divine_tuple = tuple(value for value in list(self.divines.values()))
         return (items_tuple + stat_tuple + divine_tuple)
         
@@ -197,6 +202,7 @@ class Champion(object):
         self.armor.addStat(item.armor)
         self.mr.addStat(item.mr)
         self.crit.addStat(item.crit / 100)
+        self.omnivamp.addStat(item.omnivamp)
 
     def canCast(self, time):
         # 4 conditions:
@@ -350,6 +356,13 @@ class Champion(object):
         # 
         # if not crit
         critChance = min(1, critChance)
+        self.critCounter += critChance
+        if self.critCounter > 1:
+            for item in items:
+                # pass whether it's spell for holobow
+                item.ability("onCrit", time, self, is_spell)
+            self.critCounter -= 1
+
         preDmg = damage
         preCritDmg = damageIfCrit
         

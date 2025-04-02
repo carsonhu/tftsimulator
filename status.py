@@ -31,8 +31,8 @@ class Status(object):
         return 0
 
     def wearoff(self, champion, time):
-        self.wearoffEffect(champion, time)
         self.active = False
+        self.wearoffEffect(champion, time)
         self.opponent = None
 
 
@@ -274,6 +274,27 @@ class DecayingASModifier(Status):
             champion.aspd.add -= self.addition
             self.addition = 0
         super().update(champion, time)
+
+
+class CritModifier(Status):
+    # increase crit by %
+    def __init__(self, name):
+        super().__init__("Crit Modifier {}".format(name))
+        self.addition = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.crit.addStat(params)
+        self.addition = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+    def wearoffEffect(self, champion, time):
+        champion.aspd.addStat(-1 * self.addition)
+        return True
+
 
 class ASModifier(Status):
     # increase AS by %

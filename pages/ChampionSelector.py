@@ -27,7 +27,11 @@ all_buffs = sorted(set14buffs.class_buffs + set14buffs.augments
             + set14buffs.no_buff + set14buffs.stat_buffs)
 
 all_items = sorted(set14items.offensive_craftables + set14items.artifacts
-            + set14items.radiants + set14items.no_item)
+            + set14items.radiants + set14items.no_item + set14items.exotech)
+
+# should be dynamic depending on whether ur exotech
+craftables = set14items.offensive_craftables + set14items.exotech
+
 
 aug_buffs = sorted(set14buffs.augments)
 
@@ -74,15 +78,16 @@ with st.sidebar:
 
     # Add items to Champion
     for item in items:
-      if item != 'NoItem':
-        champ.items.append(utils.class_for_name('set14items', item)())
+        if item != 'NoItem':
+            champ.items.append(utils.class_for_name('set14items', item)())
+            champ.item_count += 1
     class_utilities.add_buffs(champ, buffs)
 
     champ_before_sims = copy.deepcopy(champ)
 
 simLists = set14_streamlit_main.doExperimentOneExtra(champ, enemy,
-           utils.convertStrList('set14items', all_items),
-           utils.convertStrList('set14buffs', aug_buffs) + extra_buffs, t)
+            utils.convertStrList('set14items', all_items),
+            utils.convertStrList('set14buffs', aug_buffs) + extra_buffs, t)
 
 tab1, tab2 = st.tabs(["Items", "Radiant Refractor"])
 
@@ -118,7 +123,7 @@ with tab1:
     df_flt = df
 
     if radio_value == "Craftable":
-        df_flt = df_flt[df_flt['Extra class name'].isin(set14items.offensive_craftables+['NoItem'])]
+        df_flt = df_flt[df_flt['Extra class name'].isin(craftables + ['NoItem'])]
     if radio_value == "Artifact":
         df_flt = df_flt[df_flt['Extra class name'].isin(set14items.artifacts+['NoItem'])]
     if radio_value == "Radiant":

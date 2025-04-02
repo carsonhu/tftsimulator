@@ -34,7 +34,7 @@ class Simulator(object):
         self.frameTime = 1/30
         # self.frameTime = 1/60
 
-    def itemStats(self,items, champion):
+    def itemStats(self, items, champion):
         for item in items:
             champion.addStats(item)
         for item in items:
@@ -45,6 +45,7 @@ class Simulator(object):
     def simulate(self, items, buffs, champion, opponents, duration):
         # there's no real distinction between items and buffs
         # dmgVector: (Time, Damage Dealt, current AS, current Mana)
+        champion.item_count += len([item for item in items if item.name != 'NoItem'])
         items = items + buffs + champion.items
         champion.items = items
         champion.opponents = opponents

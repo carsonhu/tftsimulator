@@ -8,12 +8,13 @@ import set14buffs as buffs
 import status
 
 champ_list = ['Kogmaw', 'Kindred', 'Nidalee', 'Seraphine', 'Zyra',
-              'Leblanc', 'Senna', 'TwistedFate', 'Vayne', 'Veigar',
+              'Jhin', 'Leblanc', 'Senna', 'TwistedFate', 'Vayne', 'Veigar',
               'Draven', 'Elise', 'Jinx', 'Varus', 'Yuumi',
-              'Aphelios', 'Annie', 'Brand', 'MissFortune', 'Xayah', 'Zeri', 'Ziggs']
+              'Aphelios', 'Brand', 'MissFortune', 'Vex', 'Xayah', 'Zeri', 'Ziggs']
 
 
 class Kogmaw(Champion):
+    canFourStar = True
     def __init__(self, level):
         hp = 500
         atk = 50
@@ -26,7 +27,7 @@ class Kogmaw(Champion):
         self.default_traits = ['Boombot', 'Rapidfire']
         self.buff_duration = 5
         self.manalockDuration = 5
-        self.aspd_bonus = [55, 55, 55]
+        self.aspd_bonus = [55, 55, 55, 55]
         self.items = [buffs.KogUlt()]
         self.castTime = 0
 
@@ -34,8 +35,8 @@ class Kogmaw(Champion):
         self.notes = "Boombot not yet coded, need to figure out interaction with runaans/shiv"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [.4, .4, .4]
-        apScale = [9, 14, 20]
+        adScale = [.4, .4, .4, .4]
+        apScale = [9, 14, 20, 26]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
@@ -46,6 +47,7 @@ class Kogmaw(Champion):
 
 
 class Kindred(Champion):
+    canFourStar = True
     def __init__(self, level):
         hp= 500
         atk = 48
@@ -59,8 +61,8 @@ class Kindred(Champion):
         self.castTime = 1.5
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [5.2, 5.2, 5.2]
-        apScale = [20, 30, 45]
+        adScale = [5.2, 5.2, 5.2, 5.2]
+        apScale = [20, 30, 45, 60]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
@@ -104,7 +106,7 @@ class Nidalee(Champion):
 
 
 class Seraphine(Champion):
-    canFourStar = False
+    canFourStar = True
     def __init__(self, level):
         hp= 500
         atk = 30
@@ -117,10 +119,9 @@ class Seraphine(Champion):
         self.default_traits = ['AnimaSquad', 'Techie']
         self.castTime = 1
         self.num_targets = 3
-        self.canFourStar = False
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [250, 375, 585]
+        apScale = [250, 375, 585, 795]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -131,7 +132,7 @@ class Seraphine(Champion):
 
 
 class Zyra(Champion):
-    canFourStar = False
+    canFourStar = True
     def __init__(self, level):
         hp= 500
         atk = 30
@@ -143,14 +144,13 @@ class Zyra(Champion):
         super().__init__('Zyra', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['StreetDemon', 'Techie']
         self.castTime = 1
-        self.canFourStar = False
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [260, 390, 600]
+        apScale = [260, 390, 600, 810]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [130, 195, 300]
+        apScale = [130, 195, 300, 405]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -158,6 +158,41 @@ class Zyra(Champion):
                 time, 1, self.abilityScaling, 'magical')
         self.multiTargetSpell(opponents, items,
                 time, 1, self.extraAbilityScaling, 'magical')
+
+
+class Jhin(Champion):
+    def __init__(self, level):
+        hp= 550
+        atk = 44
+        curMana = 14
+        fullMana = 74
+        aspd = .74
+        armor = 20
+        mr = 20
+        super().__init__('Jhin', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        self.default_traits = ['Exotech', 'Marksman', 'Dynamo']
+        self.castTime = 1
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [1.74, 1.74, 1.74]
+        return adScale[level - 1] * AD
+
+    def fourthAbilityScaling(self, level, AD, AP):
+        adScale = [4.44, 4.44, 4.44]
+        return adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        for index in range(3):
+            self.multiTargetSpell(opponents[index:], items,
+                                  time, 1,
+                                  self.abilityScaling,
+                                  'physical')
+            opponents[index].applyStatus(status.ArmorReduction("Armor Jhin"), self, time, 4.4 * self.ap.stat, .8)
+        self.multiTargetSpell(opponents, items,
+                              time, 1,
+                              self.fourthAbilityScaling,
+                              'physical', 1)            
+
 
 class Leblanc(Champion):
     # Cast times verified 12/7/24
@@ -201,7 +236,7 @@ class TwistedFate(Champion):
         self.items = [buffs.TFUlt()]
         self.castTime = 1
         self.num_targets = 2
-        self.notes = "kingpin alternates red and blue; targets is for red card"
+        self.notes = "kingpin alternates red and blue; targets is for red card. syndicate 7 not in yet"
         self.red_card = True
 
     def abilityScaling(self, level, AD, AP):
@@ -306,7 +341,7 @@ class Veigar(Champion):
 class Draven(Champion):
     # unconfirmed: is spell 1 auto or 0
     def __init__(self, level):
-        hp= 700
+        hp = 700
         atk = 53
         curMana = 30
         fullMana = 120
@@ -348,7 +383,7 @@ class Senna(Champion):
         self.castTime = 1
         self.num_targets = 2
         self.items = [buffs.SennaUlt()]
-        self.notes = "Passive will hit 1 other target"
+        self.notes = "Passive will hit 1 other target, does not need IE to crit"
 
     def autoScaling(self, level, AD, AP):
         adScale = [.4, .4, .4]
@@ -379,6 +414,7 @@ class Jinx(Champion):
         self.default_traits = ['StreetDemon', 'Marksman']
         self.castTime = 2
         self.rockets = 5
+        self.notes = "Cast time should slightly increase over time, not implemented yet."
 
     def abilityScaling(self, level, AD, AP):
         adScale = [1.4, 1.4, 1.5]
@@ -475,6 +511,7 @@ class Aphelios(Champion):
         self.chakrams = 0
         self.manalockDuration = 999
         self.castTime = 1
+        self.notes = "Ox force not coded in yet, use glass cannon instead"
 
     def abilityScaling(self, level, AD, AP):
         apScale = [20, 30, 100]
@@ -497,7 +534,7 @@ class Aphelios(Champion):
 class Xayah(Champion):
     # TODO: How many autos is her ult?
     def __init__(self, level):
-        hp= 800
+        hp = 800
         atk = 60
         curMana = 25
         fullMana = 75
@@ -540,7 +577,7 @@ class Zeri(Champion):
         armor = 30
         mr = 30
         super().__init__('Zeri', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Rapidfire']
+        self.default_traits = ['Exotech', 'Rapidfire']
         self.castTime = .2
         self.items = [buffs.ZeriUlt()]
         self.queued_autos = []
@@ -576,7 +613,7 @@ class MissFortune(Champion):
         # self.num_bullets = 8
         self.dmg_falloff = .75
         self.notes = "8 bullets in each wave, assume every bullet hits. \
-                      fixed at 4 targets, each getting hit by 2 bullets."
+                      fixed at 4 targets, each getting hit by 2 bullets. no 7 syndicate yet"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [.5, .5, 1.35]
@@ -698,6 +735,43 @@ class Yuumi(Champion):
         self.multiTargetSpell(opponents, items,
                 time, 1, self.secondaryAbilityScaling, 'magical')
         self.marked = not self.marked
+
+
+class Vex(Champion):
+    def __init__(self, level):
+        hp= 800
+        atk = 30
+        curMana = 0
+        fullMana = 30
+        aspd = .8
+        armor = 30
+        mr = 30
+        super().__init__('Vex', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        self.default_traits = ['Divinicorp', 'Executioner']
+        self.items = [buffs.VexUlt()]
+        self.omnivamp.addStat(.15)
+        self.castTime = 1
+        self.num_targets = 2
+        self.convert_true = False
+        self.notes = "Always overheals; gunblade ally healing doesn't overheal."
+
+    def abilityScaling(self, level, AD, AP):
+        apScale = [190, 285, 1100]
+        return apScale[level - 1] * AP
+
+    def extraAbilityScaling(self, level, AD, AP):
+        apScale = [100, 150, 600]
+        return apScale[level - 1] * AP
+
+    def performAbility(self, opponents, items, time):
+        self.convert_true = True
+        self.multiTargetSpell(opponents, items,
+                time, 1, self.abilityScaling, 'magical')
+        if self.num_targets > 1:
+            self.multiTargetSpell(opponents, items,
+                    time, self.num_targets - 1, self.extraAbilityScaling, 'magical')
+        self.convert_true = False    
+
 
 
 class Ziggs(Champion):
