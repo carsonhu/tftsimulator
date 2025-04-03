@@ -10,7 +10,7 @@ import status
 champ_list = ['Kogmaw', 'Kindred', 'Nidalee', 'Seraphine', 'Zyra',
               'Jhin', 'Leblanc', 'Senna', 'TwistedFate', 'Vayne', 'Veigar',
               'Draven', 'Elise', 'Jinx', 'Varus', 'Yuumi',
-              'Aphelios', 'Brand', 'MissFortune', 'Vex', 'Xayah', 'Zeri', 'Ziggs']
+              'Annie', 'Aphelios', 'Brand', 'MissFortune', 'Vex', 'Xayah', 'Zeri', 'Ziggs']
 
 
 class Kogmaw(Champion):
@@ -247,7 +247,7 @@ class TwistedFate(Champion):
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(opponents, items,
-                              time, 2, self.abilityScaling, 'magical')
+                              time, 2, self.abilityScaling, 'magical', 1)
 
         if self.is_kingpin:
             if self.red_card:
@@ -271,7 +271,7 @@ class TwistedFate(Champion):
 class Vayne(Champion):
     def __init__(self, level):
         hp = 550
-        atk = 53
+        atk = 50
         curMana = 40
         fullMana = 80
         aspd = .7
@@ -330,10 +330,11 @@ class Veigar(Champion):
         self.multiTargetSpell(opponents, items,
                               time, 1, lambda x, y, z: self.true_bonus * self.abilityScaling(x, y, z), 'true')
         if self.cyberboss_upgrade:
-            self.multiTargetSpell(opponents, items,
-                                  time, self.num_targets, self.extraAbilityScaling, 'magical')
-            self.multiTargetSpell(opponents, items,
-                                  time, self.num_targets, lambda x, y, z: self.true_bonus * self.extraAbilityScaling(x, y, z), 'true')
+            if self.num_targets > 1: 
+                self.multiTargetSpell(opponents, items,
+                                      time, self.num_targets - 1, self.extraAbilityScaling, 'magical')
+                self.multiTargetSpell(opponents, items,
+                                      time, self.num_targets - 1, lambda x, y, z: self.true_bonus * self.extraAbilityScaling(x, y, z), 'true')
 
 
 class Draven(Champion):
@@ -784,8 +785,8 @@ class Ziggs(Champion):
         self.default_traits = ['Cyberboss', 'Strategist']
         self.cyberboss_upgrade = False
         self.castTime = 1
-        self.num_targets = 2
-        self.num_extra_targets = 5
+        self.num_targets = 3
+        self.num_extra_targets = 2
         self.notes = "Num targets is for center, extra targets is for further away"
 
     def abilityScaling(self, level, AD, AP):
