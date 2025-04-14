@@ -344,6 +344,7 @@ class Veigar(Champion):
         self.castTime = 1
         self.num_targets = 2
         self.true_bonus = .4 if self.level == 3 else .25
+        self.notes = "Does 40% true dmg if 3*, 25\% otherwise"
 
     def abilityScaling(self, level, AD, AP):
         apScale = [320, 420, 560]
@@ -674,14 +675,14 @@ class Annie(Champion):
         self.amp_level = 0  # amp_level gets modified by AMP
         self.castTime = 1
         self.num_targets = 2
-        self.notes = "# targets is for tibbers; doesn't account for tibbers dmg so don't trust this at all"
+        self.notes = "# targets is for tibbers; doesn't account for tibbers' dmg so don't trust this at all"
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [175, 265, 790]
+        apScale = [210, 315, 1200]
         return apScale[level - 1] * AP
 
     def fireballAbilityScaling(self, level, AD, AP):
-        apScale = [40, 60, 180]
+        apScale = [30, 45, 240]
         return apScale[level - 1] * AP
 
     def tibbersAbilityScaling(self, level, AD, AP):
