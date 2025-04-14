@@ -214,30 +214,42 @@ def plot_df(df, simLists):
             st.pyplot(fig)
 
 def items_list(items, default_item='NoItem'):
-  """Items list: Display 3 select boxes for the 3 items to be calculated.
+    """Items list: Display 3 select boxes for the 3 items to be calculated.
   
-  Args:
+    Args:
       items (list[str]): list of strings for item names
   
-  Returns:
+    Returns:
       (string, string, string): the 3 items
-  """
-  index = 0
-  if default_item in items:
-    index = items.index(default_item)
+    """
+    def reset_items():
+        st.session_state.Items1 = default_item
+        st.session_state.Items2 = default_item
+        st.session_state.Items3 = default_item
 
-  #col1, col2, col3 = st.columns(3)
+    # index = 0
+    # if default_item in items:
+    #     index = items.index(default_item)
 
-  item1 = st.selectbox(
-  'Item 1',
-   items, index=index)
-  item2 = st.selectbox(
-  'Item 2',
-   items, index=index)
-  item3 = st.selectbox(
-  'Item 3',
-   items, index=index)
-  return item1, item2, item3
+    for item in ['Items1', 'Items2', 'Items3']:
+        if item not in st.session_state:
+            st.session_state[item] = default_item
+
+    #col1, col2, col3 = st.columns(3)
+
+    item1 = st.selectbox(
+            'Item 1',
+            items, key="Items1")
+    item2 = st.selectbox(
+            'Item 2',
+            items, key="Items2")
+    item3 = st.selectbox(
+            'Item 3',
+            items, key="Items3")
+
+    st.button("Reset items", on_click=reset_items)
+
+    return item1, item2, item3
 
 def enemy_list(key):
   """Enemy list: Configure the base stats of the enemy: HP, Armor, and MR

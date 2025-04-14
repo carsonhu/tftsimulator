@@ -20,7 +20,7 @@ radiants = ['RadiantGuardbreaker', 'RadiantShiv', 'RadiantBlue',
             'RadiantHoJ', 'RadiantRed', 'RadiantMorellos', 'RadiantQSS',
             'RadiantAdaptive']
 
-exotech = ['Holobow', 'PulseStabilizer', 'HyperFangs']
+exotech = ['Holobow', 'PulseStabilizer']
 
 no_item = ['NoItem']
 

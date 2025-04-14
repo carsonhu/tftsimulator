@@ -168,7 +168,7 @@ class Strategist(Buff):
     def __init__(self, level, params):
         super().__init__("Strategist " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {2: .06, 3: .1, 4: .14, 5: .18}
+        self.scaling = {2: .06, 3: .09, 4: .12, 5: .15}
         self.is_strategist = 0
         self.extraBuff(params)
 
@@ -221,7 +221,7 @@ class AnimaSquad(Buff):
     def __init__(self, level, params):
         super().__init__("Anima Squad " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {3: .05, 5: .12, 7: .2}
+        self.scaling = {3: .05, 5: .1, 7: .15}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.addStat(self.scaling[self.level])
@@ -234,7 +234,7 @@ class Divinicorp(Buff):
     def __init__(self, level, params):
         super().__init__("Divinicorp " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {1: 1, 2: 1.1, 3: 1.25, 4: 1.45, 5: 1.65, 6: 1.9, 7: 2.15}
+        self.scaling = {1: 1, 2: 1.1, 3: 1.25, 4: 1.4, 5: 1.6, 6: 1.8, 7: 2}
 
         # divincorp base
         self.ad_base = 8
@@ -288,7 +288,7 @@ class Exotech(Buff):
     def __init__(self, level, params):
         super().__init__("Exotech " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {3: 2, 5: 4, 7: 8}
+        self.scaling = {3: 2, 5: 5, 7: 9}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(self.scaling[self.level] * champion.item_count)
@@ -342,7 +342,7 @@ class Executioner(Buff):
     def __init__(self, level, params):
         super().__init__("Executioner " + str(level), level, params, phases=["preCombat"])
         self.critChanceScaling = {2: .25, 3: .35, 4: .45, 5: .5}
-        self.critDmgScaling = {2: .05, 3: .15, 4: .15, 5: .15}
+        self.critDmgScaling = {2: .05, 3: .1, 4: .15, 5: .15}
 
     def performAbility(self, phase, time, champion, input=0):
         champion.canSpellCrit = True
@@ -411,8 +411,9 @@ class VayneUlt(Buff):
                                           'true')
             champion.ultAutos -= 1
             if champion.ultAutos == 0:
-                champion.aspd.addStat(-50)     
-                champion.manalockTime = time + .01                                                                            
+                champion.aspd.mult = 1
+                champion.aspd.as_cap = 5
+                champion.manalockTime = time + .01                                                                        
         return 0
 
 
@@ -477,10 +478,14 @@ class SennaUlt(Buff):
         super().__init__("Ion Beam", level, params, phases=["preAttack"])
 
     def performAbility(self, phase, time, champion, input_=0):
+        # temporary measure; her passive can already crit
+        champCanCrit = champion.canSpellCrit
+        champion.canSpellCrit = True
         champion.multiTargetSpell(champion.opponents,
                                   champion.items, time,
                                   1, champion.autoScaling,
                                   'physical')
+        champion.canSpellCrit = champCanCrit
         return 0
 
 class TFUlt(Buff):
@@ -515,7 +520,7 @@ class ZeriUlt(Buff):
                 champion.multiTargetSpell(champion.opponents,
                                           champion.items, time,
                                           1, lambda x, y, z: champion.abilityScaling(x, bottom[0], z),
-                                          'physical')      
+                                          'physical')
 
                 heapq.heappush(champion.queued_autos,
                                (next_auto, (bottom[0], bottom[1], bottom[2], next_auto)))

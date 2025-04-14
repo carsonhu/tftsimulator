@@ -7,7 +7,7 @@ import random
 import set14buffs as buffs
 import status
 
-champ_list = ['Kogmaw', 'Kindred', 'Nidalee', 'Seraphine', 'Zyra',
+champ_list = ['Kogmaw', 'Kindred', 'Nidalee', 'Seraphine', 'Shaco', 'Zyra',
               'Jhin', 'Leblanc', 'Senna', 'TwistedFate', 'Vayne', 'Veigar',
               'Draven', 'Elise', 'Jinx', 'Varus', 'Yuumi',
               'Annie', 'Aphelios', 'Brand', 'MissFortune', 'Vex', 'Xayah', 'Zeri', 'Ziggs']
@@ -63,6 +63,33 @@ class Kindred(Champion):
     def abilityScaling(self, level, AD, AP):
         adScale = [5.2, 5.2, 5.2, 5.2]
         apScale = [20, 30, 45, 60]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items,
+                              time, 1,
+                              self.abilityScaling,
+                              'physical', 1)
+
+
+class Shaco(Champion):
+    canFourStar = True
+    def __init__(self, level):
+        hp= 600
+        atk = 55
+        curMana = 0
+        fullMana = 50
+        aspd = .8
+        armor = 40
+        mr = 40
+        super().__init__('Shaco', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        self.default_traits = ['Slayer']
+        self.castTime = 1
+        self.notes = "Just using for ranged investigation"
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [2.75, 2.75, 2.75]
+        apScale = [40, 60, 90, 120]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
@@ -218,6 +245,7 @@ class Leblanc(Champion):
                 time, 1, self.abilityScaling, 'magical')
         self.sigils += 1
 
+
 class TwistedFate(Champion):
     def __init__(self, level):
         hp = 600
@@ -283,7 +311,7 @@ class Vayne(Champion):
         self.ultAutos = 0
         self.manalockDuration = 15
         self.castTime = 0
-        self.notes = "ult gives her 50\% as for 3 autos"
+        self.notes = "ult gives her 2x as for 3 autos"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [.5, .5, .5]
@@ -296,7 +324,8 @@ class Vayne(Champion):
 
     def performAbility(self, opponents, items, time):
         self.ultAutos = 3
-        self.aspd.addStat(50)
+        self.aspd.mult = 2
+        self.aspd.as_cap = 10
         self.nextAttackTime = time + .01
 
 
@@ -378,10 +407,10 @@ class Senna(Champion):
         mr = 25
         super().__init__('Senna', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['Divinicorp', 'Slayer']
-        self.castTime = 1
+        self.castTime = 2
         self.num_targets = 2
         self.items = [buffs.SennaUlt()]
-        self.notes = "Passive will hit 1 other target. currently bugged; passive doesnt need ie to crit but not reflected in sims"
+        self.notes = "Passive will hit 1 other target. passive doesnt need ie to crit"
 
     def autoScaling(self, level, AD, AP):
         adScale = [.4, .4, .4]
