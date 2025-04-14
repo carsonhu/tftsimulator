@@ -32,7 +32,7 @@ class Kogmaw(Champion):
         self.castTime = 0
 
         self.ultActive = False
-        self.notes = "Boombot not yet coded, need to figure out interaction with runaans/shiv"
+        self.notes = "Boombot not yet coded, multiply dmg by 37\% for boombot 2, 81\% for boombot 4"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [.4, .4, .4, .4]
@@ -58,7 +58,7 @@ class Kindred(Champion):
         mr = 15
         super().__init__('Kindred', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['Rapidfire', 'Marksman']
-        self.castTime = 1.5
+        self.castTime = 1.3
 
     def abilityScaling(self, level, AD, AP):
         adScale = [5.2, 5.2, 5.2, 5.2]
@@ -69,7 +69,7 @@ class Kindred(Champion):
         self.multiTargetSpell(opponents, items,
                               time, 1,
                               self.abilityScaling,
-                              'physical', 1)
+                              'physical')
 
 
 class Shaco(Champion):
@@ -198,7 +198,7 @@ class Jhin(Champion):
         mr = 20
         super().__init__('Jhin', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['Exotech', 'Marksman', 'Dynamo']
-        self.castTime = 1
+        self.castTime = .6
 
     def abilityScaling(self, level, AD, AP):
         adScale = [1.74, 1.74, 1.74]
@@ -218,7 +218,7 @@ class Jhin(Champion):
         self.multiTargetSpell(opponents, items,
                               time, 1,
                               self.fourthAbilityScaling,
-                              'physical', 1)            
+                              'physical')
 
 
 class Leblanc(Champion):
@@ -259,7 +259,7 @@ class TwistedFate(Champion):
         self.is_kingpin = False
         self.default_traits = ['Syndicate', 'Rapidfire']
         self.items = [buffs.TFUlt()]
-        self.castTime = 1
+        self.castTime = .5
         self.num_targets = 2
         self.notes = "kingpin alternates red and blue; targets is for red card. syndicate 7 not in yet"
         self.red_card = True
@@ -392,7 +392,9 @@ class Draven(Champion):
     def performAbility(self, opponents, items, time):
         for count in range(self.num_targets * 2):
             # technically this is just hitting the 1st guy X times so we'll change it if it matters
-            num_attacks = 1 if count == 0 else 0
+            # num_attacks = 1 if count == 0 else 0
+            # doesnt count for guinsoo / runaans
+            num_attacks = 0
             self.multiTargetSpell(opponents, items, time, 1,
                                   lambda x, y, z: self.dmg_falloff**(count) * self.abilityScaling(x, y, z), 'physical', num_attacks)
 
@@ -538,7 +540,7 @@ class Aphelios(Champion):
         self.base_chakrams = 4
         self.chakrams = 0
         self.manalockDuration = 999
-        self.castTime = 1
+        self.castTime = .6
         self.notes = "Ox force not coded in yet, use glass cannon instead"
 
     def abilityScaling(self, level, AD, AP):

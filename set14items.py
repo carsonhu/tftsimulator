@@ -182,7 +182,7 @@ class Titans(Item):
 
 class Nashors(Item):
     def __init__(self):
-        super().__init__("Nashor's Tooth", aspd=10, ap=10, has_radiant=True, phases=["preAbility", "onUpdate"])
+        super().__init__("Nashor's Tooth", aspd=10, ap=10, has_radiant=True, phases=["postAbility", "onUpdate"])
         self.active = False
         self.wearoffTime = 9999
         self.base_duration = 5
@@ -191,7 +191,7 @@ class Nashors(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         duration = champion.castTime + self.base_duration # add cast time
-        if phase == "preAbility":
+        if phase == "postAbility":
             if not self.active:
                 # if not active, give the AS bonus
                 champion.aspd.addStat(self.aspdBoost)
@@ -631,7 +631,7 @@ class RadiantJeweledGauntlet(Item):
 
 class RadiantNashors(Item):
     def __init__(self):
-        super().__init__("Radiant Nashor's", aspd=20, ap=30, phases=["preAbility", "onUpdate"])
+        super().__init__("Radiant Nashor's", aspd=20, ap=30, phases=["postAbility", "onUpdate"])
         self.active = False
         self.wearoffTime = 9999
         self.duration = 8
@@ -640,7 +640,7 @@ class RadiantNashors(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         self.duration = champion.castTime + self.duration # add cast time
-        if phase == "preAbility":
+        if phase == "postAbility":
             if not self.active:
                 # if not active, give the AS bonus
                 champion.aspd.addStat(self.aspdBoost)

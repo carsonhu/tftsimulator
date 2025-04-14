@@ -34,7 +34,8 @@ augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
             'CategoryFive', 'Moonlight', 'PiercingLotusI',
             'PiercingLotusII', 'BlueBatteryIII', 'FinalAscension',
             'CyberneticUplinkII', 'CyberneticUplinkIII', 'SpeedKills',
-            'StandUnitedI', 'Ascension']
+            'StandUnitedI', 'Ascension', 'CyberneticImplantsII',
+            'CyberneticImplantsIII']
 
 stat_buffs = ['ASBuff']
 
@@ -768,6 +769,29 @@ class StandUnitedI(Buff):
         champion.atk.addStat(champion.num_traits * self.scaling)
         champion.ap.addStat(champion.num_traits * self.scaling)
         return 0
+
+
+class CyberneticImplantsII(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Cybernetic Implants II", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.atk.addStat(20)
+        return 0
+
+
+class CyberneticImplantsIII(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Cybernetic Implants III", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.atk.addStat(30)
+        return 0
+
 
 
 class SpeedKills(Buff):

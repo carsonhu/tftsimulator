@@ -164,7 +164,7 @@ def plot_df(df, simLists):
         # st.write(simLists[to_plot])
 
         champ_name = simLists[index]["Champ"].name
-        # champ_level = simLists[index]["Champ"].level
+        champ_level = simLists[index]["Champ"].level
         champ_item = simLists[index]["Extra"].name
 
         new_entry['Name'] = champ_name
@@ -190,7 +190,7 @@ def plot_df(df, simLists):
         #       yaxis_title = "Damage",
         #       hovermode = "x unified")
             fig, ax = plt.subplots()
-            ax.set_title('{} Damage Chart'.format(champ_name))
+            ax.set_title('{} {} Damage Chart'.format(champ_name, champ_level))
             ax.set_xlabel('Time')
             ax.set_ylabel('Damage')
         with col2:

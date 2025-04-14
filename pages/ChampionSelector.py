@@ -50,7 +50,7 @@ with st.sidebar:
         'number of extra targets', min_value=1, max_value=max(3, champ.num_extra_targets+1), value=champ.num_extra_targets)
         champ.num_extra_targets = targets
 
-    with st.popover("Extra options"):
+    with st.popover("Extra options / bonus stats"):
         class_utilities.first_takedown("Takedown", champ)
         class_utilities.num_traits("Num traits", champ)
         class_utilities.bonus_stats("Bonus Stats", champ)
@@ -121,7 +121,7 @@ with tab1:
 
     df = set14_streamlit_main.createSelectorDPSTable(simLists)
     df_flt = df
-
+    
     if radio_value == "Craftable":
         df_flt = df_flt[df_flt['Extra class name'].isin(craftables + ['NoItem'])]
     if radio_value == "Artifact":
