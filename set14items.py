@@ -599,13 +599,14 @@ class RadiantLastWhisper(Item):
 class RadiantGS(Item):
     # needs reworking
     def __init__(self):
-        super().__init__("Radiant GS", aspd=10, ad=40, ap=40, phases="preCombat")
+        super().__init__("Radiant GS", aspd=10, ad=50, ap=50, phases="preCombat")
 
     def performAbility(self, phase, time, champion, input_):
-        # input_ is target
-        vsGiants = champion.opponents[0].hp.stat >= 1750
-        if vsGiants:
-            champion.dmgMultiplier.add += .6
+        # input_ is target        
+        if len(champion.opponents) > 0:
+            vsGiants = champion.opponents[0].hp.stat >= 1750
+            if vsGiants:
+                champion.dmgMultiplier.add += .5
         return 0
 
 

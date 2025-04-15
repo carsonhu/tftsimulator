@@ -723,7 +723,7 @@ class Brand(Champion):
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [80, 120, 600]
+        apScale = [100, 150, 600]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):

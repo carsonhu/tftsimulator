@@ -93,6 +93,7 @@ tab1, tab2 = st.tabs(["Items", "Radiant Refractor"])
 
 with tab2:
     st.write("TODO: add radiant refractor table")
+    # time to radiant refract things
 
 with tab1:
     # Header
