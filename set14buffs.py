@@ -645,7 +645,7 @@ class GlassCannonII(Buff):
         super().__init__("Glass Cannon II", level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.dmgMultiplier.addStat(.25)
+        champion.dmgMultiplier.addStat(.18)
         return 0
 
 
@@ -871,7 +871,7 @@ class ScopedWeaponsII(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__("ScopedWeaponsII", level, params, phases=["preCombat"])
-        self.scaling = 18
+        self.scaling = 25
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(self.scaling)
@@ -949,11 +949,10 @@ class Shred30(Buff):
     levels = [1]
     
     def __init__(self, level=1, params=0):
-        super().__init__("30% Armor/MR Shred", level, params, phases=["onUpdate"])
+        super().__init__("30% Armor/MR Shred", level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        # expensive af but w/e
         for opponent in champion.opponents:
-            opponent.armor.mult = .7
-            opponent.mr.mult = .7
+            opponent.applyStatus(status.ArmorReduction("Armor 30"), champion, time, 30, .7)
+            opponent.applyStatus(status.MRReduction("MR 30"), champion, time, 30, .7)
         return 0

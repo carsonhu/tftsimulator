@@ -108,7 +108,7 @@ class Warmogs(Item):
 
 class HoJ(Item):
     def __init__(self):
-        super().__init__("Hand of Justice", mana=10, crit=20, ad=30, ap=30, omnivamp=.24, has_radiant=True, phases=None)
+        super().__init__("Hand of Justice", mana=10, crit=20, ad=30, ap=30, omnivamp=.12, has_radiant=True, phases=None)
 
     def performAbility(self, phase, time, champion, input_=0):
         return 0
@@ -441,7 +441,7 @@ class WitsEnd(Item):
 
 class PulseStabilizer(Item):
     def __init__(self):
-        super().__init__("Pulse Stabilizer", crit=35, ad=35, phases="postPreCombat")
+        super().__init__("Pulse Stabilizer", crit=30, ad=30, phases="postPreCombat")
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.canSpellCrit:
@@ -452,16 +452,16 @@ class PulseStabilizer(Item):
 
 class Holobow(Item):
     def __init__(self):
-        super().__init__("Holobow", aspd=15, ap=20, mana=15, phases=["onCrit", "postAbility"])
+        super().__init__("Holobow", aspd=25, ap=25, mana=15, phases=["onCrit", "postAbility"])
         self.buff_duration = 5
-        self.crit_value = .4
+        self.crit_value = .6
 
     def performAbility(self, phase, time, champion, input_=0):
         # it's an autoattack
         if phase == "onCrit" and not input_:
             champion.addMana(2)
         elif phase == "postAbility":
-            champion.applyStatus(status.CritModifier("Holobow"),
+            champion.applyStatus(status.CritModifier("Holobow {}".format(champion.numCasts)),
                              self, time, self.buff_duration, self.crit_value)
         return 0    
 
@@ -603,10 +603,11 @@ class RadiantGS(Item):
 
     def performAbility(self, phase, time, champion, input_):
         # input_ is target        
+        champion.dmgMultiplier.add += .2
         if len(champion.opponents) > 0:
             vsGiants = champion.opponents[0].hp.stat >= 1750
             if vsGiants:
-                champion.dmgMultiplier.add += .5
+                champion.dmgMultiplier.add += .3
         return 0
 
 

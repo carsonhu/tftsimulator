@@ -204,6 +204,9 @@ class Champion(object):
         self.crit.addStat(item.crit / 100)
         self.omnivamp.addStat(item.omnivamp)
 
+    def addStat(self, stat, amount):
+        getattr(self, stat).addStat(amount)
+
     def canCast(self, time):
         # 4 conditions:
         # Current mana >= full mana

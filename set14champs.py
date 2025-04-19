@@ -88,7 +88,7 @@ class Shaco(Champion):
         self.notes = "Just using for ranged investigation"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [2.75, 2.75, 2.75]
+        adScale = [3, 3, 3]
         apScale = [40, 60, 90, 120]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -265,11 +265,11 @@ class TwistedFate(Champion):
         self.red_card = True
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [160, 240, 375]
+        apScale = [200, 300, 450]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [260, 390, 610]
+        apScale = [250, 375, 565]
         mult = 1 if self.red_card else 0.5
         return apScale[level - 1] * AP * mult
 
@@ -651,7 +651,7 @@ class MissFortune(Champion):
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
-        num_waves = 12 if self.is_kingpin else 8
+        num_waves = 12 if self.is_kingpin else 9
         for wave in range(num_waves):
             self.multiTargetSpell(opponents, items,
                                   time, self.num_targets_fixed,
@@ -680,11 +680,11 @@ class Annie(Champion):
         self.notes = "# targets is for tibbers; doesn't account for tibbers' dmg so don't trust this at all"
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [210, 315, 1200]
+        apScale = [230, 345, 1200]
         return apScale[level - 1] * AP
 
     def fireballAbilityScaling(self, level, AD, AP):
-        apScale = [30, 45, 240]
+        apScale = [40, 60, 300]
         return apScale[level - 1] * AP
 
     def tibbersAbilityScaling(self, level, AD, AP):

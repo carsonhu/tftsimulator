@@ -123,6 +123,15 @@ with tab1:
     df = set14_streamlit_main.createSelectorDPSTable(simLists)
     df_flt = df
     
+    # remove exotech items
+    include_exotech = False
+    for buff in champ_before_sims.items:
+        if 'Exotech' in buff.name:
+            include_exotech = True
+            break
+    if not include_exotech:
+        craftables = set14items.offensive_craftables
+
     if radio_value == "Craftable":
         df_flt = df_flt[df_flt['Extra class name'].isin(craftables + ['NoItem'])]
     if radio_value == "Artifact":
