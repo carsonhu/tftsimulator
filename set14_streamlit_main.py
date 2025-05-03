@@ -37,6 +37,8 @@ class Simulator(object):
     def itemStats(self, items, champion):
         for item in items:
             champion.addStats(item)
+        for item in items: # mb.
+            item.ability("prePreCombat", 0, champion)
         for item in items:
             item.ability("preCombat", 0, champion)
         for item in items:

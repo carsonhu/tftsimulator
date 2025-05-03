@@ -35,7 +35,7 @@ augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
             'PiercingLotusII', 'BlueBatteryIII', 'FinalAscension',
             'CyberneticUplinkII', 'CyberneticUplinkIII', 'SpeedKills',
             'StandUnitedI', 'Ascension', 'CyberneticImplantsII',
-            'CyberneticImplantsIII']
+            'CyberneticImplantsIII', 'SatedSpellweaver', 'BoardOfDirectors']
 
 stat_buffs = ['ASBuff']
 
@@ -195,7 +195,7 @@ class AMP(Buff):
     def __init__(self, level, params):
         super().__init__("AMP " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {2: 1, 3: 2, 4: 3, 5: 4}
+        self.scaling = {2: 1, 3: 2, 4: 3, 5: 5}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.amp_level = self.scaling[self.level]
@@ -208,7 +208,7 @@ class Cypher(Buff):
     def __init__(self, level, params):
         super().__init__("Cypher " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {3: 30, 4: 45, 5: 55}
+        self.scaling = {3: 30, 4: 45, 5: 65}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.atk.addStat(self.scaling[self.level])
@@ -237,6 +237,9 @@ class Divinicorp(Buff):
                          phases=["preCombat"])
         self.scaling = {1: 1, 2: 1.1, 3: 1.25, 4: 1.4, 5: 1.6, 6: 1.8, 7: 2}
 
+        # for board of directors
+        self.board_scaling = {1: 1.75, 2: 1.85, 3: 1.95, 4: 2.05, 5: 2.15, 6: 2.25}
+
         # divincorp base
         self.ad_base = 8
         self.ap_base = 9
@@ -248,6 +251,8 @@ class Divinicorp(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         mult = 2 if self.is_divin else 1
+        if self.level <= 3 and champion.boardOfDirectors:
+            mult *= self.board_scaling[champion.stage]
         if champion.divines["Morgana"]:
             champion.ap.addStat(self.ap_base * self.scaling[self.level] * mult)
         if champion.divines["Senna"]:
@@ -302,7 +307,7 @@ class Dynamo(Buff):
     def __init__(self, level, params):
         super().__init__("Dynamo " + str(level), level, params,
                          phases=["onUpdate"])
-        self.scaling = {2: 5, 3: 7, 4: 10}
+        self.scaling = {2: 4, 3: 7, 4: 10}
         self.is_dynamo = 0
         self.extraBuff(params)
         self.next_mana = 3
@@ -460,7 +465,7 @@ class VexUlt(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         # input is damage dealt
         if champion.convert_true:
-            dmg = input_[0] * champion.omnivamp.stat
+            dmg = input_[0] * champion.omnivamp.stat * 1.8
             # technically awkward: all dmg will be redirected towards main opponent
             champion.doDamage(opponent=champion.opponents[0],
                               items=[],
@@ -496,7 +501,7 @@ class TFUlt(Buff):
         super().__init__("Ace High", level, params, phases=["preAttack"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.ap.addStat(2)
+        champion.ap.addStat(1.5)
         return 0
 
 
@@ -626,6 +631,17 @@ class FlurryOfBlows(Buff):
         return 0
 
 
+class SatedSpellweaver(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Sated Spellweaver", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.omnivamp.addStat(.15)
+        return 0
+
+
 class GlassCannonI(Buff):
     levels = [1]
 
@@ -634,7 +650,7 @@ class GlassCannonI(Buff):
         super().__init__("Glass Cannon I", level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.dmgMultiplier.addStat(.15)
+        champion.dmgMultiplier.addStat(.13)
         return 0
 
 
@@ -645,7 +661,7 @@ class GlassCannonII(Buff):
         super().__init__("Glass Cannon II", level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.dmgMultiplier.addStat(.18)
+        champion.dmgMultiplier.addStat(.2)
         return 0
 
 
@@ -840,6 +856,10 @@ class BadLuckProtection(Buff):
         super().__init__("Bad Luck Protection", level, params, phases=["onUpdate"])
   
     def performAbility(self, phase, time, champion, input_=0):
+        # on add stat:
+        # input is (stat, amount)
+        # returns amt to add
+        # if it's crit, add to ad instead
         if champion.canCrit or champion.canSpellCrit or champion.crit.base > 0:
             champion.canCrit = False
             champion.canSpellCrit = False
@@ -897,6 +917,18 @@ class FinalAscension(Buff):
         return 0
 
 
+class BoardOfDirectors(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Board of Directors", level, params, phases=["prePreCombat"])
+        
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.boardOfDirectors = True
+        return 0
+
+
 class ClockworkAccelerator(Buff):
     levels = [1]
 
@@ -918,7 +950,7 @@ class CyberneticUplinkII(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__("Cybernetic Uplink II", level, params, phases=["onUpdate"])
-        self.manaBonus = 2.5
+        self.manaBonus = 2
         self.nextBonus = 1
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -934,7 +966,7 @@ class CyberneticUplinkIII(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__("Cybernetic Uplink III", level, params, phases=["onUpdate"])
-        self.manaBonus = 3.5
+        self.manaBonus = 3
         self.nextBonus = 1
 
     def performAbility(self, phase, time, champion, input_=0):

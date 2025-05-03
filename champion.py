@@ -130,6 +130,7 @@ class Champion(object):
                         "Renekton": False}
 
         self.categoryFive = False
+        self.boardOfDirectors = False
         
         self.num_targets = 0
         self.num_extra_targets = 0
@@ -163,6 +164,7 @@ class Champion(object):
                      self.num_traits,
                      self.stage,
                      self.categoryFive,
+                     self.boardOfDirectors,
                      self.num_targets,
                      self.num_extra_targets,
                      self.item_count)

@@ -115,7 +115,7 @@ class HoJ(Item):
 
 class TacticiansCrown(Item):
     def __init__(self):
-        super().__init__("Tacticians' Crown (Coronation)", aspd=25, ad=25, ap=35, phases=None)
+        super().__init__("Tacticians' Crown (Coronation)", aspd=20, ad=25, ap=30, phases=None)
 
     def performAbility(self, phase, time, champion, input_=0):
         return 0
@@ -452,16 +452,16 @@ class PulseStabilizer(Item):
 
 class Holobow(Item):
     def __init__(self):
-        super().__init__("Holobow", aspd=25, ap=25, mana=15, phases=["onCrit", "postAbility"])
+        super().__init__("Holobow", aspd=25, ap=30, mana=15, phases=["onCrit", "postAbility"])
         self.buff_duration = 5
-        self.crit_value = .6
+        self.crit_value = .4
 
     def performAbility(self, phase, time, champion, input_=0):
         # it's an autoattack
         if phase == "onCrit" and not input_:
             champion.addMana(2)
         elif phase == "postAbility":
-            champion.applyStatus(status.CritModifier("Holobow {}".format(champion.numCasts)),
+            champion.applyStatus(status.CritModifier("Holobow"),
                              self, time, self.buff_duration, self.crit_value)
         return 0    
 

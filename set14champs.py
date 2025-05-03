@@ -35,7 +35,7 @@ class Kogmaw(Champion):
         self.notes = "Boombot not yet coded, multiply dmg by 37\% for boombot 2, 81\% for boombot 4"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [.4, .4, .4, .4]
+        adScale = [.5, .5, .5, .5]
         apScale = [9, 14, 20, 26]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -173,11 +173,11 @@ class Zyra(Champion):
         self.castTime = 1
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [260, 390, 600, 810]
+        apScale = [290, 435, 660, 885]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [130, 195, 300, 405]
+        apScale = [145, 220, 330, 440]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -191,7 +191,7 @@ class Jhin(Champion):
     def __init__(self, level):
         hp= 550
         atk = 44
-        curMana = 14
+        curMana = 4
         fullMana = 74
         aspd = .74
         armor = 20
@@ -201,7 +201,7 @@ class Jhin(Champion):
         self.castTime = .6
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [1.74, 1.74, 1.74]
+        adScale = [1.64, 1.64, 1.64]
         return adScale[level - 1] * AD
 
     def fourthAbilityScaling(self, level, AD, AP):
@@ -265,11 +265,11 @@ class TwistedFate(Champion):
         self.red_card = True
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [200, 300, 450]
+        apScale = [220, 330, 450]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [250, 375, 565]
+        apScale = [265, 400, 565]
         mult = 1 if self.red_card else 0.5
         return apScale[level - 1] * AP * mult
 
@@ -300,8 +300,8 @@ class Vayne(Champion):
     def __init__(self, level):
         hp = 550
         atk = 50
-        curMana = 40
-        fullMana = 80
+        curMana = 30
+        fullMana = 90
         aspd = .7
         armor = 20
         mr = 20
@@ -347,7 +347,7 @@ class Veigar(Champion):
         self.notes = "Does 40% true dmg if 3*, 25\% otherwise"
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [320, 420, 560]
+        apScale = [310, 400, 535]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
@@ -528,7 +528,7 @@ class Aphelios(Champion):
         hp= 800
         atk = 63
         curMana = 0
-        fullMana = 60
+        fullMana = 50
         aspd = .75
         armor = 30
         mr = 30
@@ -549,7 +549,7 @@ class Aphelios(Champion):
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def chakramAbilityScaling(self, level, AD, AP):
-        adScale = [.07, .07, .2]
+        adScale = [.11, .11, .2]
         return adScale[level - 1] * AD * self.chakrams
 
     def performAbility(self, opponents, items, time):
@@ -558,14 +558,14 @@ class Aphelios(Champion):
                               self.abilityScaling,
                               'physical', 1)
         self.chakrams = self.base_chakrams + self.num_targets
-        self.ultAutos = 6
+        self.ultAutos = 8
 
 
 class Xayah(Champion):
     # TODO: How many autos is her ult?
     def __init__(self, level):
         hp = 800
-        atk = 60
+        atk = 65
         curMana = 25
         fullMana = 75
         aspd = .8
@@ -684,7 +684,7 @@ class Annie(Champion):
         return apScale[level - 1] * AP
 
     def fireballAbilityScaling(self, level, AD, AP):
-        apScale = [40, 60, 300]
+        apScale = [45, 68, 300]
         return apScale[level - 1] * AP
 
     def tibbersAbilityScaling(self, level, AD, AP):
@@ -719,7 +719,7 @@ class Brand(Champion):
         self.num_targets = 3
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [260, 390, 1500]
+        apScale = [250, 375, 1500]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
@@ -750,13 +750,13 @@ class Yuumi(Champion):
         self.notes = "Every other cast will be marked"
 
     def abilityScaling(self, level, AD, AP):
-        mult = 1.75 if self.marked else 1
-        apScale = [95, 145, 220]
+        mult = 1.9 if self.marked else 1
+        apScale = [100, 150, 235]
         return apScale[level - 1] * AP * mult
 
     def secondaryAbilityScaling(self, level, AD, AP):
-        mult = 1.75 if self.marked else 1
-        apScale = [55, 85, 125]
+        mult = 1.9 if self.marked else 1
+        apScale = [60, 90, 140]
         return apScale[level - 1] * AP * mult
 
     def performAbility(self, opponents, items, time):
