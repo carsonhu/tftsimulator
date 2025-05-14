@@ -6,11 +6,11 @@ offensive_craftables = ['Rabadons', 'Bloodthirster', 'HextechGunblade', 'Guinsoo
                         'Archangels', 'HoJ', 'Guardbreaker', 'GuardbreakerNoGuard', 'InfinityEdge', 'LastWhisper',
                         'Shojin', 'Titans', 'GS', 'GSNoGiant', 'Nashors',
                         'RunaansHurricane', 'Deathblade', 'QSS', 'JeweledGauntlet', 'Red', 'Shiv',
-                        'Blue', 'Morellos', 'TacticiansCrown', 'Adaptive',
+                        'Blue', 'Morellos', 'TacticiansCrown', 'Adaptive', 'GuinsoosRagebladeNew', 'VoidStaff', 'KrakensFury',
                         'DynamoEmblem', 'TechieEmblem']
 
 artifacts = ['InfinityForce', 'Fishbones', 'RFC', 'Mittens', 'GamblersBlade',
-             'WitsEnd', 'LichBane', 'GoldCollector']
+             'WitsEnd', 'LichBane', 'GoldCollector', 'Flickerblade', 'ShivArtifact']
 
 radiants = ['RadiantGuardbreaker', 'RadiantShiv', 'RadiantBlue',
             'RadiantArchangels', 'RadiantRunaansHurricane', 'RadiantGuinsoosRageblade',
@@ -87,6 +87,19 @@ class GuinsoosRageblade(Item):
             champion.aspd.add += 5
         return 0
 
+class GuinsoosRagebladeNew(Item):
+    def __init__(self):
+        super().__init__("Guinsoo's Rageblade (New)", aspd=10, ap=10, has_radiant=True, phases=["onUpdate"])
+        self.next_bonus = 1
+        self.aspd_bonus = 7
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time > self.next_bonus:
+            if champion.aspd.stat <= 5:
+                champion.aspd.add += self.aspd_bonus
+            self.next_bonus += 1
+        return 0
+
 class Archangels(Item):
     def __init__(self):
         super().__init__("Archangels", mana=15, ap=20, has_radiant=True, phases=["onUpdate"])
@@ -97,6 +110,18 @@ class Archangels(Item):
             champion.ap.add += 30
             self.nextAP += 5
         return 0
+
+
+class VoidStaff(Item):
+    def __init__(self):
+        super().__init__("Void Staff", mana=15, ap=35, aspd=10, has_radiant=True, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        for opponent in champion.opponents:
+            opponent.mr.mult = .7
+        return 0
+
+
 
 class Warmogs(Item):
     def __init__(self):
@@ -238,6 +263,14 @@ class RunaansHurricane(Item):
 
         return 0
 
+class KrakensFury(Item):
+    def __init__(self):
+        super().__init__("Kraken's Fury", aspd=10, ad=25, has_radiant=True, phases="preAttack")
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.atk.addStat(3)
+        return 0
+
 class Deathblade(Item):
     def __init__(self):
         super().__init__("Deathblade", ad=55, has_radiant=True, phases="preCombat")
@@ -354,7 +387,7 @@ class DynamoEmblem(Item):
         super().__init__("Dynamo Emblem", mana=15, phases="preAbility")
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.dmgMultiplier.addStat(champion.fullMana.stat / 1000)
+        champion.dmgMultiplier.addStat(champion.fullMana.stat / 1000 * 1.5)
         return 0
 
 
@@ -436,6 +469,40 @@ class WitsEnd(Item):
         champion.doDamage(champion.opponents[0], [], 0, baseDmg, baseDmg,'magical', time)
         return 0        
    
+
+class ShivArtifact(Item):
+    def __init__(self):
+        super().__init__("Statikk Shiv (Artifact)", ap=25, aspd=20, has_radiant=True, phases=["preAttack"])
+        self.shivDmg = 30
+        self.shivTargets = 4
+        self.counter = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        # here, we'll just preset certain times where you get the deathblade stacks.
+        self.counter += 1
+        if self.counter == 3:
+            self.counter = 0
+            baseDmg = self.shivDmg + champion.ap.stat * .4
+            # only consider dmg to primary target
+            for opponent in champion.opponents[0:self.shivTargets]:
+                champion.doDamage(opponent, [], 0, baseDmg, baseDmg,'magical', time)
+        return 0
+
+
+class Flickerblade(Item):
+    def __init__(self):
+        super().__init__("Flickerblade", aspd=15, ap=10, ad=10, has_radiant=True, phases=["postAttack"])
+        self.counter = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        self.counter += 1
+        if champion.aspd.stat <= 5:
+            champion.aspd.add += 8
+        if self.counter == 5:
+            champion.atk.addStat(4)
+            champion.ap.addStat(5)
+            self.counter = 0
+        return 0
 
 ### EXOTECH
 

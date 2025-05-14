@@ -381,7 +381,7 @@ def doExperimentOneExtraWrapped(champion: ObjectWrapper, opponent: ObjectWrapper
       simList.append({"Champ": champ, "Extra": item, "Results": results})
     for buff in buffList:
       champ = copy.deepcopy(champion)
-      equal_buffs = [champ_buff for champ_buff in champ.items if champ_buff.name.split(" ")[0] == buff.name.split(" ")[0]] 
+      equal_buffs = [champ_buff for champ_buff in champ.items if champ_buff.name.split(" ")[0] == buff.name.split(" ")[0] and (champ_buff.name.split(" ")[0] in class_buffs or (champ_buff.name == buff.name) ) ] 
       for equal_buff in equal_buffs:
         champ.items.remove(equal_buff)
       results = simulator.simulate([], [copy.deepcopy(buff)], champ,

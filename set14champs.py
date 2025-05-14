@@ -10,14 +10,15 @@ import status
 champ_list = ['Kogmaw', 'Kindred', 'Nidalee', 'Seraphine', 'Shaco', 'Zyra',
               'Jhin', 'Leblanc', 'Senna', 'TwistedFate', 'Vayne', 'Veigar',
               'Draven', 'Elise', 'Jinx', 'Varus', 'Yuumi',
-              'Annie', 'Aphelios', 'Brand', 'MissFortune', 'Vex', 'Xayah', 'Zeri', 'Ziggs']
+              'Annie', 'Aphelios', 'Brand', 'MissFortune', 'Vex', 'Xayah', 'Zeri', 'Ziggs',
+              'Urgot']
 
 
 class Kogmaw(Champion):
     canFourStar = True
     def __init__(self, level):
         hp = 500
-        atk = 50
+        atk = 53
         curMana = 0
         fullMana = 40
         aspd = .7
@@ -29,7 +30,7 @@ class Kogmaw(Champion):
         self.manalockDuration = 5
         self.aspd_bonus = [50, 50, 50, 50]
         self.items = [buffs.KogUlt()]
-        self.castTime = 0
+        self.castTime = 0.5
 
         self.ultActive = False
         self.notes = "Boombot not yet coded, multiply dmg by 37\% for boombot 2, 81\% for boombot 4"
@@ -269,7 +270,7 @@ class TwistedFate(Champion):
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [265, 400, 565]
+        apScale = [245, 365, 550]
         mult = 1 if self.red_card else 0.5
         return apScale[level - 1] * AP * mult
 
@@ -464,7 +465,7 @@ class Elise(Champion):
         hp = 700
         atk = 40
         curMana = 0
-        fullMana = 55
+        fullMana = 50
         aspd = .75
         armor = 25
         mr = 25
@@ -603,7 +604,7 @@ class Zeri(Champion):
         atk = 65
         curMana = 0
         fullMana = 40
-        aspd = .75
+        aspd = .8
         armor = 30
         mr = 30
         super().__init__('Zeri', hp, atk, curMana, fullMana, aspd, armor, mr, level)
@@ -628,7 +629,7 @@ class Zeri(Champion):
 class MissFortune(Champion):
     def __init__(self, level):
         hp= 700
-        atk = 50
+        atk = 53
         curMana = 50
         fullMana = 150
         aspd = .75
@@ -708,14 +709,14 @@ class Brand(Champion):
     def __init__(self, level):
         hp= 800
         atk = 35
-        curMana = 25
+        curMana = 10
         fullMana = 70
         aspd = .7
         armor = 30
         mr = 30
         super().__init__('Brand', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['StreetDemon', 'Techie']
-        self.castTime = 2
+        self.castTime = 1.9
         self.num_targets = 3
 
     def abilityScaling(self, level, AD, AP):
@@ -786,7 +787,7 @@ class Vex(Champion):
         self.notes = "Always overheals; gunblade ally healing doesn't overheal."
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [190, 285, 1100]
+        apScale = [180, 270, 1100]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
@@ -837,6 +838,38 @@ class Ziggs(Champion):
             self.multiTargetSpell(opponents, items,
                                   time, self.num_extra_targets,
                                   self.extraAbilityScaling, 'magical')
+
+
+class Urgot(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 66
+        curMana = 0
+        fullMana = 40
+        aspd = .85
+        armor = 15
+        mr = 15
+        super().__init__('Urgot', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        self.default_traits = ['Boombot', 'Executioner']
+        self.buff_duration = 5
+        self.manalockDuration = 5
+        self.aspd_bonus = [125, 125, 125] 
+        self.items = [buffs.UrgotUlt()]
+        self.castTime = 0.75    
+
+        self.ultActive = False
+        self.notes = "Boombot not yet coded, multiply dmg by 37\% for boombot 2, 81\% for boombot 4"
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [1, 1, 1]
+        apScale = [8, 12, 100]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        self.applyStatus(status.ASModifier("Urgot"),
+                         self, time, self.buff_duration, self.aspd_bonus[self.level-1])
+        self.applyStatus(status.UltActivator("Urgot ult"),
+                         self, time, self.buff_duration)
 
 
 class ZeroResistance(Champion):
