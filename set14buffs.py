@@ -1,5 +1,5 @@
 from collections import deque, Counter
-from set14items import Item
+from item import Item
 from champion import Stat, Attack, AD
 
 import heapq
@@ -308,7 +308,7 @@ class Dynamo(Buff):
     def __init__(self, level, params):
         super().__init__("Dynamo " + str(level), level, params,
                          phases=["onUpdate"])
-        self.scaling = {2: 5, 3: 7, 4: 11}
+        self.scaling = {0: 0, 2: 5, 3: 7, 4: 11}
         self.is_dynamo = 0
         self.extraBuff(params)
         self.next_mana = 3
