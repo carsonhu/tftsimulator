@@ -129,7 +129,6 @@ class Champion(object):
                         "Vex": False,
                         "Renekton": False}
 
-        self.categoryFive = False
         self.boardOfDirectors = False
         
         self.num_targets = 0
@@ -163,7 +162,6 @@ class Champion(object):
                      self.first_takedown,
                      self.num_traits,
                      self.stage,
-                     self.categoryFive,
                      self.boardOfDirectors,
                      self.num_targets,
                      self.num_extra_targets,
@@ -204,9 +202,11 @@ class Champion(object):
         self.armor.addStat(item.armor)
         self.mr.addStat(item.mr)
         self.crit.addStat(item.crit / 100)
+        self.dmgMultiplier.addStat(item.dmgMultiplier)
         self.omnivamp.addStat(item.omnivamp)
 
     def addStat(self, stat, amount):
+        # separate function good for bad luck + holobow
         getattr(self, stat).addStat(amount)
 
     def canCast(self, time):
@@ -411,11 +411,13 @@ class Champion(object):
                 item.ability("preAttack", time, self, newAttack)
         if self.canSpellCrit:
             baseCritDmg *= self.critDamage()
-        baseDmg *= self.dmgMultiplier.stat
-        baseCritDmg *= self.dmgMultiplier.stat
+        # baseDmg *= self.dmgMultiplier.stat
+        # baseCritDmg *= self.dmgMultiplier.stat
 
         for opponent in opponents[0:targets]:
-            self.doDamage(opponent, items, self.crit.stat, baseCritDmg, baseDmg, type, time, is_spell=True)    
+            multipliedDmg = baseDmg * self.dmgMultiplier.stat
+            multipliedCritDmg = baseCritDmg * self.dmgMultiplier.stat
+            self.doDamage(opponent, items, self.crit.stat, multipliedCritDmg, multipliedDmg, type, time, is_spell=True)    
 
     def damage(self, dmg, dtype, defender):
         """deal dmg, dmg is premitigated

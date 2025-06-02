@@ -30,8 +30,7 @@ class_buffs = ['Rapidfire', 'Techie', 'StreetDemon', 'Marksman',
 augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
             'BlazingSoulI', 'BlazingSoulII', 'BadLuckProtection',
             'CalculatedEnhancement', 'GlassCannonI',
-            'GlassCannonII', 'FlurryOfBlows', 'MacesWill', 'Backup',
-            'CategoryFive', 'Moonlight', 'PiercingLotusI',
+            'GlassCannonII', 'FlurryOfBlows', 'MacesWill', 'Backup', 'Moonlight', 'PiercingLotusI',
             'PiercingLotusII', 'BlueBatteryIII', 'FinalAscension',
             'CyberneticUplinkII', 'CyberneticUplinkIII', 'SpeedKills',
             'StandUnitedI', 'Ascension', 'CyberneticImplantsII',
@@ -96,7 +95,7 @@ class Rapidfire(Buff):
     def __init__(self, level, params):
         super().__init__("Rapidfire " + str(level), level, params,
                          phases=["preCombat", "preAttack"])
-        self.scaling = {0: 0, 2: 4, 4: 11, 6: 24}
+        self.scaling = {0: 0, 2: 4, 4: 11, 6: 22}
         self.base_scaling = 10
         self.stacks = 0
         self.maxStacks = 10
@@ -239,7 +238,7 @@ class Divinicorp(Buff):
         self.scaling = {1: 1, 2: 1.1, 3: 1.25, 4: 1.4, 5: 1.65, 6: 1.9, 7: 2.1}
 
         # for board of directors
-        self.board_scaling = {1: 1.75, 2: 1.85, 3: 1.95, 4: 2.05, 5: 2.15, 6: 2.25}
+        self.board_scaling = {1: 1.6, 2: 1.7, 3: 1.8, 4: 1.9, 5: 2, 6: 2.1}
 
         # divincorp base
         self.ad_base = 8
@@ -295,7 +294,7 @@ class Exotech(Buff):
     def __init__(self, level, params):
         super().__init__("Exotech " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {3: 2, 5: 5, 7: 9}
+        self.scaling = {3: 2, 5: 5, 7: 11}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(self.scaling[self.level] * champion.item_count)
@@ -757,17 +756,6 @@ class Moonlight(Buff):
         return 0
 
 
-class CategoryFive(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        super().__init__("Category Five", level, params, phases=["preCombat"])
-
-    def performAbility(self, phase, time, champion, input_=0):
-        champion.categoryFive = True
-        return 0
-
-
 class MacesWill(Buff):
     levels = [1]
 
@@ -873,10 +861,7 @@ class BadLuckProtection(Buff):
         super().__init__("Bad Luck Protection", level, params, phases=["onUpdate"])
   
     def performAbility(self, phase, time, champion, input_=0):
-        # on add stat:
-        # input is (stat, amount)
-        # returns amt to add
-        # if it's crit, add to ad instead
+        # does not work with holobow
         if champion.canCrit or champion.canSpellCrit or champion.crit.base > 0:
             champion.canCrit = False
             champion.canSpellCrit = False

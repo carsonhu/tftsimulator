@@ -36,7 +36,7 @@ class Kogmaw(Champion):
         self.notes = "Boombot not yet coded, multiply dmg by 37\% for boombot 2, 81\% for boombot 4"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [.5, .5, .5, .5]
+        adScale = [.5, .5, .6, .75]
         apScale = [9, 14, 20, 26]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -51,7 +51,7 @@ class Kindred(Champion):
     canFourStar = True
     def __init__(self, level):
         hp= 500
-        atk = 48
+        atk = 50
         curMana = 0
         fullMana = 50
         aspd = .7
@@ -62,7 +62,7 @@ class Kindred(Champion):
         self.castTime = 1.3
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [5.2, 5.2, 5.2, 5.2]
+        adScale = [5.2, 5.2, 5.4, 5.6]
         apScale = [20, 30, 45, 60]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -117,7 +117,7 @@ class Nidalee(Champion):
         self.ultActive = False
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [200, 300, 455]
+        apScale = [220, 330, 500]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
@@ -132,6 +132,31 @@ class Nidalee(Champion):
         self.multiTargetSpell(opponents, items,
                               time, num_targets, self.extraAbilityScaling, 'magical')
 
+
+class Morgana(Champion):
+    canFourStar = True
+    def __init__(self, level):
+        hp= 500
+        atk = 30
+        curMana = 0
+        fullMana = 40
+        aspd = .7
+        armor = 15
+        mr = 15
+        super().__init__('Morgana', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        self.default_traits = ['Divinicorp', 'Dynamo']
+        self.castTime = 1
+        self.cast_duration = 16
+
+    def abilityScaling(self, level, AD, AP):
+        apScale = [400, 600, 1000] 
+        return apScale[level - 1] * AP / self.cast_duration
+
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items,
+                time, 2, self.abilityScaling, 'magical')
+        
 
 class Seraphine(Champion):
     canFourStar = True
@@ -149,7 +174,7 @@ class Seraphine(Champion):
         self.num_targets = 3
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [250, 375, 585, 795]
+        apScale = [250, 375, 600, 825]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -238,7 +263,7 @@ class Leblanc(Champion):
         self.notes = "Cast time doesnt increase with more sigils"
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [65, 95, 145]
+        apScale = [70, 105, 160]
         return apScale[level - 1] * AP * self.sigils
 
     def performAbility(self, opponents, items, time):
@@ -301,8 +326,8 @@ class Vayne(Champion):
     def __init__(self, level):
         hp = 550
         atk = 50
-        curMana = 30
-        fullMana = 90
+        curMana = 25
+        fullMana = 75
         aspd = .7
         armor = 20
         mr = 20
@@ -348,7 +373,7 @@ class Veigar(Champion):
         self.notes = "Does 40% true dmg if 3*, 25\% otherwise"
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [310, 400, 535]
+        apScale = [320, 450, 600]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):

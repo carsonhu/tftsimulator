@@ -296,6 +296,26 @@ class CritModifier(Status):
         return True
 
 
+class DmgAmpModifier(Status):
+    # increase crit by %
+    def __init__(self, name):
+        super().__init__("Dmg Amp Modifier {}".format(name))
+        self.addition = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.dmgMultiplier.addStat(params)
+        self.addition = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+    def wearoffEffect(self, champion, time):
+        champion.dmgMultiplier.addStat(-1 * self.addition)
+        return True
+    
+
 class ASModifier(Status):
     # increase AS by %
     # NOTE: does not work with stacking
