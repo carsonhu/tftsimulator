@@ -8,7 +8,7 @@ import status
 offensive_craftables = ['Rabadons', 'Bloodthirster', 'HextechGunblade',
                         'Archangels', 'HoJ', 'InfinityEdge', 'LastWhisper',
                         'Shojin', 'Titans', 'GS', 'GSNoGiant', 'Nashors', 'StrikersFlail',
-                        'Deathblade', 'QSS', 'JeweledGauntlet', 'Red', 'Shiv', 'SteraksGage',
+                        'Deathblade', 'QSS', 'JeweledGauntlet', 'Red', 'SteraksGage',
                         'Blue', 'Morellos', 'TacticiansCrown', 'Adaptive', 'GuinsoosRageblade', 'VoidStaff', 'KrakensFury',
                         'DynamoEmblem', 'TechieEmblem']
 
