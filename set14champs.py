@@ -36,7 +36,7 @@ class Kogmaw(Champion):
         self.notes = "Boombot not yet coded, multiply dmg by 37\% for boombot 2, 81\% for boombot 4"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [.5, .5, .6, .75]
+        adScale = [.4, .4, .6, .8]
         apScale = [9, 14, 20, 26]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -217,8 +217,8 @@ class Jhin(Champion):
     def __init__(self, level):
         hp= 550
         atk = 44
-        curMana = 4
-        fullMana = 74
+        curMana = 14
+        fullMana = 64
         aspd = .74
         armor = 20
         mr = 20
@@ -263,7 +263,7 @@ class Leblanc(Champion):
         self.notes = "Cast time doesnt increase with more sigils"
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [70, 105, 160]
+        apScale = [75, 115, 170]
         return apScale[level - 1] * AP * self.sigils
 
     def performAbility(self, opponents, items, time):
@@ -328,7 +328,7 @@ class Vayne(Champion):
         atk = 50
         curMana = 25
         fullMana = 75
-        aspd = .7
+        aspd = .75
         armor = 20
         mr = 20
         super().__init__('Vayne', hp, atk, curMana, fullMana, aspd, armor, mr, level)
@@ -442,7 +442,7 @@ class Senna(Champion):
         self.notes = "Passive will hit 1 other target. passive doesnt need ie to crit"
 
     def autoScaling(self, level, AD, AP):
-        adScale = [.4, .4, .4]
+        adScale = [.45, .45, .45]
         return adScale[level - 1] * AD
 
     def abilityScaling(self, level, AD, AP):
@@ -520,8 +520,8 @@ class Varus(Champion):
     def __init__(self, level):
         hp= 700
         atk = 35
-        curMana = 15
-        fullMana = 75
+        curMana = 20
+        fullMana = 70
         aspd = .75
         armor = 25
         mr = 25
@@ -655,8 +655,8 @@ class MissFortune(Champion):
     def __init__(self, level):
         hp= 700
         atk = 53
-        curMana = 50
-        fullMana = 150
+        curMana = 40
+        fullMana = 135
         aspd = .75
         armor = 30
         mr = 30
@@ -773,7 +773,7 @@ class Yuumi(Champion):
         self.amp_level = 0
         self.castTime = 1
         self.marked = False
-        self.notes = "Every other cast will be marked"
+        self.notes = "Ability is simplified to: Every other cast will be marked"
 
     def abilityScaling(self, level, AD, AP):
         mult = 1.9 if self.marked else 1

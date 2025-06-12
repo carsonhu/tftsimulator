@@ -66,8 +66,8 @@ def buff_bar(buff_list, num_buffs=1, max_buffs=4, starting_buffs=[], default_ite
     return buffs
 
 def stage_selector():
-    stage = st.selectbox("Current stage", (2, 3, 4, 5, 6), index=2)
-    return stage
+    stage = st.selectbox("Current stage", ("2-1", "3-1", "4-1", "5-1", "6-1"), index=2)
+    return int(stage.split('-')[0])
 
 def divinicorp_selector(champion):
     st.header("Divinicorp Buffs")

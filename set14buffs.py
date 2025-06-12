@@ -35,7 +35,7 @@ augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
             'CyberneticUplinkII', 'CyberneticUplinkIII', 'SpeedKills',
             'StandUnitedI', 'Ascension', 'CyberneticImplantsII',
             'CyberneticImplantsIII', 'SatedSpellweaver', 'BoardOfDirectors',
-            'ShareTheSpotlight']
+            'ShareTheSpotlight', 'PumpingUpI', 'PumpingUpII', 'PumpingUpIII', 'NoScoutNoPivot']
 
 stat_buffs = ['ASBuff']
 
@@ -238,7 +238,7 @@ class Divinicorp(Buff):
         self.scaling = {1: 1, 2: 1.1, 3: 1.25, 4: 1.4, 5: 1.65, 6: 1.9, 7: 2.1}
 
         # for board of directors
-        self.board_scaling = {1: 1.6, 2: 1.7, 3: 1.8, 4: 1.9, 5: 2, 6: 2.1}
+        self.board_scaling = {1: 1.5, 2: 1.6, 3: 1.7, 4: 1.8, 5: 1.9, 6: 2}
 
         # divincorp base
         self.ad_base = 8
@@ -294,7 +294,7 @@ class Exotech(Buff):
     def __init__(self, level, params):
         super().__init__("Exotech " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {3: 2, 5: 5, 7: 11}
+        self.scaling = {3: 2, 5: 6, 7: 13}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(self.scaling[self.level] * champion.item_count)
@@ -307,7 +307,7 @@ class Dynamo(Buff):
     def __init__(self, level, params):
         super().__init__("Dynamo " + str(level), level, params,
                          phases=["onUpdate"])
-        self.scaling = {0: 0, 2: 5, 3: 7, 4: 11}
+        self.scaling = {0: 0, 2: 4, 3: 6, 4: 10}
         self.is_dynamo = 0
         self.extraBuff(params)
         self.next_mana = 3
@@ -824,11 +824,64 @@ class SpeedKills(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         for item in champion.items:
             if "Rapidfire" in item.name:
-                item.stacks = 2
+                item.stacks = 1
                 item.maxStacks = 15
                 break
         return 0
 
+
+class PumpingUpI(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Pumping Up I", level, params, phases=["preCombat"])
+        self.base_scaling = 6
+        self.bonus_scaling = .5
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.atk.addStat(self.base_scaling + self.bonus_scaling * 6 * (champion.stage - 2))
+        champion.ap.addStat(self.base_scaling + self.bonus_scaling * 6 * (champion.stage - 2))
+        return 0
+    
+
+class PumpingUpII(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Pumping Up II", level, params, phases=["preCombat"])
+        self.base_scaling = 8
+        self.bonus_scaling = 1
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.atk.addStat(self.base_scaling + self.bonus_scaling * 6 * (champion.stage - 2))
+        champion.ap.addStat(self.base_scaling + self.bonus_scaling * 6 * (champion.stage - 2))
+        return 0
+    
+class PumpingUpIII(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Pumping Up III", level, params, phases=["preCombat"])
+        self.base_scaling = 12
+        self.bonus_scaling = 2
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.atk.addStat(self.base_scaling + self.bonus_scaling * 6 * (champion.stage - 2))
+        champion.ap.addStat(self.base_scaling + self.bonus_scaling * 6 * (champion.stage - 2))
+        return 0
+
+class NoScoutNoPivot(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("No Scout no Pivot", level, params, phases=["preCombat"])
+        self.scaling = 2
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.atk.addStat(self.scaling * 5 * (champion.stage - 2))
+        champion.ap.addStat(self.scaling * 5 * (champion.stage - 2))
+        return 0
+    
 
 class BlazingSoulI(Buff):
     levels = [1]

@@ -21,7 +21,7 @@ radiants = ['RadiantBlue', 'RadiantVoidStaff',
             'RadiantNashors', 'RadiantShojin', 'RadiantInfinityEdge',
             'RadiantDeathblade', 'RadiantTitans', 'RadiantStrikersFlail',
             'RadiantHoJ', 'RadiantRed', 'RadiantMorellos', 'RadiantQSS',
-            'RadiantAdaptive', 'RadiantSteraksGage']
+            'RadiantAdaptive', 'RadiantSteraksGage', 'RadiantGuinsoosRageblade']
 
 exotech = ['Holobow', 'PulseStabilizer']
 
@@ -497,8 +497,8 @@ class WitsEnd(Item):
 
 class ShivArtifact(Item):
     def __init__(self):
-        super().__init__("Statikk Shiv (Artifact)", ap=30, aspd=30, has_radiant=True, phases=["preAttack"])
-        self.shivDmg = 30
+        super().__init__("Statikk Shiv (Artifact)", ap=40, aspd=40, has_radiant=True, phases=["preAttack"])
+        self.shivDmg = 40
         self.shivTargets = 4
         self.counter = 0
 
@@ -522,7 +522,7 @@ class Flickerblade(Item):
     def performAbility(self, phase, time, champion, input_=0):
         self.counter += 1
         if champion.aspd.stat <= 5:
-            champion.aspd.addStat(8)
+            champion.aspd.addStat(7)
         if self.counter == 5:
             champion.atk.addStat(4)
             champion.ap.addStat(5)
@@ -601,13 +601,13 @@ class RadiantSteraksGage(Item):
 
 class RadiantStrikersFlail(Item):
     def __init__(self):
-        super().__init__("Radiant Strikers' Flail", crit=40, aspd=40, dmgMultiplier = 0.2, has_radiant=True, phases=["preCombat", "onCrit"])
+        super().__init__("Radiant Strikers' Flail", crit=35, aspd=35, dmgMultiplier = 0.2, has_radiant=True, phases=["preCombat", "onCrit"])
         self.current_buff = 0
         self.buff_duration = 8
-        self.dmg_amp_value = .1
+        self.dmg_amp_value = .08
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.applyStatus(status.DmgAmpModifier("StrikersFlail {} {}".format(id(self), self.current_buff)),
+        champion.applyStatus(status.DmgAmpModifier("RadiantStrikersFlail {} {}".format(id(self), self.current_buff)),
                             self, time, self.buff_duration, self.dmg_amp_value)
         self.current_buff = (self.current_buff + 1) % 4   
         return 0
@@ -683,7 +683,7 @@ class RadiantRunaansHurricane(Item):
 
 class RadiantGuinsoosRageblade(Item):
     def __init__(self):
-        super().__init__("Radiant Guinsoo's Rageblade", aspd=20, ap=20, phases=["onUpdate"])
+        super().__init__("Radiant Guinsoo's Rageblade", aspd=30, ap=30, phases=["onUpdate"])
         self.next_bonus = 1
         self.aspd_bonus = 14
 
@@ -791,7 +791,7 @@ class RadiantShojin(Item):
 
 class RadiantVoidStaff(Item):
     def __init__(self):
-        super().__init__("Radiant Void Staff", mana=15, ap=50, aspd=30, phases=["preCombat"])
+        super().__init__("Radiant Void Staff", mana=30, ap=60, aspd=60, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
         for opponent in champion.opponents:
