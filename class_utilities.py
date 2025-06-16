@@ -310,14 +310,24 @@ def bonus_stats(key, champ):
       ad_bonus = st.number_input('Bonus AD',
                                        min_value=0, max_value=2000,
                                        value=0, key=key + "ad")
+      dmgamp_bonus = st.number_input('DmgAmp',
+                                       min_value=0, max_value=1000,
+                                       value=0, key=key + "dmgamp")
     with cols[1]:
       ap_bonus = st.number_input('Bonus AP',
                                        min_value=0, max_value=2000,
                                        value=0, key=key + "ap")
+      crit_bonus = st.number_input('Bonus Crit',
+                                       min_value=0, max_value=200,
+                                       value=0, key=key + "crit")      
     with cols[2]:
       as_bonus = st.number_input('Bonus AS',
                                        min_value=0, max_value=200,
                                        value=0, key=key + "AS")
+      crit_dmg_bonus = st.number_input('CritDmg',
+                                       min_value=0, max_value=200,
+                                       value=0, key=key + "critdmg")
+      
     # with col2:
     #   crit_bonus = st.number_input('Bonus Crit',
     #                                    min_value=0, max_value=200,
@@ -328,8 +338,9 @@ def bonus_stats(key, champ):
     champ.atk.addStat(ad_bonus)
     champ.ap.addStat(ap_bonus)
     champ.aspd.addStat(as_bonus)
-    # champ.crit.addStat(crit_bonus)
-    # champ.critDmg.addStat(crit_dmg_bonus)
+    champ.dmgMultiplier.addStat(dmgamp_bonus / 100)
+    champ.crit.addStat(crit_bonus / 100)
+    champ.critDmg.addStat(crit_dmg_bonus / 100)
 
 
 def num_traits(key, champ):
