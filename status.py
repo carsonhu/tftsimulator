@@ -130,7 +130,7 @@ class ADModifier(Status):
 
     def applicationEffect(self, champion, time, duration, params):
         self.toAdd = params
-        champion.atk.addStat(self.toAdd)
+        champion.bonus_ad.addStat(self.toAdd)
         return True
 
     def reapplicationEffect(self, champion, time, duration, params):
@@ -138,7 +138,7 @@ class ADModifier(Status):
         # self.addition = params
         return True
     def wearoffEffect(self, champion, time):
-        champion.atk.addStat(-1 * self.toAdd)
+        champion.bonus_ad.addStat(-1 * self.toAdd)
         return True
 
 class  AsheUlt(Status):

@@ -1,7 +1,7 @@
 class Item(object):
     def __init__(self, name, hp=0, ad=0, ap=0, 
                  aspd=0, armor=0, mr=0, crit=0,
-                 dodge=0, mana=0, dmgMultiplier=0, omnivamp=0, has_radiant=False, item_type='Craftable', phases=None):
+                 dodge=0, manaRegen=0, mana=0, dmgMultiplier=0, omnivamp=0, has_radiant=False, item_type='Craftable', phases=None):
         self.name = name
         self.hp = hp
         self.ad = ad
@@ -12,6 +12,7 @@ class Item(object):
         self.crit = crit
         self.dodge = dodge
         self.mana = mana
+        self.manaRegen = manaRegen
         self.dmgMultiplier = dmgMultiplier
         self.omnivamp = omnivamp
         self.has_radiant = has_radiant
