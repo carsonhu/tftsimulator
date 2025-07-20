@@ -181,7 +181,7 @@ class BattleAcademia(Buff):
 
     def __init__(self, level, params):
         super().__init__(
-            "BattleAcademia " + str(level), level, params, phases=["preCombat"]
+            "Battle Academia " + str(level), level, params, phases=["preCombat"]
         )
         self.scaling = {3: 3, 5: 5, 7: 7}
 

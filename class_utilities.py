@@ -131,7 +131,11 @@ def divinicorp_selector(champion):
 def write_champion(champ):
     st.subheader("Base stats")
     cols = st.columns(4)
-    ad_text = f"AD: :blue[{round(champ.atk.stat * champ.bonus_ad.stat, 2)}] = {champ.atk.base} * :green[{round(champ.bonus_ad.stat, 4)} AD]"
+    ad_text = (
+        f"AD: :blue[{round(champ.atk.stat * champ.bonus_ad.stat, 2)}] = {champ.atk.base} * :green[{round(champ.bonus_ad.stat, 4)} AD]"
+        if champ.bonus_ad.addMultiplier == 1
+        else f"AD: :blue[{round(champ.atk.stat * champ.bonus_ad.stat, 2)}] = {champ.atk.base} * ({1} + :red[{champ.bonus_ad.addMultiplier}] * :green[{round(champ.bonus_ad.add/100, 4)} AD])"
+    )
     ap_text = (
         f"AP: :blue[{round(champ.ap.stat, 2)}] = {champ.ap.base} + :green[{round(champ.ap.add, 2)} AP]"
         if champ.ap.addMultiplier == 1

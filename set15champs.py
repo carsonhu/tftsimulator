@@ -432,7 +432,7 @@ class Kaisa(Champion):
             level,
             Role.MARKSMAN,
         )
-        self.default_traits = ["Supreme Cells", "Duelist"]
+        self.default_traits = ["SupremeCells", "Duelist"]
         self.projectiles = 8
         self.castTime = 1.5
         self.notes = "Click 'more options' button to set bonus AD"
@@ -469,9 +469,9 @@ class Caitlyn(Champion):
             level,
             Role.CASTER,
         )
-        self.default_traits = ["Battle Academia", "Sniper"]
+        self.default_traits = ["BattleAcademia", "Sniper"]
         self.potential = 0
-        self.castTime = 1
+        self.castTime = 2.5
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):

@@ -98,6 +98,50 @@ class ArtisticKO(Buff):
         return 0
 
 
+class BulletHell(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Bullet Hell", level, params, phases=["preCombat"])
+        self.scaling = 1.33
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if hasattr(champion, "projectiles"):
+            champion.projectiles = int(champion.projectiles * self.scaling)
+        return 0
+
+
+class StarStudent(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Star Student", level, params, phases=["postPreCombat"])
+        self.hp_scaling = 200
+        self.potential_scaling = 1.6
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.hp.addStat(self.hp_scaling)
+        if hasattr(champion, "potential"):
+            champion.potential = int(champion.potential * self.potential_scaling)
+        return 0
+
+
+class Mage(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Mage", level, params, phases=["preCombat", "postAbility"])
+        self.dmgMultiplierScaling = -0.15
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            # cast twice = not quite double cast time but close to it
+            champion.castTime *= 1.8
+            champion.dmgMultiplier.addStat(self.dmgMultiplierScaling)
+        elif phase == "postAbility":
+            champion.performAbility(champion.opponents, champion.items, time)
+
+
 class Precision(Buff):
     levels = [1]
 
