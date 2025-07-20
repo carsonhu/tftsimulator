@@ -39,16 +39,18 @@ with st.sidebar:
         totalMana = st.number_input("Total Mana", min_value=10, max_value=120, value=50, key="totalmana")
         baseAS = st.number_input("Base AS", min_value = 0.5, max_value = 1.0, value=0.7, key="baseAS")
         baseAD = st.number_input("Base AD", min_value = 0, max_value = 1000, value=0, key="baseAD")
+        manaRegen = st.number_input("Mana Regen", min_value = 0, max_value = 20, value=0, key="manaRegen")
     with col2:
         startingMana = st.number_input("Start Mana", min_value=0, max_value=totalMana, value=0, key="startmana")
         bonusAS = st.number_input("Bonus AS", min_value = 0, max_value = 1000, value=0, key="bonusAS")
-        spellDmg = st.number_input("Spell Damage", min_value = 0, max_value = 1000, value=1, key="Spell Damage")
+        spellDmg = st.number_input("Spell Damage", min_value = 0, max_value = 1000, value=100, key="Spell Damage")
 
     new_champ = set15champs.BaseChamp(1)
     new_champ.role = Role(role)
     new_champ.castTime = castTime
     new_champ.fullMana.base = totalMana
     new_champ.curMana = startingMana
+    new_champ.manaRegen.add += manaRegen
     
     new_champ.aspd.base = baseAS
     new_champ.aspd.add = bonusAS

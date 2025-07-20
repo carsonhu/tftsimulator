@@ -43,7 +43,7 @@ craftables = set15items.offensive_craftables
 aug_buffs = sorted(set15buffs.augments)
 
 powerups = sorted(set15buffs.powerups + set15buffs.no_buff)
-
+valid_powerups = powerups
 
 champ_before_sims = None
 
@@ -85,7 +85,9 @@ with st.sidebar:
         all_buffs, max_buffs=10, num_buffs=2, starting_buffs=champ.default_traits
     )
 
-    chosen_powerup = class_utilities.powerup_bar(powerups)
+    # get power ups
+    valid_powerups = class_utilities.get_valid_powerups(champ, powerups)
+    chosen_powerup = class_utilities.powerup_bar(valid_powerups)
 
     if chosen_powerup != "NoBuff":
         class_utilities.add_powerup(champ, chosen_powerup)
@@ -187,7 +189,7 @@ with tab1:
         ]
     if radio_value == "Powerup":
         df_flt = df_flt[
-            df_flt["Extra class name"].isin(set15buffs.powerups + ["NoItem"])
+            df_flt["Extra class name"].isin(valid_powerups + ["NoItem"])
         ]
 
     new_df = df_flt.drop(["Extra class name", "Name", "Level"], axis=1)

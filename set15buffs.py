@@ -37,23 +37,15 @@ class_buffs = [
 
 augments = [
     "BackupDancers",
-    "ManaflowI",
-    "ManaflowII",
     "Shred30",
     "BlazingSoulI",
     "BlazingSoulII",
-    "GlassCannonI",
-    "GlassCannonII",
     "MacesWill",
     "Backup",
     "Moonlight",
-    "PiercingLotusI",
-    "PiercingLotusII",
-    "BlueBatteryIII",
     "FinalAscension",
     "CyberneticUplinkII",
     "CyberneticUplinkIII",
-    "SpeedKills",
     "StandUnitedI",
     "Ascension",
     "CyberneticImplantsII",
@@ -62,8 +54,9 @@ augments = [
     "PumpingUpII",
     "PumpingUpIII",
     "NoScoutNoPivot",
-    "TitanicStrength",
     "HoldTheLine",
+    "AdaptiveStyle",
+    "TonsOfStats",
 ]
 
 stat_buffs = ["ASBuff"]
@@ -149,9 +142,9 @@ class SupremeCells(Buff):
 
     def __init__(self, level, params):
         super().__init__(
-            "Supreme Cells " + str(level), level, params, phases=["preCombat"]
+            "SupremeCells " + str(level), level, params, phases=["preCombat"]
         )
-        self.scaling = {2: 10, 3: 25, 6: 40}
+        self.scaling = {2: 12, 3: 30, 4: 50}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.addStat(self.scaling[self.level])
@@ -341,11 +334,11 @@ class MonsterTrainer(Buff):
         self.trainer_level = level
 
     def performAbility(self, phase, time, champion, input=0):
-        champion.trainer_level = self.trainer_level
+        champion.trainer_level += self.trainer_level
         # smolder only
         if champion.name == "Smolder":
-            champion.bonus_ad.addStat(self.trainer_level)
-            if self.trainer_level >= 30:
+            champion.bonus_ad.addStat(champion.trainer_level)
+            if champion.trainer_level >= 30:
                 champion.fullMana.addStat(-10)
                 champion.armorPierce.addStat(0.5)
         return 0
@@ -391,6 +384,8 @@ class KayleUlt(Buff):
     def __init__(self, level=1, params=0):
         super().__init__("Unleash the Demon", level, params, phases=["preAttack"])
         self.buff_duration = 3
+        self.finalAscentAP = 5
+        self.finalAscent10Scaling = 0.55
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.multiTargetSpell(
@@ -403,7 +398,7 @@ class KayleUlt(Buff):
         )
         if champion.finalAscent:
             if champion.tactician_level >= 7 and champion.numAttacks % 3 == 0:
-                champion.ap.addStat(4)
+                champion.ap.addStat(self.finalAscentAP)
             if champion.tactician_level == 10:
                 num_targets = int(champion.num_targets * 1.5)
                 for i in range(2):
@@ -412,7 +407,8 @@ class KayleUlt(Buff):
                         champion.items,
                         time,
                         num_targets,
-                        lambda x, y, z: 0.5 * champion.waveAbilityScaling(x, y, z),
+                        lambda x, y, z: self.finalAscent10Scaling
+                        * champion.waveAbilityScaling(x, y, z),
                         "magical",
                     )
                 for opponent in champion.opponents[0:num_targets]:
@@ -484,27 +480,18 @@ class JhinUlt(Buff):
         return 0
 
 
-# AUGMENTS
-
-
-class BlueBatteryIII(Buff):
-    # crazy bug that i gotta fix: naming it 'blue' fucks things up with blue
+class MundoUlt(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__(
-            "BlueBattery III",
-            level,
-            params,
-            phases=["preCombat", "postAbility"],
-        )
+        super().__init__("Give em the Chair!", level, params, phases=["preAttack"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        if phase == "preCombat":
-            champion.ap.addStat(5)
-        elif phase == "postAbility":
-            champion.addMana(5)
-        return 0
+        input_.scaling = champion.passiveAbilityScaling
+        return input_
+
+
+# AUGMENTS
 
 
 class HoldTheLine(Buff):
@@ -519,34 +506,6 @@ class HoldTheLine(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         champion.bonus_ad.addStat(self.ad_scaling * self.frontliners)
         champion.ap.addStat(self.ap_scaling * self.frontliners)
-        return 0
-
-
-class JeweledLotusII(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        super().__init__("Jeweled Lotus II", level, params, phases=["preCombat"])
-        self.critBonus = 0.15
-
-    def performAbility(self, phase, time, champion, input_=0):
-        if phase == "preCombat":
-            champion.canSpellCrit = True
-            champion.crit.addStat(self.critBonus)
-        return 0
-
-
-class JeweledLotusIII(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        super().__init__("Jeweled Lotus III", level, params, phases=["preCombat"])
-        self.critBonus = 0.45
-
-    def performAbility(self, phase, time, champion, input_=0):
-        if phase == "preCombat":
-            champion.canSpellCrit = True
-            champion.crit.addStat(0.45)
         return 0
 
 
@@ -570,58 +529,6 @@ class GlassCannonII(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.addStat(0.2)
-        return 0
-
-
-class ManaflowI(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        super().__init__("Manaflow I", level, params, phases=["preCombat"])
-
-    def performAbility(self, phase, time, champion, input_=0):
-        champion.manaPerAttack.addStat(2)
-        return 0
-
-
-class ManaflowII(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        super().__init__("Manaflow II", level, params, phases=["preCombat"])
-
-    def performAbility(self, phase, time, champion, input_=0):
-        champion.manaPerAttack.addStat(3)
-        return 0
-
-
-class PiercingLotusI(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        super().__init__("Piercing Lotus I", level, params, phases=["preCombat"])
-
-    def performAbility(self, phase, time, champion, input_=0):
-        champion.crit.addStat(0.05)
-        champion.canSpellCrit = True
-        for opponent in champion.opponents:
-            opponent.applyStatus(status.MRReduction("MR Piercing"), self, time, 30, 0.8)
-        return 0
-
-
-class PiercingLotusII(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        super().__init__("Piercing Lotus II", level, params, phases=["preCombat"])
-
-    def performAbility(self, phase, time, champion, input_=0):
-        champion.crit.addStat(0.2)
-        champion.canSpellCrit = True
-        for opponent in champion.opponents:
-            opponent.applyStatus(
-                status.MRReduction("MR Piercing 2"), self, time, 30, 0.8
-            )
         return 0
 
 
@@ -649,6 +556,26 @@ class MacesWill(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(6)
         champion.crit.addStat(0.2)
+        return 0
+
+
+class TonsOfStats(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Tons of Stats", level, params, phases=["preCombat"])
+        self.scaling = 4
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.hp.addStat(self.scaling * 11)
+        champion.bonus_ad.addStat(self.scaling)
+        champion.ap.addStat(self.scaling)
+        champion.aspd.addStat(self.scaling)
+        champion.armor.addStat(self.scaling)
+        champion.mr.addStat(self.scaling)
+        # hacky
+        if champion.curMana < champion.fullMana.stat:
+            champion.curMana += self.scaling
         return 0
 
 
@@ -695,21 +622,6 @@ class CyberneticImplantsIII(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.bonus_ad.addStat(30)
-        return 0
-
-
-class SpeedKills(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        super().__init__("Speed Kills", level, params, phases=["postPreCombat"])
-
-    def performAbility(self, phase, time, champion, input_=0):
-        for item in champion.items:
-            if "Rapidfire" in item.name:
-                item.stacks = 1
-                item.maxStacks = 15
-                break
         return 0
 
 
@@ -795,16 +707,21 @@ class BlazingSoulII(Buff):
         return 0
 
 
-class TitanicStrength(Buff):
+class AdaptiveStyle(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__("Titanic Strength", level, params, phases=["postPreCombat"])
-        self.scaling = 0.0125
+        super().__init__("AdaptiveStyle", level, params, phases=["preAttack"])
+        self.stacks = 0
+        self.max_stacks = 20
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.bonus_ad.addStat(self.scaling * champion.hp.stat)
-        champion.ap.addStat(self.scaling * champion.hp.stat)
+        for item in champion.items:
+            if "Duelist" in item.name and self.stacks < self.max_stacks:
+                self.stacks += 1
+                champion.bonus_ad.addStat(2)
+                champion.ap.addStat(2)
+                break
         return 0
 
 

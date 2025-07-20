@@ -11,6 +11,7 @@ from set15champs import *
 from set15items import *
 
 # import plotly.graph_objects as go
+import json
 import pandas as pd
 import numpy as np
 import itertools
@@ -79,6 +80,17 @@ def buff_bar(
     return buffs
 
 
+def get_valid_powerups(champ, powerups):
+    with open("champ_powerups.json", "r") as file:
+        data = json.load(file)
+    if champ.name in data:
+        valid_powerups = data[champ.name]
+        valid_powerups += set15buffs.no_buff
+        intersection = [item for item in powerups if item in valid_powerups]
+        return intersection
+    return []
+
+
 def powerup_bar(powerup_list, default_item="NoBuff"):
     st.header("Power Up")
     # item_cols = st.columns([2, 1])
@@ -119,7 +131,7 @@ def divinicorp_selector(champion):
 def write_champion(champ):
     st.subheader("Base stats")
     cols = st.columns(4)
-    ad_text = f"AD: :blue[{round(champ.atk.stat * (1 + champ.bonus_ad.add / 100), 2)}] = {champ.atk.base} * :green[{round(1 + champ.bonus_ad.add / 100, 4)} AD]"
+    ad_text = f"AD: :blue[{round(champ.atk.stat * champ.bonus_ad.stat, 2)}] = {champ.atk.base} * :green[{round(champ.bonus_ad.stat, 4)} AD]"
     ap_text = (
         f"AP: :blue[{round(champ.ap.stat, 2)}] = {champ.ap.base} + :green[{round(champ.ap.add, 2)} AP]"
         if champ.ap.addMultiplier == 1

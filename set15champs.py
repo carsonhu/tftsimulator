@@ -16,6 +16,7 @@ champ_list = [
     "Kayle",
     "Lucian",
     "Sivir",
+    "DrMundo",
     "Jhin",
     "Gangplank",
     "Caitlyn",
@@ -27,7 +28,7 @@ champ_list = [
 class Gnar(Champion):
     def __init__(self, level):
         hp = 500
-        atk = 52
+        atk = 50
         curMana = 0
         fullMana = 40
         aspd = 0.7
@@ -93,13 +94,13 @@ class Ezreal(Champion):
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [110, 165, 275]
+        adScale = [115, 175, 300]
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def magicAbilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [220, 330, 550]
+        apScale = [230, 350, 600]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
@@ -258,7 +259,7 @@ class Sivir(Champion):
         self.notes = "boomerang hits through each target twice"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [160, 240, 360]
+        adScale = [170, 255, 385]
         apScale = [20, 30, 45]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -274,6 +275,69 @@ class Sivir(Champion):
                 lambda x, y, z: 0.6 ** (count) * self.abilityScaling(x, y, z),
                 "physical",
             )
+
+
+class DrMundo(Champion):
+    def __init__(self, level):
+        hp = 800
+        atk = 60
+        curMana = 30
+        fullMana = 60
+        aspd = 0.75
+        armor = 40
+        mr = 40
+        super().__init__(
+            "DrMundo",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.default_traits = ["Luchador"]
+        self.items.append(buffs.MundoUlt())
+        self.num_targets = 2
+        self.castTime = 1.3
+        self.notes = "Mundo Hero. Num targets is # secondary units hit."
+
+    def passiveAbilityScaling(self, level, AD, bonus_AD, AP):
+        # this is for attack scaling
+        hpScale = 0.06
+        return AD * bonus_AD + self.hp.stat * hpScale
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [120, 180, 280]
+        apScale = [0, 0, 0]
+        hpScale = 0.3
+        return (
+            apScale[level - 1] * AP + adScale[level - 1] * AD + self.hp.stat * hpScale
+        )
+
+    def splashAbilityScaling(self, level, AD, AP):
+        apScale = 0.25
+        return self.abilityScaling(level, AD, AP) * apScale * AP
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents,
+            items,
+            time,
+            1,
+            self.abilityScaling,
+            "physical",
+        )
+        self.multiTargetSpell(
+            opponents,
+            items,
+            time,
+            self.num_targets,
+            self.splashAbilityScaling,
+            "physical",
+        )
 
 
 class Jhin(Champion):
@@ -301,13 +365,14 @@ class Jhin(Champion):
         self.items.append(buffs.JhinUlt())
         # append jhinult to items
         self.castTime = 0
+        self.ultMultiplier = 1
         self.manaGainMultiplier.base = 0
         self.notes = "Wraith not coded yet"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [180, 270, 415]
         apScale = [30, 45, 70]
-        return apScale[level - 1] * AP + adScale[level - 1] * AD
+        return (apScale[level - 1] * AP + adScale[level - 1] * AD) * self.ultMultiplier
 
 
 class Gangplank(Champion):
@@ -332,7 +397,7 @@ class Gangplank(Champion):
             Role.FIGHTER,
         )
         self.default_traits = ["Duelist"]
-        self.castTime = 0.5
+        self.castTime = 1
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
@@ -501,11 +566,11 @@ class Smolder(Champion):
         )
         self.default_traits = ["MonsterTrainer"]
         self.trainer_level = 0
-        self.castTime = 0.5
-        self.notes = "modify mosnter level through trait"
+        self.castTime = 1  # verified
+        self.notes = "Smolder passive burn not included"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [350, 525, 840]
+        adScale = [200, 300, 480]
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 

@@ -1,4 +1,5 @@
 from set15buffs import Buff
+from stats import JhinBonusAD
 
 
 class AttackExpert(Buff):
@@ -78,10 +79,53 @@ class Bludgeoner(Buff):
 
     def __init__(self, level, params):
         super().__init__("Bludgeoner", level, params, phases=["preCombat"])
-        self.scaling = 0.4
+        self.scaling = 0.35
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.armorPierce.addStat(self.scaling)
+        return 0
+
+
+class ArtisticKO(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Artistic KO", level, params, phases=["preCombat"])
+        self.scaling = 1.4
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.ultMultiplier = self.scaling
+        return 0
+
+
+class Precision(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Precision", level, params, phases=["preCombat", "preAttack"])
+        self.set_aspd = 0.7
+        # self.as_conversion = 0.8
+        self.atk_multiplier = 1.3
+        self.extra_mana = 10
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.aspd.base = self.set_aspd
+            champion.aspd.as_cap = self.set_aspd
+            champion.bonus_ad = JhinBonusAD(
+                champion.bonus_ad.base,
+                champion.bonus_ad.mult,
+                champion.bonus_ad.add,
+                champion.aspd,
+            )
+            champion.manaPerAttack.addStat(10)
+        elif phase == "preAttack":
+            # doublecheck to ensure it doesn't activate during cast
+            if input_.regularAuto:
+                input_.scaling = (
+                    lambda level, baseAD, AD, AP: baseAD * AD * self.atk_multiplier
+                )
+            return input_
         return 0
 
 
@@ -111,6 +155,18 @@ class HerosArc(Buff):
         return 0
 
 
+class Efficient(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Efficient", level, params, phases=["preCombat"])
+        self.scaling = 20
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.fullMana.addStat(-20)
+        return 0
+
+
 class BestestBoy(Buff):
     levels = [1]
 
@@ -125,6 +181,18 @@ class BestestBoy(Buff):
             if time > self.next_bonus:
                 self.next_bonus += 5
                 champion.bonus_ad.addStat(self.scaling)
+        return 0
+
+
+class RareTreat(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Rare Treat", level, params, phases=["prePreCombat"])
+        self.scaling = 15
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.trainer_level += self.scaling
         return 0
 
 
@@ -247,7 +315,7 @@ class Kahunahuna(Buff):
     def __init__(self, level, params):
         super().__init__("Kahunahuna", level, params, phases=["postAttack"])
         self.stacks = 0
-        self.scaling = 200
+        self.scaling = 215
 
     def performAbility(self, phase, time, champion, input_=0):
         self.stacks += 1

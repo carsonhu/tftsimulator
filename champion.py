@@ -72,6 +72,8 @@ class Champion(object):
         # notes for user
         self.notes = ""
 
+        self.trainer_level = 0  # Monster trainer
+
         self.tactician_level = 4
         self.first_takedown = 5  # time of first takedown
         self.num_traits = 0
@@ -262,8 +264,8 @@ class Champion(object):
     def update(self, opponents, items, time):
         self.opponents = opponents
         # Update each status
-        for status in self.statuses.values():
-            status.update(self, time)
+        for statusa in self.statuses.values():
+            statusa.update(self, time)
 
         # mana regeneration
         if time >= self.nextMana:
