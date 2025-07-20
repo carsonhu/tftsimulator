@@ -87,7 +87,8 @@ class Ezreal(Champion):
         )
         self.default_traits = ["BattleAcademia", "Prodigy"]
         self.potential = 0
-        self.castTime = 0.5
+        self.castTime = 0.8
+        self.secondaryCastTime = 1.1  # when he has to blink
         self.buff_duration = 5 + self.castTime
         self.aspd_bonus = 25
         self.stat_per_potential = 4

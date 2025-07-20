@@ -187,6 +187,8 @@ class BattleAcademia(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.potential = self.scaling[self.level]
+        if "Ezreal" in champion.name:  # increases cast time a bit
+            champion.castTime = champion.secondaryCastTime
         return 0
 
 
