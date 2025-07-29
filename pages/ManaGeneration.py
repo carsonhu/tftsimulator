@@ -36,7 +36,7 @@ with st.sidebar:
     col1, col2, = st.columns(2)
 
     with col1:
-        totalMana = st.number_input("Total Mana", min_value=10, max_value=120, value=50, key="totalmana")
+        totalMana = st.number_input("Total Mana", min_value=10, max_value=140, value=50, key="totalmana")
         baseAS = st.number_input("Base AS", min_value = 0.5, max_value = 1.0, value=0.7, key="baseAS")
         baseAD = st.number_input("Base AD", min_value = 0, max_value = 1000, value=0, key="baseAD")
         manaRegen = st.number_input("Mana Regen", min_value = 0, max_value = 20, value=0, key="manaRegen")

@@ -33,6 +33,7 @@ offensive_craftables = [
     "GuinsoosRageblade",
     "VoidStaff",
     "KrakensFury",
+    "EdgeOfNight",
 ]
 
 mana_items = ["Blue", "Shojin", "GuinsoosRageblade", "Nashors", "Adaptive"]
@@ -48,6 +49,7 @@ artifacts = [
     "GoldCollector",
     "Flickerblade",
     "ShivArtifact",
+    "Dawncore",
 ]
 
 radiants = [
@@ -318,7 +320,7 @@ class Shojin(Item):
     def __init__(self):
         super().__init__(
             "Spear of Shojin",
-            ad=20,
+            ad=18,
             manaRegen=1,
             ap=10,
             has_radiant=True,
@@ -695,6 +697,21 @@ class Flickerblade(Item):
         return 0
 
 
+class Dawncore(Item):
+    def __init__(self):
+        super().__init__("Dawncore", ad=20, ap=20, phases=["preCombat", "postAbility"])
+        self.counter = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.fullMana.addStat(-10)
+        elif phase == "postAbility":
+            if champion.fullMana.stat > 15:
+                # we don't want to use mult since we do want it to round.
+                champion.fullMana.addStat(-1 * (champion.fullMana.stat // 10))
+        return 0
+
+
 ### RADIANTS
 
 
@@ -923,7 +940,7 @@ class RadiantShojin(Item):
     def __init__(self):
         super().__init__(
             "Radiant Spear of Shojin",
-            ad=40,
+            ad=35,
             manaRegen=2,
             ap=30,
             phases=["preCombat"],

@@ -288,6 +288,17 @@ def plot_df(df, simLists):
             st.pyplot(fig)
 
 
+def frameRate(key):
+    fps = st.radio(
+        "Frame Rate (60 = double the runtime): Leave at 30 fps",
+        [30, 60],
+        key=key,
+        index=0,
+        horizontal=True,
+    )
+    return fps
+
+
 def items_list(items, default_item="NoItem", num_items=3):
     """Items list: Display 3 select boxes for the 3 items to be calculated.
 
@@ -413,7 +424,7 @@ def bonus_stats(key, champ):
     #   crit_dmg_bonus = st.number_input('Bonus Crit Dmg',
     #                                    min_value=0, max_value=200,
     #                                    value=0, key=key + "critdmg")
-    champ.atk.addStat(ad_bonus)
+    champ.bonus_ad.addStat(ad_bonus)
     champ.ap.addStat(ap_bonus)
     champ.aspd.addStat(as_bonus)
     champ.dmgMultiplier.addStat(dmgamp_bonus / 100)
@@ -452,6 +463,21 @@ def add_buffs(champ, buffs, add_noitem=False):
 
 def add_powerup(champ, powerup):
     champ.items.append(utils.class_for_name("set15powerups", powerup)(1, []))
+
+
+def mentor_selector(champion):
+    st.header("Mentor Buffs")
+    item_cols = st.columns(3)
+
+    buffs = []
+
+    mentors = {"Udyr": False, "Yasuo": False, "Ryze": False}
+
+    for index, name in enumerate(list(mentors.keys())):
+        with item_cols[index]:
+            champ_mentors = champion.name == name
+            mentors[name] = st.checkbox(name, value=champ_mentors)
+    champion.mentors = mentors
 
 
 def champ_selector(champ_list):

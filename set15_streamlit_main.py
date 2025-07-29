@@ -44,9 +44,10 @@ class Simulator(object):
         for item in items:
             item.ability("postPreCombat", 0, champion)
 
-    def simulate(self, items, buffs, champion, opponents, duration):
+    def simulate(self, items, buffs, champion, opponents, duration, frameRate=30):
         # there's no real distinction between items and buffs
         # dmgVector: (Time, Damage Dealt, current AS, current Mana)
+        self.frameTime = 1 / frameRate
         champion.item_count += len([item for item in items if item.name != "NoItem"])
         items = items + buffs + champion.items
         champion.items = items
@@ -557,7 +558,12 @@ def radiantRefactor(champions, opponent, itemList, t):
 
 @st.cache_data(hash_funcs={ObjectWrapper: hash_func})
 def doExperimentOneExtraWrapped(
-    champion: ObjectWrapper, opponent: ObjectWrapper, _itemList, _buffList, t
+    champion: ObjectWrapper,
+    opponent: ObjectWrapper,
+    _itemList,
+    _buffList,
+    t,
+    frameRate,
 ):
     simulator = Simulator()
     simList = []
@@ -574,6 +580,7 @@ def doExperimentOneExtraWrapped(
             champ,
             [copy.deepcopy(opponent) for i in range(8)],
             t,
+            frameRate,
         )
         simList.append({"Champ": champ, "Extra": item, "Results": results})
     for buff in buffList:
@@ -605,11 +612,15 @@ def doExperimentOneExtraWrapped(
 
 
 # @st.cache_data(hash_funcs={Champion: hash_func})
-def doExperimentOneExtra(champion: Champion, opponent: Champion, itemList, buffList, t):
+def doExperimentOneExtra(
+    champion: Champion, opponent: Champion, itemList, buffList, t, frameRate=30
+):
     champ_obj = ObjectWrapper(champion)
     opponent_obj = ObjectWrapper(opponent)
 
-    return doExperimentOneExtraWrapped(champ_obj, opponent_obj, itemList, buffList, t)
+    return doExperimentOneExtraWrapped(
+        champ_obj, opponent_obj, itemList, buffList, t, frameRate
+    )
     # this is done with champ already with a set of items
     # simulator = Simulator()
     # simList = []

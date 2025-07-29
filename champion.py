@@ -40,6 +40,9 @@ class Champion(object):
         self.manaGainMultiplier = Stat(1, 1, 0)
         self.level = level
         self.dmgMultiplier = Stat(1, 1, 0)
+        self.extraDmgMultiplier = Stat(
+            1, 1, 0
+        )  # 2nd dmg multiplier for 'increased dmg against'
         self.crit = Stat(0.25, 1, 0)
         self.critDmg = Stat(1.4, 1, 0)
         self.omnivamp = Stat(0, 1, 0)
@@ -71,6 +74,9 @@ class Champion(object):
 
         # notes for user
         self.notes = ""
+
+        # Divinicorp buffs
+        self.mentors = {"Udyr": False, "Yasuo": False, "Ryze": False}
 
         self.trainer_level = 0  # Monster trainer
 
@@ -120,8 +126,9 @@ class Champion(object):
             self.num_extra_targets,
             self.item_count,
         )
+        mentor_tuple = tuple(value for value in list(self.mentors.values()))
         # return stat_tuple
-        return items_tuple + stat_tuple
+        return items_tuple + stat_tuple + mentor_tuple
 
     def __hash__(self):
         # used for caching
@@ -326,8 +333,8 @@ class Champion(object):
         baseCritDmg = baseDmg
         if attack.canCrit:
             baseCritDmg *= self.critDamage()
-        baseDmg *= self.dmgMultiplier.stat
-        baseCritDmg *= self.dmgMultiplier.stat
+        baseDmg *= self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        baseCritDmg *= self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
         for target in range(attack.numTargets):
             self.doDamage(
                 attack.opponents[target],
@@ -396,7 +403,9 @@ class Champion(object):
 
         if avgDmg:
             # record (Time, Damage Dealt, current AS, current Mana)
-            self.dmgVector.append((time, avgDmg, self.aspd.stat, self.curMana))
+            self.dmgVector.append(
+                (time, avgDmg, self.aspd.stat, self.curMana, self.fullMana.stat)
+            )
 
     def multiTargetSpell(
         self,
@@ -428,12 +437,14 @@ class Champion(object):
                 item.ability("preAttack", time, self, newAttack)
         if self.canSpellCrit:
             baseCritDmg *= self.critDamage()
-        # baseDmg *= self.dmgMultiplier.stat
-        # baseCritDmg *= self.dmgMultiplier.stat
 
         for opponent in opponents[0:targets]:
-            multipliedDmg = baseDmg * self.dmgMultiplier.stat
-            multipliedCritDmg = baseCritDmg * self.dmgMultiplier.stat
+            multipliedDmg = (
+                baseDmg * self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+            )
+            multipliedCritDmg = (
+                baseCritDmg * self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+            )
             self.doDamage(
                 opponent,
                 items,

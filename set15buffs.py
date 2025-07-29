@@ -33,6 +33,7 @@ class_buffs = [
     "MonsterTrainer",
     "SoulFighter",
     "Strategist",
+    "Mentor",
 ]
 
 augments = [
@@ -50,13 +51,21 @@ augments = [
     "Ascension",
     "CyberneticImplantsII",
     "CyberneticImplantsIII",
+    "KnowYourEnemy",
     "PumpingUpI",
     "PumpingUpII",
     "PumpingUpIII",
     "NoScoutNoPivot",
     "HoldTheLine",
     "AdaptiveStyle",
+    "MessHall",
     "TonsOfStats",
+    "LearnFromTheBestRyze",
+    "LearnFromTheBestUdyr",
+    "LearnFromTheBestYasuo",
+    "LitFuseSolo",
+    "LitFuseDuo",
+    "LitFuseTrio",
 ]
 
 stat_buffs = ["ASBuff"]
@@ -144,7 +153,7 @@ class SupremeCells(Buff):
         super().__init__(
             "SupremeCells " + str(level), level, params, phases=["preCombat"]
         )
-        self.scaling = {2: 12, 3: 30, 4: 50}
+        self.scaling = {2: 0.12, 3: 0.30, 4: 0.50}
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.addStat(self.scaling[self.level])
@@ -157,8 +166,8 @@ class Sniper(Buff):
     def __init__(self, level, params):
         # params is number of hexes
         super().__init__("Sniper " + str(level), level, params, phases=["preCombat"])
-        self.scaling = {0: 0, 2: 0.1, 3: 0.15, 4: 0.25, 5: 0.3}
-        self.base_scaling = {0: 0, 2: 0.04, 3: 0.06, 4: 0.09, 5: 0.12}
+        self.scaling = {0: 0, 2: 0.13, 3: 0.16, 4: 0.22, 5: 0.25}
+        self.base_scaling = {0: 0, 2: 0.03, 3: 0.05, 4: 0.07, 5: 0.1}
         self.base_bonus = 0
         self.extraBuff(params)
 
@@ -198,7 +207,7 @@ class Prodigy(Buff):
     def __init__(self, level, params):
         super().__init__("Prodigy " + str(level), level, params, phases=["preCombat"])
         self.scaling = {0: 0, 2: 3, 3: 5, 4: 7, 5: 9}
-        self.non_prodigy_scaling = {0: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+        self.non_prodigy_scaling = {0: 0, 2: 1, 3: 1, 4: 2, 5: 3}
         self.is_prodigy = 0
         self.extraBuff(params)
 
@@ -226,7 +235,7 @@ class Strategist(Buff):
         super().__init__(
             "Strategist " + str(level), level, params, phases=["preCombat"]
         )
-        self.scaling = {2: 0.04, 3: 0.07, 4: 0.11, 5: 0.15}
+        self.scaling = {2: 0.04, 3: 0.06, 4: 0.1, 5: 0.14}
         self.is_strategist = 0
         self.extraBuff(params)
 
@@ -255,7 +264,7 @@ class SoulFighter(Buff):
         )
         self.scaling = {2: 120, 4: 200, 6: 300, 8: 450}
         self.ad_scaling = {2: 1, 4: 2, 6: 3, 8: 4}
-        self.true_dmg_scaling = {2: 0.1, 4: 0.16, 6: 0.24, 8: 0.36}
+        self.true_dmg_scaling = {2: 0.1, 4: 0.16, 6: 0.24, 8: 0.32}
         self.next_bonus = 1
         self.max_stacks = 8
         self.stacks = 0
@@ -285,6 +294,60 @@ class SoulFighter(Buff):
         return 0
 
 
+class Mentor(Buff):
+    levels = [1, 4]
+
+    def __init__(self, level, params):
+        super().__init__("Mentor " + str(level), level, params, phases=["prePreCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if self.level == 1 and champion.name in champion.mentors:
+            champion.mentors[champion.name] = True
+            # if you want to set the other ones be my guest
+        elif self.level == 4:
+            champion.upgraded = True
+            champion.mentors["Udyr"] = True
+            champion.mentors["Yasuo"] = True
+            champion.mentors["Ryze"] = True
+        return 0
+
+
+class MentorBuff(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("MentorBuff", level, params, phases=["preCombat"])
+
+        # divincorp base
+        self.adBase = 8
+        self.asBase = 10
+        self.manaPerAttackBase = 2
+
+    def performAbility(self, phase, time, champion, input_=0):
+
+        if champion.mentors["Udyr"]:
+            champion.bonus_ad.addStat(self.adBase)
+            champion.ap.addStat(self.adBase)
+        if champion.mentors["Yasuo"]:
+            champion.aspd.addStat(self.asBase)
+        if champion.mentors["Ryze"]:
+            champion.manaPerAttack.addStat(self.manaPerAttackBase)
+        return 0
+
+
+class Edgelord(Buff):
+    levels = [0, 2, 4, 6]
+
+    def __init__(self, level, params):
+        super().__init__("Edgelord " + str(level), level, params, phases=["preCombat"])
+        self.scaling = {2: 15, 4: 35, 6: 50}
+
+    def performAbility(self, phase, time, champion, input=0):
+        champion.atk.addStat(self.scaling[self.level])
+        champion.aspd.addStat(20)
+        return 0
+
+
 class Executioner(Buff):
     levels = [0, 2, 3, 4, 5]
 
@@ -292,8 +355,8 @@ class Executioner(Buff):
         super().__init__(
             "Executioner " + str(level), level, params, phases=["preCombat"]
         )
-        self.critChanceScaling = {2: 0.25, 3: 0.35, 4: 0.45, 5: 0.55}
-        self.critDmgScaling = {2: 0.1, 3: 0.12, 4: 0.15, 5: 0.2}
+        self.critChanceScaling = {2: 0.25, 3: 0.35, 4: 0.5, 5: 0.55}
+        self.critDmgScaling = {2: 0.1, 3: 0.12, 4: 0.18, 5: 0.28}
 
     def performAbility(self, phase, time, champion, input=0):
         champion.canSpellCrit = True
@@ -307,7 +370,7 @@ class Sorcerer(Buff):
 
     def __init__(self, level, params):
         super().__init__("Sorcerer " + str(level), level, params, phases=["preCombat"])
-        self.scaling = {2: 20, 4: 50, 6: 80}
+        self.scaling = {2: 20, 4: 50, 6: 90}
 
     def performAbility(self, phase, time, champion, input=0):
         champion.ap.addStat(self.scaling[self.level])
@@ -343,6 +406,11 @@ class MonsterTrainer(Buff):
             if champion.trainer_level >= 30:
                 champion.fullMana.addStat(-10)
                 champion.armorPierce.addStat(0.5)
+        elif champion.name == "KogMaw":
+            champion.ap.addStat(champion.trainer_level)
+            if champion.trainer_level >= 30:
+                champion.aspd.mult += 0.15
+                champion.aspd.as_cap = 6
         return 0
 
 
@@ -350,7 +418,7 @@ class Duelist(Buff):
     levels = [0, 2, 4, 6]
 
     def __init__(self, level=0, params=0):
-        super().__init__("Duelist", level, params, phases=["postAttack"])
+        super().__init__("Duelist " + str(level), level, params, phases=["postAttack"])
         self.scaling = {2: 4, 4: 7, 6: 10}
         self.stacks = 0
 
@@ -377,6 +445,28 @@ class GnarUlt(Buff):
         if self.stacks < self.max_stacks:
             self.stacks += 1
             champion.aspd.addStat(self.as_scaling * champion.ap.stat)
+        return 0
+
+
+class AsheUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Gates of Avarosa", level, params, phases=["preAttack"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.ultAutos > 0:
+            champion.multiTargetSpell(
+                champion.opponents,
+                champion.items,
+                time,
+                1,
+                champion.abilityScaling,
+                "physical",
+            )
+            champion.ultAutos -= 1
+            if champion.ultAutos == 0:
+                champion.manalockTime = time + 0.01
         return 0
 
 
@@ -482,6 +572,41 @@ class JhinUlt(Buff):
         return 0
 
 
+class KogmawUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            "Static Surge", level, params, phases=["preCombat", "preAttack"]
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.multiTargetSpell(
+            champion.opponents,
+            champion.items,
+            time,
+            1,
+            champion.passiveAbilityScaling,
+            "magical",
+        )
+        if champion.nextAutoEnhanced:
+            targets = 3
+            champion.multiTargetSpell(
+                champion.opponents,
+                champion.items,
+                time,
+                targets,
+                champion.abilityScaling,
+                "magical",
+            )
+            for opponent in champion.opponents[0:targets]:
+                opponent.applyStatus(
+                    status.MRReduction("MR 30"), champion, time, 4, 0.7
+                )
+
+        return 0
+
+
 class MundoUlt(Buff):
     levels = [1]
 
@@ -494,6 +619,97 @@ class MundoUlt(Buff):
 
 
 # AUGMENTS
+
+
+class LearnFromTheBestUdyr(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            "Learn From The Best (Udyr)", level, params, phases=["preCombat"]
+        )
+        self.scaling = 4
+
+    def performAbility(self, phase, time, champion, input_=0):
+        boost = {1: 0, 2: 1, 3: 4}.get(champion.level, 0) * self.scaling
+        champion.bonus_ad.addStat(boost)
+        champion.ap.addStat(boost)
+        return 0
+
+
+class LearnFromTheBestYasuo(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            "Learn From The Best (Yasuo)", level, params, phases=["preCombat"]
+        )
+        self.scaling = 5
+
+    def performAbility(self, phase, time, champion, input_=0):
+        boost = {1: 0, 2: 1, 3: 4}.get(champion.level, 0) * self.scaling
+        champion.aspd.addStat(boost)
+        return 0
+
+
+class LearnFromTheBestRyze(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            "Learn From The Best (Ryze)", level, params, phases=["preCombat"]
+        )
+        self.scaling = 1
+
+    def performAbility(self, phase, time, champion, input_=0):
+        boost = {1: 0, 2: 1, 3: 4}.get(champion.level, 0) * self.scaling
+        champion.manaPerAttack.addStat(boost)
+        return 0
+
+
+class LitFuseSolo(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Lit Fuse (Solo)", level, params, phases=["onUpdate"])
+        self.activation_time = 6
+        self.manaBonus = 60
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time > self.activation_time:
+            self.activation_time = 999
+            champion.addMana(self.manaBonus)
+        return 0
+
+
+class LitFuseDuo(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Lit Fuse (Duo)", level, params, phases=["onUpdate"])
+        self.activation_time = 6
+        self.manaBonus = 30
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time > self.activation_time:
+            self.activation_time = 999
+            champion.addMana(self.manaBonus)
+        return 0
+
+
+class LitFuseTrio(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Lit Fuse (Trio)", level, params, phases=["onUpdate"])
+        self.activation_time = 6
+        self.manaBonus = 20
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time > self.activation_time:
+            self.activation_time = 999
+            champion.addMana(self.manaBonus)
+        return 0
 
 
 class HoldTheLine(Buff):
@@ -520,6 +736,18 @@ class GlassCannonI(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.addStat(0.13)
+        return 0
+
+
+class KnowYourEnemy(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        # vayne bolts inflicts status "Silver Bolts"
+        super().__init__("Know Your Enemy", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.dmgMultiplier.addStat(0.15)
         return 0
 
 
@@ -672,6 +900,27 @@ class PumpingUpIII(Buff):
         return 0
 
 
+class MessHall(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Mess Hall", level, params, phases=["onUpdate", "preAttack"])
+        self.activation_time = 10
+        self.activated = False
+        self.aspd_scaling = 20
+        self.dmg_scaling = 1.4
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate":
+            if time > self.activation_time and not self.activated:
+                self.activated = True
+                champion.aspd.addStat(self.aspd_scaling)
+        elif phase == "preAttack" and self.activated:
+            dmg = champion.atk.stat * champion.bonus_ad.stat * self.dmg_scaling
+            champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "magical", time)
+        return 0
+
+
 class NoScoutNoPivot(Buff):
     levels = [1]
 
@@ -715,7 +964,7 @@ class AdaptiveStyle(Buff):
     def __init__(self, level=1, params=0):
         super().__init__("AdaptiveStyle", level, params, phases=["preAttack"])
         self.stacks = 0
-        self.max_stacks = 20
+        self.max_stacks = 15
 
     def performAbility(self, phase, time, champion, input_=0):
         for item in champion.items:

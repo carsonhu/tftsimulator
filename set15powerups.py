@@ -16,6 +16,81 @@ class AttackExpert(Buff):
         return 0
 
 
+class SolarBreath(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Solar Breath", level, params, phases=["preCombat"])
+        self.scaling = 0.15
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.extraDmgMultiplier.addStat(self.scaling)
+        return 0
+
+
+class SkyPiercer(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Sky Piercer", level, params, phases=["preCombat"])
+        self.scaling = 0.08
+
+    def performAbility(self, phase, time, champion, input_=0):
+        for opponent in champion.opponents:
+            opponent.armor.mult = 0.7
+            opponent.mr.mult = 0.7
+
+        champion.extraDmgMultiplier.addStat(self.scaling)
+        return 0
+
+
+class CycloneRush(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("CycloneRush", level, params, phases=["preCombat"])
+        self.scaling = 15
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(self.scaling)
+        return 0
+
+
+class SpiritSword(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__(
+            "Spirit Sword",
+            level,
+            params,
+            phases=["preCombat", "onCrit", "onDealDamage"],
+        )
+        self.buffActive = False
+        self.proc_scaling = 0.4
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.crit.addStat(0.2)
+        elif phase == "onCrit":
+            self.buffActive = True
+        elif phase == "onDealDamage":
+            if self.buffActive:
+                self.buffActive = False
+                spell_dmg = self.proc_scaling * input_
+                champion.doDamage(
+                    champion.opponents[0],
+                    [],
+                    0,
+                    spell_dmg,
+                    spell_dmg,
+                    "magical",
+                    time,
+                )
+            return input_
+        return 0
+
+
 class CriticalThreat(Buff):
     levels = [1]
 
@@ -106,8 +181,13 @@ class BulletHell(Buff):
         self.scaling = 1.33
 
     def performAbility(self, phase, time, champion, input_=0):
+        if champion.name == "Ashe":
+            if hasattr(champion, "projectile_multiplier"):
+                champion.projectile_multiplier = self.scaling
+                return 0
         if hasattr(champion, "projectiles"):
             champion.projectiles = int(champion.projectiles * self.scaling)
+
         return 0
 
 
@@ -117,7 +197,7 @@ class StarStudent(Buff):
     def __init__(self, level, params):
         super().__init__("Star Student", level, params, phases=["postPreCombat"])
         self.hp_scaling = 200
-        self.potential_scaling = 1.6
+        self.potential_scaling = 1.4
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.hp.addStat(self.hp_scaling)
@@ -131,7 +211,7 @@ class Mage(Buff):
 
     def __init__(self, level, params):
         super().__init__("Mage", level, params, phases=["preCombat", "postAbility"])
-        self.dmgMultiplierScaling = -0.15
+        self.dmgMultiplierScaling = -0.2
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -177,11 +257,23 @@ class KeenEye(Buff):
     levels = [1]
 
     def __init__(self, level, params):
-        super().__init__("KeenEye", level, params, phases=["preCombat"])
+        super().__init__("Keen Eye", level, params, phases=["preCombat"])
         self.scaling = 0.4
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.mrPierce.addStat(self.scaling)
+        return 0
+
+
+class KillerInstinct(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Killer Instinct", level, params, phases=["preCombat"])
+        self.scaling = 3
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.manaRegen.addStat(self.scaling)
         return 0
 
 
@@ -217,14 +309,19 @@ class BestestBoy(Buff):
     def __init__(self, level, params):
         super().__init__("BestestBoy", level, params, phases=["onUpdate"])
         self.scaling = 12
-        self.next_bonus = 5
+        self.bonus_interval = 4
+        self.next_bonus = 1
 
     def performAbility(self, phase, time, champion, input_=0):
         # in the future this will be done beforehand
         if champion.name == "Smolder":
             if time > self.next_bonus:
-                self.next_bonus += 5
+                self.next_bonus += self.bonus_interval
                 champion.bonus_ad.addStat(self.scaling)
+        elif champion.name == "KogMaw":
+            if time > self.next_bonus:
+                self.next_bonus += self.bonus_interval
+                champion.ap.addStat(self.scaling)
         return 0
 
 
@@ -277,8 +374,8 @@ class Annihilation(Buff):
         super().__init__(
             "Annihilation", level, params, phases=["preCombat", "onUpdate"]
         )
-        self.scaling = 0.15
-        self.takedown_scaling = 0.15
+        self.scaling = 0.12
+        self.takedown_scaling = 0.16
         self.activated = False
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -327,6 +424,25 @@ class RampingRage(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(self.scaling)
+        return 0
+
+
+class Desperado(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Desperado", level, params, phases=["postAttack"])
+        self.attack_threshold = 12
+        self.scaling = 1.2
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.numAttacks % 12 == 0:
+            baseDmg = champion.atk.stat * champion.bonus_ad.stat * self.scaling
+            # could change this to 5 opps
+            for i in range(5):
+                champion.doDamage(
+                    champion.opponents[0], [], 0, baseDmg, baseDmg, "physical", time
+                )
         return 0
 
 

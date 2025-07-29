@@ -84,7 +84,7 @@ with st.sidebar:
     buffs = class_utilities.buff_bar(
         all_buffs, max_buffs=10, num_buffs=2, starting_buffs=champ.default_traits
     )
-
+    buffs.append(("MentorBuff", 1, []))
     # get power ups
     valid_powerups = class_utilities.get_valid_powerups(champ, powerups)
     chosen_powerup = class_utilities.powerup_bar(valid_powerups)
@@ -101,9 +101,11 @@ with st.sidebar:
                     utils.class_for_name("set15buffs", buff[0])(level, buff[2])
                 )
 
-    # class_utilities.divinicorp_selector(champ)
+    class_utilities.mentor_selector(champ)
 
     enemy = class_utilities.enemy_list("Champ selector")
+
+    framerate = class_utilities.frameRate("Frame Rate")
 
     # Add items to Champion
     for item in items:
@@ -125,6 +127,7 @@ simLists = set15_streamlit_main.doExperimentOneExtra(
     utils.convertStrList("set15items", all_items),
     utils.convertStrList("set15buffs", aug_buffs) + extra_buffs,
     t,
+    framerate,
 )
 
 tab1, tab2 = st.tabs(["Items", "Radiant Refractor"])
@@ -188,9 +191,7 @@ with tab1:
             df_flt["Extra class name"].isin(set15buffs.augments + ["NoItem"])
         ]
     if radio_value == "Powerup":
-        df_flt = df_flt[
-            df_flt["Extra class name"].isin(valid_powerups + ["NoItem"])
-        ]
+        df_flt = df_flt[df_flt["Extra class name"].isin(valid_powerups + ["NoItem"])]
 
     new_df = df_flt.drop(["Extra class name", "Name", "Level"], axis=1)
 

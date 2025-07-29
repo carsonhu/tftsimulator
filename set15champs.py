@@ -13,6 +13,7 @@ champ_list = [
     "Ezreal",
     "Gnar",
     "Kalista",
+    "KaiSa",
     "Kayle",
     "Lucian",
     "Sivir",
@@ -20,8 +21,13 @@ champ_list = [
     "Jhin",
     "Gangplank",
     "Caitlyn",
+    "KogMaw",
     "Malzahar",
+    "Karma",
+    "Ryze",
+    "Senna",
     "Smolder",
+    "Ashe",
 ]
 
 
@@ -92,7 +98,7 @@ class Ezreal(Champion):
         self.buff_duration = 5 + self.castTime
         self.aspd_bonus = 25
         self.stat_per_potential = 4
-        self.notes = ""
+        self.notes = "AS bonus lasts slightly too long with mage in sims"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [115, 175, 300]
@@ -149,7 +155,7 @@ class Kalista(Champion):
         self.notes = "Click 'more options' button to set bonus AD"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [400, 600, 900]
+        adScale = [380, 570, 900]
         apScale = [60, 90, 135]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -189,12 +195,12 @@ class Kayle(Champion):
 
     def passiveAbilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [30, 45, 70]
+        apScale = [33, 50, 75]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def waveAbilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [60, 90, 140]
+        apScale = [55, 85, 125]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
 
@@ -276,6 +282,40 @@ class Sivir(Champion):
                 lambda x, y, z: 0.6 ** (count) * self.abilityScaling(x, y, z),
                 "physical",
             )
+
+
+class Syndra(Champion):
+    def __init__(self, level):
+        hp = 450
+        atk = 40
+        curMana = 0
+        fullMana = 30
+        aspd = 0.7
+        armor = 20
+        mr = 20
+        super().__init__(
+            "Syndra",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["Prodigy"]
+        self.castTime = .6
+        self.notes = "No MR shred"
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [230, 345, 520]
+        return (apScale[level - 1] * AP + adScale[level - 1] * AD)
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "magical")
 
 
 class DrMundo(Champion):
@@ -408,11 +448,11 @@ class Gangplank(Champion):
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
-            opponents, items, time, 1, self.abilityScaling, "physical"
+            opponents, items, time, 1, self.abilityScaling, "physical", 1
         )
 
 
-class Kaisa(Champion):
+class KaiSa(Champion):
     def __init__(self, level):
         hp = 550
         atk = 45
@@ -422,7 +462,7 @@ class Kaisa(Champion):
         armor = 25
         mr = 25
         super().__init__(
-            "Kaisa",
+            "KaiSa",
             hp,
             atk,
             curMana,
@@ -445,7 +485,7 @@ class Kaisa(Champion):
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
-            opponents, items, time, 1, self.abilityScaling, "physical"
+            opponents, items, time, 1, self.abilityScaling, "physical", 2
         )
 
 
@@ -472,7 +512,7 @@ class Caitlyn(Champion):
         )
         self.default_traits = ["BattleAcademia", "Sniper"]
         self.potential = 0
-        self.castTime = 2.5
+        self.castTime = 2.5  # semi-verified
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
@@ -487,7 +527,7 @@ class Caitlyn(Champion):
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
-            opponents, items, time, 1, self.abilityScaling, "physical"
+            opponents, items, time, 1, self.abilityScaling, "physical", 1
         )
         for i in range(self.potential + 1):
             self.multiTargetSpell(
@@ -498,6 +538,49 @@ class Caitlyn(Champion):
                 self.secondaryAbilityScaling,
                 "physical",
             )
+
+
+class KogMaw(Champion):
+    def __init__(self, level):
+        hp = 650
+        atk = 15
+        curMana = 0
+        fullMana = 40
+        aspd = 0.75
+        armor = 30
+        mr = 30
+        super().__init__(
+            "KogMaw",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.default_traits = ["MonsterTrainer"]
+        self.items.append(buffs.KogmawUlt())
+        self.nextAutoEnhanced = False
+        self.castTime = 0
+        self.notes = ""
+
+    def passiveAbilityScaling(self, level, AD, AP):
+        apScale = [30, 45, 70]
+        adScale = [0, 0, 0]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def abilityScaling(self, level, AD, AP):
+        apScale = [55, 85, 130]
+        adScale = [0, 0, 0]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        self.nextAutoEnhanced = True
+        if self.trainer_level >= 15:
+            self.aspd.addStat(12)
 
 
 class Malzahar(Champion):
@@ -523,7 +606,7 @@ class Malzahar(Champion):
         )
         self.default_traits = ["Prodigy"]
         self.buff_duration = 15
-        self.castTime = 0.5
+        self.castTime = 0.5  # Verified
         self.notes = "Click 'more options' button to set bonus AD"
 
     def dotScaling(self, level, AD, AP):
@@ -542,6 +625,56 @@ class Malzahar(Champion):
             self.buff_duration,
             self.dotScaling,
         )
+
+
+class Senna(Champion):
+    def __init__(self, level):
+        hp = 650
+        atk = 55
+        curMana = 15
+        fullMana = 75
+        aspd = 0.75
+        armor = 30
+        mr = 30
+        super().__init__(
+            "Senna",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.num_targets = 2
+        self.default_traits = ["Executioner"]
+        self.castTime = 2.4  # semi-verified
+        self.notes = "No mana refund"
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [315, 475, 755]
+        apScale = [35, 55, 85]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def secondaryAbilityScaling(self, level, AD, AP):
+        scale = 0.22
+        return scale * self.abilityScaling(level, AD, AP)
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, 1, self.abilityScaling, "physical"
+        )
+        if self.num_targets > 1:
+            self.multiTargetSpell(
+                opponents,
+                items,
+                time,
+                self.num_targets - 1,
+                self.secondaryAbilityScaling,
+                "physical",
+            )
 
 
 class Smolder(Champion):
@@ -582,7 +715,7 @@ class Smolder(Champion):
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
-            opponents, items, time, 1, self.abilityScaling, "physical"
+            opponents, items, time, 1, self.abilityScaling, "physical", 1
         )
         self.multiTargetSpell(
             opponents, items, time, 3, self.secondaryAbilityScaling, "magical"
@@ -596,6 +729,154 @@ class Smolder(Champion):
                     1,
                     lambda x, y, z: 0.75 * self.abilityScaling(x, y, z),
                     "physical",
+                )
+
+
+class Ashe(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 60
+        curMana = 0
+        fullMana = 80
+        aspd = 0.8
+        armor = 35
+        mr = 35
+        super().__init__(
+            "Ashe",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.items.append(buffs.AsheUlt())
+        self.base_projectiles = 8  # special case for bullet hell
+        self.projectile_multiplier = 1  # for bullet hell
+        self.manalockDuration = 999
+        self.default_traits = ["Duelist"]
+        self.ultAutos = 0
+        self.castTime = 0
+        self.notes = ""
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [13, 19, 90]
+        apScale = [1, 2, 10]
+        num_arrows = int(
+            int(
+                self.base_projectiles
+                * (1 + min(self.aspd.add / 100, 5 / self.aspd.base - 1))
+            )
+            * self.projectile_multiplier
+        )
+        return (apScale[level - 1] * AP + adScale[level - 1] * AD) * num_arrows
+
+    def performAbility(self, opponents, items, time):
+        self.ultAutos = 8
+
+
+class Karma(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 40
+        curMana = 0
+        fullMana = 70
+        aspd = 0.75
+        armor = 35
+        mr = 35
+        super().__init__(
+            "Karma",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["Sorcerer"]
+        self.num_targets = 2
+        self.castTime = 1.5
+        self.notes = ""
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [1050, 1575, 5000]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, self.num_targets, self.abilityScaling, "magical"
+        )
+
+
+class Ryze(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 50
+        curMana = 10
+        fullMana = 60
+        aspd = 0.8
+        armor = 35
+        mr = 35
+        super().__init__(
+            "Ryze",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["Mentor", "Executioner", "Strategist"]
+        self.upgraded = False
+        self.num_targets = 2
+        self.castTime = 4  # verified
+        self.notes = ""
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [720, 1080, 6000]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def secondaryAbilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [110, 165, 550]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def waveScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [60, 90, 300]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "magical")
+        if self.num_targets > 1:
+            self.multiTargetSpell(
+                opponents,
+                items,
+                time,
+                self.num_targets - 1,
+                self.secondaryAbilityScaling,
+                "magical",
+            )
+        if self.upgraded:
+            for i in range(6):
+                self.multiTargetSpell(
+                    opponents,
+                    items,
+                    time,
+                    1,
+                    self.waveScaling,
+                    "magical",
                 )
 
 
