@@ -112,22 +112,6 @@ class HextechGunblade(Item):
         )
 
 
-class GuinsoosRagebladeOld(Item):
-    def __init__(self):
-        super().__init__(
-            "Guinsoo's Rageblade (Old)",
-            aspd=10,
-            ap=10,
-            has_radiant=True,
-            phases=["postAttack"],
-        )
-
-    def performAbility(self, phase, time, champion, input_=0):
-        if champion.aspd.stat <= 5:
-            champion.aspd.add += 5
-        return 0
-
-
 class GuinsoosRageblade(Item):
     def __init__(self):
         super().__init__(

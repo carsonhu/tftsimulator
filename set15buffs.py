@@ -577,7 +577,7 @@ class KogmawUlt(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(
-            "Static Surge", level, params, phases=["preCombat", "preAttack"]
+            "Static Surge", level, params, phases=["preAttack"]
         )
 
     def performAbility(self, phase, time, champion, input_=0):

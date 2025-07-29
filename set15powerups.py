@@ -358,11 +358,12 @@ class SuperGenius(Buff):
     def __init__(self, level, params):
         super().__init__("Super Genius", level, params, phases=["onUpdate"])
         # self.scaling = 1
-        self.next_bonus = 2
+        self.next_bonus = 1.5
+        self.bonus_interval = 1.5
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.next_bonus:
-            self.next_bonus += 2
+            self.next_bonus += self.bonus_interval
             champion.ap.addStat(champion.manaRegen.stat)
         return 0
 

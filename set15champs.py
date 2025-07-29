@@ -58,7 +58,7 @@ class Gnar(Champion):
         self.buff_duration = 6
         self.manalockDuration = self.buff_duration
         self.ad_bonus = [90, 90, 90]
-        self.notes = ""
+        self.notes = "AS bonus does not reset, care when comparing with other champs"
 
     def performAbility(self, opponents, items, time):
         self.applyStatus(
@@ -765,13 +765,7 @@ class Ashe(Champion):
     def abilityScaling(self, level, AD, AP):
         adScale = [13, 19, 90]
         apScale = [1, 2, 10]
-        num_arrows = int(
-            int(
-                self.base_projectiles
-                * (1 + min(self.aspd.add / 100, 5 / self.aspd.base - 1))
-            )
-            * self.projectile_multiplier
-        )
+        num_arrows = round(self.base_projectiles + 4 * ((self.aspd.add + 100)/125 - 0.8)) * self.projectile_multiplier
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * num_arrows
 
     def performAbility(self, opponents, items, time):

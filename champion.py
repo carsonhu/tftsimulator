@@ -445,10 +445,11 @@ class Champion(object):
             multipliedCritDmg = (
                 baseCritDmg * self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
             )
+            critChance = self.crit.stat if self.canSpellCrit else 0
             self.doDamage(
                 opponent,
                 items,
-                self.crit.stat,
+                critChance,
                 multipliedCritDmg,
                 multipliedDmg,
                 type,
