@@ -28,6 +28,7 @@ champ_list = [
     "Senna",
     "Smolder",
     "Ashe",
+    "Samira",
 ]
 
 
@@ -306,13 +307,13 @@ class Syndra(Champion):
             Role.CASTER,
         )
         self.default_traits = ["Prodigy"]
-        self.castTime = .6
+        self.castTime = 0.6
         self.notes = "No MR shred"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
         apScale = [230, 345, 520]
-        return (apScale[level - 1] * AP + adScale[level - 1] * AD)
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "magical")
@@ -765,7 +766,10 @@ class Ashe(Champion):
     def abilityScaling(self, level, AD, AP):
         adScale = [13, 19, 90]
         apScale = [1, 2, 10]
-        num_arrows = round(self.base_projectiles + 4 * ((self.aspd.add + 100)/125 - 0.8)) * self.projectile_multiplier
+        num_arrows = (
+            round(self.base_projectiles + 4 * ((self.aspd.add + 100) / 125 - 0.8))
+            * self.projectile_multiplier
+        )
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * num_arrows
 
     def performAbility(self, opponents, items, time):
@@ -872,6 +876,65 @@ class Ryze(Champion):
                     self.waveScaling,
                     "magical",
                 )
+
+
+class Samira(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 50
+        curMana = 0
+        fullMana = 15
+        aspd = 0.75
+        armor = 45
+        mr = 45
+        super().__init__(
+            "Samira",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["SoulFighter", "Edgelord"]
+        self.num_targets = 3
+        self.ultAutos = 0
+        self.stacks = 0
+        self.castTime = 0.5
+        self.notes = "Edgelord is coded to give fixed 20% AS."
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [90, 135, 650]
+        apScale = [0, 0, 0]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def spinAbilityScaling(self, level, AD, AP):
+        adScale = [310, 465, 2200]
+        apScale = [50, 75, 225]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        self.stacks += 1
+        if self.stacks == 5:
+            self.stacks = 0
+            self.castTime = 3
+            self.multiTargetSpell(
+                opponents,
+                items,
+                time,
+                self.num_targets,
+                self.spinAbilityScaling,
+                "physical",
+                2,
+            )
+        else:
+            self.castTime = 0.5
+            self.multiTargetSpell(
+                opponents, items, time, 1, self.abilityScaling, "physical", 1
+            )
 
 
 class BaseChamp(Champion):

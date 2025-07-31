@@ -80,7 +80,7 @@ def resNoDmg(res, label):
 
 
 def plotRes(res, label):
-    plt.plot(res[0], res[1], label)
+    plt.plot(res[0], res    [1], label)
 
 
 def getDPS(results, time):
@@ -102,10 +102,19 @@ def dpsSplit(results):
 def getDPSFunction(results):
     # bug: doesnt work if last result is less than desired time
     # e.g u want dps at 20, but only have dps up to 18
+    x = [a[0] for a in results]
+    y = np.cumsum([a[1][0] for a in results])
 
-    return interpolate.interp1d(
-        [a[0] for a in results], np.cumsum([a[1][0] for a in results])
-    )
+    f = interpolate.interp1d(x, y, bounds_error=False, fill_value=(y[0], y[-1]))
+
+    def safe_interp(t):
+        if isinstance(t, (float, int)):
+            t = np.clip(t, x[0], x[-1])
+        else:
+            t = np.clip(t, x[0], x[-1])
+        return f(t)
+
+    return safe_interp
 
 
 def createDPSChart(simList):

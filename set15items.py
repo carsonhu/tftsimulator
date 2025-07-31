@@ -50,6 +50,7 @@ artifacts = [
     "Flickerblade",
     "ShivArtifact",
     "Dawncore",
+    "CrownOfDemacia",
 ]
 
 radiants = [
@@ -129,6 +130,25 @@ class GuinsoosRageblade(Item):
             if champion.aspd.stat <= 5:
                 champion.aspd.add += self.aspd_bonus
             self.next_bonus += 1
+        return 0
+
+
+class CrownOfDemacia(Item):
+    def __init__(self):
+        super().__init__(
+            "Crown of Demacia",
+            aspd=30,
+            hp=300,
+            phases=["onUpdate"],
+        )
+        self.next_bonus = 2
+        self.scaling = 10
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time > self.next_bonus:
+            champion.atk.addStat(self.scaling)
+            champion.ap.addStat(self.scaling)
+            self.next_bonus += 2
         return 0
 
 

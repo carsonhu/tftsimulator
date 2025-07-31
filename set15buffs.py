@@ -34,6 +34,7 @@ class_buffs = [
     "SoulFighter",
     "Strategist",
     "Mentor",
+    "Edgelord",
 ]
 
 augments = [
@@ -264,7 +265,7 @@ class SoulFighter(Buff):
         )
         self.scaling = {2: 120, 4: 200, 6: 300, 8: 450}
         self.ad_scaling = {2: 1, 4: 2, 6: 3, 8: 4}
-        self.true_dmg_scaling = {2: 0.1, 4: 0.16, 6: 0.24, 8: 0.32}
+        self.true_dmg_scaling = {2: 0.1, 4: 0.16, 6: 0.22, 8: 0.3}
         self.next_bonus = 1
         self.max_stacks = 8
         self.stacks = 0
@@ -576,9 +577,7 @@ class KogmawUlt(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__(
-            "Static Surge", level, params, phases=["preAttack"]
-        )
+        super().__init__("Static Surge", level, params, phases=["preAttack"])
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.multiTargetSpell(
