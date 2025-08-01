@@ -174,7 +174,7 @@ class VoidStaff(Item):
     def __init__(self):
         super().__init__(
             "Void Staff",
-            manaRegen=2,
+            manaRegen=1,
             ap=35,
             aspd=15,
             has_radiant=True,
@@ -478,7 +478,7 @@ class Red(Item):
 class Morellos(Item):
     def __init__(self):
         super().__init__(
-            "Morellos (no burn yet)", ap=20, manaRegen=2, hp=150, phases=None
+            "Morellos (no burn yet)", ap=20, manaRegen=1, hp=150, phases=None
         )
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -960,7 +960,7 @@ class RadiantVoidStaff(Item):
     def __init__(self):
         super().__init__(
             "Radiant Void Staff",
-            manaRegen=2,
+            manaRegen=3,
             ap=60,
             aspd=60,
             phases=["preCombat"],
@@ -1023,7 +1023,7 @@ class RadiantMorellos(Item):
     def __init__(self):
         super().__init__(
             "RadiantMorellos (no burn yet)",
-            manaRegen=4,
+            manaRegen=3,
             aspd=25,
             ap=50,
             hp=150,

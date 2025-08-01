@@ -443,7 +443,7 @@ class Gangplank(Champion):
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [375, 565, 875]
+        adScale = [320, 480, 875]
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -569,7 +569,7 @@ class KogMaw(Champion):
         self.notes = ""
 
     def passiveAbilityScaling(self, level, AD, AP):
-        apScale = [30, 45, 70]
+        apScale = [33, 50, 80]
         adScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -611,7 +611,7 @@ class Malzahar(Champion):
         self.notes = "Click 'more options' button to set bonus AD"
 
     def dotScaling(self, level, AD, AP):
-        apScale = [520, 780, 1300]
+        apScale = [545, 820, 1390]
         return apScale[level - 1] * AP / self.buff_duration
 
     def performAbility(self, opponents, items, time):
@@ -804,7 +804,7 @@ class Karma(Champion):
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [1050, 1575, 5000]
+        apScale = [1125, 1700, 5000]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
@@ -852,7 +852,7 @@ class Ryze(Champion):
 
     def waveScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [60, 90, 300]
+        apScale = [50, 75, 250]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):

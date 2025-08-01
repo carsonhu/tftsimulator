@@ -476,7 +476,7 @@ class Kahunahuna(Buff):
     def __init__(self, level, params):
         super().__init__("Kahunahuna", level, params, phases=["postAttack"])
         self.stacks = 0
-        self.scaling = 215
+        self.scaling = 150
 
     def performAbility(self, phase, time, champion, input_=0):
         self.stacks += 1

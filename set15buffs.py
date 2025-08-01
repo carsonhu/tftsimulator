@@ -207,7 +207,7 @@ class Prodigy(Buff):
 
     def __init__(self, level, params):
         super().__init__("Prodigy " + str(level), level, params, phases=["preCombat"])
-        self.scaling = {0: 0, 2: 3, 3: 5, 4: 7, 5: 9}
+        self.scaling = {0: 0, 2: 3, 3: 5, 4: 7, 5: 8}
         self.non_prodigy_scaling = {0: 0, 2: 1, 3: 1, 4: 2, 5: 3}
         self.is_prodigy = 0
         self.extraBuff(params)
@@ -263,9 +263,9 @@ class SoulFighter(Buff):
             params,
             phases=["onUpdate", "onDealDamage"],
         )
-        self.scaling = {2: 120, 4: 200, 6: 300, 8: 450}
+        self.scaling = {2: 120, 4: 200, 6: 300, 8: 650}
         self.ad_scaling = {2: 1, 4: 2, 6: 3, 8: 4}
-        self.true_dmg_scaling = {2: 0.1, 4: 0.16, 6: 0.22, 8: 0.3}
+        self.true_dmg_scaling = {2: 0.1, 4: 0.16, 6: 0.22, 8: 0.28}
         self.next_bonus = 1
         self.max_stacks = 8
         self.stacks = 0
