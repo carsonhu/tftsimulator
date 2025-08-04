@@ -75,8 +75,18 @@ class Champion(object):
         # notes for user
         self.notes = ""
 
-        # Divinicorp buffs
+        # Mentor buffs
         self.mentors = {"Udyr": False, "Yasuo": False, "Ryze": False}
+
+        # Star Guardians
+        self.starguardians = {
+            "Syndra": False,
+            "Xayah": False,
+            "Ahri": False,
+            "Jinx": False,
+            "Seraphine": False,
+            "Emblem": False,
+        }
 
         self.trainer_level = 0  # Monster trainer
 
@@ -127,8 +137,9 @@ class Champion(object):
             self.item_count,
         )
         mentor_tuple = tuple(value for value in list(self.mentors.values()))
+        starguardian_tuple = tuple(value for value in list(self.starguardians.values()))
         # return stat_tuple
-        return items_tuple + stat_tuple + mentor_tuple
+        return items_tuple + stat_tuple + mentor_tuple + starguardian_tuple
 
     def __hash__(self):
         # used for caching
@@ -278,7 +289,7 @@ class Champion(object):
         if time >= self.nextMana:
             self.nextMana += 0.5
             # time provided = will check for manalock
-            self.addMana(self.manaRegen.stat // 2, time)
+            self.addMana(self.manaRegen.stat / 2, time)
             # if self.manaRegen.stat > 0:
             #     self.dmgVector.append(
             #         (time, (0, "physical"), self.aspd.stat, self.curMana)

@@ -67,6 +67,9 @@ augments = [
     "LitFuseSolo",
     "LitFuseDuo",
     "LitFuseTrio",
+    "WaterLotusI",
+    "WaterLotusII",
+    "Hero101",
 ]
 
 stat_buffs = ["ASBuff"]
@@ -197,8 +200,11 @@ class BattleAcademia(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.potential = self.scaling[self.level]
-        if "Ezreal" in champion.name:  # increases cast time a bit
+        if (
+            "Ezreal" in champion.name or "Katarina" in champion.name
+        ):  # increases cast time a bit
             champion.castTime = champion.secondaryCastTime
+
         return 0
 
 
@@ -292,6 +298,40 @@ class SoulFighter(Buff):
                     time,
                 )
             return input_
+        return 0
+
+
+class StarGuardianBuff(Buff):
+    levels = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+    def __init__(self, level, params):
+        super().__init__(f"Star Guardian {level}", level, params, phases=["preCombat"])
+        self.scaling = {2: 1, 3: 1, 4: 1, 5: 1, 6: 1.4, 7: 1.45, 8: 1.5, 9: 1.6, 10: 1}
+
+        # Syndra: Gain 5 Ability Power every 3 seconds
+        self.syndra_interval = 3
+        self.next_syndra = 3
+        self.syndra_ap = 5
+
+        # Xayah: Every 3rd attack deals 50 (+ 60) magic damage
+
+        # Ahri: After casting, gain 3 Mana over 2 seconds
+        self.ahri_mana = 3
+
+        # Jinx: +5% Attack Speed. +22% AS after takedowns, decaying over 3s
+        # Simplified to 5 + (7 x SG)
+
+        # Seraphine: Gain 5 ArmorMRHealth and 5% ADASCritCrit Damage
+
+    def performAbility(self, phase, time, champion, input_=0):
+
+        if champion.mentors["Udyr"]:
+            champion.bonus_ad.addStat(self.adBase)
+            champion.ap.addStat(self.adBase)
+        if champion.mentors["Yasuo"]:
+            champion.aspd.addStat(self.asBase)
+        if champion.mentors["Ryze"]:
+            champion.manaPerAttack.addStat(self.manaPerAttackBase)
         return 0
 
 
@@ -433,6 +473,24 @@ class Duelist(Buff):
 # Unit buffs
 
 
+class KennenUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Nine Thousand Volts", level, params, phases=["preAttack"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.multiTargetSpell(
+            champion.opponents,
+            champion.items,
+            time,
+            1,
+            champion.passiveAbilityScaling,
+            "magical",
+        )
+        return 0
+
+
 class GnarUlt(Buff):
     levels = [1]
 
@@ -565,7 +623,7 @@ class JhinUlt(Buff):
         elif phase == "preAttack":
             if champion.numAttacks % 4 == 0:
                 input_.canOnHit = True
-                input_.canCrit = champion.canSpellCrit
+                input_.canCrit = True
                 input_.attackType = "physical"
                 input_.scaling = lambda level, baseAD, AD, AP: champion.abilityScaling(
                     level, AD, AP
@@ -663,6 +721,74 @@ class LearnFromTheBestRyze(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         boost = {1: 0, 2: 1, 3: 4}.get(champion.level, 0) * self.scaling
         champion.manaPerAttack.addStat(boost)
+        return 0
+
+
+class WaterLotusI(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            "Water Lotus I",
+            level,
+            params,
+            phases=["preCombat", "onCrit", "postAbility"],
+        )
+        self.crit_scaling = 0.05
+        self.scaling = 0.09
+        self.duration = 3
+        self.restoreMana = False
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.crit.addStat(self.crit_scaling)
+            champion.canSpellCrit = True
+        elif phase == "onCrit" and input_:
+            # input is is_spell
+            self.restoreMana = True
+        elif phase == "postAbility" and self.restoreMana:
+            self.restoreMana = False
+            champion.applyStatus(
+                status.ManaRegenModifier("Water Lotus I"),
+                champion,
+                time,
+                self.duration,
+                params=self.scaling * champion.fullMana.stat / self.duration,
+            )
+        return 0
+
+
+class WaterLotusII(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            "Water Lotus II (instant mana restore)",
+            level,
+            params,
+            phases=["preCombat", "onCrit", "postAbility"],
+        )
+        self.crit_scaling = 0.2
+        self.scaling = 0.15
+        self.duration = 3
+        self.restoreMana = False
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.crit.addStat(self.crit_scaling)
+            champion.canSpellCrit = True
+        elif phase == "onCrit" and input_:
+            # input is is_spell
+            self.restoreMana = True
+        elif phase == "postAbility" and self.restoreMana:
+            self.restoreMana = False
+            champion.applyStatus(
+                status.ManaRegenModifier("Water Lotus II"),
+                champion,
+                time,
+                self.duration,
+                params=self.scaling * champion.fullMana.stat / self.duration,
+            )
         return 0
 
 
@@ -773,6 +899,22 @@ class Moonlight(Buff):
         if champion.level == 3:
             champion.bonus_ad.addStat(45)
             champion.ap.addStat(45)
+        return 0
+
+
+class Hero101(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Hero101", level, params, phases=["preCombat"])
+        self.scaling = 0.15
+
+    def performAbility(self, phase, time, champion, input_=0):
+        # may not interact well with other forms of scaling, watch out
+        for item in champion.items:
+            if "Academia" in item.name:
+                champion.fullMana.mult -= self.scaling
+                break
         return 0
 
 

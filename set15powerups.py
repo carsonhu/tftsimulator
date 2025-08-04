@@ -1,5 +1,6 @@
 from set15buffs import Buff
 from stats import JhinBonusAD
+import math
 
 
 class AttackExpert(Buff):
@@ -181,12 +182,12 @@ class BulletHell(Buff):
         self.scaling = 1.33
 
     def performAbility(self, phase, time, champion, input_=0):
-        if champion.name == "Ashe":
+        if champion.name == "Ashe" or champion.name == "Yuumi":
             if hasattr(champion, "projectile_multiplier"):
                 champion.projectile_multiplier = self.scaling
                 return 0
-        if hasattr(champion, "projectiles"):
-            champion.projectiles = int(champion.projectiles * self.scaling)
+        elif hasattr(champion, "projectiles"):
+            champion.projectiles = math.ceil(champion.projectiles * self.scaling)
 
         return 0
 
@@ -211,13 +212,15 @@ class Mage(Buff):
 
     def __init__(self, level, params):
         super().__init__("Mage", level, params, phases=["preCombat", "postAbility"])
-        self.dmgMultiplierScaling = -0.2
+        self.dmgMultiplierScaling = -0.25
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             # cast twice = not quite double cast time but close to it
             champion.castTime *= 1.8
-            champion.dmgMultiplier.addStat(self.dmgMultiplierScaling)
+            champion.dmgMultiplier.mult = (
+                champion.dmgMultiplier.mult + self.dmgMultiplierScaling
+            )
         elif phase == "postAbility":
             champion.performAbility(champion.opponents, champion.items, time)
 
@@ -398,6 +401,18 @@ class GatherForce(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.bonus_ad.addStat(self.scaling * champion.fullMana.stat)
+        return 0
+
+
+class DarkAmulet(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Dark Amulet", level, params, phases=["preAbility"])
+        self.scaling = 12
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.ap.addStat(self.scaling)
         return 0
 
 

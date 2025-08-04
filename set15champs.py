@@ -15,11 +15,13 @@ champ_list = [
     "Kalista",
     "KaiSa",
     "Kayle",
+    "Kennen",
     "Lucian",
     "Sivir",
     "DrMundo",
     "Jhin",
     "Gangplank",
+    "Katarina",
     "Caitlyn",
     "KogMaw",
     "Malzahar",
@@ -29,6 +31,7 @@ champ_list = [
     "Smolder",
     "Ashe",
     "Samira",
+    "Yuumi",
 ]
 
 
@@ -203,6 +206,57 @@ class Kayle(Champion):
         adScale = [0, 0, 0]
         apScale = [55, 85, 125]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+
+class Kennen(Champion):
+    def __init__(self, level):
+        hp = 700
+        atk = 45
+        curMana = 30
+        fullMana = 80
+        aspd = 0.7
+        armor = 40
+        mr = 40
+        super().__init__(
+            "Kennen",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.default_traits = ["SupremeCells", "Sorcerer"]
+        self.items.append(buffs.KennenUlt())
+        self.num_targets = 2
+        self.castTime = 0.5
+        self.notes = ""
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [160, 240, 360]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def passiveAbilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [30, 45, 70]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        for count in range(self.num_targets):
+            # technically this is just hitting the 1st guy X times so we'll
+            # change it if it matters
+            self.multiTargetSpell(
+                opponents,
+                items,
+                time,
+                2,
+                lambda x, y, z: 0.65 ** (count) * self.abilityScaling(x, y, z),
+                "magical",
+            )
 
 
 class Lucian(Champion):
@@ -451,6 +505,58 @@ class Gangplank(Champion):
         self.multiTargetSpell(
             opponents, items, time, 1, self.abilityScaling, "physical", 1
         )
+
+
+class Katarina(Champion):
+    def __init__(self, level):
+        hp = 800
+        atk = 35
+        curMana = 0
+        fullMana = 30
+        aspd = 0.8
+        armor = 55
+        mr = 55
+        super().__init__(
+            "Katarina",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ASSASSIN,
+        )
+        self.default_traits = ["BattleAcademia", "Executioner"]
+        self.potential = 0
+        self.num_targets = 2
+        self.castTime = 0.7
+        self.secondaryCastTime = 1.1
+        self.notes = ""
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [150, 225, 350]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def potentialAbilityScaling(self, level, AD, AP):
+        potentialScaling = 0.13
+        return self.abilityScaling(level, AD, AP) * potentialScaling * self.potential
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, self.num_targets, self.abilityScaling, "magical"
+        )
+        if self.potential > 0:
+            self.multiTargetSpell(
+                opponents,
+                items,
+                time,
+                self.num_targets,
+                self.potentialAbilityScaling,
+                "magical",
+            )
 
 
 class KaiSa(Champion):
@@ -798,9 +904,9 @@ class Karma(Champion):
             Role.CASTER,
         )
         self.default_traits = ["Sorcerer"]
-        self.num_targets = 2
+        self.num_targets = 1
         self.castTime = 1.5
-        self.notes = ""
+        self.notes = "A lot of things i'm not sure on with karma yet"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
@@ -935,6 +1041,64 @@ class Samira(Champion):
             self.multiTargetSpell(
                 opponents, items, time, 1, self.abilityScaling, "physical", 1
             )
+
+
+class Yuumi(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 40
+        curMana = 0
+        fullMana = 40
+        aspd = 0.75
+        armor = 35
+        mr = 35
+        super().__init__(
+            "Yuumi",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["BattleAcademia", "Prodigy"]
+        self.castTime = 2.4
+        self.projectiles = 15
+        self.projectile_multiplier = 1
+        self.potential = 0
+        self.notes = ""
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [26, 39, 150]
+        return (
+            (apScale[level - 1] * AP + adScale[level - 1] * AD)
+            * self.projectiles
+            * self.projectile_multiplier
+        )
+
+    def extraAbilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [26, 39, 150]
+        potentialScaling = 0.32
+        return (
+            (apScale[level - 1] * AP + adScale[level - 1] * AD)
+            * potentialScaling
+            * self.potential
+            * (self.projectiles // 5)
+            * self.projectile_multiplier
+        )
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "magical")
+        if self.potential > 0:
+            self.multiTargetSpell(
+                opponents, items, time, 1, self.extraAbilityScaling, "true"
+            )
+        self.projectiles += 5
 
 
 class BaseChamp(Champion):

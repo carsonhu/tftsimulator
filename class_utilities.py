@@ -480,6 +480,28 @@ def mentor_selector(champion):
     champion.mentors = mentors
 
 
+def starguardian_selector(champion):
+    st.header("Star Guardian Buffs")
+    item_cols = st.columns(3)
+
+    buffs = []
+
+    starguardians = {
+        "Syndra": False,
+        "Xayah": False,
+        "Ahri": False,
+        "Jinx": False,
+        "Seraphine": False,
+        "Emblem": False,
+    }
+
+    for index, name in enumerate(list(starguardians.keys())):
+        with item_cols[index]:
+            champ_stargs = champion.name == name
+            starguardians[name] = st.checkbox(name, value=champ_stargs)
+    champion.starguardians = starguardians
+
+
 def champ_selector(champ_list):
     """champ list: select da champion
 
