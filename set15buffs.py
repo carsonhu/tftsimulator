@@ -170,7 +170,7 @@ class Sniper(Buff):
     def __init__(self, level, params):
         # params is number of hexes
         super().__init__("Sniper " + str(level), level, params, phases=["preCombat"])
-        self.base_scailng = {0: 0, 2: 0.13, 3: 0.16, 4: 0.22, 5: 0.25}
+        self.base_scaling = {0: 0, 2: 0.13, 3: 0.16, 4: 0.22, 5: 0.25}
         self.scaling = {0: 0, 2: 0.03, 3: 0.05, 4: 0.07, 5: 0.1}
         self.base_bonus = 0
         self.extraBuff(params)
