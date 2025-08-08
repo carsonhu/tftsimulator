@@ -631,6 +631,61 @@ class JhinUlt(Buff):
         return 0
 
 
+class ViegoUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            "Combo of the Ruined King",
+            level,
+            params,
+            phases=["preAttack"],
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.ult_phase == 0:
+            input_.canOnHit = True
+            input_.canCrit = True
+            input_.attackType = "magical"
+            input_.scaling = (
+                lambda level, baseAD, AD, AP: champion.autoAbilityScaling(level, AD, AP)
+                + baseAD * AD
+            )
+        elif champion.ult_phase > 0:
+            input_.canOnHit = True
+            input_.canCrit = champion.canSpellCrit
+            input_.attackType = "magical"
+            input_.scaling = lambda level, baseAD, AD, AP: champion.abilityScaling(
+                level, AD, AP
+            )
+            champion.ult_phase = (champion.ult_phase + 1) % 4
+            if champion.ult_phase == 0:
+                champion.manalockTime = time + 0.01
+        return input_
+
+
+class ZiggsUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            "Orbital Ordinance",
+            level,
+            params,
+            phases=["preAttack"],
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        input_.canOnHit = True
+        input_.canCrit = True
+        input_.attackType = "magical"
+        input_.scaling = (
+            lambda level, baseAD, AD, AP: champion.autoAbilityScaling(level, AD, AP)
+            + baseAD * AD
+        )
+        return input_
+
+
 class KogmawUlt(Buff):
     levels = [1]
 

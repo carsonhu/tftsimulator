@@ -149,7 +149,7 @@ with tab1:
     )
 
     st.write(
-        "Most cast times/manalock times are guesses. Units can cast after they have completed 30\% of an autoattack. Simulator is probably not very accurate to true gameplay at high attack speeds."
+        "Most cast times/manalock times are guesses. Units can cast after they have completed 30\% of an autoattack. Champs must attack at least once between casts (should only affect Samira). Simulator is probably not very accurate to true gameplay at high attack speeds."
     )
 
     itemSimulator = set15_streamlit_main.Simulator()

@@ -32,6 +32,8 @@ champ_list = [
     "Ashe",
     "Samira",
     "Yuumi",
+    "Ziggs",
+    "Viego",
 ]
 
 
@@ -636,7 +638,7 @@ class Caitlyn(Champion):
         self.multiTargetSpell(
             opponents, items, time, 1, self.abilityScaling, "physical", 1
         )
-        for i in range(self.potential + 1):
+        for i in range(self.potential):
             self.multiTargetSpell(
                 opponents,
                 items,
@@ -837,6 +839,96 @@ class Smolder(Champion):
                     lambda x, y, z: 0.75 * self.abilityScaling(x, y, z),
                     "physical",
                 )
+
+
+class Viego(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 30
+        curMana = 0
+        fullMana = 40
+        aspd = 0.9
+        armor = 60
+        mr = 60
+        super().__init__(
+            "Viego",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.FIGHTER,
+        )
+        self.default_traits = ["SoulFighter", "Duelist"]
+        self.items.append(buffs.ViegoUlt())
+        self.ult_phase = 0  # for the ult
+        self.manalockDuration = 999
+        self.castTime = 0
+        self.notes = "not sure how viego's cast time works, temporarily at 0"
+
+    def autoAbilityScaling(self, level, AD, AP):
+        # AD scaling is defined in the buff ViegoUlt
+        apScale = [30, 45, 70]
+        return apScale[level - 1] * AP
+
+    def abilityScaling(self, level, AD, AP):
+        # jank as fuck: Ability sets it to 1, and the buff increments it.
+        # 1st attack Ult phase is at 2
+        # 2nd attack ult phase is at 3
+        # 3rd attack ult phase is at 0 to make sure this func isn't called again
+        apScale = [0, 0, 0]
+        if self.ult_phase == 2 or self.ult_phase == 3:
+            apScale = [100, 150, 250]
+        elif self.ult_phase == 0:
+            apScale = [210, 315, 530]
+        return apScale[level - 1] * AP
+
+    def performAbility(self, opponents, items, time):
+        self.ult_phase = 1
+
+
+class Ziggs(Champion):
+    def __init__(self, level):
+        hp = 650
+        atk = 20
+        curMana = 0
+        fullMana = 90
+        aspd = 0.75
+        armor = 30
+        mr = 30
+        super().__init__(
+            "Ziggs",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.default_traits = ["Strategist"]
+        self.items.append(buffs.ZiggsUlt())
+        self.num_targets = 2
+        self.castTime = 0.5
+        self.notes = ""
+
+    def autoAbilityScaling(self, level, AD, AP):
+        apScale = [42, 63, 100]
+        return apScale[level - 1] * AP
+
+    def abilityScaling(self, level, AD, AP):
+        apScale = [200, 400, 465]
+        return apScale[level - 1] * AP
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, self.num_targets, self.abilityScaling, "magical"
+        )
 
 
 class Ashe(Champion):
@@ -1074,10 +1166,8 @@ class Yuumi(Champion):
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
         apScale = [26, 39, 150]
-        return (
-            (apScale[level - 1] * AP + adScale[level - 1] * AD)
-            * self.projectiles
-            * self.projectile_multiplier
+        return (apScale[level - 1] * AP + adScale[level - 1] * AD) * math.ceil(
+            self.projectiles * self.projectile_multiplier
         )
 
     def extraAbilityScaling(self, level, AD, AP):
@@ -1088,8 +1178,7 @@ class Yuumi(Champion):
             (apScale[level - 1] * AP + adScale[level - 1] * AD)
             * potentialScaling
             * self.potential
-            * (self.projectiles // 5)
-            * self.projectile_multiplier
+            * math.ceil((self.projectiles // 5) * self.projectile_multiplier)
         )
 
     def performAbility(self, opponents, items, time):

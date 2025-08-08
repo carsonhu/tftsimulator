@@ -103,6 +103,8 @@ class Champion(object):
         self.numAttacks = 0
         self.numCasts = 0
 
+        self.attacksOnLastCast = -1  # Can't cast if we haven't attacked yet
+
     def hashFunction(self):
         # Hash to cache champion data
         print(self.items)
@@ -199,6 +201,7 @@ class Champion(object):
             and self.fullMana.stat > -1
             and self.manalockTime <= time
             and self.attackWindupLockout < time
+            and self.numAttacks > self.attacksOnLastCast
         )
 
     def canAttack(self, time):
@@ -312,11 +315,13 @@ class Champion(object):
                 # if they instant cast they shouldn't be manalocked
                 self.manalockTime = 0
             else:
-                # manalock duration is deprecated
+                # manalock duration is deprecated in most cases
                 self.manalockTime = max(
                     time + self.manalockDuration, time + self.castTime
                 )
             self.curMana = self.curMana - self.fullMana.stat + self.startingMana
+
+            self.attacksOnLastCast = self.numAttacks
             # basically, can't attack before cast time up.
             # this logic might be slightly incorrect
             self.nextAttackTime = max(self.nextAttackTime, time + self.castTime)

@@ -203,7 +203,7 @@ class StarStudent(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         champion.hp.addStat(self.hp_scaling)
         if hasattr(champion, "potential"):
-            champion.potential = int(champion.potential * self.potential_scaling)
+            champion.potential = math.ceil(champion.potential * self.potential_scaling)
         return 0
 
 

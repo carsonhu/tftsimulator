@@ -1038,12 +1038,12 @@ class RadiantAdaptive(Item):
     def __init__(self):
         super().__init__(
             "Radiant Adaptive Helm",
-            manaRegen=5,
+            manaRegen=4,
             ad=30,
-            ap=55,
+            ap=30,
             phases=["preCombat"],
         )
-        self.mult = 0.4
+        self.mult = 0.3
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.manaGainMultiplier.addStat(self.mult)
