@@ -179,7 +179,7 @@ class BulletHell(Buff):
 
     def __init__(self, level, params):
         super().__init__("Bullet Hell", level, params, phases=["preCombat"])
-        self.scaling = 1.33
+        self.scaling = 1.3
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.name == "Ashe" or champion.name == "Yuumi":
@@ -187,7 +187,7 @@ class BulletHell(Buff):
                 champion.projectile_multiplier = self.scaling
                 return 0
         elif hasattr(champion, "projectiles"):
-            champion.projectiles = math.ceil(champion.projectiles * self.scaling)
+            champion.projectiles = round(champion.projectiles * self.scaling)
 
         return 0
 

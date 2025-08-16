@@ -35,6 +35,7 @@ class_buffs = [
     "Strategist",
     "Mentor",
     "Edgelord",
+    "Bastion",
 ]
 
 augments = [
@@ -213,7 +214,7 @@ class Prodigy(Buff):
 
     def __init__(self, level, params):
         super().__init__("Prodigy " + str(level), level, params, phases=["preCombat"])
-        self.scaling = {0: 0, 2: 3, 3: 5, 4: 7, 5: 8}
+        self.scaling = {0: 0, 2: 3, 3: 4, 4: 6, 5: 7}
         self.non_prodigy_scaling = {0: 0, 2: 1, 3: 1, 4: 2, 5: 3}
         self.is_prodigy = 0
         self.extraBuff(params)
@@ -381,10 +382,10 @@ class Edgelord(Buff):
 
     def __init__(self, level, params):
         super().__init__("Edgelord " + str(level), level, params, phases=["preCombat"])
-        self.scaling = {2: 15, 4: 35, 6: 50}
+        self.scaling = {2: 15, 4: 35, 6: 55}
 
     def performAbility(self, phase, time, champion, input=0):
-        champion.atk.addStat(self.scaling[self.level])
+        champion.bonus_ad.addStat(self.scaling[self.level])
         champion.aspd.addStat(20)
         return 0
 
@@ -411,10 +412,30 @@ class Sorcerer(Buff):
 
     def __init__(self, level, params):
         super().__init__("Sorcerer " + str(level), level, params, phases=["preCombat"])
-        self.scaling = {2: 20, 4: 50, 6: 90}
+        self.scaling = {2: 20, 4: 50, 6: 80}
 
     def performAbility(self, phase, time, champion, input=0):
         champion.ap.addStat(self.scaling[self.level])
+        return 0
+
+
+class Bastion(Buff):
+    levels = [0, 2, 4, 6]
+
+    def __init__(self, level, params):
+        super().__init__(
+            "Bastion " + str(level), level, params, phases=["preCombat", "onUpdate"]
+        )
+        self.scaling = {2: 18, 4: 40, 6: 75}
+        self.doubleTime = 10
+
+    def performAbility(self, phase, time, champion, input=0):
+        if phase == "preCombat":
+            champion.armor.addStat(self.scaling[self.level] * 2)
+            champion.mr.addStat(self.scaling[self.level] * 2)
+        elif phase == "onUpdate" and time > self.doubleTime:
+            champion.mr.addStat(-1 * self.scaling[self.level])
+            self.doubleTime = 999
         return 0
 
 
@@ -728,6 +749,28 @@ class MundoUlt(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         input_.scaling = champion.passiveAbilityScaling
         return input_
+
+
+class ShenUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("TwilightAssault", level, params, phases=["preAttack"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.ultAutos > 0:
+            champion.multiTargetSpell(
+                champion.opponents,
+                champion.items,
+                time,
+                1,
+                champion.abilityScaling,
+                "true",
+            )
+            champion.ultAutos -= 1
+            if champion.ultAutos == 0:
+                champion.manalockTime = time + 0.01
+        return 0
 
 
 # AUGMENTS
@@ -1226,8 +1269,8 @@ class BackupDancers(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__("Backup Dancers", level, params, phases=["onUpdate"])
-        self.asBonus = 10.5
-        self.nextBonus = 3
+        self.asBonus = 9
+        self.nextBonus = 0
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "onUpdate":

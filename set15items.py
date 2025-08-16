@@ -103,7 +103,7 @@ class Bloodthirster(Item):
 
 class EdgeOfNight(Item):
     def __init__(self):
-        super().__init__("Edge of Night", ad=10, ap=10, aspd=20, phases=None)
+        super().__init__("Edge of Night", ad=10, ap=10, aspd=15, phases=None)
 
 
 class HextechGunblade(Item):
@@ -228,7 +228,7 @@ class StrikersFlail(Item):
             "StrikersFlail",
             crit=20,
             hp=150,
-            aspd=20,
+            aspd=10,
             dmgMultiplier=0.1,
             has_radiant=True,
             phases=["onCrit"],
@@ -735,7 +735,7 @@ class RadiantStrikersFlail(Item):
         super().__init__(
             "Radiant Strikers' Flail",
             crit=35,
-            aspd=35,
+            aspd=25,
             hp=150,
             dmgMultiplier=0.2,
             has_radiant=True,

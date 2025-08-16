@@ -15,10 +15,11 @@ champ_list = [
     "Kalista",
     "KaiSa",
     "Kayle",
-    "Kennen",
+    "KennenHERO",
     "Lucian",
     "Sivir",
-    "DrMundo",
+    "DrMundoHERO",
+    "ShenHERO",
     "Jhin",
     "Gangplank",
     "Katarina",
@@ -206,11 +207,11 @@ class Kayle(Champion):
 
     def waveAbilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [55, 85, 125]
+        apScale = [55, 75, 110]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
 
-class Kennen(Champion):
+class KennenHERO(Champion):
     def __init__(self, level):
         hp = 700
         atk = 45
@@ -220,7 +221,7 @@ class Kennen(Champion):
         armor = 40
         mr = 40
         super().__init__(
-            "Kennen",
+            "KennenHERO",
             hp,
             atk,
             curMana,
@@ -289,7 +290,7 @@ class Lucian(Champion):
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [80, 120, 180]
+        apScale = [85, 130, 225]
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * self.projectiles
 
     def performAbility(self, opponents, items, time):
@@ -375,7 +376,7 @@ class Syndra(Champion):
         self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "magical")
 
 
-class DrMundo(Champion):
+class DrMundoHERO(Champion):
     def __init__(self, level):
         hp = 800
         atk = 60
@@ -385,7 +386,7 @@ class DrMundo(Champion):
         armor = 40
         mr = 40
         super().__init__(
-            "DrMundo",
+            "DrMundoHERO",
             hp,
             atk,
             curMana,
@@ -499,7 +500,7 @@ class Gangplank(Champion):
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [320, 480, 875]
+        adScale = [285, 430, 775]
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -539,7 +540,7 @@ class Katarina(Champion):
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [150, 225, 350]
+        apScale = [130, 200, 300]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def potentialAbilityScaling(self, level, AD, AP):
@@ -588,7 +589,7 @@ class KaiSa(Champion):
         self.notes = "Click 'more options' button to set bonus AD"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [30, 45, 70]
+        adScale = [38, 57, 90]
         apScale = [6, 8, 14]
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * self.projectiles
 
@@ -596,6 +597,43 @@ class KaiSa(Champion):
         self.multiTargetSpell(
             opponents, items, time, 1, self.abilityScaling, "physical", 2
         )
+
+
+class ShenHERO(Champion):
+    def __init__(self, level):
+        hp = 800
+        atk = 60
+        curMana = 0
+        fullMana = 60
+        aspd = 0.7
+        armor = 55
+        mr = 55
+        super().__init__(
+            "ShenHERO",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.default_traits = ["Bastion", "Edgelord"]
+        self.ultAutos = 0
+        self.items.append(buffs.ShenUlt())
+        self.manalockDuration = 999
+        self.castTime = 0
+        self.notes = "Crew not coded; Shen Hero augment"
+
+    def abilityScaling(self, level, AD, AP):
+        mrScale = [0.75, 1.15, 1.75]
+        apScale = [70, 105, 170]
+        return apScale[level - 1] * AP + mrScale[level - 1] * self.mr.stat
+
+    def performAbility(self, opponents, items, time):
+        self.ultAutos = 3
 
 
 class Caitlyn(Champion):
@@ -677,7 +715,7 @@ class KogMaw(Champion):
         self.notes = ""
 
     def passiveAbilityScaling(self, level, AD, AP):
-        apScale = [33, 50, 80]
+        apScale = [36, 55, 87]
         adScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -689,7 +727,7 @@ class KogMaw(Champion):
     def performAbility(self, opponents, items, time):
         self.nextAutoEnhanced = True
         if self.trainer_level >= 15:
-            self.aspd.addStat(12)
+            self.aspd.addStat(15)
 
 
 class Malzahar(Champion):
@@ -740,8 +778,8 @@ class Senna(Champion):
     def __init__(self, level):
         hp = 650
         atk = 55
-        curMana = 15
-        fullMana = 75
+        curMana = 0
+        fullMana = 60
         aspd = 0.75
         armor = 30
         mr = 30
@@ -918,7 +956,7 @@ class Ziggs(Champion):
         self.notes = ""
 
     def autoAbilityScaling(self, level, AD, AP):
-        apScale = [42, 63, 100]
+        apScale = [50, 75, 120]
         return apScale[level - 1] * AP
 
     def abilityScaling(self, level, AD, AP):
@@ -962,7 +1000,7 @@ class Ashe(Champion):
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [13, 19, 90]
+        adScale = [14, 21, 100]
         apScale = [1, 2, 10]
         num_arrows = (
             round(self.base_projectiles + 4 * ((self.aspd.add + 100) / 125 - 0.8))
@@ -998,17 +1036,19 @@ class Karma(Champion):
         self.default_traits = ["Sorcerer"]
         self.num_targets = 1
         self.castTime = 1.5
-        self.notes = "A lot of things i'm not sure on with karma yet"
+        self.cast_ticks = 12
+        self.notes = "A lot of things i'm not sure on with karma yet. Cast split into 12 ticks for strikers calculation"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
         apScale = [1125, 1700, 5000]
-        return apScale[level - 1] * AP + adScale[level - 1] * AD
+        return (apScale[level - 1] * AP + adScale[level - 1] * AD) / self.cast_ticks
 
     def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(
-            opponents, items, time, self.num_targets, self.abilityScaling, "magical"
-        )
+        for _ in range(self.cast_ticks):
+            self.multiTargetSpell(
+                opponents, items, time, self.num_targets, self.abilityScaling, "magical"
+            )
 
 
 class Ryze(Champion):

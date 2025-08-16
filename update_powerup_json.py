@@ -39,7 +39,9 @@ def getChamps(output_file):
     champ_powerups = {}
     for champ, value in filtered.items():
         parts = value["mName"].split("_")
-        champ_name = parts[-2] if parts[-1] == "HERO" else parts[-1]
+        champ_name = (
+            "".join((parts[-2], parts[-1])) if parts[-1] == "HERO" else parts[-1]
+        )
 
         champ_powerups[champ_name] = []
         print(value["mName"])
