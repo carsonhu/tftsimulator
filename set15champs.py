@@ -1255,7 +1255,7 @@ class TwistedFate(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.MARKSMAN,
         )
         self.default_traits = []
         self.items.append(buffs.TwistedFateUlt())
