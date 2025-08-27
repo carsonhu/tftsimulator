@@ -1,5 +1,5 @@
 from item import Item
-from stats import JhinBonusAD
+from stats import JhinBonusAD, Attack
 
 import status
 import ast
@@ -62,9 +62,7 @@ augments = [
     "AdaptiveStyle",
     "MessHall",
     "TonsOfStats",
-    "LearnFromTheBestRyze",
-    "LearnFromTheBestUdyr",
-    "LearnFromTheBestYasuo",
+    "LearnFromTheBest",
     "LitFuseSolo",
     "LitFuseDuo",
     "LitFuseTrio",
@@ -307,7 +305,17 @@ class StarGuardianBuff(Buff):
 
     def __init__(self, level, params):
         super().__init__(f"Star Guardian {level}", level, params, phases=["preCombat"])
-        self.scaling = {2: 1, 3: 1, 4: 1, 5: 1, 6: 1.4, 7: 1.45, 8: 1.5, 9: 1.6, 10: 1}
+        self.scaling = {
+            2: 1,
+            3: 1.1,
+            4: 1.2,
+            5: 1.3,
+            6: 1.4,
+            7: 1.45,
+            8: 1.5,
+            9: 1.6,
+            10: 1,
+        }
 
         # Syndra: Gain 5 Ability Power every 3 seconds
         self.syndra_interval = 3
@@ -509,6 +517,47 @@ class KennenUlt(Buff):
             champion.passiveAbilityScaling,
             "magical",
         )
+        return 0
+
+
+class TwistedFateUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("52 Card Calamity", level, params, phases=["preAttack"])
+        # self.newAttack = Attack()
+
+    def performAbility(self, phase, time, champion, input_=0):
+        # attack 1: .7 power on enemy 1
+        # attack 2: .4 (or .49?) power on enemy 2
+        # spell 1: 1 power on enemy 1
+        # spell 2: .7 power on enemy 2
+        # spell 3: .4 (or .49?) power on enemy 3
+        for index in range(1, 3):
+            # 1: .7
+            # 2: .49
+            #
+            newAttack = Attack()
+            newAttack.opponents = champion.opponents
+            newAttack.canCrit = champion.canCrit
+            newAttack.canOnHit = True
+            newAttack.numTargets = 1
+            newAttack.scaling = lambda a, x, y, z: 0.7 ** (index) * input_.scaling(
+                a, x, y, z
+            )
+            champion.doAttack(newAttack, champion.items, time)
+        for index in range(3):
+            # TF spell portion can't crit without spellcrit
+            champion.multiTargetSpell(
+                champion.opponents,
+                champion.items,
+                time,
+                1,
+                lambda x, y, z: 0.7 ** (index) * champion.autoAbilityScaling(x, y, z),
+                "magical",
+            )
+        champion.marks += 1
+
         return 0
 
 
@@ -776,49 +825,23 @@ class ShenUlt(Buff):
 # AUGMENTS
 
 
-class LearnFromTheBestUdyr(Buff):
+class LearnFromTheBest(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__(
-            "Learn From The Best (Udyr)", level, params, phases=["preCombat"]
-        )
-        self.scaling = 4
+        super().__init__("Learn From The Best", level, params, phases=["preCombat"])
+        self.udyr_scaling = 4
+        self.yas_scaling = 5
+        self.ryze_scaling = 1
 
     def performAbility(self, phase, time, champion, input_=0):
-        boost = {1: 0, 2: 1, 3: 4}.get(champion.level, 0) * self.scaling
-        champion.bonus_ad.addStat(boost)
-        champion.ap.addStat(boost)
-        return 0
+        boost = {1: 0, 2: 1, 3: 2}.get(champion.level, 0)
+        champion.bonus_ad.addStat(boost * self.udyr_scaling)
+        champion.ap.addStat(boost * self.udyr_scaling)
 
+        champion.aspd.addStat(boost * self.yas_scaling)
+        champion.manaPerAttack.addStat(boost * self.ryze_scaling)
 
-class LearnFromTheBestYasuo(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        super().__init__(
-            "Learn From The Best (Yasuo)", level, params, phases=["preCombat"]
-        )
-        self.scaling = 5
-
-    def performAbility(self, phase, time, champion, input_=0):
-        boost = {1: 0, 2: 1, 3: 4}.get(champion.level, 0) * self.scaling
-        champion.aspd.addStat(boost)
-        return 0
-
-
-class LearnFromTheBestRyze(Buff):
-    levels = [1]
-
-    def __init__(self, level=1, params=0):
-        super().__init__(
-            "Learn From The Best (Ryze)", level, params, phases=["preCombat"]
-        )
-        self.scaling = 1
-
-    def performAbility(self, phase, time, champion, input_=0):
-        boost = {1: 0, 2: 1, 3: 4}.get(champion.level, 0) * self.scaling
-        champion.manaPerAttack.addStat(boost)
         return 0
 
 

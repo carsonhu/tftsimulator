@@ -123,7 +123,7 @@ class GuinsoosRageblade(Item):
             phases=["onUpdate"],
         )
         self.next_bonus = 1
-        self.aspd_bonus = 7
+        self.aspd_bonus = 6
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.next_bonus:
@@ -165,7 +165,7 @@ class Archangels(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.nextAP:
-            champion.ap.add += 30
+            champion.ap.addStat(30)
             self.nextAP += 5
         return 0
 
@@ -324,7 +324,7 @@ class Shojin(Item):
     def __init__(self):
         super().__init__(
             "Spear of Shojin",
-            ad=18,
+            ad=15,
             manaRegen=1,
             ap=10,
             has_radiant=True,
@@ -365,7 +365,7 @@ class Nashors(Item):
             "Nashor's Tooth",
             aspd=10,
             hp=150,
-            ap=20,
+            ap=25,
             manaRegen=2,
             has_radiant=True,
             phases=["postAbility", "onUpdate"],
@@ -414,7 +414,7 @@ class KrakensFury(Item):
         super().__init__(
             "Kraken's Fury",
             aspd=10,
-            ad=15,
+            ad=20,
             has_radiant=True,
             phases="preAttack",
         )
@@ -440,7 +440,7 @@ class SteraksGage(Item):
 
 class QSS(Item):
     def __init__(self):
-        super().__init__("Quicksilver", aspd=30, crit=20, phases="onUpdate")
+        super().__init__("Quicksilver", aspd=30, crit=20, mr=20, phases="onUpdate")
         self.nextAS = 2
         self.asGain = 3
         self.procs_left = 9
@@ -518,7 +518,7 @@ class GS(Item):
     def __init__(self):
         super().__init__(
             "Giant Slayer",
-            aspd=20,
+            aspd=15,
             ad=20,
             ap=20,
             has_radiant=True,
@@ -540,9 +540,9 @@ class GSNoGiant(Item):
     def __init__(self):
         super().__init__(
             "Giant Slayer (no Giant)",
-            aspd=10,
-            ad=25,
-            ap=25,
+            aspd=15,
+            ad=20,
+            ap=20,
             has_radiant=True,
             phases="preCombat",
         )
@@ -561,7 +561,7 @@ class Blue(Item):
     def __init__(self):
         super().__init__(
             "Blue Buff",
-            manaRegen=5,
+            manaRegen=6,
             ap=15,
             ad=15,
             has_radiant=True,
@@ -649,7 +649,7 @@ class LichBane(Item):
 
 class WitsEnd(Item):
     def __init__(self):
-        super().__init__("Wit's End", aspd=30, mr=30, hp=300, phases="preAttack")
+        super().__init__("Wit's End", aspd=30, mr=30, hp=300, phases="onAttack")
         self.dmg = {2: 42, 3: 60, 4: 75, 5: 90, 6: 100}
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -693,7 +693,7 @@ class Flickerblade(Item):
     def performAbility(self, phase, time, champion, input_=0):
         self.counter += 1
         if champion.aspd.stat <= 5:
-            champion.aspd.addStat(7)
+            champion.aspd.addStat(6)
         if self.counter == 5:
             champion.bonus_ad.addStat(4)
             champion.ap.addStat(5)
@@ -800,8 +800,8 @@ class RadiantBlue(Item):
         super().__init__(
             "Radiant Blue",
             manaRegen=10,
-            ap=60,
-            ad=60,
+            ap=45,
+            ad=45,
             has_radiant=True,
             phases=None,
         )
@@ -822,10 +822,10 @@ class RadiantArchangels(Item):
 class RadiantGuinsoosRageblade(Item):
     def __init__(self):
         super().__init__(
-            "Radiant Guinsoo's Rageblade", aspd=30, ap=30, phases=["onUpdate"]
+            "Radiant Guinsoo's Rageblade", aspd=25, ap=30, phases=["onUpdate"]
         )
         self.next_bonus = 1
-        self.aspd_bonus = 14
+        self.aspd_bonus = 12
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.next_bonus:
@@ -944,9 +944,9 @@ class RadiantShojin(Item):
     def __init__(self):
         super().__init__(
             "Radiant Spear of Shojin",
-            ad=35,
+            ad=30,
             manaRegen=2,
-            ap=30,
+            ap=25,
             phases=["preCombat"],
         )
         self.counter = 0
@@ -975,7 +975,7 @@ class RadiantVoidStaff(Item):
 class RadiantInfinityEdge(Item):
     def __init__(self):
         super().__init__(
-            "Radiant InfinityEdge", ad=70, crit=75, phases=["postPreCombat"]
+            "Radiant InfinityEdge", ad=65, crit=75, phases=["postPreCombat"]
         )
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -998,8 +998,8 @@ class RadiantQSS(Item):
     def __init__(self):
         super().__init__("Radiant Quicksilver", aspd=50, crit=20, phases="onUpdate")
         self.nextAS = 2
-        self.asGain = 9
-        self.procs_left = 7
+        self.asGain = 7
+        self.procs_left = 9
 
     def performAbility(self, phase, time, champion, input_=0):
         if time >= self.nextAS and self.procs_left > 0:
@@ -1039,8 +1039,8 @@ class RadiantAdaptive(Item):
         super().__init__(
             "Radiant Adaptive Helm",
             manaRegen=4,
-            ad=30,
-            ap=30,
+            ad=45,
+            ap=45,
             phases=["preCombat"],
         )
         self.mult = 0.3

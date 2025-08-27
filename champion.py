@@ -97,6 +97,7 @@ class Champion(object):
 
         self.num_targets = 0
         self.num_extra_targets = 0
+        self.percent_popped_marks = -1  # TF-only
         self.item_count = 0  # number of craftables
 
         self.critCounter = 0
@@ -136,6 +137,7 @@ class Champion(object):
             self.stage,
             self.num_targets,
             self.num_extra_targets,
+            self.percent_popped_marks,
             self.item_count,
         )
         mentor_tuple = tuple(value for value in list(self.mentors.values()))

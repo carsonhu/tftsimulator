@@ -67,6 +67,16 @@ with st.sidebar:
             value=champ.num_extra_targets,
         )
         champ.num_extra_targets = targets
+    # TF-only:
+    if hasattr(champ, "percent_popped_marks") and champ.percent_popped_marks > -1:
+        popped_marks = st.slider(
+            "% of Marks that Get Popped",
+            min_value=0.0,
+            max_value=1.0,
+            value=1.0,
+            step=0.1,
+        )
+        champ.percent_popped_marks = popped_marks
 
     with st.popover("Extra options / bonus stats"):
         class_utilities.first_takedown("Takedown", champ)

@@ -18,6 +18,7 @@ champ_list = [
     "KennenHERO",
     "Lucian",
     "Sivir",
+    "Syndra",
     "DrMundoHERO",
     "ShenHERO",
     "Jhin",
@@ -35,6 +36,7 @@ champ_list = [
     "Yuumi",
     "Ziggs",
     "Viego",
+    "TwistedFate",
 ]
 
 
@@ -191,7 +193,7 @@ class Kayle(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.SPECIALIST,
         )
         self.num_targets = 2
         self.items.append(buffs.KayleUlt())
@@ -365,12 +367,16 @@ class Syndra(Champion):
         )
         self.default_traits = ["Prodigy"]
         self.castTime = 0.6
-        self.notes = "No MR shred"
+        self.chaosScaling = 0.06
+        self.notes = "No MR shred, gimme a second to code SG in"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [230, 345, 520]
+        apScale = [215, 325, 485]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def chaosAbilityScaling(self, level, AD, AP):
+        return self.abilityScaling(level, AD, AP) * self.chaosScaling
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "magical")
@@ -641,7 +647,7 @@ class Caitlyn(Champion):
         hp = 650
         atk = 55
         curMana = 0
-        fullMana = 40
+        fullMana = 60
         aspd = 0.75
         armor = 30
         mr = 30
@@ -663,12 +669,12 @@ class Caitlyn(Champion):
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [340, 510, 815]
+        adScale = [330, 495, 790]
         apScale = [30, 45, 70]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def secondaryAbilityScaling(self, level, AD, AP):
-        adScale = [90, 135, 210]
+        adScale = [85, 130, 205]
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -801,8 +807,8 @@ class Senna(Champion):
         self.notes = "No mana refund"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [315, 475, 755]
-        apScale = [35, 55, 85]
+        adScale = [385, 580, 960]
+        apScale = [40, 60, 95]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def secondaryAbilityScaling(self, level, AD, AP):
@@ -851,7 +857,7 @@ class Smolder(Champion):
         self.notes = "Smolder passive burn not included"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [200, 300, 480]
+        adScale = [215, 325, 515]
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -909,7 +915,7 @@ class Viego(Champion):
 
     def autoAbilityScaling(self, level, AD, AP):
         # AD scaling is defined in the buff ViegoUlt
-        apScale = [30, 45, 70]
+        apScale = [30, 45, 80]
         return apScale[level - 1] * AP
 
     def abilityScaling(self, level, AD, AP):
@@ -919,9 +925,9 @@ class Viego(Champion):
         # 3rd attack ult phase is at 0 to make sure this func isn't called again
         apScale = [0, 0, 0]
         if self.ult_phase == 2 or self.ult_phase == 3:
-            apScale = [100, 150, 250]
+            apScale = [100, 150, 270]
         elif self.ult_phase == 0:
-            apScale = [210, 315, 530]
+            apScale = [210, 315, 560]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -1002,8 +1008,8 @@ class Ashe(Champion):
     def abilityScaling(self, level, AD, AP):
         adScale = [14, 21, 100]
         apScale = [1, 2, 10]
-        num_arrows = (
-            round(self.base_projectiles + 4 * ((self.aspd.add + 100) / 125 - 0.8))
+        num_arrows = round(
+            (self.base_projectiles + 4 * ((self.aspd.add + 100) / 125 - 0.8))
             * self.projectile_multiplier
         )
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * num_arrows
@@ -1041,7 +1047,7 @@ class Karma(Champion):
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [1125, 1700, 5000]
+        apScale = [1050, 1575, 6500]
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) / self.cast_ticks
 
     def performAbility(self, opponents, items, time):
@@ -1080,12 +1086,12 @@ class Ryze(Champion):
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [720, 1080, 6000]
+        apScale = [770, 1155, 6000]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def secondaryAbilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [110, 165, 550]
+        apScale = [110, 165, 1200]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def waveScaling(self, level, AD, AP):
@@ -1145,12 +1151,12 @@ class Samira(Champion):
         self.notes = "Edgelord is coded to give fixed 20% AS."
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [90, 135, 650]
+        adScale = [80, 120, 650]
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def spinAbilityScaling(self, level, AD, AP):
-        adScale = [310, 465, 2200]
+        adScale = [230, 345, 2200]
         apScale = [50, 75, 225]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -1205,7 +1211,7 @@ class Yuumi(Champion):
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [26, 39, 150]
+        apScale = [25, 38, 135]
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * math.ceil(
             self.projectiles * self.projectile_multiplier
         )
@@ -1228,6 +1234,57 @@ class Yuumi(Champion):
                 opponents, items, time, 1, self.extraAbilityScaling, "true"
             )
         self.projectiles += 5
+
+
+class TwistedFate(Champion):
+    def __init__(self, level):
+        hp = 900
+        atk = 30
+        curMana = 40
+        fullMana = 120
+        aspd = 0.85
+        armor = 40
+        mr = 40
+        super().__init__(
+            "TwistedFate",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = []
+        self.items.append(buffs.TwistedFateUlt())
+        self.marks = 0
+        self.percent_popped_marks = 1
+        self.castTime = 1.5
+        self.notes = " "
+
+    def autoAbilityScaling(self, level, AD, AP):
+        # AD scaling is defined in the buff ViegoUlt
+        apScale = [35, 55, 999]
+        return apScale[level - 1] * AP
+
+    def abilityScalingPhysical(self, level, AD, AP):
+        adScale = [120, 180, 1500]
+        return adScale[level - 1] * AD
+
+    def abilityScalingMagical(self, level, AD, AP):
+        apScale = [26, 40, 500]
+        return apScale[level - 1] * AP * round(self.marks * self.percent_popped_marks)
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, 4, self.abilityScalingPhysical, "physical"
+        )
+        self.multiTargetSpell(
+            opponents, items, time, 4, self.abilityScalingMagical, "magical"
+        )
+        self.marks = 0
 
 
 class BaseChamp(Champion):

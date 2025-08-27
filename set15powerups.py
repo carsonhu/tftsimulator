@@ -155,7 +155,7 @@ class Bludgeoner(Buff):
 
     def __init__(self, level, params):
         super().__init__("Bludgeoner", level, params, phases=["preCombat"])
-        self.scaling = 0.35
+        self.scaling = 0.4
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.armorPierce.addStat(self.scaling)
@@ -167,10 +167,32 @@ class ArtisticKO(Buff):
 
     def __init__(self, level, params):
         super().__init__("Artistic KO", level, params, phases=["preCombat"])
-        self.scaling = 1.4
+        self.scaling = 1.35
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.ultMultiplier = self.scaling
+        return 0
+
+
+class RisingChaos(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("RisingChaos", level, params, phases=["preAbility"])
+        self.orbs = 1
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.name == "Syndra":
+            for orb in range(self.orbs):
+                champion.multiTargetSpell(
+                    champion.opponents,
+                    champion.items,
+                    time,
+                    1,
+                    champion.chaosAbilityScaling,
+                    "magical",
+                )
+            self.orbs += 1
         return 0
 
 
@@ -233,7 +255,7 @@ class Precision(Buff):
         self.set_aspd = 0.7
         # self.as_conversion = 0.8
         self.atk_multiplier = 1.3
-        self.extra_mana = 10
+        self.extra_mana = 5
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -245,7 +267,7 @@ class Precision(Buff):
                 champion.bonus_ad.add,
                 champion.aspd,
             )
-            champion.manaPerAttack.addStat(10)
+            champion.manaPerAttack.addStat(self.extra_mana)
         elif phase == "preAttack":
             # doublecheck to ensure it doesn't activate during cast
             if input_.regularAuto:
@@ -299,10 +321,10 @@ class Efficient(Buff):
 
     def __init__(self, level, params):
         super().__init__("Efficient", level, params, phases=["preCombat"])
-        self.scaling = 20
+        self.scaling = 15
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.fullMana.addStat(-20)
+        champion.fullMana.addStat(-1 * self.scaling)
         return 0
 
 
@@ -361,12 +383,13 @@ class SuperGenius(Buff):
     def __init__(self, level, params):
         super().__init__("Super Genius", level, params, phases=["onUpdate"])
         # self.scaling = 1
-        self.next_bonus = 1.5
-        self.bonus_interval = 1.5
+        self.next_bonus = 2
+        self.bonus_interval = 2
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.next_bonus:
             self.next_bonus += self.bonus_interval
+            # adaptive does not multiply it
             champion.ap.addStat(champion.manaRegen.stat)
         return 0
 
