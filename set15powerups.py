@@ -9,7 +9,7 @@ class AttackExpert(Buff):
     def __init__(self, level, params):
         super().__init__("Attack Expert", level, params, phases=["preCombat"])
         self.base_scaling = 5
-        self.scaling = 0.3
+        self.scaling = 0.35
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.bonus_ad.addStat(self.base_scaling)
@@ -118,7 +118,7 @@ class MagicExpert(Buff):
     def __init__(self, level, params):
         super().__init__("Magic Expert", level, params, phases=["preCombat"])
         self.base_scaling = 10
-        self.scaling = 0.3
+        self.scaling = 0.35
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.ap.addStat(self.base_scaling)
@@ -155,7 +155,7 @@ class Bludgeoner(Buff):
 
     def __init__(self, level, params):
         super().__init__("Bludgeoner", level, params, phases=["preCombat"])
-        self.scaling = 0.4
+        self.scaling = 0.45
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.armorPierce.addStat(self.scaling)
@@ -214,6 +214,31 @@ class BulletHell(Buff):
         return 0
 
 
+class IceBender(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Ice Bender", level, params, phases=["preCombat", "preAbility"])
+        self.scaling = .25
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.name == "Ryze":
+            if phase == "preCombat":
+                # make sure he can't do shit
+                champion.nextAttackTime = 3
+                champion.attackWindupLockout = 3
+            elif phase == "preAbility":
+                champion.multiTargetSpell(
+                    champion.opponents,
+                    champion.items,
+                    time,
+                    champion.num_targets,
+                    lambda x, y, z: self.scaling * champion.abilityScaling(x, y, z),
+                    "magical",
+                )
+        return 0
+
+
 class StarStudent(Buff):
     levels = [1]
 
@@ -234,7 +259,7 @@ class Mage(Buff):
 
     def __init__(self, level, params):
         super().__init__("Mage", level, params, phases=["preCombat", "postAbility"])
-        self.dmgMultiplierScaling = -0.25
+        self.dmgMultiplierScaling = -0.2
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -283,7 +308,7 @@ class KeenEye(Buff):
 
     def __init__(self, level, params):
         super().__init__("Keen Eye", level, params, phases=["preCombat"])
-        self.scaling = 0.4
+        self.scaling = 0.45
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.mrPierce.addStat(self.scaling)
@@ -333,7 +358,7 @@ class BestestBoy(Buff):
 
     def __init__(self, level, params):
         super().__init__("BestestBoy", level, params, phases=["onUpdate"])
-        self.scaling = 12
+        self.scaling = 14
         self.bonus_interval = 4
         self.next_bonus = 1
 
@@ -472,7 +497,7 @@ class Desperado(Buff):
     def __init__(self, level, params):
         super().__init__("Desperado", level, params, phases=["postAttack"])
         self.attack_threshold = 12
-        self.scaling = 1.2
+        self.scaling = 1.4
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.numAttacks % 12 == 0:
@@ -491,7 +516,7 @@ class Surge66(Buff):
 
     def __init__(self, level, params):
         super().__init__("Surge66", level, params, phases=["preCombat", "postAttack"])
-        self.aspd_scaling = 15
+        self.aspd_scaling = 20
         self.ap_scaling = 10
 
     def performAbility(self, phase, time, champion, input_=0):

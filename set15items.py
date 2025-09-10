@@ -157,7 +157,7 @@ class Archangels(Item):
         super().__init__(
             "Archangels",
             manaRegen=1,
-            ap=20,
+            ap=30,
             has_radiant=True,
             phases=["onUpdate"],
         )
@@ -165,7 +165,7 @@ class Archangels(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.nextAP:
-            champion.ap.addStat(30)
+            champion.ap.addStat(20)
             self.nextAP += 5
         return 0
 
@@ -365,30 +365,22 @@ class Nashors(Item):
             "Nashor's Tooth",
             aspd=10,
             hp=150,
-            ap=25,
-            manaRegen=2,
+            ap=15,
+            manaRegen=0,
+            crit=20,
             has_radiant=True,
-            phases=["postAbility", "onUpdate"],
+            phases=["preCombat", "onCrit"],
         )
-        self.active = False
-        self.wearoffTime = 9999
-        self.base_duration = 5
-        self.aspdBoost = 30
-        # we just dont treat it as a sttus
+        self.manaBonus = 2
+        self.manaCritBonus = 2
 
     def performAbility(self, phase, time, champion, input_=0):
-        duration = champion.castTime + self.base_duration  # add cast time
-        if phase == "postAbility":
-            if not self.active:
-                # if not active, give the AS bonus
-                champion.aspd.addStat(self.aspdBoost)
-            self.active = True
-            self.wearoffTime = time + duration
-        elif phase == "onUpdate":
-            if time > self.wearoffTime and self.active:
-                # wearing off
-                self.active = False
-                champion.aspd.addStat(self.aspdBoost * -1)
+        if phase == "preCombat":
+            champion.manaPerAttack.addStat(self.manaBonus)
+        elif phase == "onCrit" and not input_:
+            # input is: is spell or not spell
+            # definitely want to watch for this, as it might be rly bad
+            champion.addMana(self.manaCritBonus, time)
         return 0
 
 
@@ -414,13 +406,20 @@ class KrakensFury(Item):
         super().__init__(
             "Kraken's Fury",
             aspd=10,
-            ad=20,
+            ad=10,
             has_radiant=True,
             phases="preAttack",
         )
+        self.stacks = 0
+        self.maxStacks = 20
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.bonus_ad.addStat(3)
+        if self.stacks < self.maxStacks:
+            self.stacks += 1
+            champion.bonus_ad.addStat(3)
+        elif self.stacks == self.maxStacks:
+            champion.aspd.addStat(40)
+            self.stacks += 1
         return 0
 
 
@@ -440,16 +439,14 @@ class SteraksGage(Item):
 
 class QSS(Item):
     def __init__(self):
-        super().__init__("Quicksilver", aspd=30, crit=20, mr=20, phases="onUpdate")
-        self.nextAS = 2
+        super().__init__("Quicksilver", aspd=10, crit=20, mr=20, phases="onUpdate")
+        self.nextAS = 1
         self.asGain = 3
-        self.procs_left = 9
 
     def performAbility(self, phase, time, champion, input_=0):
-        if time >= self.nextAS and self.procs_left > 0:
+        if time >= self.nextAS:
             champion.aspd.addStat(self.asGain)
-            self.nextAS += 2
-            self.procs_left -= 1
+            self.nextAS += 1
         return 0
 
 
@@ -472,7 +469,7 @@ class JeweledGauntlet(Item):
 
 class Red(Item):
     def __init__(self):
-        super().__init__("Red (no burn yet)", aspd=35, dmgMultiplier=0.06, phases=None)
+        super().__init__("Red (no burn yet)", aspd=45, dmgMultiplier=0.06, phases=None)
 
 
 class Morellos(Item):
@@ -527,7 +524,7 @@ class GS(Item):
 
     def performAbility(self, phase, time, champion, input_):
         # input_ is target
-        champion.dmgMultiplier.add += 0.1
+        champion.dmgMultiplier.add += 0.15
         if len(champion.opponents) > 0:
             vsGiants = champion.opponents[0].role == Role.TANK
             if vsGiants:
@@ -561,12 +558,17 @@ class Blue(Item):
     def __init__(self):
         super().__init__(
             "Blue Buff",
-            manaRegen=6,
+            manaRegen=5,
             ap=15,
             ad=15,
             has_radiant=True,
-            phases=None,
+            phases="preCombat",
         )
+
+    def performAbility(self, phase, time, champion, input_):
+        champion.ap.mult += .1
+        champion.bonus_ad.mult += .1
+        return 0
 
 
 ### ARTIFACTS
@@ -576,11 +578,12 @@ class InfinityForce(Item):
     def __init__(self):
         super().__init__(
             "Infinity Force",
-            ad=25,
-            ap=25,
-            aspd=25,
-            hp=250,
-            mana=25,
+            ad=30,
+            ap=30,
+            aspd=30,
+            hp=300,
+            armor=30,
+            mr=30,
             item_type="Artifact",
             phases=None,
         )
@@ -588,7 +591,7 @@ class InfinityForce(Item):
 
 class Fishbones(Item):
     def __init__(self):
-        super().__init__("Fishbones", aspd=50, ad=20, phases=None)
+        super().__init__("Fishbones", aspd=30, ad=20, phases=None)
 
     def performAbility(self, phase, time, champion, input_):
         return 0
@@ -596,7 +599,7 @@ class Fishbones(Item):
 
 class RFC(Item):
     def __init__(self):
-        super().__init__("Rapid Firecannon", aspd=66, phases=None)
+        super().__init__("Rapid Firecannon", aspd=75, phases=None)
 
     def performAbility(self, phase, time, champion, input_):
         return 0
@@ -631,7 +634,7 @@ class LichBane(Item):
         super().__init__(
             "Lich Bane", ap=30, aspd=30, phases=["preAbility", "preAttack"]
         )
-        self.dmg = {2: 240, 3: 320, 4: 400, 5: 480, 6: 540}
+        self.dmg = {2: 240, 3: 320, 4: 450, 5: 525, 6: 600}
         self.enhancedAuto = False
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -695,8 +698,8 @@ class Flickerblade(Item):
         if champion.aspd.stat <= 5:
             champion.aspd.addStat(6)
         if self.counter == 5:
-            champion.bonus_ad.addStat(4)
-            champion.ap.addStat(5)
+            champion.bonus_ad.addStat(3)
+            champion.ap.addStat(4)
             self.counter = 0
         return 0
 
@@ -798,23 +801,28 @@ class RadiantShiv(Item):
 class RadiantBlue(Item):
     def __init__(self):
         super().__init__(
-            "Radiant Blue",
+            "Radiant Blue Buff",
             manaRegen=10,
-            ap=45,
-            ad=45,
+            ap=30,
+            ad=30,
             has_radiant=True,
-            phases=None,
+            phases="preCombat",
         )
+
+    def performAbility(self, phase, time, champion, input_):
+        champion.ap.mult += .2
+        champion.bonus_ad.mult += .2
+        return 0
 
 
 class RadiantArchangels(Item):
     def __init__(self):
-        super().__init__("Radiant Archangels", manaRegen=2, ap=60, phases=["onUpdate"])
+        super().__init__("Radiant Archangels", manaRegen=2, ap=55, phases=["onUpdate"])
         self.nextAP = 4
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.nextAP:
-            champion.ap.add += 40
+            champion.ap.add += 35
             self.nextAP += 4
         return 0
 
@@ -840,13 +848,19 @@ class RadiantKrakensFury(Item):
         super().__init__(
             "Radiant Kraken's Fury",
             aspd=25,
-            ad=30,
-            has_radiant=True,
+            ad=20,
             phases="preAttack",
         )
+        self.stacks = 0
+        self.maxStacks = 20
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.bonus_ad.addStat(6)
+        if self.stacks < self.maxStacks:
+            self.stacks += 1
+            champion.bonus_ad.addStat(6)
+        elif self.stacks == self.maxStacks:
+            champion.aspd.addStat(80)
+            self.stacks += 1
         return 0
 
 
@@ -884,7 +898,7 @@ class RadiantGS(Item):
 
     def performAbility(self, phase, time, champion, input_):
         # input_ is target
-        champion.dmgMultiplier.add += 0.2
+        champion.dmgMultiplier.add += 0.25
         if len(champion.opponents) > 0:
             vsGiants = champion.opponents[0].hp.stat >= 1750
             if vsGiants:
@@ -908,36 +922,16 @@ class RadiantJeweledGauntlet(Item):
         return 0
 
 
-class RadiantNashors(Item):
+class RadiantNashors(Nashors):
     def __init__(self):
-        super().__init__(
-            "Radiant Nashor's",
-            manaRegen=3,
-            aspd=20,
-            ap=30,
-            hp=200,
-            phases=["postAbility", "onUpdate"],
-        )
-        self.active = False
-        self.wearoffTime = 9999
-        self.duration = 8
-        self.aspdBoost = 75
-        # we just dont treat it as a sttus
-
-    def performAbility(self, phase, time, champion, input_=0):
-        self.duration = champion.castTime + self.duration  # add cast time
-        if phase == "postAbility":
-            if not self.active:
-                # if not active, give the AS bonus
-                champion.aspd.addStat(self.aspdBoost)
-            self.active = True
-            self.wearoffTime = time + self.duration
-        elif phase == "onUpdate":
-            if time > self.wearoffTime and self.active:
-                # wearing off
-                self.active = False
-                champion.aspd.addStat(self.aspdBoost * -1)
-        return 0
+        super().__init__()
+        self.name = "Radiant Nashor's Tooth"
+        self.hp = 200
+        self.ap = 30
+        self.aspd = 20
+        self.crit = 35
+        self.manaBonus = 4
+        self.manaCritBonus = 4
 
 
 class RadiantShojin(Item):
@@ -996,26 +990,23 @@ class RadiantDeathblade(Item):
 
 class RadiantQSS(Item):
     def __init__(self):
-        super().__init__("Radiant Quicksilver", aspd=50, crit=20, phases="onUpdate")
-        self.nextAS = 2
-        self.asGain = 7
-        self.procs_left = 9
+        super().__init__("Radiant Quicksilver", aspd=25, crit=40, mr=30, phases="onUpdate")
+        self.nextAS = 1
+        self.asGain = 6
 
     def performAbility(self, phase, time, champion, input_=0):
-        if time >= self.nextAS and self.procs_left > 0:
+        if time >= self.nextAS:
             champion.aspd.addStat(self.asGain)
-            self.nextAS += 2
-            self.procs_left -= 1
+            self.nextAS += 1
         return 0
 
 
 class RadiantRed(Item):
     def __init__(self):
-        super().__init__("Radiant Red (no burn yet)", aspd=60, phases=["preCombat"])
+        super().__init__("Radiant Red (no burn yet)", aspd=65, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += 0.1
-        # champion.critDmg.add += 0.1
         return 0
 
 

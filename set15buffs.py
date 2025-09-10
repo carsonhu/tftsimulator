@@ -213,7 +213,7 @@ class Prodigy(Buff):
     def __init__(self, level, params):
         super().__init__("Prodigy " + str(level), level, params, phases=["preCombat"])
         self.scaling = {0: 0, 2: 3, 3: 4, 4: 6, 5: 7}
-        self.non_prodigy_scaling = {0: 0, 2: 1, 3: 1, 4: 2, 5: 3}
+        self.non_prodigy_scaling = {0: 0, 2: 1, 3: 1, 4: 1, 5: 1}
         self.is_prodigy = 0
         self.extraBuff(params)
 
@@ -605,8 +605,8 @@ class KayleUlt(Buff):
     def __init__(self, level=1, params=0):
         super().__init__("Unleash the Demon", level, params, phases=["preAttack"])
         self.buff_duration = 3
-        self.finalAscentAP = 5
-        self.finalAscent10Scaling = 0.55
+        self.finalAscentAP = 6
+        self.finalAscent10Scaling = 0.6
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.multiTargetSpell(

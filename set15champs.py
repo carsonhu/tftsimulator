@@ -217,8 +217,8 @@ class KennenHERO(Champion):
     def __init__(self, level):
         hp = 700
         atk = 45
-        curMana = 30
-        fullMana = 80
+        curMana = 20
+        fullMana = 60
         aspd = 0.7
         armor = 40
         mr = 40
@@ -302,9 +302,9 @@ class Lucian(Champion):
 class Sivir(Champion):
     def __init__(self, level):
         hp = 450
-        atk = 45
+        atk = 50
         curMana = 0
-        fullMana = 60
+        fullMana = 50
         aspd = 0.7
         armor = 20
         mr = 20
@@ -522,7 +522,7 @@ class Katarina(Champion):
         atk = 35
         curMana = 0
         fullMana = 30
-        aspd = 0.8
+        aspd = 0.75
         armor = 55
         mr = 55
         super().__init__(
@@ -535,7 +535,7 @@ class Katarina(Champion):
             armor,
             mr,
             level,
-            Role.ASSASSIN,
+            Role.FIGHTER,
         )
         self.default_traits = ["BattleAcademia", "Executioner"]
         self.potential = 0
@@ -595,7 +595,7 @@ class KaiSa(Champion):
         self.notes = "Click 'more options' button to set bonus AD"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [38, 57, 90]
+        adScale = [36, 54, 84]
         apScale = [6, 8, 14]
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * self.projectiles
 
@@ -610,8 +610,8 @@ class ShenHERO(Champion):
         hp = 800
         atk = 60
         curMana = 0
-        fullMana = 60
-        aspd = 0.7
+        fullMana = 50
+        aspd = 0.75
         armor = 55
         mr = 55
         super().__init__(
@@ -741,7 +741,7 @@ class Malzahar(Champion):
         hp = 800
         atk = 40
         curMana = 0
-        fullMana = 35
+        fullMana = 30
         aspd = 0.7
         armor = 30
         mr = 30
@@ -807,7 +807,7 @@ class Senna(Champion):
         self.notes = "No mana refund"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [385, 580, 960]
+        adScale = [360, 540, 875]
         apScale = [40, 60, 95]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -857,7 +857,7 @@ class Smolder(Champion):
         self.notes = "Smolder passive burn not included"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [215, 325, 515]
+        adScale = [225, 340, 540]
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -966,7 +966,7 @@ class Ziggs(Champion):
         return apScale[level - 1] * AP
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [200, 400, 465]
+        apScale = [230, 345, 550]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -1086,7 +1086,7 @@ class Ryze(Champion):
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [770, 1155, 6000]
+        apScale = [770, 1155, 6000] if not self.upgraded else [800, 1200, 6000]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def secondaryAbilityScaling(self, level, AD, AP):
@@ -1096,7 +1096,7 @@ class Ryze(Champion):
 
     def waveScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [50, 75, 250]
+        apScale = [45, 65, 450]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
@@ -1151,7 +1151,7 @@ class Samira(Champion):
         self.notes = "Edgelord is coded to give fixed 20% AS."
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [80, 120, 650]
+        adScale = [105, 160, 650]
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -1211,14 +1211,14 @@ class Yuumi(Champion):
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [25, 38, 135]
+        apScale = [24, 36, 150]
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * math.ceil(
             self.projectiles * self.projectile_multiplier
         )
 
     def extraAbilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [26, 39, 150]
+        apScale = [24, 36, 150]
         potentialScaling = 0.32
         return (
             (apScale[level - 1] * AP + adScale[level - 1] * AD)
@@ -1270,11 +1270,11 @@ class TwistedFate(Champion):
         return apScale[level - 1] * AP
 
     def abilityScalingPhysical(self, level, AD, AP):
-        adScale = [120, 180, 1500]
+        adScale = [200, 300, 9999]
         return adScale[level - 1] * AD
 
     def abilityScalingMagical(self, level, AD, AP):
-        apScale = [26, 40, 500]
+        apScale = [15, 25, 500]
         return apScale[level - 1] * AP * round(self.marks * self.percent_popped_marks)
 
     def performAbility(self, opponents, items, time):
