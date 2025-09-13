@@ -14,7 +14,6 @@
     "Rogue",
     "HerosArc",
     "100PushUps",
-    "BloodFury",
     "BuiltDifferent",
     "Corrupted",
     "FusionDance",
@@ -72,7 +71,6 @@
     "Health",
     "KaijuSize",
     "MetabolicExplosion",
-    "Over9000",
     "PureHeart",
     "Resistant",
     "RoundTwo",
@@ -81,8 +79,8 @@
     "SpikyShell",
     "StarSailor",
     "Unstoppable",
-    "Classy",
     "LivingWall",
+    "StarryKnight",
     "Atomic",
     "Corrosive",
     "InnerFire",
@@ -95,14 +93,12 @@
     "FinalBoss",
     "Finalist",
     "Health",
-    "KillerInstinct",
     "Supremacy",
     "Thrillseeker",
     "Trickster",
     "Unflinching",
     "Bludgeoner",
     "MidasTouch",
-    "Rogue",
     "BloodFury",
     "FusionDance",
     "KaijuSize",
@@ -117,8 +113,6 @@
     "Hemorrhage"
   ],
   "Lucian": [
-    "BloodFury",
-    "BulletHell",
     "CriticalThreat",
     "FairyTail",
     "KillerInstinct",
@@ -130,6 +124,7 @@
     "RobustRanger",
     "KeenEye",
     "MidasTouch",
+    "DriftDuo",
     "Caretaker",
     "ChaosStorm",
     "Classy",
@@ -165,7 +160,6 @@
     "NotDoneYet",
     "OnTheEdge",
     "SpiritSword",
-    "TimeSkip",
     "Weights",
     "Surge66",
     "KeenEye",
@@ -180,7 +174,6 @@
     "FinalBoss",
     "Selfish",
     "StretchyArms",
-    "TinyTerror",
     "Unflinching",
     "MidasTouch",
     "SeriousSlam",
@@ -198,7 +191,6 @@
     "Finalist",
     "Supremacy",
     "DarkAmulet",
-    "Hemorrhage",
     "Corrupted",
     "FusionDance",
     "Unflinching",
@@ -285,7 +277,6 @@
     "StandStrong",
     "Corrosive",
     "InnerFire",
-    "Over9000",
     "PureHeart",
     "RoundTwo",
     "TitanForm",
@@ -307,7 +298,6 @@
     "SuperGenius",
     "MaxCap",
     "Magic",
-    "Classy",
     "MidasTouch",
     "SolarBreath",
     "SkyPiercer",
@@ -329,7 +319,8 @@
     "Precision",
     "MechPilot",
     "SolarBreath",
-    "SkyPiercer"
+    "SkyPiercer",
+    "DriftDuo"
   ],
   "Zyra": [
     "ChaosStorm",
@@ -357,8 +348,6 @@
     "StarSailor",
     "SuperGenius",
     "RampingRage",
-    "ShadowClone",
-    "Classy",
     "MindBattery",
     "KeenEye",
     "MidasTouch",
@@ -375,7 +364,6 @@
     "SeriousSlam",
     "StretchyArms",
     "Thrillseeker",
-    "TimeSkip",
     "TinyTerror",
     "Trickster",
     "MidasTouch",
@@ -407,7 +395,6 @@
     "Atomic",
     "BloodFury",
     "InnerFire",
-    "Over9000",
     "PureHeart",
     "Socialite",
     "SpikyShell",
@@ -420,9 +407,7 @@
     "Health",
     "KaijuSize",
     "MetabolicExplosion",
-    "Over9000",
     "PureHeart",
-    "RareTreat",
     "Resistant",
     "RoundTwo",
     "Selfish",
@@ -430,7 +415,6 @@
     "SpikyShell",
     "Unstoppable",
     "Atomic",
-    "BestestBoy",
     "Corrosive",
     "InnerFire",
     "StandStrong",
@@ -475,14 +459,12 @@
     "Corrosive",
     "Demolitionist",
     "InnerFire",
-    "Over9000",
     "RoundTwo",
     "Socialite",
     "TitanForm",
     "100PushUps"
   ],
   "Kayle": [
-    "BloodFury",
     "CriticalThreat",
     "Doublestrike",
     "FinalAscent",
@@ -515,7 +497,14 @@
     "Singularity",
     "SpikyShell",
     "StandStrong",
-    "TitanForm"
+    "TitanForm",
+    "Atomic",
+    "BloodFury",
+    "Corrosive",
+    "PureHeart",
+    "Socialite",
+    "Unstoppable",
+    "100PushUps"
   ],
   "Xayah": [
     "Attack",
@@ -542,7 +531,8 @@
     "MaxCap",
     "OnTheEdge",
     "SolarBreath",
-    "SkyPiercer"
+    "SkyPiercer",
+    "Veteran"
   ],
   "ShenHERO": [
     "CriticalThreat",
@@ -597,7 +587,8 @@
     "MaxCap",
     "Over9000",
     "SolarBreath",
-    "Supremacy"
+    "Supremacy",
+    "SupremeSurge"
   ],
   "XinZhao": [
     "AdaptiveSkin",
@@ -611,7 +602,6 @@
     "TitanForm",
     "LivingWall",
     "Atomic",
-    "BloodFury",
     "Corrosive",
     "InnerFire",
     "PureHeart",
@@ -630,6 +620,7 @@
     "SoleFighter",
     "KeenEye",
     "MidasTouch",
+    "ShineBrighter",
     "Caretaker",
     "ChaosStorm",
     "Classy",
@@ -665,7 +656,6 @@
     "Classy",
     "FinalBoss",
     "FusionDance",
-    "SeriousSlam",
     "StretchyArms",
     "Thrillseeker",
     "Unflinching",
@@ -804,6 +794,7 @@
     "Bludgeoner",
     "Hemorrhage",
     "MidasTouch",
+    "Efficient",
     "BuiltDifferent",
     "ChaosStorm",
     "CycloneRush",
@@ -814,7 +805,8 @@
     "PowerFont",
     "Precision",
     "SolarBreath",
-    "SkyPiercer"
+    "SkyPiercer",
+    "Veteran"
   ],
   "Poppy": [
     "AdaptiveSkin",
@@ -845,14 +837,12 @@
     "Over9000",
     "PowerFont",
     "RampingRage",
-    "RareTreat",
     "Speed",
     "GatherForce",
     "Bludgeoner",
     "Desperado",
     "MidasTouch",
     "GoldenEdge",
-    "CycloneRush",
     "Demolitionist",
     "MaxCap",
     "Precision",
@@ -870,9 +860,10 @@
     "PowerFont",
     "StarStudent",
     "SuperGenius",
-    "Classy",
     "KeenEye",
-    "MidasTouch"
+    "MidasTouch",
+    "SolarBreath",
+    "SkyPiercer"
   ],
   "Rakan": [
     "AdaptiveSkin",
@@ -888,8 +879,8 @@
     "SpikyShell",
     "StarStudent",
     "Unstoppable",
-    "Atomic",
     "Lovers",
+    "Atomic",
     "StandStrong",
     "TitanForm",
     "Corrosive",
@@ -971,7 +962,6 @@
     "StarStudent",
     "Classy",
     "LivingWall",
-    "Classy",
     "Corrosive",
     "InnerFire",
     "RoundTwo",
@@ -980,7 +970,6 @@
     "SpikyShell"
   ],
   "Lulu": [
-    "Template",
     "Template"
   ],
   "KogMaw": [
@@ -990,7 +979,6 @@
     "FairyTail",
     "Magic",
     "MagicExpert",
-    "RareTreat",
     "Speed",
     "SpiritSword",
     "Surge66",
@@ -998,7 +986,6 @@
     "MidasTouch",
     "Caretaker",
     "ChaosStorm",
-    "CycloneRush",
     "EssenceShare",
     "MaxCap",
     "Over9000",
@@ -1054,9 +1041,7 @@
   "Samira": [
     "AttackExpert",
     "EssenceShare",
-    "FairyTail",
     "Finalist",
-    "KillerInstinct",
     "ShadowClone",
     "CriticalThreat",
     "ChaosStorm",
@@ -1086,6 +1071,7 @@
     "Selfish",
     "Singularity",
     "StandStrong",
+    "GoldenGloves",
     "BestDefense",
     "Corrosive",
     "InnerFire",
@@ -1163,7 +1149,6 @@
     "SpiritSword",
     "Bludgeoner",
     "Hyperactive",
-    "Desperado",
     "MidasTouch",
     "GoldenEdge",
     "BuiltDifferent",
@@ -1249,7 +1234,12 @@
     "DoomBarrage",
     "Bludgeoner",
     "Hyperactive",
-    "MidasTouch"
+    "MidasTouch",
+    "BuiltDifferent",
+    "Precision",
+    "SolarBreath",
+    "Demolitionist",
+    "SkyPiercer"
   ],
   "Gwen": [
     "ChaosStorm",
@@ -1257,13 +1247,11 @@
     "Finalist",
     "MagicExpert",
     "Needlework",
-    "Selfish",
     "TinyTerror",
     "TitanForm",
     "Unflinching",
     "DarkAmulet",
     "KeenEye",
-    "Hemorrhage",
     "MidasTouch",
     "BuiltDifferent",
     "Corrupted",
@@ -1273,7 +1261,6 @@
     "Rogue"
   ],
   "Katarina": [
-    "BloodFury",
     "FairyTail",
     "FinalBoss",
     "Finalist",
@@ -1300,7 +1287,8 @@
     "Weights",
     "100PushUps",
     "KeenEye",
-    "CrimsonVeil"
+    "CrimsonVeil",
+    "Veteran"
   ],
   "Ryze": [
     "ChaosStorm",
@@ -1309,7 +1297,6 @@
     "Efficient",
     "KillerInstinct",
     "MagicExpert",
-    "ShadowClone",
     "SoulChipper",
     "Annihilation",
     "IceBender",
@@ -1325,7 +1312,6 @@
     "BodyChange",
     "Health",
     "MetabolicExplosion",
-    "Over9000",
     "PureHeart",
     "Resistant",
     "RoundTwo",
@@ -1356,6 +1342,7 @@
     "TitanForm",
     "Health",
     "Singularity",
+    "Mechablade",
     "Atomic",
     "MechPilot",
     "SpikyShell",
@@ -1376,7 +1363,6 @@
     "RampingRage",
     "Speed",
     "Bludgeoner",
-    "Hemorrhage",
     "Hemorrhage",
     "MidasTouch",
     "AttackExpert",
@@ -1428,8 +1414,7 @@
     "Weights",
     "100PushUps",
     "Bludgeoner",
-    "CrimsonVeil",
-    "Rogue"
+    "CrimsonVeil"
   ],
   "DrMundoHERO": [
     "Attack",
@@ -1527,7 +1512,8 @@
     "SpikyShell",
     "Supremacy",
     "TitanForm",
-    "Unstoppable"
+    "Unstoppable",
+    "SupremeSurge"
   ],
   "Ashe": [
     "AttackExpert",

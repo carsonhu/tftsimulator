@@ -10,4 +10,4 @@ if response.status_code == 200:
         f.write(response.content)
     print(f"Downloaded to {output_path}")
 else:
-    print(f"Failed to download. Status code: {response.status_code}")
+    print(f"Failed to download. Status code: {response.status_code}")   

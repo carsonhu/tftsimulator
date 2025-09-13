@@ -59,7 +59,9 @@ def getChamps(output_file):
                             .removeprefix("TFT15_MechanicTrait_")
                         )
                         powerup_name = aliases.get(powerup_name, powerup_name)
-                        champ_powerups[champ_name].append(powerup_name)
+                        # expensive, but it's a cheap operation overall
+                        if powerup_name not in champ_powerups[champ_name]:
+                            champ_powerups[champ_name].append(powerup_name)
 
     # Suppose `data` is a Python dict or list you got from json.load / json.loads
     pretty = json.dumps(

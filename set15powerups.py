@@ -126,6 +126,19 @@ class MagicExpert(Buff):
         return 0
 
 
+class DriftDuo(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Drift Duo", level, params, phases=["preCombat"])
+        self.scaling = 3
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.manaRegen.addStat(self.scaling)
+        return 0
+
+
+
 class OnTheEdge(Buff):
     levels = [1]
 
@@ -445,7 +458,7 @@ class GatherForce(Buff):
 
     def __init__(self, level, params):
         super().__init__("Gather Force", level, params, phases=["preAbility"])
-        self.scaling = 0.4
+        self.scaling = 0.45
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.bonus_ad.addStat(self.scaling * champion.fullMana.stat)

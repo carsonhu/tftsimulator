@@ -369,10 +369,11 @@ class Nashors(Item):
             manaRegen=0,
             crit=20,
             has_radiant=True,
-            phases=["preCombat", "onCrit"],
+            phases=["preCombat", "onCrit", "postAttack"],
         )
         self.manaBonus = 2
         self.manaCritBonus = 2
+        self.isActive = False
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -380,7 +381,11 @@ class Nashors(Item):
         elif phase == "onCrit" and not input_:
             # input is: is spell or not spell
             # definitely want to watch for this, as it might be rly bad
-            champion.addMana(self.manaCritBonus, time)
+            self.isActive = True
+            champion.manaPerAttack.addStat(self.manaCritBonus)
+        elif phase == "postAttack" and self.isActive:
+            champion.manaPerAttack.addStat(-1 * self.manaCritBonus)
+            self.isActive = False
         return 0
 
 
@@ -564,10 +569,11 @@ class Blue(Item):
             has_radiant=True,
             phases="preCombat",
         )
+        self.multScaling = .1
 
     def performAbility(self, phase, time, champion, input_):
-        champion.ap.mult += .1
-        champion.bonus_ad.mult += .1
+        champion.ap.addMultiplier += self.multScaling
+        champion.bonus_ad.addMultiplier += self.multScaling
         return 0
 
 
@@ -805,13 +811,13 @@ class RadiantBlue(Item):
             manaRegen=10,
             ap=30,
             ad=30,
-            has_radiant=True,
             phases="preCombat",
         )
+        self.multScaling = .2
 
     def performAbility(self, phase, time, champion, input_):
-        champion.ap.mult += .2
-        champion.bonus_ad.mult += .2
+        champion.ap.mult += self.multScaling
+        champion.bonus_ad.mult += self.multScaling
         return 0
 
 

@@ -1,29 +1,4 @@
 {
-  "{46c7fdd2}": {
-    "mName": "TFT15_MechanicTrait_BloodFury_Consumable",
-    "constants": {
-      "{df085b93}": {
-        "HealthToFeed": {
-          "mValue": 3.0,
-          "__type": "GameModeConstantFloat"
-        }
-      },
-      "__type": "{d65315ee}"
-    },
-    "ItemTags": [
-      "Consumable"
-    ],
-    "mDisplayNameTra": "TFT15_MechanicTrait_BloodFury_Consumable_Name",
-    "mDescriptionNameTra": "TFT15_MechanicTrait_BloodFury_Consumable_Desc",
-    "mIconPath": "ASSETS/Maps/TFT/Icons/Items/Hexcore/TFT15_Ravenous_LightSnack.TFT_Set15.tex",
-    "mColor": [
-      6,
-      85,
-      20,
-      255
-    ],
-    "__type": "TftItemData"
-  },
   "{010811b8}": {
     "mName": "TFT15_MechanicTrait_SpellslingerSoul_ScriptData",
     "mConstants": {
@@ -248,7 +223,6 @@
           "{39150a30}",
           "{06e2086e}",
           "{e8a7cc3e}",
-          "{02880ab2}",
           "{87f3ffa2}",
           "{dac4e346}",
           "{887328ac}",
@@ -258,7 +232,8 @@
           "{dae5f970}",
           "{2456ec1a}",
           "{2a2f94ea}",
-          "{1a505aca}"
+          "{1a505aca}",
+          "{3efbd1f0}"
         ],
         "__type": "{71ae72e5}"
       },
@@ -286,14 +261,12 @@
           "{965ec772}",
           "{4392e708}",
           "{39150a30}",
-          "{0d89c29a}",
           "{a48c0d7a}",
           "{075ebf38}",
           "{d31e9b52}",
           "{377b4a3e}",
           "{f3bcd5de}",
-          "{963ac64e}",
-          "{1b1293ae}"
+          "{963ac64e}"
         ],
         "__type": "{71ae72e5}"
       },
@@ -323,8 +296,6 @@
     "mConstants": {
       "Primary": {
         "traits": [
-          "{915a6902}",
-          "{fa0d4302}",
           "{4f331712}",
           "{2fcd5f0e}",
           "{0d89c29a}",
@@ -335,7 +306,9 @@
           "{cf4ccf22}",
           "{58280838}",
           "{6f44ecb2}",
-          "{963ac64e}"
+          "{963ac64e}",
+          "{eb7f08b6}",
+          "{eb7f08b6}"
         ],
         "__type": "{71ae72e5}"
       },
@@ -391,7 +364,6 @@
           "{73980172}",
           "{8504d1f2}",
           "{b0bdef92}",
-          "{2e9d9acc}",
           "{997a8c72}",
           "{21919ed2}",
           "{6f44ecb2}",
@@ -448,8 +420,7 @@
           "{d31e9b52}",
           "{4392e708}",
           "{a48c0d7a}",
-          "{70037574}",
-          "{7fcccb0c}"
+          "{70037574}"
         ],
         "__type": "{71ae72e5}"
       },
@@ -601,7 +572,6 @@
         "traits": [
           "{4dbd572a}",
           "{d9c96592}",
-          "{02880ab2}",
           "{87f3ffa2}",
           "{887328ac}",
           "{61aa8c36}",
@@ -675,7 +645,9 @@
           "{11affe5e}",
           "{388c7682}",
           "{e4ea185a}",
-          "{7d8c6e8e}"
+          "{7d8c6e8e}",
+          "{eb7f08b6}",
+          "{eb7f08b6}"
         ],
         "__type": "{71ae72e5}"
       }
@@ -728,7 +700,6 @@
           "{dae5f970}",
           "{d1f3d382}",
           "{089dd172}",
-          "{ff0be91a}",
           "{2a2f94ea}",
           "{ab21215a}",
           "{6f44ecb2}",
@@ -761,7 +732,6 @@
           "{b30d5af2}",
           "{8e5cfe42}",
           "{075ebf38}",
-          "{2e9d9acc}",
           "{99cd7550}",
           "{d31e9b52}",
           "{963ac64e}",
@@ -813,7 +783,6 @@
           "{23a7189a}",
           "{915a6902}",
           "{d9c96592}",
-          "{02880ab2}",
           "{87f3ffa2}",
           "{af9c3db2}",
           "{67ee8e78}",
@@ -836,9 +805,7 @@
           "{39150a30}",
           "{06e2086e}",
           "{e8a7cc3e}",
-          "{02880ab2}",
           "{87f3ffa2}",
-          "{af56e4d2}",
           "{dac4e346}",
           "{887328ac}",
           "{c87c28a2}",
@@ -926,7 +893,6 @@
           "{4dbd572a}",
           "{03c2f512}",
           "{d9c96592}",
-          "{02880ab2}",
           "{887328ac}",
           "{af9c3db2}",
           "{61aa8c36}",
@@ -943,7 +909,6 @@
     "mConstants": {
       "Primary": {
         "traits": [
-          "{915a6902}",
           "{4f331712}",
           "{a942d9ea}",
           "{7794e8ca}",
@@ -995,18 +960,15 @@
         ],
         "__type": "{71ae72e5}"
       },
-      "Second": {
+      "Secondary": {
         "traits": [
           "{23a7189a}",
           "{915a6902}",
           "{4dbd572a}",
-          "{a942d9ea}",
-          "{02880ab2}",
           "{87f3ffa2}",
           "{af9c3db2}",
           "{2456ec1a}",
-          "{260be062}",
-          "{a0c3c63c}"
+          "{260be062}"
         ],
         "__type": "{71ae72e5}"
       }
@@ -1048,7 +1010,8 @@
           "{3cf33ec4}",
           "{8504d1f2}",
           "{e4ea185a}",
-          "{7d8c6e8e}"
+          "{7d8c6e8e}",
+          "{bf02d462}"
         ],
         "__type": "{71ae72e5}"
       }
@@ -1148,7 +1111,8 @@
           "{3cf33ec4}",
           "{02880ab2}",
           "{e4ea185a}",
-          "{a48c0d7a}"
+          "{a48c0d7a}",
+          "{aed199aa}"
         ],
         "__type": "{71ae72e5}"
       }
@@ -1177,7 +1141,6 @@
       "Secondary": {
         "traits": [
           "{23a7189a}",
-          "{915a6902}",
           "{4dbd572a}",
           "{d9c96592}",
           "{87f3ffa2}",
@@ -1205,7 +1168,8 @@
           "{941de572}",
           "{9345e4a6}",
           "{6f44ecb2}",
-          "{963ac64e}"
+          "{963ac64e}",
+          "{366a3e56}"
         ],
         "__type": "{71ae72e5}"
       },
@@ -1271,7 +1235,6 @@
           "{2a2f94ea}",
           "{965ec772}",
           "{591747ae}",
-          "{b30d5af2}",
           "{8e5cfe42}",
           "{075ebf38}",
           "{377b4a3e}",
@@ -1499,7 +1462,8 @@
           "{c71b5a92}",
           "{f3bcd5de}",
           "{7fcccb0c}",
-          "{963ac64e}"
+          "{963ac64e}",
+          "{c5d1e73e}"
         ],
         "__type": "{71ae72e5}"
       },
@@ -1515,7 +1479,8 @@
           "{941de572}",
           "{11affe5e}",
           "{e4ea185a}",
-          "{7d8c6e8e}"
+          "{7d8c6e8e}",
+          "{bf02d462}"
         ],
         "__type": "{71ae72e5}"
       }
@@ -1571,7 +1536,6 @@
           "{02880ab2}",
           "{941de572}",
           "{089dd172}",
-          "{af56e4d2}",
           "{ab8e06b2}",
           "{c71b5a92}",
           "{f3bcd5de}",
@@ -1583,7 +1547,6 @@
       },
       "Secondary": {
         "traits": [
-          "{056b9e86}",
           "{03c2f512}",
           "{3cf33ec4}",
           "{11affe5e}",
@@ -1617,7 +1580,7 @@
         ],
         "__type": "{71ae72e5}"
       },
-      "Second": {
+      "Secondary": {
         "traits": [
           "{e4ea185a}",
           "{7d8c6e8e}"
@@ -1645,14 +1608,14 @@
           "{56f9397e}",
           "{67ee8e78}",
           "{0c824c06}",
-          "{2456ec1a}"
+          "{2456ec1a}",
+          "{2a6b43b2}"
         ],
         "__type": "{71ae72e5}"
       },
       "Secondary": {
         "traits": [
           "{23a7189a}",
-          "{2a6b43b2}",
           "{ff0e96aa}",
           "{61aa8c36}",
           "{4dbd572a}",
@@ -1838,7 +1801,6 @@
           "{2fcd5f0e}",
           "{580e08c6}",
           "{15475a22}",
-          "{af56e4d2}",
           "{ab8e06b2}",
           "{b0bdef92}",
           "{21919ed2}",
@@ -1851,7 +1813,6 @@
         "traits": [
           "{b1cda756}",
           "{b06bf712}",
-          "{056b9e86}",
           "{539fddda}",
           "{3cf33ec4}",
           "{02880ab2}",
@@ -1947,9 +1908,7 @@
         "traits": [
           "{433dff6c}",
           "{539fddda}",
-          "{2fcd5f0e}",
           "{4392e708}",
-          "{0d89c29a}",
           "{ff0be91a}",
           "{4f331712}",
           "{b06bf712}",
@@ -1993,7 +1952,8 @@
           "{dac4e346}",
           "{c87c28a2}",
           "{56f9397e}",
-          "{ff0e96aa}"
+          "{ff0e96aa}",
+          "{12a5898a}"
         ],
         "__type": "{71ae72e5}"
       },
@@ -2132,7 +2092,6 @@
           "{b0bdef92}",
           "{f3bcd5de}",
           "{772b4c7a}",
-          "{26b5c5f2}",
           "{963ac64e}",
           "{a0c3c63c}"
         ],
@@ -2282,7 +2241,7 @@
         ],
         "__type": "{71ae72e5}"
       },
-      "Second": {
+      "Secondary": {
         "traits": [
           "{5fb34836}",
           "{11affe5e}",
@@ -2306,13 +2265,11 @@
           "{4392e708}",
           "{15475a22}",
           "{9aee5f00}",
-          "{c87c28a2}",
           "{99cd7550}",
           "{61aa8c36}",
           "{377b4a3e}",
           "{70037574}",
           "{6f44ecb2}",
-          "{7fcccb0c}",
           "{963ac64e}"
         ],
         "__type": "{71ae72e5}"
@@ -2337,7 +2294,6 @@
     "mConstants": {
       "Primary": {
         "traits": [
-          "{915a6902}",
           "{2fcd5f0e}",
           "{965ec772}",
           "{4392e708}",
@@ -2369,7 +2325,8 @@
           "{997a8c72}",
           "{260be062}",
           "{6f44ecb2}",
-          "{2457e3aa}"
+          "{2457e3aa}",
+          "{bf02d462}"
         ],
         "__type": "{71ae72e5}"
       }
@@ -2388,7 +2345,6 @@
           "{c5d1e73e}",
           "{0d89c29a}",
           "{15475a22}",
-          "{ff0be91a}",
           "{a7598f2a}",
           "{a175e344}",
           "{c71fe85e}",
@@ -2419,7 +2375,6 @@
           "{44618598}",
           "{39150a30}",
           "{e8a7cc3e}",
-          "{02880ab2}",
           "{87f3ffa2}",
           "{dac4e346}",
           "{887328ac}",
@@ -2464,7 +2419,8 @@
           "{ff0e96aa}",
           "{61aa8c36}",
           "{39150a30}",
-          "{56f9397e}"
+          "{56f9397e}",
+          "{5a83fb14}"
         ],
         "__type": "{71ae72e5}"
       },
@@ -2587,8 +2543,7 @@
           "{997a8c72}",
           "{260be062}",
           "{f3bcd5de}",
-          "{2457e3aa}",
-          "{1b1293ae}"
+          "{2457e3aa}"
         ],
         "__type": "{71ae72e5}"
       }
@@ -2761,7 +2716,8 @@
           "{67ee8e78}",
           "{a48c0d7a}",
           "{61aa8c36}",
-          "{2456ec1a}"
+          "{2456ec1a}",
+          "{aed199aa}"
         ],
         "__type": "{71ae72e5}"
       }
@@ -2893,27 +2849,27 @@
         "constants": {
           "{df085b93}": {
             "AD": {
-              "mValue": 0.03999999910593033,
+              "mValue": 0.05000000074505806,
               "__type": "GameModeConstantFloat"
             },
             "AP": {
-              "mValue": 4.0,
+              "mValue": 5.0,
               "__type": "GameModeConstantFloat"
             },
             "AS": {
-              "mValue": 0.03999999910593033,
+              "mValue": 0.05000000074505806,
               "__type": "GameModeConstantFloat"
             },
             "Armor": {
-              "mValue": 4.0,
+              "mValue": 8.0,
               "__type": "GameModeConstantFloat"
             },
             "MR": {
-              "mValue": 4.0,
+              "mValue": 8.0,
               "__type": "GameModeConstantFloat"
             },
             "Health": {
-              "mValue": 40.0,
+              "mValue": 50.0,
               "__type": "GameModeConstantFloat"
             },
             "Mana": {
@@ -3002,7 +2958,6 @@
         "__type": "GameModeConstantBool"
       },
       "IsPVEAllowed": {
-        "mValue": true,
         "__type": "GameModeConstantBool"
       }
     },
@@ -3143,7 +3098,7 @@
         "constants": {
           "{df085b93}": {
             "IncreasedDamage": {
-              "mValue": 0.4000000059604645,
+              "mValue": 0.3499999940395355,
               "__type": "GameModeConstantFloat"
             },
             "NumEnemies": {
@@ -3450,12 +3405,129 @@
               "__type": "GameModeConstantFloat"
             },
             "Durability": {
-              "mValue": 0.20000000298023224,
+              "mValue": 0.11999999731779099,
               "__type": "GameModeConstantFloat"
             },
             "NumWeights": {
               "mValue": 10,
               "__type": "GameModeConstantInteger"
+            }
+          },
+          "__type": "{d65315ee}"
+        },
+        "minUnits": 1,
+        "Style": 1,
+        "__type": "TftConditionalTraitSetData"
+      }
+    ],
+    "{14b4616a}": true,
+    "__type": "TftTraitData"
+  },
+  "{03cd78a4}": {
+    "mName": "TFT15_MechanicTrait_DriftDuo_ScriptData",
+    "mConstants": {
+      "InvalidChampions": {
+        "mValue": [
+          ""
+        ],
+        "__type": "GameModeConstantStringVector"
+      },
+      "Weight": {
+        "mValue": 15,
+        "__type": "GameModeConstantInteger"
+      },
+      "AllowMultiple": {
+        "__type": "GameModeConstantBool"
+      },
+      "InvalidAugments": {
+        "items": [
+          "{3c6eee90}"
+        ],
+        "__type": "{80996016}"
+      },
+      "MaxLevel": {
+        "mValue": 7,
+        "__type": "GameModeConstantInteger"
+      },
+      "MinLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxStage": {
+        "mValue": 3,
+        "__type": "GameModeConstantInteger"
+      },
+      "MinStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "TraitActive": {
+        "__type": "{43e9418e}"
+      },
+      "TraitLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "IsTrait": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "IsDuo": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "IsCommon": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsStacking": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsChampion": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsRole": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsWeird": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsPVEAllowed": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      }
+    },
+    "mRequiredConstantsGroup": "{b874104c}",
+    "__type": "ScriptDataObject"
+  },
+  "{eb7f08b6}": {
+    "mName": "TFT15_MechanicTrait_DriftDuo",
+    "mDisplayNameTra": "TFT15_MechanicTrait_DriftDuo_Name",
+    "mDescriptionNameTra": "TFT15_MechanicTrait_DriftDuo_Desc",
+    "{0247448b}": "TFT15_MechanicTrait_DriftDuo_ShortDesc",
+    "mIconPath": "ASSETS/UX/TraitIcons/Trait_Icon_15_SecretTechnique.TFT_Set15.tex",
+    "TraitType": 3,
+    "mConditionalTraitSets": [
+      {
+        "{86b5abcb}": [
+          {
+            "targetStrategy": 1,
+            "buffName": "TFT15_MechanicTrait_DriftDuo_UnitBuff",
+            "__type": "{76621fa6}"
+          },
+          {
+            "targetStrategy": 4,
+            "buffName": "TFT15_MechanicTrait_DriftDuo_ArmyBuff",
+            "__type": "{76621fa6}"
+          }
+        ],
+        "constants": {
+          "{df085b93}": {
+            "ManaRegen": {
+              "mValue": 3.0,
+              "__type": "GameModeConstantFloat"
             }
           },
           "__type": "{d65315ee}"
@@ -3563,7 +3635,11 @@
         "constants": {
           "{df085b93}": {
             "DamagePercent": {
-              "mValue": 0.25,
+              "mValue": 0.2199999988079071,
+              "__type": "GameModeConstantFloat"
+            },
+            "{fee776bd}": {
+              "mValue": 0.5,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -3674,7 +3750,7 @@
               "__type": "GameModeConstantFloat"
             },
             "Base": {
-              "mValue": 15.0,
+              "mValue": 20.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -3767,13 +3843,14 @@
         "__type": "GameModeConstantInteger"
       },
       "MinLevel": {
-        "mValue": 10,
         "__type": "GameModeConstantInteger"
       },
       "MaxStage": {
+        "mValue": 9,
         "__type": "GameModeConstantInteger"
       },
       "MinStage": {
+        "mValue": 9,
         "__type": "GameModeConstantInteger"
       },
       "TraitActive": {
@@ -3817,6 +3894,117 @@
     },
     "mRequiredConstantsGroup": "{b874104c}",
     "__type": "ScriptDataObject"
+  },
+  "{050e3d04}": {
+    "mName": "TFT15_MechanicTrait_Deadeye_ScriptData",
+    "mConstants": {
+      "InvalidChampions": {
+        "mValue": [
+          ""
+        ],
+        "__type": "GameModeConstantStringVector"
+      },
+      "Weight": {
+        "mValue": 10,
+        "__type": "GameModeConstantInteger"
+      },
+      "InvalidAugments": {
+        "items": [
+          "{3c6eee90}"
+        ],
+        "__type": "{80996016}"
+      },
+      "MaxLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "TraitActive": {
+        "__type": "{43e9418e}"
+      },
+      "TraitLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "IsTrait": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsDuo": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsCommon": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "IsStacking": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsChampion": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsRole": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsWeird": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsPVEAllowed": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      }
+    },
+    "mRequiredConstantsGroup": "{b874104c}",
+    "__type": "ScriptDataObject"
+  },
+  "{cc9fa456}": {
+    "mName": "TFT15_MechanicTrait_Deadeye",
+    "mDisplayNameTra": "TFT15_MechanicTrait_LongShot_Name",
+    "mDescriptionNameTra": "TFT15_MechanicTrait_LongShot_Desc",
+    "{0247448b}": "TFT15_MechanicTrait_LongShot_Desc",
+    "mIconPath": "ASSETS/UX/TraitIcons/Trait_Icon_15_SecretTechnique.TFT_Set15.tex",
+    "TraitType": 3,
+    "mConditionalTraitSets": [
+      {
+        "{86b5abcb}": [
+          {
+            "targetStrategy": 1,
+            "buffName": "TFT15_MechanicTrait_Deadeye_UnitBuff",
+            "__type": "{76621fa6}"
+          }
+        ],
+        "constants": {
+          "{df085b93}": {
+            "{1d279a19}": {
+              "mValue": 0.03500000014901161,
+              "__type": "GameModeConstantFloat"
+            },
+            "{77548ee7}": {
+              "mValue": 0.009999999776482582,
+              "__type": "GameModeConstantFloat"
+            }
+          },
+          "__type": "{d65315ee}"
+        },
+        "minUnits": 1,
+        "maxUnits": 1,
+        "Style": 1,
+        "__type": "TftConditionalTraitSetData"
+      }
+    ],
+    "{14b4616a}": true,
+    "__type": "TftTraitData"
   },
   "{056b9e86}": {
     "mName": "TFT15_MechanicTrait_CycloneRush",
@@ -3976,7 +4164,7 @@
         "constants": {
           "{df085b93}": {
             "percent": {
-              "mValue": 1.0,
+              "mValue": 0.75,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -4539,7 +4727,7 @@
         "constants": {
           "{df085b93}": {
             "Amount": {
-              "mValue": 10.0,
+              "mValue": 12.0,
               "__type": "GameModeConstantFloat"
             },
             "Interval": {
@@ -4547,7 +4735,11 @@
               "__type": "GameModeConstantFloat"
             },
             "PerCombatAmount": {
-              "mValue": 35.0,
+              "mValue": 40.0,
+              "__type": "GameModeConstantFloat"
+            },
+            "{eea8ebbf}": {
+              "mValue": 80.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -4659,15 +4851,23 @@
               "__type": "GameModeConstantInteger"
             },
             "AppropriateRound": {
-              "mValue": 1,
-              "__type": "GameModeConstantInteger"
-            },
-            "{837c081f}": {
               "mValue": 2,
               "__type": "GameModeConstantInteger"
             },
-            "{c39eebe1}": {
+            "AppropriateStagePVE": {
+              "mValue": 2,
+              "__type": "GameModeConstantInteger"
+            },
+            "AppropriateRoundPVE": {
               "mValue": 7,
+              "__type": "GameModeConstantInteger"
+            },
+            "{3566d185}": {
+              "mValue": 3,
+              "__type": "GameModeConstantInteger"
+            },
+            "{ae4fd56b}": {
+              "mValue": 6,
               "__type": "GameModeConstantInteger"
             }
           },
@@ -4886,7 +5086,7 @@
               "__type": "GameModeConstantInteger"
             },
             "DamageAmp": {
-              "mValue": 0.15000000596046448,
+              "mValue": 0.10000000149011612,
               "__type": "GameModeConstantFloat"
             },
             "ICD": {
@@ -5053,7 +5253,7 @@
         "constants": {
           "{df085b93}": {
             "PctAdditionalPotential": {
-              "mValue": 60,
+              "mValue": 40,
               "__type": "GameModeConstantInteger"
             },
             "BaseHealth": {
@@ -5088,14 +5288,14 @@
               "__type": "GameModeConstantFloat"
             },
             "PctAdditionalPotential": {
-              "mValue": 60,
+              "mValue": 40,
               "__type": "GameModeConstantInteger"
             },
             "BaseXP": {
               "mValue": 1,
               "__type": "GameModeConstantInteger"
             },
-            "{fa5c946a}": {
+            "XPPerSurvival": {
               "mValue": 1,
               "__type": "GameModeConstantInteger"
             }
@@ -5401,11 +5601,11 @@
               "__type": "GameModeConstantFloat"
             },
             "AD": {
-              "mValue": 0.11999999731779099,
+              "mValue": 0.14000000059604645,
               "__type": "GameModeConstantFloat"
             },
             "AP": {
-              "mValue": 12.0,
+              "mValue": 14.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -5438,7 +5638,7 @@
         "constants": {
           "{df085b93}": {
             "ManaRegen": {
-              "mValue": 2.0,
+              "mValue": 3.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -5555,7 +5755,7 @@
               "__type": "GameModeConstantFloat"
             },
             "PermanentHealth": {
-              "mValue": 8,
+              "mValue": 10,
               "__type": "GameModeConstantInteger"
             }
           },
@@ -5670,7 +5870,7 @@
               "__type": "GameModeConstantFloat"
             },
             "Damage": {
-              "mValue": 0.09000000357627869,
+              "mValue": 0.10999999940395355,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -5863,15 +6063,15 @@
               "__type": "GameModeConstantFloat"
             },
             "APDamage2": {
-              "mValue": 100.0,
+              "mValue": 130.0,
               "__type": "GameModeConstantFloat"
             },
             "APDamage3": {
-              "mValue": 140.0,
+              "mValue": 190.0,
               "__type": "GameModeConstantFloat"
             },
             "APDamage4": {
-              "mValue": 200.0,
+              "mValue": 275.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -6108,11 +6308,11 @@
         "constants": {
           "{df085b93}": {
             "BonusMana": {
-              "mValue": 2.0,
+              "mValue": 5.0,
               "__type": "GameModeConstantFloat"
             },
             "PercentHealthAsAS": {
-              "mValue": 0.029999999329447746,
+              "mValue": 0.03999999910593033,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -6161,7 +6361,7 @@
               "__type": "GameModeConstantFloat"
             },
             "Mana": {
-              "mValue": 10.0,
+              "mValue": 5.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -6248,6 +6448,116 @@
     "mRequiredConstantsGroup": "{b874104c}",
     "__type": "ScriptDataObject"
   },
+  "{12a5898a}": {
+    "mName": "TFT15_MechanicTrait_GoldenGloves",
+    "mDisplayNameTra": "TFT15_MechanicTrait_GoldenGloves_Name",
+    "mDescriptionNameTra": "TFT15_MechanicTrait_GoldenGloves_Desc",
+    "{0247448b}": "TFT15_MechanicTrait_GoldenGloves_ShortDesc",
+    "mIconPath": "ASSETS/UX/TraitIcons/Trait_Icon_15_SecretTechnique.TFT_Set15.tex",
+    "TraitType": 3,
+    "mConditionalTraitSets": [
+      {
+        "{86b5abcb}": [
+          {
+            "targetStrategy": 1,
+            "buffName": "TFT15_MechanicTrait_GoldenGloves_UnitBuff",
+            "__type": "{76621fa6}"
+          }
+        ],
+        "constants": {
+          "{df085b93}": {
+            "AD": {
+              "mValue": 0.014999999664723873,
+              "__type": "GameModeConstantFloat"
+            }
+          },
+          "__type": "{d65315ee}"
+        },
+        "minUnits": 1,
+        "Style": 1,
+        "__type": "TftConditionalTraitSetData"
+      }
+    ],
+    "{14b4616a}": true,
+    "__type": "TftTraitData"
+  },
+  "{845bfde0}": {
+    "mName": "TFT15_MechanicTrait_GoldenGloves_ScriptData",
+    "mConstants": {
+      "InvalidChampions": {
+        "mValue": [
+          ""
+        ],
+        "__type": "GameModeConstantStringVector"
+      },
+      "Weight": {
+        "mValue": 10,
+        "__type": "GameModeConstantInteger"
+      },
+      "AllowMultiple": {
+        "__type": "GameModeConstantBool"
+      },
+      "InvalidAugments": {
+        "items": [
+          "{3c6eee90}"
+        ],
+        "__type": "{80996016}"
+      },
+      "MaxLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxStage": {
+        "mValue": 3,
+        "__type": "GameModeConstantInteger"
+      },
+      "MinStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "TraitActive": {
+        "__type": "{43e9418e}"
+      },
+      "TraitLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "IsTrait": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsDuo": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsCommon": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsStacking": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsChampion": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "IsRole": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsWeird": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsPVEAllowed": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      }
+    },
+    "mRequiredConstantsGroup": "{b874104c}",
+    "__type": "ScriptDataObject"
+  },
   "{139e0960}": {
     "mName": "TFT15_MechanicTrait_Kahunahuna",
     "mDisplayNameTra": "TFT15_MechanicTrait_Kahunahuna_Name",
@@ -6271,7 +6581,7 @@
               "__type": "GameModeConstantFloat"
             },
             "ADDamage": {
-              "mValue": 215.0,
+              "mValue": 150.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -6462,7 +6772,7 @@
               "__type": "GameModeConstantFloat"
             },
             "AD": {
-              "mValue": 0.5,
+              "mValue": 0.44999998807907104,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -6495,7 +6805,7 @@
         "constants": {
           "{df085b93}": {
             "PctBonusAP": {
-              "mValue": 30.0,
+              "mValue": 35.0,
               "__type": "GameModeConstantFloat"
             },
             "BaseAP": {
@@ -6606,7 +6916,7 @@
         "constants": {
           "{df085b93}": {
             "AS": {
-              "mValue": 15.0,
+              "mValue": 20.0,
               "__type": "GameModeConstantFloat"
             },
             "AP": {
@@ -6977,7 +7287,7 @@
               "__type": "GameModeConstantFloat"
             },
             "AS": {
-              "mValue": 1.0,
+              "mValue": 1.5,
               "__type": "GameModeConstantFloat"
             },
             "PerXResists": {
@@ -7087,7 +7397,7 @@
         "constants": {
           "{df085b93}": {
             "ReducedDamage": {
-              "mValue": 0.15000000596046448,
+              "mValue": 0.20000000298023224,
               "__type": "GameModeConstantFloat"
             },
             "Duration": {
@@ -7141,7 +7451,6 @@
         "__type": "GameModeConstantStringVector"
       },
       "Weight": {
-        "mValue": 10,
         "__type": "GameModeConstantInteger"
       },
       "AllowMultiple": {
@@ -7161,9 +7470,11 @@
         "__type": "GameModeConstantInteger"
       },
       "MaxStage": {
+        "mValue": 9,
         "__type": "GameModeConstantInteger"
       },
       "MinStage": {
+        "mValue": 9,
         "__type": "GameModeConstantInteger"
       },
       "TraitActive": {
@@ -7300,11 +7611,11 @@
         "constants": {
           "{df085b93}": {
             "BaseDA": {
-              "mValue": 15.0,
+              "mValue": 12.0,
               "__type": "GameModeConstantFloat"
             },
             "IncreasedDA": {
-              "mValue": 30.0,
+              "mValue": 28.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -7727,7 +8038,7 @@
               "__type": "GameModeConstantFloat"
             },
             "PercentMaxHealthInitial": {
-              "mValue": 15.0,
+              "mValue": 10.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -7833,7 +8144,7 @@
         "constants": {
           "{df085b93}": {
             "ADPctFromMana": {
-              "mValue": 40.0,
+              "mValue": 45.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -8091,7 +8402,7 @@
         "constants": {
           "{df085b93}": {
             "Health": {
-              "mValue": 400,
+              "mValue": 150,
               "__type": "GameModeConstantInteger"
             },
             "StunDuration": {
@@ -8315,7 +8626,7 @@
         "constants": {
           "{df085b93}": {
             "PercentDamage": {
-              "mValue": 0.07999999821186066,
+              "mValue": 0.05999999865889549,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -8508,15 +8819,15 @@
               "__type": "GameModeConstantFloat"
             },
             "ADPerSacrifice": {
-              "mValue": 0.029999999329447746,
+              "mValue": 0.03999999910593033,
               "__type": "GameModeConstantFloat"
             },
             "{cc84e244}": {
-              "mValue": 1.5,
+              "mValue": 2.0,
               "__type": "GameModeConstantFloat"
             },
             "HealthPerSacrifice": {
-              "mValue": 75.0,
+              "mValue": 100.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -8570,7 +8881,7 @@
               "__type": "GameModeConstantFloat"
             },
             "PercentBADDamage": {
-              "mValue": 120.0,
+              "mValue": 140.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -8659,8 +8970,54 @@
     "mRequiredConstantsGroup": "{b874104c}",
     "__type": "ScriptDataObject"
   },
-  "{285417e0}": {
-    "mName": "TFT15_MechanicTrait_FrostTouch_ScriptData",
+  "{277a8fda}": {
+    "mName": "TFT15_MechanicTrait_BattleScarred",
+    "mDisplayNameTra": "TFT15_MechanicTrait_BattleScarred_Name",
+    "mDescriptionNameTra": "TFT15_MechanicTrait_BattleScarred_Desc",
+    "{0247448b}": "TFT15_MechanicTrait_BattleScarred_ShortDesc",
+    "mIconPath": "ASSETS/UX/TraitIcons/Trait_Icon_15_SecretTechnique.TFT_Set15.tex",
+    "TraitType": 3,
+    "InnateTraitSets": [
+      {
+        "constants": {
+          "__type": "{d65315ee}"
+        },
+        "__type": "TftBaseTraitSetData"
+      }
+    ],
+    "mConditionalTraitSets": [
+      {
+        "{86b5abcb}": [
+          {
+            "targetStrategy": 1,
+            "buffName": "TFT15_MechanicTrait_BattleScarred_UnitBuff",
+            "__type": "{76621fa6}"
+          }
+        ],
+        "constants": {
+          "{df085b93}": {
+            "Defenses": {
+              "mValue": 5.0,
+              "__type": "GameModeConstantFloat"
+            },
+            "Durability": {
+              "mValue": 0.15000000596046448,
+              "__type": "GameModeConstantFloat"
+            }
+          },
+          "__type": "{d65315ee}"
+        },
+        "minUnits": 1,
+        "maxUnits": 1,
+        "Style": 1,
+        "__type": "TftConditionalTraitSetData"
+      }
+    ],
+    "{14b4616a}": true,
+    "__type": "TftTraitData"
+  },
+  "{a7ac2d90}": {
+    "mName": "TFT15_MechanicTrait_BattleScarred_ScriptData",
     "mConstants": {
       "InvalidChampions": {
         "mValue": [
@@ -8671,10 +9028,6 @@
       "Weight": {
         "mValue": 10,
         "__type": "GameModeConstantInteger"
-      },
-      "AllowMultiple": {
-        "mValue": true,
-        "__type": "GameModeConstantBool"
       },
       "InvalidAugments": {
         "items": [
@@ -8692,6 +9045,86 @@
         "__type": "GameModeConstantInteger"
       },
       "MinStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "TraitActive": {
+        "__type": "{43e9418e}"
+      },
+      "TraitLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "IsTrait": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsDuo": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsCommon": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "IsStacking": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsChampion": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsRole": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsWeird": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsPVEAllowed": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      }
+    },
+    "mRequiredConstantsGroup": "{b874104c}",
+    "__type": "ScriptDataObject"
+  },
+  "{285417e0}": {
+    "mName": "TFT15_MechanicTrait_FrostTouch_ScriptData",
+    "mConstants": {
+      "InvalidChampions": {
+        "mValue": [
+          ""
+        ],
+        "__type": "GameModeConstantStringVector"
+      },
+      "Weight": {
+        "__type": "GameModeConstantInteger"
+      },
+      "AllowMultiple": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "InvalidAugments": {
+        "items": [
+          "{3c6eee90}"
+        ],
+        "__type": "{80996016}"
+      },
+      "MaxLevel": {
+        "mValue": 10,
+        "__type": "GameModeConstantInteger"
+      },
+      "MinLevel": {
+        "mValue": 10,
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxStage": {
+        "mValue": 9,
+        "__type": "GameModeConstantInteger"
+      },
+      "MinStage": {
+        "mValue": 9,
         "__type": "GameModeConstantInteger"
       },
       "TraitActive": {
@@ -8754,7 +9187,7 @@
         "constants": {
           "{df085b93}": {
             "StunDuration": {
-              "mValue": 1.5,
+              "mValue": 1.0,
               "__type": "GameModeConstantFloat"
             },
             "PercentageChanceToTrigger": {
@@ -8769,36 +9202,6 @@
           "__type": "{d65315ee}"
         },
         "minUnits": 1,
-        "maxUnits": 1,
-        "Style": 1,
-        "__type": "TftConditionalTraitSetData"
-      },
-      {
-        "{86b5abcb}": [
-          {
-            "targetStrategy": 1,
-            "buffName": "TFT15_MechanicTrait_FrostTouch_UnitBuff",
-            "__type": "{76621fa6}"
-          }
-        ],
-        "constants": {
-          "{df085b93}": {
-            "StunDuration": {
-              "mValue": 1.5,
-              "__type": "GameModeConstantFloat"
-            },
-            "PercentageChanceToTrigger": {
-              "mValue": 25,
-              "__type": "GameModeConstantInteger"
-            },
-            "DamagePerStage": {
-              "mValue": 50,
-              "__type": "GameModeConstantInteger"
-            }
-          },
-          "__type": "{d65315ee}"
-        },
-        "minUnits": 2,
         "Style": 1,
         "__type": "TftConditionalTraitSetData"
       }
@@ -8816,7 +9219,7 @@
         "__type": "GameModeConstantStringVector"
       },
       "Weight": {
-        "mValue": 10,
+        "mValue": 5,
         "__type": "GameModeConstantInteger"
       },
       "AllowMultiple": {
@@ -8835,6 +9238,7 @@
         "__type": "GameModeConstantInteger"
       },
       "MaxStage": {
+        "mValue": 3,
         "__type": "GameModeConstantInteger"
       },
       "MinStage": {
@@ -9047,19 +9451,19 @@
         "constants": {
           "{df085b93}": {
             "AD": {
-              "mValue": 10.0,
+              "mValue": 8.0,
               "__type": "GameModeConstantFloat"
             },
             "AS": {
-              "mValue": 10.0,
+              "mValue": 8.0,
               "__type": "GameModeConstantFloat"
             },
             "Health": {
-              "mValue": 180.0,
+              "mValue": 150.0,
               "__type": "GameModeConstantFloat"
             },
             "Resists": {
-              "mValue": 12.0,
+              "mValue": 8.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -9086,15 +9490,15 @@
         "constants": {
           "{df085b93}": {
             "AD": {
-              "mValue": 12.0,
+              "mValue": 15.0,
               "__type": "GameModeConstantFloat"
             },
             "AS": {
-              "mValue": 12.0,
+              "mValue": 15.0,
               "__type": "GameModeConstantFloat"
             },
             "Health": {
-              "mValue": 250.0,
+              "mValue": 300.0,
               "__type": "GameModeConstantFloat"
             },
             "Resists": {
@@ -9122,7 +9526,7 @@
         "__type": "GameModeConstantStringVector"
       },
       "Weight": {
-        "mValue": 15,
+        "mValue": 20,
         "__type": "GameModeConstantInteger"
       },
       "AllowMultiple": {
@@ -9142,7 +9546,7 @@
         "__type": "GameModeConstantInteger"
       },
       "MaxStage": {
-        "mValue": 3,
+        "mValue": 4,
         "__type": "GameModeConstantInteger"
       },
       "MinStage": {
@@ -9286,7 +9690,7 @@
               "__type": "GameModeConstantFloat"
             },
             "PctHealth": {
-              "mValue": 25.0,
+              "mValue": 18.0,
               "__type": "GameModeConstantFloat"
             },
             "NumDeathsStage2": {
@@ -9408,7 +9812,7 @@
         "constants": {
           "{df085b93}": {
             "AS": {
-              "mValue": 0.11999999731779099,
+              "mValue": 0.15000000596046448,
               "__type": "GameModeConstantFloat"
             },
             "Threshold": {
@@ -9416,7 +9820,7 @@
               "__type": "GameModeConstantFloat"
             },
             "Duration": {
-              "mValue": 4.0,
+              "mValue": 3.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -9525,11 +9929,11 @@
         "constants": {
           "{df085b93}": {
             "ShieldPercent": {
-              "mValue": 0.4000000059604645,
+              "mValue": 0.5,
               "__type": "GameModeConstantFloat"
             },
             "MagicResist": {
-              "mValue": 10,
+              "mValue": 25,
               "__type": "GameModeConstantInteger"
             }
           },
@@ -9637,7 +10041,7 @@
         "constants": {
           "{df085b93}": {
             "StatShare": {
-              "mValue": 0.4000000059604645,
+              "mValue": 0.44999998807907104,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -9670,7 +10074,7 @@
         "constants": {
           "{df085b93}": {
             "PctAdditionalDamage": {
-              "mValue": 150.0,
+              "mValue": 175.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -9850,7 +10254,7 @@
         "constants": {
           "{df085b93}": {
             "MagicResistReduce": {
-              "mValue": 4.0,
+              "mValue": 5.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -9966,7 +10370,7 @@
               "__type": "GameModeConstantFloat"
             },
             "DamagePerStage": {
-              "mValue": 5.0,
+              "mValue": 8.0,
               "__type": "GameModeConstantFloat"
             },
             "ICD": {
@@ -10079,7 +10483,7 @@
         "constants": {
           "{df085b93}": {
             "PercentHealth": {
-              "mValue": 105.0,
+              "mValue": 60.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -10201,6 +10605,344 @@
     ],
     "{14b4616a}": true,
     "__type": "TftTraitData"
+  },
+  "{33cc2c42}": {
+    "mName": "TFT15_MechanicTrait_StarryKnight_ScriptData",
+    "mConstants": {
+      "InvalidChampions": {
+        "mValue": [
+          ""
+        ],
+        "__type": "GameModeConstantStringVector"
+      },
+      "Weight": {
+        "mValue": 10,
+        "__type": "GameModeConstantInteger"
+      },
+      "InvalidAugments": {
+        "items": [
+          "{3c6eee90}"
+        ],
+        "__type": "{80996016}"
+      },
+      "MaxLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxStage": {
+        "mValue": 3,
+        "__type": "GameModeConstantInteger"
+      },
+      "MinStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "TraitActive": {
+        "__type": "{43e9418e}"
+      },
+      "TraitLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "IsTrait": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsDuo": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsCommon": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "IsStacking": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsChampion": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsRole": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsWeird": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsPVEAllowed": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      }
+    },
+    "mRequiredConstantsGroup": "{b874104c}",
+    "__type": "ScriptDataObject"
+  },
+  "{3efbd1f0}": {
+    "mName": "TFT15_MechanicTrait_StarryKnight",
+    "mDisplayNameTra": "TFT15_MechanicTrait_StarryKnight_Name",
+    "mDescriptionNameTra": "TFT15_MechanicTrait_StarryKnight_Desc",
+    "{0247448b}": "TFT15_MechanicTrait_StarryKnight_ShortDesc",
+    "mIconPath": "ASSETS/UX/TraitIcons/Trait_Icon_15_SecretTechnique.TFT_Set15.tex",
+    "TraitType": 3,
+    "mConditionalTraitSets": [
+      {
+        "{86b5abcb}": [
+          {
+            "targetStrategy": 1,
+            "buffName": "TFT15_MechanicTrait_StarryKnight_UnitBuff",
+            "__type": "{76621fa6}"
+          }
+        ],
+        "constants": {
+          "{df085b93}": {
+            "Health": {
+              "mValue": 0.05999999865889549,
+              "__type": "GameModeConstantFloat"
+            },
+            "AP": {
+              "mValue": 10.0,
+              "__type": "GameModeConstantFloat"
+            },
+            "Mult": {
+              "mValue": 2.0,
+              "__type": "GameModeConstantFloat"
+            }
+          },
+          "__type": "{d65315ee}"
+        },
+        "minUnits": 1,
+        "maxUnits": 1,
+        "Style": 1,
+        "__type": "TftConditionalTraitSetData"
+      }
+    ],
+    "{14b4616a}": true,
+    "__type": "TftTraitData"
+  },
+  "{366a3e56}": {
+    "mName": "TFT15_MechanicTrait_ShineBrighter",
+    "mDisplayNameTra": "TFT15_MechanicTrait_ShineBrighter_Name",
+    "mDescriptionNameTra": "TFT15_MechanicTrait_ShineBrighter_Desc",
+    "{0247448b}": "TFT15_MechanicTrait_ShineBrighter_DescShort",
+    "mIconPath": "ASSETS/UX/TraitIcons/Trait_Icon_15_SecretTechnique.TFT_Set15.tex",
+    "TraitType": 3,
+    "mConditionalTraitSets": [
+      {
+        "{86b5abcb}": [
+          {
+            "targetStrategy": 1,
+            "buffName": "TFT15_MechanicTrait_ShineBrighter_UnitBuff",
+            "__type": "{76621fa6}"
+          }
+        ],
+        "constants": {
+          "{df085b93}": {
+            "percent": {
+              "mValue": 0.10000000149011612,
+              "__type": "GameModeConstantFloat"
+            }
+          },
+          "__type": "{d65315ee}"
+        },
+        "minUnits": 1,
+        "Style": 1,
+        "__type": "TftConditionalTraitSetData"
+      }
+    ],
+    "{14b4616a}": true,
+    "__type": "TftTraitData"
+  },
+  "{4a5d1b04}": {
+    "mName": "TFT15_MechanicTrait_ShineBrighter_ScriptData",
+    "mConstants": {
+      "InvalidChampions": {
+        "mValue": [
+          ""
+        ],
+        "__type": "GameModeConstantStringVector"
+      },
+      "Weight": {
+        "mValue": 10,
+        "__type": "GameModeConstantInteger"
+      },
+      "AllowMultiple": {
+        "__type": "GameModeConstantBool"
+      },
+      "InvalidAugments": {
+        "items": [
+          "{3c6eee90}"
+        ],
+        "__type": "{80996016}"
+      },
+      "MaxLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "TraitActive": {
+        "__type": "{43e9418e}"
+      },
+      "TraitLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "IsTrait": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsDuo": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsCommon": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsStacking": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsChampion": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "IsRole": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsWeird": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsPVEAllowed": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      }
+    },
+    "mRequiredConstantsGroup": "{b874104c}",
+    "__type": "ScriptDataObject"
+  },
+  "{3766ed9a}": {
+    "mName": "TFT15_MechanicTrait_SoulSurvivor",
+    "mDisplayNameTra": "TFT15_MechanicTrait_SoulSurvivor_Name",
+    "mDescriptionNameTra": "TFT15_MechanicTrait_SoulSurvivor_Desc",
+    "{0247448b}": "TFT15_MechanicTrait_SoulSurvivor_ShortDesc",
+    "mIconPath": "ASSETS/UX/TraitIcons/Trait_Icon_15_SecretTechnique.TFT_Set15.tex",
+    "TraitType": 3,
+    "mConditionalTraitSets": [
+      {
+        "{86b5abcb}": [
+          {
+            "targetStrategy": 1,
+            "buffName": "TFT15_MechanicTrait_SoulSurvivor_UnitBuff",
+            "__type": "{76621fa6}"
+          }
+        ],
+        "constants": {
+          "{df085b93}": {
+            "AD": {
+              "mValue": 0.20000000298023224,
+              "__type": "GameModeConstantFloat"
+            },
+            "AS": {
+              "mValue": 0.4000000059604645,
+              "__type": "GameModeConstantFloat"
+            }
+          },
+          "__type": "{d65315ee}"
+        },
+        "minUnits": 1,
+        "Style": 1,
+        "__type": "TftConditionalTraitSetData"
+      }
+    ],
+    "{14b4616a}": true,
+    "__type": "TftTraitData"
+  },
+  "{58a71e50}": {
+    "mName": "TFT15_MechanicTrait_SoulSurvivor_ScriptData",
+    "mConstants": {
+      "InvalidChampions": {
+        "mValue": [
+          ""
+        ],
+        "__type": "GameModeConstantStringVector"
+      },
+      "Weight": {
+        "mValue": 10,
+        "__type": "GameModeConstantInteger"
+      },
+      "AllowMultiple": {
+        "__type": "GameModeConstantBool"
+      },
+      "InvalidAugments": {
+        "items": [
+          "{3c6eee90}"
+        ],
+        "__type": "{80996016}"
+      },
+      "MaxLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "TraitActive": {
+        "__type": "{43e9418e}"
+      },
+      "TraitLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "IsTrait": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsDuo": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsCommon": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsStacking": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsChampion": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "IsRole": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsWeird": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsPVEAllowed": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      }
+    },
+    "mRequiredConstantsGroup": "{b874104c}",
+    "__type": "ScriptDataObject"
   },
   "{3777332c}": {
     "mName": "TFT15_MechanicTrait_MidasTouch_ScriptData",
@@ -10338,7 +11080,7 @@
               "__type": "GameModeConstantFloat"
             },
             "Duration": {
-              "mValue": 12.0,
+              "mValue": 15.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -10437,7 +11179,7 @@
         "constants": {
           "{df085b93}": {
             "MechHealth": {
-              "mValue": 0.5,
+              "mValue": 0.6000000238418579,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -10458,11 +11200,11 @@
         "constants": {
           "{df085b93}": {
             "HealthShare": {
-              "mValue": 0.5,
+              "mValue": 0.6000000238418579,
               "__type": "GameModeConstantFloat"
             },
             "OtherStatShare": {
-              "mValue": 1.0,
+              "mValue": 0.800000011920929,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -10484,11 +11226,11 @@
         "constants": {
           "{df085b93}": {
             "HealthShare": {
-              "mValue": 0.5,
+              "mValue": 0.6000000238418579,
               "__type": "GameModeConstantFloat"
             },
             "OtherStatShare": {
-              "mValue": 1.0,
+              "mValue": 0.800000011920929,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -10601,11 +11343,11 @@
         "constants": {
           "{df085b93}": {
             "BaseADAP": {
-              "mValue": 10.0,
+              "mValue": 16.0,
               "__type": "GameModeConstantFloat"
             },
             "ADAPPerHat": {
-              "mValue": 2.0,
+              "mValue": 0.75,
               "__type": "GameModeConstantFloat"
             },
             "PercentHatLoss": {
@@ -10728,9 +11470,11 @@
         "__type": "GameModeConstantInteger"
       },
       "MaxStage": {
+        "mValue": 9,
         "__type": "GameModeConstantInteger"
       },
       "MinStage": {
+        "mValue": 3,
         "__type": "GameModeConstantInteger"
       },
       "TraitActive": {
@@ -10794,8 +11538,8 @@
         "constants": {
           "{df085b93}": {
             "Cadence": {
-              "mValue": 2,
-              "__type": "GameModeConstantInteger"
+              "mValue": 2.0,
+              "__type": "GameModeConstantFloat"
             }
           },
           "__type": "{d65315ee}"
@@ -10827,7 +11571,7 @@
         "constants": {
           "{df085b93}": {
             "PctBonusAD": {
-              "mValue": 30.0,
+              "mValue": 35.0,
               "__type": "GameModeConstantFloat"
             },
             "BaseAD": {
@@ -11060,7 +11804,7 @@
         "constants": {
           "{df085b93}": {
             "PctHealth": {
-              "mValue": 0.20000000298023224,
+              "mValue": 0.30000001192092896,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -11169,7 +11913,7 @@
         "constants": {
           "{df085b93}": {
             "NumAttacksPerProc": {
-              "mValue": 70.0,
+              "mValue": 85.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -11286,7 +12030,7 @@
               "__type": "GameModeConstantInteger"
             },
             "DamagePercent": {
-              "mValue": 0.20000000298023224,
+              "mValue": 0.18000000715255737,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -11646,7 +12390,7 @@
               "__type": "GameModeConstantInteger"
             },
             "DamageReduction": {
-              "mValue": 15.0,
+              "mValue": 10.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -11834,7 +12578,7 @@
               "__type": "GameModeConstantInteger"
             },
             "ReducedDamage": {
-              "mValue": 0.5,
+              "mValue": 0.44999998807907104,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -11977,7 +12721,8 @@
       },
       "InvalidAugments": {
         "items": [
-          "{3c6eee90}"
+          "{3c6eee90}",
+          "{c6459b1b}"
         ],
         "__type": "{80996016}"
       },
@@ -12056,7 +12801,7 @@
         "constants": {
           "{df085b93}": {
             "BonusHealth": {
-              "mValue": 1000.0,
+              "mValue": 900.0,
               "__type": "GameModeConstantFloat"
             },
             "BonusDA": {
@@ -12064,7 +12809,7 @@
               "__type": "GameModeConstantFloat"
             },
             "BonusDR": {
-              "mValue": 0.15000000596046448,
+              "mValue": 0.20000000298023224,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -12086,15 +12831,15 @@
         "constants": {
           "{df085b93}": {
             "BonusHealth": {
-              "mValue": 1400.0,
+              "mValue": 1250.0,
               "__type": "GameModeConstantFloat"
             },
             "BonusDA": {
-              "mValue": 0.30000001192092896,
+              "mValue": 0.20000000298023224,
               "__type": "GameModeConstantFloat"
             },
             "BonusDR": {
-              "mValue": 0.20000000298023224,
+              "mValue": 0.25,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -12127,7 +12872,7 @@
         "constants": {
           "{df085b93}": {
             "ManaPct": {
-              "mValue": 0.20000000298023224,
+              "mValue": 0.3499999940395355,
               "__type": "GameModeConstantFloat"
             },
             "NumAllies": {
@@ -12240,11 +12985,11 @@
         "constants": {
           "{df085b93}": {
             "StatsPct": {
-              "mValue": 35.0,
+              "mValue": 50.0,
               "__type": "GameModeConstantFloat"
             },
             "HealthPct": {
-              "mValue": 15.0,
+              "mValue": 10.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -12424,7 +13169,7 @@
         "constants": {
           "{df085b93}": {
             "HealthRatio": {
-              "mValue": 0.3499999940395355,
+              "mValue": 0.30000001192092896,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -12577,9 +13322,11 @@
         "__type": "GameModeConstantInteger"
       },
       "MaxStage": {
+        "mValue": 9,
         "__type": "GameModeConstantInteger"
       },
       "MinStage": {
+        "mValue": 3,
         "__type": "GameModeConstantInteger"
       },
       "TraitActive": {
@@ -12646,11 +13393,11 @@
         "constants": {
           "{df085b93}": {
             "Resists": {
-              "mValue": 40.0,
+              "mValue": 48.0,
               "__type": "GameModeConstantFloat"
             },
             "Conversion": {
-              "mValue": 2.0,
+              "mValue": 3.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -12821,27 +13568,27 @@
               "__type": "GameModeConstantFloat"
             },
             "HP3": {
-              "mValue": 550.0,
+              "mValue": 750.0,
               "__type": "GameModeConstantFloat"
             },
             "HP4": {
-              "mValue": 650.0,
+              "mValue": 1000.0,
               "__type": "GameModeConstantFloat"
             },
             "AS1": {
-              "mValue": 10.0,
-              "__type": "GameModeConstantFloat"
-            },
-            "AS2": {
-              "mValue": 30.0,
-              "__type": "GameModeConstantFloat"
-            },
-            "AS3": {
               "mValue": 40.0,
               "__type": "GameModeConstantFloat"
             },
+            "AS2": {
+              "mValue": 55.0,
+              "__type": "GameModeConstantFloat"
+            },
+            "AS3": {
+              "mValue": 80.0,
+              "__type": "GameModeConstantFloat"
+            },
             "AS4": {
-              "mValue": 50.0,
+              "mValue": 100.0,
               "__type": "GameModeConstantFloat"
             },
             "Multiplier": {
@@ -13027,8 +13774,121 @@
         "constants": {
           "{df085b93}": {
             "Reduction": {
-              "mValue": 20,
+              "mValue": 15,
               "__type": "GameModeConstantInteger"
+            }
+          },
+          "__type": "{d65315ee}"
+        },
+        "minUnits": 1,
+        "Style": 1,
+        "__type": "TftConditionalTraitSetData"
+      }
+    ],
+    "{14b4616a}": true,
+    "__type": "TftTraitData"
+  },
+  "{66c00340}": {
+    "mName": "TFT15_MechanicTrait_SupremeSurge_ScriptData",
+    "mConstants": {
+      "InvalidChampions": {
+        "mValue": [
+          ""
+        ],
+        "__type": "GameModeConstantStringVector"
+      },
+      "Weight": {
+        "mValue": 10,
+        "__type": "GameModeConstantInteger"
+      },
+      "AllowMultiple": {
+        "__type": "GameModeConstantBool"
+      },
+      "InvalidAugments": {
+        "items": [
+          "{3c6eee90}"
+        ],
+        "__type": "{80996016}"
+      },
+      "MaxLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "TraitActive": {
+        "__type": "{43e9418e}"
+      },
+      "TraitLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "IsTrait": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsDuo": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsCommon": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsStacking": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsChampion": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "IsRole": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsWeird": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsPVEAllowed": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      }
+    },
+    "mRequiredConstantsGroup": "{b874104c}",
+    "__type": "ScriptDataObject"
+  },
+  "{aed199aa}": {
+    "mName": "TFT15_MechanicTrait_SupremeSurge",
+    "mDisplayNameTra": "TFT15_MechanicTrait_SupremeSurge_Name",
+    "mDescriptionNameTra": "TFT15_MechanicTrait_SupremeSurge_Desc",
+    "{0247448b}": "TFT15_MechanicTrait_SupremeSurge_ShortDesc",
+    "mIconPath": "ASSETS/UX/TraitIcons/Trait_Icon_15_SecretTechnique.TFT_Set15.tex",
+    "TraitType": 3,
+    "mConditionalTraitSets": [
+      {
+        "{86b5abcb}": [
+          {
+            "targetStrategy": 1,
+            "buffName": "TFT15_MechanicTrait_SupremeSurge_UnitBuff",
+            "__type": "{76621fa6}"
+          }
+        ],
+        "constants": {
+          "{df085b93}": {
+            "percent": {
+              "mValue": 0.15000000596046448,
+              "__type": "GameModeConstantFloat"
+            },
+            "Mana": {
+              "mValue": 15.0,
+              "__type": "GameModeConstantFloat"
             }
           },
           "__type": "{d65315ee}"
@@ -13262,7 +14122,7 @@
         "constants": {
           "{df085b93}": {
             "PercentIgnore": {
-              "mValue": 40.0,
+              "mValue": 45.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -13557,7 +14417,7 @@
         "constants": {
           "{df085b93}": {
             "PctRegen": {
-              "mValue": 5.0,
+              "mValue": 6.5,
               "__type": "GameModeConstantFloat"
             },
             "Interval": {
@@ -13719,7 +14579,7 @@
         "constants": {
           "{df085b93}": {
             "PercentDamageEcho": {
-              "mValue": 0.30000001192092896,
+              "mValue": 0.25,
               "__type": "GameModeConstantFloat"
             },
             "{e9e2b861}": {
@@ -13731,7 +14591,7 @@
               "__type": "GameModeConstantInteger"
             },
             "{44d79b6f}": {
-              "mValue": 8,
+              "mValue": 10,
               "__type": "GameModeConstantInteger"
             }
           },
@@ -13774,10 +14634,11 @@
         "__type": "GameModeConstantInteger"
       },
       "MaxStage": {
-        "mValue": 3,
+        "mValue": 4,
         "__type": "GameModeConstantInteger"
       },
       "MinStage": {
+        "mValue": 3,
         "__type": "GameModeConstantInteger"
       },
       "TraitActive": {
@@ -13851,7 +14712,7 @@
               "__type": "GameModeConstantInteger"
             },
             "Health": {
-              "mValue": 140,
+              "mValue": 120,
               "__type": "GameModeConstantInteger"
             },
             "PercentIncrease": {
@@ -13859,7 +14720,7 @@
               "__type": "GameModeConstantFloat"
             },
             "NumRounds": {
-              "mValue": 3,
+              "mValue": 4,
               "__type": "GameModeConstantInteger"
             }
           },
@@ -13892,7 +14753,7 @@
         "constants": {
           "{df085b93}": {
             "AttackSpeed": {
-              "mValue": 110.0,
+              "mValue": 100.0,
               "__type": "GameModeConstantFloat"
             },
             "DecayDuration": {
@@ -14017,11 +14878,11 @@
               "__type": "GameModeConstantInteger"
             },
             "APPerAttack": {
-              "mValue": 5.0,
+              "mValue": 6.0,
               "__type": "GameModeConstantFloat"
             },
             "ReducedWaveDamage": {
-              "mValue": 0.550000011920929,
+              "mValue": 0.6000000238418579,
               "__type": "GameModeConstantFloat"
             },
             "NumAttacks": {
@@ -14212,7 +15073,7 @@
         "constants": {
           "{df085b93}": {
             "ShieldAmount": {
-              "mValue": 120.0,
+              "mValue": 135.0,
               "__type": "GameModeConstantFloat"
             },
             "Duration": {
@@ -14249,11 +15110,11 @@
         "constants": {
           "{df085b93}": {
             "Duration": {
-              "mValue": 8,
+              "mValue": 6,
               "__type": "GameModeConstantInteger"
             },
             "DamageAmp": {
-              "mValue": 0.10000000149011612,
+              "mValue": 0.07999999821186066,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -14587,6 +15448,119 @@
     "mRequiredConstantsGroup": "{b874104c}",
     "__type": "ScriptDataObject"
   },
+  "{84cf205a}": {
+    "mName": "TFT15_MechanicTrait_10TonSlam",
+    "mDisplayNameTra": "TFT15_MechanicTrait_10TonSlam_Name",
+    "mDescriptionNameTra": "TFT15_MechanicTrait_10TonSlam_Desc",
+    "{0247448b}": "TFT15_MechanicTrait_10TonSlam_ShortDesc",
+    "mIconPath": "ASSETS/UX/TraitIcons/Trait_Icon_15_SecretTechnique.TFT_Set15.tex",
+    "TraitType": 3,
+    "mConditionalTraitSets": [
+      {
+        "{86b5abcb}": [
+          {
+            "targetStrategy": 1,
+            "buffName": "TFT15_MechanicTrait_10TonSlam_UnitBuff",
+            "__type": "{76621fa6}"
+          }
+        ],
+        "constants": {
+          "{df085b93}": {
+            "Duration": {
+              "mValue": 1.0,
+              "__type": "GameModeConstantFloat"
+            },
+            "percent": {
+              "mValue": 0.11999999731779099,
+              "__type": "GameModeConstantFloat"
+            }
+          },
+          "__type": "{d65315ee}"
+        },
+        "minUnits": 1,
+        "Style": 1,
+        "__type": "TftConditionalTraitSetData"
+      }
+    ],
+    "{14b4616a}": true,
+    "__type": "TftTraitData"
+  },
+  "{f3313310}": {
+    "mName": "TFT15_MechanicTrait_10TonSlam_ScriptData",
+    "mConstants": {
+      "InvalidChampions": {
+        "mValue": [
+          ""
+        ],
+        "__type": "GameModeConstantStringVector"
+      },
+      "Weight": {
+        "mValue": 10,
+        "__type": "GameModeConstantInteger"
+      },
+      "AllowMultiple": {
+        "__type": "GameModeConstantBool"
+      },
+      "InvalidAugments": {
+        "items": [
+          "{3c6eee90}"
+        ],
+        "__type": "{80996016}"
+      },
+      "MaxLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "TraitActive": {
+        "__type": "{43e9418e}"
+      },
+      "TraitLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "IsTrait": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsDuo": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsCommon": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsStacking": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsChampion": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "IsRole": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsWeird": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsPVEAllowed": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      }
+    },
+    "mRequiredConstantsGroup": "{b874104c}",
+    "__type": "ScriptDataObject"
+  },
   "{8504d1f2}": {
     "mName": "TFT15_MechanicTrait_OnTheEdge",
     "mDisplayNameTra": "TFT15_MechanicTrait_OnTheEdge_Name",
@@ -14711,6 +15685,7 @@
         "__type": "GameModeConstantStringVector"
       },
       "Weight": {
+        "mValue": 5,
         "__type": "GameModeConstantInteger"
       },
       "InvalidAugments": {
@@ -14893,11 +15868,11 @@
               "__type": "GameModeConstantFloat"
             },
             "TotalResists": {
-              "mValue": 50.0,
+              "mValue": 80.0,
               "__type": "GameModeConstantFloat"
             },
             "ResistsPerDamageInstanceMagic": {
-              "mValue": 5.0,
+              "mValue": 6.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -14930,7 +15905,7 @@
         "constants": {
           "{df085b93}": {
             "MissingHealthHeal": {
-              "mValue": 0.15000000596046448,
+              "mValue": 0.18000000715255737,
               "__type": "GameModeConstantFloat"
             },
             "HealTickRate": {
@@ -15344,7 +16319,7 @@
         "constants": {
           "{df085b93}": {
             "PercentIgnore": {
-              "mValue": 35.0,
+              "mValue": 45.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -15368,6 +16343,7 @@
         "__type": "GameModeConstantStringVector"
       },
       "Weight": {
+        "mValue": 10,
         "__type": "GameModeConstantInteger"
       },
       "InvalidAugments": {
@@ -15454,7 +16430,7 @@
               "__type": "GameModeConstantFloat"
             },
             "Base": {
-              "mValue": 0.07999999821186066,
+              "mValue": 0.10000000149011612,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -15673,7 +16649,7 @@
               "__type": "GameModeConstantFloat"
             },
             "AttackScale": {
-              "mValue": 1.75,
+              "mValue": 2.0999999046325684,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -15737,7 +16713,6 @@
         "__type": "GameModeConstantStringVector"
       },
       "Weight": {
-        "mValue": 10,
         "__type": "GameModeConstantInteger"
       },
       "AllowMultiple": {
@@ -15756,9 +16731,11 @@
         "__type": "GameModeConstantInteger"
       },
       "MaxStage": {
+        "mValue": 9,
         "__type": "GameModeConstantInteger"
       },
       "MinStage": {
+        "mValue": 9,
         "__type": "GameModeConstantInteger"
       },
       "TraitActive": {
@@ -15933,7 +16910,7 @@
         "constants": {
           "{df085b93}": {
             "DamageAmp": {
-              "mValue": 0.03999999910593033,
+              "mValue": 0.04500000178813934,
               "__type": "GameModeConstantFloat"
             },
             "Omnivamp": {
@@ -16050,7 +17027,7 @@
         "constants": {
           "{df085b93}": {
             "BleedPct": {
-              "mValue": 25.0,
+              "mValue": 20.0,
               "__type": "GameModeConstantFloat"
             },
             "BleedDuration": {
@@ -16167,7 +17144,7 @@
               "__type": "GameModeConstantFloat"
             },
             "Base": {
-              "mValue": 0.10000000149011612,
+              "mValue": 0.11999999731779099,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -16347,7 +17324,7 @@
         "constants": {
           "{df085b93}": {
             "IncreasedProjectiles": {
-              "mValue": 35,
+              "mValue": 30,
               "__type": "GameModeConstantInteger"
             },
             "{28c023cc}": {
@@ -16866,7 +17843,7 @@
         "constants": {
           "{df085b93}": {
             "PercentDamage": {
-              "mValue": 1.5,
+              "mValue": 1.75,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -17399,7 +18376,7 @@
               "__type": "GameModeConstantFloat"
             },
             "FlatDR": {
-              "mValue": 35.0,
+              "mValue": 25.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -17422,11 +18399,17 @@
     "TraitType": 3,
     "mConditionalTraitSets": [
       {
-        "activatedBuffName": "TFT15_MechanicTrait_Bladenado_UnitBuff",
+        "{86b5abcb}": [
+          {
+            "targetStrategy": 1,
+            "buffName": "TFT15_MechanicTrait_Bladenado_UnitBuff",
+            "__type": "{76621fa6}"
+          }
+        ],
         "constants": {
           "{df085b93}": {
             "PercentDamage": {
-              "mValue": 0.20000000298023224,
+              "mValue": 0.25,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -17618,11 +18601,11 @@
               "__type": "GameModeConstantFloat"
             },
             "Duration": {
-              "mValue": 4.0,
+              "mValue": 3.0,
               "__type": "GameModeConstantFloat"
             },
             "ChillDuration": {
-              "mValue": 6.0,
+              "mValue": 4.0,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -17635,6 +18618,125 @@
     ],
     "{14b4616a}": true,
     "__type": "TftTraitData"
+  },
+  "{bf02d462}": {
+    "mName": "TFT15_MechanicTrait_Veteran",
+    "mDisplayNameTra": "TFT15_MechanicTrait_Veteran_Name",
+    "mDescriptionNameTra": "TFT15_MechanicTrait_Veteran_Desc",
+    "{0247448b}": "TFT15_MechanicTrait_Veteran_ShortDesc",
+    "mIconPath": "ASSETS/UX/TraitIcons/Trait_Icon_15_SecretTechnique.TFT_Set15.tex",
+    "TraitType": 3,
+    "InnateTraitSets": [
+      {
+        "constants": {
+          "__type": "{d65315ee}"
+        },
+        "__type": "TftBaseTraitSetData"
+      }
+    ],
+    "mConditionalTraitSets": [
+      {
+        "{86b5abcb}": [
+          {
+            "targetStrategy": 1,
+            "buffName": "TFT15_MechanicTrait_Veteran_UnitBuff",
+            "__type": "{76621fa6}"
+          }
+        ],
+        "constants": {
+          "{df085b93}": {
+            "{1d279a19}": {
+              "mValue": 0.03999999910593033,
+              "__type": "GameModeConstantFloat"
+            },
+            "Stats": {
+              "mValue": 0.3499999940395355,
+              "__type": "GameModeConstantFloat"
+            }
+          },
+          "__type": "{d65315ee}"
+        },
+        "minUnits": 1,
+        "maxUnits": 1,
+        "Style": 1,
+        "__type": "TftConditionalTraitSetData"
+      }
+    ],
+    "{14b4616a}": true,
+    "__type": "TftTraitData"
+  },
+  "{e30652e8}": {
+    "mName": "TFT15_MechanicTrait_Veteran_ScriptData",
+    "mConstants": {
+      "InvalidChampions": {
+        "mValue": [
+          ""
+        ],
+        "__type": "GameModeConstantStringVector"
+      },
+      "Weight": {
+        "mValue": 10,
+        "__type": "GameModeConstantInteger"
+      },
+      "InvalidAugments": {
+        "items": [
+          "{3c6eee90}"
+        ],
+        "__type": "{80996016}"
+      },
+      "MaxLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinStage": {
+        "__type": "GameModeConstantInteger"
+      },
+      "TraitActive": {
+        "__type": "{43e9418e}"
+      },
+      "TraitLevel": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MaxPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "MinPlayerHealth": {
+        "__type": "GameModeConstantInteger"
+      },
+      "IsTrait": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsDuo": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsCommon": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      },
+      "IsStacking": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsChampion": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsRole": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsWeird": {
+        "__type": "GameModeConstantBool"
+      },
+      "IsPVEAllowed": {
+        "mValue": true,
+        "__type": "GameModeConstantBool"
+      }
+    },
+    "mRequiredConstantsGroup": "{b874104c}",
+    "__type": "ScriptDataObject"
   },
   "{c7f8a1bc}": {
     "mName": "TFT15_MechanicTrait_Momentum",
@@ -17824,6 +18926,14 @@
     "{0247448b}": "TFT15_MechanicTrait_TestCost_SimpleDesc",
     "mIconPath": "ASSETS/UX/TraitIcons/Trait_Icon_15_SecretTechnique.TFT_Set15.tex",
     "TraitType": 3,
+    "InnateTraitSets": [
+      {
+        "constants": {
+          "__type": "{d65315ee}"
+        },
+        "__type": "TftBaseTraitSetData"
+      }
+    ],
     "mConditionalTraitSets": [
       {
         "minUnits": 1,
@@ -17932,7 +19042,7 @@
               "__type": "GameModeConstantInteger"
             },
             "APGain": {
-              "mValue": 1,
+              "mValue": 8,
               "__type": "GameModeConstantInteger"
             }
           },
@@ -17965,7 +19075,7 @@
         "constants": {
           "{df085b93}": {
             "DAMultiplier": {
-              "mValue": 0.15000000596046448,
+              "mValue": 0.20000000298023224,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -18092,7 +19202,7 @@
               "__type": "GameModeConstantFloat"
             },
             "DA": {
-              "mValue": 0.11999999731779099,
+              "mValue": 0.03999999910593033,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -18114,11 +19224,11 @@
         "constants": {
           "{df085b93}": {
             "DummyHealth": {
-              "mValue": 400.0,
+              "mValue": 1250.0,
               "__type": "GameModeConstantFloat"
             },
             "DA": {
-              "mValue": 0.20000000298023224,
+              "mValue": 0.05999999865889549,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -18142,7 +19252,7 @@
         "__type": "GameModeConstantStringVector"
       },
       "Weight": {
-        "mValue": 20,
+        "mValue": 5,
         "__type": "GameModeConstantInteger"
       },
       "AllowMultiple": {
@@ -18162,6 +19272,7 @@
         "__type": "GameModeConstantInteger"
       },
       "MaxStage": {
+        "mValue": 3,
         "__type": "GameModeConstantInteger"
       },
       "MinStage": {
@@ -18228,7 +19339,7 @@
         "constants": {
           "{df085b93}": {
             "StatIncrease": {
-              "mValue": 0.30000001192092896,
+              "mValue": 0.25,
               "__type": "GameModeConstantFloat"
             },
             "HealingPercent": {
@@ -18253,7 +19364,7 @@
         "constants": {
           "{df085b93}": {
             "StatIncrease": {
-              "mValue": 0.30000001192092896,
+              "mValue": 0.25,
               "__type": "GameModeConstantFloat"
             },
             "HealingPercent": {
@@ -18349,5 +19460,30 @@
     },
     "mRequiredConstantsGroup": "{b874104c}",
     "__type": "ScriptDataObject"
+  },
+  "{46c7fdd2}": {
+    "mName": "TFT15_MechanicTrait_BloodFury_Consumable",
+    "constants": {
+      "{df085b93}": {
+        "HealthToFeed": {
+          "mValue": 3.0,
+          "__type": "GameModeConstantFloat"
+        }
+      },
+      "__type": "{d65315ee}"
+    },
+    "ItemTags": [
+      "Consumable"
+    ],
+    "mDisplayNameTra": "TFT15_MechanicTrait_BloodFury_Consumable_Name",
+    "mDescriptionNameTra": "TFT15_MechanicTrait_BloodFury_Consumable_Desc",
+    "mIconPath": "ASSETS/Maps/TFT/Icons/Items/Hexcore/TFT15_Ravenous_LightSnack.TFT_Set15.tex",
+    "mColor": [
+      6,
+      85,
+      20,
+      255
+    ],
+    "__type": "TftItemData"
   }
 }
