@@ -304,7 +304,7 @@ class StarGuardianBuff(Buff):
     levels = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     def __init__(self, level, params):
-        super().__init__(f"Star Guardian {level}", level, params, phases=["preCombat"])
+        super().__init__(f"Star Guardian {level}", level, params, phases=["preCombat", "onUpdate", "postAbility"])
         self.scaling = {
             2: 1,
             3: 1.1,
@@ -333,11 +333,10 @@ class StarGuardianBuff(Buff):
         # Seraphine: Gain 5 ArmorMRHealth and 5% ADASCritCrit Damage
 
     def performAbility(self, phase, time, champion, input_=0):
-
-        if champion.mentors["Udyr"]:
-            champion.bonus_ad.addStat(self.adBase)
-            champion.ap.addStat(self.adBase)
-        if champion.mentors["Yasuo"]:
+        if phase == "postAbility":
+            if champion.star_guardians["Ahri"]:
+                champion.addMana(self.ahri_mana * self.scaling)
+        if champion.star_guardians["Syndra"]:
             champion.aspd.addStat(self.asBase)
         if champion.mentors["Ryze"]:
             champion.manaPerAttack.addStat(self.manaPerAttackBase)
@@ -754,6 +753,36 @@ class ZiggsUlt(Buff):
             + baseAD * AD
         )
         return input_
+
+
+class JinxUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            "Star Rocket Blast Off!",
+            level,
+            params,
+            phases=["postAttack", "onCrit"],
+        )
+        self.max_AS = [60, 60, 300]
+        self.attack_critted = False
+        self.current_bonus = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onCrit" and not self.attack_critted and not input_:
+            self.attack_critted = True
+        if phase == "postAttack":
+            max_amt = self.max_AS[champion.level - 1] * champion.ap.stat
+            amt = 6 if not self.attack_critted else 9
+            amt *= champion.ap.stat
+            # print("Jinx current AP: ", champion.ap.stat)
+            if max_amt > self.current_bonus:
+                amt_to_add = min(max_amt - self.current_bonus, amt)
+                # print("Amt to add: ", amt_to_add)
+                self.current_bonus += amt_to_add
+                champion.aspd.addStat(amt_to_add)
+            self.attack_critted = False
 
 
 class KogmawUlt(Buff):

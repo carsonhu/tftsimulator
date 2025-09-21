@@ -146,7 +146,7 @@ class CrownOfDemacia(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.next_bonus:
-            champion.atk.addStat(self.scaling)
+            champion.bonus_ad.addStat(self.scaling)
             champion.ap.addStat(self.scaling)
             self.next_bonus += 2
         return 0
@@ -378,7 +378,7 @@ class Nashors(Item):
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             champion.manaPerAttack.addStat(self.manaBonus)
-        elif phase == "onCrit" and not input_:
+        elif phase == "onCrit" and not input_ and not self.isActive:
             # input is: is spell or not spell
             # definitely want to watch for this, as it might be rly bad
             self.isActive = True
@@ -1021,7 +1021,6 @@ class RadiantMorellos(Item):
         super().__init__(
             "RadiantMorellos (no burn yet)",
             manaRegen=3,
-            aspd=25,
             ap=50,
             hp=150,
             phases=None,

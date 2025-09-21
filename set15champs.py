@@ -27,11 +27,13 @@ champ_list = [
     "Caitlyn",
     "KogMaw",
     "Malzahar",
+    "Yasuo",
     "Karma",
     "Ryze",
     "Senna",
     "Smolder",
     "Ashe",
+    "Jinx",
     "Samira",
     "Yuumi",
     "Ziggs",
@@ -411,11 +413,11 @@ class DrMundoHERO(Champion):
 
     def passiveAbilityScaling(self, level, AD, bonus_AD, AP):
         # this is for attack scaling
-        hpScale = 0.06
+        hpScale = 0.07
         return AD * bonus_AD + self.hp.stat * hpScale
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [120, 180, 280]
+        adScale = [140, 210, 330]
         apScale = [0, 0, 0]
         hpScale = 0.3
         return (
@@ -475,7 +477,7 @@ class Jhin(Champion):
         self.notes = "Wraith not coded yet"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [180, 270, 415]
+        adScale = [190, 285, 440]
         apScale = [30, 45, 70]
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * self.ultMultiplier
 
@@ -595,7 +597,7 @@ class KaiSa(Champion):
         self.notes = "Click 'more options' button to set bonus AD"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [36, 54, 84]
+        adScale = [32, 48, 75]
         apScale = [6, 8, 14]
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * self.projectiles
 
@@ -760,10 +762,10 @@ class Malzahar(Champion):
         self.default_traits = ["Prodigy"]
         self.buff_duration = 15
         self.castTime = 0.5  # Verified
-        self.notes = "Click 'more options' button to set bonus AD"
+        self.notes = ""
 
     def dotScaling(self, level, AD, AP):
-        apScale = [545, 820, 1390]
+        apScale = [515, 775, 1315]
         return apScale[level - 1] * AP / self.buff_duration
 
     def performAbility(self, opponents, items, time):
@@ -934,6 +936,42 @@ class Viego(Champion):
         self.ult_phase = 1
 
 
+class Yasuo(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 70
+        curMana = 0
+        fullMana = 40
+        aspd = 0.75
+        armor = 60
+        mr = 60
+        super().__init__(
+            "Yasuo",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.FIGHTER,
+        )
+        self.default_traits = ["Mentor", "Edgelord"]
+        self.castTime = 1
+        self.notes = "4 mentor not in"
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [180, 270, 430]
+        apScale = [0, 0, 0]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, 3, self.abilityScaling, "physical"
+        )
+
+
 class Ziggs(Champion):
     def __init__(self, level):
         hp = 650
@@ -978,7 +1016,7 @@ class Ziggs(Champion):
 class Ashe(Champion):
     def __init__(self, level):
         hp = 850
-        atk = 60
+        atk = 65
         curMana = 0
         fullMana = 80
         aspd = 0.8
@@ -1018,12 +1056,56 @@ class Ashe(Champion):
         self.ultAutos = 8
 
 
+class Jinx(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 70
+        curMana = 10
+        fullMana = 80
+        aspd = 0.75
+        armor = 35
+        mr = 35
+        super().__init__(
+            "Jinx",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["StarGuardian", "Sniper"]
+        self.items.append(buffs.JinxUlt())
+        self.castTime = 1.25
+        self.notes = " "
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [200, 300, 900]
+        apScale = [0, 0, 0]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def aoeAbilityScaling(self, level, AD, AP):
+        adScale = [575, 875, 4000]
+        apScale = [0, 0, 0]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, 1, self.abilityScaling, "physical")
+        self.multiTargetSpell(
+            opponents, items, time, 1, self.aoeAbilityScaling, "physical"
+        )
+
+
 class Karma(Champion):
     def __init__(self, level):
         hp = 850
         atk = 40
         curMana = 0
-        fullMana = 70
+        fullMana = 65
         aspd = 0.75
         armor = 35
         mr = 35
