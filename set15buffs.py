@@ -30,7 +30,6 @@ class_buffs = [
     "Sniper",
     "Sorcerer",
     "Luchador",
-    "MonsterTrainer",
     "SoulFighter",
     "Strategist",
     "Mentor",
@@ -301,6 +300,7 @@ class SoulFighter(Buff):
 
 
 class StarGuardianBuff(Buff):
+    # levels = [1]
     levels = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     def __init__(self, level, params):
@@ -324,7 +324,7 @@ class StarGuardianBuff(Buff):
 
         # Xayah: Every 3rd attack deals 50 (+ 60) magic damage
 
-        # Ahri: After casting, gain 3 Mana over 2 seconds
+        # Ahri: After casting, gain 3 Mana over 2 seconds. Adjusting this to be instant only screws up syndra.
         self.ahri_mana = 3
 
         # Jinx: +5% Attack Speed. +22% AS after takedowns, decaying over 3s
@@ -389,7 +389,7 @@ class Edgelord(Buff):
 
     def __init__(self, level, params):
         super().__init__("Edgelord " + str(level), level, params, phases=["preCombat"])
-        self.scaling = {2: 15, 4: 35, 6: 55}
+        self.scaling = {2: 15, 4: 40, 6: 60}
 
     def performAbility(self, phase, time, champion, input=0):
         champion.bonus_ad.addStat(self.scaling[self.level])
@@ -458,31 +458,6 @@ class Luchador(Buff):
         return 0
 
 
-class MonsterTrainer(Buff):
-    levels = [0, 15, 30, 40]
-
-    def __init__(self, level, params):
-        super().__init__(
-            "Monster Trainer " + str(level), level, params, phases=["preCombat"]
-        )
-        self.trainer_level = level
-
-    def performAbility(self, phase, time, champion, input=0):
-        champion.trainer_level += self.trainer_level
-        # smolder only
-        if champion.name == "Smolder":
-            champion.bonus_ad.addStat(champion.trainer_level)
-            if champion.trainer_level >= 30:
-                champion.fullMana.addStat(-10)
-                champion.armorPierce.addStat(0.5)
-        elif champion.name == "KogMaw":
-            champion.ap.addStat(champion.trainer_level)
-            if champion.trainer_level >= 30:
-                champion.aspd.mult += 0.15
-                champion.aspd.as_cap = 6
-        return 0
-
-
 class Duelist(Buff):
     levels = [0, 2, 4, 6]
 
@@ -499,6 +474,17 @@ class Duelist(Buff):
 
 
 # Unit buffs
+
+
+class SmolderUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Burn Blast", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.armorPierce.addStat(0.3)
+        return 0
 
 
 class KennenUlt(Buff):
@@ -789,31 +775,34 @@ class KogmawUlt(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__("Static Surge", level, params, phases=["preAttack"])
+        super().__init__("Static Surge", level, params, phases=["preAttack", "preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.multiTargetSpell(
-            champion.opponents,
-            champion.items,
-            time,
-            1,
-            champion.passiveAbilityScaling,
-            "magical",
-        )
-        if champion.nextAutoEnhanced:
-            targets = 3
+        if phase == "preCombat":
+            champion.aspd.as_cap = 6
+        if phase == "preAttack":
             champion.multiTargetSpell(
                 champion.opponents,
                 champion.items,
                 time,
-                targets,
-                champion.abilityScaling,
+                1,
+                champion.passiveAbilityScaling,
                 "magical",
             )
-            for opponent in champion.opponents[0:targets]:
-                opponent.applyStatus(
-                    status.MRReduction("MR 30"), champion, time, 4, 0.7
+            if champion.nextAutoEnhanced:
+                targets = 3
+                champion.multiTargetSpell(
+                    champion.opponents,
+                    champion.items,
+                    time,
+                    targets,
+                    champion.abilityScaling,
+                    "magical",
                 )
+                for opponent in champion.opponents[0:targets]:
+                    opponent.applyStatus(
+                        status.MRReduction("MR 30"), champion, time, 4, 0.7
+                    )
 
         return 0
 

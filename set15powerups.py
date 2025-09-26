@@ -45,18 +45,6 @@ class SkyPiercer(Buff):
         return 0
 
 
-class CycloneRush(Buff):
-    levels = [1]
-
-    def __init__(self, level, params):
-        super().__init__("CycloneRush", level, params, phases=["preCombat"])
-        self.scaling = 15
-
-    def performAbility(self, phase, time, champion, input_=0):
-        champion.aspd.addStat(self.scaling)
-        return 0
-
-
 class SpiritSword(Buff):
     levels = [1]
 
@@ -68,7 +56,7 @@ class SpiritSword(Buff):
             phases=["preCombat", "onCrit", "onDealDamage"],
         )
         self.buffActive = False
-        self.proc_scaling = 0.4
+        self.proc_scaling = 0.3
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -172,6 +160,22 @@ class Bludgeoner(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.armorPierce.addStat(self.scaling)
+        return 0
+
+
+class FairyTail(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Fairy Tail (instant dmg)", level, params, phases=["postAbility"])
+        # guessing the scaling
+        self.scaling = {1: 80, 2: 119, 3: 158, 4: 236, 5: 275, 6: 275}
+
+    def performAbility(self, phase, time, champion, input_=0):
+        dmg = self.scaling[champion.stage] * 2
+        champion.doDamage(
+                    champion.opponents[0], [], 0, dmg, dmg, "magical", time
+        )
         return 0
 
 
@@ -388,18 +392,6 @@ class BestestBoy(Buff):
         return 0
 
 
-class RareTreat(Buff):
-    levels = [1]
-
-    def __init__(self, level, params):
-        super().__init__("Rare Treat", level, params, phases=["prePreCombat"])
-        self.scaling = 15
-
-    def performAbility(self, phase, time, champion, input_=0):
-        champion.trainer_level += self.scaling
-        return 0
-
-
 class PowerFont(Buff):
     levels = [1]
 
@@ -497,7 +489,7 @@ class RampingRage(Buff):
 
     def __init__(self, level, params):
         super().__init__("Ramping Rage", level, params, phases=["postAttack"])
-        self.scaling = 3
+        self.scaling = 3.5
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(self.scaling)
@@ -509,11 +501,11 @@ class Desperado(Buff):
 
     def __init__(self, level, params):
         super().__init__("Desperado", level, params, phases=["postAttack"])
-        self.attack_threshold = 12
-        self.scaling = 1.4
+        self.attack_threshold = 8
+        self.scaling = 1
 
     def performAbility(self, phase, time, champion, input_=0):
-        if champion.numAttacks % 12 == 0:
+        if champion.numAttacks % self.attack_threshold == 0:
             baseDmg = champion.atk.stat * champion.bonus_ad.stat * self.scaling
             # could change this to 5 opps
             for i in range(5):

@@ -33,6 +33,7 @@ champ_list = [
     "Senna",
     "Smolder",
     "Ashe",
+    "AsheNew",
     "Jinx",
     "Samira",
     "Yuumi",
@@ -417,9 +418,9 @@ class DrMundoHERO(Champion):
         return AD * bonus_AD + self.hp.stat * hpScale
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [140, 210, 330]
+        adScale = [120, 180, 280]
         apScale = [0, 0, 0]
-        hpScale = 0.3
+        hpScale = 0.25
         return (
             apScale[level - 1] * AP + adScale[level - 1] * AD + self.hp.stat * hpScale
         )
@@ -700,8 +701,8 @@ class KogMaw(Champion):
         hp = 650
         atk = 15
         curMana = 0
-        fullMana = 40
-        aspd = 0.75
+        fullMana = 50
+        aspd = 0.8
         armor = 30
         mr = 30
         super().__init__(
@@ -716,14 +717,14 @@ class KogMaw(Champion):
             level,
             Role.MARKSMAN,
         )
-        self.default_traits = ["MonsterTrainer"]
+        self.default_traits = [""]
         self.items.append(buffs.KogmawUlt())
         self.nextAutoEnhanced = False
         self.castTime = 0
         self.notes = ""
 
     def passiveAbilityScaling(self, level, AD, AP):
-        apScale = [36, 55, 87]
+        apScale = [50, 75, 120]
         adScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -734,8 +735,7 @@ class KogMaw(Champion):
 
     def performAbility(self, opponents, items, time):
         self.nextAutoEnhanced = True
-        if self.trainer_level >= 15:
-            self.aspd.addStat(15)
+        self.aspd.addStat(15)
 
 
 class Malzahar(Champion):
@@ -837,7 +837,7 @@ class Smolder(Champion):
         hp = 650
         atk = 55
         curMana = 0
-        fullMana = 60
+        fullMana = 50
         aspd = 0.75
         armor = 30
         mr = 30
@@ -853,13 +853,12 @@ class Smolder(Champion):
             level,
             Role.CASTER,
         )
-        self.default_traits = ["MonsterTrainer"]
-        self.trainer_level = 0
+        self.default_traits = [""]  
         self.castTime = 1  # verified
         self.notes = "Smolder passive burn not included"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [225, 340, 540]
+        adScale = [265, 400, 635]
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -875,16 +874,15 @@ class Smolder(Champion):
         self.multiTargetSpell(
             opponents, items, time, 3, self.secondaryAbilityScaling, "magical"
         )
-        if self.trainer_level >= 15:
-            if self.numCasts % 2 == 0:
-                self.multiTargetSpell(
-                    opponents,
-                    items,
-                    time,
-                    1,
-                    lambda x, y, z: 0.75 * self.abilityScaling(x, y, z),
-                    "physical",
-                )
+        if self.numCasts % 2 == 0:
+            self.multiTargetSpell(
+                opponents,
+                items,
+                time,
+                1,
+                lambda x, y, z: 0.75 * self.abilityScaling(x, y, z),
+                "physical",
+            )
 
 
 class Viego(Champion):
@@ -893,7 +891,7 @@ class Viego(Champion):
         atk = 30
         curMana = 0
         fullMana = 40
-        aspd = 0.9
+        aspd = 0.85
         armor = 60
         mr = 60
         super().__init__(
@@ -978,7 +976,7 @@ class Ziggs(Champion):
         atk = 20
         curMana = 0
         fullMana = 90
-        aspd = 0.75
+        aspd = 0.8
         armor = 30
         mr = 30
         super().__init__(
@@ -1048,6 +1046,49 @@ class Ashe(Champion):
         apScale = [1, 2, 10]
         num_arrows = round(
             (self.base_projectiles + 4 * ((self.aspd.add + 100) / 125 - 0.8))
+            * self.projectile_multiplier
+        )
+        return (apScale[level - 1] * AP + adScale[level - 1] * AD) * num_arrows
+
+    def performAbility(self, opponents, items, time):
+        self.ultAutos = 8
+
+
+class AsheNew(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 65
+        curMana = 0
+        fullMana = 80
+        aspd = 0.8
+        armor = 35
+        mr = 35
+        super().__init__(
+            "Ashe",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.items.append(buffs.AsheUlt())
+        self.base_projectiles = 8  # special case for bullet hell
+        self.projectile_multiplier = 1  # for bullet hell
+        self.manalockDuration = 999
+        self.default_traits = ["Duelist"]
+        self.ultAutos = 0
+        self.castTime = 0
+        self.notes = ""
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [17, 26, 125]
+        apScale = [1, 2, 10]
+        num_arrows = round(
+            (self.base_projectiles)
             * self.projectile_multiplier
         )
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * num_arrows
@@ -1269,7 +1310,7 @@ class Yuumi(Champion):
         atk = 40
         curMana = 0
         fullMana = 40
-        aspd = 0.75
+        aspd = 0.8
         armor = 35
         mr = 35
         super().__init__(
@@ -1286,27 +1327,27 @@ class Yuumi(Champion):
         )
         self.default_traits = ["BattleAcademia", "Prodigy"]
         self.castTime = 2.4
-        self.projectiles = 15
+        self.projectiles = 20
         self.projectile_multiplier = 1
         self.potential = 0
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [24, 36, 150]
+        apScale = [25, 38, 150]
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * math.ceil(
             self.projectiles * self.projectile_multiplier
         )
 
     def extraAbilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [24, 36, 150]
-        potentialScaling = 0.32
+        apScale = [25, 38, 150]
+        potentialScaling = 0.2
         return (
             (apScale[level - 1] * AP + adScale[level - 1] * AD)
             * potentialScaling
             * self.potential
-            * math.ceil((self.projectiles // 5) * self.projectile_multiplier)
+            * math.ceil((self.projectiles // 4) * self.projectile_multiplier)
         )
 
     def performAbility(self, opponents, items, time):
@@ -1315,7 +1356,7 @@ class Yuumi(Champion):
             self.multiTargetSpell(
                 opponents, items, time, 1, self.extraAbilityScaling, "true"
             )
-        self.projectiles += 5
+        self.projectiles += 4
 
 
 class TwistedFate(Champion):

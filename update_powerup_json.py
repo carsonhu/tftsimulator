@@ -73,5 +73,5 @@ def getChamps(output_file):
         json.dump(champ_powerups, f, indent=2, ensure_ascii=False)
 
 
-# updateJson()
+updateJson()
 getChamps("champ_powerups.json")

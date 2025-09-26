@@ -354,8 +354,7 @@ class Titans(Item):
             champion.ap.addStat(2)
         self.stacks += 1
         if self.stacks == 25:
-            champion.armor.addStat(20)
-            champion.mr.addStat(20)
+            champion.dmgMultiplier.addStat(.1)
         return 0
 
 
@@ -444,7 +443,7 @@ class SteraksGage(Item):
 
 class QSS(Item):
     def __init__(self):
-        super().__init__("Quicksilver", aspd=10, crit=20, mr=20, phases="onUpdate")
+        super().__init__("Quicksilver", aspd=15, crit=20, mr=20, phases="onUpdate")
         self.nextAS = 1
         self.asGain = 3
 
@@ -550,7 +549,7 @@ class GSNoGiant(Item):
         )
 
     def performAbility(self, phase, time, champion, input_):
-        champion.dmgMultiplier.add += 0.1
+        champion.dmgMultiplier.add += 0.15
         return 0
 
 
@@ -904,7 +903,7 @@ class RadiantGS(Item):
 
     def performAbility(self, phase, time, champion, input_):
         # input_ is target
-        champion.dmgMultiplier.add += 0.25
+        champion.dmgMultiplier.add += 0.2
         if len(champion.opponents) > 0:
             vsGiants = champion.opponents[0].hp.stat >= 1750
             if vsGiants:
@@ -996,7 +995,7 @@ class RadiantDeathblade(Item):
 
 class RadiantQSS(Item):
     def __init__(self):
-        super().__init__("Radiant Quicksilver", aspd=25, crit=40, mr=30, phases="onUpdate")
+        super().__init__("Radiant Quicksilver", aspd=40, crit=40, mr=30, phases="onUpdate")
         self.nextAS = 1
         self.asGain = 6
 
@@ -1035,8 +1034,8 @@ class RadiantAdaptive(Item):
         super().__init__(
             "Radiant Adaptive Helm",
             manaRegen=4,
-            ad=45,
-            ap=45,
+            ad=60,
+            ap=60,
             phases=["preCombat"],
         )
         self.mult = 0.3
@@ -1057,6 +1056,5 @@ class RadiantTitans(Item):
             champion.ap.addStat(3)
         self.stacks += 1
         if self.stacks == 25:
-            champion.armor.addStat(50)
-            champion.mr.addStat(50)
+            champion.dmgMultiplier.addStat(.2)
         return 0
