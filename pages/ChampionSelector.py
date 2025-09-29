@@ -1,18 +1,20 @@
 import sys
 
 sys.path.append("..")
-import set15_streamlit_main
+import copy
+import inspect
+import itertools
+
+import numpy as np
+import pandas as pd
 import streamlit as st
-import set15items
+
+import class_utilities
+import set15_streamlit_main
 import set15buffs
 import set15champs
-import class_utilities
-import pandas as pd
-import numpy as np
-import copy
-import itertools
+import set15items
 import utils
-import inspect
 
 st.set_page_config(layout="wide")
 
@@ -79,7 +81,8 @@ with st.sidebar:
         champ.percent_popped_marks = popped_marks
 
     with st.popover("Extra options / bonus stats"):
-        class_utilities.first_takedown("Takedown", champ)
+        # class_utilities.first_takedown("First Takedown", champ)
+        class_utilities.total_takedowns("takedowns", champ)
         class_utilities.num_traits("Num traits", champ)
         class_utilities.bonus_stats("Bonus Stats", champ)
     stage = class_utilities.stage_selector()
@@ -95,6 +98,7 @@ with st.sidebar:
         all_buffs, max_buffs=10, num_buffs=2, starting_buffs=champ.default_traits
     )
     buffs.append(("MentorBuff", 1, []))
+
     # get power ups
     valid_powerups = class_utilities.get_valid_powerups(champ, powerups)
     chosen_powerup = class_utilities.powerup_bar(valid_powerups)
@@ -112,6 +116,10 @@ with st.sidebar:
                 )
 
     class_utilities.mentor_selector(champ)
+
+    if "StarGuardian" in [b[0] for b in buffs]:
+        class_utilities.starguardian_selector(champ)
+
 
     enemy = class_utilities.enemy_list("Champ selector")
 

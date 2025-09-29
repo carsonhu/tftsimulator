@@ -1,8 +1,8 @@
-from item import Item
-from stats import JhinBonusAD, Attack
+import ast
 
 import status
-import ast
+from item import Item
+from stats import Attack, JhinBonusAD
 
 
 def get_classes_from_file(file_path):
@@ -35,6 +35,7 @@ class_buffs = [
     "Mentor",
     "Edgelord",
     "Bastion",
+    "StarGuardian"
 ]
 
 augments = [
@@ -43,7 +44,9 @@ augments = [
     "BlazingSoulI",
     "BlazingSoulII",
     "MacesWill",
-    "Backup",
+    "BestFriendsI",
+    "BestFriendsII",
+    "TinyButDeadly",
     "Moonlight",
     "FinalAscension",
     "CyberneticUplinkII",
@@ -299,49 +302,82 @@ class SoulFighter(Buff):
         return 0
 
 
-class StarGuardianBuff(Buff):
+class StarGuardian(Buff):
     # levels = [1]
-    levels = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    # Star guardian works differently from other traits
+    levels = [0, 1]
 
     def __init__(self, level, params):
         super().__init__(f"Star Guardian {level}", level, params, phases=["preCombat", "onUpdate", "postAbility"])
         self.scaling = {
+            0: 0, 
+            1: 1,
             2: 1,
-            3: 1.1,
-            4: 1.2,
-            5: 1.3,
-            6: 1.4,
-            7: 1.45,
-            8: 1.5,
-            9: 1.6,
-            10: 1,
+            3: 1.05,
+            4: 1.1,
+            5: 1.12,
+            6: 1.14,
+            7: 1.16,
+            8: 1.18,
+            9: 1.2,
+            10: 1.5,
         }
 
         # Syndra: Gain 5 Ability Power every 3 seconds
         self.syndra_interval = 3
         self.next_syndra = 3
-        self.syndra_ap = 5
+        self.syndra_ap = 6  
 
-        # Xayah: Every 3rd attack deals 50 (+ 60) magic damage
+        # Xayah: Every 3rd attack deals 60 (+ 75) magic damage
+        self.xayah_base = 60
+        # 1: 0, 2: 0, 3: 75, 4: 150, 5: 225, 6: 300
+        self.xayah_stage = 75
 
         # Ahri: After casting, gain 3 Mana over 2 seconds. Adjusting this to be instant only screws up syndra.
         self.ahri_mana = 3
 
-        # Jinx: +5% Attack Speed. +22% AS after takedowns, decaying over 3s
-        # Simplified to 5 + (7 x SG)
+        # Jinx: +8% Attack Speed. +25% AS after takedowns, decaying over 3s
+        # Simplified to 8 + (20.5 x SG scaling)
+        self.jinx_base = 8
+        self.jinx_scaling = 20.5
 
         # Seraphine: Gain 5 ArmorMRHealth and 5% ADASCritCrit Damage
+        self.seraphine_base = 5
+
+        # Emblem 1
+        self.emblem_scaling = .1
+        # Emblem 2
 
     def performAbility(self, phase, time, champion, input_=0):
+        emblem_scaling = 1
+        # emblem_scaling += champion.star_guardians["Emblem"] * self.emblem_scaling
+        level = sum(champion.star_guardians.values())
+        scaling = self.scaling[level] * emblem_scaling
+        if phase == "preCombat":
+            if champion.star_guardians["Jinx"]:
+                champion.aspd.addStat(self.jinx_base + self.jinx_scaling * scaling)
+            if champion.star_guardians["Seraphine"]:
+                champion.bonus_ad.addStat(self.seraphine_base * scaling)
+                champion.aspd.addStat(self.seraphine_base * scaling)
+                champion.crit.addStat(self.seraphine_base * scaling / 100)
+                champion.critDmg.addStat(self.seraphine_base * scaling / 100)
         if phase == "postAbility":
             if champion.star_guardians["Ahri"]:
-                champion.addMana(self.ahri_mana * self.scaling)
-        if champion.star_guardians["Syndra"]:
-            champion.aspd.addStat(self.asBase)
-        if champion.mentors["Ryze"]:
-            champion.manaPerAttack.addStat(self.manaPerAttackBase)
-        return 0
+                champion.addMana(self.ahri_mana * scaling)
+        if phase == "onUpdate":
+            if champion.star_guardians["Syndra"]:
+                if time > self.next_syndra:
+                    self.next_syndra += self.syndra_interval
+                    champion.ap.addStat(self.syndra_ap * scaling)
+        if phase == "preAttack":
+            if champion.star_guardians["Xayah"]:
+                if champion.numAttacks % 3 == 0:
+                    dmg = self.xayah_base + max(champion.stage - 2, 0) * self.xayah_stage
+                    dmg *= scaling
+                    champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "magical", time)
 
+        return 0
+    
 
 class Mentor(Buff):
     levels = [1, 4]
@@ -474,6 +510,17 @@ class Duelist(Buff):
 
 
 # Unit buffs
+
+
+class KaisaUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Missile Massacre", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.bonus_ad.addStat(champion.takedowns)
+        return 0
 
 
 class SmolderUlt(Buff):
@@ -803,6 +850,7 @@ class KogmawUlt(Buff):
                     opponent.applyStatus(
                         status.MRReduction("MR 30"), champion, time, 4, 0.7
                     )
+                champion.nextAutoEnhanced = False
 
         return 0
 
@@ -1089,14 +1137,38 @@ class TonsOfStats(Buff):
         return 0
 
 
-class Backup(Buff):
+class BestFriendsI(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__("Backup", level, params, phases=["preCombat"])
+        super().__init__("Best Friends I", level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(12)
+        champion.armor.addStat(12)
+        return 0
+
+
+class BestFriendsII(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Best Friends II", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(15)
+        champion.armor.addStat(20)
+        return 0
+    
+
+class TinyButDeadly(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Tiny But Deadly", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(30)
         return 0
 
 

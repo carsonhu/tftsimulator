@@ -1,2 +1,5 @@
 aliases = {"ShadowJutsu" : "ShadowClone",
-           "RareCandy" : "RareTreat"}
+           "RareCandy" : "RareTreat",
+           "Attack": "MaxAttack",
+           "Speed": "MaxSpeed",
+           "Magic": "MaxArcana"}

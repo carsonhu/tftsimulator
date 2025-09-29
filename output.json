@@ -206,8 +206,7 @@
           "{915a6902}",
           "{591747ae}",
           "{e4ea185a}",
-          "{61aa8c36}",
-          "{6effac9e}"
+          "{61aa8c36}"
         ],
         "__type": "{71ae72e5}"
       }
@@ -546,8 +545,7 @@
           "{dac4e346}",
           "{56f9397e}",
           "{67ee8e78}",
-          "{ff0e96aa}",
-          "{4293de40}"
+          "{ff0e96aa}"
         ],
         "__type": "{71ae72e5}"
       },
@@ -862,7 +860,6 @@
           "{887328ac}",
           "{61aa8c36}",
           "{67ee8e78}",
-          "{6effac9e}",
           "{fa4ccbd6}"
         ],
         "__type": "{71ae72e5}"
@@ -1015,9 +1012,7 @@
     "mConstants": {
       "Primary": {
         "traits": [
-          "{433dff6c}",
           "{4f331712}",
-          "{a942d9ea}",
           "{ccce9050}",
           "{089dd172}",
           "{dae5f970}",
@@ -1025,7 +1020,6 @@
           "{772b4c7a}",
           "{963ac64e}",
           "{a0c3c63c}",
-          "{941de572}",
           "{ba93725a}",
           "{64faa096}",
           "{e70532c2}"
@@ -4299,7 +4293,7 @@
         "__type": "GameModeConstantStringVector"
       },
       "Weight": {
-        "mValue": 10,
+        "mValue": 5,
         "__type": "GameModeConstantInteger"
       },
       "AllowMultiple": {
@@ -6617,7 +6611,7 @@
         "constants": {
           "{df085b93}": {
             "PercentDamage": {
-              "mValue": 0.05999999865889549,
+              "mValue": 0.05000000074505806,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -8837,16 +8831,16 @@
         "constants": {
           "{df085b93}": {
             "Cadence": {
-              "mValue": 10,
+              "mValue": 9,
               "__type": "GameModeConstantInteger"
             },
             "StunDuration": {
-              "mValue": 1.5,
+              "mValue": 1.0,
               "__type": "GameModeConstantFloat"
             },
-            "Damage": {
-              "mValue": 80.0,
-              "__type": "GameModeConstantFloat"
+            "InitialDelay": {
+              "mValue": 4,
+              "__type": "GameModeConstantInteger"
             }
           },
           "__type": "{d65315ee}"
@@ -11520,7 +11514,7 @@
         "__type": "GameModeConstantStringVector"
       },
       "Weight": {
-        "mValue": 10,
+        "mValue": 6,
         "__type": "GameModeConstantInteger"
       },
       "AllowMultiple": {
@@ -12568,7 +12562,7 @@
               "__type": "GameModeConstantInteger"
             },
             "ShieldPercent": {
-              "mValue": 0.15000000596046448,
+              "mValue": 0.20000000298023224,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -15408,7 +15402,7 @@
         "constants": {
           "{df085b93}": {
             "PercentHealth": {
-              "mValue": 0.25,
+              "mValue": 0.15000000596046448,
               "__type": "GameModeConstantFloat"
             }
           },
@@ -20139,7 +20133,7 @@
         "__type": "GameModeConstantStringVector"
       },
       "Weight": {
-        "mValue": 15,
+        "mValue": 6,
         "__type": "GameModeConstantInteger"
       },
       "InvalidAugments": {
@@ -20268,12 +20262,8 @@
         ],
         "constants": {
           "{df085b93}": {
-            "ASBoost": {
-              "mValue": 0.15000000596046448,
-              "__type": "GameModeConstantFloat"
-            },
-            "{24404b05}": {
-              "mValue": 4.0,
+            "{bf96824b}": {
+              "mValue": 0.25,
               "__type": "GameModeConstantFloat"
             },
             "ShieldDuration": {
@@ -20283,6 +20273,10 @@
             "{b4f50e48}": {
               "mValue": 4.0,
               "__type": "GameModeConstantFloat"
+            },
+            "{d2dba0ab}": {
+              "mValue": 5,
+              "__type": "GameModeConstantInteger"
             }
           },
           "__type": "{d65315ee}"

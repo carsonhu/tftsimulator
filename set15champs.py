@@ -1,13 +1,15 @@
-from champion import Champion
-from stats import Stat, Attack
-from collections import deque
-from role import Role
-import math
-import numpy as np
 import heapq
+import math
 import random
+from collections import deque
+
+import numpy as np
+
 import set15buffs as buffs
 import status
+from champion import Champion
+from role import Role
+from stats import Attack, Stat
 
 champ_list = [
     "Ezreal",
@@ -368,7 +370,7 @@ class Syndra(Champion):
             level,
             Role.CASTER,
         )
-        self.default_traits = ["Prodigy"]
+        self.default_traits = ["StarGuardian", "Prodigy"]
         self.castTime = 0.6
         self.chaosScaling = 0.06
         self.notes = "No MR shred, gimme a second to code SG in"
@@ -593,9 +595,10 @@ class KaiSa(Champion):
             Role.MARKSMAN,
         )
         self.default_traits = ["SupremeCells", "Duelist"]
+        self.items.append(buffs.KaisaUlt())
         self.projectiles = 8
         self.castTime = 1.5
-        self.notes = "Click 'more options' button to set bonus AD"
+        self.notes = "Click 'more options' button to set number of takedowns"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [32, 48, 75]
@@ -1121,7 +1124,7 @@ class Jinx(Champion):
         self.default_traits = ["StarGuardian", "Sniper"]
         self.items.append(buffs.JinxUlt())
         self.castTime = 1.25
-        self.notes = " "
+        self.notes = "Star Guardian not included yet."
 
     def abilityScaling(self, level, AD, AP):
         adScale = [200, 300, 900]
@@ -1205,7 +1208,7 @@ class Ryze(Champion):
         self.upgraded = False
         self.num_targets = 2
         self.castTime = 4  # verified
-        self.notes = ""
+        self.notes = "Ice bender not updated yet."
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
@@ -1223,7 +1226,7 @@ class Ryze(Champion):
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "magical")
+        # main cast dmg comes out last just to make strikers calculation better
         if self.num_targets > 1:
             self.multiTargetSpell(
                 opponents,
@@ -1243,6 +1246,8 @@ class Ryze(Champion):
                     self.waveScaling,
                     "magical",
                 )
+        self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "magical")
+        
 
 
 class Samira(Champion):

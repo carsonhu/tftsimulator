@@ -1,6 +1,7 @@
+import math
+
 from set15buffs import Buff
 from stats import JhinBonusAD
-import math
 
 
 class AttackExpert(Buff):
@@ -126,6 +127,21 @@ class DriftDuo(Buff):
         return 0
 
 
+class Hemorrhage(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Hemorrhage (Instant)", level, params, phases=["PostOnDealSpellDamage"])
+        self.scaling = .6
+
+    def performAbility(self, phase, time, champion, input_=0):
+        # input: (dmg, dtype)
+        dmg = input_[0] * self.scaling
+        champion.doDamage(
+            champion.opponents[0], [], 0, dmg, dmg, "true", time
+        )
+        return 0
+
 
 class OnTheEdge(Buff):
     levels = [1]
@@ -169,7 +185,7 @@ class FairyTail(Buff):
     def __init__(self, level, params):
         super().__init__("Fairy Tail (instant dmg)", level, params, phases=["postAbility"])
         # guessing the scaling
-        self.scaling = {1: 80, 2: 119, 3: 158, 4: 236, 5: 275, 6: 275}
+        self.scaling = {1: 80, 2: 119, 3: 158, 4: 197, 5: 236, 6: 275}
 
     def performAbility(self, phase, time, champion, input_=0):
         dmg = self.scaling[champion.stage] * 2
@@ -370,6 +386,63 @@ class Efficient(Buff):
         return 0
 
 
+class MaxSpeed(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Max Speed", level, params, phases=["preCombat"])
+        self.base = 15
+        self.takedown_interval = 3
+
+    def performAbility(self, phase, time, champion, input_=0):
+        to_add = self.base + (champion.takedowns // self.takedown_interval)
+        champion.aspd.addStat(to_add)
+        return 0
+
+
+class MaxAttack(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Max Attack", level, params, phases=["preCombat"])
+        self.base = 12
+        self.takedown_interval = 2
+
+    def performAbility(self, phase, time, champion, input_=0):
+        to_add = self.base + (champion.takedowns // self.takedown_interval)
+        champion.bonus_ad.addStat(to_add)
+        return 0
+    
+
+class MaxArcana(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Max Arcana", level, params, phases=["preCombat"])
+        self.base = 20
+        self.takedown_interval = 2
+
+    def performAbility(self, phase, time, champion, input_=0):
+        to_add = self.base + (champion.takedowns // self.takedown_interval)
+        champion.ap.addStat(to_add)
+        return 0
+
+
+class HatTrick(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Hat Trick", level, params, phases=["preCombat"])
+        self.base = 16
+        self.stat_per_takedown = .75
+
+    def performAbility(self, phase, time, champion, input_=0):
+        to_add = self.base + champion.takedowns * self.stat_per_takedown
+        champion.bonus_ad.addStat(to_add)
+        champion.ap.addStat(to_add)
+        return 0
+
+
 class BestestBoy(Buff):
     levels = [1]
 
@@ -451,7 +524,7 @@ class GatherForce(Buff):
     def __init__(self, level, params):
         super().__init__("Gather Force", level, params, phases=["preAbility"])
         self.scaling = 0.45
-
+    
     def performAbility(self, phase, time, champion, input_=0):
         champion.bonus_ad.addStat(self.scaling * champion.fullMana.stat)
         return 0

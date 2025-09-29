@@ -1,9 +1,10 @@
 import random
-import status
+
 import set15roles
+import status
 import utils
 from role import Role
-from stats import Stat, AD, Aspd, AP, Resist, Attack, ArmorPierce
+from stats import AD, AP, ArmorPierce, Aspd, Attack, Resist, Stat
 
 
 class Champion(object):
@@ -78,14 +79,21 @@ class Champion(object):
         # Mentor buffs
         self.mentors = {"Udyr": False, "Yasuo": False, "Ryze": False}
 
+        # Takedowns
+        self.takedowns = 0
+
         # Star Guardians
-        self.starguardians = {
+        self.star_guardians = {
             "Syndra": False,
             "Xayah": False,
             "Ahri": False,
+            "Poppy": False,
+            "Neeko": False,
+            "Rell": False,
             "Jinx": False,
             "Seraphine": False,
             "Emblem": False,
+            "Emblem 2": False
         }
 
         self.trainer_level = 0  # Monster trainer
@@ -133,6 +141,7 @@ class Champion(object):
             self.castTime,
             self.tactician_level,
             self.first_takedown,
+            self.takedowns,
             self.num_traits,
             self.stage,
             self.num_targets,
@@ -141,7 +150,7 @@ class Champion(object):
             self.item_count,
         )
         mentor_tuple = tuple(value for value in list(self.mentors.values()))
-        starguardian_tuple = tuple(value for value in list(self.starguardians.values()))
+        starguardian_tuple = tuple(value for value in list(self.star_guardians.values()))
         # return stat_tuple
         return items_tuple + stat_tuple + mentor_tuple + starguardian_tuple
 
@@ -418,6 +427,10 @@ class Champion(object):
         for item in items:
             # if you need to track how much dmg was actually dealt
             item.ability("PostOnDealDamage", time, self, avgDmg)
+
+        if is_spell:
+            for item in items:
+                item.ability("PostOnDealSpellDamage", time, self, avgDmg)
 
         if avgDmg:
             # record (Time, Damage Dealt, current AS, current Mana)

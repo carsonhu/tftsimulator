@@ -1,21 +1,22 @@
 # This is for commonly used functions in fated/snipers
 
-import set15_streamlit_main
+import itertools
+# import plotly.graph_objects as go
+import json
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import streamlit as st
+
+import set15_streamlit_main
 import set15buffs
 import set15champs
 import set15items
+import utils
 from set15buffs import *
 from set15champs import *
 from set15items import *
-
-# import plotly.graph_objects as go
-import json
-import pandas as pd
-import numpy as np
-import itertools
-import utils
 
 
 def buff_bar(
@@ -367,20 +368,18 @@ def enemy_list(key):
 
 
 def first_takedown(key, champ):
-    """Enemy list: Configure the base stats of the enemy: HP, Armor, and MR
-
-    Args:
-        key (string): unique key for streamlit
-
-    Returns:
-        Champion: a champion with the requested hp, armor, and mr
-    """
-
     # st.subheader("First takedown")
     first_takedown = st.number_input(
         "Time of first takedown", min_value=1, max_value=30, value=5, key=key
     )
     champ.first_takedown = first_takedown
+
+
+def total_takedowns(key, champ):
+    takedowns = st.number_input(
+        "Total takedowns", min_value=0, max_value=100, value=0, key=key
+    )
+    champ.takedowns = takedowns
 
 
 def bonus_stats(key, champ):
@@ -496,7 +495,7 @@ def starguardian_selector(champion):
     }
 
     for index, name in enumerate(list(starguardians.keys())):
-        with item_cols[index]:
+        with item_cols[index % 3]:
             champ_stargs = champion.name == name
             starguardians[name] = st.checkbox(name, value=champ_stargs)
     champion.starguardians = starguardians
