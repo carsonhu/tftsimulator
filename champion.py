@@ -96,7 +96,7 @@ class Champion(object):
             "Emblem 2": False
         }
 
-        self.trainer_level = 0  # Monster trainer
+        self.tiny_team = False
 
         self.tactician_level = 4
         self.first_takedown = 5  # time of first takedown
@@ -130,6 +130,7 @@ class Champion(object):
             self.mr.stat,
             self.bonus_ad.stat,
             self.manaPerAttack.stat,
+            self.manaRegen.stat,
             self.manaGainMultiplier.stat,
             self.level,
             self.dmgMultiplier.stat,

@@ -108,6 +108,7 @@ with st.sidebar:
 
     extra_buffs = []
     for buff in buffs:
+        # Buff: ("Name", level, param)
         levels = utils.class_for_name("set15buffs", buff[0]).levels
         for level in levels:
             if level != buff[1]:
@@ -133,6 +134,8 @@ with st.sidebar:
     class_utilities.add_buffs(champ, buffs)
 
     champ_before_sims = copy.deepcopy(champ)
+
+    print("Champ buffs: ", champ_before_sims.items)
 
 if chosen_powerup == "NoBuff":
     for powerup in powerups:
@@ -182,6 +185,10 @@ with tab1:
     options = ["Craftable", "Artifact", "Radiant", "Trait", "Augment/Buff"]
     if len([item for item in items if item != "NoItem"]) >= 3:
         options = ["Trait", "Augment/Buff"]
+
+    # if "Star Guardian" in buffs, add "star Guardian" option
+    if any(buff.name.startswith("Star Guardian") for buff in champ_before_sims.items):
+        options.append("Star Guardian")
     if chosen_powerup == "NoBuff":
         options.append("Powerup")
 
@@ -189,6 +196,14 @@ with tab1:
 
     df = set15_streamlit_main.createSelectorDPSTable(simLists)
     df_flt = df
+
+    # starguardian filter
+    star_guardians = list(champ.star_guardians.keys())
+    sg_list = []
+    for sign in ["+", "-"]:
+        for sg in star_guardians:
+            sg_list.append("Star Guardian ({}{})".format(sign, sg))
+
 
     if radio_value == "Craftable":
         df_flt = df_flt[df_flt["Extra class name"].isin(craftables + ["NoItem"])]
@@ -210,6 +225,8 @@ with tab1:
         ]
     if radio_value == "Powerup":
         df_flt = df_flt[df_flt["Extra class name"].isin(valid_powerups + ["NoItem"])]
+    if radio_value == "Star Guardian":
+        df_flt = df_flt[df_flt["Extra"].isin(sg_list + ["NoItem"])]
 
     new_df = df_flt.drop(["Extra class name", "Name", "Level"], axis=1)
 

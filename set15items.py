@@ -1,9 +1,10 @@
 # from collections import deque
 import re
-from item import Item
-from role import Role
+
 import set15buffs
 import status
+from item import Item
+from role import Role
 
 # from champion import Stat
 
@@ -50,6 +51,7 @@ artifacts = [
     "Flickerblade",
     "ShivArtifact",
     "Dawncore",
+    "TitanicHydra",
     "CrownOfDemacia",
 ]
 
@@ -98,7 +100,7 @@ class Rabadons(Item):
 
 class Bloodthirster(Item):
     def __init__(self):
-        super().__init__("Bloodthirster", ad=15, ap=15, omnivamp=0.20, phases=None)
+        super().__init__("Bloodthirster", ad=20, ap=20, omnivamp=0.20, phases=None)
 
 
 class EdgeOfNight(Item):
@@ -596,7 +598,7 @@ class InfinityForce(Item):
 
 class Fishbones(Item):
     def __init__(self):
-        super().__init__("Fishbones", aspd=30, ad=20, phases=None)
+        super().__init__("Fishbones", aspd=50, ad=50, phases=None)
 
     def performAbility(self, phase, time, champion, input_):
         return 0
@@ -612,7 +614,7 @@ class RFC(Item):
 
 class Mittens(Item):
     def __init__(self):
-        super().__init__("Mittens", aspd=60, phases=None)
+        super().__init__("Mittens", aspd=75, phases=None)
 
     def performAbility(self, phase, time, champion, input_):
         return 0
@@ -652,6 +654,23 @@ class LichBane(Item):
                     champion.opponents[0], [], 0, dmg, dmg, "magical", time
                 )
                 self.enhancedAuto = False
+        return 0
+
+
+class TitanicHydra(Item):
+    def __init__(self):
+        super().__init__(
+            "Titanic Hydra (2 targets)", ad=20, aspd=20, hp=300, phases=["preAttack"]
+        )
+        self.hp_scaling = .03
+        self.ad_scaling = .08
+
+    def performAbility(self, phase, time, champion, input_=0):
+        dmg = champion.hp.stat * self.hp_scaling + self.ad_scaling * champion.atk.stat * champion.bonus_ad.stat
+        for opp in range(2):
+            champion.doDamage(
+                champion.opponents[opp], [], 0, dmg, dmg, "physical", time
+            )
         return 0
 
 
@@ -711,7 +730,7 @@ class Flickerblade(Item):
 
 class Dawncore(Item):
     def __init__(self):
-        super().__init__("Dawncore", ad=20, ap=20, phases=["preCombat", "postAbility"])
+        super().__init__("Dawncore", ad=15, ap=15, phases=["preCombat", "postAbility"])
         self.counter = 0
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -933,7 +952,7 @@ class RadiantNashors(Nashors):
         self.name = "Radiant Nashor's Tooth"
         self.hp = 200
         self.ap = 30
-        self.aspd = 20
+        self.aspd = 10
         self.crit = 35
         self.manaBonus = 4
         self.manaCritBonus = 4

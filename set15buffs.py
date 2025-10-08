@@ -41,6 +41,7 @@ class_buffs = [
 augments = [
     "BackupDancers",
     "Shred30",
+    "Shred20",
     "BlazingSoulI",
     "BlazingSoulII",
     "MacesWill",
@@ -71,6 +72,7 @@ augments = [
     "WaterLotusI",
     "WaterLotusII",
     "Hero101",
+    "TinyTeam"
 ]
 
 stat_buffs = ["ASBuff"]
@@ -305,10 +307,10 @@ class SoulFighter(Buff):
 class StarGuardian(Buff):
     # levels = [1]
     # Star guardian works differently from other traits
-    levels = [0, 1]
+    levels = [1]
 
     def __init__(self, level, params):
-        super().__init__(f"Star Guardian {level}", level, params, phases=["preCombat", "onUpdate", "postAbility"])
+        super().__init__(f"Star Guardian {level}", level, params, phases=["preCombat", "preAttack", "onUpdate", "postAbility"])
         self.scaling = {
             0: 0, 
             1: 1,
@@ -329,17 +331,17 @@ class StarGuardian(Buff):
         self.syndra_ap = 6  
 
         # Xayah: Every 3rd attack deals 60 (+ 75) magic damage
-        self.xayah_base = 60
+        self.xayah_base = 50
         # 1: 0, 2: 0, 3: 75, 4: 150, 5: 225, 6: 300
-        self.xayah_stage = 75
+        self.xayah_stage = 60
 
         # Ahri: After casting, gain 3 Mana over 2 seconds. Adjusting this to be instant only screws up syndra.
-        self.ahri_mana = 3
+        self.ahri_mana = 5
 
         # Jinx: +8% Attack Speed. +25% AS after takedowns, decaying over 3s
-        # Simplified to 8 + (20.5 x SG scaling)
+        # Simplified to 8 + (15 x SG scaling)
         self.jinx_base = 8
-        self.jinx_scaling = 20.5
+        self.jinx_scaling = 15
 
         # Seraphine: Gain 5 ArmorMRHealth and 5% ADASCritCrit Damage
         self.seraphine_base = 5
@@ -350,7 +352,10 @@ class StarGuardian(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         emblem_scaling = 1
-        # emblem_scaling += champion.star_guardians["Emblem"] * self.emblem_scaling
+        emblem_scaling += champion.star_guardians["Emblem"] * self.emblem_scaling + \
+            champion.star_guardians["Emblem 2"] * self.emblem_scaling
+        if champion.tiny_team:
+            emblem_scaling *= 2
         level = sum(champion.star_guardians.values())
         scaling = self.scaling[level] * emblem_scaling
         if phase == "preCombat":
@@ -549,6 +554,30 @@ class KennenUlt(Buff):
             champion.passiveAbilityScaling,
             "magical",
         )
+        return 0
+
+
+class XayahUlt(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Sharp Feathers Shine", level, params, phases=["preAttack"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.ultAutos > 0:
+            champion.multiTargetSpell(
+                champion.opponents,
+                champion.items,
+                time,
+                3,
+                champion.abilityScaling,
+                "physical",
+            )
+            champion.ultAutos -= 1
+            if champion.ultAutos == 0:
+                champion.manalockTime = time + 0.01
+                champion.aspd.addStat(-1 * champion.spellASBonus)
+                champion.spellASBonus = 0
         return 0
 
 
@@ -1043,7 +1072,6 @@ class GlassCannonI(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        # vayne bolts inflicts status "Silver Bolts"
         super().__init__("Glass Cannon I", level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -1055,11 +1083,10 @@ class KnowYourEnemy(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        # vayne bolts inflicts status "Silver Bolts"
         super().__init__("Know Your Enemy", level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.dmgMultiplier.addStat(0.15)
+        champion.dmgMultiplier.addStat(0.18)
         return 0
 
 
@@ -1103,6 +1130,17 @@ class Hero101(Buff):
                 champion.fullMana.mult -= self.scaling
                 break
         return 0
+
+
+class TinyTeam(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Tiny Team", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if sum(champion.star_guardians.values()) <= 3:
+            champion.tiny_team = True
 
 
 class MacesWill(Buff):
@@ -1227,7 +1265,7 @@ class PumpingUpII(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__("Pumping Up II", level, params, phases=["preCombat"])
-        self.base_scaling = 8
+        self.base_scaling = 10
         self.bonus_scaling = 1
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -1242,7 +1280,7 @@ class PumpingUpIII(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__("Pumping Up III", level, params, phases=["preCombat"])
-        self.base_scaling = 12
+        self.base_scaling = 16
         self.bonus_scaling = 2
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -1397,32 +1435,22 @@ class CyberneticUplinkII(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__("Cybernetic Uplink II", level, params, phases=["onUpdate"])
+        super().__init__("Cybernetic Uplink II", level, params, phases=["preCombat"])
         self.manaBonus = 2
-        self.nextBonus = 1
 
     def performAbility(self, phase, time, champion, input_=0):
-        if phase == "onUpdate":
-            if time >= self.nextBonus:
-                champion.addMana(self.manaBonus)
-                self.nextBonus += 1
-        return 0
+        champion.manaRegen.addStat(self.manaBonus)
 
 
 class CyberneticUplinkIII(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__("Cybernetic Uplink III", level, params, phases=["onUpdate"])
+        super().__init__("Cybernetic Uplink III", level, params, phases=["preCombat"])
         self.manaBonus = 3
-        self.nextBonus = 1
 
     def performAbility(self, phase, time, champion, input_=0):
-        if phase == "onUpdate":
-            if time >= self.nextBonus:
-                champion.addMana(self.manaBonus)
-                self.nextBonus += 1
-        return 0
+        champion.manaRegen.addStat(self.manaBonus)
 
 
 class Shred30(Buff):
@@ -1437,4 +1465,19 @@ class Shred30(Buff):
                 status.ArmorReduction("Armor 30"), champion, time, 30, 0.7
             )
             opponent.applyStatus(status.MRReduction("MR 30"), champion, time, 30, 0.7)
+        return 0
+
+
+class Shred20(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("20% Armor/MR Shred", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        for opponent in champion.opponents:
+            opponent.applyStatus(
+                status.ArmorReduction("Armor 20"), champion, time, 30, 0.8
+            )
+            opponent.applyStatus(status.MRReduction("MR 20"), champion, time, 30, 0.8)
         return 0

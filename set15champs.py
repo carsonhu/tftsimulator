@@ -26,6 +26,7 @@ champ_list = [
     "Jhin",
     "Gangplank",
     "Katarina",
+    "Xayah",
     "Caitlyn",
     "KogMaw",
     "Malzahar",
@@ -35,7 +36,6 @@ champ_list = [
     "Senna",
     "Smolder",
     "Ashe",
-    "AsheNew",
     "Jinx",
     "Samira",
     "Yuumi",
@@ -247,7 +247,7 @@ class KennenHERO(Champion):
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [160, 240, 360]
+        apScale = [145, 220, 330]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def passiveAbilityScaling(self, level, AD, AP):
@@ -420,7 +420,7 @@ class DrMundoHERO(Champion):
         return AD * bonus_AD + self.hp.stat * hpScale
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [120, 180, 280]
+        adScale = [100, 150, 225]
         apScale = [0, 0, 0]
         hpScale = 0.25
         return (
@@ -641,12 +641,54 @@ class ShenHERO(Champion):
 
     def abilityScaling(self, level, AD, AP):
         mrScale = [0.75, 1.15, 1.75]
-        apScale = [70, 105, 170]
+        apScale = [60, 80, 140]
         return apScale[level - 1] * AP + mrScale[level - 1] * self.mr.stat
 
     def performAbility(self, opponents, items, time):
         self.ultAutos = 3
 
+
+class Xayah(Champion):
+    def __init__(self, level):
+        hp = 550
+        atk = 45
+        curMana = 20
+        fullMana = 70
+        aspd = 0.75
+        armor = 25
+        mr = 25
+        super().__init__(
+            "Xayah",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.items.append(buffs.XayahUlt())
+        self.manalockDuration = 999
+        self.default_traits = ["StarGuardian", "Edgelord"]
+        self.ultAutos = 0
+        self.spellASBonus = 0
+        self.as_base = 80
+        self.castTime = 0
+        self.notes = ""
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [50, 75, 115]
+        apScale = [0, 0, 0]
+        return (apScale[level - 1] * AP + adScale[level - 1] * AD)
+
+    def performAbility(self, opponents, items, time):
+        self.ultAutos = 3
+        as_bonus = self.as_base * self.ap.stat
+        self.spellASBonus = as_bonus
+        self.aspd.addStat(self.spellASBonus)
+    
 
 class Caitlyn(Champion):
     def __init__(self, level):
@@ -742,6 +784,7 @@ class KogMaw(Champion):
 
 
 class Malzahar(Champion):
+    # Bug: in-game dmg doesn't snapshot with archangels, but in sim it does
     def __init__(self, level):
         hp = 800
         atk = 40
@@ -772,10 +815,6 @@ class Malzahar(Champion):
         return apScale[level - 1] * AP / self.buff_duration
 
     def performAbility(self, opponents, items, time):
-        # self.multiTargetSpell(opponents, items,
-        #                 time, 1,
-        #                 self.abilityScaling,
-        #                 'physical')
         opponents[0].applyStatus(
             status.DoTEffect("Malz {}".format(self.numCasts)),
             self,
@@ -808,7 +847,7 @@ class Senna(Champion):
         )
         self.num_targets = 2
         self.default_traits = ["Executioner"]
-        self.castTime = 2.4  # semi-verified
+        self.castTime = 2  # semi-verified
         self.notes = "No mana refund"
 
     def abilityScaling(self, level, AD, AP):
@@ -861,7 +900,7 @@ class Smolder(Champion):
         self.notes = "Smolder passive burn not included"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [265, 400, 635]
+        adScale = [290, 435, 700]
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -1014,7 +1053,7 @@ class Ziggs(Champion):
         )
 
 
-class Ashe(Champion):
+class AsheOld(Champion):
     def __init__(self, level):
         hp = 850
         atk = 65
@@ -1057,10 +1096,10 @@ class Ashe(Champion):
         self.ultAutos = 8
 
 
-class AsheNew(Champion):
+class Ashe(Champion):
     def __init__(self, level):
         hp = 850
-        atk = 65
+        atk = 68
         curMana = 0
         fullMana = 80
         aspd = 0.8
@@ -1088,8 +1127,8 @@ class AsheNew(Champion):
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [17, 26, 125]
-        apScale = [1, 2, 10]
+        adScale = [20, 35, 150]
+        apScale = [2, 3, 15]
         num_arrows = round(
             (self.base_projectiles)
             * self.projectile_multiplier
@@ -1124,7 +1163,8 @@ class Jinx(Champion):
         self.default_traits = ["StarGuardian", "Sniper"]
         self.items.append(buffs.JinxUlt())
         self.castTime = 1.25
-        self.notes = "Star Guardian not included yet."
+        self.super_mega = False
+        self.notes = "Jinx is reinterpreted as flat AS instead of on takedown"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [200, 300, 900]
@@ -1136,12 +1176,20 @@ class Jinx(Champion):
         apScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
+    def superMegaAbilityScaling(self, level, AD, AP):
+        return self.aoeAbilityScaling(level, AD, AP) * 1.5
+
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
-            opponents, items, time, 1, self.abilityScaling, "physical")
+                opponents, items, time, 1, self.abilityScaling, "physical")
+        if not self.super_mega or self.numCasts % 3 != 0:
+            scaling = self.aoeAbilityScaling
+        else:
+            scaling = self.superMegaAbilityScaling
         self.multiTargetSpell(
-            opponents, items, time, 1, self.aoeAbilityScaling, "physical"
+            opponents, items, time, 1, scaling, "physical"
         )
+
 
 
 class Karma(Champion):
@@ -1212,7 +1260,7 @@ class Ryze(Champion):
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
-        apScale = [770, 1155, 6000] if not self.upgraded else [800, 1200, 6000]
+        apScale = [850, 1275, 7000]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def secondaryAbilityScaling(self, level, AD, AP):
@@ -1398,7 +1446,7 @@ class TwistedFate(Champion):
         return apScale[level - 1] * AP
 
     def abilityScalingPhysical(self, level, AD, AP):
-        adScale = [200, 300, 9999]
+        adScale = [230, 350, 9999]
         return adScale[level - 1] * AD
 
     def abilityScalingMagical(self, level, AD, AP):

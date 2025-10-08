@@ -3,6 +3,8 @@ import math
 from set15buffs import Buff
 from stats import JhinBonusAD
 
+import status
+
 
 class AttackExpert(Buff):
     levels = [1]
@@ -35,7 +37,7 @@ class SkyPiercer(Buff):
 
     def __init__(self, level, params):
         super().__init__("Sky Piercer", level, params, phases=["preCombat"])
-        self.scaling = 0.08
+        self.scaling = 0.05
 
     def performAbility(self, phase, time, champion, input_=0):
         for opponent in champion.opponents:
@@ -127,19 +129,46 @@ class DriftDuo(Buff):
         return 0
 
 
+class FuryBreak(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__(
+            "Fury Break (10s)", level, params, phases=["preCombat", "onUpdate"]
+        )
+        self.as_scaling = 25
+        self.time_bonus = 10
+        self.buff_duration = 4
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.aspd.addStat(self.as_scaling)
+        if phase == "onUpdate":
+            if time > self.time_bonus:
+                self.time_bonus = 999
+                champion.applyStatus(
+                    status.DecayingASModifier("FuryBreak"),
+                    self,
+                    time,
+                    self.buff_duration,
+                    300,
+                )
+        return 0
+
+
 class Hemorrhage(Buff):
     levels = [1]
 
     def __init__(self, level, params):
-        super().__init__("Hemorrhage (Instant)", level, params, phases=["PostOnDealSpellDamage"])
-        self.scaling = .6
+        super().__init__(
+            "Hemorrhage (Instant)", level, params, phases=["PostOnDealSpellDamage"]
+        )
+        self.scaling = 0.6
 
     def performAbility(self, phase, time, champion, input_=0):
         # input: (dmg, dtype)
         dmg = input_[0] * self.scaling
-        champion.doDamage(
-            champion.opponents[0], [], 0, dmg, dmg, "true", time
-        )
+        champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "true", time)
         return 0
 
 
@@ -183,15 +212,15 @@ class FairyTail(Buff):
     levels = [1]
 
     def __init__(self, level, params):
-        super().__init__("Fairy Tail (instant dmg)", level, params, phases=["postAbility"])
+        super().__init__(
+            "Fairy Tail (instant dmg)", level, params, phases=["postAbility"]
+        )
         # guessing the scaling
         self.scaling = {1: 80, 2: 119, 3: 158, 4: 197, 5: 236, 6: 275}
 
     def performAbility(self, phase, time, champion, input_=0):
         dmg = self.scaling[champion.stage] * 2
-        champion.doDamage(
-                    champion.opponents[0], [], 0, dmg, dmg, "magical", time
-        )
+        champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "magical", time)
         return 0
 
 
@@ -251,8 +280,10 @@ class IceBender(Buff):
     levels = [1]
 
     def __init__(self, level, params):
-        super().__init__("Ice Bender", level, params, phases=["preCombat", "preAbility"])
-        self.scaling = .25
+        super().__init__(
+            "Ice Bender", level, params, phases=["preCombat", "preAbility"]
+        )
+        self.scaling = 0.25
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.name == "Ryze":
@@ -386,6 +417,42 @@ class Efficient(Buff):
         return 0
 
 
+class Weights(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Weights", level, params, phases=["preCombat"])
+        self.scaling = 50
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(self.scaling)
+        return 0
+
+
+class WindWall(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Wind Wall", level, params, phases=["preCombat"])
+        self.scaling = 0.6
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.crit.addStat(self.scaling)
+        return 0
+
+
+class CornerCarry(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Corner Carry", level, params, phases=["preCombat"])
+        self.scaling = 30
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(self.scaling)
+        return 0
+
+
 class MaxSpeed(Buff):
     levels = [1]
 
@@ -412,7 +479,7 @@ class MaxAttack(Buff):
         to_add = self.base + (champion.takedowns // self.takedown_interval)
         champion.bonus_ad.addStat(to_add)
         return 0
-    
+
 
 class MaxArcana(Buff):
     levels = [1]
@@ -434,7 +501,7 @@ class HatTrick(Buff):
     def __init__(self, level, params):
         super().__init__("Hat Trick", level, params, phases=["preCombat"])
         self.base = 16
-        self.stat_per_takedown = .75
+        self.stat_per_takedown = 0.75
 
     def performAbility(self, phase, time, champion, input_=0):
         to_add = self.base + champion.takedowns * self.stat_per_takedown
@@ -523,11 +590,10 @@ class GatherForce(Buff):
 
     def __init__(self, level, params):
         super().__init__("Gather Force", level, params, phases=["preAbility"])
-        self.scaling = 0.45
-    
+        self.scaling = 0.4
+
     def performAbility(self, phase, time, champion, input_=0):
         champion.bonus_ad.addStat(self.scaling * champion.fullMana.stat)
-        return 0
 
 
 class DarkAmulet(Buff):
@@ -539,7 +605,18 @@ class DarkAmulet(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.ap.addStat(self.scaling)
-        return 0
+
+
+class SuperMega(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Super Mega", level, params, phases=["preCombat"])
+        self.scaling = 20
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.bonus_ad.addStat(self.scaling)
+        champion.super_mega = True
 
 
 class MindBattery(Buff):

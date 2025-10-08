@@ -1,20 +1,22 @@
-from set15items import *
-import matplotlib.pyplot as plt
-from scipy import interpolate
-import time
 import copy
 import csv
-from collections import deque, defaultdict
-from set15champs import *
-from set15buffs import *
-from champion import Champion
-import set15items
-import numpy as np
 import itertools
-import xlsxwriter
-import streamlit as st
+import time
+from collections import defaultdict, deque
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import streamlit as st
+import xlsxwriter
+from scipy import interpolate
+
+import set15items
 import utils
+from champion import Champion
+from set15buffs import *
+from set15champs import *
+from set15items import *
 
 
 class ObjectWrapper:
@@ -615,7 +617,26 @@ def doExperimentOneExtraWrapped(
             [copy.deepcopy(opponent) for i in range(8)],
             t,
         )
+
         simList.append({"Champ": champ, "Extra": buff, "Results": results})
+
+    if any(buff.name.startswith("Star Guardian") for buff in champion.items):
+        for sg in champion.star_guardians:
+            champ = copy.deepcopy(champion)
+            champ.star_guardians[sg] = not champ.star_guardians[sg]
+            
+            results = simulator.simulate([], [], champ,
+                                         [copy.deepcopy(opponent) for i in range(8)],
+                                         t, frameRate)
+            plus = "+" if champ.star_guardians[sg] else "-"
+            sg_buff = Buff("Star Guardian ({}{})".format(plus, sg), 1, 0, None)
+            simList.append({"Champ": champ, "Extra": sg_buff, "Results": results})
+
+            
+            
+    # Star Guardian:
+    # if star guardian is in the buff list:
+    # no need to remove a buff: instead copy buff? and rename it "Star Guardian (+x) and Star Guardian (-x)
 
     return simList
 
@@ -739,8 +760,8 @@ def createSelectorDPSTable(simLists):
 
         # for index, item in enumerate(sorted_items):
         new_entry["Extra"] = sim["Extra"].name
+        # print(new_entry["Extra"])
         new_entry["Extra class name"] = type(sim["Extra"]).__name__
-
         # DPS at 5s
         for t in [5, 10, 15, 20, 25]:
             res = getDPS(sim["Results"], t)

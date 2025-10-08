@@ -401,12 +401,18 @@ def bonus_stats(key, champ):
         dmgamp_bonus = st.number_input(
             "DmgAmp", min_value=0, max_value=1000, value=0, key=key + "dmgamp"
         )
+        manaregen_bonus = st.number_input(
+            "ManaRegen", min_value=0, max_value=10, value=0, key=key + "manaregen"
+        )
     with cols[1]:
         ap_bonus = st.number_input(
             "Bonus AP", min_value=0, max_value=2000, value=0, key=key + "ap"
         )
         crit_bonus = st.number_input(
             "Bonus Crit", min_value=0, max_value=200, value=0, key=key + "crit"
+        )
+        mpa_bonus = st.number_input(
+            "ManaPerAuto", min_value=0, max_value=15, value=0, key=key + "mpa"
         )
     with cols[2]:
         as_bonus = st.number_input(
@@ -426,6 +432,8 @@ def bonus_stats(key, champ):
     champ.bonus_ad.addStat(ad_bonus)
     champ.ap.addStat(ap_bonus)
     champ.aspd.addStat(as_bonus)
+    champ.manaRegen.addStat(manaregen_bonus)
+    champ.manaPerAttack.addStat(mpa_bonus)
     champ.dmgMultiplier.addStat(dmgamp_bonus / 100)
     champ.crit.addStat(crit_bonus / 100)
     champ.critDmg.addStat(crit_dmg_bonus / 100)
@@ -468,8 +476,6 @@ def mentor_selector(champion):
     st.header("Mentor Buffs")
     item_cols = st.columns(3)
 
-    buffs = []
-
     mentors = {"Udyr": False, "Yasuo": False, "Ryze": False}
 
     for index, name in enumerate(list(mentors.keys())):
@@ -483,22 +489,24 @@ def starguardian_selector(champion):
     st.header("Star Guardian Buffs")
     item_cols = st.columns(3)
 
-    buffs = []
-
-    starguardians = {
+    star_guardians = {
         "Syndra": False,
         "Xayah": False,
         "Ahri": False,
+        "Poppy": False,
+        "Neeko": False,
+        "Rell": False,
         "Jinx": False,
         "Seraphine": False,
         "Emblem": False,
+        "Emblem 2": False
     }
 
-    for index, name in enumerate(list(starguardians.keys())):
+    for index, name in enumerate(list(star_guardians.keys())):
         with item_cols[index % 3]:
             champ_stargs = champion.name == name
-            starguardians[name] = st.checkbox(name, value=champ_stargs)
-    champion.starguardians = starguardians
+            star_guardians[name] = st.checkbox(name, value=champ_stargs)
+    champion.star_guardians = star_guardians
 
 
 def champ_selector(champ_list):
