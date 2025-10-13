@@ -4,12 +4,12 @@ import random
 from collections import deque
 
 import numpy as np
-
 import set15buffs as buffs
-import status
-from champion import Champion
 from role import Role
 from stats import Attack, Stat
+
+import status
+from champion import Champion
 
 champ_list = [
     "Ezreal",
@@ -23,6 +23,7 @@ champ_list = [
     "Syndra",
     "DrMundoHERO",
     "ShenHERO",
+    "Janna",
     "Jhin",
     "Gangplank",
     "Katarina",
@@ -35,6 +36,7 @@ champ_list = [
     "Ryze",
     "Senna",
     "Smolder",
+    "Akali",
     "Ashe",
     "Jinx",
     "Samira",
@@ -521,6 +523,44 @@ class Gangplank(Champion):
         )
 
 
+class Janna(Champion):
+    def __init__(self, level):
+        hp = 600
+        atk = 35
+        curMana = 10
+        fullMana = 60
+        aspd = 0.7
+        armor = 25
+        mr = 25
+        super().__init__(
+            "Janna",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["Strategist"]
+        self.castTime = 1.65
+        self.projectiles = 4
+        self.notes = "No veteran yet; checkmark all 3 mentors and manually add the stats in extra options"
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [130, 195, 310]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        for p in range(self.projectiles):
+            self.multiTargetSpell(
+                opponents, items, time, 1, self.abilityScaling, "magical"
+            )
+
+
 class Katarina(Champion):
     def __init__(self, level):
         hp = 800
@@ -676,19 +716,19 @@ class Xayah(Champion):
         self.spellASBonus = 0
         self.as_base = 80
         self.castTime = 0
-        self.notes = ""
+        self.notes = "Edgelord is coded as +20% AS, jinx is flat AS as well"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [50, 75, 115]
         apScale = [0, 0, 0]
-        return (apScale[level - 1] * AP + adScale[level - 1] * AD)
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
         self.ultAutos = 3
         as_bonus = self.as_base * self.ap.stat
         self.spellASBonus = as_bonus
         self.aspd.addStat(self.spellASBonus)
-    
+
 
 class Caitlyn(Champion):
     def __init__(self, level):
@@ -895,7 +935,7 @@ class Smolder(Champion):
             level,
             Role.CASTER,
         )
-        self.default_traits = [""]  
+        self.default_traits = [""]
         self.castTime = 1  # verified
         self.notes = "Smolder passive burn not included"
 
@@ -1096,6 +1136,55 @@ class AsheOld(Champion):
         self.ultAutos = 8
 
 
+class Akali(Champion):
+    def __init__(self, level):
+        hp = 1050
+        atk = 30
+        curMana = 0
+        fullMana = 40
+        aspd = 0.7
+        armor = 65
+        mr = 65
+        super().__init__(
+            "Akali",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.FIGHTER,
+        )
+        self.default_traits = ["SupremeCells", "Executioner"]
+        self.castTime = 1.5
+        self.num_targets = 2
+        self.notes = "Akali itemization is about maximizing invulnerability; use for traits/augs primarily"
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [95, 145, 1000]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def dashAbilityScaling(self, level, AD, AP):
+        adScale = [0, 0, 0]
+        apScale = [75, 115, 1500]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "magical")
+        if self.num_targets > 1:
+            self.multiTargetSpell(
+                opponents,
+                items,
+                time,
+                self.num_targets - 1,
+                self.dashAbilityScaling,
+                "magical",
+            )
+
+
 class Ashe(Champion):
     def __init__(self, level):
         hp = 850
@@ -1129,10 +1218,7 @@ class Ashe(Champion):
     def abilityScaling(self, level, AD, AP):
         adScale = [20, 35, 150]
         apScale = [2, 3, 15]
-        num_arrows = round(
-            (self.base_projectiles)
-            * self.projectile_multiplier
-        )
+        num_arrows = round((self.base_projectiles) * self.projectile_multiplier)
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * num_arrows
 
     def performAbility(self, opponents, items, time):
@@ -1181,15 +1267,13 @@ class Jinx(Champion):
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
-                opponents, items, time, 1, self.abilityScaling, "physical")
+            opponents, items, time, 1, self.abilityScaling, "physical"
+        )
         if not self.super_mega or self.numCasts % 3 != 0:
             scaling = self.aoeAbilityScaling
         else:
             scaling = self.superMegaAbilityScaling
-        self.multiTargetSpell(
-            opponents, items, time, 1, scaling, "physical"
-        )
-
+        self.multiTargetSpell(opponents, items, time, 1, scaling, "physical")
 
 
 class Karma(Champion):
@@ -1295,7 +1379,6 @@ class Ryze(Champion):
                     "magical",
                 )
         self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "magical")
-        
 
 
 class Samira(Champion):

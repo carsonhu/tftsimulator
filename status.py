@@ -51,8 +51,8 @@ class Status(object):
 
 
 class DoTEffect(Status):
-    # increase AS by %
-    # NOTE: does not work with stacking
+    # apply damage once per second. in-game it's at least every half-second
+    # but this is chill for clarity
     def __init__(self, name):
         super().__init__("DoT {}".format(name))
         self.scaling = lambda x, y, z: 0
@@ -64,8 +64,6 @@ class DoTEffect(Status):
         return True
 
     def reapplicationEffect(self, champion, time, duration, params):
-        # champion.aspd.add += params
-        # self.addition = params
         return True
 
     def wearoffEffect(self, champion, time):

@@ -1,8 +1,9 @@
 import ast
 
-import status
 from item import Item
 from stats import Attack, JhinBonusAD
+
+import status
 
 
 def get_classes_from_file(file_path):
@@ -35,7 +36,7 @@ class_buffs = [
     "Mentor",
     "Edgelord",
     "Bastion",
-    "StarGuardian"
+    "StarGuardian",
 ]
 
 augments = [
@@ -60,7 +61,6 @@ augments = [
     "PumpingUpI",
     "PumpingUpII",
     "PumpingUpIII",
-    "NoScoutNoPivot",
     "HoldTheLine",
     "AdaptiveStyle",
     "MessHall",
@@ -72,7 +72,7 @@ augments = [
     "WaterLotusI",
     "WaterLotusII",
     "Hero101",
-    "TinyTeam"
+    "TinyTeam",
 ]
 
 stat_buffs = ["ASBuff"]
@@ -310,9 +310,14 @@ class StarGuardian(Buff):
     levels = [1]
 
     def __init__(self, level, params):
-        super().__init__(f"Star Guardian {level}", level, params, phases=["preCombat", "preAttack", "onUpdate", "postAbility"])
+        super().__init__(
+            f"Star Guardian {level}",
+            level,
+            params,
+            phases=["preCombat", "preAttack", "onUpdate", "postAbility"],
+        )
         self.scaling = {
-            0: 0, 
+            0: 0,
             1: 1,
             2: 1,
             3: 1.05,
@@ -328,7 +333,7 @@ class StarGuardian(Buff):
         # Syndra: Gain 5 Ability Power every 3 seconds
         self.syndra_interval = 3
         self.next_syndra = 3
-        self.syndra_ap = 6  
+        self.syndra_ap = 6
 
         # Xayah: Every 3rd attack deals 60 (+ 75) magic damage
         self.xayah_base = 50
@@ -347,13 +352,15 @@ class StarGuardian(Buff):
         self.seraphine_base = 5
 
         # Emblem 1
-        self.emblem_scaling = .1
+        self.emblem_scaling = 0.1
         # Emblem 2
 
     def performAbility(self, phase, time, champion, input_=0):
         emblem_scaling = 1
-        emblem_scaling += champion.star_guardians["Emblem"] * self.emblem_scaling + \
-            champion.star_guardians["Emblem 2"] * self.emblem_scaling
+        emblem_scaling += (
+            champion.star_guardians["Emblem"] * self.emblem_scaling
+            + champion.star_guardians["Emblem 2"] * self.emblem_scaling
+        )
         if champion.tiny_team:
             emblem_scaling *= 2
         level = sum(champion.star_guardians.values())
@@ -377,12 +384,16 @@ class StarGuardian(Buff):
         if phase == "preAttack":
             if champion.star_guardians["Xayah"]:
                 if champion.numAttacks % 3 == 0:
-                    dmg = self.xayah_base + max(champion.stage - 2, 0) * self.xayah_stage
+                    dmg = (
+                        self.xayah_base + max(champion.stage - 2, 0) * self.xayah_stage
+                    )
                     dmg *= scaling
-                    champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "magical", time)
+                    champion.doDamage(
+                        champion.opponents[0], [], 0, dmg, dmg, "magical", time
+                    )
 
         return 0
-    
+
 
 class Mentor(Buff):
     levels = [1, 4]
@@ -838,10 +849,8 @@ class JinxUlt(Buff):
             max_amt = self.max_AS[champion.level - 1] * champion.ap.stat
             amt = 6 if not self.attack_critted else 9
             amt *= champion.ap.stat
-            # print("Jinx current AP: ", champion.ap.stat)
             if max_amt > self.current_bonus:
                 amt_to_add = min(max_amt - self.current_bonus, amt)
-                # print("Amt to add: ", amt_to_add)
                 self.current_bonus += amt_to_add
                 champion.aspd.addStat(amt_to_add)
             self.attack_critted = False
@@ -851,7 +860,9 @@ class KogmawUlt(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__("Static Surge", level, params, phases=["preAttack", "preCombat"])
+        super().__init__(
+            "Static Surge", level, params, phases=["preAttack", "preCombat"]
+        )
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -1197,7 +1208,7 @@ class BestFriendsII(Buff):
         champion.aspd.addStat(15)
         champion.armor.addStat(20)
         return 0
-    
+
 
 class TinyButDeadly(Buff):
     levels = [1]
