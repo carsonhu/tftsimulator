@@ -134,10 +134,10 @@ class FuryBreak(Buff):
 
     def __init__(self, level, params):
         super().__init__(
-            "Fury Break (10s)", level, params, phases=["preCombat", "onUpdate"]
+            "Fury Break (15s)", level, params, phases=["preCombat", "onUpdate"]
         )
         self.as_scaling = 25
-        self.time_bonus = 10
+        self.time_bonus = 15
         self.buff_duration = 4
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -333,6 +333,7 @@ class Mage(Buff):
                 champion.dmgMultiplier.mult + self.dmgMultiplierScaling
             )
         elif phase == "postAbility":
+            champion.numCasts += 1
             champion.performAbility(champion.opponents, champion.items, time)
 
 

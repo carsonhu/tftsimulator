@@ -848,7 +848,7 @@ class Malzahar(Champion):
         self.default_traits = ["Prodigy"]
         self.buff_duration = 15
         self.castTime = 0.5  # Verified
-        self.notes = ""
+        self.notes = "Arch a bit bugged compared to in-game. Malz bugs not included."
 
     def dotScaling(self, level, AD, AP):
         apScale = [515, 775, 1315]

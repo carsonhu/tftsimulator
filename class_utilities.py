@@ -1,18 +1,18 @@
 # This is for commonly used functions in fated/snipers
 
 import itertools
+
 # import plotly.graph_objects as go
 import json
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import streamlit as st
-
 import set15_streamlit_main
 import set15buffs
 import set15champs
 import set15items
+import streamlit as st
 import utils
 from set15buffs import *
 from set15champs import *
@@ -212,6 +212,8 @@ def plot_df(df, simLists):
 
     for index in indices_to_plot:
         new_entry = {}
+        # (Time, Damage Dealt, current AS, current Mana, full Mana)
+
         dmgList = pd.DataFrame(
             [
                 [
@@ -219,7 +221,11 @@ def plot_df(df, simLists):
                     damageInstance[1][0],
                     damageInstance[1][1],
                     damageInstance[2],
-                    damageInstance[3],
+                    (
+                        "{} / {}".format(damageInstance[3], damageInstance[4])
+                        if damageInstance[4] > 0
+                        else str(damageInstance[3])
+                    ),
                 ]
                 for damageInstance in simLists[index]["Results"]
             ]
@@ -229,8 +235,6 @@ def plot_df(df, simLists):
         dmgList = dmgList[["Time", "Dmg", "Total Dmg", "Type", "AS", "Mana"]]
 
         new_entry["Dmg"] = dmgList
-
-        rounded_list = dmgList.round(2)
 
         # st.write(simLists[to_plot])
 
@@ -486,6 +490,11 @@ def mentor_selector(champion):
 
 
 def starguardian_selector(champion):
+    """Select which Star Guardians will be enabled
+
+    Args:
+        champion (Champion): Champion selected. Their Star guardian will be set to true.
+    """
     st.header("Star Guardian Buffs")
     item_cols = st.columns(3)
 
@@ -499,7 +508,7 @@ def starguardian_selector(champion):
         "Jinx": False,
         "Seraphine": False,
         "Emblem": False,
-        "Emblem 2": False
+        "Emblem 2": False,
     }
 
     for index, name in enumerate(list(star_guardians.keys())):

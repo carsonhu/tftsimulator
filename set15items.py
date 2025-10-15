@@ -2,9 +2,10 @@
 import re
 
 import set15buffs
-import status
 from item import Item
 from role import Role
+
+import status
 
 # from champion import Stat
 
@@ -132,7 +133,6 @@ class GuinsoosRageblade(Item):
             if champion.aspd.stat <= 5:
                 champion.aspd.add += self.aspd_bonus
             self.next_bonus += 1
-        return 0
 
 
 class CrownOfDemacia(Item):
@@ -151,7 +151,6 @@ class CrownOfDemacia(Item):
             champion.bonus_ad.addStat(self.scaling)
             champion.ap.addStat(self.scaling)
             self.next_bonus += 2
-        return 0
 
 
 class Archangels(Item):
@@ -169,7 +168,6 @@ class Archangels(Item):
         if time > self.nextAP:
             champion.ap.addStat(20)
             self.nextAP += 5
-        return 0
 
 
 class VoidStaff(Item):
@@ -186,15 +184,11 @@ class VoidStaff(Item):
     def performAbility(self, phase, time, champion, input_=0):
         for opponent in champion.opponents:
             opponent.mr.mult = 0.7
-        return 0
 
 
 class Warmogs(Item):
     def __init__(self):
         super().__init__("Warmogs", hp=1000, phases=None)
-
-    def performAbility(self, phase, time, champion, input_=0):
-        return 0
 
 
 class HoJ(Item):
@@ -210,18 +204,12 @@ class HoJ(Item):
             phases=None,
         )
 
-    def performAbility(self, phase, time, champion, input_=0):
-        return 0
-
 
 class TacticiansCrown(Item):
     def __init__(self):
         super().__init__(
             "Tacticians' Crown (Coronation)", aspd=20, ad=25, ap=30, phases=None
         )
-
-    def performAbility(self, phase, time, champion, input_=0):
-        return 0
 
 
 class StrikersFlail(Item):
@@ -250,7 +238,6 @@ class StrikersFlail(Item):
             self.dmg_amp_value,
         )
         self.current_buff = (self.current_buff + 1) % 4
-        return 0
 
 
 class Guardbreaker(Item):
@@ -267,7 +254,6 @@ class Guardbreaker(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += 0.25
-        return 0
 
 
 class GuardbreakerNoGuard(Item):
@@ -284,7 +270,6 @@ class GuardbreakerNoGuard(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += 0.1
-        return 0
 
 
 class InfinityEdge(Item):
@@ -301,7 +286,6 @@ class InfinityEdge(Item):
         if champion.canSpellCrit:
             champion.critDmg.add += 0.1
         champion.canSpellCrit = True
-        return 0
 
 
 class LastWhisper(Item):
@@ -319,7 +303,6 @@ class LastWhisper(Item):
         # NOTE: LW usually applies AFTER attack but we want to calculate w/ reduced armor
         for opponent in champion.opponents:
             opponent.armor.mult = 0.7
-        return 0
 
 
 class Shojin(Item):
@@ -332,11 +315,9 @@ class Shojin(Item):
             has_radiant=True,
             phases=["preCombat"],
         )
-        self.counter = 0
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.manaPerAttack.addStat(5)
-        return 0
 
 
 class Titans(Item):
@@ -356,8 +337,7 @@ class Titans(Item):
             champion.ap.addStat(2)
         self.stacks += 1
         if self.stacks == 25:
-            champion.dmgMultiplier.addStat(.1)
-        return 0
+            champion.dmgMultiplier.addStat(0.1)
 
 
 class Nashors(Item):
@@ -387,7 +367,6 @@ class Nashors(Item):
         elif phase == "postAttack" and self.isActive:
             champion.manaPerAttack.addStat(-1 * self.manaCritBonus)
             self.isActive = False
-        return 0
 
 
 class Adaptive(Item):
@@ -404,7 +383,6 @@ class Adaptive(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.manaGainMultiplier.addStat(0.15)
-        return 0
 
 
 class KrakensFury(Item):
@@ -426,7 +404,6 @@ class KrakensFury(Item):
         elif self.stacks == self.maxStacks:
             champion.aspd.addStat(40)
             self.stacks += 1
-        return 0
 
 
 class Deathblade(Item):
@@ -435,7 +412,6 @@ class Deathblade(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += 0.1
-        return 0
 
 
 class SteraksGage(Item):
@@ -453,7 +429,6 @@ class QSS(Item):
         if time >= self.nextAS:
             champion.aspd.addStat(self.asGain)
             self.nextAS += 1
-        return 0
 
 
 class JeweledGauntlet(Item):
@@ -470,7 +445,6 @@ class JeweledGauntlet(Item):
         if champion.canSpellCrit:
             champion.critDmg.add += 0.1
         champion.canSpellCrit = True
-        return 0
 
 
 class Red(Item):
@@ -483,9 +457,6 @@ class Morellos(Item):
         super().__init__(
             "Morellos (no burn yet)", ap=20, manaRegen=1, hp=150, phases=None
         )
-
-    def performAbility(self, phase, time, champion, input_=0):
-        return 0
 
 
 class Shiv(Item):
@@ -513,7 +484,6 @@ class Shiv(Item):
             for opponent in champion.opponents[0 : self.shivTargets]:
                 champion.doDamage(opponent, [], 0, baseDmg, baseDmg, "magical", time)
                 opponent.applyStatus(status.MRReduction("MR"), champion, time, 5, 0.7)
-        return 0
 
 
 class GS(Item):
@@ -535,7 +505,6 @@ class GS(Item):
             vsGiants = champion.opponents[0].role == Role.TANK
             if vsGiants:
                 champion.dmgMultiplier.add += 0.15
-        return 0
 
 
 class GSNoGiant(Item):
@@ -552,7 +521,6 @@ class GSNoGiant(Item):
 
     def performAbility(self, phase, time, champion, input_):
         champion.dmgMultiplier.add += 0.15
-        return 0
 
 
 class Bramble(Item):
@@ -570,12 +538,11 @@ class Blue(Item):
             has_radiant=True,
             phases="preCombat",
         )
-        self.multScaling = .1
+        self.multScaling = 0.1
 
     def performAbility(self, phase, time, champion, input_):
         champion.ap.addMultiplier += self.multScaling
         champion.bonus_ad.addMultiplier += self.multScaling
-        return 0
 
 
 ### ARTIFACTS
@@ -600,40 +567,25 @@ class Fishbones(Item):
     def __init__(self):
         super().__init__("Fishbones", aspd=50, ad=50, phases=None)
 
-    def performAbility(self, phase, time, champion, input_):
-        return 0
-
 
 class RFC(Item):
     def __init__(self):
         super().__init__("Rapid Firecannon", aspd=75, phases=None)
-
-    def performAbility(self, phase, time, champion, input_):
-        return 0
 
 
 class Mittens(Item):
     def __init__(self):
         super().__init__("Mittens", aspd=75, phases=None)
 
-    def performAbility(self, phase, time, champion, input_):
-        return 0
-
 
 class GamblersBlade(Item):
     def __init__(self):
         super().__init__("Gambler's Blade (30g)", aspd=65, ap=10, phases=None)
 
-    def performAbility(self, phase, time, champion, input_):
-        return 0
-
 
 class GoldCollector(Item):
     def __init__(self):
         super().__init__("Gold Collector", ad=25, crit=30, phases=None)
-
-    def performAbility(self, phase, time, champion, input_):
-        return 0
 
 
 class LichBane(Item):
@@ -654,7 +606,6 @@ class LichBane(Item):
                     champion.opponents[0], [], 0, dmg, dmg, "magical", time
                 )
                 self.enhancedAuto = False
-        return 0
 
 
 class TitanicHydra(Item):
@@ -662,16 +613,18 @@ class TitanicHydra(Item):
         super().__init__(
             "Titanic Hydra (2 targets)", ad=20, aspd=20, hp=300, phases=["preAttack"]
         )
-        self.hp_scaling = .03
-        self.ad_scaling = .08
+        self.hp_scaling = 0.03
+        self.ad_scaling = 0.08
 
     def performAbility(self, phase, time, champion, input_=0):
-        dmg = champion.hp.stat * self.hp_scaling + self.ad_scaling * champion.atk.stat * champion.bonus_ad.stat
+        dmg = (
+            champion.hp.stat * self.hp_scaling
+            + self.ad_scaling * champion.atk.stat * champion.bonus_ad.stat
+        )
         for opp in range(2):
             champion.doDamage(
                 champion.opponents[opp], [], 0, dmg, dmg, "physical", time
             )
-        return 0
 
 
 class WitsEnd(Item):
@@ -684,7 +637,6 @@ class WitsEnd(Item):
         champion.doDamage(
             champion.opponents[0], [], 0, baseDmg, baseDmg, "magical", time
         )
-        return 0
 
 
 class ShivArtifact(Item):
@@ -709,7 +661,6 @@ class ShivArtifact(Item):
             # only consider dmg to primary target
             for opponent in champion.opponents[0 : self.shivTargets]:
                 champion.doDamage(opponent, [], 0, baseDmg, baseDmg, "magical", time)
-        return 0
 
 
 class Flickerblade(Item):
@@ -725,7 +676,6 @@ class Flickerblade(Item):
             champion.bonus_ad.addStat(3)
             champion.ap.addStat(4)
             self.counter = 0
-        return 0
 
 
 class Dawncore(Item):
@@ -740,7 +690,6 @@ class Dawncore(Item):
             if champion.fullMana.stat > 15:
                 # we don't want to use mult since we do want it to round.
                 champion.fullMana.addStat(-1 * (champion.fullMana.stat // 10))
-        return 0
 
 
 ### RADIANTS
@@ -783,7 +732,6 @@ class RadiantStrikersFlail(Item):
             self.dmg_amp_value,
         )
         self.current_buff = (self.current_buff + 1) % 4
-        return 0
 
 
 class RadiantGuardbreaker(Item):
@@ -798,7 +746,6 @@ class RadiantGuardbreaker(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += 0.5
-        return 0
 
 
 class RadiantShiv(Item):
@@ -819,7 +766,6 @@ class RadiantShiv(Item):
             for opponent in champion.opponents[0 : self.shivTargets]:
                 champion.doDamage(opponent, [], 0, baseDmg, baseDmg, "magical", time)
                 opponent.applyStatus(status.MRReduction("MR"), champion, time, 5, 0.7)
-        return 0
 
 
 class RadiantBlue(Item):
@@ -831,12 +777,11 @@ class RadiantBlue(Item):
             ad=30,
             phases="preCombat",
         )
-        self.multScaling = .2
+        self.multScaling = 0.2
 
     def performAbility(self, phase, time, champion, input_):
         champion.ap.mult += self.multScaling
         champion.bonus_ad.mult += self.multScaling
-        return 0
 
 
 class RadiantArchangels(Item):
@@ -848,7 +793,6 @@ class RadiantArchangels(Item):
         if time > self.nextAP:
             champion.ap.add += 35
             self.nextAP += 4
-        return 0
 
 
 class RadiantGuinsoosRageblade(Item):
@@ -864,7 +808,6 @@ class RadiantGuinsoosRageblade(Item):
             if champion.aspd.stat <= 5:
                 champion.aspd.add += self.aspd_bonus
             self.next_bonus += 1
-        return 0
 
 
 class RadiantKrakensFury(Item):
@@ -885,7 +828,6 @@ class RadiantKrakensFury(Item):
         elif self.stacks == self.maxStacks:
             champion.aspd.addStat(80)
             self.stacks += 1
-        return 0
 
 
 class RadiantHoJ(Item):
@@ -900,9 +842,6 @@ class RadiantHoJ(Item):
             phases=None,
         )
 
-    def performAbility(self, phase, time, champion, input_=0):
-        return 0
-
 
 class RadiantLastWhisper(Item):
     def __init__(self):
@@ -912,7 +851,6 @@ class RadiantLastWhisper(Item):
         # NOTE: LW usually applies AFTER attack but we want to calculate w/ reduced armor
         for opponent in champion.opponents:
             opponent.armor.mult = 0.7
-        return 0
 
 
 class RadiantGS(Item):
@@ -927,7 +865,6 @@ class RadiantGS(Item):
             vsGiants = champion.opponents[0].hp.stat >= 1750
             if vsGiants:
                 champion.dmgMultiplier.add += 0.3
-        return 0
 
 
 class RadiantRabadons(Item):
@@ -943,7 +880,6 @@ class RadiantJeweledGauntlet(Item):
         if champion.canSpellCrit:
             champion.critDmg.add += 0.1
         champion.canSpellCrit = True
-        return 0
 
 
 class RadiantNashors(Nashors):
@@ -971,7 +907,6 @@ class RadiantShojin(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.manaPerAttack.addStat(10)
-        return 0
 
 
 class RadiantVoidStaff(Item):
@@ -987,7 +922,6 @@ class RadiantVoidStaff(Item):
     def performAbility(self, phase, time, champion, input_=0):
         for opponent in champion.opponents:
             opponent.mr.mult = 0.7
-        return 0
 
 
 class RadiantInfinityEdge(Item):
@@ -1000,7 +934,6 @@ class RadiantInfinityEdge(Item):
         if champion.canSpellCrit:
             champion.critDmg.add += 0.1
         champion.canSpellCrit = True
-        return 0
 
 
 class RadiantDeathblade(Item):
@@ -1009,12 +942,13 @@ class RadiantDeathblade(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += 0.2
-        return 0
 
 
 class RadiantQSS(Item):
     def __init__(self):
-        super().__init__("Radiant Quicksilver", aspd=40, crit=40, mr=30, phases="onUpdate")
+        super().__init__(
+            "Radiant Quicksilver", aspd=40, crit=40, mr=30, phases="onUpdate"
+        )
         self.nextAS = 1
         self.asGain = 6
 
@@ -1022,7 +956,6 @@ class RadiantQSS(Item):
         if time >= self.nextAS:
             champion.aspd.addStat(self.asGain)
             self.nextAS += 1
-        return 0
 
 
 class RadiantRed(Item):
@@ -1031,7 +964,6 @@ class RadiantRed(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += 0.1
-        return 0
 
 
 class RadiantMorellos(Item):
@@ -1043,9 +975,6 @@ class RadiantMorellos(Item):
             hp=150,
             phases=None,
         )
-
-    def performAbility(self, phase, time, champion, input_=0):
-        return 0
 
 
 class RadiantAdaptive(Item):
@@ -1061,7 +990,6 @@ class RadiantAdaptive(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.manaGainMultiplier.addStat(self.mult)
-        return 0
 
 
 class RadiantTitans(Item):
@@ -1075,5 +1003,4 @@ class RadiantTitans(Item):
             champion.ap.addStat(3)
         self.stacks += 1
         if self.stacks == 25:
-            champion.dmgMultiplier.addStat(.2)
-        return 0
+            champion.dmgMultiplier.addStat(0.2)

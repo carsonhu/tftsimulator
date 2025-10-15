@@ -1,10 +1,11 @@
 import random
 
 import set15roles
-import status
 import utils
 from role import Role
 from stats import AD, AP, ArmorPierce, Aspd, Attack, Resist, Stat
+
+import status
 
 
 class Champion(object):
@@ -93,7 +94,7 @@ class Champion(object):
             "Jinx": False,
             "Seraphine": False,
             "Emblem": False,
-            "Emblem 2": False
+            "Emblem 2": False,
         }
 
         self.tiny_team = False
@@ -151,7 +152,9 @@ class Champion(object):
             self.item_count,
         )
         mentor_tuple = tuple(value for value in list(self.mentors.values()))
-        starguardian_tuple = tuple(value for value in list(self.star_guardians.values()))
+        starguardian_tuple = tuple(
+            value for value in list(self.star_guardians.values())
+        )
         # return stat_tuple
         return items_tuple + stat_tuple + mentor_tuple + starguardian_tuple
 
@@ -434,7 +437,7 @@ class Champion(object):
                 item.ability("PostOnDealSpellDamage", time, self, avgDmg)
 
         if avgDmg:
-            # record (Time, Damage Dealt, current AS, current Mana)
+            # record (Time, Damage Dealt, current AS, current Mana, full Mana)
             self.dmgVector.append(
                 (time, avgDmg, self.aspd.stat, self.curMana, self.fullMana.stat)
             )
