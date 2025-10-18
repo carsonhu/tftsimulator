@@ -212,15 +212,32 @@ class FairyTail(Buff):
     levels = [1]
 
     def __init__(self, level, params):
-        super().__init__(
-            "Fairy Tail (instant dmg)", level, params, phases=["postAbility"]
-        )
+        super().__init__("Fairy Tail", level, params, phases=["postAbility"])
         # guessing the scaling
-        self.scaling = {1: 80, 2: 119, 3: 158, 4: 197, 5: 236, 6: 275}
+        base = 80
+        final = 275
+        increment = (final - base) / 4
+
+        self.scaling = {
+            1: 80,
+            2: 80,
+            3: 80 + increment,
+            4: 80 + increment * 2,
+            5: 80 + increment * 3,
+            6: 80 + increment * 4,
+        }
+        self.buff_duration = 8
 
     def performAbility(self, phase, time, champion, input_=0):
         dmg = self.scaling[champion.stage] * 2
-        champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "magical", time)
+        champion.opponents[0].applyStatus(
+            status.DoTEffectNoItems("FairyTail {}".format(champion.numCasts)),
+            champion,
+            time,
+            self.buff_duration,
+            dmg,
+        )
+        # champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "magical", time)
         return 0
 
 

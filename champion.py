@@ -378,6 +378,8 @@ class Champion(object):
             )
 
     def critDamage(self):
+        # Crit chance < 1: critdmg.stat
+        # Crit chance > 1: add half the overfill crit chance to dmg
         return self.critDmg.stat + max(0, 0 + (self.crit.stat - 1) / 2)
 
     def doDamage(

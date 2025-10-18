@@ -73,6 +73,7 @@ augments = [
     "WaterLotusII",
     "Hero101",
     "TinyTeam",
+    "FuryBreakAlly",
 ]
 
 stat_buffs = ["ASBuff"]
@@ -929,6 +930,33 @@ class ShenUlt(Buff):
 
 
 # AUGMENTS
+
+
+class FuryBreakAlly(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            "Ally Fury Break (5s)", level, params, phases=["preCombat", "onUpdate"]
+        )
+        self.as_scaling = 25
+        self.time_bonus = 5
+        self.buff_duration = 4
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.aspd.addStat(self.as_scaling)
+        if phase == "onUpdate":
+            if time > self.time_bonus:
+                self.time_bonus = 999
+                champion.applyStatus(
+                    status.DecayingASModifier("FuryBreak"),
+                    self,
+                    time,
+                    self.buff_duration,
+                    300,
+                )
+        return 0
 
 
 class LearnFromTheBest(Buff):

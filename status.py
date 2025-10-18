@@ -86,18 +86,41 @@ class DoTEffect(Status):
         super().update(champion, time)
 
 
-class VarusBolts(Status):
-    def __init__(self, wearoff_time):
-        super().__init__("Varus Bolt", wearoff_time=wearoff_time)
+class DoTEffectNoItems(Status):
+    # bad code but this is for fairy tail
+    # no scaling, just raw damage
+    def __init__(self, name):
+        super().__init__("DoT {}".format(name))
+        self.damage = 0
+        self.next_proc = 0
 
     def applicationEffect(self, champion, time, duration, params):
+        self.damage = params / duration
+        self.next_proc = math.floor(time) + 1
         return True
 
     def reapplicationEffect(self, champion, time, duration, params):
         return True
 
     def wearoffEffect(self, champion, time):
+        self.next_proc = 999
         return True
+
+    def update(self, champion, time):
+        if time > self.next_proc:
+            # do damage
+            self.opponent.doDamage(
+                self.opponent.opponents[0],
+                [],
+                0,
+                self.damage,
+                self.damage,
+                "magical",
+                time,
+            )
+
+            self.next_proc += 1
+        super().update(champion, time)
 
 
 class UltActivator(Status):
