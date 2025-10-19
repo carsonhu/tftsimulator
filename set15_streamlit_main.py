@@ -7,16 +7,16 @@ from collections import defaultdict, deque
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import set15items
 import streamlit as st
+import utils
 import xlsxwriter
 from scipy import interpolate
-
-import set15items
-import utils
-from champion import Champion
 from set15buffs import *
 from set15champs import *
 from set15items import *
+
+from champion import Champion
 
 
 class ObjectWrapper:
@@ -82,7 +82,7 @@ def resNoDmg(res, label):
 
 
 def plotRes(res, label):
-    plt.plot(res[0], res    [1], label)
+    plt.plot(res[0], res[1], label)
 
 
 def getDPS(results, time):
@@ -516,7 +516,6 @@ def createDPScsv(simLists):
 def doExperiment(champion, opponent, itemList, buffList, t):
     simulator = Simulator()
     simList = []
-    # buffList.append(buffs.NoBuff(0,[]))
     for itemCombo in itemList:
         for buffCombo in buffList:
             champ = copy.deepcopy(champion)
@@ -624,16 +623,14 @@ def doExperimentOneExtraWrapped(
         for sg in champion.star_guardians:
             champ = copy.deepcopy(champion)
             champ.star_guardians[sg] = not champ.star_guardians[sg]
-            
-            results = simulator.simulate([], [], champ,
-                                         [copy.deepcopy(opponent) for i in range(8)],
-                                         t, frameRate)
+
+            results = simulator.simulate(
+                [], [], champ, [copy.deepcopy(opponent) for i in range(8)], t, frameRate
+            )
             plus = "+" if champ.star_guardians[sg] else "-"
             sg_buff = Buff("Star Guardian ({}{})".format(plus, sg), 1, 0, None)
             simList.append({"Champ": champ, "Extra": sg_buff, "Results": results})
 
-            
-            
     # Star Guardian:
     # if star guardian is in the buff list:
     # no need to remove a buff: instead copy buff? and rename it "Star Guardian (+x) and Star Guardian (-x)
@@ -716,7 +713,6 @@ def createUnitDPSTable(simLists):
             noitem = sorted(items[0:index] + ["NoItem"] + items[index + 1 :])
             noitem_key = (entry["Name"], entry["Level"]) + tuple(noitem) + tuple(buffs)
             item_key = (entry["Name"], entry["Level"]) + tuple(items) + tuple(buffs)
-            print(noitem_key)
             entry["Item {} DPS".format(index + 1)] = round(
                 (
                     dpsDict[item_key] / dpsDict[noitem_key]
@@ -731,7 +727,6 @@ def createUnitDPSTable(simLists):
             nobuff = sorted(buffs[0:index] + ["NoItem"] + buffs[index + 1 :])
             nobuff_key = (entry["Name"], entry["Level"]) + tuple(items) + tuple(nobuff)
             buff_key = (entry["Name"], entry["Level"]) + tuple(items) + tuple(buffs)
-            print(nobuff_key)
             entry["Buff {} DPS".format(index + 1)] = round(
                 (
                     dpsDict[buff_key] / dpsDict[nobuff_key]
@@ -784,8 +779,6 @@ def createSelectorDPSTable(simLists):
     for entry in entries:
         items = [entry["Extra"]]
         for index, item in enumerate(items):
-            # noitem = sorted(items[0:index] + ['NoItem'] + items[index+1:])
-            # nobuff = sorted(items[0:index] + ['NoBuff'] + items[index+1:])
 
             noitem_key = (entry["Name"], entry["Level"], "NoItem")
             nobuff_key = (entry["Name"], entry["Level"], "NoItem")
