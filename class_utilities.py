@@ -1,22 +1,18 @@
 # This is for commonly used functions in fated/snipers
 
-import itertools
-
 # import plotly.graph_objects as go
 import json
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-import set15_streamlit_main
 import set15buffs
-import set15champs
-import set15items
 import streamlit as st
 import utils
 from set15buffs import *
 from set15champs import *
 from set15items import *
+
+from set15.helpers import buff_display_map, item_display_map
 
 
 def buff_bar(
@@ -32,6 +28,11 @@ def buff_bar(
     Returns:
         tuple: (buff name, buff level, params)
     """
+
+    # display name -> class name
+    buff_map = buff_display_map(buff_list)
+    buff_list = list(buff_map.keys())
+    # buff_list = buff_display_names(buff_list)
     st.header("Global Buffs")
     item_cols = st.columns([2, 1, 1])
     num_buffs = st.slider(
@@ -53,6 +54,7 @@ def buff_bar(
             buff1 = st.selectbox(
                 "Buff {}".format(n + 1), buff_list, key="Buff {}".format(n), index=index
             )
+            buff1 = buff_map[buff1]
         with item_cols[1]:
             buff1level = st.selectbox(
                 "Level",
@@ -305,38 +307,53 @@ def frameRate(key):
 
 
 def items_list(items, default_item="NoItem", num_items=3):
-    """Items list: Display 3 select boxes for the 3 items to be calculated.
-
-    Args:
-      items (list[str]): list of strings for item names
-
-    Returns:
-      (string, string, string): the 3 items
     """
+    Items list: Display select boxes for choosing items by display name,
+    but return the corresponding class names.
+    """
+    # Mapping: {DisplayName: ClassName}
+    display_map = item_display_map(items)
 
+    # Get the lists separately for clarity
+    display_names = list(display_map.keys())
+
+    # --- default handling ---
     def reset_items():
-        st.session_state.Items1 = default_item
-        st.session_state.Items2 = default_item
-        st.session_state.Items3 = default_item
+        for i in range(1, num_items + 1):
+            st.session_state[f"Items{i}"] = default_item
 
-    # index = 0
-    # if default_item in items:
-    #     index = items.index(default_item)
+    for i in range(1, num_items + 1):
+        key = f"Items{i}"
+        if key not in st.session_state:
+            st.session_state[key] = default_item
 
-    for item in ["Items1", "Items2", "Items3"]:
-        if item not in st.session_state:
-            st.session_state[item] = default_item
-
-    # col1, col2, col3 = st.columns(3)
-
+    # --- UI rendering ---
     item_buttons = []
     for n in range(1, num_items + 1):
-        item_buttons.append(
-            st.selectbox("Item {}".format(n), items, key="Items{}".format(n))
+        # Find the current selected display name
+        current_class = st.session_state[f"Items{n}"]
+        current_display = next(
+            (disp for disp, cls in display_map.items() if cls == current_class),
+            list(display_map.keys())[0],  # fallback to first
         )
 
-    st.button("Reset items", on_click=reset_items)
+        selected_display = st.selectbox(
+            f"Item {n}",
+            display_names,
+            index=(
+                display_names.index(current_display)
+                if current_display in display_names
+                else 0
+            ),
+            key=f"Items{n}_display",
+        )
 
+        # Convert back to class name
+        selected_class = display_map[selected_display]
+        st.session_state[f"Items{n}"] = selected_class
+        item_buttons.append(selected_class)
+
+    st.button("Reset items", on_click=reset_items)
     return item_buttons
 
 
@@ -493,7 +510,8 @@ def starguardian_selector(champion):
     """Select which Star Guardians will be enabled
 
     Args:
-        champion (Champion): Champion selected. Their Star guardian will be set to true.
+        champion (Champion): Champion selected
+          Their Star guardian will be set to true.
     """
     st.header("Star Guardian Buffs")
     item_cols = st.columns(3)
