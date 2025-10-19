@@ -25,7 +25,7 @@ class SolarBreath(Buff):
 
     def __init__(self, level, params):
         super().__init__("Solar Breath", level, params, phases=["preCombat"])
-        self.scaling = 0.15
+        self.scaling = 0.1
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.extraDmgMultiplier.addStat(self.scaling)

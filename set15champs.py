@@ -168,7 +168,7 @@ class Kalista(Champion):
         )
         self.default_traits = ["SoulFighter", "Executioner"]
         self.castTime = 0.5
-        self.notes = "Click 'more options' button to set bonus AD"
+        self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
         adScale = [380, 570, 900]
@@ -375,7 +375,7 @@ class Syndra(Champion):
         self.default_traits = ["StarGuardian", "Prodigy"]
         self.castTime = 0.6
         self.chaosScaling = 0.06
-        self.notes = "No MR shred, gimme a second to code SG in"
+        self.notes = "No MR shred"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [0, 0, 0]
@@ -479,7 +479,7 @@ class Jhin(Champion):
         self.castTime = 0
         self.ultMultiplier = 1
         self.manaGainMultiplier.base = 0
-        self.notes = "Wraith not coded yet"
+        self.notes = "Wraith not coded"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [190, 285, 440]
@@ -509,8 +509,8 @@ class Gangplank(Champion):
             Role.FIGHTER,
         )
         self.default_traits = ["Duelist"]
-        self.castTime = 1
-        self.notes = ""
+        self.castTime = 0
+        self.notes = "Cast time scales with AS; seems to be essentially 0"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [285, 430, 775]
@@ -638,7 +638,10 @@ class KaiSa(Champion):
         self.items.append(buffs.KaisaUlt())
         self.projectiles = 8
         self.castTime = 1.5
-        self.notes = "Click 'more options' button to set number of takedowns"
+        self.notes = (
+            "Click 'more options' button to set number of takedowns. Kaisa cast time seems to have slight AS scaling ingame,"
+            "             to a minimum of 1 second. This is not implemented in sims."
+        )
 
     def abilityScaling(self, level, AD, AP):
         adScale = [32, 48, 75]

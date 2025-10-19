@@ -48,6 +48,8 @@ augments = [
     "MacesWill",
     "BestFriendsI",
     "BestFriendsII",
+    "TrifectaI",
+    "TrifectaII",
     "TinyButDeadly",
     "Moonlight",
     "FinalAscension",
@@ -1235,6 +1237,28 @@ class BestFriendsII(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(15)
         champion.armor.addStat(20)
+        return 0
+
+
+class TrifectaI(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Trifecta I", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(20)
+        return 0
+
+
+class TrifectaII(Buff):
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__("Trifecta II", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(30)
         return 0
 
 
