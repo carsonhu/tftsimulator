@@ -8,7 +8,7 @@ import pandas as pd
 import set15buffs
 import streamlit as st
 import utils
-from helpers import buff_display_map, item_display_map
+from helpers import buff_display_map, buff_display_names, item_display_map
 from set15buffs import *
 from set15champs import *
 from set15items import *
@@ -30,6 +30,7 @@ def buff_bar(
 
     # display name -> class name
     buff_map = buff_display_map(buff_list)
+    starting_buffs = buff_display_names(starting_buffs)
     buff_list = list(buff_map.keys())
     # buff_list = buff_display_names(buff_list)
     st.header("Global Buffs")
