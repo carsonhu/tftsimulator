@@ -136,7 +136,7 @@ class FuryBreak(Buff):
         super().__init__(
             "Fury Break (15s)", level, params, phases=["preCombat", "onUpdate"]
         )
-        self.as_scaling = 25
+        self.as_scaling = 30
         self.time_bonus = 15
         self.buff_duration = 4
 
@@ -214,17 +214,17 @@ class FairyTail(Buff):
     def __init__(self, level, params):
         super().__init__("Fairy Tail", level, params, phases=["postAbility"])
         # guessing the scaling
-        base = 80
-        final = 275
+        base = 75
+        final = 260
         increment = (final - base) / 4
 
         self.scaling = {
-            1: 80,
-            2: 80,
-            3: 80 + increment,
-            4: 80 + increment * 2,
-            5: 80 + increment * 3,
-            6: 80 + increment * 4,
+            1: base,
+            2: base,
+            3: base + increment,
+            4: base + increment * 2,
+            5: base + increment * 3,
+            6: base + increment * 4,
         }
         self.buff_duration = 8
 
@@ -504,7 +504,7 @@ class MaxArcana(Buff):
 
     def __init__(self, level, params):
         super().__init__("Max Arcana", level, params, phases=["preCombat"])
-        self.base = 20
+        self.base = 15
         self.takedown_interval = 2
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -630,7 +630,7 @@ class SuperMega(Buff):
 
     def __init__(self, level, params):
         super().__init__("Super Mega", level, params, phases=["preCombat"])
-        self.scaling = 20
+        self.scaling = 30
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.bonus_ad.addStat(self.scaling)

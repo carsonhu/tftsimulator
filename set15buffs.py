@@ -176,7 +176,7 @@ class Sniper(Buff):
     def __init__(self, level, params):
         # params is number of hexes
         super().__init__("Sniper " + str(level), level, params, phases=["preCombat"])
-        self.base_scaling = {0: 0, 2: 0.13, 3: 0.16, 4: 0.22, 5: 0.25}
+        self.base_scaling = {0: 0, 2: 0.13, 3: 0.18, 4: 0.25, 5: 0.25}
         self.scaling = {0: 0, 2: 0.03, 3: 0.05, 4: 0.07, 5: 0.1}
         self.base_bonus = 0
         self.extraBuff(params)
@@ -276,7 +276,7 @@ class SoulFighter(Buff):
             phases=["onUpdate", "onDealDamage"],
         )
         self.scaling = {2: 120, 4: 200, 6: 300, 8: 650}
-        self.ad_scaling = {2: 1, 4: 2, 6: 3, 8: 4}
+        self.ad_scaling = {2: 1, 4: 2.5, 6: 4, 8: 4}
         self.true_dmg_scaling = {2: 0.1, 4: 0.16, 6: 0.22, 8: 0.28}
         self.next_bonus = 1
         self.max_stacks = 8
@@ -474,7 +474,7 @@ class Sorcerer(Buff):
 
     def __init__(self, level, params):
         super().__init__("Sorcerer " + str(level), level, params, phases=["preCombat"])
-        self.scaling = {2: 20, 4: 50, 6: 80}
+        self.scaling = {2: 20, 4: 55, 6: 80}
 
     def performAbility(self, phase, time, champion, input=0):
         champion.ap.addStat(self.scaling[self.level])

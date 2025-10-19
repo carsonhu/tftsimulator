@@ -126,7 +126,7 @@ class GuinsoosRageblade(Item):
             phases=["onUpdate"],
         )
         self.next_bonus = 1
-        self.aspd_bonus = 6
+        self.aspd_bonus = 7
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.next_bonus:
@@ -801,7 +801,7 @@ class RadiantGuinsoosRageblade(Item):
             "Radiant Guinsoo's Rageblade", aspd=25, ap=30, phases=["onUpdate"]
         )
         self.next_bonus = 1
-        self.aspd_bonus = 12
+        self.aspd_bonus = 13
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.next_bonus:
@@ -819,12 +819,13 @@ class RadiantKrakensFury(Item):
             phases="preAttack",
         )
         self.stacks = 0
-        self.maxStacks = 20
+        self.maxStacks = 15
+        self.adPerStack = 8
 
     def performAbility(self, phase, time, champion, input_=0):
         if self.stacks < self.maxStacks:
             self.stacks += 1
-            champion.bonus_ad.addStat(6)
+            champion.bonus_ad.addStat(self.adPerStack)
         elif self.stacks == self.maxStacks:
             champion.aspd.addStat(80)
             self.stacks += 1

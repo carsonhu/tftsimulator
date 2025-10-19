@@ -812,7 +812,7 @@ class KogMaw(Champion):
         self.notes = ""
 
     def passiveAbilityScaling(self, level, AD, AP):
-        apScale = [50, 75, 120]
+        apScale = [44, 66, 110]
         adScale = [0, 0, 0]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -1045,8 +1045,8 @@ class Yasuo(Champion):
         self.notes = "4 mentor not in"
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [180, 270, 430]
-        apScale = [0, 0, 0]
+        adScale = [140, 210, 335]
+        apScale = [45, 45, 45]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
@@ -1193,7 +1193,7 @@ class Ashe(Champion):
         hp = 850
         atk = 68
         curMana = 0
-        fullMana = 80
+        fullMana = 70
         aspd = 0.8
         armor = 35
         mr = 35
