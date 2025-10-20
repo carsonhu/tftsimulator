@@ -261,12 +261,6 @@ def plot_df(df, simLists):
 
     if len(dmg_dict) > 0:
         with col1:
-            #     fig = go.Figure()
-            #     fig.update_layout(
-            #       title="{} Damage Chart".format(champ_name),
-            #       xaxis_title = "Time",
-            #       yaxis_title = "Damage",
-            #       hovermode = "x unified")
             fig, ax = plt.subplots()
             ax.set_title("{} {} Damage Chart".format(champ_name, champ_level))
             ax.set_xlabel("Time")
@@ -282,10 +276,6 @@ def plot_df(df, simLists):
             )
 
     for key, value in dmg_dict.items():
-        # with col1:
-        # fig.add_trace(go.Line(x=value['Dmg']['Time'],
-        #                       y=value['Dmg']['Total Dmg'],
-        #                       name=plot_labels[key]))
         ax.plot(value["Dmg"]["Time"], value["Dmg"]["Total Dmg"], label=plot_labels[key])
         ax.legend()
 

@@ -58,8 +58,6 @@ augments = [
     "CyberneticUplinkIII",
     "StandUnitedI",
     "Ascension",
-    "CyberneticImplantsII",
-    "CyberneticImplantsIII",
     "KnowYourEnemy",
     "PumpingUpI",
     "PumpingUpII",

@@ -1,17 +1,12 @@
 import copy
-import csv
 import itertools
-import time
 from collections import defaultdict, deque
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import set15items
 import streamlit as st
-import utils
 import xlsxwriter
-from scipy import interpolate
 from set15buffs import *
 from set15champs import *
 from set15items import *
@@ -102,21 +97,44 @@ def dpsSplit(results):
 
 
 def getDPSFunction(results):
-    # bug: doesnt work if last result is less than desired time
-    # e.g u want dps at 20, but only have dps up to 18
-    x = [a[0] for a in results]
-    y = np.cumsum([a[1][0] for a in results])
+    """
+    results: iterable of items where
+      x_i = a[0]
+      y_i = a[1][0]
+    Returns f(t): piecewise-linear interpolation of cumulative y vs x.
+    - Works with scalars or arrays for t
+    - Clamps outside [x_min, x_max] to endpoints (your old fill_value)
+    - No SciPy required (np.interp)
+    """
+    # Extract x, cumulative y
+    x = np.asarray([a[0] for a in results], dtype=float)
+    y = np.cumsum([a[1][0] for a in results], dtype=float)
 
-    f = interpolate.interp1d(x, y, bounds_error=False, fill_value=(y[0], y[-1]))
+    # Guard rails
+    if x.size == 0:
+        # No data: return constant zero function
+        return lambda t: np.zeros_like(np.asarray(t, dtype=float))
+    # Ensure x is strictly increasing for interpolation
+    order = np.argsort(x)
+    x = x[order]
+    y = y[order]
+    # Collapse duplicate x’s by taking the last y for each x
+    uniq, idx = np.unique(x, return_index=True)
+    if uniq.size != x.size:
+        x = uniq
+        y = y[idx]
 
-    def safe_interp(t):
-        if isinstance(t, (float, int)):
-            t = np.clip(t, x[0], x[-1])
-        else:
-            t = np.clip(t, x[0], x[-1])
-        return f(t)
+    x_min, x_max = x[0], x[-1]
+    y_min, y_max = y[0], y[-1]
 
-    return safe_interp
+    def f(t):
+        t = np.asarray(t, dtype=float)
+        # Clamp to bounds then interpolate
+        t_clamped = np.clip(t, x_min, x_max)
+        out = np.interp(t_clamped, x, y, left=y_min, right=y_max)
+        return out
+
+    return f
 
 
 def createDPSChart(simList):

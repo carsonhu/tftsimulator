@@ -889,9 +889,7 @@
     "Unstoppable",
     "SpikyShell"
   ],
-  "Lulu": [
-    "Template"
-  ],
+  "Lulu": ["Template"],
   "KogMaw": [
     "BestestBoy",
     "Doublestrike",
@@ -1318,7 +1316,8 @@
     "BloodFury",
     "MaxCap",
     "OnTheEdge",
-    "SolarBreath"
+    "SolarBreath",
+    "StandAlone"
   ],
   "Jhin": [
     "AttackExpert",

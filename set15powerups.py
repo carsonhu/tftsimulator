@@ -208,6 +208,30 @@ class Bludgeoner(Buff):
         return 0
 
 
+class StandAlone(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Stand Alone", level, params, phases=["preCombat"])
+        self.scaling = 0.3
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.hp.mult += self.scaling
+        return 0
+
+
+class Tankzilla(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Tankzilla", level, params, phases=["preCombat"])
+        self.scaling = 0.2
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.hp.mult += self.scaling
+        return 0
+
+
 class FairyTail(Buff):
     levels = [1]
 
