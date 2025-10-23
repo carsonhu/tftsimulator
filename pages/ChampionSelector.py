@@ -5,15 +5,14 @@ import copy
 import inspect
 import itertools
 
+import class_utilities
 import numpy as np
 import pandas as pd
-import streamlit as st
-
-import class_utilities
 import set15_streamlit_main
 import set15buffs
 import set15champs
 import set15items
+import streamlit as st
 import utils
 
 st.set_page_config(layout="wide")
@@ -121,7 +120,6 @@ with st.sidebar:
     if "StarGuardian" in [b[0] for b in buffs]:
         class_utilities.starguardian_selector(champ)
 
-
     enemy = class_utilities.enemy_list("Champ selector")
 
     framerate = class_utilities.frameRate("Frame Rate")
@@ -170,7 +168,7 @@ with tab1:
     )
 
     st.write(
-        "Most cast times/manalock times are guesses. Units can cast after they have completed 30\% of an autoattack. Champs must attack at least once between casts (should only affect Samira). Simulator is probably not very accurate to true gameplay at high attack speeds."
+        r"Most cast times/manalock times are guesses. Units can cast after they have completed 30% of an autoattack. Champs must attack at least once between casts (should only affect Samira). Simulator is probably not very accurate to true gameplay at high attack speeds."
     )
 
     itemSimulator = set15_streamlit_main.Simulator()
@@ -203,7 +201,6 @@ with tab1:
     for sign in ["+", "-"]:
         for sg in star_guardians:
             sg_list.append("Star Guardian ({}{})".format(sign, sg))
-
 
     if radio_value == "Craftable":
         df_flt = df_flt[df_flt["Extra class name"].isin(craftables + ["NoItem"])]

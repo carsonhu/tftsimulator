@@ -429,6 +429,7 @@ class KrakensFury(Item):
             self.display_name,
             aspd=10,
             ad=10,
+            mr=20,
             has_radiant=True,
             phases="preAttack",
         )

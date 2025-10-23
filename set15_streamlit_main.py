@@ -2,7 +2,6 @@ import copy
 import itertools
 from collections import defaultdict, deque
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -70,14 +69,14 @@ class Simulator(object):
         return champion.dmgVector
 
 
-def resNoDmg(res, label):
-    a, b = zip(*[(result[0], result[1][0]) for result in res])
-    b = np.cumsum(b)
-    plt.plot(a, b, label=label)
+# def resNoDmg(res, label):
+#     a, b = zip(*[(result[0], result[1][0]) for result in res])
+#     b = np.cumsum(b)
+#     plt.plot(a, b, label=label)
 
 
-def plotRes(res, label):
-    plt.plot(res[0], res[1], label)
+# def plotRes(res, label):
+#     plt.plot(res[0], res[1], label)
 
 
 def getDPS(results, time):

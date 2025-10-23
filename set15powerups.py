@@ -238,17 +238,14 @@ class FairyTail(Buff):
     def __init__(self, level, params):
         super().__init__("Fairy Tail", level, params, phases=["postAbility"])
         # guessing the scaling
-        base = 75
-        final = 260
-        increment = (final - base) / 4
 
         self.scaling = {
-            1: base,
-            2: base,
-            3: base + increment,
-            4: base + increment * 2,
-            5: base + increment * 3,
-            6: base + increment * 4,
+            1: 75,
+            2: 75,
+            3: 120,
+            4: 170,
+            5: 260,
+            6: 260,
         }
         self.buff_duration = 8
 

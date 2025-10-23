@@ -2,9 +2,13 @@
 
 # import plotly.graph_objects as go
 import json
+import os
+from importlib.resources import files  # Python 3.9+
+from pathlib import Path
+from typing import List, Optional
 
-import matplotlib.pyplot as plt
 import pandas as pd
+import plotly.graph_objects as go
 import set15buffs
 import streamlit as st
 import utils
@@ -12,6 +16,72 @@ from helpers import buff_display_map, buff_display_names, item_display_map
 from set15buffs import *
 from set15champs import *
 from set15items import *
+
+# Detect stlite/Pyodide (stlite sets this env var)
+IS_STLITE = os.environ.get("PYODIDE_BASE_URL") is not None
+
+
+def select_rows_fallback(df: pd.DataFrame, label="Trials to plot"):
+    # Show a read-only table plus a multiselect to choose rows
+    labels = {i: f"{i}: {df.loc[i, 'Extra']}" for i in df.index}
+    choice = st.multiselect(label, df.index.tolist(), format_func=lambda i: labels[i])
+    st.dataframe(df, use_container_width=True)
+    return choice
+
+
+def checkbox_select_fallback(
+    df: pd.DataFrame,
+    *,
+    label: str = "Trials to plot",
+    display_df: bool = True,
+    key_prefix: str = "plotpick",
+    search_cols: Optional[List[str]] = None,
+) -> list:
+    """
+    Render a compact list of checkboxes for the dataframe's index, with
+    select/clear and an optional text filter. Returns a list of selected indices.
+    """
+
+    # Keep stable keys per row across reruns
+    def _row_key(i):
+        return f"{key_prefix}_row_{i}"
+
+    # Quick text filter (client-side)
+    q = st.text_input("Filter", placeholder="type to filter…", key=f"{key_prefix}_q")
+    if q:
+        q_lower = q.lower()
+        cols = search_cols or [c for c in df.columns if df[c].dtype == "object"]
+        mask = pd.Series([False] * len(df), index=df.index)
+        for c in cols:
+            mask |= df[c].astype(str).str.lower().str.contains(q_lower, na=False)
+        df = df[mask]
+
+    # Select / Clear
+    c1, c2, c3 = st.columns([1, 1, 6])
+    with c1:
+        if st.button("Select all", key=f"{key_prefix}_all"):
+            for i in df.index:
+                st.session_state[_row_key(i)] = True
+    with c2:
+        if st.button("Clear", key=f"{key_prefix}_none"):
+            for i in df.index:
+                st.session_state[_row_key(i)] = False
+
+    # Checkboxes (left) + optional table (right)
+    left, right = st.columns([1, 3])
+    selected: list[int] = []
+    with left:
+        st.markdown(f"**{label}**")
+        for i, row in df.iterrows():
+            lab = f"{i}: {row.get('Extra', '')}"
+            if st.checkbox(lab, key=_row_key(i)):
+                selected.append(i)
+
+    if display_df:
+        with right:
+            st.dataframe(df, use_container_width=True)
+
+    return selected
 
 
 def buff_bar(
@@ -83,14 +153,17 @@ def buff_bar(
     return buffs
 
 
+def _load_powerups():
+    # assumes champ_powerups.json sits next to app.py (or current working dir)
+    text = Path("champ_powerups.json").read_text(encoding="utf-8")
+    return json.loads(text)
+
+
 def get_valid_powerups(champ, powerups):
-    with open("champ_powerups.json", "r") as file:
-        data = json.load(file)
+    data = _load_powerups()
     if champ.name in data:
-        valid_powerups = data[champ.name]
-        valid_powerups += set15buffs.no_buff
-        intersection = [item for item in powerups if item in valid_powerups]
-        return intersection
+        valid_powerups = data[champ.name] + set15buffs.no_buff
+        return [item for item in powerups if item in valid_powerups]
     return []
 
 
@@ -115,20 +188,6 @@ def stage_selector():
 def level_selector():
     level = st.slider("Tactician Level", 3, 10, value=4)
     return level
-
-
-def divinicorp_selector(champion):
-    st.header("Divinicorp Buffs")
-    item_cols = st.columns(2)
-
-    buffs = []
-
-    divines = {"Morgana": False, "Senna": False, "Vex": False, "Renekton": False}
-    for index, name in enumerate(list(divines.keys())):
-        with item_cols[index % 2]:
-            champ_divine = champion.name == name
-            divines[name] = st.checkbox(name, value=champ_divine)
-    champion.divines = divines
 
 
 def write_champion(champ):
@@ -194,95 +253,232 @@ def write_champion(champ):
 
 
 def plot_df(df, simLists):
-    df["To Plot"] = False
-    df_test = st.data_editor(
-        df,
-        column_config={
-            "To Plot": st.column_config.CheckboxColumn(
-                "To Plot",
-                help="Which trials to plot",
-                default=False,
-            )
-        },
-        hide_index=False,
-    )
-    indices_to_plot = df_test.index[df_test["To Plot"]].tolist()
+    # --- selection UI ---
+    if not IS_STLITE:
+        df["To Plot"] = False
+        df_edit = st.data_editor(
+            df,
+            column_config={
+                "To Plot": st.column_config.CheckboxColumn(
+                    "To Plot", help="Which trials to plot", default=False
+                )
+            },
+            hide_index=False,
+        )
+        indices_to_plot = df_edit.index[df_edit["To Plot"]].tolist()
+    else:
+        indices_to_plot = checkbox_select_fallback(df, label="Trials to plot")
 
-    # we want this to be comma separated input
-
+    # --- build series dict ---
     dmg_dict = {}
-
-    for index in indices_to_plot:
-        new_entry = {}
-        # (Time, Damage Dealt, current AS, current Mana, full Mana)
-
-        dmgList = pd.DataFrame(
+    for idx in indices_to_plot:
+        dmg = pd.DataFrame(
             [
                 [
-                    damageInstance[0],
-                    damageInstance[1][0],
-                    damageInstance[1][1],
-                    damageInstance[2],
-                    (
-                        "{} / {}".format(damageInstance[3], damageInstance[4])
-                        if damageInstance[4] > 0
-                        else str(damageInstance[3])
-                    ),
+                    inst[0],
+                    inst[1][0],
+                    inst[1][1],
+                    inst[2],
+                    f"{inst[3]:.1f} / {inst[4]}" if inst[4] > 0 else f"{inst[3]:.1f}",
                 ]
-                for damageInstance in simLists[index]["Results"]
-            ]
+                for inst in simLists[idx]["Results"]
+            ],
+            columns=["Time", "Dmg", "Type", "AS", "Mana"],
         )
-        dmgList.columns = ["Time", "Dmg", "Type", "AS", "Mana"]
-        dmgList["Total Dmg"] = dmgList["Dmg"].cumsum()
-        dmgList = dmgList[["Time", "Dmg", "Total Dmg", "Type", "AS", "Mana"]]
+        dmg["Total Dmg"] = dmg["Dmg"].cumsum()
+        dmg = dmg[["Time", "Dmg", "Total Dmg", "Type", "AS", "Mana"]]
+        dmg_dict[idx] = {
+            "Dmg": dmg,
+            "Name": simLists[idx]["Champ"].name,
+            "Level": simLists[idx]["Champ"].level,
+            "Item": simLists[idx]["Extra"].name,
+        }
 
-        new_entry["Dmg"] = dmgList
-
-        # st.write(simLists[to_plot])
-
-        champ_name = simLists[index]["Champ"].name
-        champ_level = simLists[index]["Champ"].level
-        champ_item = simLists[index]["Extra"].name
-
-        new_entry["Name"] = champ_name
-        # new_entry['Level'] = champ_level
-        new_entry["Item"] = champ_item
-        dmg_dict[index] = new_entry
-
-    # label
+    if not dmg_dict:
+        st.info("Tick one or more rows to plot.")
+        return
 
     col1, col2 = st.columns([3, 1])
+    plot_labels = {k: f"{k}: {v['Item']}" for k, v in dmg_dict.items()}
 
-    plot_labels = {
-        key: "{}: {}".format(key, value["Item"]) for key, value in dmg_dict.items()
-    }
+    # ---------------------- PLOT (left) ----------------------
+    with col1:
+        # theme-aware basics
+        is_dark = (
+            (st.get_option("theme.base") == "dark")
+            if st.get_option("theme.base")
+            else False
+        )
+        COLORS_LIGHT = [
+            "#1f77b4",
+            "#ff7f0e",
+            "#2ca02c",
+            "#d62728",
+            "#9467bd",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+            "#bcbd22",
+            "#17becf",
+        ]
+        COLORS_DARK = [
+            "#4cc9f0",
+            "#f72585",
+            "#ffd166",
+            "#80ed99",
+            "#f8961e",
+            "#56cfe1",
+            "#b8f2e6",
+            "#ffcad4",
+            "#c77dff",
+            "#72efdd",
+        ]
+        COLORS = COLORS_DARK if is_dark else COLORS_LIGHT
 
-    # setting the title
+        font_color = "#EAEAEA" if is_dark else "#111111"
+        grid_color = "rgba(255,255,255,0.12)" if is_dark else "rgba(0,0,0,0.12)"
+        legend_bg = "rgba(20,20,20,0.85)" if is_dark else "rgba(250,250,250,0.95)"
+        legend_font = "#FFFFFF" if is_dark else "#111111"
 
-    if len(dmg_dict) > 0:
-        with col1:
-            fig, ax = plt.subplots()
-            ax.set_title("{} {} Damage Chart".format(champ_name, champ_level))
-            ax.set_xlabel("Time")
-            ax.set_ylabel("Damage")
-        with col2:
-            index = st.selectbox(
-                "Index Log", list(dmg_dict.keys()), format_func=lambda x: plot_labels[x]
+        fig = go.Figure()
+
+        # ---- add each series: visual line + invisible hover helper ----
+        for i, (key, val) in enumerate(dmg_dict.items()):
+            d = val["Dmg"]
+            t = d["Time"].to_numpy()
+            y = d["Total Dmg"].to_numpy()
+
+            # 1) Visual line (linear), excluded from hover
+            fig.add_trace(
+                go.Scatter(
+                    x=t,
+                    y=y,
+                    mode="lines",
+                    line=dict(width=3, color=COLORS[i % len(COLORS)]),
+                    line_shape="linear",
+                    name=plot_labels[key],
+                    hoverinfo="skip",
+                    showlegend=True,
+                )
             )
+
+            # 2) Hover helper: midpoint markers that report LEFT endpoint values
+            if len(t) >= 2:
+                mids = (t[:-1] + t[1:]) / 2.0
+                prev_vals = y[:-1]
+                prev_times = t[:-1]
+
+                fig.add_trace(
+                    go.Scatter(
+                        x=mids,
+                        y=prev_vals,
+                        customdata=prev_times,
+                        mode="markers",
+                        marker=dict(size=0.1, opacity=0),  # invisible, but hoverable
+                        name=plot_labels[key],
+                        showlegend=False,
+                        # Put series name in the content & remove the "extra" box.
+                        hovertemplate=(
+                            "<b>%{fullData.name}</b><br>"
+                            "t=%{customdata:.1f}s<br>"
+                            "Total Dmg=%{y:,.0f}"
+                            "<extra></extra>"
+                        ),
+                    )
+                )
+            else:
+                fig.add_trace(
+                    go.Scatter(
+                        x=t,
+                        y=y,
+                        customdata=t,
+                        mode="markers",
+                        marker=dict(size=0.1, opacity=0),
+                        name=plot_labels[key],
+                        showlegend=False,
+                        hovertemplate=(
+                            "<b>%{fullData.name}</b><br>"
+                            "t=%{customdata:.1f}s<br>"
+                            "Total Dmg=%{y:,.0f}"
+                            "<extra></extra>"
+                        ),
+                    )
+                )
+
+        first_key = next(iter(dmg_dict))
+        fig.update_layout(
+            template=None,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            title=f"{dmg_dict[first_key]['Name']} {dmg_dict[first_key]['Level']} Damage Chart",
+            title_x=0.5,
+            title_font=dict(size=26, color=font_color),
+            font=dict(size=14, color=font_color),
+            xaxis=dict(
+                title="Time (s)",
+                showgrid=True,
+                gridcolor=grid_color,
+                zeroline=False,
+                tickfont=dict(color=font_color),
+                title_font=dict(color=font_color),
+            ),
+            yaxis=dict(
+                title="Damage",
+                showgrid=True,
+                gridcolor=grid_color,
+                zeroline=False,
+                tickformat=",",
+                tickfont=dict(color=font_color),
+                title_font=dict(color=font_color),
+            ),
+            legend=dict(
+                x=0.02,
+                y=0.98,
+                xanchor="left",
+                yanchor="top",
+                bgcolor=legend_bg,
+                bordercolor="rgba(0,0,0,0.2)",
+                borderwidth=1,
+                font=dict(size=16, color=legend_font),
+            ),
+            # ----- KEY CHANGES: unified hover at top, no overlaying panel -----
+            hovermode="x unified",  # one tooltip at the top
+            hoverlabel=dict(
+                namelength=-1,
+                align="left",
+                bgcolor="rgba(20,20,20,0.6)",  # purely cosmetic now
+                bordercolor="rgba(255,255,255,0.12)",
+            ),
+            hoverdistance=20,  # cursor → nearest point tolerance
+            spikedistance=-1,  # spike follows cursor, not nearest point
+            margin=dict(l=60, r=20, t=70, b=60),
+        )
+
+        # vertical cursor line
+        fig.update_xaxes(
+            showspikes=True,
+            spikemode="across",
+            spikesnap="cursor",
+            spikethickness=1,
+            spikecolor="#bbbbbb",
+            spikedash="dot",
+        )
+
+        st.plotly_chart(
+            fig, use_container_width=True, config={"displaylogo": False}, theme=None
+        )
+
+    # ---------------------- TABLE (right) ----------------------
+    with col2:
+        options = list(dmg_dict.keys())
+        sel = st.selectbox("Index Log", options, format_func=lambda x: plot_labels[x])
+        if sel is not None:
             st.dataframe(
-                dmg_dict[index]["Dmg"].round(2),
+                dmg_dict[sel]["Dmg"].round(2),
                 hide_index=True,
                 column_config={"Total Dmg": None},
+                use_container_width=True,
             )
-
-    for key, value in dmg_dict.items():
-        ax.plot(value["Dmg"]["Time"], value["Dmg"]["Total Dmg"], label=plot_labels[key])
-        ax.legend()
-
-    if len(dmg_dict) > 0:
-        with col1:
-            # st.plotly_chart(fig)
-            st.pyplot(fig)
 
 
 def frameRate(key):
