@@ -348,7 +348,7 @@ class Doublestrike(Buff):
                 if self.auto_counter >= 1:
                     champion.aspd.addStat(200)
                     self.champ_as_cap = champion.aspd.as_cap  # store it
-                    champion.aspd.as_cap = 100
+                    champion.aspd.as_cap = champion.aspd.as_cap + 2 * champion.aspd.base
                     self.doublestrikeActive = True
                     self.auto_counter -= 1
             elif self.doublestrikeActive:
