@@ -1,5 +1,6 @@
-from powerup_aliases import aliases
 import json
+
+from powerup_aliases import aliases
 
 
 def updateJson():

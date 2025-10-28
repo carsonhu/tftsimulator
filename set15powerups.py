@@ -48,6 +48,19 @@ class SkyPiercer(Buff):
         return 0
 
 
+class NoxiousTrap(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Noxious Trap (no burn)", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        for opponent in champion.opponents:
+            opponent.armor.mult = min(opponent.armor.mult, 0.8)
+            opponent.mr.mult = min(opponent.mr.mult, 0.8)
+        return 0
+
+
 class SpiritSword(Buff):
     levels = [1]
 
