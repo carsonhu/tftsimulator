@@ -714,6 +714,35 @@ class AsheUlt(Buff):
         return 0
 
 
+class YoneUlt(Buff):
+    levels = [1]
+    display_name = "Dual Blade Technique: Inner Reflection"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preAttack"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(5)
+        if champion.numAttacks % 2 == 0:
+            champion.multiTargetSpell(
+                champion.opponents,
+                champion.items,
+                time,
+                1,
+                champion.trueAutoAbilityScaling,
+                "true",
+            )
+        else:
+            champion.multiTargetSpell(
+                champion.opponents,
+                champion.items,
+                time,
+                1,
+                champion.apAutoAbilityScaling,
+                "magical",
+            )
+
+
 class KayleUlt(Buff):
     levels = [1]
     display_name = "Unleash the Demon"

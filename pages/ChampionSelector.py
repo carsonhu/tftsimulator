@@ -6,6 +6,8 @@ import inspect
 import itertools
 
 import class_utilities
+
+# import metrics_panel
 import numpy as np
 import pandas as pd
 import set15_streamlit_main
@@ -134,6 +136,20 @@ with st.sidebar:
     champ_before_sims = copy.deepcopy(champ)
 
     print("Champ buffs: ", champ_before_sims.items)
+
+# # Metrics
+
+# if "show_metrics" not in st.session_state:
+#     st.session_state.show_metrics = False
+
+# st.sidebar.toggle("Show server metrics", key="show_metrics")
+# if st.session_state.show_metrics:
+#     # Run once per render; use a placeholder so it doesn't block the rest of the UI
+#     with st.sidebar:
+#         st.session_state["_metrics_live"] = True
+#         metrics_panel(poll_every=2.0)
+
+# # End metrics
 
 if chosen_powerup == "NoBuff":
     for powerup in powerups:

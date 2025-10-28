@@ -735,7 +735,8 @@ def champ_selector(champ_list):
     item_cols = st.columns([3, 1])
 
     with item_cols[0]:
-        champ = st.selectbox("Champion", champ_list)
+        # index 1 cuz we're not starting on akali
+        champ = st.selectbox("Champion", champ_list, index=1)
     with item_cols[1]:
         levels = [1, 2, 3]
         if utils.class_for_name("set15champs", champ).canFourStar:
@@ -743,4 +744,5 @@ def champ_selector(champ_list):
         champlevel = st.selectbox("Level", levels, index=1)
 
     new_champ = utils.class_for_name("set15champs", champ)(champlevel)
+    return new_champ
     return new_champ

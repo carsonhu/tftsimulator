@@ -44,6 +44,7 @@ champ_list = [
     "Ziggs",
     "Viego",
     "TwistedFate",
+    "Yone",
 ]
 
 
@@ -1547,6 +1548,51 @@ class TwistedFate(Champion):
             opponents, items, time, 4, self.abilityScalingMagical, "magical"
         )
         self.marks = 0
+
+
+class Yone(Champion):
+    def __init__(self, level):
+        hp = 1300
+        atk = 40
+        curMana = 80
+        fullMana = 180
+        aspd = 0.9
+        armor = 75
+        mr = 75
+        super().__init__(
+            "Yone",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.FIGHTER,
+        )
+        self.default_traits = ["Edgelord"]
+        self.items.append(buffs.YoneUlt())
+        self.num_targets = 4
+        self.castTime = 1
+        self.notes = "Edgelord is coded as +20% AS"
+
+    def apAutoAbilityScaling(self, level, AD, AP):
+        apScale = [100, 160, 999]
+        return apScale[level - 1] * AP
+
+    def trueAutoAbilityScaling(self, level, AD, AP):
+        adScale = [25, 40, 400]
+        return adScale[level - 1] * AD
+
+    def abilityScaling(self, level, AD, AP):
+        apScale = [120, 180, 999]
+        return apScale[level - 1] * AP
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, self.num_targets, self.abilityScaling, "physical"
+        )
 
 
 class BaseChamp(Champion):

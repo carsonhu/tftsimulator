@@ -314,6 +314,56 @@ class BulletHell(Buff):
         return 0
 
 
+class Doublestrike(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Doublestrike", level, params, phases=["postAttack"])
+        self.scaling = 0.3
+        self.doublestrikeActive = False
+        self.auto_counter = 0
+        self.champ_as_cap = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+
+        # if multistrike not active:
+        # option 1: edit attackTime() function for the next 2 attacks
+
+        if phase == "postAttack":
+            self.auto_counter += self.scaling
+            if not self.doublestrikeActive:
+                if self.auto_counter >= 1:
+                    champion.aspd.addStat(200)
+                    self.champ_as_cap = champion.aspd.as_cap  # store it
+                    champion.aspd.as_cap = 100
+                    self.doublestrikeActive = True
+                    self.auto_counter -= 1
+            elif self.doublestrikeActive:
+                self.doublestrikeActive = False
+                champion.aspd.addStat(-200)
+                champion.aspd.as_cap = self.champ_as_cap
+
+        return 0
+
+
+class Pursuit(Buff):
+    levels = [1]
+
+    def __init__(self, level, params):
+        super().__init__("Pursuit", level, params, phases=["preCombat", "preAbility"])
+        self.scaling = 8
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.castTime += 0.25
+            if hasattr(champion, "projectiles"):
+                champion.projectiles += 1
+        elif phase == "preAbility":
+            champion.ap.addStat(8)
+
+        return 0
+
+
 class IceBender(Buff):
     levels = [1]
 
