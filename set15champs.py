@@ -115,7 +115,7 @@ class Ezreal(Champion):
         self.buff_duration = 5 + self.castTime
         self.aspd_bonus = 25
         self.stat_per_potential = 4
-        self.notes = "AS bonus lasts slightly too long with mage in sims"
+        self.notes = "AS bonus lasts slightly too long with mage in sims, since both casts occur at same time"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [115, 175, 300]
@@ -596,7 +596,7 @@ class Katarina(Champion):
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def potentialAbilityScaling(self, level, AD, AP):
-        potentialScaling = 0.13
+        potentialScaling = 0.12
         return self.abilityScaling(level, AD, AP) * potentialScaling * self.potential
 
     def performAbility(self, opponents, items, time):
@@ -645,7 +645,7 @@ class KaiSa(Champion):
         )
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [32, 48, 75]
+        adScale = [34, 51, 80]
         apScale = [6, 8, 14]
         return (apScale[level - 1] * AP + adScale[level - 1] * AD) * self.projectiles
 

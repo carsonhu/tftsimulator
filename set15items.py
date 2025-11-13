@@ -918,13 +918,13 @@ class RadiantKrakensFury(Item):
     def __init__(self):
         super().__init__(
             self.display_name,
-            aspd=25,
+            aspd=20,
             ad=20,
             phases="preAttack",
         )
         self.stacks = 0
         self.maxStacks = 15
-        self.adPerStack = 8
+        self.adPerStack = 7
 
     def performAbility(self, phase, time, champion, input_=0):
         if self.stacks < self.maxStacks:
