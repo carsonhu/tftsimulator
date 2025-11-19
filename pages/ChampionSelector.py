@@ -156,7 +156,7 @@ if chosen_powerup == "NoBuff":
         if powerup != "NoBuff":
             extra_buffs.append(utils.class_for_name("set15powerups", powerup)(1, []))
 
-simLists = set15_streamlit_main.doExperimentOneExtra(
+simLists, source = set15_streamlit_main.doExperimentOneExtra(
     champ,
     enemy,
     utils.convertStrList("set15items", all_items),
@@ -164,6 +164,7 @@ simLists = set15_streamlit_main.doExperimentOneExtra(
     t,
     framerate,
 )
+st.caption(f"Simulation computed via: {source}")
 
 tab1, tab2 = st.tabs(["Items", "Radiant Refractor"])
 

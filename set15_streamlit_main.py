@@ -569,13 +569,14 @@ def doExperimentOneExtraWrapped(
         response.raise_for_status()
         result_data = response.json()
         results = pickle.loads(base64.b64decode(result_data["results_pickle"]))
-        return results
+        return results, "API"
     except requests.exceptions.RequestException as e:
         print(f"API request failed: {e}. Falling back to local computation.")
         # Fallback to local computation using sim_core
-        return do_experiment_one_extra_local(
+        results = do_experiment_one_extra_local(
             champion_obj, opponent_obj, _itemList, _buffList, t, frameRate
         )
+        return results, "Local"
 
 
 # @st.cache_data(hash_funcs={Champion: hash_func})
