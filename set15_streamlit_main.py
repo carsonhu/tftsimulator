@@ -19,15 +19,7 @@ from sim_core import do_experiment_one_extra as do_experiment_one_extra_local
 from champion import Champion
 
 
-class ObjectWrapper:
-    # Used for hash functions
-    def __init__(self, champion):
-        self.obj = champion
-        self.hash = champion.__hash__()
 
-
-def hash_func(obj: ObjectWrapper) -> str:
-    return obj.hash
 
 
 def getDPS(results, time):
@@ -534,26 +526,17 @@ def radiantRefactor(champions, opponent, itemList, t):
     return 0
 
 
-@st.cache_data(hash_funcs={ObjectWrapper: hash_func})
+@st.cache_data
 def doExperimentOneExtraWrapped(
-    champion: ObjectWrapper,
-    opponent: ObjectWrapper,
-    _itemList,
-    _buffList,
-    t,
-    frameRate,
+    champion_pickle: str,
+    opponent_pickle: str,
+    item_list_pickle: str,
+    buff_list_pickle: str,
+    t: float,
+    frameRate: int,
 ):
     # API URL
     api_url = os.getenv("SIM_API_URL", "http://localhost:8000/simulate")
-
-    champion_obj = champion.obj
-    opponent_obj = opponent.obj
-
-    # Serialize
-    champion_pickle = base64.b64encode(pickle.dumps(champion_obj)).decode("utf-8")
-    opponent_pickle = base64.b64encode(pickle.dumps(opponent_obj)).decode("utf-8")
-    item_list_pickle = base64.b64encode(pickle.dumps(_itemList)).decode("utf-8")
-    buff_list_pickle = base64.b64encode(pickle.dumps(_buffList)).decode("utf-8")
 
     payload = {
         "champion_pickle": champion_pickle,
@@ -572,6 +555,13 @@ def doExperimentOneExtraWrapped(
         return results, "API"
     except requests.exceptions.RequestException as e:
         print(f"API request failed: {e}. Falling back to local computation.")
+        
+        # Deserialize for local computation
+        champion_obj = pickle.loads(base64.b64decode(champion_pickle))
+        opponent_obj = pickle.loads(base64.b64decode(opponent_pickle))
+        _itemList = pickle.loads(base64.b64decode(item_list_pickle))
+        _buffList = pickle.loads(base64.b64decode(buff_list_pickle))
+
         # Fallback to local computation using sim_core
         results = do_experiment_one_extra_local(
             champion_obj, opponent_obj, _itemList, _buffList, t, frameRate
@@ -583,11 +573,14 @@ def doExperimentOneExtraWrapped(
 def doExperimentOneExtra(
     champion: Champion, opponent: Champion, itemList, buffList, t, frameRate=30
 ):
-    champ_obj = ObjectWrapper(champion)
-    opponent_obj = ObjectWrapper(opponent)
+    # Serialize before calling cached function
+    champion_pickle = base64.b64encode(pickle.dumps(champion)).decode("utf-8")
+    opponent_pickle = base64.b64encode(pickle.dumps(opponent)).decode("utf-8")
+    item_list_pickle = base64.b64encode(pickle.dumps(itemList)).decode("utf-8")
+    buff_list_pickle = base64.b64encode(pickle.dumps(buffList)).decode("utf-8")
 
     return doExperimentOneExtraWrapped(
-        champ_obj, opponent_obj, itemList, buffList, t, frameRate
+        champion_pickle, opponent_pickle, item_list_pickle, buff_list_pickle, t, frameRate
     )
     # this is done with champ already with a set of items
     # simulator = Simulator()
