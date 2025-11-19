@@ -9,6 +9,12 @@ import xlsxwriter
 from set15buffs import *
 from set15champs import *
 from set15items import *
+from simulator import Simulator
+import requests
+import base64
+import pickle
+import os
+from sim_core import do_experiment_one_extra as do_experiment_one_extra_local
 
 from champion import Champion
 
@@ -22,61 +28,6 @@ class ObjectWrapper:
 
 def hash_func(obj: ObjectWrapper) -> str:
     return obj.hash
-
-
-class Simulator(object):
-    def __init__(self):
-        self.current_time = 0
-        self.frameTime = 1 / 30
-        # self.frameTime = 1/60
-
-    def itemStats(self, items, champion):
-        for item in items:
-            champion.addStats(item)
-        for item in items:  # mb.
-            item.ability("prePreCombat", 0, champion)
-        for item in items:
-            item.ability("preCombat", 0, champion)
-        for item in items:
-            item.ability("postPreCombat", 0, champion)
-
-    def simulate(self, items, buffs, champion, opponents, duration, frameRate=30):
-        # there's no real distinction between items and buffs
-        # dmgVector: (Time, Damage Dealt, current AS, current Mana)
-        self.frameTime = 1 / frameRate
-        champion.item_count += len([item for item in items if item.name != "NoItem"])
-        items = items + buffs + champion.items
-        champion.items = items
-        champion.opponents = opponents
-        self.itemStats(items, champion)
-        self.current_time = 0
-
-        for opponent in opponents:
-            opponent.nextAttackTime = duration * 2
-        while self.current_time < duration:
-            champion.update(opponents, items, self.current_time)
-            for opponent in opponents:
-                opponent.update(champion, [], self.current_time)
-            self.current_time += self.frameTime
-        return champion.dmgVector
-
-    def simulateUlt(self, items, buffs, champion, opponents):
-        items = items + buffs + champion.items
-        champion.items = items
-        champion.opponents = opponents
-        self.itemStats(items, champion)
-        champion.performAbility(opponents, items, 0)
-        return champion.dmgVector
-
-
-# def resNoDmg(res, label):
-#     a, b = zip(*[(result[0], result[1][0]) for result in res])
-#     b = np.cumsum(b)
-#     plt.plot(a, b, label=label)
-
-
-# def plotRes(res, label):
-#     plt.plot(res[0], res[1], label)
 
 
 def getDPS(results, time):
@@ -592,67 +543,39 @@ def doExperimentOneExtraWrapped(
     t,
     frameRate,
 ):
-    simulator = Simulator()
-    simList = []
-    champion = champion.obj
-    opponent = opponent.obj
-    itemList = _itemList
-    buffList = _buffList
+    # API URL
+    api_url = os.getenv("SIM_API_URL", "http://localhost:8000/simulate")
 
-    for item in itemList:
-        champ = copy.deepcopy(champion)
-        results = simulator.simulate(
-            [copy.deepcopy(item)],
-            [],
-            champ,
-            [copy.deepcopy(opponent) for i in range(8)],
-            t,
-            frameRate,
+    champion_obj = champion.obj
+    opponent_obj = opponent.obj
+
+    # Serialize
+    champion_pickle = base64.b64encode(pickle.dumps(champion_obj)).decode("utf-8")
+    opponent_pickle = base64.b64encode(pickle.dumps(opponent_obj)).decode("utf-8")
+    item_list_pickle = base64.b64encode(pickle.dumps(_itemList)).decode("utf-8")
+    buff_list_pickle = base64.b64encode(pickle.dumps(_buffList)).decode("utf-8")
+
+    payload = {
+        "champion_pickle": champion_pickle,
+        "opponent_pickle": opponent_pickle,
+        "item_list_pickle": item_list_pickle,
+        "buff_list_pickle": buff_list_pickle,
+        "t": t,
+        "frame_rate": frameRate,
+    }
+
+    try:
+        response = requests.post(api_url, json=payload)
+        response.raise_for_status()
+        result_data = response.json()
+        results = pickle.loads(base64.b64decode(result_data["results_pickle"]))
+        return results
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed: {e}. Falling back to local computation.")
+        # Fallback to local computation using sim_core
+        return do_experiment_one_extra_local(
+            champion_obj, opponent_obj, _itemList, _buffList, t, frameRate
         )
-        simList.append({"Champ": champ, "Extra": item, "Results": results})
-    for buff in buffList:
-        champ = copy.deepcopy(champion)
-
-        # Note: Does not work if buff name consists of two words
-        equal_buffs = [
-            champ_buff
-            for champ_buff in champ.items
-            if champ_buff.name.rsplit(" ", 1)[0] == buff.name.rsplit(" ", 1)[0]
-            and (
-                champ_buff.name.rsplit(" ", 1)[0].replace(" ", "") in class_buffs
-                or (champ_buff.name == buff.name)
-            )
-        ]
-
-        for equal_buff in equal_buffs:
-            champ.items.remove(equal_buff)
-        results = simulator.simulate(
-            [],
-            [copy.deepcopy(buff)],
-            champ,
-            [copy.deepcopy(opponent) for i in range(8)],
-            t,
-        )
-
-        simList.append({"Champ": champ, "Extra": buff, "Results": results})
-
-    if any(buff.name.startswith("Star Guardian") for buff in champion.items):
-        for sg in champion.star_guardians:
-            champ = copy.deepcopy(champion)
-            champ.star_guardians[sg] = not champ.star_guardians[sg]
-
-            results = simulator.simulate(
-                [], [], champ, [copy.deepcopy(opponent) for i in range(8)], t, frameRate
-            )
-            plus = "+" if champ.star_guardians[sg] else "-"
-            sg_buff = Buff("Star Guardian ({}{})".format(plus, sg), 1, 0, None)
-            simList.append({"Champ": champ, "Extra": sg_buff, "Results": results})
-
-    # Star Guardian:
-    # if star guardian is in the buff list:
-    # no need to remove a buff: instead copy buff? and rename it "Star Guardian (+x) and Star Guardian (-x)
-
-    return simList
 
 
 # @st.cache_data(hash_funcs={Champion: hash_func})
