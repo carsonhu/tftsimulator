@@ -81,7 +81,7 @@ with st.sidebar:
         )
         champ.percent_popped_marks = popped_marks
 
-    with st.popover("Extra options / bonus stats"):
+    with st.expander("Extra options / bonus stats"):
         # class_utilities.first_takedown("First Takedown", champ)
         class_utilities.total_takedowns("takedowns", champ)
         class_utilities.num_traits("Num traits", champ)

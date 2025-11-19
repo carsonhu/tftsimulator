@@ -745,4 +745,3 @@ def champ_selector(champ_list):
 
     new_champ = utils.class_for_name("set15champs", champ)(champlevel)
     return new_champ
-    return new_champ
