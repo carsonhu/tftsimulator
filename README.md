@@ -13,14 +13,17 @@ The sidebar allows you to configure the base settings, and the user can then plo
 # Getting Started
 
 ## Prerequisites
-1.  **Install Python**: Ensure you have Python installed (version 3.9 or higher is recommended). You can download it from [python.org](https://www.python.org/).
+1.  **Install Python**: Ensure you have a stable version of Python installed (**3.10, 3.11, or 3.12**).
+    *   *Note: Do not use Python 3.13 or 3.14 yet, as some libraries are not compatible.*
+    *   **Recommended**: [Download Python 3.12 Installer](https://www.python.org/ftp/python/3.12.8/python-3.12.8-amd64.exe) (Direct Link)
+    *   Or visit [python.org downloads](https://www.python.org/downloads/).
 2.  **Download Code**: Download this repository to your local machine.
 
 ## Quick Start (Windows)
 
 1.  **One-time Setup**:
     *   Double-click `setup.bat`.
-    *   This will install all necessary libraries. You only need to do this once.
+    *   This will create a virtual environment (`.venv`) and install all necessary libraries. You only need to do this once.
 
 2.  **Run the App**:
     *   Double-click `run_app.bat`.
