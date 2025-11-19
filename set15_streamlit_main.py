@@ -536,28 +536,30 @@ def doExperimentOneExtraWrapped(
     frameRate: int,
 ):
     # API URL
-    api_url = os.getenv("SIM_API_URL", "http://localhost:8000/simulate")
+    api_url = os.getenv("SIM_API_URL")
 
-    payload = {
-        "champion_pickle": champion_pickle,
-        "opponent_pickle": opponent_pickle,
-        "item_list_pickle": item_list_pickle,
-        "buff_list_pickle": buff_list_pickle,
-        "t": t,
-        "frame_rate": frameRate,
-    }
+    if api_url:
+        payload = {
+            "champion_pickle": champion_pickle,
+            "opponent_pickle": opponent_pickle,
+            "item_list_pickle": item_list_pickle,
+            "buff_list_pickle": buff_list_pickle,
+            "t": t,
+            "frame_rate": frameRate,
+        }
 
-    try:
-        response = requests.post(api_url, json=payload)
-        response.raise_for_status()
-        result_data = response.json()
-        results = pickle.loads(base64.b64decode(result_data["results_pickle"]))
-        return results, "API"
-    except requests.exceptions.RequestException as e:
-        print(f"API request failed: {e}. Falling back to local computation.")
-        
-        # Deserialize for local computation
-        champion_obj = pickle.loads(base64.b64decode(champion_pickle))
+        try:
+            response = requests.post(api_url, json=payload)
+            response.raise_for_status()
+            result_data = response.json()
+            results = pickle.loads(base64.b64decode(result_data["results_pickle"]))
+            return results, "API"
+        except requests.exceptions.RequestException as e:
+            print(f"API request failed: {e}. Falling back to local computation.")
+    
+    # Fallback or default to local computation
+    # Deserialize for local computation
+    champion_obj = pickle.loads(base64.b64decode(champion_pickle))
         opponent_obj = pickle.loads(base64.b64decode(opponent_pickle))
         _itemList = pickle.loads(base64.b64decode(item_list_pickle))
         _buffList = pickle.loads(base64.b64decode(buff_list_pickle))

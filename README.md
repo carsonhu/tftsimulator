@@ -24,9 +24,7 @@ The sidebar allows you to configure the base settings, and the user can then plo
 
 2.  **Run the App**:
     *   Double-click `run_app.bat`.
-    *   This will open two windows:
-        1.  A terminal window for the **API Server** (keep this open).
-        2.  Your web browser with the **TFT Simulator**.
+    *   This will launch the **TFT Simulator** in your web browser.
 
 ## Manual Setup
 
@@ -37,14 +35,8 @@ If you prefer to run commands manually:
     pip install -r requirements.txt
     ```
 
-2.  Run the API server (in one terminal):
+2.  Run the Streamlit app:
     ```sh
-    uvicorn sim_api:app --port 8000
-    ```
-
-3.  Run the Streamlit app (in another terminal):
-    ```sh
-    set SIM_API_URL=http://localhost:8000/simulate
     streamlit run app.py
     ```
 
