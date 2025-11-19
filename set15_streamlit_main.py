@@ -1011,53 +1011,6 @@ def fatedTab():
     return 0
 
 
-def asheTab():
-    t = 30
-    simLists = []
-    simDict = {}
-    # this is going to be individual champ tab
-    st.header("Ashe")
-
-    # for now, just copy over the functionality
-
-    # items
-    ADComboList = getComboList(
-        [
-            NoItem(),
-            IE(),
-            HoJ(),
-            GS(),
-            RH(),
-            LW(),
-            Shojin(),
-            Blue(),
-            Rageblade(),
-            Red(),
-            DB(),
-            Nashors(),
-            Guardbreaker(),
-        ],
-        3,
-    )
-
-    # buffs
-    asheBuffList = getComboList(
-        [
-            NoBuff(0, []),
-            Sniper(4, []),
-            Porcelain(2, []),
-        ],
-        2,
-        False,
-    )
-
-    if st.button("Run trials"):
-        simLists = doExperiment(Ashe(2), DummyTank(2), ADComboList, asheBuffList, t)
-
-        df = createUnitDPSTable(simLists)
-        st.write(df)
-
-
 def constructCSV():
     t = 30
 
