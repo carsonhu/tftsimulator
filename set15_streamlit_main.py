@@ -560,15 +560,15 @@ def doExperimentOneExtraWrapped(
     # Fallback or default to local computation
     # Deserialize for local computation
     champion_obj = pickle.loads(base64.b64decode(champion_pickle))
-        opponent_obj = pickle.loads(base64.b64decode(opponent_pickle))
-        _itemList = pickle.loads(base64.b64decode(item_list_pickle))
-        _buffList = pickle.loads(base64.b64decode(buff_list_pickle))
+    opponent_obj = pickle.loads(base64.b64decode(opponent_pickle))
+    _itemList = pickle.loads(base64.b64decode(item_list_pickle))
+    _buffList = pickle.loads(base64.b64decode(buff_list_pickle))
 
-        # Fallback to local computation using sim_core
-        results = do_experiment_one_extra_local(
-            champion_obj, opponent_obj, _itemList, _buffList, t, frameRate
-        )
-        return results, "Local"
+    # Fallback to local computation using sim_core
+    results = do_experiment_one_extra_local(
+        champion_obj, opponent_obj, _itemList, _buffList, t, frameRate
+    )
+    return results, "Local"
 
 
 # @st.cache_data(hash_funcs={Champion: hash_func})
