@@ -1,4 +1,4 @@
-https://tftsimulator.streamlit.app/ChampionSelector
+https://tftsimulator.app/ChampionSelector
 
 # About the Project
 
