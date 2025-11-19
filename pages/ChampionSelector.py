@@ -164,7 +164,6 @@ simLists, source = set15_streamlit_main.doExperimentOneExtra(
     t,
     framerate,
 )
-st.caption(f"Simulation computed via: {source}")
 
 tab1, tab2 = st.tabs(["Items", "Radiant Refractor"])
 
@@ -254,3 +253,5 @@ with tab1:
         )
 
     class_utilities.plot_df(new_df, simLists)
+
+st.caption(f"Simulation computed via: {source}")
