@@ -17,7 +17,7 @@ import set15items
 import streamlit as st
 import utils
 
-st.set_page_config(layout="wide")
+st.set_page_config(page_title="TFT Simulator", layout="wide")
 
 t = 30
 simLists = []
