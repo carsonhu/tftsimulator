@@ -1,6 +1,6 @@
 import random
 
-import set15roles
+import set16roles
 import utils
 from role import Role
 from stats import AD, AP, ArmorPierce, Aspd, Attack, Resist, Stat
@@ -66,7 +66,7 @@ class Champion(object):
         self.attackWindupLockout = (
             -1
         )  # attack windup: can only cast after attack windup is finished
-        self.items = [set15roles.ChampRole()]
+        self.items = [set16roles.ChampRole()]
 
         self.statuses = {}  # current statuses
         self.nextAttackTime = 0
@@ -77,36 +77,17 @@ class Champion(object):
         # notes for user
         self.notes = ""
 
-        # Mentor buffs
-        self.mentors = {"Udyr": False, "Yasuo": False, "Ryze": False}
-
         # Takedowns
         self.takedowns = 0
 
-        # Star Guardians
-        self.star_guardians = {
-            "Syndra": False,
-            "Xayah": False,
-            "Ahri": False,
-            "Poppy": False,
-            "Neeko": False,
-            "Rell": False,
-            "Jinx": False,
-            "Seraphine": False,
-            "Emblem": False,
-            "Emblem 2": False,
-        }
-
-        self.tiny_team = False
-
         self.tactician_level = 4
         self.first_takedown = 5  # time of first takedown
-        self.num_traits = 0
         self.stage = 2  # 2, 3, 4, 5, 6
 
         self.num_targets = 0
         self.num_extra_targets = 0
-        self.percent_popped_marks = -1  # TF-only
+        self.souls = 0
+
         self.item_count = 0  # number of craftables
 
         self.critCounter = 0
@@ -144,19 +125,14 @@ class Champion(object):
             self.tactician_level,
             self.first_takedown,
             self.takedowns,
-            self.num_traits,
             self.stage,
             self.num_targets,
             self.num_extra_targets,
-            self.percent_popped_marks,
+            self.souls,
             self.item_count,
         )
-        mentor_tuple = tuple(value for value in list(self.mentors.values()))
-        starguardian_tuple = tuple(
-            value for value in list(self.star_guardians.values())
-        )
         # return stat_tuple
-        return items_tuple + stat_tuple + mentor_tuple + starguardian_tuple
+        return items_tuple + stat_tuple
 
     def __hash__(self):
         # used for caching

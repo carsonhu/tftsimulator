@@ -37,12 +37,12 @@ def _to_display_names(class_names, module_name, is_buff=False):
 
 def buff_display_names(buff_class_names):
     """Return display names for buffs (with 'NoItem' display name → 'NoBuff')."""
-    return _to_display_names(buff_class_names, "set15buffs", is_buff=True)
+    return _to_display_names(buff_class_names, "set16buffs", is_buff=True)
 
 
 def item_display_names(item_class_names):
     """Return display names for items."""
-    return _to_display_names(item_class_names, "set15items", is_buff=False)
+    return _to_display_names(item_class_names, "set16items", is_buff=False)
 
 
 def buff_display_map(buff_class_names):

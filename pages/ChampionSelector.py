@@ -10,10 +10,10 @@ import class_utilities
 # import metrics_panel
 import numpy as np
 import pandas as pd
-import set15_streamlit_main
-import set15buffs
-import set15champs
-import set15items
+import set16_streamlit_main
+import set16buffs
+import set16champs
+import set16items
 import streamlit as st
 import utils
 
@@ -24,29 +24,26 @@ simLists = []
 simDict = {}
 
 
-champ_list = sorted(set15champs.champ_list)
+champ_list = sorted(set16champs.champ_list)
 
 # all_items = []
 all_buffs = sorted(
-    set15buffs.class_buffs
-    + set15buffs.augments
-    + set15buffs.no_buff
-    + set15buffs.stat_buffs
+    set16buffs.class_buffs
+    + set16buffs.augments
+    + set16buffs.no_buff
+    + set16buffs.stat_buffs
 )
 
 all_items = sorted(
-    set15items.offensive_craftables
-    + set15items.artifacts
-    + set15items.radiants
-    + set15items.no_item
+    set16items.offensive_craftables
+    + set16items.artifacts
+    + set16items.radiants
+    + set16items.no_item
 )
 
-craftables = set15items.offensive_craftables
+craftables = set16items.offensive_craftables
 
-aug_buffs = sorted(set15buffs.augments)
-
-powerups = sorted(set15buffs.powerups + set15buffs.no_buff)
-valid_powerups = powerups
+aug_buffs = sorted(set16buffs.augments)
 
 champ_before_sims = None
 
@@ -98,26 +95,17 @@ with st.sidebar:
     buffs = class_utilities.buff_bar(
         all_buffs, max_buffs=10, num_buffs=2, starting_buffs=champ.default_traits
     )
-    buffs.append(("MentorBuff", 1, []))
-
-    # get power ups
-    valid_powerups = class_utilities.get_valid_powerups(champ, powerups)
-    chosen_powerup = class_utilities.powerup_bar(valid_powerups)
-
-    if chosen_powerup != "NoBuff":
-        class_utilities.add_powerup(champ, chosen_powerup)
 
     extra_buffs = []
     for buff in buffs:
         # Buff: ("Name", level, param)
-        levels = utils.class_for_name("set15buffs", buff[0]).levels
+        levels = utils.class_for_name("set16buffs", buff[0]).levels
         for level in levels:
             if level != buff[1]:
                 extra_buffs.append(
-                    utils.class_for_name("set15buffs", buff[0])(level, buff[2])
+                    utils.class_for_name("set16buffs", buff[0])(level, buff[2])
                 )
 
-    class_utilities.mentor_selector(champ)
 
     if "StarGuardian" in [b[0] for b in buffs]:
         class_utilities.starguardian_selector(champ)
@@ -129,7 +117,7 @@ with st.sidebar:
     # Add items to Champion
     for item in items:
         if item != "NoItem":
-            champ.items.append(utils.class_for_name("set15items", item)())
+            champ.items.append(utils.class_for_name("set16items", item)())
             champ.item_count += 1
     class_utilities.add_buffs(champ, buffs)
 
@@ -151,16 +139,11 @@ with st.sidebar:
 
 # # End metrics
 
-if chosen_powerup == "NoBuff":
-    for powerup in powerups:
-        if powerup != "NoBuff":
-            extra_buffs.append(utils.class_for_name("set15powerups", powerup)(1, []))
-
-simLists, source = set15_streamlit_main.doExperimentOneExtra(
+simLists, source = set16_streamlit_main.doExperimentOneExtra(
     champ,
     enemy,
-    utils.convertStrList("set15items", all_items),
-    utils.convertStrList("set15buffs", aug_buffs) + extra_buffs,
+    utils.convertStrList("set16items", all_items),
+    utils.convertStrList("set16buffs", aug_buffs) + extra_buffs,
     t,
     framerate,
 )
@@ -187,7 +170,7 @@ with tab1:
         r"Most cast times/manalock times are guesses. Units can cast after they have completed 30% of an autoattack. Champs must attack at least once between casts (should only affect Samira). Simulator is probably not very accurate to true gameplay at high attack speeds."
     )
 
-    itemSimulator = set15_streamlit_main.Simulator()
+    itemSimulator = set16_streamlit_main.Simulator()
     itemSimulator.itemStats(champ_before_sims.items, champ_before_sims)
 
     class_utilities.write_champion(champ_before_sims)
@@ -200,33 +183,21 @@ with tab1:
     if len([item for item in items if item != "NoItem"]) >= 3:
         options = ["Trait", "Augment/Buff"]
 
-    # if "Star Guardian" in buffs, add "star Guardian" option
-    if any(buff.name.startswith("Star Guardian") for buff in champ_before_sims.items):
-        options.append("Star Guardian")
-    if chosen_powerup == "NoBuff":
-        options.append("Powerup")
-
     radio_value = st.radio("", options, index=0, horizontal=True)
 
-    df = set15_streamlit_main.createSelectorDPSTable(simLists)
+    df = set16_streamlit_main.createSelectorDPSTable(simLists)
     df_flt = df
 
-    # starguardian filter
-    star_guardians = list(champ.star_guardians.keys())
-    sg_list = []
-    for sign in ["+", "-"]:
-        for sg in star_guardians:
-            sg_list.append("Star Guardian ({}{})".format(sign, sg))
 
     if radio_value == "Craftable":
         df_flt = df_flt[df_flt["Extra class name"].isin(craftables + ["NoItem"])]
     if radio_value == "Artifact":
         df_flt = df_flt[
-            df_flt["Extra class name"].isin(set15items.artifacts + ["NoItem"])
+            df_flt["Extra class name"].isin(set16items.artifacts + ["NoItem"])
         ]
     if radio_value == "Radiant":
         df_flt = df_flt[
-            df_flt["Extra class name"].isin(set15items.radiants + ["NoItem"])
+            df_flt["Extra class name"].isin(set16items.radiants + ["NoItem"])
         ]
     if radio_value == "Trait":
         df_flt = df_flt[
@@ -234,12 +205,8 @@ with tab1:
         ]
     if radio_value == "Augment/Buff":
         df_flt = df_flt[
-            df_flt["Extra class name"].isin(set15buffs.augments + ["NoItem"])
+            df_flt["Extra class name"].isin(set16buffs.augments + ["NoItem"])
         ]
-    if radio_value == "Powerup":
-        df_flt = df_flt[df_flt["Extra class name"].isin(valid_powerups + ["NoItem"])]
-    if radio_value == "Star Guardian":
-        df_flt = df_flt[df_flt["Extra"].isin(sg_list + ["NoItem"])]
 
     new_df = df_flt.drop(["Extra class name", "Name", "Level"], axis=1)
 

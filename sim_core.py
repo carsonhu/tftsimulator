@@ -3,7 +3,7 @@
 import copy
 from typing import Any, Dict, List
 
-from set15buffs import Buff, class_buffs  # or wherever Buff lives
+from set16buffs import Buff, class_buffs  # or wherever Buff lives
 from simulator import Simulator
 
 

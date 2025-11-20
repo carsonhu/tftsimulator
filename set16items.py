@@ -409,7 +409,7 @@ class Adaptive(Item):
     def __init__(self):
         super().__init__(
             self.display_name,
-            manaRegen=2,
+            manaRegen=3,
             ad=15,
             ap=15,
             has_radiant=True,
@@ -442,7 +442,7 @@ class KrakensFury(Item):
             self.stacks += 1
             champion.bonus_ad.addStat(self.adPerStack)
         elif self.stacks == self.maxStacks:
-            champion.aspd.addStat(40)
+            champion.aspd.addStat(30)
             self.stacks += 1
 
 
@@ -548,8 +548,8 @@ class GS(Item):
         super().__init__(
             self.display_name,
             aspd=15,
-            ad=20,
-            ap=20,
+            ad=15,
+            ap=15,
             has_radiant=True,
             phases="preCombat",
         )
@@ -1063,7 +1063,7 @@ class RadiantDeathblade(Item):
     display_name = "Radiant Deathblade"
 
     def __init__(self):
-        super().__init__(self.display_name, ad=105, phases="preCombat")
+        super().__init__(self.display_name, ad=110, phases="preCombat")
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += 0.2
@@ -1112,7 +1112,7 @@ class RadiantAdaptive(Item):
     def __init__(self):
         super().__init__(
             self.display_name,
-            manaRegen=4,
+            manaRegen=6,
             ad=60,
             ap=60,
             phases=["preCombat"],

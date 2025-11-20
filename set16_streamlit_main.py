@@ -6,9 +6,9 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import xlsxwriter
-from set15buffs import *
-from set15champs import *
-from set15items import *
+from set16buffs import *
+from set16champs import *
+from set16items import *
 from simulator import Simulator
 import requests
 import base64
