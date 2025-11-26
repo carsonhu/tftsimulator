@@ -72,6 +72,7 @@ class Champion(object):
         self.nextAttackTime = 0
         self.opponents = []
         self.dmgVector = []
+        self.dmgDealt = 0 # no need to serialize
         self.alive = True
 
         # notes for user
@@ -79,6 +80,8 @@ class Champion(object):
 
         # Takedowns
         self.takedowns = 0
+        
+        self.souls = 0
 
         self.tactician_level = 4
         self.first_takedown = 5  # time of first takedown
@@ -87,7 +90,7 @@ class Champion(object):
         self.num_targets = 0
         self.num_extra_targets = 0
         self.souls = 0
-
+        self.pilot = None
         self.item_count = 0  # number of craftables
 
         self.critCounter = 0
@@ -125,10 +128,11 @@ class Champion(object):
             self.tactician_level,
             self.first_takedown,
             self.takedowns,
+            self.souls,
+            self.pilot,
             self.stage,
             self.num_targets,
             self.num_extra_targets,
-            self.souls,
             self.item_count,
         )
         # return stat_tuple
@@ -405,7 +409,7 @@ class Champion(object):
                 avgDmg = item.ability("onDealSpellDamage", time, self, avgDmg)
 
         avgDmg = self.damage(avgDmg, dtype, opponent)
-
+        self.dmgDealt += avgDmg[0]
         for item in items:
             # if you need to track how much dmg was actually dealt
             item.ability("PostOnDealDamage", time, self, avgDmg)
@@ -419,6 +423,7 @@ class Champion(object):
             self.dmgVector.append(
                 (time, avgDmg, self.aspd.stat, self.curMana, self.fullMana.stat)
             )
+
 
     def multiTargetSpell(
         self,

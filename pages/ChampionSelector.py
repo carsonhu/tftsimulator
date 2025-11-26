@@ -44,6 +44,9 @@ all_items = sorted(
 craftables = set16items.offensive_craftables
 
 aug_buffs = sorted(set16buffs.augments)
+void_buffs = sorted(set16buffs.void_buffs)
+
+selected_void_buff = None
 
 champ_before_sims = None
 
@@ -106,9 +109,34 @@ with st.sidebar:
                     utils.class_for_name("set16buffs", buff[0])(level, buff[2])
                 )
 
+    # Void buff selector
+    if "Void" in [b[0] for b in buffs]:
+        selected_void_buff = class_utilities.void_buff_selector(champ)
+        if selected_void_buff != "NoBuff":
+            champ.items.append(utils.class_for_name("set16buffs", selected_void_buff)(1, []))
+        else:
+            for void_buff in void_buffs:
+                if void_buff != "NoBuff":
+                    extra_buffs.append(utils.class_for_name("set16buffs", void_buff)(1, []))
 
-    if "StarGuardian" in [b[0] for b in buffs]:
-        class_utilities.starguardian_selector(champ)
+    # HexMech Pilot selector
+    if "HexMech" in [b[0] for b in buffs]:
+        st.header("Pilot")
+        pilot_role_name = st.selectbox(
+            "Select Pilot Role",
+            ["Tank", "Fighter", "Caster", "Marksman", "Assassin"],
+            index=0,
+            key="pilot_selector"
+        )
+        # Map string to Role enum
+        role_map = {
+            "Fighter": set16champs.Role.FIGHTER,
+            "Tank": set16champs.Role.TANK,
+            "Caster": set16champs.Role.CASTER,
+            "Marksman": set16champs.Role.MARKSMAN,
+            "Assassin": set16champs.Role.ASSASSIN
+        }
+        champ.pilot = role_map[pilot_role_name]
 
     enemy = class_utilities.enemy_list("Champ selector")
 
@@ -182,6 +210,10 @@ with tab1:
     options = ["Craftable", "Artifact", "Radiant", "Trait", "Augment/Buff"]
     if len([item for item in items if item != "NoItem"]) >= 3:
         options = ["Trait", "Augment/Buff"]
+    if selected_void_buff == "NoBuff":
+        options.append("Void")
+    if "HexMech" in [b[0] for b in buffs]:
+        options.append("Pilot")
 
     radio_value = st.radio("", options, index=0, horizontal=True)
 
@@ -206,6 +238,14 @@ with tab1:
     if radio_value == "Augment/Buff":
         df_flt = df_flt[
             df_flt["Extra class name"].isin(set16buffs.augments + ["NoItem"])
+        ]
+    if radio_value == "Void":
+        df_flt = df_flt[
+            df_flt["Extra class name"].isin(void_buffs + ["NoItem"])
+        ]
+    if radio_value == "Pilot":
+        df_flt = df_flt[
+            df_flt["Extra"].str.startswith("Pilot")
         ]
 
     new_df = df_flt.drop(["Extra class name", "Name", "Level"], axis=1)

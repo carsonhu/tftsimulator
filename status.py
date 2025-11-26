@@ -50,12 +50,18 @@ class Status(object):
         # else, reapplication
 
 
+
+def zero_scaling(x, y, z):
+    """Default zero scaling function for DoT effects."""
+    return 0
+
+
 class DoTEffect(Status):
     # apply damage once per second. in-game it's at least every half-second
     # but this is chill for clarity
     def __init__(self, name):
         super().__init__("DoT {}".format(name))
-        self.scaling = lambda x, y, z: 0
+        self.scaling = zero_scaling
         self.next_proc = 0
 
     def applicationEffect(self, champion, time, duration, params):

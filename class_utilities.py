@@ -722,6 +722,30 @@ def starguardian_selector(champion):
     champion.star_guardians = star_guardians
 
 
+def void_buff_selector(champion):
+    """Select which Void buff to apply
+
+    Args:
+        champion (Champion): Champion selected
+          The selected void buff will be added to their items.
+    
+    Returns:
+        str: The selected void buff class name
+    """
+    st.header("Void Buff")
+    
+    void_buff_options = set16buffs.no_buff + set16buffs.void_buffs
+    
+    selected_buff = st.selectbox(
+        "Select Void Buff",
+        void_buff_options,
+        index=0,
+        key="void_buff_selector"
+    )
+    
+    return selected_buff
+
+
 def champ_selector(champ_list):
     """champ list: select da champion
 

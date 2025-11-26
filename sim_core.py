@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 
 from set16buffs import Buff, class_buffs  # or wherever Buff lives
 from simulator import Simulator
+from role import Role
 
 
 def do_experiment_one_extra(
@@ -81,4 +82,27 @@ def do_experiment_one_extra(
             sg_buff = Buff(f"Star Guardian ({plus}{sg})", 1, 0, None)
             sim_list.append({"Champ": champ, "Extra": sg_buff, "Results": results})
 
+    # HexMech Pilot toggles
+    if any(buff.name.startswith("HexMech") for buff in champion.items):
+        for role in Role:
+            champ = copy.deepcopy(champion)
+            champ.pilot = role
+            
+            results = simulator.simulate(
+                [],
+                [],
+                champ,
+                [copy.deepcopy(opponent) for _ in range(8)],
+                duration,
+                frameRate=frame_rate,
+            )
+            
+            pilot_mode = PilotMode(f"Pilot: {role.value}")
+            sim_list.append({"Champ": champ, "Extra": pilot_mode, "Results": results})
+
     return sim_list
+
+
+class PilotMode:
+    def __init__(self, name):
+        self.name = name

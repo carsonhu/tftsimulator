@@ -103,12 +103,17 @@ class Resist(Stat):
         return max(self.mult * (self.base + self.add), 0)
 
 
+def default_scaling(level, baseAD, AD, AP=0):
+    """Default scaling function for attacks."""
+    return baseAD * AD
+
+
 class Attack(object):
     # stores details on an attack
     def __init__(
         self,
         opponents=None,
-        scaling=lambda level, baseAD, AD, AP=0: baseAD * AD,
+        scaling=None,
         canCrit=True,
         canOnHit=True,
         multiplier=Stat(0, 1, 0),
@@ -117,7 +122,7 @@ class Attack(object):
         regularAuto=True,
     ):
         self.opponents = opponents
-        self.scaling = scaling
+        self.scaling = scaling if scaling is not None else default_scaling
         self.canCrit = canCrit
         self.canOnHit = canOnHit
         self.multiplier = multiplier

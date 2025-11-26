@@ -435,7 +435,7 @@ class KrakensFury(Item):
         )
         self.stacks = 0
         self.maxStacks = 15
-        self.adPerStack = 4
+        self.adPerStack = 3.5
 
     def performAbility(self, phase, time, champion, input_=0):
         if self.stacks < self.maxStacks:
@@ -645,7 +645,10 @@ class Mittens(Item):
     display_name = "Mittens"
 
     def __init__(self):
-        super().__init__(self.display_name, aspd=75, phases=None)
+        super().__init__(self.display_name, aspd=65, phases="preCombat")
+
+    def performAbility(self, phase, time, champion, input_):
+        champion.dmgMultiplier.add += 0.15
 
 
 class GamblersBlade(Item):
@@ -767,7 +770,7 @@ class Dawncore(Item):
 
     def __init__(self):
         super().__init__(
-            self.display_name, ad=15, ap=15, phases=["preCombat", "postAbility"]
+            self.display_name, ad=10, ap=10, phases=["preCombat", "postAbility"]
         )
         self.counter = 0
 
@@ -775,7 +778,7 @@ class Dawncore(Item):
         if phase == "preCombat":
             champion.fullMana.addStat(-10)
         elif phase == "postAbility":
-            if champion.fullMana.stat > 15:
+            if champion.fullMana.stat > 10:
                 # we don't want to use mult since we do want it to round.
                 champion.fullMana.addStat(-1 * (champion.fullMana.stat // 10))
 
