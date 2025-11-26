@@ -860,7 +860,7 @@ class AdrenalineModules(Buff):
 
 class SpitterSpines(Buff):
     levels = [1]
-    display_name = "Spitter Spines"
+    display_name = "Spitter Spines (unfinished)"
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["PostOnDealDamage"])
