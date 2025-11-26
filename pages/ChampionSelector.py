@@ -96,7 +96,7 @@ with st.sidebar:
     items = class_utilities.items_list(all_items)
 
     buffs = class_utilities.buff_bar(
-        all_buffs, max_buffs=10, num_buffs=2, starting_buffs=champ.default_traits
+        all_buffs, max_buffs=10, num_buffs=2, starting_buffs=champ.default_traits, champ_name=champ.name
     )
 
     extra_buffs = []

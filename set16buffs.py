@@ -56,7 +56,6 @@ augments = [
     "PumpingUpII",
     "PumpingUpIII",
     "HoldTheLine",
-    "MessHall",
     "TonsOfStats",
     "JeweledLotusI",
     "JeweledLotusII",

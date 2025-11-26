@@ -85,7 +85,7 @@ def checkbox_select_fallback(
 
 
 def buff_bar(
-    buff_list, num_buffs=1, max_buffs=4, starting_buffs=[], default_item="NoBuff"
+    buff_list, num_buffs=1, max_buffs=4, starting_buffs=[], default_item="NoBuff", champ_name=""
 ):
     """Buff Bar: Code for displaying the Buffs input list:
     Each Buff has a name and a level.
@@ -93,6 +93,7 @@ def buff_bar(
     Args:
         buff_list (TYPE): List of buffs to add in
         num_buffs (int, optional): Number of buffs in the buff bar
+        champ_name (str, optional): Champion name to key widgets for proper reset
 
     Returns:
         tuple: (buff name, buff level, params)
@@ -110,6 +111,7 @@ def buff_bar(
         min_value=1,
         max_value=max_buffs,
         value=max(num_buffs, len(starting_buffs)),
+        key=f"num_buffs_{champ_name}",
     )
     buffs = []
 
@@ -122,14 +124,14 @@ def buff_bar(
                 if starting_buffs[n] in buff_list:
                     index = buff_list.index(starting_buffs[n])
             buff1 = st.selectbox(
-                "Buff {}".format(n + 1), buff_list, key="Buff {}".format(n), index=index
+                "Buff {}".format(n + 1), buff_list, key=f"Buff_{n}_{champ_name}", index=index
             )
             buff1 = buff_map[buff1]
         with item_cols[1]:
             buff1level = st.selectbox(
                 "Level",
                 utils.class_for_name("set16buffs", buff1).levels,
-                key="Buff lvl {}".format(n),
+                key=f"Buff_lvl_{n}_{champ_name}",
             )
         with item_cols[2]:
             extraParams = utils.class_for_name("set16buffs", buff1).extraParameters()
@@ -139,7 +141,7 @@ def buff_bar(
                     min_value=extraParams["Min"],
                     max_value=extraParams["Max"],
                     value=extraParams["Default"],
-                    key=extraParams["Title"] + str(n),
+                    key=f"{extraParams['Title']}_{n}_{champ_name}",
                 )
             else:
                 buff1Extra = st.number_input(
@@ -147,7 +149,7 @@ def buff_bar(
                     min_value=0,
                     max_value=0,
                     value=0,
-                    key="extra buff" + buff1 + str(n),
+                    key=f"extra_buff_{buff1}_{n}_{champ_name}",
                 )
         buffs.append((buff1, buff1level, buff1Extra))
     return buffs
