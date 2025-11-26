@@ -23,7 +23,7 @@ champ_list = [
     "Orianna",
     "Teemo",
     "Tristana",
-    "TwistedFate",
+    # "TwistedFate",
     # 3-cost
     "Ahri",
     "Draven",
@@ -419,7 +419,7 @@ class TwistedFate(Champion):
         self.default_traits = ["Bilgewater", "Quickstriker"]
         self.items.append(buffs.TwistedFateUlt()) # not implemented yet
         self.num_targets = 3
-        self.notes = "Any target > 2 gets the 50% reduction"
+        self.notes = "Any target > 2 gets the 50% reduction. Unfinished."
 
     # AP: 33, 50, 75
     abilityScaling = create_ability_scaling([0, 0, 0], [33, 50, 75])

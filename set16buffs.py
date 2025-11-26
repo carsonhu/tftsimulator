@@ -394,7 +394,7 @@ class Quickstriker(Buff):
 
     def extraParameters():
         # defining the parameters for the extra shit
-        return {"Title": "Is Quickstriker", "Min": 0, "Max": 1, "Default": 1}
+        return {"Title": "Is Quick", "Min": 0, "Max": 1, "Default": 1}
 
     def extraBuff(self, is_quickstriker):
         self.is_quickstriker = is_quickstriker
