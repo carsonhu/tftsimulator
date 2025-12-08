@@ -83,6 +83,10 @@ class Champion(object):
         
         self.souls = 0
 
+        # Augments
+        self.seraphim = False
+        self.retribution = False
+
         self.tactician_level = 4
         self.first_takedown = 5  # time of first takedown
         self.stage = 2  # 2, 3, 4, 5, 6
@@ -129,6 +133,8 @@ class Champion(object):
             self.first_takedown,
             self.takedowns,
             self.souls,
+            self.seraphim,
+            self.retribution,
             self.pilot,
             self.stage,
             self.num_targets,

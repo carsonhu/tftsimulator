@@ -266,6 +266,7 @@ def plot_df(df, simLists):
                 )
             },
             hide_index=False,
+            use_container_width=False,
         )
         indices_to_plot = df_edit.index[df_edit["To Plot"]].tolist()
     else:
@@ -509,6 +510,8 @@ def items_list(items, default_item="NoItem", num_items=3):
     def reset_items():
         for i in range(1, num_items + 1):
             st.session_state[f"Items{i}"] = default_item
+            if f"Items{i}_display" in st.session_state:
+                del st.session_state[f"Items{i}_display"]
 
     for i in range(1, num_items + 1):
         key = f"Items{i}"

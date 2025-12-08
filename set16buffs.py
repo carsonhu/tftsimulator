@@ -1,11 +1,11 @@
 # ...existing code...
 import ast
-
 from collections import deque
+
 from item import Item
+from role import Role
 from stats import Attack, JhinBonusAD
 
-from role import Role
 import status
 
 
@@ -35,14 +35,15 @@ class_buffs = [
     "Zaun",
     "ShadowIsles",
     "HexMech",
+    "Disruptor",
+    "Slayer",
+    "Shurima"
 ]
 
 augments = [
     "BackupDancers",
     "Shred30",
     "Shred20",
-    "BlazingSoulI",
-    "BlazingSoulII",
     "MacesWill",
     "BestFriendsI",
     "BestFriendsII",
@@ -52,9 +53,6 @@ augments = [
     "StandUnitedI",
     "Ascension",
     "KnowYourEnemy",
-    "PumpingUpI",
-    "PumpingUpII",
-    "PumpingUpIII",
     "HoldTheLine",
     "TonsOfStats",
     "JeweledLotusI",
@@ -63,6 +61,14 @@ augments = [
     "KeepAway",
     "FireAxiom",
     "AirAxiom",
+    "ContinuumCogs",
+    "OverclockedCapacitors",
+    "SeraphimsStaff",
+    "Retribution",
+    "GlassCannonI",
+    "GlassCannonII",
+    "NoScoutNoPivot",
+    "MessHall"
 ]
 
 void_buffs = ["SpitterSpines", "LeechingNucleus", "AdrenalineModules"]
@@ -74,19 +80,21 @@ no_buff = ["NoBuff"]
 
 class ChampionAbilityScaling:
     """Picklable wrapper for champion ability scaling."""
+
     def __init__(self, champion):
         self.champion = champion
-    
+
     def __call__(self, level, AD, bonusAD, AP):
         return self.champion.abilityScaling(level, bonusAD, AP)
 
 
 class ScaledChampionAbilityScaling:
     """Picklable wrapper for scaled champion ability scaling."""
+
     def __init__(self, champion, scale_factor):
         self.champion = champion
         self.scale_factor = scale_factor
-    
+
     def __call__(self, level, AD, bonusAD, AP):
         return self.scale_factor * self.champion.abilityScaling(level, bonusAD, AP)
 
@@ -94,14 +102,13 @@ class ScaledChampionAbilityScaling:
 class ScaledChampionAbilityScaling2:
     """Picklable wrapper for scaled champion ability scaling.
     we'll fix this lmao"""
-    
+
     def __init__(self, champion, scale_factor):
         self.champion = champion
         self.scale_factor = scale_factor
-    
+
     def __call__(self, level, bonusAD, AP):
         return self.scale_factor * self.champion.abilityScaling(level, bonusAD, AP)
-
 
 
 class Buff(Item):
@@ -248,7 +255,9 @@ class Yordle(Buff):
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
-        amt_to_add = self.aspd_per_yordle * self.level + self.num_three_stars * (self.aspd_per_yordle / 2)
+        amt_to_add = self.aspd_per_yordle * self.level + self.num_three_stars * (
+            self.aspd_per_yordle / 2
+        )
         champion.aspd.addStat(amt_to_add)
         return 0
 
@@ -268,13 +277,13 @@ class Freljord(Buff):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
-        self.dmgamp_scaling = {3: .1, 5: .16, 7: .22}
+        self.dmgamp_scaling = {3: 0.1, 5: 0.16, 7: 0.22}
         self.is_freljord = 0
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
         multiplier = 1.5 if self.is_freljord else 1
-        value_to_add = (self.dmgamp_scaling[self.level] * multiplier)
+        value_to_add = self.dmgamp_scaling[self.level] * multiplier
         champion.dmgMultiplier.addStat(value_to_add)
         return 0
 
@@ -294,7 +303,7 @@ class Invoker(Buff):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
-        self.scaling = {2: .25, 4: .4}
+        self.scaling = {2: 0.25, 4: 0.4}
         self.team_mana_regen = 1
         self.is_invoker = 0
         self.extraBuff(params)
@@ -313,21 +322,18 @@ class Invoker(Buff):
         self.is_invoker = is_invoker
 
 
-
 class Caretaker(Buff):
     levels = [1]
     display_name = "Caretaker"
 
     def __init__(self, level, params):
-        super().__init__(
-            f"{self.display_name}", level, params, phases=["preCombat"]
-        )
+        super().__init__(f"{self.display_name}", level, params, phases=["preCombat"])
         self.num_three_stars = 0
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.num_three_stars = self.num_three_stars
-        champion.castTime = 2 + .25 * self.num_three_stars
+        champion.castTime = 2 + 0.25 * self.num_three_stars
         return 0
 
     def extraParameters():
@@ -348,9 +354,9 @@ class HexMech(Buff):
         )
         self.pilot_star_level = 0
         self.adScaling = [15, 25, 40]
-        self.dmgAmpScaling = [.1, .18, .3]
+        self.dmgAmpScaling = [0.1, 0.18, 0.3]
         self.manaRegenScaling = [3, 6, 12]
-        self.critScaling = [.3, .6, 1]
+        self.critScaling = [0.3, 0.6, 1]
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -358,9 +364,13 @@ class HexMech(Buff):
             if champion.pilot == Role.FIGHTER:
                 champion.bonus_ad.addStat(self.adScaling[self.pilot_star_level - 1])
             elif champion.pilot == Role.MARKSMAN:
-                champion.dmgMultiplier.addStat(self.dmgAmpScaling[self.pilot_star_level - 1])
+                champion.dmgMultiplier.addStat(
+                    self.dmgAmpScaling[self.pilot_star_level - 1]
+                )
             elif champion.pilot == Role.CASTER:
-                champion.manaRegen.addStat(self.manaRegenScaling[self.pilot_star_level - 1])
+                champion.manaRegen.addStat(
+                    self.manaRegenScaling[self.pilot_star_level - 1]
+                )
             elif champion.pilot == Role.ASSASSIN:
                 champion.crit.addStat(self.critScaling[self.pilot_star_level - 1])
         return 0
@@ -400,6 +410,25 @@ class Quickstriker(Buff):
         self.is_quickstriker = is_quickstriker
 
 
+class Shurima(Buff):
+    levels = [0, 2]
+    display_name = "Shurima"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["onUpdate"]
+        )
+        self.scaling = 2
+        self.next_AS = 0
+        
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time > self.next_AS:
+            champion.aspd.addStat(self.scaling)
+            self.next_AS = time + 1
+        return 0
+
+
 class Arcanist(Buff):
     levels = [0, 2, 4, 6]
     display_name = "Arcanist"
@@ -409,11 +438,15 @@ class Arcanist(Buff):
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
         self.scaling = {2: 18, 4: 25, 6: 40}
-        self.arcanist_scaling = {2: 25, 4: 45, 6: 70}
+        self.arcanist_scaling = {2: 25, 4: 40, 6: 60}
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
-        amt_to_add = self.scaling[self.level] if not self.is_arcanist else self.arcanist_scaling[self.level]
+        amt_to_add = (
+            self.scaling[self.level]
+            if not self.is_arcanist
+            else self.arcanist_scaling[self.level]
+        )
         champion.ap.addStat(amt_to_add)
         return 0
 
@@ -425,18 +458,46 @@ class Arcanist(Buff):
         self.is_arcanist = is_arcanist
 
 
+class Slayer(Buff):
+    levels = [0, 2, 4, 6]
+    display_name = "Slayer"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+        )
+        self.scaling = {2: 22, 4: 33, 6: 44}
+        self.bonus_amp = 0
+        self.extraBuff(params)
+
+    def performAbility(self, phase, time, champion, input_=0):
+        amt_to_add = self.scaling[self.level] * (1 + self.bonus_amp)
+        champion.bonus_ad.addStat(amt_to_add)
+        return 0
+
+    def extraParameters():
+        # defining the parameters for the extra shit
+        return {"Title": "Amp (0-50%)", "Min": 0.0, "Max": .5, "Default": .25}
+
+    def extraBuff(self, bonus_amp):
+        self.bonus_amp = bonus_amp
+
+
+
 class Gunslinger(Buff):
     levels = [0, 2, 4]
     display_name = "Gunslinger"
 
     def __init__(self, level, params):
         super().__init__(
-            f"{self.display_name} {level}", level, params, phases=["preCombat", "postAttack"]
+            f"{self.display_name} {level}",
+            level,
+            params,
+            phases=["preCombat", "postAttack"],
         )
         self.adScaling = {2: 20, 4: 35}
         self.extraDamage = {2: 100, 4: 200}
         self.stacks = 0
-
 
     def performAbility(self, phase, time, champion, input=0):
         if phase == "preCombat":
@@ -450,9 +511,9 @@ class Gunslinger(Buff):
                     0,
                     self.extraDamage[self.level],
                     self.extraDamage[self.level],
-                "physical",
-                time,
-            )
+                    "physical",
+                    time,
+                )
         return 0
 
 
@@ -499,7 +560,6 @@ class Void(Buff):
         return 0
 
 
-
 class Disruptor(Buff):
     levels = [0, 2, 4]
     display_name = "Disruptor"
@@ -508,13 +568,12 @@ class Disruptor(Buff):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
-        self.scaling = {2: .25, 4: .45}
+        self.scaling = {2: 0.25, 4: 0.45}
 
     def performAbility(self, phase, time, champion, input=0):
         if phase == "preCombat":
             champion.extraDmgMultiplier.addStat(self.scaling[self.level])
         return 0
-
 
 
 class Vanquisher(Buff):
@@ -538,6 +597,28 @@ class Vanquisher(Buff):
 # Unit buffs
 
 
+class AzirUlt(Buff):
+    levels = [1]
+    display_name = "Arise!"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preAttack"])
+    
+    def performAbility(self, phase, time, champion, input_=0):
+        for index, soldier_attack in enumerate(champion.soldier_intervals[0:champion.soldiers]):
+            if champion.numAttacks > soldier_attack:
+                champion.soldier_intervals[index] += 3
+                champion.multiTargetSpell(
+                    champion.opponents,
+                    champion.items,
+                    time,
+                    1,
+                    champion.abilityScaling,
+                    "magical",
+                )
+        return 0
+
+
 class JhinUlt(Buff):
     levels = [1]
     display_name = "Curtain Call"
@@ -549,22 +630,25 @@ class JhinUlt(Buff):
         if champion.ultAutos > 0:
             input_.canOnHit = True
             input_.canCrit = champion.canSpellCrit
-            input_.attackType = 'physical'
-            input_.scaling = ChampionAbilityScaling(champion) if champion.ultAutos > 1 else ScaledChampionAbilityScaling(
-                        champion, 2.44
-                    )
+            input_.attackType = "physical"
+            input_.scaling = (
+                ChampionAbilityScaling(champion)
+                if champion.ultAutos > 1
+                else ScaledChampionAbilityScaling(champion, 2.44)
+            )
             champion.ultAutos -= 1
             if champion.ultAutos == 0:
                 champion.manalockTime = time + 0.01
         return 0
 
 
-
 class DravenUlt(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__("Spinning Axes", level, params, phases=["preAttack", "onUpdate"])
+        super().__init__(
+            "Spinning Axes", level, params, phases=["preAttack", "onUpdate"]
+        )
         self.attack_queue = deque()
         self.axe_return_time = 1.3
 
@@ -573,7 +657,7 @@ class DravenUlt(Buff):
             if champion.axes > 0:
                 input_.canOnHit = True
                 input_.canCrit = champion.canCrit
-                input_.attackType = 'physical'
+                input_.attackType = "physical"
                 input_.scaling = ChampionAbilityScaling(champion)
                 champion.axes -= 1
                 self.attack_queue.append(time + self.axe_return_time)
@@ -589,9 +673,10 @@ class KaisaUlt(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__("Icathian Rain", level, params, phases=["postPreCombat", "preAttack"])
-        self.autoCount = 0 # separate counter for empowered autos
-        
+        super().__init__(
+            "Icathian Rain", level, params, phases=["postPreCombat", "preAttack"]
+        )
+        self.autoCount = 0  # separate counter for empowered autos
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "postPreCombat":
@@ -614,7 +699,7 @@ class KaisaUlt(Buff):
                     time,
                     1,
                     champion.empoweredAbilityScaling2,
-                "magical",
+                    "magical",
                 )
             else:
                 champion.multiTargetSpell(
@@ -623,7 +708,7 @@ class KaisaUlt(Buff):
                     time,
                     1,
                     champion.empoweredAbilityScaling,
-                "magical",
+                    "magical",
                 )
             self.autoCount += 1
         return 0
@@ -664,7 +749,7 @@ class JinxUlt(Buff):
         if champion.numAttacks >= champion.auto_threshold[champion.level - 1]:
             input_.canOnHit = True
             input_.canCrit = champion.canCrit
-            input_.attackType = 'physical'
+            input_.attackType = "physical"
             input_.scaling = ChampionAbilityScaling(champion)
             for i in range(2):
                 champion.doAttack(input_, champion.items, time)
@@ -688,7 +773,7 @@ class THexUlt(Buff):
             if champion.curMana > 0:
                 if time > champion.nextDrain:
                     print("Draining THex ult: {} {}".format(time, champion.curMana))
-                    champion.nextDrain += .25
+                    champion.nextDrain += 0.25
                     champion.curMana -= 33 / 4
                     for i in range(champion.num_targets):
                         scale_factor = 1.0
@@ -699,7 +784,11 @@ class THexUlt(Buff):
                         elif i >= 3:
                             scale_factor = 0.55
 
-                        scaling_func = champion.abilityScaling if scale_factor == 1.0 else ScaledChampionAbilityScaling2(champion, scale_factor)
+                        scaling_func = (
+                            champion.abilityScaling
+                            if scale_factor == 1.0
+                            else ScaledChampionAbilityScaling2(champion, scale_factor)
+                        )
 
                         champion.multiTargetSpell(
                             champion.opponents,
@@ -726,7 +815,7 @@ class THexUlt(Buff):
 
             if champion.curMana <= 0:
                 champion.ultActive = False
-                champion.nextAttackTime = time + .01
+                champion.nextAttackTime = time + 0.01
                 champion.curMana = 0
         return 0
 
@@ -737,7 +826,7 @@ class VeigarUlt(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
-        self.multScaling = .5
+        self.multScaling = 0.5
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.canSpellCrit = True
@@ -750,8 +839,9 @@ class ViegoUlt(Buff):
     display_name = "Blade of the Ruined King"
 
     def __init__(self, level=1, params=0):
-        super().__init__(self.display_name, level, params, phases=["preCombat", "preAttack"])
-        
+        super().__init__(
+            self.display_name, level, params, phases=["preCombat", "preAttack"]
+        )
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -764,9 +854,9 @@ class ViegoUlt(Buff):
                     time,
                     1,
                     champion.extraAbilityScaling,
-                "magical",
+                    "magical",
                 )
-        
+
         return 0
 
 
@@ -774,11 +864,15 @@ class YunaraUlt(Buff):
     levels = [1]
 
     def __init__(self, level=1, params=0):
-        super().__init__("Transcendent State", level, params, phases=["preCombat", "preAttack", "onCrit", "onDealDamage"])
+        super().__init__(
+            "Transcendent State",
+            level,
+            params,
+            phases=["preCombat", "preAttack", "onCrit", "onDealDamage"],
+        )
         self.newAttack = Attack()
         self.critBonus = False
         self.true_dmg_scaling = 0.33
-
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -790,13 +884,13 @@ class YunaraUlt(Buff):
             if phase == "preAttack":
                 input_.canOnHit = True
                 input_.canCrit = champion.canSpellCrit
-                input_.attackType = 'physical'
+                input_.attackType = "physical"
                 input_.scaling = ChampionAbilityScaling(champion)
                 for index in range(1, champion.num_targets):
                     # 1: .6
                     # 2: .36
                     self.newAttack.scaling = ScaledChampionAbilityScaling(
-                        champion, 0.6 ** index
+                        champion, 0.6**index
                     )
                     champion.doAttack(self.newAttack, champion.items, time)
             elif phase == "onCrit":
@@ -815,7 +909,7 @@ class YunaraUlt(Buff):
                     )
                 self.critBonus = False
                 return input_
-        return 0
+        return input_
 
 
 # VOID BUFFS
@@ -833,7 +927,7 @@ class LeechingNucleus(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         if self.stacks < self.max_stacks:
-            self.stacks += 1   
+            self.stacks += 1
             champion.bonus_ad.addStat(self.scaling)
             champion.ap.addStat(self.scaling)
         return input_
@@ -844,10 +938,12 @@ class AdrenalineModules(Buff):
     display_name = "Adrenaline Modules"
 
     def __init__(self, level=1, params=0):
-        super().__init__(self.display_name, level, params, phases=["preCombat", "preAttack"])
-        self.initial_scaling = .15
+        super().__init__(
+            self.display_name, level, params, phases=["preCombat", "preAttack"]
+        )
+        self.initial_scaling = 0.15
         self.bonus_threshold = 3
-        self.bonus_scaling = .01
+        self.bonus_scaling = 0.01
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -900,6 +996,43 @@ class Kahunahuna(Buff):
         return 0
 
 
+
+class SeraphimsStaff(Buff):
+    levels = [1]
+    display_name = "Seraphim's Staff"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name,
+            level,
+            params,
+            phases=["preCombat"],
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.seraphim = True
+        return 0
+
+
+class Retribution(Buff):
+    levels = [1]
+    display_name = "Retribution"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name,
+            level,
+            params,
+            phases=["preCombat"],
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.retribution = True
+        return 0
+
+
 class JeweledLotusI(Buff):
     levels = [1]
     display_name = "Jeweled Lotus I"
@@ -932,7 +1065,7 @@ class JeweledLotusII(Buff):
             phases=["preCombat"],
         )
         self.crit_scaling = 0.4
-        self.crit_dmg_scaling = .1
+        self.crit_dmg_scaling = 0.1
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -1214,7 +1347,8 @@ class MessHall(Buff):
         )
         self.activation_time = 10
         self.activated = False
-        self.aspd_scaling = 20
+        self.aspd_scaling = 8
+        self.base_dmg = 30
         self.dmg_scaling = 1.4
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -1223,7 +1357,10 @@ class MessHall(Buff):
                 self.activated = True
                 champion.aspd.addStat(self.aspd_scaling)
         elif phase == "preAttack" and self.activated:
-            dmg = champion.atk.stat * champion.bonus_ad.stat * self.dmg_scaling
+            # 50 AD, 30 AP: 1.5 + 1.3 - 1 = 1.8
+            scaling = (champion.bonus_ad.stat + champion.ap.stat - 1)
+            dmg = self.base_dmg * scaling
+            champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "magical", time)
             champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "magical", time)
         return 0
 
@@ -1234,37 +1371,12 @@ class NoScoutNoPivot(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
-        self.scaling = 2
+        self.ad_scaling = 1
+        self.ap_scaling = 1.5
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.bonus_ad.addStat(self.scaling * 5 * (champion.stage - 2))
-        champion.ap.addStat(self.scaling * 5 * (champion.stage - 2))
-        return 0
-
-
-class BlazingSoulI(Buff):
-    levels = [1]
-    display_name = "Blazing Soul I"
-
-    def __init__(self, level=1, params=0):
-        super().__init__(self.display_name, level, params, phases=["preCombat"])
-
-    def performAbility(self, phase, time, champion, input_=0):
-        champion.aspd.addStat(20)
-        champion.ap.addStat(20)
-        return 0
-
-
-class BlazingSoulII(Buff):
-    levels = [1]
-    display_name = "Blazing Soul II"
-
-    def __init__(self, level=1, params=0):
-        super().__init__(self.display_name, level, params, phases=["preCombat"])
-
-    def performAbility(self, phase, time, champion, input_=0):
-        champion.aspd.addStat(35)
-        champion.ap.addStat(35)
+        champion.bonus_ad.addStat(self.ad_scaling * 5 * (champion.stage - 2))
+        champion.ap.addStat(self.ap_scaling * 5 * (champion.stage - 2))
         return 0
 
 
@@ -1382,6 +1494,42 @@ class AirAxiom(Buff):
                 status.ArmorReduction("Air Hex"), champion, time, 30, 0.7
             )
             opponent.applyStatus(status.MRReduction("Air Hex"), champion, time, 30, 0.7)
+        return 0
+
+
+class ContinuumCogs(Buff):
+    levels = [1]
+    display_name = "Continuum Cogs"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["onUpdate"])
+        self.manaRegenBonus = 2
+        self.apBonus = 12
+        self.interval = 8
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate":
+            if time >= self.interval:
+                self.interval = 999
+                champion.manaRegen.addStat(self.manaRegenBonus)
+                champion.ap.addStat(self.apBonus)
+        return 0
+
+
+class OverclockedCapacitors(Buff):
+    levels = [1]
+    display_name = "Overclocked Capacitors"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["onUpdate"])
+        self.asBonus = 22
+        self.interval = 8
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate":
+            if time >= self.interval:
+                self.interval = 999
+                champion.aspd.addStat(self.asBonus)
         return 0
 
 

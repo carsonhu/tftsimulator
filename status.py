@@ -65,8 +65,10 @@ class DoTEffect(Status):
         self.next_proc = 0
 
     def applicationEffect(self, champion, time, duration, params):
-        self.scaling = params
-        self.next_proc = math.floor(time) + 1
+        # params: (scaling function, interval)
+        self.scaling = params[0]
+        self.interval = params[1]
+        self.next_proc = math.floor(time) + self.interval
         return True
 
     def reapplicationEffect(self, champion, time, duration, params):
@@ -88,7 +90,7 @@ class DoTEffect(Status):
                 "magical",
             )
 
-            self.next_proc += 1
+            self.next_proc += self.interval
         super().update(champion, time)
 
 
