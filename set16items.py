@@ -50,6 +50,7 @@ artifacts = [
     "Dawncore",
     "TitanicHydra",
     "CrownOfDemacia",
+    "DarkinStaff"
 ]
 
 radiants = [
@@ -424,8 +425,8 @@ class Adaptive(Item):
         super().__init__(
             self.display_name,
             manaRegen=3,
-            ad=15,
-            ap=15,
+            ad=10,
+            ap=10,
             has_radiant=True,
             phases=["preCombat"],
         )
@@ -800,6 +801,25 @@ class Dawncore(Item):
                 champion.fullMana.addStat(-1 * (champion.fullMana.stat // 10))
 
 
+
+class DarkinStaff(Item):
+    display_name = "Darkin Staff"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, manaRegen=1, ap=40, phases=["postAbility"]
+        )
+        self.manaSpent = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.fullMana.stat > 0:
+            self.manaSpent += champion.fullMana.stat
+            while self.manaSpent >= 20:
+                self.manaSpent -= 20
+                dmg = 50
+                champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "magical", time)
+
+
 ### RADIANTS
 
 
@@ -1055,8 +1075,8 @@ class RadiantAdaptive(Adaptive):
         super().__init__()
         self.name = self.display_name
         self.manaRegen = 6
-        self.ad = 30
-        self.ap = 30
+        self.ad = 20
+        self.ap = 20
         self.mult = 0.3
 
 

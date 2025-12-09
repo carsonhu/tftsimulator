@@ -503,6 +503,9 @@ def items_list(items, default_item="NoItem", num_items=3):
     # Mapping: {DisplayName: ClassName}
     display_map = item_display_map(items)
 
+    # Reverse map: ClassName -> DisplayName
+    class_to_display = {v: k for k, v in display_map.items()}
+
     # Get the lists separately for clarity
     display_names = list(display_map.keys())
 
@@ -510,7 +513,10 @@ def items_list(items, default_item="NoItem", num_items=3):
     def reset_items():
         for i in range(1, num_items + 1):
             st.session_state[f"Items{i}"] = default_item
-            if f"Items{i}_display" in st.session_state:
+            # Explicitly reset the display widget to the default item's display name
+            if default_item in class_to_display:
+                st.session_state[f"Items{i}_display"] = class_to_display[default_item]
+            elif f"Items{i}_display" in st.session_state:
                 del st.session_state[f"Items{i}_display"]
 
     for i in range(1, num_items + 1):
@@ -528,15 +534,14 @@ def items_list(items, default_item="NoItem", num_items=3):
             list(display_map.keys())[0],  # fallback to first
         )
 
+        display_key = f"Items{n}_display"
+        if display_key not in st.session_state:
+            st.session_state[display_key] = current_display
+
         selected_display = st.selectbox(
             f"Item {n}",
             display_names,
-            index=(
-                display_names.index(current_display)
-                if current_display in display_names
-                else 0
-            ),
-            key=f"Items{n}_display",
+            key=display_key,
         )
 
         # Convert back to class name

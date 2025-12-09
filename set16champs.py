@@ -23,6 +23,8 @@ champ_list = [
     "Sona",
     "Viego",
     # 2-cost
+    "Aphelios",
+    "Ashe",
     "Bard",
     "Orianna",
     "Teemo",
@@ -34,6 +36,7 @@ champ_list = [
     "Gwen",
     "Jinx",
     "Malzahar",
+    "Milio",
     "Vayne",
     # 4-cost,
     "Kaisa",
@@ -242,7 +245,7 @@ class Kogmaw(Champion):
         self.default_traits = ["Void", "Arcanist", "Longshot"]
         self.castTime = 1 # unverified
         self.num_targets = 2
-        self.notes = "No shred"
+        self.notes = "No shred included"
 
     # AP: 140/200/300
     abilityScaling = create_ability_scaling([0, 0, 0], [140, 200, 300])
@@ -251,7 +254,7 @@ class Kogmaw(Champion):
         self.multiTargetSpell(
             opponents, items, time, 1, self.abilityScaling, "magical"
         )
-        if self.num_targets > 2:
+        if self.num_targets >= 2:
             self.multiTargetSpell(
                 opponents, items, time, 1, lambda x,y,z: self.abilityScaling(x,y,z) * .5, "magical"
             )
@@ -282,11 +285,11 @@ class Lulu(Champion):
         self.castTime = 1 # unverified
         self.notes = ""
 
-    # AP: 265/400/600
-    abilityScaling = create_ability_scaling([0, 0, 0], [265, 400, 600])
+    # AP: 285/425/635
+    abilityScaling = create_ability_scaling([0, 0, 0], [285, 425, 635])
 
-    # AP: 110/165/250
-    extraAbilityScaling = create_ability_scaling([0, 0, 0], [110, 165, 250])
+    # AP: 120/180/270
+    extraAbilityScaling = create_ability_scaling([0, 0, 0], [120, 180, 270])
     
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
@@ -408,6 +411,85 @@ class Viego(Champion):
         )
 
 
+class Aphelios(Champion):
+    def __init__(self, level):
+        hp = 650
+        atk = 20
+        curMana = 0
+        fullMana = 40
+        aspd = 0.75
+        armor = 20
+        mr = 20
+        super().__init__(
+            "Aphelios",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.default_traits = []
+        self.castTime = 0
+        self.items.append(buffs.ApheliosUlt())
+        self.manalockDuration = 999
+        self.severumAttacks = 8
+        self.severumAttacksLeft = 0
+        self.severumActivated = False
+        # infernum, severum activated, severum
+        self.notes = "Shred is just permanent"
+
+    # AD: 70/105/175
+    abilityScaling = create_ability_scaling([70, 105, 175], [0, 0, 0])
+
+    def performAbility(self, opponents, items, time):
+        self.severumAttacksLeft = math.floor(self.severumAttacks * self.ap.stat)
+        self.severumActivated = True
+
+
+class Ashe(Champion):
+    def __init__(self, level):
+        hp = 550
+        atk = 53
+        curMana = 20
+        fullMana = 80
+        aspd = 0.7
+        armor = 20
+        mr = 20
+        super().__init__(
+            "Ashe",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["Freljord", "Quickstriker"]
+        self.castTime = .5
+        self.num_targets = 2
+        self.notes = "need to verify cast time"
+
+    # AD: 125/185/290, AP: 15/25/35
+    abilityScaling = create_ability_scaling([125, 185, 290], [15, 25, 35])
+
+    def performAbility(self, opponents, items, time):
+        # does not count as auto
+        self.multiTargetSpell(
+            opponents, items, time, 1, self.abilityScaling, "physical"
+        )
+        if self.num_targets >= 2:
+            self.multiTargetSpell(
+                opponents, items, time, 1, lambda x,y,z: self.abilityScaling(x,y,z) * .33, "physical"
+            )
+
+
 class Bard(Champion):
     def __init__(self, level):
         hp = 750
@@ -511,11 +593,11 @@ class Teemo(Champion):
         self.castTime = 1 # verified
         self.notes = ""
 
-    # AP: 125/185/285
-    abilityScaling = create_ability_scaling([0, 0, 0], [125, 185, 285])
+    # AP: 130/200/300
+    abilityScaling = create_ability_scaling([0, 0, 0], [130, 200, 300])
 
-    # AP: 30, 45, 70
-    dotScaling = create_ability_scaling([0, 0, 0], [30, 45, 70], func_name="dotScaling")
+    # AP: 35/55/85
+    dotScaling = create_ability_scaling([0, 0, 0], [35, 55, 85], func_name="dotScaling")
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
@@ -699,8 +781,8 @@ class Jinx(Champion):
         self.manaGainMultiplier.base = 0
         self.notes = ""
 
-    # AD: 38/57/100, AP: 4/6/9
-    abilityScaling = create_ability_scaling([38, 57, 100], [4, 6, 9])
+    # AD: 42/63/110, AP: 4/6/9
+    abilityScaling = create_ability_scaling([42, 63, 110], [4, 6, 9])
 
 
 class Gwen(Champion):
@@ -754,7 +836,7 @@ class Malzahar(Champion):
         atk = 25
         curMana = 0
         fullMana = 35
-        aspd = 0.7
+        aspd = 0.8
         armor = 20
         mr = 20
         super().__init__(
@@ -828,12 +910,53 @@ class Vayne(Champion):
         )
 
 
+class Milio(Champion):
+    def __init__(self, level):
+        hp = 500
+        atk = 30
+        curMana = 0
+        fullMana = 60
+        aspd = 0.75
+        armor = 30
+        mr = 30
+        super().__init__(
+            "Milio",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["Invoker"]
+        self.castTime = 1
+        self.num_targets = 2
+        self.notes = "does 3 bounces mean 4 enemies hit? num targets is for final bounce"
+
+    # AP: 190/285/445
+    abilityScaling = create_ability_scaling([0, 0, 0], [190, 285, 445])
+
+    # AP: 160/240/375
+    extraAbilityScaling = create_ability_scaling([0, 0, 0], [160, 240, 375])
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, 4, self.abilityScaling, "magical"
+        )
+        self.multiTargetSpell(
+            opponents, items, time, self.num_targets, self.extraAbilityScaling, "magical"
+        )
+
+
 class Kaisa(Champion):
     def __init__(self, level):
         hp = 1000
-        atk = 55
-        curMana = 0
-        fullMana = 70
+        atk = 60
+        curMana = 20
+        fullMana = 60
         aspd = 0.8
         armor = 20
         mr = 20

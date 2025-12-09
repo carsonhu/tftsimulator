@@ -282,7 +282,7 @@ class Freljord(Buff):
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
-        multiplier = 1.5 if self.is_freljord else 1
+        multiplier = 2.5 if self.is_freljord else 1
         value_to_add = self.dmgamp_scaling[self.level] * multiplier
         champion.dmgMultiplier.addStat(value_to_add)
         return 0
@@ -597,6 +597,38 @@ class Vanquisher(Buff):
 # Unit buffs
 
 
+class ApheliosUlt(Buff):
+    levels = [1]
+    display_name = "Incendiary Onslaught"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat", "preAttack", "postAbility"])
+    
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            # permashred everyone
+            for opponent in champion.opponents:
+                opponent.applyStatus(
+                    status.ArmorReduction("Aph Armor 30"), champion, time, 30, 0.7
+                )
+        elif phase == "postAbility" and champion.severumActivated:
+            # severum was activated, apply buff
+            champion.severumActivated = False
+            champion.aspd.addStat(200)
+        elif phase == "preAttack":
+            if champion.severumAttacksLeft == 0:
+                # Infernum
+                input_.numTargets = 3
+            else:
+                input_.scaling = ChampionAbilityScaling(champion)
+                champion.severumAttacksLeft -= 1
+                if champion.severumAttacksLeft == 0:
+                    # deactivate
+                    champion.aspd.addStat(-200)
+                    champion.manalockTime = time + 0.01  
+        return 0
+
+
 class AzirUlt(Buff):
     levels = [1]
     display_name = "Arise!"
@@ -677,6 +709,7 @@ class KaisaUlt(Buff):
             "Icathian Rain", level, params, phases=["postPreCombat", "preAttack"]
         )
         self.autoCount = 0  # separate counter for empowered autos
+        # todo: fix so it resets on cast
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "postPreCombat":
@@ -686,9 +719,11 @@ class KaisaUlt(Buff):
                 # fix role stuff: hardcoded in, but caster is 7 mpA, 2 mana regen. Marksman is 10 mpA, 0 mana regen.
                 champion.manaRegen.addStat(-2)
                 champion.manaPerAttack.addStat(3)
+                champion.manalockDuration = 5
                 champion.role = Role.MARKSMAN
                 champion.castTime = 0
-                champion.fullMana.base = 40
+                champion.curMana = 10 # need to change curmana to be a stat
+                champion.fullMana.base = 30
                 champion.atk.base = 25
 
         elif phase == "preAttack" and not champion.ad_version and champion.ultActive:
@@ -1348,7 +1383,7 @@ class MessHall(Buff):
         self.activation_time = 10
         self.activated = False
         self.aspd_scaling = 8
-        self.base_dmg = 30
+        self.base_dmg = 25
         self.dmg_scaling = 1.4
 
     def performAbility(self, phase, time, champion, input_=0):
