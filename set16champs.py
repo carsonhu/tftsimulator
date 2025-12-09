@@ -43,7 +43,7 @@ champ_list = [
     "Kalista",
     "Lissandra",
     "Lux",
-    "MissFortune",
+    # "MissFortune",
     "Seraphine",
     "Veigar",
     "Yunara",
@@ -1150,7 +1150,7 @@ class MissFortune(Champion):
         )
         self.default_traits = ["Bilgewater", "Gunslinger"]
         self.castTime = 1
-        self.notes = "Bilgewater; add AD / AS as needed"
+        self.notes = "Bilgewater; add AD / AS as needed. passive not included yet"
 
     # AD: 130, 200, 1000, AP: 15, 25, 70
     abilityScaling = create_ability_scaling([130, 200, 1000], [15, 25, 70])

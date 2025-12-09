@@ -263,7 +263,7 @@ class Yordle(Buff):
 
     def extraParameters():
         # defining the parameters for the extra shit
-        return {"Title": "# 3 Star Yordles", "Min": 0, "Max": 8, "Default": 0}
+        return {"Title": "# 3* Yordles", "Min": 0, "Max": 8, "Default": 0}
 
     def extraBuff(self, num_three_stars):
         self.num_three_stars = num_three_stars

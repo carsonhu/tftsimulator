@@ -656,14 +656,14 @@ class RFC(Item):
     display_name = "Rapid Firecannon"
 
     def __init__(self):
-        super().__init__(self.display_name, aspd=75, phases=None)
+        super().__init__(self.display_name, aspd=65, dmgMultiplier=.05,  phases=None)
 
 
 class Mittens(Item):
     display_name = "Mittens"
 
     def __init__(self):
-        super().__init__(self.display_name, aspd=65, phases="preCombat")
+        super().__init__(self.display_name, aspd=65, dmgMultiplier=.15, phases="preCombat")
 
     def performAbility(self, phase, time, champion, input_):
         champion.dmgMultiplier.add += 0.15
@@ -680,7 +680,7 @@ class GoldCollector(Item):
     display_name = "Gold Collector"
 
     def __init__(self):
-        super().__init__(self.display_name, ad=25, crit=30, phases=None)
+        super().__init__(self.display_name, ad=40, crit=20, phases=None)
 
 
 class LichBane(Item):
@@ -746,12 +746,11 @@ class ShivArtifact(Item):
     def __init__(self):
         super().__init__(
             self.display_name,
-            ap=40,
-            aspd=40,
-            has_radiant=True,
+            ap=50,
+            aspd=15,
             phases=["preAttack"],
         )
-        self.shivDmg = 40
+        self.shivDmg = 30
         self.shivTargets = 4
         self.counter = 0
 
@@ -770,16 +769,16 @@ class Flickerblade(Item):
     display_name = "Flickerblade"
 
     def __init__(self):
-        super().__init__(self.display_name, aspd=15, ap=10, phases=["postAttack"])
+        super().__init__(self.display_name, aspd=12, ap=10, phases=["postAttack"])
         self.counter = 0
 
     def performAbility(self, phase, time, champion, input_=0):
         self.counter += 1
         if champion.aspd.stat <= 5:
-            champion.aspd.addStat(6)
+            champion.aspd.addStat(5)
         if self.counter == 5:
-            champion.bonus_ad.addStat(3)
-            champion.ap.addStat(4)
+            champion.bonus_ad.addStat(2)
+            champion.ap.addStat(2)
             self.counter = 0
 
 
@@ -1009,7 +1008,7 @@ class RadiantVoidStaff(VoidStaff):
     def __init__(self):
         super().__init__()
         self.name = self.display_name
-        self.manaRegen = 3
+        self.manaRegen = 2
         self.ap = 30
         self.aspd = 75
 
