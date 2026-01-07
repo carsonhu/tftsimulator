@@ -29,6 +29,7 @@ champ_list = [
     "Orianna",
     "Teemo",
     "Tristana",
+    "Yasuo",
     # "TwistedFate",
     # 3-cost
     "Ahri",
@@ -46,6 +47,7 @@ champ_list = [
     # "MissFortune",
     "Seraphine",
     "Veigar",
+    "Yone",
     "Yunara",
     # 5-cost
     "Azir",
@@ -518,8 +520,8 @@ class Bard(Champion):
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
-        # AP: 105/160/240, multiplied by number of meeps
-        base_scaling = create_ability_scaling([0, 0, 0], [105, 160, 240])
+        # AP: 120/170/240, multiplied by number of meeps
+        base_scaling = create_ability_scaling([0, 0, 0], [120, 170, 240])
         return base_scaling(None, level, AD, AP) * (self.base_meeps + self.num_three_stars)
 
     def performAbility(self, opponents, items, time):
@@ -593,11 +595,11 @@ class Teemo(Champion):
         self.castTime = 1 # verified
         self.notes = ""
 
-    # AP: 130/200/300
-    abilityScaling = create_ability_scaling([0, 0, 0], [130, 200, 300])
+    # AP: 130/200/330
+    abilityScaling = create_ability_scaling([0, 0, 0], [130, 200, 330])
 
-    # AP: 35/55/85
-    dotScaling = create_ability_scaling([0, 0, 0], [35, 55, 85], func_name="dotScaling")
+    # AP: 35/55/100
+    dotScaling = create_ability_scaling([0, 0, 0], [35, 55, 100], func_name="dotScaling")
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
@@ -680,6 +682,41 @@ class TwistedFate(Champion):
 
 
 
+class Yasuo(Champion):
+    def __init__(self, level):
+        hp = 750
+        atk = 45
+        curMana = 0
+        fullMana = 30
+        aspd = 0.8
+        armor = 45
+        mr = 45
+        super().__init__(
+            "Yasuo",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.FIGHTER,
+        )
+        self.default_traits = ["Ionia", "Slayer"]
+        self.castTime = .5
+        self.notes = "Always hits 2 targets"
+
+    # AD: 85, 125, 190  AP: 8, 12, 18
+    abilityScaling = create_ability_scaling([85, 125, 190], [8, 12, 18])
+
+    def performAbility(self, opponents, items, time):
+        # does not count as auto
+        self.multiTargetSpell(
+            opponents, items, time, 2, self.abilityScaling, "physical"
+        )
+
+
 class Ahri(Champion):
     def __init__(self, level):
         hp = 650
@@ -719,7 +756,7 @@ class Ahri(Champion):
 class Draven(Champion):
     def __init__(self, level):
         hp= 650
-        atk = 45
+        atk = 50
         curMana = 60
         fullMana = 100
         aspd = .75
@@ -743,8 +780,8 @@ class Draven(Champion):
         self.items.append(buffs.DravenUlt())
         self.notes = "1.3 second return time."
 
-    # AD: 140/210/350, AP: 10/15/25
-    abilityScaling = create_ability_scaling([140, 210, 350], [10, 15, 25])
+    # AD: 120/170/290, AP: 10/15/25
+    abilityScaling = create_ability_scaling([120, 170, 290], [10, 15, 25])
 
     def performAbility(self, opponents, items, time):
         # he can only hold 2 axes, but this doesnt rly matter
@@ -781,8 +818,8 @@ class Jinx(Champion):
         self.manaGainMultiplier.base = 0
         self.notes = ""
 
-    # AD: 42/63/110, AP: 4/6/9
-    abilityScaling = create_ability_scaling([42, 63, 110], [4, 6, 9])
+    # AD: 65/100/155, AP: 4/6/9
+    abilityScaling = create_ability_scaling([65, 100, 155], [4, 6, 9])
 
 
 class Gwen(Champion):
@@ -981,8 +1018,8 @@ class Kaisa(Champion):
         self.castTime = 1.5
         self.notes = ""
 
-    # AD: 38, 57, 135  AP: 6, 9, 20
-    abilityScaling = create_ability_scaling([38, 57, 135], [6, 9, 20])
+    # AD: 42, 63, 150  AP: 6, 9, 20
+    abilityScaling = create_ability_scaling([42, 63, 150], [6, 9, 20])
 
     # AP: 60, 90, 500
     empoweredAbilityScaling = create_ability_scaling([0, 0, 0], [60, 90, 500], func_name="empoweredAbilityScaling")
@@ -1008,8 +1045,8 @@ class Kalista(Champion):
         hp = 800
         atk = 50
         curMana = 20
-        fullMana = 70
-        aspd = 0.8
+        fullMana = 65
+        aspd = 0.85
         armor = 30
         mr = 30
         super().__init__(
@@ -1152,8 +1189,8 @@ class MissFortune(Champion):
         self.castTime = 1
         self.notes = "Bilgewater; add AD / AS as needed. passive not included yet"
 
-    # AD: 130, 200, 1000, AP: 15, 25, 70
-    abilityScaling = create_ability_scaling([130, 200, 1000], [15, 25, 70])
+    # AD: 145, 220, 3000, AP: 15, 25, 70
+    abilityScaling = create_ability_scaling([145, 220, 3000], [15, 25, 70])
 
     def extraAbilityScaling(self, level, AD, AP):
         return self.abilityScaling(level, AD, AP) * 0.65
@@ -1195,9 +1232,9 @@ class Seraphine(Champion):
         self.musicNotes = 0
         self.notes = ""
 
-    # AP: 25/40/200
+    # AP: 35/55/200
     def abilityScaling(self, level, AD, AP):
-        base_scaling = create_ability_scaling([0, 0, 0], [25, 40, 200])
+        base_scaling = create_ability_scaling([0, 0, 0], [35, 55, 200])
         return base_scaling(None, level, AD, AP) * self.musicNotes
 
     # AP: 270/405/2200
@@ -1252,14 +1289,78 @@ class Veigar(Champion):
 
         self.notes = "Edit bonus AP in extra options"
 
-    # AP: 60/90/135
-    abilityScaling = create_ability_scaling([0, 0, 0], [60, 90, 135])
+    # AP: 62/93/199
+    abilityScaling = create_ability_scaling([0, 0, 0], [62, 93, 199])
 
     def performAbility(self, opponents, items, time):
         for i in range(self.num_missiles[self.level - 1]):
             self.multiTargetSpell(
                 opponents, items, time, 1, self.abilityScaling, "magical"
             )
+
+
+class Yone(Champion):
+    def __init__(self, level):
+        hp = 800
+        atk = 20
+        curMana = 30
+        fullMana = 100
+        aspd = 0.9
+        armor = 60
+        mr = 60
+        super().__init__(
+            "Yone",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.FIGHTER,
+        )
+        self.default_traits = ["Ionia", "Slayer"]
+        self.items.append(buffs.YoneUlt())
+        self.num_targets = 3
+        self.castTime = 1
+        self.notes = ""
+
+    # AD: 80/120/800
+    def adAutoAbilityScaling(self, level, AD, AP):
+        base_scaling = create_ability_scaling([80, 120, 800], [0, 0, 0])
+        return base_scaling(None, level, AD, AP)
+
+    # AP: 140/210/1400
+    def apAutoAbilityScaling(self, level, AD, AP):
+        base_scaling = create_ability_scaling([0, 0, 0], [140, 210, 1400])
+        return base_scaling(None, level, AD, AP)
+
+    # AD: 40/60/240, AP: 40/60/240
+    def abilityScaling(self, level, AD, AP):
+        base_scaling = create_ability_scaling([40, 60, 240], [40, 60, 240])
+        return base_scaling(None, level, AD, AP)
+
+    # AD: 160/240/1080, AP: 160/240/1080
+    def splitAbilityScaling(self, level, AD, AP):
+        base_scaling = create_ability_scaling([160, 240, 1080], [160, 240, 1080])
+        return base_scaling(None, level, AD, AP)
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, self.num_targets, self.abilityScaling, "physical"
+        )
+        self.multiTargetSpell(
+            opponents, items, time, self.num_targets, self.abilityScaling, "magical"
+        )
+
+        # split portion
+        self.multiTargetSpell(
+            opponents, items, time, 1, self.splitAbilityScaling, "physical"
+        )
+        self.multiTargetSpell(
+            opponents, items, time, 1, self.splitAbilityScaling, "magical"
+        )
 
 
 class Yunara(Champion):
@@ -1286,20 +1387,22 @@ class Yunara(Champion):
         self.default_traits = ["Ionia", "Quickstriker"]
         self.items.append(buffs.YunaraUlt())
         self.castTime = 0
+        self.manalockDuration = 4
         self.buff_duration = 4
         self.num_targets = 2
         self.ultActive = False
         self.as_ap_scaling = [75, 75, 300]
         self.notes = ""
 
-    # AD: 85/130/450
-    abilityScaling = create_ability_scaling([85, 130, 450], [0, 0, 0])
+    # AD: 80/120/425
+    abilityScaling = create_ability_scaling([80, 120, 425], [0, 0, 0])
 
     def performAbility(self, opponents, items, time):
         self.applyStatus(status.ASModifier("Yunara"),
                     self, time, self.buff_duration, self.as_ap_scaling[self.level-1] * self.ap.stat)
         self.applyStatus(status.UltActivator("Yunara ult"),
                          self, time, self.buff_duration)
+        
 
 
 class Azir(Champion):
@@ -1386,7 +1489,7 @@ class THex(Champion):
 
     # divided by 4 since it procs every .25s
     def abilityScaling(self, level, AD, AP):
-        # AD: 120/200/2000, AP: 10/15/150
+        # AD: 125/200/2000, AP: 10/15/150
         base_scaling = create_ability_scaling([120, 200, 2000], [10, 15, 150])
         return base_scaling(None, level, AD, AP) / 4
 

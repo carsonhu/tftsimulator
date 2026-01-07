@@ -50,7 +50,8 @@ artifacts = [
     "Dawncore",
     "TitanicHydra",
     "CrownOfDemacia",
-    "DarkinStaff"
+    "DarkinStaff",
+    "CappaJuice"
 ]
 
 radiants = [
@@ -451,7 +452,7 @@ class KrakensFury(Item):
         self.stacks = 0
         self.maxStacks = 15
         self.adPerStack = 3.5
-        self.max_stack_as = 30
+        self.max_stack_as = 15
 
     def performAbility(self, phase, time, champion, input_=0):
         if self.stacks < self.maxStacks:
@@ -651,6 +652,26 @@ class Fishbones(Item):
     def __init__(self):
         super().__init__(self.display_name, aspd=50, ad=50, phases=None)
 
+
+class CappaJuice(Item):
+    display_name = "Cappa Juice"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name,
+            aspd=20,
+            ad=25,
+            ap=25,
+            phases=["preCombat"],
+        )
+        self.hats = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            self.hats = champion.takedowns
+            if self.hats > 0:
+                champion.bonus_ad.addStat(self.hats)
+                champion.ap.addStat(self.hats)
 
 class RFC(Item):
     display_name = "Rapid Firecannon"
@@ -913,7 +934,7 @@ class RadiantKrakensFury(KrakensFury):
         self.ad = 20
         self.mr = 40
         self.adPerStack = 7
-        self.max_stack_as = 60
+        self.max_stack_as = 30
 
 
 class RadiantHoJ(HoJ):
@@ -1074,8 +1095,8 @@ class RadiantAdaptive(Adaptive):
         super().__init__()
         self.name = self.display_name
         self.manaRegen = 6
-        self.ad = 20
-        self.ap = 20
+        self.ad = 25
+        self.ap = 25
         self.mult = 0.3
 
 

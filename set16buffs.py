@@ -7,6 +7,7 @@ from role import Role
 from stats import Attack, JhinBonusAD
 
 import status
+from bilgewater_utils import optimize_bilgewater_stats
 
 
 def get_classes_from_file(file_path):
@@ -41,7 +42,6 @@ class_buffs = [
 ]
 
 augments = [
-    "BackupDancers",
     "Shred30",
     "Shred20",
     "MacesWill",
@@ -57,10 +57,9 @@ augments = [
     "TonsOfStats",
     "JeweledLotusI",
     "JeweledLotusII",
-    "Kahunahuna",
-    "KeepAway",
     "FireAxiom",
     "AirAxiom",
+    "WaterAxiom",
     "ContinuumCogs",
     "OverclockedCapacitors",
     "SeraphimsStaff",
@@ -68,7 +67,8 @@ augments = [
     "GlassCannonI",
     "GlassCannonII",
     "NoScoutNoPivot",
-    "MessHall"
+    "MessHall",
+    "SoulAwakening",
 ]
 
 void_buffs = ["SpitterSpines", "LeechingNucleus", "AdrenalineModules"]
@@ -195,7 +195,7 @@ class ShadowIsles(Buff):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
-        self.scaling = {0: 0, 2: 18, 3: 20, 4: 22, 5: 25}
+        self.scaling = {0: 0, 2: 18, 3: 20, 4: 25, 5: 33}
         self.souls = 0
         self.extraBuff(params)
 
@@ -355,7 +355,7 @@ class HexMech(Buff):
         self.pilot_star_level = 0
         self.adScaling = [15, 25, 40]
         self.dmgAmpScaling = [0.1, 0.18, 0.3]
-        self.manaRegenScaling = [3, 6, 12]
+        self.manaRegenScaling = [2, 4, 5]
         self.critScaling = [0.3, 0.6, 1]
         self.extraBuff(params)
 
@@ -427,6 +427,54 @@ class Shurima(Buff):
             champion.aspd.addStat(self.scaling)
             self.next_AS = time + 1
         return 0
+
+
+class Bilgewater(Buff):
+    levels = [0, 3, 5, 7, 10]
+    display_name = "Bilgewater"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+        )
+        self.extraBuff(params)
+
+    def performAbility(self, phase, time, champion, input_=0):
+        # Calculate optimal stats based on current silver serpents
+        stats = optimize_bilgewater_stats(self.silver_serpents)
+        
+        # Apply multiplier for level 10
+        multiplier = 2 if self.level >= 10 else 1
+        
+        # Apply stats
+        # HP is applied as a percentage multiplier (e.g., 4% -> 0.04)
+        if stats["HP"] > 0:
+            champion.hp.mult += (stats["HP"] / 100.0) * multiplier
+            
+        # AS is applied as a flat value (e.g., 4% -> 4)
+        if stats["AS"] > 0:
+            champion.aspd.addStat(stats["AS"] * multiplier)
+            
+        # AD is applied as bonus AD
+        if stats["AD"] > 0:
+            champion.bonus_ad.addStat(stats["AD"] * multiplier)
+            
+        # AP is applied directly
+        if stats["AP"] > 0:
+            champion.ap.addStat(stats["AP"] * multiplier)
+            
+        return 0
+
+    def extraParameters():
+        # defining the parameters for the extra shit
+        return {"Title": "Silver Serpents", "Min": 0, "Max": 1000, "Default": 0}
+
+    def extraBuff(self, silver_serpents):
+        self.silver_serpents = silver_serpents
+
+
+
+
 
 
 class Arcanist(Buff):
@@ -813,11 +861,11 @@ class THexUlt(Buff):
                     for i in range(champion.num_targets):
                         scale_factor = 1.0
                         if i == 1:
-                            scale_factor = 0.85
+                            scale_factor = 0.75
                         elif i == 2:
-                            scale_factor = 0.7
+                            scale_factor = 0.5
                         elif i >= 3:
-                            scale_factor = 0.55
+                            scale_factor = 0.25
 
                         scaling_func = (
                             champion.abilityScaling
@@ -895,6 +943,37 @@ class ViegoUlt(Buff):
         return 0
 
 
+class YoneUlt(Buff):
+    levels = [1]
+    display_name = "Kin of the Stained Blade"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name, level, params, phases=["preAttack"]
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.numAttacks % 2 == 1:
+            champion.multiTargetSpell(
+                champion.opponents,
+                champion.items,
+                time,
+                1,
+                champion.adAutoAbilityScaling,
+                "physical",
+            )
+        else:
+            champion.multiTargetSpell(
+                champion.opponents,
+                champion.items,
+                time,
+                1,
+                champion.apAutoAbilityScaling,
+                "magical",
+            )
+        return 0
+
+
 class YunaraUlt(Buff):
     levels = [1]
 
@@ -903,7 +982,7 @@ class YunaraUlt(Buff):
             "Transcendent State",
             level,
             params,
-            phases=["preCombat", "preAttack", "onCrit", "onDealDamage"],
+            phases=["preCombat", "preAttack", "onCrit", "PostOnDealDamage"],
         )
         self.newAttack = Attack()
         self.critBonus = False
@@ -925,14 +1004,14 @@ class YunaraUlt(Buff):
                     # 1: .6
                     # 2: .36
                     self.newAttack.scaling = ScaledChampionAbilityScaling(
-                        champion, 0.6**index
+                        champion, 0.25**index
                     )
                     champion.doAttack(self.newAttack, champion.items, time)
             elif phase == "onCrit":
                 self.critBonus = True
-            elif phase == "onDealDamage":
+            elif phase == "PostOnDealDamage":
                 if self.critBonus:
-                    true_dmg = self.true_dmg_scaling * input_
+                    true_dmg = self.true_dmg_scaling * input_[0]
                     champion.doDamage(
                         champion.opponents[0],
                         [],
@@ -943,7 +1022,7 @@ class YunaraUlt(Buff):
                         time,
                     )
                 self.critBonus = False
-                return input_
+                # return input_
         return input_
 
 
@@ -1159,6 +1238,34 @@ class GlassCannonII(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.addStat(0.3)
+        return 0
+
+
+class SoulAwakening(Buff):
+    levels = [1]
+    display_name = "Soul Awakening"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["onUpdate", "onDealDamage"])
+        self.ad_ap_boost = 2
+        self.next_boost = 1
+        self.deal_true_damage = False
+        self.true_dmg_boost = .12
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate":
+            if time > self.next_boost:
+                self.next_boost += 1
+                champion.bonus_ad.addStat(self.ad_ap_boost)
+                champion.ap.addStat(self.ad_ap_boost)
+            if self.next_boost == 10:
+                self.next_boost = 999
+                self.deal_true_damage = True
+        elif phase == "onDealDamage":
+            if self.deal_true_damage:
+                dmg = input_ * self.true_dmg_boost # note: this may interact badly with other things
+                champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "true", time)
+            return input_
         return 0
 
 
@@ -1525,10 +1632,21 @@ class AirAxiom(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(20)
         for opponent in champion.opponents:
-            opponent.applyStatus(
-                status.ArmorReduction("Air Hex"), champion, time, 30, 0.7
-            )
-            opponent.applyStatus(status.MRReduction("Air Hex"), champion, time, 30, 0.7)
+            opponent.applyStatus(status.ArmorReduction("Air Hex"), champion, time, 30, 0.7)
+        return 0
+
+
+class WaterAxiom(Buff):
+    levels = [1]
+    display_name = "Water Axiom"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.manaRegen.addStat(3)
+        for opponent in champion.opponents:
+            opponent.applyStatus(status.MRReduction("Water Hex"), champion, time, 30, 0.7)
         return 0
 
 
