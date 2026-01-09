@@ -36,6 +36,7 @@ champ_list = [
     "Draven",
     "Gwen",
     "Jinx",
+    "Leblanc",
     "Malzahar",
     "Milio",
     "Vayne",
@@ -947,6 +948,46 @@ class Vayne(Champion):
         )
 
 
+class Leblanc(Champion):
+    def __init__(self, level):
+        hp = 650
+        atk = 35
+        curMana = 0
+        fullMana = 60
+        aspd = 0.75
+        armor = 25
+        mr = 25
+        super().__init__(
+            "Leblanc",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["Invoker"]
+        self.castTime = 1
+        self.notes = ""
+
+    # AP: 300/450/700
+    abilityScaling = create_ability_scaling([0, 0, 0], [300, 450, 700])
+
+    # AP: 180/270/450
+    extraAbilityScaling = create_ability_scaling([0, 0, 0], [180, 270, 450])
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, 1, self.abilityScaling, "magical"
+        )
+        self.multiTargetSpell(
+            opponents, items, time, 2, self.extraAbilityScaling, "magical"
+        )
+
+
 class Milio(Champion):
     def __init__(self, level):
         hp = 500
@@ -981,7 +1022,7 @@ class Milio(Champion):
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
-            opponents, items, time, 4, self.abilityScaling, "magical"
+            opponents, items, time, 2, self.abilityScaling, "magical"
         )
         self.multiTargetSpell(
             opponents, items, time, self.num_targets, self.extraAbilityScaling, "magical"
@@ -1508,6 +1549,46 @@ class THex(Champion):
             self.missilesPerTick = (4 + self.aspd.stat // 4) / 4
             # self.curMana = self.fullMana.stat # shouldn't proc another cast
             print("mana: {}".format(self.curMana))
+
+
+class Ziggs(Champion):
+    def __init__(self, level):
+        hp = 650
+        atk = 10
+        curMana = 0
+        fullMana = 60
+        aspd = 0.75
+        armor = 25
+        mr = 25
+        super().__init__(
+            "Leblanc",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["Invoker"]
+        self.castTime = 1
+        self.notes = ""
+
+    # AP: 300/450/700
+    abilityScaling = create_ability_scaling([0, 0, 0], [300, 450, 700])
+
+    # AP: 180/270/450
+    extraAbilityScaling = create_ability_scaling([0, 0, 0], [180, 270, 450])
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, 1, self.abilityScaling, "magical"
+        )
+        self.multiTargetSpell(
+            opponents, items, time, 2, self.extraAbilityScaling, "magical"
+        )
 
 
 class BaseChamp(Champion):
