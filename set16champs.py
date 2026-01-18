@@ -449,7 +449,7 @@ class Aphelios(Champion):
     abilityScaling = create_ability_scaling([70, 105, 175], [0, 0, 0])
 
     def performAbility(self, opponents, items, time):
-        self.severumAttacksLeft = math.floor(self.severumAttacks * self.ap.stat)
+        self.severumAttacksLeft = round(self.severumAttacks * self.ap.stat)
         self.severumActivated = True
 
 
@@ -675,7 +675,7 @@ class TwistedFate(Champion):
         self.num_targets = 3
         self.notes = "Any target > 2 gets the 50% reduction. Unfinished."
 
-    # AP: 33, 50, 75
+    # AP: 50, 75, 115
     abilityScaling = create_ability_scaling([0, 0, 0], [33, 50, 75])
 
     # AP: 70/105/160
@@ -1140,7 +1140,7 @@ class Lissandra(Champion):
             Role.CASTER,
         )
         self.default_traits = ["Freljord", "Invoker"]
-        self.castTime = 1
+        self.castTime = .6
         self.notes = "no chill interaction yet"
 
     # AP: 275, 415, 2500
@@ -1490,6 +1490,47 @@ class Azir(Champion):
         else:
             self.multiTargetSpell(
                 opponents, items, time, self.soldiers, self.extraAbilityScaling, "magical"
+            )
+
+
+class BaronNashor(Champion):
+    def __init__(self, level):
+        hp = 3000
+        atk = 120
+        curMana = 0
+        fullMana = 50
+        aspd = 0.5
+        armor = 85
+        mr = 85
+        super().__init__(
+            "Baron Nashor",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.FIGHTER,
+        )
+        self.default_traits = ["Void"]
+        self.num_targets = 3
+        self.items.append(buffs.BaronNashorUlt())
+        self.castTime = 3.2
+        self.notes = "Autoattacks will hit 2 targets."
+
+    # AD: 250/375/20000, AP: 30/45/500
+    abilityScaling = create_ability_scaling([250, 375, 20000], [30, 45, 500])
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, self.num_targets, self.abilityScaling, "physical"
+        )
+
+        for i in range(10):
+            self.multiTargetSpell(
+                opponents, items, time, 1, lambda x, y, z: .5 * self.abilityScaling(x, y, z), "physical"
             )
 
 

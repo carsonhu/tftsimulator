@@ -38,6 +38,7 @@ all_items = sorted(
     set16items.offensive_craftables
     + set16items.artifacts
     + set16items.radiants
+    + set16items.emblems
     + set16items.no_item
 )
 
@@ -207,7 +208,7 @@ with tab1:
 
     display_dps = st.checkbox("Display DPS", value=False)
 
-    options = ["Craftable", "Artifact", "Radiant", "Trait", "Augment/Buff"]
+    options = ["Craftable", "Artifact", "Radiant", "Emblem", "Trait", "Augment/Buff"]
     if len([item for item in items if item != "NoItem"]) >= 3:
         options = ["Trait", "Augment/Buff"]
     if selected_void_buff == "NoBuff":
@@ -230,6 +231,10 @@ with tab1:
     if radio_value == "Radiant":
         df_flt = df_flt[
             df_flt["Extra class name"].isin(set16items.radiants + ["NoItem"])
+        ]
+    if radio_value == "Emblem":
+        df_flt = df_flt[
+            df_flt["Extra class name"].isin(set16items.emblems + ["NoItem"])
         ]
     if radio_value == "Trait":
         df_flt = df_flt[

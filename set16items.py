@@ -78,7 +78,148 @@ radiants = [
     "RadiantGuinsoosRageblade",
 ]
 
+emblems = [
+    "VanquisherEmblem",
+    "QuickstrikerEmblem",
+    "YordleEmblem",
+    "LongshotEmblem",
+    "ZaunEmblem",
+    "BilgewaterEmblem",
+    "GunslingerEmblem",
+    "DemaciaEmblem",
+    "SlayerEmblem",
+    "IoniaEmblem",
+    "NoxusEmblem",
+    "ArcanistEmblem",
+    "VoidEmblem",
+]
+
 no_item = ["NoItem"]
+
+
+class Emblem(Item):
+    display_name = "Emblem"
+
+    def __init__(self, display_name, trait, **kwargs):
+        super().__init__(display_name, **kwargs)
+        self.trait = trait
+
+
+class VanquisherEmblem(Emblem):
+    display_name = "Vanquisher Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Vanquisher", ad=15, ap=15, crit=20, phases=None
+        )
+
+
+class QuickstrikerEmblem(Emblem):
+    display_name = "Quickstriker Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Quickstriker", aspd=25, phases=None
+        )
+
+
+class YordleEmblem(Emblem):
+    display_name = "Yordle Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Yordle", ad=20, ap=20, phases=None
+        )
+
+
+class LongshotEmblem(Emblem):
+    display_name = "Longshot Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Longshot", hp=150, aspd=20, phases=None
+        )
+
+
+class ZaunEmblem(Emblem):
+    display_name = "Zaun Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Zaun", hp=350, crit=20, phases=None
+        )
+
+
+class BilgewaterEmblem(Emblem):
+    display_name = "Bilgewater Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Bilgewater", ad=10, ap=10, mana=2, phases=None
+        )
+
+
+class GunslingerEmblem(Emblem):
+    display_name = "Gunslinger Emblem (no Armor reduce)"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Gunslinger", hp=150, ad=20, phases=None
+        )
+
+
+class DemaciaEmblem(Emblem):
+    display_name = "Demacia Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Demacia", manaRegen=3, phases=None
+        )
+
+
+class SlayerEmblem(Emblem):
+    display_name = "Slayer Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Slayer", ad=20, phases=None
+        )
+
+
+class IoniaEmblem(Emblem):
+    display_name = "Ionia Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Ionia", ad=25, ap=25, phases=None
+        )
+
+
+class NoxusEmblem(Emblem):
+    display_name = "Noxus Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Noxus", ad=25, ap=25, phases=None
+        )
+
+
+class ArcanistEmblem(Emblem):
+    display_name = "Arcanist Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Arcanist", ap=25, phases=None
+        )
+
+
+class VoidEmblem(Emblem):
+    display_name = "Void Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Void", ad=10, ap=10, aspd=20, phases=None
+        )
 
 
 class NoItem(Item):

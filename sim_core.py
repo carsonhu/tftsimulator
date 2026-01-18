@@ -3,6 +3,8 @@
 import copy
 from typing import Any, Dict, List
 
+import set16items
+import set16buffs
 from set16buffs import Buff, class_buffs  # or wherever Buff lives
 from simulator import Simulator
 from role import Role
@@ -25,6 +27,74 @@ def do_experiment_one_extra(
 
     # items first
     for item in item_list:
+        if isinstance(item, set16items.Emblem):
+            # 0. Check if Emblem item is already on champion
+            if any(i.name == item.name for i in champion.items):
+                continue
+            
+            # 1. Check if trait is already on champion
+            existing_buffs = [b for b in champion.items if b.name.startswith(item.trait)]
+            trait_cls = getattr(set16buffs, item.trait)
+            
+            # Helper to get default params
+            default_params = []
+            if hasattr(trait_cls, "extraParameters"):
+                try:
+                    default_params = trait_cls.extraParameters()["Default"]
+                except:
+                    default_params = 0
+
+            if not existing_buffs:
+                # Case A: Trait not present. Add lowest non-zero level.
+                default_level = [l for l in trait_cls.levels if l > 0][0]
+                buff_instance = trait_cls(default_level, default_params)
+                
+                # Create display item with level info
+                flavor_item = copy.deepcopy(item)
+                flavor_item.name = f"{item.name} (Level {default_level})"
+                
+                champ = copy.deepcopy(champion)
+                results = simulator.simulate(
+                    [copy.deepcopy(item)],
+                    [buff_instance], # Add buff
+                    champ,
+                    [copy.deepcopy(opponent) for _ in range(8)],
+                    duration,
+                    frameRate=frame_rate,
+                )
+                sim_list.append({"Champ": champ, "Extra": flavor_item, "Results": results})
+
+            elif existing_buffs[0].level == 0:
+                # Case B: Trait present but level 0 (NoBuff). Simulate ALL levels.
+                for level in trait_cls.levels:
+                    champ = copy.deepcopy(champion)
+                    
+                    # Remove existing buff
+                    to_remove = [b for b in champ.items if b.name.startswith(item.trait)]
+                    for b in to_remove:
+                        champ.items.remove(b)
+                        
+                    buff_instance = trait_cls(level, default_params)
+                    
+                    # Create display item with level info
+                    flavor_item = copy.deepcopy(item)
+                    flavor_item.name = f"{item.name} ({item.trait} {level})"
+                    
+                    results = simulator.simulate(
+                        [copy.deepcopy(item)],
+                        [buff_instance],
+                        champ,
+                        [copy.deepcopy(opponent) for _ in range(8)],
+                        duration,
+                        frameRate=frame_rate,
+                    )
+                    sim_list.append({"Champ": champ, "Extra": flavor_item, "Results": results})
+            else:
+                # Case C: Trait present and active. Skip.
+                continue
+
+            continue 
+
         champ = copy.deepcopy(champion)
         results = simulator.simulate(
             [copy.deepcopy(item)],

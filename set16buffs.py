@@ -668,6 +668,7 @@ class ApheliosUlt(Buff):
                 # Infernum
                 input_.numTargets = 3
             else:
+                input_.canCrit = champion.canSpellCrit
                 input_.scaling = ChampionAbilityScaling(champion)
                 champion.severumAttacksLeft -= 1
                 if champion.severumAttacksLeft == 0:
@@ -1715,4 +1716,37 @@ class Shred20(Buff):
                 status.ArmorReduction("Armor 20"), champion, time, 30, 0.8
             )
             opponent.applyStatus(status.MRReduction("MR 20"), champion, time, 30, 0.8)
+        return 0
+
+
+class Demacia(Buff):
+    levels = [0, 3, 5, 7]
+    display_name = "Demacia"
+    
+    def __init__(self, level, params):
+        super().__init__(f"{self.display_name} {level}", level, params, phases=None)
+        
+    def performAbility(self, phase, time, champion, input_=0):
+        return 0
+
+
+class Ionia(Buff):
+    levels = [0, 3, 5, 7]
+    display_name = "Ionia"
+
+    def __init__(self, level, params):
+        super().__init__(f"{self.display_name} {level}", level, params, phases=None)
+        
+    def performAbility(self, phase, time, champion, input_=0):
+        return 0
+
+
+class Noxus(Buff):
+    levels = [0, 3, 5, 7]
+    display_name = "Noxus"
+
+    def __init__(self, level, params):
+        super().__init__(f"{self.display_name} {level}", level, params, phases=None)
+        
+    def performAbility(self, phase, time, champion, input_=0):
         return 0
