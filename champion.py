@@ -66,6 +66,7 @@ class Champion(object):
         self.attackWindupLockout = (
             -1
         )  # attack windup: can only cast after attack windup is finished
+        self.attackWindupRatio = .3
         self.items = [set16roles.ChampRole()]
 
         self.statuses = {}  # current statuses
@@ -281,7 +282,7 @@ class Champion(object):
 
         # in case it's accelerated by vayne
         self.nextAttackTime = min(self.nextAttackTime, time) + self.attackTime()
-        self.attackWindupLockout = time + self.attackTime() * 0.3
+        self.attackWindupLockout = time + self.attackTime() * self.attackWindupRatio
 
     def update(self, opponents, items, time):
         self.opponents = opponents
@@ -352,11 +353,12 @@ class Champion(object):
             baseCritDmg *= self.critDamage()
         baseDmg *= self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
         baseCritDmg *= self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        crit_chance = self.crit.stat if attack.canCrit else 0 # only increment crit if we can actually crit
         for target in range(attack.numTargets):
             self.doDamage(
                 attack.opponents[target],
                 items,
-                self.crit.stat,
+                crit_chance,
                 baseCritDmg,
                 baseDmg,
                 attack.attackType,

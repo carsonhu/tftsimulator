@@ -645,6 +645,21 @@ class Vanquisher(Buff):
 # Unit buffs
 
 
+class ZoeUlt(Buff):
+    levels = [1]
+    display_name = "Double Trouble Bubble"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat"])
+    
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            # permashred everyone. Not exactly accurate but it'll do
+            for opponent in champion.opponents:
+                opponent.applyStatus(
+                    status.MRReduction("Zoe MR 30"), champion, time, 30, 0.7
+                )
+
 class ApheliosUlt(Buff):
     levels = [1]
     display_name = "Incendiary Onslaught"
@@ -720,6 +735,8 @@ class JhinUlt(Buff):
             champion.ultAutos -= 1
             if champion.ultAutos == 0:
                 champion.manalockTime = time + 0.01
+                champion.aspd.base = .7
+                champion.aspd.as_cap = 5
         return 0
 
 
@@ -1226,7 +1243,7 @@ class KnowYourEnemy(Buff):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.dmgMultiplier.addStat(0.18)
+        champion.dmgMultiplier.addStat(0.15)
         return 0
 
 
@@ -1387,8 +1404,8 @@ class PreparationI(Buff):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.bonus_ad.addStat(8)
-        champion.ap.addStat(8)
+        champion.bonus_ad.addStat(12)
+        champion.ap.addStat(12)
         return 0
 
 
@@ -1400,8 +1417,8 @@ class PreparationII(Buff):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.bonus_ad.addStat(12)
-        champion.ap.addStat(12)
+        champion.bonus_ad.addStat(16)
+        champion.ap.addStat(16)
         return 0
 
 

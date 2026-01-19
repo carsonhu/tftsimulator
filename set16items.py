@@ -537,7 +537,7 @@ class Nashors(Item):
             self.display_name,
             aspd=10,
             hp=150,
-            ap=15,
+            ap=20,
             manaRegen=0,
             crit=20,
             has_radiant=True,
@@ -731,8 +731,8 @@ class GSNoGiant(Item):
         super().__init__(
             self.display_name,
             aspd=15,
-            ad=20,
-            ap=20,
+            ad=15,
+            ap=15,
             has_radiant=True,
             phases="preCombat",
         )
@@ -937,7 +937,7 @@ class Flickerblade(Item):
     def performAbility(self, phase, time, champion, input_=0):
         self.counter += 1
         if champion.aspd.stat <= 5:
-            champion.aspd.addStat(5)
+            champion.aspd.addStat(6)
         if self.counter == 5:
             champion.bonus_ad.addStat(2)
             champion.ap.addStat(2)
@@ -949,7 +949,7 @@ class Dawncore(Item):
 
     def __init__(self):
         super().__init__(
-            self.display_name, ad=10, ap=10, phases=["preCombat", "postAbility"]
+            self.display_name, ad=15, ap=15, phases=["preCombat", "postAbility"]
         )
         self.counter = 0
 

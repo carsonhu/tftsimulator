@@ -40,6 +40,7 @@ champ_list = [
     "Malzahar",
     "Milio",
     "Vayne",
+    "Zoe",
     # 4-cost,
     "Kaisa",
     "Kalista",
@@ -82,7 +83,7 @@ class Anivia(Champion):
         atk = 30
         curMana = 0
         fullMana = 40
-        aspd = 0.7
+        aspd = 0.75
         armor = 20
         mr = 20
         super().__init__(
@@ -135,6 +136,7 @@ class Briar(Champion):
         self.castTime = .5 # unverified
         self.manalockDuration = 4
         self.buff_duration = 4
+        self.aspd_scaling = [300, 300, 350]
         self.notes = ""
 
     def performAbility(self, opponents, items, time):
@@ -150,7 +152,7 @@ class Briar(Champion):
             self,
             time,
             self.buff_duration,
-            300 * self.ap.stat,
+            self.aspd_scaling[self.level - 1] * self.ap.stat,
         )
 
 
@@ -192,7 +194,7 @@ class Caitlyn(Champion):
 class Jhin(Champion):
     def __init__(self, level):
         hp = 444
-        atk = 48
+        atk = 44
         curMana = 0
         fullMana = 70
         aspd = 0.7
@@ -217,11 +219,14 @@ class Jhin(Champion):
         self.ultAutos = 0
         self.notes = ""
 
-    # AD: 125, 190, 280  AP: 15, 22, 34
-    abilityScaling = create_ability_scaling([125, 190, 280], [15, 22, 34])
+    # AD: 135/200/300 AP: 15/22/34
+    abilityScaling = create_ability_scaling([135, 200, 300], [15, 22, 34])
 
     def performAbility(self, opponents, items, time):
         self.ultAutos = 4
+        self.aspd.base = 1
+        self.aspd.as_cap = 1
+
 
 
 class Kogmaw(Champion):
@@ -330,8 +335,8 @@ class Qiyana(Champion):
         self.num_targets = 2
         self.notes = ""
 
-    # AD: 160/240/360, AP: 20/30/45
-    abilityScaling = create_ability_scaling([160, 240, 360], [20, 30, 45])
+    # AD: 160/240/400, AP: 20/30/45
+    abilityScaling = create_ability_scaling([160, 240, 400], [20, 30, 45])
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
@@ -435,6 +440,7 @@ class Aphelios(Champion):
             level,
             Role.MARKSMAN,
         )
+        self.attackWindupRatio = .15
         self.default_traits = []
         self.castTime = 0
         self.items.append(buffs.ApheliosUlt())
@@ -451,6 +457,7 @@ class Aphelios(Champion):
     def performAbility(self, opponents, items, time):
         self.severumAttacksLeft = round(self.severumAttacks * self.ap.stat)
         self.severumActivated = True
+        self.nextAttackTime = time + .01
 
 
 class Ashe(Champion):
@@ -479,7 +486,7 @@ class Ashe(Champion):
         self.num_targets = 2
         self.notes = "need to verify cast time"
 
-    # AD: 125/185/290, AP: 15/25/35
+    # AD: 135/195/300, AP: 15/25/35
     abilityScaling = create_ability_scaling([125, 185, 290], [15, 25, 35])
 
     def performAbility(self, opponents, items, time):
@@ -536,7 +543,7 @@ class Orianna(Champion):
         hp = 550
         atk = 30
         curMana = 20
-        fullMana = 60
+        fullMana = 50
         aspd = 0.7
         armor = 20
         mr = 20
@@ -757,7 +764,7 @@ class Ahri(Champion):
 class Draven(Champion):
     def __init__(self, level):
         hp= 650
-        atk = 50
+        atk = 53
         curMana = 60
         fullMana = 100
         aspd = .75
@@ -894,8 +901,8 @@ class Malzahar(Champion):
         self.castTime = .5 # verified
         self.notes = ""
 
-    # AP: 30/45/80
-    abilityScaling = create_ability_scaling([0, 0, 0], [30, 45, 80])
+    # AP: 29/43/68
+    abilityScaling = create_ability_scaling([0, 0, 0], [29, 43, 68])
 
     def performAbility(self, opponents, items, time):
         opponents[0].applyStatus(
@@ -946,6 +953,41 @@ class Vayne(Champion):
         self.multiTargetSpell(
             opponents, items, time, 1, self.abilityScaling, "true"
         )
+
+
+class Zoe(Champion):
+    def __init__(self, level):
+        hp = 500
+        atk = 35
+        curMana = 30
+        fullMana = 60
+        aspd = 0.8
+        armor = 25
+        mr = 25
+        super().__init__(
+            "Zoe",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = []
+        self.castTime = 1
+        self.notes = "permanent shred"
+
+    # AP: 330/500/700
+    abilityScaling = create_ability_scaling([0, 0, 0], [330, 500, 700])
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, 2, self.abilityScaling, "magical"
+        )
+
 
 
 class Leblanc(Champion):
@@ -1059,14 +1101,14 @@ class Kaisa(Champion):
         self.castTime = 1.5
         self.notes = ""
 
-    # AD: 42, 63, 150  AP: 6, 9, 20
-    abilityScaling = create_ability_scaling([42, 63, 150], [6, 9, 20])
+    # AD: 39/63/150  AP: 6/9/20
+    abilityScaling = create_ability_scaling([39, 63, 150], [6, 9, 20])
 
     # AP: 60, 90, 500
     empoweredAbilityScaling = create_ability_scaling([0, 0, 0], [60, 90, 500], func_name="empoweredAbilityScaling")
 
-    # AP: 265, 400, 1600
-    empoweredAbilityScaling2 = create_ability_scaling([0, 0, 0], [265, 400, 1600], func_name="empoweredAbilityScaling2")
+    # AP: 250, 400, 1600
+    empoweredAbilityScaling2 = create_ability_scaling([0, 0, 0], [250, 400, 1600], func_name="empoweredAbilityScaling2")
 
     def performAbility(self, opponents, items, time):
         if self.ad_version:
@@ -1537,7 +1579,7 @@ class BaronNashor(Champion):
 class THex(Champion):
     def __init__(self, level):
         hp = 1400
-        atk = 75
+        atk = 85
         curMana = 30
         fullMana = 100
         aspd = 0.9
@@ -1571,13 +1613,13 @@ class THex(Champion):
 
     # divided by 4 since it procs every .25s
     def abilityScaling(self, level, AD, AP):
-        # AD: 125/200/2000, AP: 10/15/150
-        base_scaling = create_ability_scaling([120, 200, 2000], [10, 15, 150])
+        # AD: 145/250/2000, AP: 10/15/150
+        base_scaling = create_ability_scaling([145, 250, 2000], [10, 15, 150])
         return base_scaling(None, level, AD, AP) / 4
 
     # multiplied by 4 since this is based off per-second damage
     def extraAbilityScaling(self, level, AD, AP):
-        return self.abilityScaling(level, AD, AP) * .3 * 4
+        return self.abilityScaling(level, AD, AP) * .25  * 4
 
     def performAbility(self, opponents, items, time):
         if not self.ultActive:
