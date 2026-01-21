@@ -33,8 +33,8 @@ def do_experiment_one_extra(
                 continue
             
             # 1. Check if trait is already on champion
-            existing_buffs = [b for b in champion.items if b.name.startswith(item.trait)]
             trait_cls = getattr(set16buffs, item.trait)
+            existing_buffs = [b for b in champion.items if isinstance(b, trait_cls)]
             
             # Helper to get default params
             default_params = []
