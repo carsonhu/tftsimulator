@@ -3,13 +3,13 @@
 # import plotly.graph_objects as go
 import json
 import os
-from importlib.resources import files  # Python 3.9+
+
 from pathlib import Path
 from typing import List, Optional
 
 import pandas as pd
 import plotly.graph_objects as go
-import set16buffs
+
 import streamlit as st
 import utils
 from helpers import buff_display_map, buff_display_names, item_display_map
@@ -481,7 +481,65 @@ def plot_df(df, simLists):
                 hide_index=True,
                 column_config={"Total Dmg": None},
                 use_container_width=True,
+                height=300,
             )
+
+            # --- PIE CHART (Damage Split) ---
+            # Re-calculate split from raw results for the selected index
+            # Result structure: [timestamp, (damage_amount, damage_type), ...]
+            raw_results = simLists[sel]["Results"]
+            dps_totals = {"physical": 0.0, "magical": 0.0, "true": 0.0}
+            
+            for res in raw_results:
+                # res[1] is (damage_amount, damage_type)
+                amt, dtype = res[1]
+                # Normalize key just in case (e.g. "magic" vs "magical")
+                if dtype == "magic": 
+                    dtype = "magical"
+                if dtype in dps_totals:
+                    dps_totals[dtype] += amt
+
+            total_dmg = sum(dps_totals.values())
+            if total_dmg > 0:
+                # Colors: Phys (Redish), Magic (Blueish), True (Whiteish)
+                all_colors = ["#de4b39", "#2db2e3", "#f0e6d2"]
+                all_labels = ["Physical", "Magic", "True"]
+                all_values = [dps_totals["physical"], dps_totals["magical"], dps_totals["true"]]
+
+                final_labels = []
+                final_values = []
+                final_colors = []
+
+                for i, val in enumerate(all_values):
+                    if val > 0:
+                        final_labels.append(all_labels[i])
+                        final_values.append(val)
+                        final_colors.append(all_colors[i])
+
+                fig_pie = go.Figure(
+                    data=[
+                        go.Pie(
+                            labels=final_labels,
+                            values=final_values,
+                            hole=0.4,
+                            textinfo="label+percent",
+                            marker=dict(colors=final_colors),
+                            sort=False # Keep Phys/Magic/True order
+                        )
+                    ]
+                )
+                fig_pie.update_layout(
+                    title="Damage Distribution",
+                    title_x=0.5,
+                    margin=dict(l=20, r=20, t=40, b=20),
+                    height=300,
+                    # Transparent background to blend in
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    font=dict(color="#EAEAEA" if (st.get_option("theme.base") == "dark") else "#111111"),
+                    showlegend=False
+                )
+                st.plotly_chart(fig_pie, use_container_width=True)
 
 
 def frameRate(key):

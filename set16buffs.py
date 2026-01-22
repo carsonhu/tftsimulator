@@ -38,7 +38,8 @@ class_buffs = [
     "HexMech",
     "Disruptor",
     "Slayer",
-    "Shurima"
+    "Shurima",
+    "StarForger",
 ]
 
 augments = [
@@ -342,6 +343,21 @@ class Caretaker(Buff):
 
     def extraBuff(self, num_three_stars):
         self.num_three_stars = num_three_stars
+
+
+class StarForger(Buff):
+    levels = [0, 25, 60, 140, 300, 475, 675]
+    display_name = "Star Forger"
+
+    def __init__(self, level, params):
+        super().__init__(f"{self.display_name} {level}", level, params, phases=["preCombat"])
+        self.stardust = self.level
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.stardust = self.stardust
+        return 0
+
+
 
 
 class HexMech(Buff):

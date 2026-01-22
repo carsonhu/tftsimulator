@@ -52,6 +52,7 @@ champ_list = [
     "Yone",
     "Yunara",
     # 5-cost
+    "AurelionSol",
     "Azir",
     "THex",
     
@@ -1486,6 +1487,73 @@ class Yunara(Champion):
         self.applyStatus(status.UltActivator("Yunara ult"),
                          self, time, self.buff_duration)
         
+
+class AurelionSol(Champion):
+    def __init__(self, level):
+        hp = 1100
+        atk = 50
+        curMana = 25
+        fullMana = 75
+        aspd = 0.8
+        armor = 40
+        mr = 40
+        super().__init__(
+            "Aurelion Sol",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["StarForger"]
+        self.stardust = 0
+        self.num_targets = 2
+        self.castTime = 1
+        self.notes = "25 Shockwave: hits num targets + 1. 140 shockwave: hits num targets + 2. 300 shockwave: hits 8 targets."
+
+    # AP: 480/800/5000
+    abilityScaling = create_ability_scaling([0, 0, 0], [480, 800, 5000])
+
+    # AP: 100/150/1000
+    shockwaveAbilityScaling = create_ability_scaling([0, 0, 0], [100, 150, 1000])
+
+    # AP: 500/750/9999
+    meteorAbilityScaling = create_ability_scaling([0, 0, 0], [500, 750, 9999])
+
+    def performAbility(self, opponents, items, time):
+        dmgMult = 1
+        if self.stardust >= 60:
+            dmgMult = 1.15
+        
+        # star crash
+        self.multiTargetSpell(
+            opponents, items, time, self.num_targets, lambda x, y, z: self.abilityScaling(x, y, z) * dmgMult, "magical"
+        )
+        if self.stardust >= 475:
+            self.multiTargetSpell(
+                opponents, items, time, self.num_targets, lambda x, y, z: self.abilityScaling(x, y, z) * dmgMult * .33, "true"
+            )   
+        
+        # Shockwave
+        shockwave_targets = self.num_targets + 1
+        if self.stardust >= 140:
+            shockwave_targets = self.num_targets + 2
+        if self.stardust >= 300:
+            shockwave_targets = 8
+        if self.stardust >= 25:
+            self.multiTargetSpell(
+                        opponents, items, time, shockwave_targets, self.shockwaveAbilityScaling, "magical"
+            )   
+
+        # Meteor
+        if self.stardust >= 675:
+            self.multiTargetSpell(
+                opponents, items, time, self.num_targets, self.meteorAbilityScaling, "magical"
+            )
 
 
 class Azir(Champion):

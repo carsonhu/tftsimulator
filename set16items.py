@@ -92,6 +92,7 @@ emblems = [
     "NoxusEmblem",
     "ArcanistEmblem",
     "VoidEmblem",
+    "InvokerEmblem",
 ]
 
 no_item = ["NoItem"]
@@ -220,6 +221,18 @@ class VoidEmblem(Emblem):
         super().__init__(
             self.display_name, trait="Void", ad=10, ap=10, aspd=20, phases=None
         )
+
+
+class InvokerEmblem(Emblem):
+    display_name = "Invoker Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Invoker", manaRegen=3, phases=["preAbility"]
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.ap.addStat(0.20 * champion.fullMana.stat)
 
 
 class NoItem(Item):
@@ -603,7 +616,7 @@ class KrakensFury(Item):
             champion.aspd.addStat(self.max_stack_as)
             self.stacks += 1
 
-
+    
 class Deathblade(Item):
     display_name = "Deathblade"
 

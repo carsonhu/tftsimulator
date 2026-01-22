@@ -95,6 +95,7 @@ class Champion(object):
         self.num_targets = 0
         self.num_extra_targets = 0
         self.souls = 0
+        self.stardust = 0
         self.pilot = None
         self.item_count = 0  # number of craftables
 
@@ -134,6 +135,7 @@ class Champion(object):
             self.first_takedown,
             self.takedowns,
             self.souls,
+            self.stardust,
             self.seraphim,
             self.retribution,
             self.pilot,
