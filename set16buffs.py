@@ -70,6 +70,7 @@ augments = [
     "NoScoutNoPivot",
     "MessHall",
     "SoulAwakening",
+    "FocusedFire",
 ]
 
 void_buffs = ["SpitterSpines", "LeechingNucleus", "AdrenalineModules"]
