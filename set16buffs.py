@@ -54,7 +54,8 @@ augments = [
     "StandUnitedI",
     "Ascension",
     "KnowYourEnemy",
-    "HoldTheLine",
+    "HoldTheLine5",
+    "HoldTheLine7",
     "TonsOfStats",
     "JeweledLotusI",
     "JeweledLotusII",
@@ -1224,9 +1225,25 @@ class JeweledLotusII(Buff):
         return 0
 
 
-class HoldTheLine(Buff):
+class HoldTheLine5(Buff):
     levels = [1]
-    display_name = "HoldTheLine"
+    display_name = "Hold The Line (5 units)"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat"])
+        self.ad_scaling = 9
+        self.ap_scaling = 10
+        self.frontliners = 5
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.bonus_ad.addStat(self.ad_scaling * self.frontliners)
+        champion.ap.addStat(self.ap_scaling * self.frontliners)
+        return 0
+
+
+class HoldTheLine7(Buff):
+    levels = [1]
+    display_name = "Hold The Line (7 units)"
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
@@ -1630,7 +1647,7 @@ class FocusedFire(Buff):
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
         self.adBonus = 5
-        self.nextBonus = 5
+        self.nextBonus = 0
         self.bonusInterval = 5
 
     def performAbility(self, phase, time, champion, input_=0):
