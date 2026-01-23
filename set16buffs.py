@@ -346,7 +346,7 @@ class Caretaker(Buff):
 
 
 class StarForger(Buff):
-    levels = [0, 25, 60, 140, 300, 475, 675]
+    levels = [0, 25, 60, 140, 300, 475, 750]
     display_name = "Star Forger"
 
     def __init__(self, level, params):
@@ -1691,7 +1691,7 @@ class ContinuumCogs(Buff):
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
         self.manaRegenBonus = 2
-        self.apBonus = 12
+        self.apBonus = 15
         self.interval = 8
 
     def performAbility(self, phase, time, champion, input_=0):

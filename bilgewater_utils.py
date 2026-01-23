@@ -19,7 +19,7 @@ def optimize_bilgewater_stats(silver_serpents):
         counts[f"T{tier['id']}_AS"] = 0
         counts[f"T{tier['id']}_ADAP"] = 0
 
-    accumulated_stats = {"HP": 0, "AS": 0, "AD": 0, "AP": 0}
+    accumulated_stats = {"HP": 0, "AS": 0, "AD": 15, "AP": 15}
 
     while silver_serpents > 0:
         best_option = None

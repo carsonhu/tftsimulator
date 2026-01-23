@@ -1513,7 +1513,7 @@ class AurelionSol(Champion):
         self.stardust = 0
         self.num_targets = 2
         self.castTime = 1
-        self.notes = "25 Shockwave: hits num targets + 1. 140 shockwave: hits num targets + 2. 300 shockwave: hits 8 targets."
+        self.notes = "25 Shockwave: hits num targets + 2. 140 shockwave: hits num targets + 4. 300 shockwave: hits 8 targets."
 
     # AP: 480/800/5000
     abilityScaling = create_ability_scaling([0, 0, 0], [480, 800, 5000])
@@ -1539,9 +1539,9 @@ class AurelionSol(Champion):
             )   
         
         # Shockwave
-        shockwave_targets = self.num_targets + 1
+        shockwave_targets = self.num_targets + 2
         if self.stardust >= 140:
-            shockwave_targets = self.num_targets + 2
+            shockwave_targets = self.num_targets + 4
         if self.stardust >= 300:
             shockwave_targets = 8
         if self.stardust >= 25:
@@ -1550,7 +1550,7 @@ class AurelionSol(Champion):
             )   
 
         # Meteor
-        if self.stardust >= 675:
+        if self.stardust >= 750:
             self.multiTargetSpell(
                 opponents, items, time, self.num_targets, self.meteorAbilityScaling, "magical"
             )
