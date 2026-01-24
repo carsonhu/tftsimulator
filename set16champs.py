@@ -1099,7 +1099,7 @@ class Kaisa(Champion):
         self.items.append(buffs.KaisaUlt())
         self.ad_version = True
         self.ultActive = False
-        self.castTime = 1.5
+        self.castTime = 2
         self.notes = ""
 
     # AD: 39/63/150  AP: 6/9/20
