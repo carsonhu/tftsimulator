@@ -46,7 +46,8 @@ champ_list = [
     "Kalista",
     "Lissandra",
     "Lux",
-    # "MissFortune",
+    "MissFortune",
+    "MissFortuneNew",
     "Seraphine",
     "Veigar",
     "Yone",
@@ -1251,7 +1252,7 @@ class Lux(Champion):
 class MissFortune(Champion):
     def __init__(self, level):
         hp = 800
-        atk = 50
+        atk = 55
         curMana = 0
         fullMana = 30
         aspd = 0.75
@@ -1278,6 +1279,47 @@ class MissFortune(Champion):
 
     def extraAbilityScaling(self, level, AD, AP):
         return self.abilityScaling(level, AD, AP) * 0.65
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(
+            opponents, items, time, 1, self.abilityScaling, "physical"
+        )
+        for i in range(self.numCasts // 3 + 1):
+            self.multiTargetSpell(
+                opponents, items, time, 1, self.extraAbilityScaling, "physical"
+            )
+
+
+class MissFortuneNew(Champion):
+    def __init__(self, level):
+        hp = 800
+        atk = 55
+        curMana = 0
+        fullMana = 30
+        aspd = 0.75
+        armor = 30
+        mr = 30
+        super().__init__(
+            "Miss Fortune (New)",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["Bilgewater", "Gunslinger"]
+        self.castTime = 1
+        self.notes = "Bilgewater; add AD / AS as needed. passive not included yet"
+
+    # AD: 320, 345, 370, AP: 15, 25, 70
+    abilityScaling = create_ability_scaling([320, 345, 370], [15, 25, 70])
+
+    def extraAbilityScaling(self, level, AD, AP):
+        return self.abilityScaling(level, AD, AP) * 0.4
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(

@@ -232,7 +232,7 @@ class InvokerEmblem(Emblem):
         )
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.ap.addStat(0.20 * champion.fullMana.stat)
+        champion.ap.addStat(0.10 * champion.fullMana.stat)
 
 
 class NoItem(Item):
