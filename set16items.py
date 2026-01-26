@@ -1264,3 +1264,27 @@ class RadiantTitans(Titans):
         self.armor = 40
         self.stack_bonus = 4
         self.max_stack_bonus = 0.2
+
+
+class FirstMatesFlintlock(Item):
+    display_name = "First Mate's Flintlock"
+
+    def __init__(self):
+        super().__init__(self.display_name, ad=10, crit=20, phases=["onUpdate"])
+        self.next_bonus = 1
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time >= self.next_bonus:
+            champion.bonus_ad.addStat(3)
+            champion.aspd.addStat(3)
+            self.next_bonus += 1
+
+
+class LuckyDoubloon(Item):
+    display_name = "Lucky Doubloon"
+
+    def __init__(self):
+        super().__init__(self.display_name, aspd=20, crit=20, phases=None)
+
+
+bilgewater_items = ["FirstMatesFlintlock", "LuckyDoubloon"]

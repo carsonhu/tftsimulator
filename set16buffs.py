@@ -1011,6 +1011,32 @@ class YoneUlt(Buff):
         return 0
 
 
+
+class MissFortuneUlt(Buff):
+    levels = [1]
+    display_name = "Heartbreaker"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name, level, params, phases=["preCombat", "preAttack"]
+        )
+        self.newAttack = Attack()
+
+    def MFScaling(level, baseAD, AD, AP=0):
+        return baseAD * AD * .5
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            self.newAttack.opponents = champion.opponents
+            self.newAttack.canCrit = champion.canCrit
+            self.newAttack.canOnHit = True
+            self.newAttack.numTargets = 1
+            self.newAttack.attackType = "physical"
+            self.newAttack.scaling = MissFortuneUlt.MFScaling
+        elif phase == "preAttack":
+            champion.doAttack(self.newAttack, champion.items, time)
+
+
 class YunaraUlt(Buff):
     levels = [1]
 

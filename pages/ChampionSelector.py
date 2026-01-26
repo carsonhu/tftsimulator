@@ -168,14 +168,19 @@ with st.sidebar:
 
 # # End metrics
 
-simLists, source = set16_streamlit_main.doExperimentOneExtra(
-    champ,
-    enemy,
-    utils.convertStrList("set16items", all_items),
-    utils.convertStrList("set16buffs", aug_buffs) + extra_buffs,
-    t,
-    framerate,
-)
+    is_bilgewater = "Bilgewater" in [b[0] for b in buffs]
+    simulation_items = all_items
+    if is_bilgewater:
+        simulation_items = sorted(all_items + set16items.bilgewater_items)
+
+    simLists, source = set16_streamlit_main.doExperimentOneExtra(
+        champ,
+        enemy,
+        utils.convertStrList("set16items", simulation_items),
+        utils.convertStrList("set16buffs", aug_buffs) + extra_buffs,
+        t,
+        framerate,
+    )
 
 tab1, tab2 = st.tabs(["Items", "Radiant Refractor"])
 
@@ -223,7 +228,10 @@ with tab1:
 
 
     if radio_value == "Craftable":
-        df_flt = df_flt[df_flt["Extra class name"].isin(craftables + ["NoItem"])]
+        current_craftables = craftables
+        if is_bilgewater:
+            current_craftables = craftables + set16items.bilgewater_items
+        df_flt = df_flt[df_flt["Extra class name"].isin(current_craftables + ["NoItem"])]
     if radio_value == "Artifact":
         df_flt = df_flt[
             df_flt["Extra class name"].isin(set16items.artifacts + ["NoItem"])
