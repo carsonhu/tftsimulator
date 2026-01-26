@@ -40,6 +40,7 @@ class_buffs = [
     "Slayer",
     "Shurima",
     "StarForger",
+    "Bilgewater"
 ]
 
 augments = [
@@ -485,7 +486,7 @@ class Bilgewater(Buff):
 
     def extraParameters():
         # defining the parameters for the extra shit
-        return {"Title": "Silver Serpents", "Min": 0, "Max": 1000, "Default": 0}
+        return {"Title": "Serpents", "Min": 0, "Max": 1000, "Default": 0}
 
     def extraBuff(self, silver_serpents):
         self.silver_serpents = silver_serpents

@@ -47,7 +47,7 @@ champ_list = [
     "Lissandra",
     "Lux",
     "MissFortune",
-    "MissFortuneNew",
+    "MissFortuneNew",   
     "Seraphine",
     "Veigar",
     "Yone",
@@ -1315,8 +1315,8 @@ class MissFortuneNew(Champion):
         self.castTime = 1
         self.notes = "Bilgewater; add AD / AS as needed. passive not included yet"
 
-    # AD: 320, 345, 370, AP: 15, 25, 70
-    abilityScaling = create_ability_scaling([320, 345, 370], [15, 25, 70])
+    # AD: 230, 345, 3000, AP: 15, 25, 70
+    abilityScaling = create_ability_scaling([230, 345, 3000], [15, 25, 70])
 
     def extraAbilityScaling(self, level, AD, AP):
         return self.abilityScaling(level, AD, AP) * 0.4
@@ -1534,8 +1534,8 @@ class AurelionSol(Champion):
     def __init__(self, level):
         hp = 1100
         atk = 50
-        curMana = 25
-        fullMana = 75
+        curMana = 0
+        fullMana = 85
         aspd = 0.8
         armor = 40
         mr = 40
