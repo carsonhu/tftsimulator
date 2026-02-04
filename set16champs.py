@@ -221,8 +221,8 @@ class Jhin(Champion):
         self.ultAutos = 0
         self.notes = ""
 
-    # AD: 135/200/300 AP: 15/22/34
-    abilityScaling = create_ability_scaling([135, 200, 300], [15, 22, 34])
+    # AD: 145/215/325 AP: 15/22/34
+    abilityScaling = create_ability_scaling([145, 215, 325], [15, 22, 34])
 
     def performAbility(self, opponents, items, time):
         self.ultAutos = 4
@@ -530,8 +530,8 @@ class Bard(Champion):
         self.notes = ""
 
     def abilityScaling(self, level, AD, AP):
-        # AP: 120/170/240, multiplied by number of meeps
-        base_scaling = create_ability_scaling([0, 0, 0], [120, 170, 240])
+        # AP: 130/185/255, multiplied by number of meeps
+        base_scaling = create_ability_scaling([0, 0, 0], [130, 185, 255])
         return base_scaling(None, level, AD, AP) * (self.base_meeps + self.num_three_stars)
 
     def performAbility(self, opponents, items, time):
@@ -649,8 +649,8 @@ class Tristana(Champion):
         self.castTime = .6
         self.notes = ""
 
-    # AD: 250,375,565  AP: 30,45,70
-    abilityScaling = create_ability_scaling([250, 375, 565], [30, 45, 70])
+    # AD: 250,375,600 AP: 30,45,70
+    abilityScaling = create_ability_scaling([250, 375, 600], [30, 45, 70])
 
     def performAbility(self, opponents, items, time):
         # does not count as auto
@@ -766,7 +766,7 @@ class Ahri(Champion):
 class Draven(Champion):
     def __init__(self, level):
         hp= 650
-        atk = 53
+        atk = 58
         curMana = 60
         fullMana = 100
         aspd = .75
@@ -828,8 +828,8 @@ class Jinx(Champion):
         self.manaGainMultiplier.base = 0
         self.notes = ""
 
-    # AD: 65/100/155, AP: 4/6/9
-    abilityScaling = create_ability_scaling([65, 100, 155], [4, 6, 9])
+    # AD: 50/75/125, AP: 4/6/9
+    abilityScaling = create_ability_scaling([50, 75, 125], [4, 6, 9])
 
 
 class Gwen(Champion):
@@ -859,11 +859,11 @@ class Gwen(Champion):
         self.castTime = 1.3
         self.notes = ""
 
-    # AP: 45/68/105
-    abilityScaling = create_ability_scaling([0, 0, 0], [45, 68, 105])
+    # AP: 50/75/120
+    abilityScaling = create_ability_scaling([0, 0, 0], [50, 75, 120])
 
-    # AP: 20/30/50
-    extraAbilityScaling = create_ability_scaling([0, 0, 0], [20, 30, 50], func_name="extraAbilityScaling")
+    # AP: 25/35/60
+    extraAbilityScaling = create_ability_scaling([0, 0, 0], [25, 35, 60], func_name="extraAbilityScaling")
 
     def performAbility(self, opponents, items, time):
         snips = self.base_snips + self.souls // 80
@@ -1187,8 +1187,8 @@ class Lissandra(Champion):
         self.castTime = .6
         self.notes = "no chill interaction yet"
 
-    # AP: 275, 415, 2500
-    abilityScaling = create_ability_scaling([0, 0, 0], [275, 415, 2500])
+    # AP: 315, 475, 2500
+    abilityScaling = create_ability_scaling([0, 0, 0], [315, 475, 2500])
 
     # AP: 415, 625, 2800
     extraAbilityScaling = create_ability_scaling([0, 0, 0], [415, 625, 2800], func_name="extraAbilityScaling")
@@ -1272,7 +1272,7 @@ class MissFortuneOld(Champion):
         )
         self.default_traits = ["Bilgewater", "Gunslinger"]
         self.items.append(buffs.MissFortuneUlt())
-        self.castTime = 1
+        self.castTime = 1.2
         self.notes = "Bilgewater; add AD / AS as needed. passive not included yet"
 
     # AD: 145, 220, 3000, AP: 15, 25, 70
@@ -1314,7 +1314,7 @@ class MissFortune(Champion):
         )
         self.default_traits = ["Bilgewater", "Gunslinger"]
         self.items.append(buffs.MissFortuneUlt())
-        self.castTime = 1
+        self.castTime = 1.2
         self.notes = "Bilgewater; add AD / AS as needed. passive not included yet"
 
     # AD: 230, 345, 3000, AP: 15, 25, 70
@@ -1519,7 +1519,7 @@ class Yunara(Champion):
         self.buff_duration = 4
         self.num_targets = 2
         self.ultActive = False
-        self.as_ap_scaling = [75, 75, 300]
+        self.as_ap_scaling = [65, 65, 300]
         self.notes = ""
 
     # AD: 80/120/425
@@ -1725,13 +1725,13 @@ class THex(Champion):
 
     # divided by 4 since it procs every .25s
     def abilityScaling(self, level, AD, AP):
-        # AD: 145/250/2000, AP: 10/15/150
+        # AD: 160/265/2000, AP: 10/15/150
         base_scaling = create_ability_scaling([145, 250, 2000], [10, 15, 150])
         return base_scaling(None, level, AD, AP) / 4
 
     # multiplied by 4 since this is based off per-second damage
     def extraAbilityScaling(self, level, AD, AP):
-        return self.abilityScaling(level, AD, AP) * .25  * 4
+        return self.abilityScaling(level, AD, AP) * .2  * 4
 
     def performAbility(self, opponents, items, time):
         if not self.ultActive:

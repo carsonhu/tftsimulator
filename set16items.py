@@ -550,7 +550,7 @@ class Nashors(Item):
             self.display_name,
             aspd=10,
             hp=150,
-            ap=20,
+            ap=18,
             manaRegen=0,
             crit=20,
             has_radiant=True,
@@ -1158,7 +1158,7 @@ class RadiantNashors(Nashors):
         super().__init__()
         # override stats after Nashors __init__
         self.hp = 300
-        self.ap = 30
+        self.ap = 35
         self.aspd = 20
         self.crit = 40
         self.manaBonus = 4

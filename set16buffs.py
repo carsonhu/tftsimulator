@@ -372,10 +372,10 @@ class HexMech(Buff):
             f"{self.display_name}", level, params, phases=["postPreCombat"]
         )
         self.pilot_star_level = 0
-        self.adScaling = [15, 25, 40]
-        self.dmgAmpScaling = [0.1, 0.18, 0.3]
+        self.adScaling = [20, 30, 40]
+        self.dmgAmpScaling = [0.12, 0.2, 0.3]
         self.manaRegenScaling = [2, 4, 5]
-        self.critScaling = [0.3, 0.6, 1]
+        self.critScaling = [0.4, 0.7, 1]
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -562,7 +562,7 @@ class Gunslinger(Buff):
             params,
             phases=["preCombat", "postAttack"],
         )
-        self.adScaling = {2: 20, 4: 35}
+        self.adScaling = {2: 22, 4: 40}
         self.extraDamage = {2: 100, 4: 200}
         self.stacks = 0
 
@@ -898,11 +898,11 @@ class THexUlt(Buff):
                     for i in range(champion.num_targets):
                         scale_factor = 1.0
                         if i == 1:
-                            scale_factor = 0.75
+                            scale_factor = 0.65
                         elif i == 2:
-                            scale_factor = 0.5
+                            scale_factor = 0.3
                         elif i >= 3:
-                            scale_factor = 0.25
+                            scale_factor = 0.2
 
                         scaling_func = (
                             champion.abilityScaling
@@ -1221,7 +1221,7 @@ class JeweledLotusI(Buff):
             params,
             phases=["preCombat"],
         )
-        self.crit_scaling = 0.2
+        self.crit_scaling = 0.15
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -1241,7 +1241,7 @@ class JeweledLotusII(Buff):
             params,
             phases=["preCombat"],
         )
-        self.crit_scaling = 0.4
+        self.crit_scaling = 0.25   
         self.crit_dmg_scaling = 0.1
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -1754,7 +1754,7 @@ class OverclockedCapacitors(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
-        self.asBonus = 22
+        self.asBonus = 25
         self.interval = 8
 
     def performAbility(self, phase, time, champion, input_=0):
