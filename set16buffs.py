@@ -260,7 +260,7 @@ class Yordle(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         amt_to_add = self.aspd_per_yordle * self.level + self.num_three_stars * (
-            self.aspd_per_yordle / 2
+            self.aspd_per_yordle
         )
         champion.aspd.addStat(amt_to_add)
         return 0
