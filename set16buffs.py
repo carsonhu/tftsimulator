@@ -658,6 +658,30 @@ class Vanquisher(Buff):
 # Unit buffs
 
 
+class RumbleUlt(Buff):
+    levels = [1]
+    display_name = "Artillery Barrage"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["onUpdate"])
+        self.next_missile = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate":
+            missiles = 3 + (champion.aspd.add // 33)
+            if time >= self.next_missile:
+                champion.multiTargetSpell(
+                    champion.opponents,
+                    champion.items,
+                    time,
+                    1,
+                    champion.abilityScaling,
+                    "magical",
+                )
+                self.next_missile = time + 1 / missiles
+            
+
+
 class ZoeUlt(Buff):
     levels = [1]
     display_name = "Double Trouble Bubble"

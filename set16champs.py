@@ -20,6 +20,7 @@ champ_list = [
     "Kogmaw",
     "Lulu",
     "Qiyana",
+    "RumbleHero",
     "Sona",
     "Viego",
     # 2-cost
@@ -344,6 +345,38 @@ class Qiyana(Champion):
         self.multiTargetSpell(
             opponents, items, time, self.num_targets, self.abilityScaling, "physical"
         )
+
+
+class RumbleHero(Champion):
+    def __init__(self, level):
+        hp = 700
+        atk = 45
+        curMana = 0
+        fullMana = -1
+        aspd = 0.6
+        armor = 50
+        mr = 50
+        super().__init__(
+            "Rumble",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.SPECIALIST,
+        )
+        self.default_traits = ["Yordle"]
+        self.items.append(buffs.RumbleUlt())
+        self.castTime = 0
+        self.notes = ""
+        self.nextAttackTime = 999 # cannot attack
+
+    # AP: 32/48/72
+    abilityScaling = create_ability_scaling([0, 0, 0], [32, 48, 72])
+
 
 
 
@@ -1726,7 +1759,7 @@ class THex(Champion):
     # divided by 4 since it procs every .25s
     def abilityScaling(self, level, AD, AP):
         # AD: 160/265/2000, AP: 10/15/150
-        base_scaling = create_ability_scaling([145, 250, 2000], [10, 15, 150])
+        base_scaling = create_ability_scaling([160, 265, 2000], [10, 15, 150])
         return base_scaling(None, level, AD, AP) / 4
 
     # multiplied by 4 since this is based off per-second damage
