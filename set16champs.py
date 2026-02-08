@@ -57,6 +57,7 @@ champ_list = [
     "AurelionSol",
     "Azir",
     "THex",
+    "Warwick",
     
 ]
 
@@ -1889,3 +1890,47 @@ class SuperDummyTank(Champion):
 
     def performAbility(self, opponents, items, time):
         return 0
+
+class Warwick(Champion):
+    def __init__(self, level):
+        hp = 1200
+        atk = 60
+        curMana = 0
+        fullMana = 90
+        aspd = 0.9
+        armor = 60
+        mr = 60
+        super().__init__(
+            "Warwick",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.FIGHTER,
+        )
+        self.default_traits = ["Zaun", "Quickstriker"]
+        self.castTime = 0.5 
+        self.manalockDuration = 999
+        self.notes = "No takedown bonus"
+
+    def bonusAbilityScaling(self, level, AD, AP):
+        flat_dmg = [45, 70, 550]
+        return flat_dmg[level - 1]
+
+    def performAbility(self, opponents, items, time):
+        # Gain AS
+        as_scaling = [100, 100, 400]
+        self.aspd.addStat(as_scaling[self.level - 1])
+        
+        # Gain Omnivamp
+        self.omnivamp.addStat(0.15)
+        
+        # Add buff for on-attack damage
+        self.items.append(buffs.WarwickUlt())
+        
+        # Clear mana and ensure lock just in case (though manalockDuration should handle it)
+        self.manalockTime = 99999

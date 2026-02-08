@@ -54,6 +54,7 @@ augments = [
     "TinyButDeadly",
     "StandUnitedI",
     "Ascension",
+    "AscensionOld",
     "KnowYourEnemy",
     "HoldTheLine5",
     "HoldTheLine7",
@@ -1663,6 +1664,23 @@ class Ascension(Buff):
         return 0
 
 
+class AscensionOld(Buff):
+    levels = [1]
+    display_name = "Ascension (Old)"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["onUpdate"])
+        self.dmgBonus = 0.6
+        self.nextBonus = 15
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate":
+            if time >= self.nextBonus:
+                self.nextBonus += 99999
+                champion.dmgMultiplier.addStat(self.dmgBonus)
+        return 0
+
+
 class ScopedWeaponsII(Buff):
     levels = [1]
     display_name = "ScopedWeaponsII"
@@ -1857,4 +1875,25 @@ class Noxus(Buff):
         super().__init__(f"{self.display_name} {level}", level, params, phases=None)
 
     def performAbility(self, phase, time, champion, input_=0):
+        return 0
+
+
+class WarwickUlt(Buff):
+    levels = [1]
+    display_name = "Eternal Hunger"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["postAttack"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "postAttack":
+            if champion.opponents:
+                champion.multiTargetSpell(
+                    [champion.opponents[0]],
+                    champion.items,
+                    time,
+                    1,
+                    champion.bonusAbilityScaling,
+                    "physical"
+                )
         return 0
