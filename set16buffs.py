@@ -74,6 +74,8 @@ augments = [
     "MessHall",
     "SoulAwakening",
     "FocusedFire",
+    "Corrosion",
+    "CryMeARiver",
 ]
 
 void_buffs = ["SpitterSpines", "LeechingNucleus", "AdrenalineModules"]
@@ -1244,7 +1246,7 @@ class JeweledLotusI(Buff):
             params,
             phases=["preCombat"],
         )
-        self.crit_scaling = 0.15
+        self.crit_scaling = 0.2
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -1896,4 +1898,41 @@ class WarwickUlt(Buff):
                     champion.bonusAbilityScaling,
                     "physical"
                 )
+        return 0
+
+
+class Corrosion(Buff):
+    levels = [1]
+    display_name = "Corrosion"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name, level, params, phases=["preCombat"]
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            for opponent in champion.opponents:
+                opponent.applyStatus(status.CorrosionStatus(), champion, time, 30, 0)
+        return 0
+
+
+class CryMeARiver(Buff):
+    levels = [1]
+    display_name = "Cry Me A River"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name, level, params, phases=["preCombat", "onUpdate"]
+        )
+        self.stage_2_active = False
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.manaRegen.addStat(1)
+        elif phase == "onUpdate":
+            if not self.stage_2_active and time >= 12:
+                # After 12 seconds, increase to 3 (so add 2 more)
+                champion.manaRegen.addStat(2)
+                self.stage_2_active = True
         return 0

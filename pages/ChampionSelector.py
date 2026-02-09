@@ -42,6 +42,8 @@ all_items = sorted(
     + set16items.no_item
 )
 
+sidebar_items = sorted(all_items + set16items.bilgewater_items)
+
 craftables = set16items.offensive_craftables
 
 aug_buffs = sorted(set16buffs.augments)
@@ -94,7 +96,7 @@ with st.sidebar:
 
     st.header("Global Items")
 
-    items = class_utilities.items_list(all_items)
+    items = class_utilities.items_list(sidebar_items)
 
     buffs = class_utilities.buff_bar(
         all_buffs, max_buffs=10, num_buffs=2, starting_buffs=champ.default_traits, champ_name=champ.name

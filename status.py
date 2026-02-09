@@ -480,3 +480,32 @@ class MRReduction(Status):
             ):
                 champion.mr.mult = min(champion.armor.mult, status.reduction)
         return True
+
+
+class CorrosionStatus(Status):
+    def __init__(self):
+        super().__init__("Corrosion")
+        self.amount = 4
+        self.interval = 2
+        self.next_proc = 2
+        self.total_reduction = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.next_proc = time + self.interval
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return True
+
+    def wearoffEffect(self, champion, time):
+        # champion.armor.addStat(self.total_reduction)
+        # champion.mr.addStat(self.total_reduction)
+        return True
+
+    def update(self, champion, time):
+        if time >= self.next_proc:
+            champion.armor.addStat(-self.amount)
+            champion.mr.addStat(-self.amount)
+            self.total_reduction += self.amount
+            self.next_proc += self.interval
+        super().update(champion, time)
