@@ -984,13 +984,14 @@ class DarkinStaff(Item):
             self.display_name, manaRegen=1, ap=40, phases=["postAbility"]
         )
         self.manaSpent = 0
+        self.dmg_map = {2: 50, 3: 60, 4: 70, 5: 80, 6: 80}
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.fullMana.stat > 0:
             self.manaSpent += champion.fullMana.stat
             while self.manaSpent >= 20:
                 self.manaSpent -= 20
-                dmg = 50
+                dmg = self.dmg_map.get(champion.stage, 80)
                 champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "magical", time)
 
 

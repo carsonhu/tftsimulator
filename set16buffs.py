@@ -76,6 +76,8 @@ augments = [
     "FocusedFire",
     "Corrosion",
     "CryMeARiver",
+    "AccelerationGate",
+    "MagnetronCoil",
 ]
 
 void_buffs = ["SpitterSpines", "LeechingNucleus", "AdrenalineModules"]
@@ -1935,4 +1937,41 @@ class CryMeARiver(Buff):
                 # After 12 seconds, increase to 3 (so add 2 more)
                 champion.manaRegen.addStat(2)
                 self.stage_2_active = True
+        return 0
+
+
+class AccelerationGate(Buff):
+    levels = [1]
+    display_name = "Acceleration Gate"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name, level, params, phases=["postAbility"]
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time < 8:
+            return 0
+            
+        # "After casting... restore 35% max mana over 2 seconds"
+        # We use a status effect for the mana over time
+        champion.applyStatus(status.AccelerationGateStatus(), champion, time, 2, 0)
+        return 0
+
+
+class MagnetronCoil(Buff):
+    levels = [1]
+    display_name = "Magnetron Coil (8 casts)"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name, level, params, phases=["onUpdate"]
+        )
+        self.active = False
+        self.casts = 8
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time >= 8 and not self.active:
+            self.active = True
+            champion.dmgMultiplier.addStat(0.16 + self.casts * .01)
         return 0

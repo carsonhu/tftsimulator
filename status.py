@@ -509,3 +509,32 @@ class CorrosionStatus(Status):
             self.total_reduction += self.amount
             self.next_proc += self.interval
         super().update(champion, time)
+
+
+class AccelerationGateStatus(Status):
+    def __init__(self):
+        super().__init__("AccelerationGateStatus")
+        self.scaling = zero_scaling
+        self.next_proc = 0
+        self.ticks_remaining = 0
+        self.mana_per_tick = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.mana_per_tick = (0.35 * champion.fullMana.stat) / 4
+        self.next_proc = time + 0.5
+        self.ticks_remaining = 4
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        self.ticks_remaining = 4
+        self.mana_per_tick = (0.35 * champion.fullMana.stat) / 4
+        self.next_proc = time + 0.5
+        return True
+
+    def update(self, champion, time):
+        if self.active and time >= self.next_proc and self.ticks_remaining > 0:
+            champion.addMana(self.mana_per_tick)
+            self.next_proc += 0.5
+            self.ticks_remaining -= 1
+        
+        super().update(champion, time)
