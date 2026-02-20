@@ -950,7 +950,7 @@ class Flickerblade(Item):
     def performAbility(self, phase, time, champion, input_=0):
         self.counter += 1
         if champion.aspd.stat <= 5:
-            champion.aspd.addStat(6)
+            champion.aspd.addStat(5)
         if self.counter == 5:
             champion.bonus_ad.addStat(2)
             champion.ap.addStat(2)
@@ -981,17 +981,17 @@ class DarkinStaff(Item):
 
     def __init__(self):
         super().__init__(
-            self.display_name, manaRegen=1, ap=40, phases=["postAbility"]
+            self.display_name, manaRegen=3, ap=35, phases=["postAbility"]
         )
         self.manaSpent = 0
-        self.dmg_map = {2: 50, 3: 60, 4: 70, 5: 80, 6: 80}
+        self.dmg_map = {2: 100, 3: 100, 4: 150, 5: 200, 6: 250}
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.fullMana.stat > 0:
             self.manaSpent += champion.fullMana.stat
             while self.manaSpent >= 20:
                 self.manaSpent -= 20
-                dmg = self.dmg_map.get(champion.stage, 80)
+                dmg = self.dmg_map.get(champion.stage, 250)
                 champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, "magical", time)
 
 

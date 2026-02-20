@@ -487,8 +487,8 @@ class Aphelios(Champion):
         # infernum, severum activated, severum
         self.notes = "Shred is just permanent"
 
-    # AD: 70/105/175
-    abilityScaling = create_ability_scaling([70, 105, 175], [0, 0, 0])
+    # AD: 80/120/200
+    abilityScaling = create_ability_scaling([80, 120, 200], [0, 0, 0])
 
     def performAbility(self, opponents, items, time):
         self.severumAttacksLeft = round(self.severumAttacks * self.ap.stat)
@@ -499,7 +499,7 @@ class Aphelios(Champion):
 class Ashe(Champion):
     def __init__(self, level):
         hp = 550
-        atk = 53
+        atk = 58
         curMana = 20
         fullMana = 80
         aspd = 0.7
@@ -599,8 +599,8 @@ class Orianna(Champion):
         self.castTime = .7
         self.notes = ""
 
-    # AP: 220/330/500
-    abilityScaling = create_ability_scaling([0, 0, 0], [220, 330, 500])
+    # AP: 200/300/550
+    abilityScaling = create_ability_scaling([0, 0, 0], [200, 300, 550])
 
     # AP: 100/150/250
     extraAbilityScaling = create_ability_scaling([0, 0, 0], [100, 150, 250], func_name="extraAbilityScaling")
@@ -751,8 +751,8 @@ class Yasuo(Champion):
         self.castTime = .5
         self.notes = "Always hits 2 targets"
 
-    # AD: 85, 125, 190  AP: 8, 12, 18
-    abilityScaling = create_ability_scaling([85, 125, 190], [8, 12, 18])
+    # AD: 95/145/215  AP: 8/12/18
+    abilityScaling = create_ability_scaling([95, 145, 215], [8, 12, 18])
 
     def performAbility(self, opponents, items, time):
         # does not count as auto
@@ -862,8 +862,8 @@ class Jinx(Champion):
         self.manaGainMultiplier.base = 0
         self.notes = ""
 
-    # AD: 50/75/125, AP: 4/6/9
-    abilityScaling = create_ability_scaling([50, 75, 125], [4, 6, 9])
+    # AD: 54/82/150, AP: 4/6/9
+    abilityScaling = create_ability_scaling([54, 82, 150], [4, 6, 9])
 
 
 class Gwen(Champion):
@@ -1051,11 +1051,11 @@ class Leblanc(Champion):
         self.castTime = 1
         self.notes = ""
 
-    # AP: 300/450/700
-    abilityScaling = create_ability_scaling([0, 0, 0], [300, 450, 700])
+    # AP: 300/450/800
+    abilityScaling = create_ability_scaling([0, 0, 0], [300, 450, 800])
 
-    # AP: 180/270/450
-    extraAbilityScaling = create_ability_scaling([0, 0, 0], [180, 270, 450])
+    # AP: 180/270/500
+    extraAbilityScaling = create_ability_scaling([0, 0, 0], [180, 270, 500])
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
@@ -1553,15 +1553,15 @@ class Yunara(Champion):
         self.buff_duration = 4
         self.num_targets = 2
         self.ultActive = False
-        self.as_ap_scaling = [65, 65, 300]
+        self.as_ap_scaling = [80, 80, 100]
         self.notes = ""
 
-    # AD: 80/120/425
-    abilityScaling = create_ability_scaling([80, 120, 425], [0, 0, 0])
+    # AD: 80/120/425, AP: 8/12/50
+    abilityScaling = create_ability_scaling([80, 120, 425], [8, 12, 50])
 
     def performAbility(self, opponents, items, time):
         self.applyStatus(status.ASModifier("Yunara"),
-                    self, time, self.buff_duration, self.as_ap_scaling[self.level-1] * self.ap.stat)
+                    self, time, self.buff_duration, self.as_ap_scaling[self.level-1])
         self.applyStatus(status.UltActivator("Yunara ult"),
                          self, time, self.buff_duration)
         
@@ -1593,8 +1593,8 @@ class AurelionSol(Champion):
         self.castTime = 1
         self.notes = "25 Shockwave: hits num targets + 2. 140 shockwave: hits num targets + 4. 300 shockwave: hits 8 targets."
 
-    # AP: 480/800/5000
-    abilityScaling = create_ability_scaling([0, 0, 0], [480, 800, 5000])
+    # AP: 525/725/5000
+    abilityScaling = create_ability_scaling([0, 0, 0], [525, 725, 5000])
 
     # AP: 100/150/1000
     shockwaveAbilityScaling = create_ability_scaling([0, 0, 0], [100, 150, 1000])
@@ -1726,8 +1726,8 @@ class THex(Champion):
     def __init__(self, level):
         hp = 1400
         atk = 85
-        curMana = 30
-        fullMana = 100
+        curMana = 10
+        fullMana = 80
         aspd = 0.9
         armor = 70
         mr = 70
@@ -1759,13 +1759,13 @@ class THex(Champion):
 
     # divided by 4 since it procs every .25s
     def abilityScaling(self, level, AD, AP):
-        # AD: 160/265/2000, AP: 10/15/150
-        base_scaling = create_ability_scaling([160, 265, 2000], [10, 15, 150])
+        # AD: 360/540/2000, AP: 10/15/150
+        base_scaling = create_ability_scaling([360, 540, 2000], [10, 15, 150])
         return base_scaling(None, level, AD, AP) / 4
 
     # multiplied by 4 since this is based off per-second damage
     def extraAbilityScaling(self, level, AD, AP):
-        return self.abilityScaling(level, AD, AP) * .2  * 4
+        return self.abilityScaling(level, AD, AP) * .1  * 4
 
     def performAbility(self, opponents, items, time):
         if not self.ultActive:

@@ -504,8 +504,8 @@ class Arcanist(Buff):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
-        self.scaling = {2: 18, 4: 25, 6: 40}
-        self.arcanist_scaling = {2: 25, 4: 40, 6: 60}
+        self.scaling = {2: 15, 4: 20, 6: 35}
+        self.arcanist_scaling = {2: 25, 4: 50, 6: 70}
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -925,15 +925,13 @@ class THexUlt(Buff):
                 if time > champion.nextDrain:
                     print("Draining THex ult: {} {}".format(time, champion.curMana))
                     champion.nextDrain += 0.25
-                    champion.curMana -= 33 / 4
+                    champion.curMana -= 25 / 4
                     for i in range(champion.num_targets):
                         scale_factor = 1.0
                         if i == 1:
-                            scale_factor = 0.65
-                        elif i == 2:
                             scale_factor = 0.3
-                        elif i >= 3:
-                            scale_factor = 0.2
+                        elif i >= 2:
+                            scale_factor = 0.1
 
                         scaling_func = (
                             champion.abilityScaling
@@ -1522,8 +1520,8 @@ class WarlordsHonor(Buff):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.bonus_ad.addStat(20)
-        champion.ap.addStat(20)
+        champion.bonus_ad.addStat(24)
+        champion.ap.addStat(24)
         return 0
 
 
@@ -1657,7 +1655,7 @@ class Ascension(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
-        self.dmgBonus = 0.45
+        self.dmgBonus = 0.4
         self.nextBonus = 12
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -1721,7 +1719,7 @@ class FocusedFire(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
-        self.adBonus = 5
+        self.adBonus = 10
         self.nextBonus = 0
         self.bonusInterval = 5
 
