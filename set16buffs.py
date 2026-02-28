@@ -41,6 +41,9 @@ class_buffs = [
     "Shurima",
     "StarForger",
     "Bilgewater",
+    "IoniaEnlightened",
+    "IoniaProsperous",
+    # "IoniaBlades",
 ]
 
 augments = [
@@ -78,6 +81,7 @@ augments = [
     "CryMeARiver",
     "AccelerationGate",
     "MagnetronCoil",
+    "WarlordsHonor"
 ]
 
 void_buffs = ["SpitterSpines", "LeechingNucleus", "AdrenalineModules"]
@@ -202,7 +206,7 @@ class ShadowIsles(Buff):
     def __init__(self, level, params):
         # params is number of hexes
         super().__init__(
-            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+            f"{self.display_name} {level}", level, params, phases=["prePreCombat"]
         )
         self.scaling = {0: 0, 2: 18, 3: 20, 4: 25, 5: 33}
         self.souls = 0
@@ -525,6 +529,95 @@ class Arcanist(Buff):
         self.is_arcanist = is_arcanist
 
 
+class IoniaEnlightened(Buff):
+    levels = [0, 3, 5, 7]
+    display_name = "Ionia (Enlightened)"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+        )
+        self.scaling = {3: 10, 5: 15, 7: 20}
+        self.lvl_scaling = {3: 2, 5: 3, 7: 4}
+        self.extraBuff(params)
+
+    def performAbility(self, phase, time, champion, input_=0):
+        amt_to_add = self.scaling[self.level] + self.lvl_scaling[self.level] * champion.level
+        champion.bonus_ad.addStat(amt_to_add)
+        champion.ap.addStat(amt_to_add)
+        return 0
+
+    def extraParameters():
+        # defining the parameters for the extra shit
+        return {"Title": "Lvl Override", "Min": 0, "Max": 10, "Default": 0}
+
+    def extraBuff(self, level):
+        if level != 0:
+            champion.level = level
+
+
+class IoniaProsperous(Buff):
+    levels = [0, 3, 5, 7]
+    display_name = "Ionia (Prosperous)"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+        )
+        self.scaling = {3: 10, 5: 25, 7: 40}
+        self.gold_scaling = 2
+        self.gold = 0
+        self.extraBuff(params)
+
+    def performAbility(self, phase, time, champion, input_=0):
+        amt_to_add = self.scaling[self.level] * (1 + self.gold *.02)
+        champion.bonus_ad.addStat(amt_to_add)
+        champion.ap.addStat(amt_to_add)
+        return 0
+
+    def extraParameters():
+        # defining the parameters for the extra shit
+        return {"Title": "Gold", "Min": 0, "Max": 200, "Default": 20}
+
+    def extraBuff(self, gold):
+        self.gold = gold
+     
+
+class IoniaBlades(Buff):
+    levels = [0, 3, 5, 7]
+    display_name = "Ionia (Blades)"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat", "postAttack"]
+        )
+        self.scaling = {3: 15, 5: 25, 7: 50}
+        self.blade_scaling = {0: 0, 3: .3, 5: .38, 7: .45}
+        self.bmActive = False
+        self.bmAutoCount = 0
+
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.bonus_ad.addStat(self.scaling[self.level])
+            champion.ap.addStat(self.scaling[self.level])
+        elif phase == "postAttack":
+            # Implement doublestrike logic here
+            if not self.bmActive:
+                self.bmAutoCount += self.blade_scaling[self.level]
+                if self.bmAutoCount >= 1:
+                    champion.aspd.mult = 4
+                    self.bmActive = True
+                    self.bmAutoCount -= 1
+            else:
+                # should this increment it as well? probably not.
+                champion.aspd.mult = 1
+                self.bmActive = False
+                self.bmAutoCount = 0
+            return 0
+        return 0
+
+
 class Slayer(Buff):
     levels = [0, 2, 4, 6]
     display_name = "Slayer"
@@ -533,7 +626,7 @@ class Slayer(Buff):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
-        self.scaling = {2: 22, 4: 33, 6: 44}
+        self.scaling = {2: 20, 4: 30, 6: 40}
         self.bonus_amp = 0
         self.extraBuff(params)
 
@@ -915,6 +1008,7 @@ class THexUlt(Buff):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
         self.missiles_to_send = 0
         self.missile_count = 0
+        self.mana_drain = 30
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.ultActive:
@@ -925,7 +1019,7 @@ class THexUlt(Buff):
                 if time > champion.nextDrain:
                     print("Draining THex ult: {} {}".format(time, champion.curMana))
                     champion.nextDrain += 0.25
-                    champion.curMana -= 25 / 4
+                    champion.curMana -= self.mana_drain / 4
                     for i in range(champion.num_targets):
                         scale_factor = 1.0
                         if i == 1:
@@ -1125,7 +1219,7 @@ class LeechingNucleus(Buff):
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["onDealDamage"])
         self.stacks = 0
-        self.max_stacks = 15
+        self.max_stacks = 10
         self.scaling = 2
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -1144,7 +1238,7 @@ class AdrenalineModules(Buff):
         super().__init__(
             self.display_name, level, params, phases=["preCombat", "preAttack"]
         )
-        self.initial_scaling = 0.15
+        self.initial_scaling = 0.18
         self.bonus_threshold = 3
         self.bonus_scaling = 0.01
 

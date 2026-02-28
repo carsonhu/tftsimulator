@@ -113,9 +113,13 @@ def do_experiment_one_extra(
         equal_buffs = [
             champ_buff
             for champ_buff in champ.items
-            if champ_buff.name.rsplit(" ", 1)[0] == buff.name.rsplit(" ", 1)[0]
+            if (
+                champ_buff.name.rsplit(" ", 1)[0] == buff.name.rsplit(" ", 1)[0]
+                or type(champ_buff) == type(buff)
+            )
             and (
                 champ_buff.name.rsplit(" ", 1)[0].replace(" ", "") in class_buffs
+                or type(champ_buff).__name__ in class_buffs
                 or (champ_buff.name == buff.name)
             )
         ]

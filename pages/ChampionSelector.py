@@ -103,6 +103,7 @@ with st.sidebar:
     )
 
     extra_buffs = []
+    is_shadow_isles = "ShadowIsles" in [b[0] for b in buffs]
     for buff in buffs:
         # Buff: ("Name", level, param)
         levels = utils.class_for_name("set16buffs", buff[0]).levels
@@ -111,6 +112,17 @@ with st.sidebar:
                 extra_buffs.append(
                     utils.class_for_name("set16buffs", buff[0])(level, buff[2])
                 )
+    
+    if is_shadow_isles:
+        si_buff_tuple = next(b for b in buffs if b[0] == "ShadowIsles")
+        si_level = si_buff_tuple[1]
+        si_user_souls = si_buff_tuple[2]
+        soul_counts = [0, si_user_souls, 50, 100, 200, 300, 500]
+        soul_counts = sorted(list(set(soul_counts)))
+        for s in soul_counts:
+            si_buff = utils.class_for_name("set16buffs", "ShadowIsles")(si_level, s)
+            si_buff.name = f"Shadow Isles {si_level} ({s} souls)"
+            extra_buffs.append(si_buff)
 
     # Void buff selector
     if "Void" in [b[0] for b in buffs]:
@@ -222,6 +234,8 @@ with tab1:
         options.append("Void")
     if "HexMech" in [b[0] for b in buffs]:
         options.append("Pilot")
+    if is_shadow_isles:
+        options.append("Souls")
 
     radio_value = st.radio("", options, index=0, horizontal=True)
 
@@ -249,6 +263,7 @@ with tab1:
     if radio_value == "Trait":
         df_flt = df_flt[
             df_flt["Extra class name"].isin([x[0] for x in buffs] + ["NoItem"])
+            & ~df_flt["Extra"].str.contains(r"\(.*souls\)")
         ]
     if radio_value == "Augment/Buff":
         df_flt = df_flt[
@@ -261,6 +276,10 @@ with tab1:
     if radio_value == "Pilot":
         df_flt = df_flt[
             df_flt["Extra"].str.startswith("Pilot")
+        ]
+    if radio_value == "Souls":
+        df_flt = df_flt[
+            df_flt["Extra"].str.contains(r"\(.*souls\)") | (df_flt["Extra"] == "NoItem")
         ]
 
     new_df = df_flt.drop(["Extra class name", "Name", "Level"], axis=1)

@@ -297,11 +297,11 @@ class Lulu(Champion):
         self.castTime = 1 # unverified
         self.notes = ""
 
-    # AP: 285/425/635
-    abilityScaling = create_ability_scaling([0, 0, 0], [285, 425, 635])
+    # AP: 330/500/750
+    abilityScaling = create_ability_scaling([0, 0, 0], [330, 500, 750])
 
-    # AP: 120/180/270
-    extraAbilityScaling = create_ability_scaling([0, 0, 0], [120, 180, 270])
+    # AP: 140/210/315
+    extraAbilityScaling = create_ability_scaling([0, 0, 0], [140, 210, 315])
     
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
@@ -499,10 +499,10 @@ class Aphelios(Champion):
 class Ashe(Champion):
     def __init__(self, level):
         hp = 550
-        atk = 58
+        atk = 60
         curMana = 20
         fullMana = 80
-        aspd = 0.7
+        aspd = 0.75
         armor = 20
         mr = 20
         super().__init__(
@@ -782,12 +782,12 @@ class Ahri(Champion):
             level,
             Role.CASTER,
         )
-        self.default_traits = ["Ionia", "Arcanist"]
+        self.default_traits = ["IoniaProsperous", "IoniaEnlightened", "Arcanist"]
         self.castTime = 1
         self.notes = ""
 
-    # AP: 82/125/195
-    abilityScaling = create_ability_scaling([0, 0, 0], [82, 125, 195])
+    # AP: 82/125/225
+    abilityScaling = create_ability_scaling([0, 0, 0], [82, 125, 225])
 
     def performAbility(self, opponents, items, time):
         dmg_instances = 3 if self.numCasts % 3 != 0 else 9
@@ -824,8 +824,8 @@ class Draven(Champion):
         self.items.append(buffs.DravenUlt())
         self.notes = "1.3 second return time."
 
-    # AD: 120/170/290, AP: 10/15/25
-    abilityScaling = create_ability_scaling([120, 170, 290], [10, 15, 25])
+    # AD: 120/180/350, AP: 10/15/25
+    abilityScaling = create_ability_scaling([120, 180, 350], [10, 15, 25])
 
     def performAbility(self, opponents, items, time):
         # he can only hold 2 axes, but this doesnt rly matter
@@ -982,8 +982,8 @@ class Vayne(Champion):
         self.castTime = .7
         self.notes = ""
 
-    # AD: 100/150/230, AP: 6/10/15
-    abilityScaling = create_ability_scaling([100, 150, 230], [6, 10, 15])
+    # AD: 110/165/285, AP: 6/10/15
+    abilityScaling = create_ability_scaling([110, 165, 285], [6, 10, 15])
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
@@ -1016,8 +1016,8 @@ class Zoe(Champion):
         self.castTime = 1
         self.notes = "permanent shred"
 
-    # AP: 330/500/700
-    abilityScaling = create_ability_scaling([0, 0, 0], [330, 500, 700])
+    # AP: 330/500/1000
+    abilityScaling = create_ability_scaling([0, 0, 0], [330, 500, 1000])
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
@@ -1186,7 +1186,7 @@ class Kalista(Champion):
 
     # AD: 32/48/450, AP: 3/5/15
     def abilityScaling(self, level, AD, AP):
-        spears = 20 + self.souls // 25
+        spears = 25 + self.souls // 50
         base_scaling = create_ability_scaling([32, 48, 450], [3, 5, 15])
         return base_scaling(None, level, AD, AP) * spears
 
@@ -1200,8 +1200,8 @@ class Lissandra(Champion):
     def __init__(self, level):
         hp = 500
         atk = 30
-        curMana = 0
-        fullMana = 80
+        curMana = 20
+        fullMana = 65
         aspd = 0.75
         armor = 30
         mr = 30
@@ -1265,8 +1265,8 @@ class Lux(Champion):
     # AP: 30/45/100
     abilityScaling = create_ability_scaling([0, 0, 0], [30, 45, 100])
     
-    # AP: 290/435/1500
-    laserAbilityScaling = create_ability_scaling([0, 0, 0], [290, 435, 1500])
+    # AP: 360/550/1800
+    laserAbilityScaling = create_ability_scaling([0, 0, 0], [360, 550, 1800])
     
     # AP: 90/135/800
     laserSecondaryScaling = create_ability_scaling([0, 0, 0], [90, 135, 800])
@@ -1451,8 +1451,8 @@ class Veigar(Champion):
 
         self.notes = "Edit bonus AP in extra options"
 
-    # AP: 62/93/199
-    abilityScaling = create_ability_scaling([0, 0, 0], [62, 93, 199])
+    # AP: 56/84/199
+    abilityScaling = create_ability_scaling([0, 0, 0], [56, 84, 199])
 
     def performAbility(self, opponents, items, time):
         for i in range(self.num_missiles[self.level - 1]):
@@ -1467,7 +1467,7 @@ class Yone(Champion):
         atk = 20
         curMana = 30
         fullMana = 100
-        aspd = 0.9
+        aspd = 0.85
         armor = 60
         mr = 60
         super().__init__(
@@ -1488,14 +1488,14 @@ class Yone(Champion):
         self.castTime = 1
         self.notes = ""
 
-    # AD: 80/120/800
+    # AD: 55/85/650
     def adAutoAbilityScaling(self, level, AD, AP):
-        base_scaling = create_ability_scaling([80, 120, 800], [0, 0, 0])
+        base_scaling = create_ability_scaling([55, 85, 650], [0, 0, 0])
         return base_scaling(None, level, AD, AP)
 
-    # AP: 140/210/1400
+    # AP: 110/165/1400
     def apAutoAbilityScaling(self, level, AD, AP):
-        base_scaling = create_ability_scaling([0, 0, 0], [140, 210, 1400])
+        base_scaling = create_ability_scaling([0, 0, 0], [110, 165, 1400])
         return base_scaling(None, level, AD, AP)
 
     # AD: 40/60/240, AP: 40/60/240
@@ -1503,9 +1503,9 @@ class Yone(Champion):
         base_scaling = create_ability_scaling([40, 60, 240], [40, 60, 240])
         return base_scaling(None, level, AD, AP)
 
-    # AD: 160/240/1080, AP: 160/240/1080
+    # AD: 140/210/1080, AP: 140/210/1080
     def splitAbilityScaling(self, level, AD, AP):
-        base_scaling = create_ability_scaling([160, 240, 1080], [160, 240, 1080])
+        base_scaling = create_ability_scaling([140, 210, 1080], [140, 210, 1080])
         return base_scaling(None, level, AD, AP)
 
     def performAbility(self, opponents, items, time):
@@ -1546,7 +1546,7 @@ class Yunara(Champion):
             level,
             Role.MARKSMAN,
         )
-        self.default_traits = ["Ionia", "Quickstriker"]
+        self.default_traits = ["IoniaProsperous", "IoniaEnlightened", "Quickstriker"]
         self.items.append(buffs.YunaraUlt())
         self.castTime = 0
         self.manalockDuration = 4
@@ -1554,7 +1554,7 @@ class Yunara(Champion):
         self.num_targets = 2
         self.ultActive = False
         self.as_ap_scaling = [80, 80, 100]
-        self.notes = ""
+        self.notes = "Blademaster AS is still capped at 5 to simulate how wonky it is at higher AS"
 
     # AD: 80/120/425, AP: 8/12/50
     abilityScaling = create_ability_scaling([80, 120, 425], [8, 12, 50])
@@ -1640,7 +1640,7 @@ class Azir(Champion):
         atk = 35
         curMana = 20
         fullMana = 40
-        aspd = 0.8
+        aspd = 0.85
         armor = 30
         mr = 30
         super().__init__(
@@ -1665,8 +1665,8 @@ class Azir(Champion):
     # AP: 100/150/3000
     abilityScaling = create_ability_scaling([0, 0, 0], [100, 150, 3000])
 
-    # AP: 70/105/5000
-    extraAbilityScaling = create_ability_scaling([0, 0, 0], [70, 105, 5000])
+    # AP: 90/135/5000
+    extraAbilityScaling = create_ability_scaling([0, 0, 0], [90, 135, 5000])
 
     def performAbility(self, opponents, items, time):
         if self.soldiers < 2:
@@ -1759,13 +1759,13 @@ class THex(Champion):
 
     # divided by 4 since it procs every .25s
     def abilityScaling(self, level, AD, AP):
-        # AD: 360/540/2000, AP: 10/15/150
-        base_scaling = create_ability_scaling([360, 540, 2000], [10, 15, 150])
+        # AD: 280/420/2000, AP: 10/15/150
+        base_scaling = create_ability_scaling([280, 420, 2000], [10, 15, 150])
         return base_scaling(None, level, AD, AP) / 4
 
     # multiplied by 4 since this is based off per-second damage
     def extraAbilityScaling(self, level, AD, AP):
-        return self.abilityScaling(level, AD, AP) * .1  * 4
+        return self.abilityScaling(level, AD, AP) * .06  * 4
 
     def performAbility(self, opponents, items, time):
         if not self.ultActive:
@@ -1896,7 +1896,7 @@ class Warwick(Champion):
         hp = 1200
         atk = 60
         curMana = 0
-        fullMana = 90
+        fullMana = 70
         aspd = 0.9
         armor = 60
         mr = 60
@@ -1918,7 +1918,7 @@ class Warwick(Champion):
         self.notes = "No takedown bonus"
 
     def bonusAbilityScaling(self, level, AD, AP):
-        flat_dmg = [45, 70, 550]
+        flat_dmg = [50, 80, 550]
         return flat_dmg[level - 1]
 
     def performAbility(self, opponents, items, time):
