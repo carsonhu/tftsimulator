@@ -1749,7 +1749,7 @@ class Ascension(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
-        self.dmgBonus = 0.4
+        self.dmgBonus = 0.35
         self.nextBonus = 12
 
     def performAbility(self, phase, time, champion, input_=0):

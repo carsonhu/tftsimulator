@@ -639,8 +639,8 @@ class Teemo(Champion):
         self.castTime = 1 # verified
         self.notes = ""
 
-    # AP: 130/200/330
-    abilityScaling = create_ability_scaling([0, 0, 0], [130, 200, 330])
+    # AP: 130/200/375
+    abilityScaling = create_ability_scaling([0, 0, 0], [130, 200, 375])
 
     # AP: 35/55/100
     dotScaling = create_ability_scaling([0, 0, 0], [35, 55, 100], func_name="dotScaling")
@@ -683,8 +683,8 @@ class Tristana(Champion):
         self.castTime = .6
         self.notes = ""
 
-    # AD: 250,375,600 AP: 30,45,70
-    abilityScaling = create_ability_scaling([250, 375, 600], [30, 45, 70])
+    # AD: 265,400,660 AP: 30,45,70
+    abilityScaling = create_ability_scaling([265, 400, 660], [30, 45, 70])
 
     def performAbility(self, opponents, items, time):
         # does not count as auto
@@ -982,8 +982,8 @@ class Vayne(Champion):
         self.castTime = .7
         self.notes = ""
 
-    # AD: 110/165/285, AP: 6/10/15
-    abilityScaling = create_ability_scaling([110, 165, 285], [6, 10, 15])
+    # AD: 120/180/310, AP: 10/15/25
+    abilityScaling = create_ability_scaling([120, 180, 310], [10, 15, 25])
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
@@ -1137,8 +1137,8 @@ class Kaisa(Champion):
         self.castTime = 2
         self.notes = ""
 
-    # AD: 39/63/150  AP: 6/9/20
-    abilityScaling = create_ability_scaling([39, 63, 150], [6, 9, 20])
+    # AD: 42/68/150  AP: 6/9/20
+    abilityScaling = create_ability_scaling([42, 68, 150], [6, 9, 20])
 
     # AP: 60, 90, 500
     empoweredAbilityScaling = create_ability_scaling([0, 0, 0], [60, 90, 500], func_name="empoweredAbilityScaling")
@@ -1394,9 +1394,9 @@ class Seraphine(Champion):
         self.musicNotes = 0
         self.notes = ""
 
-    # AP: 35/55/200
+    # AP: 40/60/300
     def abilityScaling(self, level, AD, AP):
-        base_scaling = create_ability_scaling([0, 0, 0], [35, 55, 200])
+        base_scaling = create_ability_scaling([0, 0, 0], [40, 60, 300])
         return base_scaling(None, level, AD, AP) * self.musicNotes
 
     # AP: 270/405/2200
@@ -1553,7 +1553,7 @@ class Yunara(Champion):
         self.buff_duration = 4
         self.num_targets = 2
         self.ultActive = False
-        self.as_ap_scaling = [80, 80, 100]
+        self.as_ap_scaling = [90, 90, 300]
         self.notes = "Blademaster AS is still capped at 5 to simulate how wonky it is at higher AS"
 
     # AD: 80/120/425, AP: 8/12/50
