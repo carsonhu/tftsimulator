@@ -982,8 +982,8 @@ class Vayne(Champion):
         self.castTime = .7
         self.notes = ""
 
-    # AD: 120/180/310, AP: 10/15/25
-    abilityScaling = create_ability_scaling([120, 180, 310], [10, 15, 25])
+    # AD: 110/165/285, AP: 6/10/15
+    abilityScaling = create_ability_scaling([110, 165, 285], [6, 10, 15])
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(
@@ -1137,8 +1137,8 @@ class Kaisa(Champion):
         self.castTime = 2
         self.notes = ""
 
-    # AD: 42/68/150  AP: 6/9/20
-    abilityScaling = create_ability_scaling([42, 68, 150], [6, 9, 20])
+    # AD: 39/63/150  AP: 6/9/20
+    abilityScaling = create_ability_scaling([39, 63, 150], [6, 9, 20])
 
     # AP: 60, 90, 500
     empoweredAbilityScaling = create_ability_scaling([0, 0, 0], [60, 90, 500], func_name="empoweredAbilityScaling")
