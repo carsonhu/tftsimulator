@@ -734,6 +734,7 @@ class Nami(Champion):
         self.default_traits = ["Space Groove", "Replicator"]
         self.castTime = 1.0
         self.range = 4
+        self.notes = "TODO: verify whether groove count starts at cast start or cast end"
 
     abilityScaling = create_ability_scaling(
         [0, 0, 0], [410, 615, 5000], func_name="namiPrimaryScaling"
