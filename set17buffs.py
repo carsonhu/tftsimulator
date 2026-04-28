@@ -68,7 +68,11 @@ augments = [
     "Corrosion",
     "CryMeARiver",
     "WarlordsHonor",
-    "Kahunahuna"
+    "Kahunahuna",
+    "ClockworkAccelerator",
+    "BaronsLair",
+    "PartialAscension",
+    "EarlyLearnings"
 ]
 
 stat_buffs = ["ASBuff"]
@@ -193,7 +197,7 @@ class DarkStar(Buff):
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
         # 2 and 9 do nothing
-        self.scaling = {0: 0, 2: 0, 4: 40, 6: 40, 9: 0}
+        self.scaling = {0: 0, 2: 0, 4: 45, 6: 45, 9: 0}
         self.is_strongest = 0
         self.extraBuff(params)
 
@@ -1620,11 +1624,27 @@ class NoScoutNoPivot(Buff):
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
         self.ad_scaling = 1
-        self.ap_scaling = 1.5
+        self.ap_scaling = 1
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.bonus_ad.addStat(self.ad_scaling * 5 * (champion.stage - 2))
         champion.ap.addStat(self.ap_scaling * 5 * (champion.stage - 2))
+        return 0
+
+
+class EarlyLearnings(Buff):
+    levels = [1]
+    display_name = "Early Learnings (assume 1-cost)"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat"])
+        self.base = 1
+        self.ad_scaling = 2
+        self.ap_scaling = 2
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.bonus_ad.addStat(self.base + self.ad_scaling * 5 * (champion.stage - 2))
+        champion.ap.addStat(self.base + self.ap_scaling * 5 * (champion.stage - 2))
         return 0
 
 
@@ -1816,6 +1836,41 @@ class WarwickUlt(Buff):
         return 0
 
 
+class ClockworkAccelerator(Buff):
+    levels=[1]
+    display_name = "Clockwork Accelerator"
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["onUpdate"])
+        self.asBonus = 9
+        self.nextBonus = 3
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate":
+            if time >= self.nextBonus:
+                self.nextBonus += 3
+                champion.aspd.addStat(self.asBonus)
+        return 0
+
+
+
+class BaronsLair(Buff):
+    levels=[1]
+    display_name = "Baron's Lair"
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["onUpdate"])
+        self.statBonus = 5
+        self.nextBonus = 8
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate":
+            if time >= self.nextBonus:
+                self.nextBonus += 1
+                champion.bonus_ad.addStat(self.statBonus)
+                champion.ap.addStat(self.statBonus)
+        return 0
+
+
+
 class Corrosion(Buff):
     levels = [1]
     display_name = "Corrosion"
@@ -1969,21 +2024,29 @@ class Sniper(Buff):
 
 
 class Timebreaker(Buff):
-    levels = [0, 2, 3, 4]
+    levels = [0, 2, 4]
     display_name = "Timebreaker"
 
     def __init__(self, level, params):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
+        self.is_timebreaker = 1
+        self.extraBuff(params)
+
+    def extraParameters():
+        return {"Title": "Is Timebreaker", "Min": 0, "Max": 1, "Default": 1}
+
+    def extraBuff(self, is_timebreaker):
+        self.is_timebreaker = is_timebreaker
 
     def performAbility(self, phase, time, champion, input_=0):
-        if self.level >= 3:
+        if self.level >= 2:
             champion.aspd.addStat(15)
-            if "Timebreaker" in getattr(champion, 'default_traits', []):
-                if self.level >= 4:
-                    champion.aspd.addStat(50)
+            if self.level >= 4 and self.is_timebreaker:
+                champion.aspd.addStat(40)
         return 0
+
     
 
 class Anima(Buff):
@@ -2015,7 +2078,7 @@ class Challenger(Buff):
         
         # Challenger bonus for challengers
         if "Challenger" in getattr(champion, 'default_traits', []):
-            scaling = {0: 0, 2: 15, 3: 22, 4: 30, 5: 40}
+            scaling = {0: 0, 2: 15, 3: 22, 4: 40, 5: 55}
             if self.level in scaling:
                 bonus_as = scaling[self.level] * 1.25
                 champion.aspd.addStat(bonus_as)
@@ -2304,7 +2367,8 @@ class ArbiterDealDamage(Buff):
                     amt = 4 if self.level == 2 else 6
                     champion.ap.addStat(amt)
                 elif effect == "Gain mana":
-                    pass  # As per instructions: does nothing
+                    amt = 10 if self.level == 2 else 15
+                    champion.addMana(amt, time=None)
         return 0
 
 
@@ -2404,4 +2468,30 @@ class SpaceGroove(Buff):
         
         if self.level >= 3:
             champion.applyStatus(status.TheGrooveStatus(), self, time, 3.0, champion.space_groove_params)
+        return 0
+
+
+class VexUlt(Buff):
+    levels = [1]
+    display_name = "Lend Me a Hand, Shadow!"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat", "onUpdate"])
+        self.buff_5s_applied = False
+        self.buff_10s_applied = False
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            # Combat start bonus: 12 * 6 = 72
+            champion.bonus_ad.addStat(72)
+            champion.ap.addStat(72)
+        elif phase == "onUpdate":
+            if not self.buff_5s_applied and time >= 5.0:
+                champion.bonus_ad.addStat(12)
+                champion.ap.addStat(12)
+                self.buff_5s_applied = True
+            if not self.buff_10s_applied and time >= 10.0:
+                champion.bonus_ad.addStat(12)
+                champion.ap.addStat(12)
+                self.buff_10s_applied = True
         return 0

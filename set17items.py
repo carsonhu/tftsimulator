@@ -32,9 +32,10 @@ offensive_craftables = [
     "VoidStaff",
     "KrakensFury",
     "EdgeOfNight",
+    "SympatheticImplant",
 ]
 
-mana_items = ["Blue", "Shojin", "GuinsoosRageblade", "Nashors", "Adaptive"]
+mana_items = ["Blue", "Shojin", "GuinsoosRageblade", "Nashors", "Adaptive", "SympatheticImplant"]
 
 artifacts = [
     "InfinityForce",
@@ -50,7 +51,9 @@ artifacts = [
     "Dawncore",
     "TitanicHydra",
     "CrownOfDemacia",
-    "CappaJuice"
+    "CappaJuice",
+    "VarussObsession",
+    "SnipersFocus",
 ]
 
 radiants = [
@@ -723,6 +726,24 @@ class Blue(Item):
         champion.bonus_ad.addMultiplier += self.multScaling
 
 
+class SympatheticImplant(Item):
+    display_name = "Sympathetic Implant (no 4 psionic yet)"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name,
+            ap=20,
+            manaRegen=2,
+            phases=["onUpdate"],
+        )
+        self.next_bonus = 5
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time >= self.next_bonus:
+            champion.manaRegen.addStat(1)
+            self.next_bonus += 5
+
+
 ### ARTIFACTS
 
 
@@ -917,6 +938,39 @@ class Dawncore(Item):
                 # we don't want to use mult since we do want it to round.
                 champion.fullMana.addStat(-1 * (champion.fullMana.stat // 10))
 
+
+
+class VarussObsession(Item):
+    display_name = "Varus's Obsession"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name,
+            dmgMultiplier=0.15,
+            phases=["onUpdate"],
+        )
+        self.next_bonus = 1
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time >= self.next_bonus:
+            champion.bonus_ad.addStat(3)
+            champion.ap.addStat(3)
+            self.next_bonus += 1
+
+
+class SnipersFocus(Item):
+    display_name = "Sniper's Focus (4 hex)"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name,
+            ad=20,
+            aspd=20,
+            ap=20,
+            manaRegen=3,
+            dmgMultiplier=0.4,
+            phases=None,
+        )
 
 
 ### RADIANTS

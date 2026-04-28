@@ -215,7 +215,6 @@ def do_experiment_one_extra(
                 if effect == "Gain mana" and cause in [
                     "Combat Start: For each interest you would gain",
                     "Combat start: If you rerolled",
-                    "When an Arbiter deals damage 10 times"
                 ]:
                     continue
                 
