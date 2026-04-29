@@ -39,6 +39,7 @@ all_items = sorted(
     + set17items.artifacts
     + set17items.radiants
     + set17items.emblems
+    + set17items.animas
     + set17items.no_item
 )
 
@@ -206,7 +207,7 @@ with tab1:
 
     display_dps = st.checkbox("Display DPS", value=False)
 
-    options = ["Craftable", "Artifact", "Radiant", "Emblem", "Trait", "Augment/Buff"]
+    options = ["Craftable", "Artifact", "Radiant", "Emblem", "Anima", "Trait", "Augment/Buff"]
     if len([item for item in items if item != "NoItem"]) >= 3:
         options = ["Trait", "Augment/Buff"]
 
@@ -239,6 +240,10 @@ with tab1:
     if radio_value == "Emblem":
         df_flt = df_flt[
             df_flt["Extra class name"].isin(set17items.emblems + ["NoItem"])
+        ]
+    if radio_value == "Anima":
+        df_flt = df_flt[
+            df_flt["Extra class name"].isin(set17items.animas + ["NoItem"])
         ]
     if radio_value == "Trait":
         df_flt = df_flt[

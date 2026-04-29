@@ -1454,7 +1454,7 @@ class MacesWill(Buff):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.aspd.addStat(6)
+        champion.aspd.addStat(8)
         champion.crit.addStat(0.2)
         return 0
 
@@ -2035,7 +2035,7 @@ class Timebreaker(Buff):
         self.extraBuff(params)
 
     def extraParameters():
-        return {"Title": "Is Timebreaker", "Min": 0, "Max": 1, "Default": 1}
+        return {"Title": "Is TB", "Min": 0, "Max": 1, "Default": 1}
 
     def extraBuff(self, is_timebreaker):
         self.is_timebreaker = is_timebreaker
@@ -2207,7 +2207,7 @@ class ArbiterAttack(Buff):
                     amt = 3 if self.level == 2 else 5
                     champion.aspd.addStat(amt)
                 elif effect == "Gain AP":
-                    amt = 6 if self.level == 2 else 9
+                    amt = 5 if self.level == 2 else 8
                     champion.ap.addStat(amt)
                 elif effect == "Gain mana":
                     amt = 7 if self.level == 2 else 10
@@ -2333,14 +2333,13 @@ class ArbiterStarLevel(Buff):
         if phase == "preCombat":
             effect = getattr(champion, "effect", "")
             if effect == "Gain AS":
-                amt = 3 if self.level == 2 else 5
+                amt = 7 if self.level == 2 else 7
                 champion.aspd.addStat(amt * self.star_levels)
             elif effect == "Gain AP":
-                amt = 3 if self.level == 2 else 5
+                amt = 7 if self.level == 2 else 7
                 champion.ap.addStat(amt * self.star_levels)
             elif effect == "Gain mana":
-                amt = 2 if self.level == 2 else 3
-                champion.addMana(amt * self.star_levels, time=None)
+                pass
         return 0
 
 
@@ -2361,10 +2360,10 @@ class ArbiterDealDamage(Buff):
                 self.counter -= 10
                 effect = getattr(champion, "effect", "")
                 if effect == "Gain AS":
-                    amt = 3 if self.level == 2 else 5
+                    amt = 5 if self.level == 2 else 8
                     champion.aspd.addStat(amt)
                 elif effect == "Gain AP":
-                    amt = 4 if self.level == 2 else 6
+                    amt = 7 if self.level == 2 else 10
                     champion.ap.addStat(amt)
                 elif effect == "Gain mana":
                     amt = 10 if self.level == 2 else 15

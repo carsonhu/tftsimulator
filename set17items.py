@@ -80,7 +80,18 @@ radiants = [
     "RadiantGuinsoosRageblade",
 ]
 
-emblems = []
+emblems = ["ArbiterEmblem",
+           "ChallengerEmblem",
+           "DarkStarEmblem",
+           "MarauderEmblem",
+           "MeepleEmblem",
+           "RogueEmblem",
+           "SniperEmblem",
+           "TimebreakerEmblem",
+           "VoyagerEmblem",
+          ]
+
+animas = ["UwUBlaster", "EchoingBatblades", "BattleBunnyCrossbow"]
 
 no_item = ["NoItem"]
 
@@ -93,133 +104,96 @@ class Emblem(Item):
         self.trait = trait
 
 
-class VanquisherEmblem(Emblem):
-    display_name = "Vanquisher Emblem"
+class ArbiterEmblem(Emblem):
+    display_name = "Arbiter Emblem"
 
     def __init__(self):
         super().__init__(
-            self.display_name, trait="Vanquisher", ad=15, ap=15, crit=20, phases=None
+            self.display_name, trait="Arbiter", aspd=20, phases=None
         )
 
 
-class QuickstrikerEmblem(Emblem):
-    display_name = "Quickstriker Emblem"
+class ChallengerEmblem(Emblem):
+    display_name = "Challenger Emblem"
 
     def __init__(self):
         super().__init__(
-            self.display_name, trait="Quickstriker", aspd=25, phases=None
+            self.display_name, trait="Challenger", aspd=30, phases=None
         )
 
 
-class YordleEmblem(Emblem):
-    display_name = "Yordle Emblem"
+class DarkStarEmblem(Emblem):
+    display_name = "Dark Star Emblem"
 
     def __init__(self):
         super().__init__(
-            self.display_name, trait="Yordle", ad=20, ap=20, phases=None
+            self.display_name, trait="DarkStar", ad=18, ap=18, phases=None
         )
 
 
-class LongshotEmblem(Emblem):
-    display_name = "Longshot Emblem"
+class MarauderEmblem(Emblem):
+    display_name = "Marauder Emblem"
 
     def __init__(self):
         super().__init__(
-            self.display_name, trait="Longshot", hp=150, aspd=20, phases=None
+            self.display_name, trait="Marauder", ad=20, phases=None
         )
 
 
-class ZaunEmblem(Emblem):
-    display_name = "Zaun Emblem"
+class RogueEmblem(Emblem):
+    display_name = "Rogue Emblem"
 
     def __init__(self):
         super().__init__(
-            self.display_name, trait="Zaun", hp=350, crit=20, phases=None
+            self.display_name, trait="Rogue", crit=20, dmgMultiplier=.1, phases=None
         )
 
 
-class BilgewaterEmblem(Emblem):
-    display_name = "Bilgewater Emblem"
+class SniperEmblem(Emblem):
+    display_name = "Sniper Emblem"
 
     def __init__(self):
         super().__init__(
-            self.display_name, trait="Bilgewater", ad=10, ap=10, mana=2, phases=None
+            self.display_name, trait="Sniper", aspd=20, phases=None
         )
 
 
-class GunslingerEmblem(Emblem):
-    display_name = "Gunslinger Emblem (no Armor reduce)"
+class TimebreakerEmblem(Emblem):
+    display_name = "Timebreaker Emblem"
 
     def __init__(self):
         super().__init__(
-            self.display_name, trait="Gunslinger", hp=150, ad=20, phases=None
+            self.display_name, trait="Timebreaker", aspd=15, hp=300, phases=None
         )
 
 
-class DemaciaEmblem(Emblem):
-    display_name = "Demacia Emblem"
+class VoyagerEmblem(Emblem):
+    display_name = "Voyager Emblem"
 
     def __init__(self):
         super().__init__(
-            self.display_name, trait="Demacia", manaRegen=3, phases=None
-        )
-
-
-class SlayerEmblem(Emblem):
-    display_name = "Slayer Emblem"
-
-    def __init__(self):
-        super().__init__(
-            self.display_name, trait="Slayer", ad=20, phases=None
-        )
-
-
-class IoniaEmblem(Emblem):
-    display_name = "Ionia Emblem"
-
-    def __init__(self):
-        super().__init__(
-            self.display_name, trait="Ionia", ad=25, ap=25, phases=None
-        )
-
-
-class NoxusEmblem(Emblem):
-    display_name = "Noxus Emblem"
-
-    def __init__(self):
-        super().__init__(
-            self.display_name, trait="Noxus", ad=25, ap=25, phases=None
-        )
-
-
-class ArcanistEmblem(Emblem):
-    display_name = "Arcanist Emblem"
-
-    def __init__(self):
-        super().__init__(
-            self.display_name, trait="Arcanist", ap=25, phases=None
-        )
-
-
-class VoidEmblem(Emblem):
-    display_name = "Void Emblem"
-
-    def __init__(self):
-        super().__init__(
-            self.display_name, trait="Void", ad=10, ap=10, aspd=20, phases=None
-        )
-
-
-class InvokerEmblem(Emblem):
-    display_name = "Invoker Emblem"
-
-    def __init__(self):
-        super().__init__(
-            self.display_name, trait="Invoker", manaRegen=3, phases=["preAbility"]
+            self.display_name, trait="Voyager", ad=20, ap=20, phases=["preCombat"]
         )
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.ap.addStat(0.10 * champion.fullMana.stat)
+        if phase == "preCombat":
+            if champion.role not in [Role.TANK, Role.FIGHTER, Role.ASSASSIN]:
+                champion.aspd.addStat(10)
+
+
+class MeepleEmblem(Emblem):
+    display_name = "Meeple Emblem"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name, trait="Meeple", armor=20, mr=20, manaRegen=2, phases=["postPreCombat"]
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "postPreCombat":
+            meeps = getattr(champion, "meep", 0)
+            if meeps > 0:
+                champion.manaRegen.addStat(meeps)
 
 
 class NoItem(Item):
@@ -798,6 +772,105 @@ class RFC(Item):
         super().__init__(self.display_name, aspd=65, dmgMultiplier=.05,  phases=None)
 
 
+class UwUBlaster(Item):
+    display_name = "UwU Blaster"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name,
+            ad=25,
+            aspd=45,
+            phases=["onAttack"],
+        )
+        self.laser_targets = 3
+        self.laser_ratio = 0.40
+
+    def performAbility(self, phase, time, champion, input_=0):
+        # Will proc on every real autoattack (not spells)
+        if phase == "onAttack":
+            dmg = champion.atk.stat * champion.bonus_ad.stat * self.laser_ratio
+            for opponent in champion.opponents[:self.laser_targets]:
+                champion.doDamage(opponent, [], 0, dmg, dmg, "physical", time)
+
+
+class EchoingBatblades(Item):
+    display_name = "Echoing Batblades"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name,
+            ad=30,
+            aspd=20,
+            phases=["preAttack"],
+        )
+        self.counter = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preAttack":
+            self.counter += 1
+            if self.counter == 3:
+                self.counter = 0
+                dmg = champion.atk.stat * champion.bonus_ad.stat * 0.50
+                champion.doDamage(champion.opponents[0], [], 0, dmg * 10, dmg * 10, "physical", time)
+
+
+class BattleBunnyCrossbow(Item):
+    display_name = "Battle Bunny Crossbow"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name,
+            ad=20,
+            aspd=25,
+            crit=35,
+            phases=["preCombat", "onCrit"],
+        )
+        self.counter = 0
+        self.last_cast_num = -1
+        self.crits_this_cast = 0
+        self.last_attack_num = -1
+        self.crits_this_attack = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.addPrecision()
+        elif phase == "onCrit":
+            is_spell = input_
+            increment = False
+
+            if is_spell:
+                if champion.numCasts != self.last_cast_num:
+                    self.last_cast_num = champion.numCasts
+                    self.crits_this_cast = 0
+                
+                if self.crits_this_cast < 3:
+                    self.crits_this_cast += 1
+                    increment = True
+            else:
+                if champion.numAttacks != self.last_attack_num:
+                    self.last_attack_num = champion.numAttacks
+                    self.crits_this_attack = 0
+                
+                if self.crits_this_attack < 1:
+                    self.crits_this_attack += 1
+                    increment = True
+
+            if increment:
+                self.counter += 1
+                if self.counter >= 4:
+                    self.counter -= 4
+                    dmg = champion.atk.stat * champion.bonus_ad.stat * 0.80
+                    valid_targets = champion.opponents[:1]
+                    if valid_targets:
+                        target = valid_targets[0]
+                        for _ in range(5):
+                            critChance = champion.crit.stat if champion.canSpellCrit else 0
+                            critDmgMult = champion.critDamage() if champion.canSpellCrit else 1
+                            dmg_if_crit = dmg * critDmgMult
+                            champion.doDamage(target, champion.items, critChance, dmg_if_crit, dmg, "physical", time, is_spell=False, source_item=self)
+
+
+
 class Mittens(Item):
     display_name = "Mittens"
 
@@ -852,7 +925,7 @@ class TitanicHydra(Item):
             self.display_name, ad=20, aspd=20, hp=300, phases=["preAttack"]
         )
         self.hp_scaling = 0.04
-        self.ad_scaling = 0.08
+        self.ad_scaling = 0.06
 
     def performAbility(self, phase, time, champion, input_=0):
         dmg = (
@@ -926,7 +999,7 @@ class Dawncore(Item):
 
     def __init__(self):
         super().__init__(
-            self.display_name, ad=15, ap=15, phases=["preCombat", "postAbility"]
+            self.display_name, ad=15, ap=15, manaRegen=2, phases=["preCombat", "postAbility"]
         )
         self.counter = 0
 

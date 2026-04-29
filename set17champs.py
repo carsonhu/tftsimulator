@@ -130,10 +130,10 @@ class Jinx(Champion):
         num_rockets = 16 + int(self.aspd.add / 35.0)
         
         # Fires num_rockets rockets using multiTargetSpell
-        # Counts as 2 attacks (numAttacks=2)
-        # Pass numAttacks=2 to the first rocket call
+        # Counts as 3 attacks (numAttacks=3)
+        # Pass numAttacks=3 to the first rocket call
         for i in range(num_rockets):
-            na = 2 if i == 0 else 0
+            na = 3 if i == 0 else 0
             self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "physical", numAttacks=na)
 
 
@@ -414,7 +414,7 @@ class MasterYi(Champion):
         self.manalockDuration = 6.0 # 5s active + 1s meditation
         self.attack_counter = 0
 
-    passiveScaling = create_ability_scaling([60, 90, 550], [0, 0, 0])
+    passiveScaling = create_ability_scaling([70, 105, 550], [0, 0, 0])
     projectionScaling = create_ability_scaling([50, 75, 600], [20, 30, 200])
 
     def startAttack(self, opponents, items, time):
@@ -572,11 +572,10 @@ class Leblanc(Champion):
         self.activeAttacks = 5
         self.activeAttacksLeft = 0
         self.active = False
-        self.notes = "Deal dmg 10 times -> gain mana is theoretical, need a clip to verify it works how I think it would."
+        self.notes = ""
 
-    # AP: 64/96/400
     def passiveScaling(self, level, baseAD, AD, AP):
-        values = [64, 96, 400]
+        values = [62, 93, 250]
         return values[level - 1] * AP
 
     # AP: 25/25/150%
@@ -602,7 +601,7 @@ class Karma(Champion):
         atk = 40
         curMana = 0
         fullMana = 55
-        aspd = 0.75
+        aspd = 0.8
         armor = 30
         mr = 30
         super().__init__(
@@ -856,6 +855,7 @@ class Bard(Champion):
         self.default_traits = ["Meeple", "Conduit"]
         self.castTime = 4.5
         self.manalockDuration = 4.5
+        self.notes = "30\% bonus dmg to tanks not included"
 
     abilityScaling = create_ability_scaling([0, 0, 0], [220, 330, 3000], func_name="bardAbilityScaling")
     splashScaling = create_ability_scaling([0, 0, 0], [135, 205, 1500], func_name="bardSplashScaling")
@@ -1032,9 +1032,9 @@ class Sona(Champion):
         self.castTime = 1.5
         self.manalockDuration = 0.5
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [260, 390, 999], func_name="sonaAbilityScaling")
+    abilityScaling = create_ability_scaling([0, 0, 0], [280, 420, 999], func_name="sonaAbilityScaling")
     ripScaling = create_ability_scaling([0, 0, 0], [120, 180, 999], func_name="sonaRipScaling")
-    slamScaling = create_ability_scaling([0, 0, 0], [620, 930, 9999], func_name="sonaSlamScaling")
+    slamScaling = create_ability_scaling([0, 0, 0], [680, 1050, 9999], func_name="sonaSlamScaling")
 
     def performAbility(self, opponents, items, time):
         # numCasts is incremented before performAbility is called
@@ -1060,7 +1060,7 @@ class Vex(Champion):
         hp = 900
         atk = 15
         curMana = 0
-        fullMana = 100
+        fullMana = 60
         aspd = 0.80
         armor = 40
         mr = 40
@@ -1121,7 +1121,7 @@ class Milio(Champion):
         hp = 550
         atk = 30
         curMana = 0
-        fullMana = 100
+        fullMana = 30
         aspd = 0.70
         armor = 20
         mr = 20
@@ -1140,6 +1140,7 @@ class Milio(Champion):
         self.default_traits = ["Timebreaker", "Fateweaver"]
         self.castTime = 1.0
         self.bounce_counter = 0.0
+        self.notes = "Without lucky: 1.64 expected bounces, with lucky: 2.16 expected bounces"
 
     abilityScaling = create_ability_scaling([0, 0, 0], [255, 380, 575], func_name="milioAbilityScaling")
     bounceScaling = create_ability_scaling([0, 0, 0], [85, 130, 190], func_name="milioBounceScaling")

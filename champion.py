@@ -391,6 +391,7 @@ class Champion(object):
         dtype,
         time,
         is_spell=False,
+        source_item=None,
     ):
         """Actually doing damage: consider
             average of damage if crit and damage
@@ -413,8 +414,9 @@ class Champion(object):
         self.critCounter += critChance
         if self.critCounter > 1:
             for item in items:
-                # pass whether it's spell for holobow
-                item.ability("onCrit", time, self, is_spell)
+                if item != source_item:
+                    # pass whether it's spell for holobow
+                    item.ability("onCrit", time, self, is_spell)
             self.critCounter -= 1
 
         preDmg = damage
