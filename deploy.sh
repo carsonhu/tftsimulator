@@ -4,9 +4,9 @@ set -e
 cd /root/tftsimulator
 
 # Pull latest code
-git fetch origin
-git checkout main
-git pull origin main
+git fetch origin main
+git checkout -B main origin/main
+git reset --hard origin/main
 
 # Update deps in the venv you use for the app/API
 source fastapi-venv/bin/activate   # or whatever your venv is
