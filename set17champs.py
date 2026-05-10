@@ -384,7 +384,7 @@ class Corki(Champion):
                 self.missile_counter -= 1.0
             
             scaling = self.megaMissileScaling if is_mega else self.standardMissileScaling
-            na = 1 if i < 4 else 0
+            na = 1 if i % 6 == 0 else 0
             self.multiTargetSpell(opponents, items, time, 1, scaling, "physical", numAttacks=na)
 
 
