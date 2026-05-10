@@ -1984,7 +1984,6 @@ class NOVA(Buff):
                 champion.aspd.addStat(20)
             if novas.get("Akali"):
                 champion.addPrecision()
-
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             self.triggered = False
@@ -2493,4 +2492,41 @@ class VexUlt(Buff):
                 champion.bonus_ad.addStat(12)
                 champion.ap.addStat(12)
                 self.buff_10s_applied = True
+        return 0
+
+
+
+class KindredUlt(Buff):
+    levels = [1]
+    display_name = "Kindred Ult"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preAttack", "preAbility"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase in ["preAttack", "preAbility"]:
+            if phase == "preAttack" and not getattr(input_, "regularAuto", True):
+                return input_
+                
+            if hasattr(champion, "add_marks"):
+                champion.add_marks(1, time, champion.items)
+        return input_
+
+
+class CorkiUlt(Buff):
+    levels = [1]
+    display_name = "Asteroid Blaster"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["onUpdate"])
+        self.next_rocket = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.meep > 0:
+            if self.next_rocket == 0:
+                self.next_rocket = time + 8 * (1 - .1 * champion.meep)
+            if self.next_rocket <= time:
+                champion.multiTargetSpell(champion.opponents, champion.items, time, champion.num_targets, champion.meepScaling, "physical")
+                self.next_rocket = time + 8 * (1 - .1 * champion.meep)
+                print("Firing rocket at time {}".format(time))
         return 0
