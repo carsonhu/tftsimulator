@@ -1256,7 +1256,7 @@ class Kahunahuna(Buff):
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["postAttack"])
         self.stacks = 0
-        self.scaling = 1.5
+        self.scaling = 1.25
 
     def performAbility(self, phase, time, champion, input_=0):
         self.stacks += 1
@@ -1297,10 +1297,12 @@ class Retribution(Buff):
             params,
             phases=["preCombat"],
         )
+        self.crit_scaling = .15
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             champion.retribution = True
+            champion.crit.addStat(self.crit_scaling)
         return 0
 
 
@@ -1315,7 +1317,7 @@ class JeweledLotusI(Buff):
             params,
             phases=["preCombat"],
         )
-        self.crit_scaling = 0.2
+        self.crit_scaling = 0.1
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -1454,8 +1456,7 @@ class MacesWill(Buff):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.aspd.addStat(8)
-        champion.crit.addStat(0.2)
+        champion.crit.addStat(0.25)
         return 0
 
 
@@ -2126,7 +2127,7 @@ class Marauder(Buff):
         
         # Marauder bonus for marauders
         if "Marauder" in getattr(champion, 'default_traits', []):
-            ad_scaling = {0: 0, 2: 20, 4: 35, 6: 50}
+            ad_scaling = {0: 0, 2: 18, 4: 35, 6: 55}
             vamp_scaling = {0: 0, 2: 0.05, 4: 0.07, 6: 0.10}
             if self.level in ad_scaling:
                 champion.bonus_ad.addStat(ad_scaling[self.level])
@@ -2332,10 +2333,10 @@ class ArbiterStarLevel(Buff):
         if phase == "preCombat":
             effect = getattr(champion, "effect", "")
             if effect == "Gain AS":
-                amt = 7 if self.level == 2 else 7
+                amt = 7 if self.level == 2 else 8
                 champion.aspd.addStat(amt * self.star_levels)
             elif effect == "Gain AP":
-                amt = 7 if self.level == 2 else 7
+                amt = 7 if self.level == 2 else 8
                 champion.ap.addStat(amt * self.star_levels)
             elif effect == "Gain mana":
                 pass
