@@ -1256,7 +1256,7 @@ class Kahunahuna(Buff):
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["postAttack"])
         self.stacks = 0
-        self.scaling = 1.5
+        self.scaling = 1.25
 
     def performAbility(self, phase, time, champion, input_=0):
         self.stacks += 1
@@ -1297,10 +1297,12 @@ class Retribution(Buff):
             params,
             phases=["preCombat"],
         )
+        self.crit_scaling = .15
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             champion.retribution = True
+            champion.crit.addStat(self.crit_scaling)
         return 0
 
 
@@ -1315,7 +1317,7 @@ class JeweledLotusI(Buff):
             params,
             phases=["preCombat"],
         )
-        self.crit_scaling = 0.2
+        self.crit_scaling = 0.1
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -1454,8 +1456,7 @@ class MacesWill(Buff):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.aspd.addStat(8)
-        champion.crit.addStat(0.2)
+        champion.crit.addStat(0.25)
         return 0
 
 
@@ -1984,7 +1985,6 @@ class NOVA(Buff):
                 champion.aspd.addStat(20)
             if novas.get("Akali"):
                 champion.addPrecision()
-
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             self.triggered = False
@@ -2127,7 +2127,7 @@ class Marauder(Buff):
         
         # Marauder bonus for marauders
         if "Marauder" in getattr(champion, 'default_traits', []):
-            ad_scaling = {0: 0, 2: 20, 4: 35, 6: 50}
+            ad_scaling = {0: 0, 2: 18, 4: 35, 6: 55}
             vamp_scaling = {0: 0, 2: 0.05, 4: 0.07, 6: 0.10}
             if self.level in ad_scaling:
                 champion.bonus_ad.addStat(ad_scaling[self.level])
@@ -2333,10 +2333,10 @@ class ArbiterStarLevel(Buff):
         if phase == "preCombat":
             effect = getattr(champion, "effect", "")
             if effect == "Gain AS":
-                amt = 7 if self.level == 2 else 7
+                amt = 7 if self.level == 2 else 8
                 champion.aspd.addStat(amt * self.star_levels)
             elif effect == "Gain AP":
-                amt = 7 if self.level == 2 else 7
+                amt = 7 if self.level == 2 else 8
                 champion.ap.addStat(amt * self.star_levels)
             elif effect == "Gain mana":
                 pass
@@ -2493,4 +2493,41 @@ class VexUlt(Buff):
                 champion.bonus_ad.addStat(12)
                 champion.ap.addStat(12)
                 self.buff_10s_applied = True
+        return 0
+
+
+
+class KindredUlt(Buff):
+    levels = [1]
+    display_name = "Kindred Ult"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preAttack", "preAbility"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase in ["preAttack", "preAbility"]:
+            if phase == "preAttack" and not getattr(input_, "regularAuto", True):
+                return input_
+                
+            if hasattr(champion, "add_marks"):
+                champion.add_marks(1, time, champion.items)
+        return input_
+
+
+class CorkiUlt(Buff):
+    levels = [1]
+    display_name = "Asteroid Blaster"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["onUpdate"])
+        self.next_rocket = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.meep > 0:
+            if self.next_rocket == 0:
+                self.next_rocket = time + 8 * (1 - .1 * champion.meep)
+            if self.next_rocket <= time:
+                champion.multiTargetSpell(champion.opponents, champion.items, time, champion.num_targets, champion.meepScaling, "physical")
+                self.next_rocket = time + 8 * (1 - .1 * champion.meep)
+                print("Firing rocket at time {}".format(time))
         return 0

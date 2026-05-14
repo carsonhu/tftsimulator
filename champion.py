@@ -85,6 +85,9 @@ class Champion(object):
         # Arbiter
         self.cause = ""
         self.effect = ""
+        
+        # Meep
+        self.meep = 0
 
         # Augments
         self.seraphim = False
@@ -144,6 +147,7 @@ class Champion(object):
             self.luckyAbility,
             self.cause,
             self.effect,
+            self.meep,
         )
         # return stat_tuple
         return items_tuple + stat_tuple

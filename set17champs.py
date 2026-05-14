@@ -12,7 +12,7 @@ import status
 from champion import Champion
 
 champ_list = ["Caitlyn", "Ezreal", "Jinx", "Pyke", "MasterYi", "Kaisa", "MissFortuneConduit", "Viktor", "Corki", "Leblanc", "Lissandra", "Nami",
-             "Karma", "TwistedFate", "Bard", "Veigar", "Sona", "Vex", "Milio"]
+             "Karma", "TwistedFate", "Bard", "Veigar", "Sona", "Vex", "Milio", "Kindred"]
 
 def create_ability_scaling(ad_values, ap_values, func_name="abilityScaling"):
     """
@@ -123,7 +123,7 @@ class Jinx(Champion):
         self.default_traits = ["Anima", "Challenger"]
         self.castTime = 2.0
         self.notes = "Challenger is 1.25x the given value to account for dash"
-    abilityScaling = create_ability_scaling([29, 44, 65], [3, 5, 7])
+    abilityScaling = create_ability_scaling([29, 44, 70], [3, 5, 7])
 
     def performAbility(self, opponents, items, time):
         # Rockets: 15 + 1 per 35% bonus AS
@@ -163,7 +163,7 @@ class Pyke(Champion):
         self.num_targets = 2
         
     harpoonScaling = create_ability_scaling([0, 0, 0], [60, 90, 135])
-    cleaveScaling = create_ability_scaling([240, 360, 720], [0, 0, 0])
+    cleaveScaling = create_ability_scaling([210, 315, 720], [0, 0, 0])
     areaScaling = create_ability_scaling([120, 180, 360], [0, 0, 0])
 
     def performAbility(self, opponents, items, time):
@@ -296,43 +296,43 @@ class UltraFriendlyObjectStatus(status.Status):
         super().update(champion, time)
 
 
-class MeepBonusStatus(status.Status):
-    def __init__(self, name="Meep Bonus", scaling=None):
-        super().__init__(name)
-        self.scaling = scaling
-        self.next_proc = 0
+# class MeepBonusStatus(status.Status):
+#     def __init__(self, name="Meep Bonus", scaling=None):
+#         super().__init__(name)
+#         self.scaling = scaling
+#         self.next_proc = 0
 
-    def applicationEffect(self, champion, time, duration, params):
-        meeps = getattr(champion, "meep", 0)
-        self.interval = 8 * (1 - 0.1 * meeps)
-        self.next_proc = time + self.interval
-        return True
+#     def applicationEffect(self, champion, time, duration, params):
+#         meeps = getattr(champion, "meep", 0)
+#         self.interval = 8 * (1 - 0.1 * meeps)
+#         self.next_proc = time + self.interval
+#         return True
 
-    def reapplicationEffect(self, champion, time, duration, params):
-        meeps = getattr(champion, "meep", 0)
-        self.interval = 8 * (1 - 0.1 * meeps)
-        self.next_proc = time + self.interval
-        return True
+#     def reapplicationEffect(self, champion, time, duration, params):
+#         meeps = getattr(champion, "meep", 0)
+#         self.interval = 8 * (1 - 0.1 * meeps)
+#         self.next_proc = time + self.interval
+#         return True
 
-    def update(self, champion, time):
-        if self.active and time >= self.next_proc:
-            # print(f"DEBUG: Meep Bonus fired at {time}, next_proc was {self.next_proc}, meeps: {getattr(champion, 'meep', 0)}")
-            meeps = getattr(champion, "meep", 0)
-            if meeps > 0 and champion.opponents:
-                # Every 8 seconds (reduced by 10% per meep), launch an Explosive Meep at the target, 
-                # dealing 120/180/900 physical damage in a one hex radius on impact.
-                # Hits primary target and 1 secondary target (num_targets=2)
-                champion.multiTargetSpell(
-                    champion.opponents,
-                    champion.items,
-                    time,
-                    2, 
-                    self.scaling,
-                    "physical"
-                )
-            self.interval = 8 * (1 - 0.1 * meeps)
-            self.next_proc += self.interval
-        super().update(champion, time)
+#     def update(self, champion, time):
+#         if self.active and time >= self.next_proc:
+#             # print(f"DEBUG: Meep Bonus fired at {time}, next_proc was {self.next_proc}, meeps: {getattr(champion, 'meep', 0)}")
+#             meeps = getattr(champion, "meep", 0)
+#             if meeps > 0 and champion.opponents:
+#                 # Every 8 seconds (reduced by 10% per meep), launch an Explosive Meep at the target, 
+#                 # dealing 120/180/900 physical damage in a one hex radius on impact.
+#                 # Hits primary target and 1 secondary target (num_targets=2)
+#                 champion.multiTargetSpell(
+#                     champion.opponents,
+#                     champion.items,
+#                     time,
+#                     2, 
+#                     self.scaling,
+#                     "physical"
+#                 )
+#             self.interval = 8 * (1 - 0.1 * meeps)
+#             self.next_proc += self.interval
+#         super().update(champion, time)
 
 
 class Corki(Champion):
@@ -359,10 +359,9 @@ class Corki(Champion):
         self.default_traits = ["Meeple", "Fateweaver"]
         self.castTime = 4.0
         self.manalockDuration = 3.5
+        self.items.append(buffs.CorkiUlt())
         self.missile_counter = 0
-
-        # Apply Meep Bonus status at start of combat
-        self.applyStatus(MeepBonusStatus(scaling=self.meepScaling), self, 0, 999, 0)
+        self.num_targets = 2
 
     abilityScaling = create_ability_scaling([30, 44, 280], [5, 7, 24], func_name="corkiAbilityScaling")
     standardMissileScaling = abilityScaling
@@ -377,7 +376,7 @@ class Corki(Champion):
             # lucky_chance(0.2) = 1 - 0.8^2 = 0.36
             p = 0.36
             
-        for _ in range(21):
+        for i in range(21):
             is_mega = False
             self.missile_counter += p
             if self.missile_counter >= 1.0:
@@ -385,7 +384,8 @@ class Corki(Champion):
                 self.missile_counter -= 1.0
             
             scaling = self.megaMissileScaling if is_mega else self.standardMissileScaling
-            self.multiTargetSpell(opponents, items, time, 1, scaling, "physical")
+            na = 1 if i % 6 == 0 else 0
+            self.multiTargetSpell(opponents, items, time, 1, scaling, "physical", numAttacks=na)
 
 
 class MasterYi(Champion):
@@ -453,7 +453,7 @@ class Kaisa(Champion):
         self.default_traits = ["Dark Star", "Rogue"]
         self.castTime = 2.0 # 2 second cast time
         
-    abilityScaling = create_ability_scaling([36, 54, 86], [4, 6, 10])
+    abilityScaling = create_ability_scaling([30, 45, 72], [3, 5, 7])
 
     def performAbility(self, opponents, items, time):
         # 16 missiles on primary target
@@ -585,7 +585,7 @@ class Leblanc(Champion):
 
     # AP: 70/105/750
     def boltScaling(self, level, AD, AP):
-        values = [70, 105, 750]
+        values = [80, 120, 750]
         return values[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -623,7 +623,7 @@ class Karma(Champion):
         [0, 0, 0], [570 / 3, 855 / 3, 5000 / 3], func_name="karmaPrimaryScaling"
     )
     secondaryScaling = create_ability_scaling(
-        [0, 0, 0], [120, 180, 1000], func_name="karmaSecondaryScaling"
+        [0, 0, 0], [180, 270, 1000], func_name="karmaSecondaryScaling"
     )
 
     def performAbility(self, opponents, items, time):
@@ -739,7 +739,7 @@ class Nami(Champion):
         self.notes = "TODO: verify whether groove count starts at cast start or cast end"
 
     abilityScaling = create_ability_scaling(
-        [0, 0, 0], [410, 615, 5000], func_name="namiPrimaryScaling"
+        [0, 0, 0], [440, 660, 5000], func_name="namiPrimaryScaling"
     )
     secondaryScaling = create_ability_scaling(
         [0, 0, 0], [110, 165, 1000], func_name="namiSecondaryScaling"
@@ -937,8 +937,8 @@ class TwistedFate(Champion):
         self.notes = "Damage is based on expected dice roll value"
 
     def cardScaling(self, level, bonusAD, AP, roll=5.0):
-        min_vals = [190, 285, 430]
-        max_vals = [380, 570, 860]
+        min_vals = [180, 270, 405]
+        max_vals = [360, 540, 810]
 
         base_min = min_vals[level - 1]
         base_max = max_vals[level - 1]
@@ -997,12 +997,17 @@ class Veigar(Champion):
         for m in range(meeps):
             self.multiTargetSpell(opponents, items, time, 2, self.miniMeepScaling, "magical")
 
-        # 3. Replicator bonus: Duplicates the main cast (not the meep bonus)
+        # 3. Replicator bonus: Duplicates the main cast and meep bonus
         scaling = getattr(self, "replicator_scaling", 0)
         if scaling > 0:
             def scaled_scaling(level, bonusAD, AP):
                 return scaling * self.abilityScaling(level, bonusAD, AP)
             self.multiTargetSpell(opponents, items, time, 1, scaled_scaling, "magical")
+
+            def scaled_meep_scaling(level, bonusAD, AP):
+                return scaling * self.miniMeepScaling(level, bonusAD, AP)
+            for m in range(meeps):
+                self.multiTargetSpell(opponents, items, time, 2, scaled_meep_scaling, "magical")
         
         return 0
 
@@ -1032,9 +1037,9 @@ class Sona(Champion):
         self.castTime = 1.5
         self.manalockDuration = 0.5
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [280, 420, 999], func_name="sonaAbilityScaling")
+    abilityScaling = create_ability_scaling([0, 0, 0], [300, 450, 999], func_name="sonaAbilityScaling")
     ripScaling = create_ability_scaling([0, 0, 0], [120, 180, 999], func_name="sonaRipScaling")
-    slamScaling = create_ability_scaling([0, 0, 0], [680, 1050, 9999], func_name="sonaSlamScaling")
+    slamScaling = create_ability_scaling([0, 0, 0], [720, 1100, 9999], func_name="sonaSlamScaling")
 
     def performAbility(self, opponents, items, time):
         # numCasts is incremented before performAbility is called
@@ -1167,3 +1172,77 @@ class Milio(Champion):
         return 0
 
 
+class Kindred(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 55
+        curMana = 0
+        fullMana = 40
+        aspd = 0.80
+        armor = 30
+        mr = 30
+        super().__init__(
+            "Kindred",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.default_traits = ["NOVA", "Challenger"]
+        self.items.append(buffs.KindredUlt())
+        self.castTime = 0.5
+        self.kindred_marks = 0
+        self.notes = "Kindred's 1st attack after casting doesn't generate mana"
+
+    abilityScaling = create_ability_scaling(
+        [75, 115, 600], [0, 0, 0], func_name="kindredArrowScaling"
+    )
+    
+    wolfScaling = create_ability_scaling(
+        [115, 175, 900], [10, 15, 100], func_name="kindredWolfScaling"
+    )
+
+    def startAttack(self, opponents, items, time):
+        was_manalocked = time < self.manalockTime
+        
+        super().startAttack(opponents, items, time)
+
+        # "special addition for kindred: manalocked until first attack after casting
+        if was_manalocked:
+            self.manalockTime = 0
+
+    def add_marks(self, amount, time, items):
+        if not self.opponents:
+            return
+            
+        self.kindred_marks += amount
+        
+        # Wolf consumes marks (every 3 marks)
+        while self.kindred_marks >= 3:
+            self.kindred_marks -= 3
+            
+            # Wolf deals physical damage to the primary target
+            self.multiTargetSpell(
+                [self.opponents[0]], items, time, 1, self.wolfScaling, "physical"
+            )
+
+    def performAbility(self, opponents, items, time):
+        targets = [3, 3, 5][self.level - 1]
+        
+        # Active: fire arrows at the nearest 3/3/5 targets, dealing physical damage
+        self.multiTargetSpell(
+            opponents,
+            items,
+            time,
+            targets,
+            self.abilityScaling,
+            "physical"
+        )
+        
+        self.manalockDuration = 9999
+        return 0
