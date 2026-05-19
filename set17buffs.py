@@ -2531,3 +2531,44 @@ class CorkiUlt(Buff):
                 self.next_rocket = time + 8 * (1 - .1 * champion.meep)
                 print("Firing rocket at time {}".format(time))
         return 0
+
+
+class GnarUlt(Buff):
+    levels = [1]
+    display_name = "Slingshot Maneuver"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preAbility", "onUpdate"])
+        self.next_meep = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preAbility":
+            for i in range(champion.num_targets):
+                if i < len(champion.opponents):
+                    scaling_factor = 0.25**i
+                    def current_scaling(level, AD, AP, sf=scaling_factor):
+                        return sf * champion.abilityScaling(level, AD, AP)
+                    
+                    champion.multiTargetSpell(
+                        [champion.opponents[i]], champion.items, time, 1, current_scaling, "physical"
+                    )
+        elif phase == "onUpdate":
+            # Deals damage per second if he has meeps
+            if champion.meep > 0:
+                if self.next_meep == 0:
+                    self.next_meep = time + 1.0
+                
+                if time >= self.next_meep:
+                    meeps = champion.meep
+                    
+                    def meep_scaling(level, AD, AP):
+                        # AD here is bonus_ad.stat, AP is ap.stat
+                        return meeps * 0.23 * (champion.atk.stat * AD) * (1 + 0.4 * (champion.aspd.add / 100))
+
+                    if champion.opponents:
+                        champion.multiTargetSpell(
+                            champion.opponents, champion.items, time, 1, meep_scaling, "physical"
+                        )
+                    
+                    self.next_meep += 1.0
+        return input_

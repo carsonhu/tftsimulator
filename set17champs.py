@@ -12,7 +12,7 @@ import status
 from champion import Champion
 
 champ_list = ["Caitlyn", "Ezreal", "Jinx", "Pyke", "MasterYi", "Kaisa", "MissFortuneConduit", "Viktor", "Corki", "Leblanc", "Lissandra", "Nami",
-             "Karma", "TwistedFate", "Bard", "Veigar", "Sona", "Vex", "Milio", "Kindred"]
+             "Karma", "TwistedFate", "Bard", "Veigar", "Sona", "Vex", "Milio", "Kindred", "Gnar", "AurelionSol"]
 
 def create_ability_scaling(ad_values, ap_values, func_name="abilityScaling"):
     """
@@ -1245,4 +1245,134 @@ class Kindred(Champion):
         )
         
         self.manalockDuration = 9999
+        return 0
+
+
+class Gnar(Champion):
+    def __init__(self, level):
+        hp = 550
+        atk = 50
+        curMana = 0
+        fullMana = 5
+        aspd = 0.70
+        armor = 20
+        mr = 20
+        super().__init__(
+            "Gnar",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.default_traits = ["Meeple", "Sniper"]
+        self.castTime = 1.0
+        self.num_targets = 2
+        self.items.append(buffs.GnarUlt())
+        self.notes = "Generates exactly 1 mana per attack"
+
+    abilityScaling = create_ability_scaling(
+        [225, 340, 560], [20, 30, 45], func_name="gnarAbilityScaling"
+    )
+    gnarAbilityScaling = abilityScaling
+
+    def addMana(self, amount, time=None) -> None:
+        pass
+
+    def performAttack(self, opponents, items, time, multiplier=Stat(0, 1, 0), generateMana=True):
+        super().performAttack(opponents, items, time, multiplier, generateMana=False)
+        if self.manalockTime <= time and generateMana == True:
+            self.curMana += 1
+
+    def performAbility(self, opponents, items, time):
+        return 0
+
+
+class DeathbeamStatus(status.Status):
+    def __init__(self, name="Deathbeam", scaling=None, num_targets=2):
+        super().__init__(name)
+        self.scaling = scaling
+        self.num_targets = num_targets
+        self.interval = 1.0
+        self.next_proc = 0
+        self.ticks_remaining = 4
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.next_proc = time
+        self.ticks_remaining = 4
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        self.next_proc = time
+        self.ticks_remaining = 4
+        return True
+
+    def update(self, champion, time):
+        if self.active and self.ticks_remaining > 0 and time >= self.next_proc:
+            if champion.opponents:
+                for i in range(self.num_targets):
+                    if i < len(champion.opponents):
+                        scaling_factor = 0.2**i
+                        def current_scaling(level, AD, AP, sf=scaling_factor):
+                            return sf * self.scaling(level, AD, AP)
+                        
+                        champion.multiTargetSpell(
+                            [champion.opponents[i]], 
+                            champion.items, 
+                            time, 
+                            1, 
+                            current_scaling, 
+                            "magical",
+                            ability_mr_pierce=0.30
+                        )
+            self.ticks_remaining -= 1
+            self.next_proc += self.interval
+        super().update(champion, time)
+
+
+class AurelionSol(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 30
+        curMana = 15
+        fullMana = 75
+        aspd = 0.75
+        armor = 30
+        mr = 30
+        super().__init__(
+            "Aurelion Sol",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.CASTER,
+        )
+        self.default_traits = ["Mecha", "Conduit"]
+        self.castTime = 4.0
+        self.manalockDuration = 3.5
+        self.num_targets = 2
+
+    abilityScaling = create_ability_scaling(
+        [0, 0, 0], [320, 480, 2000], func_name="aurelionsolAbilityScaling"
+    )
+    aurelionsolAbilityScaling = abilityScaling
+
+    def performAbility(self, opponents, items, time):
+        self.applyStatus(
+            DeathbeamStatus(
+                scaling=self.abilityScaling, num_targets=self.num_targets
+            ),
+            self,
+            time,
+            4.0,
+            0,
+        )
         return 0

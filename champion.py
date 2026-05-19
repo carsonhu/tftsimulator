@@ -396,6 +396,8 @@ class Champion(object):
         time,
         is_spell=False,
         source_item=None,
+        ability_armor_pierce=0,
+        ability_mr_pierce=0,
     ):
         """Actually doing damage: consider
             average of damage if crit and damage
@@ -435,7 +437,7 @@ class Champion(object):
             for item in items:
                 avgDmg = item.ability("onDealSpellDamage", time, self, avgDmg)
 
-        avgDmg = self.damage(avgDmg, dtype, opponent)
+        avgDmg = self.damage(avgDmg, dtype, opponent, ability_armor_pierce, ability_mr_pierce)
         self.dmgDealt += avgDmg[0]
         for item in items:
             # if you need to track how much dmg was actually dealt
@@ -461,6 +463,8 @@ class Champion(object):
         scaling,
         type="magical",
         numAttacks=0,
+        ability_armor_pierce=0,
+        ability_mr_pierce=0,
     ):
         """Cast a damage-dealing spell
 
@@ -501,13 +505,15 @@ class Champion(object):
                 type,
                 time,
                 is_spell=True,
+                ability_armor_pierce=ability_armor_pierce,
+                ability_mr_pierce=ability_mr_pierce,
             )
 
         for attacks in range(numAttacks):
             for item in items:
                 item.ability("postAttack", time, self)
 
-    def damage(self, dmg, dtype, defender):
+    def damage(self, dmg, dtype, defender, ability_armor_pierce=0, ability_mr_pierce=0):
         """deal dmg, dmg is premitigated
 
         Args:
@@ -516,9 +522,11 @@ class Champion(object):
             defender (Champion): recipient
         """
         if dtype == "physical":
-            defense = defender.armor.stat * (1 - self.armorPierce.stat)
+            total_pierce = self.armorPierce.stat + ability_armor_pierce - self.armorPierce.stat * ability_armor_pierce
+            defense = defender.armor.stat * (1 - total_pierce)
         elif dtype == "magical":
-            defense = defender.mr.stat * (1 - self.mrPierce.stat)
+            total_pierce = self.mrPierce.stat + ability_mr_pierce - self.mrPierce.stat * ability_mr_pierce
+            defense = defender.mr.stat * (1 - total_pierce)
         elif dtype == "true":
             defense = 0
 
