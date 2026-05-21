@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -e
 
+# Move into the deployment directory
 cd /root/tftsimulator
 
-# Pull latest code
+# Cleanly sync with GitHub, forcing local files to mirror origin/main exactly
 git fetch origin main
-git checkout -B main origin/main
 git reset --hard origin/main
 
-# Update deps in the venv you use for the app/API
-source fastapi-venv/bin/activate   # or whatever your venv is
+# Activate the virtual environment and sync dependencies
+source fastapi-venv/bin/activate
 pip install -r requirements.txt
 
-# Restart services
-systemctl restart fastapi
-systemctl restart streamlit
+# Restart systemd services (using sudo to guarantee it doesn't hang or fail)
+sudo systemctl restart fastapi
+sudo systemctl restart streamlit
