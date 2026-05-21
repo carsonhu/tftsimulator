@@ -25,5 +25,5 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no $USER@$HOST 'bash -s' << "EOF"
           set -e
-          /root/tftsimulator/deploy.sh
+          bash /root/tftsimulator/deploy.sh
           EOF
