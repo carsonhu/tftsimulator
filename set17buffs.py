@@ -38,7 +38,7 @@ class_buffs = [
     "Arbiter",
     "Shepherd",
     "Replicator",
-    "SpaceGroove"
+    "SpaceGroove",
 ]
 
 augments = [
@@ -72,7 +72,7 @@ augments = [
     "ClockworkAccelerator",
     "BaronsLair",
     "PartialAscension",
-    "EarlyLearnings"
+    "EarlyLearnings",
 ]
 
 stat_buffs = ["ASBuff"]
@@ -202,7 +202,7 @@ class DarkStar(Buff):
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
-        multiplier = 1.85 if (self.level == 6 and self.is_strongest) else 1
+        multiplier = 1.7 if (self.level == 6 and self.is_strongest) else 1
         amt_to_add = self.scaling[self.level] * multiplier
         champion.bonus_ad.addStat(amt_to_add)
         champion.ap.addStat(amt_to_add)
@@ -579,7 +579,9 @@ class IoniaEnlightened(Buff):
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
-        amt_to_add = self.scaling[self.level] + self.lvl_scaling[self.level] * champion.level
+        amt_to_add = (
+            self.scaling[self.level] + self.lvl_scaling[self.level] * champion.level
+        )
         champion.bonus_ad.addStat(amt_to_add)
         champion.ap.addStat(amt_to_add)
         return 0
@@ -607,7 +609,7 @@ class IoniaProsperous(Buff):
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
-        amt_to_add = self.scaling[self.level] * (1 + self.gold *.02)
+        amt_to_add = self.scaling[self.level] * (1 + self.gold * 0.02)
         champion.bonus_ad.addStat(amt_to_add)
         champion.ap.addStat(amt_to_add)
         return 0
@@ -618,7 +620,7 @@ class IoniaProsperous(Buff):
 
     def extraBuff(self, gold):
         self.gold = gold
-     
+
 
 class IoniaBlades(Buff):
     levels = [0, 3, 5, 7]
@@ -626,13 +628,15 @@ class IoniaBlades(Buff):
 
     def __init__(self, level, params):
         super().__init__(
-            f"{self.display_name} {level}", level, params, phases=["preCombat", "postAttack"]
+            f"{self.display_name} {level}",
+            level,
+            params,
+            phases=["preCombat", "postAttack"],
         )
         self.scaling = {3: 15, 5: 25, 7: 50}
-        self.blade_scaling = {0: 0, 3: .3, 5: .38, 7: .45}
+        self.blade_scaling = {0: 0, 3: 0.3, 5: 0.38, 7: 0.45}
         self.bmActive = False
         self.bmAutoCount = 0
-
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -814,7 +818,6 @@ class RumbleUlt(Buff):
                     "magical",
                 )
                 self.next_missile = time + 1 / missiles
-            
 
 
 class ZoeUlt(Buff):
@@ -1297,7 +1300,7 @@ class Retribution(Buff):
             params,
             phases=["preCombat"],
         )
-        self.crit_scaling = .15
+        self.crit_scaling = 0.15
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -1644,7 +1647,9 @@ class EarlyLearnings(Buff):
         self.ap_scaling = 2
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.bonus_ad.addStat(self.base + self.ad_scaling * 5 * (champion.stage - 2))
+        champion.bonus_ad.addStat(
+            self.base + self.ad_scaling * 5 * (champion.stage - 2)
+        )
         champion.ap.addStat(self.base + self.ap_scaling * 5 * (champion.stage - 2))
         return 0
 
@@ -1750,7 +1755,6 @@ class FocusedFire(Buff):
         return 0
 
 
-
 class Shred30(Buff):
     levels = [1]
     display_name = "30% Armor/MR Shred"
@@ -1832,14 +1836,15 @@ class WarwickUlt(Buff):
                     time,
                     1,
                     champion.bonusAbilityScaling,
-                    "physical"
+                    "physical",
                 )
         return 0
 
 
 class ClockworkAccelerator(Buff):
-    levels=[1]
+    levels = [1]
     display_name = "Clockwork Accelerator"
+
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
         self.asBonus = 9
@@ -1853,10 +1858,10 @@ class ClockworkAccelerator(Buff):
         return 0
 
 
-
 class BaronsLair(Buff):
-    levels=[1]
+    levels = [1]
     display_name = "Baron's Lair"
+
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
         self.statBonus = 5
@@ -1871,15 +1876,12 @@ class BaronsLair(Buff):
         return 0
 
 
-
 class Corrosion(Buff):
     levels = [1]
     display_name = "Corrosion"
 
     def __init__(self, level=1, params=0):
-        super().__init__(
-            self.display_name, level, params, phases=["preCombat"]
-        )
+        super().__init__(self.display_name, level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -1920,7 +1922,9 @@ class CaitlynUlt(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preAttack" and input_.regularAuto:
             p = 0.15
-            increment = lucky_chance(p) if getattr(champion, "luckyAbility", False) else p
+            increment = (
+                lucky_chance(p) if getattr(champion, "luckyAbility", False) else p
+            )
             self.counter += increment
             if self.counter > 0.9999:
                 input_.scaling = ChampionAbilityScaling(champion)
@@ -1946,17 +1950,17 @@ class Fateweaver(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         # Innate: Fateweavers have Precision.
         champion.addPrecision()
-        
+
         # (2) Chance effects on abilities are Lucky.
         if self.level >= 2:
             champion.luckyAbility = True
-            
+
         # (4) Gain 20% Crit Chance and 20% Crit Damage. Critical strikes are also Lucky.
         if self.level >= 4:
             champion.luckyCrit = True
             champion.crit.addStat(0.20)
             champion.critDmg.addStat(0.20)
-            
+
         return 0
 
 
@@ -1966,7 +1970,10 @@ class NOVA(Buff):
 
     def __init__(self, level, params):
         super().__init__(
-            f"{self.display_name} {level}", level, params, phases=["preCombat", "onUpdate"]
+            f"{self.display_name} {level}",
+            level,
+            params,
+            phases=["preCombat", "onUpdate"],
         )
 
     def ability(self, phase, time, champion, input_=0):
@@ -1985,6 +1992,7 @@ class NOVA(Buff):
                 champion.aspd.addStat(20)
             if novas.get("Akali"):
                 champion.addPrecision()
+
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             self.triggered = False
@@ -2047,7 +2055,6 @@ class Timebreaker(Buff):
                 champion.aspd.addStat(40)
         return 0
 
-    
 
 class Anima(Buff):
     levels = [0, 3, 6]
@@ -2075,10 +2082,10 @@ class Challenger(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         # Global 10% AS
         champion.aspd.addStat(10)
-        
+
         # Challenger bonus for challengers
-        if "Challenger" in getattr(champion, 'default_traits', []):
-            scaling = {0: 0, 2: 15, 3: 22, 4: 40, 5: 55}
+        if "Challenger" in getattr(champion, "default_traits", []):
+            scaling = {0: 0, 2: 15, 3: 28, 4: 42, 5: 55}
             if self.level in scaling:
                 bonus_as = scaling[self.level] * 1.25
                 champion.aspd.addStat(bonus_as)
@@ -2124,9 +2131,9 @@ class Marauder(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         # Global 5% AS
         champion.omnivamp.addStat(0.05)
-        
+
         # Marauder bonus for marauders
-        if "Marauder" in getattr(champion, 'default_traits', []):
+        if "Marauder" in getattr(champion, "default_traits", []):
             ad_scaling = {0: 0, 2: 18, 4: 35, 6: 55}
             vamp_scaling = {0: 0, 2: 0.05, 4: 0.07, 6: 0.10}
             if self.level in ad_scaling:
@@ -2183,8 +2190,6 @@ class Arbiter(Buff):
                 champion.items.append(ArbiterManaSpent(self.level, self.params))
             elif champion.cause == "Combat Start: For each Arbiter star level":
                 champion.items.append(ArbiterStarLevel(self.level, self.params))
-            elif champion.cause == "When an Arbiter deals damage 10 times":
-                champion.items.append(ArbiterDealDamage(self.level, self.params))
         return 0
 
 
@@ -2204,14 +2209,11 @@ class ArbiterAttack(Buff):
             if self.attack_counter % 3 == 0:
                 effect = getattr(champion, "effect", "")
                 if effect == "Gain AS":
-                    amt = 3 if self.level == 2 else 5
+                    amt = 4 if self.level == 2 else 6
                     champion.aspd.addStat(amt)
                 elif effect == "Gain AP":
-                    amt = 5 if self.level == 2 else 8
+                    amt = 6 if self.level == 2 else 9
                     champion.ap.addStat(amt)
-                elif effect == "Gain mana":
-                    amt = 7 if self.level == 2 else 10
-                    champion.addMana(amt, time=None)
         return 0
 
 
@@ -2232,14 +2234,11 @@ class ArbiterPeriodic(Buff):
                 self.next_trigger += self.interval
                 effect = getattr(champion, "effect", "")
                 if effect == "Gain AS":
-                    amt = 11 if self.level == 2 else 17
+                    amt = 14 if self.level == 2 else 20
                     champion.aspd.addStat(amt)
                 elif effect == "Gain AP":
                     amt = 10 if self.level == 2 else 15
                     champion.ap.addStat(amt)
-                elif effect == "Gain mana":
-                    amt = 8 if self.level == 2 else 12
-                    champion.addMana(amt, time=None)
         return 0
 
 
@@ -2262,8 +2261,6 @@ class ArbiterInterest(Buff):
             elif effect == "Gain AP":
                 amt = 8 if self.level == 2 else 12
                 champion.ap.addStat(amt * multiplier)
-            elif effect == "Gain mana":
-                pass  # As per instructions: does nothing for mana
         return 0
 
 
@@ -2280,13 +2277,11 @@ class ArbiterReroll(Buff):
         if phase == "preCombat":
             effect = getattr(champion, "effect", "")
             if effect == "Gain AS":
-                amt = 30 if self.level == 2 else 45
+                amt = 35 if self.level == 2 else 55
                 champion.aspd.addStat(amt)
             elif effect == "Gain AP":
-                amt = 30 if self.level == 2 else 45
+                amt = 25 if self.level == 2 else 40
                 champion.ap.addStat(amt)
-            elif effect == "Gain mana":
-                pass  # As per instructions: does nothing for mana
         return 0
 
 
@@ -2313,9 +2308,6 @@ class ArbiterManaSpent(Buff):
                     elif effect == "Gain AP":
                         amt = 16 if self.level == 2 else 24
                         champion.ap.addStat(amt)
-                    elif effect == "Gain mana":
-                        amt = 10 if self.level == 2 else 15
-                        champion.addMana(amt, time=None)
         return 0
 
 
@@ -2333,41 +2325,11 @@ class ArbiterStarLevel(Buff):
         if phase == "preCombat":
             effect = getattr(champion, "effect", "")
             if effect == "Gain AS":
-                amt = 7 if self.level == 2 else 8
+                amt = 8 if self.level == 2 else 9
                 champion.aspd.addStat(amt * self.star_levels)
             elif effect == "Gain AP":
                 amt = 7 if self.level == 2 else 8
                 champion.ap.addStat(amt * self.star_levels)
-            elif effect == "Gain mana":
-                pass
-        return 0
-
-
-class ArbiterDealDamage(Buff):
-    levels = [2, 3]
-    display_name = "Arbiter (Deal Damage)"
-
-    def __init__(self, level, params):
-        super().__init__(
-            f"{self.display_name} {level}", level, params, phases=["PostOnDealDamage"]
-        )
-        self.counter = 0
-
-    def performAbility(self, phase, time, champion, input_=0):
-        if phase == "PostOnDealDamage":
-            self.counter += 1
-            if self.counter >= 10:
-                self.counter -= 10
-                effect = getattr(champion, "effect", "")
-                if effect == "Gain AS":
-                    amt = 5 if self.level == 2 else 8
-                    champion.aspd.addStat(amt)
-                elif effect == "Gain AP":
-                    amt = 7 if self.level == 2 else 10
-                    champion.ap.addStat(amt)
-                elif effect == "Gain mana":
-                    amt = 10 if self.level == 2 else 15
-                    champion.addMana(amt, time=None)
         return 0
 
 
@@ -2417,12 +2379,14 @@ class LeblancUlt(Buff):
             # Passive: Magic damage attacks
             input_.attackType = "magical"
             input_.scaling = champion.passiveScaling
-            
+
             if champion.active:
                 # 5 clone attacks
-                use_bolt = (champion.activeAttacksLeft == 1)
-                scaling_func = champion.boltScaling if use_bolt else champion.cloneScaling
-                
+                use_bolt = champion.activeAttacksLeft == 1
+                scaling_func = (
+                    champion.boltScaling if use_bolt else champion.cloneScaling
+                )
+
                 for _ in range(5):
                     champion.multiTargetSpell(
                         champion.opponents,
@@ -2430,15 +2394,14 @@ class LeblancUlt(Buff):
                         time,
                         1,
                         scaling_func,
-                        "magical"
+                        "magical",
                     )
-                
+
                 champion.activeAttacksLeft -= 1
                 if champion.activeAttacksLeft == 0:
                     champion.active = False
                     champion.manalockTime = time + 0.01
         return 0
-
 
 
 class SpaceGroove(Buff):
@@ -2455,18 +2418,20 @@ class SpaceGroove(Buff):
         # Base AS is 12 per groovian (based on trait level)
         as_bonus = 12 * self.num_groovians
         ad_ap_tick = 0
-        
+
         if self.level >= 5:
             ad_ap_tick = 5.0
-        
+
         if self.level >= 7:
             as_bonus = as_bonus * 1.1
             ad_ap_tick = 5.5
-            
+
         champion.space_groove_params = {"as_bonus": as_bonus, "ad_ap_tick": ad_ap_tick}
-        
+
         if self.level >= 3:
-            champion.applyStatus(status.TheGrooveStatus(), self, time, 3.0, champion.space_groove_params)
+            champion.applyStatus(
+                status.TheGrooveStatus(), self, time, 3.0, champion.space_groove_params
+            )
         return 0
 
 
@@ -2475,7 +2440,9 @@ class VexUlt(Buff):
     display_name = "Lend Me a Hand, Shadow!"
 
     def __init__(self, level=1, params=0):
-        super().__init__(self.display_name, level, params, phases=["preCombat", "onUpdate"])
+        super().__init__(
+            self.display_name, level, params, phases=["preCombat", "onUpdate"]
+        )
         self.buff_5s_applied = False
         self.buff_10s_applied = False
 
@@ -2496,19 +2463,62 @@ class VexUlt(Buff):
         return 0
 
 
+class XayahUlt(Buff):
+    levels = [1]
+    display_name = "Stellar Ricochet"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preAttack"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preAttack" and getattr(input_, "regularAuto", True):
+            champion.feathers = getattr(champion, "feathers", 0) + 1
+
+            for target_idx, mult in ((1, 0.6), (2, 0.36)):
+                if len(champion.opponents) > target_idx:
+                    base = (
+                        champion.atk.stat
+                        * champion.bonus_ad.stat
+                        * mult
+                        * champion.dmgMultiplier.stat
+                        * champion.extraDmgMultiplier.stat
+                    )
+                    champion.doDamage(
+                        champion.opponents[target_idx],
+                        champion.items,
+                        champion.crit.stat,
+                        base * champion.critDamage(),
+                        base,
+                        "physical",
+                        time,
+                    )
+
+            ult_left = getattr(champion, "ultAttacksLeft", 0)
+            if ult_left > 0:
+                champion.ultAttacksLeft = ult_left - 1
+                if champion.ultAttacksLeft == 0:
+                    champion.doFeatherRecall(time)
+                    champion.aspd.addStat(-75)
+                    champion.manalockTime = time + 0.01
+                    champion.manalockDuration = champion.castTime
+
+        return input_
+
 
 class KindredUlt(Buff):
     levels = [1]
     display_name = "Kindred Ult"
 
     def __init__(self, level=1, params=0):
-        super().__init__(self.display_name, level, params, phases=["preAttack", "preAbility"])
+        super().__init__(
+            self.display_name, level, params, phases=["preAttack", "preAbility"]
+        )
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase in ["preAttack", "preAbility"]:
             if phase == "preAttack" and not getattr(input_, "regularAuto", True):
                 return input_
-                
+
             if hasattr(champion, "add_marks"):
                 champion.add_marks(1, time, champion.items)
         return input_
@@ -2525,10 +2535,17 @@ class CorkiUlt(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         if champion.meep > 0:
             if self.next_rocket == 0:
-                self.next_rocket = time + 8 * (1 - .1 * champion.meep)
+                self.next_rocket = time + 8 * (1 - 0.1 * champion.meep)
             if self.next_rocket <= time:
-                champion.multiTargetSpell(champion.opponents, champion.items, time, champion.num_targets, champion.meepScaling, "physical")
-                self.next_rocket = time + 8 * (1 - .1 * champion.meep)
+                champion.multiTargetSpell(
+                    champion.opponents,
+                    champion.items,
+                    time,
+                    champion.num_targets,
+                    champion.meepScaling,
+                    "physical",
+                )
+                self.next_rocket = time + 8 * (1 - 0.1 * champion.meep)
                 print("Firing rocket at time {}".format(time))
         return 0
 
@@ -2538,7 +2555,9 @@ class GnarUlt(Buff):
     display_name = "Slingshot Maneuver"
 
     def __init__(self, level=1, params=0):
-        super().__init__(self.display_name, level, params, phases=["preAbility", "onUpdate"])
+        super().__init__(
+            self.display_name, level, params, phases=["preAbility", "onUpdate"]
+        )
         self.next_meep = 0
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -2546,29 +2565,45 @@ class GnarUlt(Buff):
             for i in range(champion.num_targets):
                 if i < len(champion.opponents):
                     scaling_factor = 0.25**i
+
                     def current_scaling(level, AD, AP, sf=scaling_factor):
                         return sf * champion.abilityScaling(level, AD, AP)
-                    
+
                     champion.multiTargetSpell(
-                        [champion.opponents[i]], champion.items, time, 1, current_scaling, "physical"
+                        [champion.opponents[i]],
+                        champion.items,
+                        time,
+                        1,
+                        current_scaling,
+                        "physical",
                     )
         elif phase == "onUpdate":
             # Deals damage per second if he has meeps
             if champion.meep > 0:
                 if self.next_meep == 0:
                     self.next_meep = time + 1.0
-                
+
                 if time >= self.next_meep:
                     meeps = champion.meep
-                    
+
                     def meep_scaling(level, AD, AP):
                         # AD here is bonus_ad.stat, AP is ap.stat
-                        return meeps * 0.23 * (champion.atk.stat * AD) * (1 + 0.4 * (champion.aspd.add / 100))
+                        return (
+                            meeps
+                            * 0.23
+                            * (champion.atk.stat * AD)
+                            * (1 + 0.4 * (champion.aspd.add / 100))
+                        )
 
                     if champion.opponents:
                         champion.multiTargetSpell(
-                            champion.opponents, champion.items, time, 1, meep_scaling, "physical"
+                            champion.opponents,
+                            champion.items,
+                            time,
+                            1,
+                            meep_scaling,
+                            "physical",
                         )
-                    
+
                     self.next_meep += 1.0
-        return input_
+        return input_
