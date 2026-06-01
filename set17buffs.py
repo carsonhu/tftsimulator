@@ -1357,8 +1357,8 @@ class HoldTheLine5(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
-        self.ad_scaling = 9
-        self.ap_scaling = 10
+        self.ad_scaling = 8
+        self.ap_scaling = 9
         self.frontliners = 5
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -1373,8 +1373,8 @@ class HoldTheLine7(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
-        self.ad_scaling = 9
-        self.ap_scaling = 10
+        self.ad_scaling = 8
+        self.ap_scaling = 9
         self.frontliners = 7
 
     def performAbility(self, phase, time, champion, input_=0):

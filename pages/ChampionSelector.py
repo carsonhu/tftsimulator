@@ -259,7 +259,7 @@ with tab1:
         # And any row that doesn't have an "Extra class name" (which our custom Buffs won't)
         # Actually, createSelectorDPSTable sets "Extra" to the name.
         df_flt = df_flt[
-            (df_flt["Extra"].str.contains(" | ", regex=False)) | (df_flt["Extra"] == "Other") | (df_flt["Extra"] == "NoItem")
+            ((df_flt["Extra"].str.contains(" | ", regex=False)) & ~df_flt["Extra"].str.endswith("Gain mana") & ~df_flt["Extra"].str.startswith("Deal Damage 10 times")) | (df_flt["Extra"] == "Other") | (df_flt["Extra"] == "NoItem")
         ]
     if radio_value == "NOVA":
         df_flt = df_flt[

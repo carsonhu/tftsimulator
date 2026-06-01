@@ -19,6 +19,7 @@ champ_list = [
     "MasterYi",
     "Kaisa",
     "MissFortuneConduit",
+    "MissFortuneChallenger",
     "Viktor",
     "Corki",
     "Leblanc",
@@ -571,6 +572,55 @@ class MissFortuneConduit(Champion):
             return burst_multiplier * self.abilityScaling(level, bonusAD, AP)
 
         self.multiTargetSpell(opponents, items, time, 2, burst_scaling, "physical")
+
+
+class MissFortuneChallenger(Champion):
+    def __init__(self, level):
+        hp = 650
+        atk = 50
+        curMana = 0
+        fullMana = 30
+        aspd = 0.75
+        armor = 30
+        mr = 30
+        super().__init__(
+            "Miss Fortune",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MARKSMAN,
+        )
+        self.default_traits = ["Challenger"]
+        self.castTime = 0.5
+        self.marked_bonus_active = False  # every other cast deals 50% more
+        self.notes = "Every other cast deals 50% more damage."
+
+    # Base damage to primary target: [130, 195, 315] AD + [12, 18, 30] AP
+    abilityScaling = create_ability_scaling([130, 195, 315], [12, 18, 30])
+
+    def performAbility(self, opponents, items, time):
+        self.marked_bonus_active = not self.marked_bonus_active
+        multiplier = 1.5 if self.marked_bonus_active else 1.0
+
+        def primary_scaling(level, bonusAD, AP):
+            return multiplier * self.abilityScaling(level, bonusAD, AP)
+
+        def secondary_scaling(level, bonusAD, AP):
+            return 0.35 * primary_scaling(level, bonusAD, AP)
+
+        # Primary target
+        self.multiTargetSpell(opponents, items, time, 1, primary_scaling, "physical")
+
+        # Ricochet to one secondary target at 35% of the primary damage
+        if len(opponents) > 1:
+            self.multiTargetSpell(
+                opponents[1:], items, time, 1, secondary_scaling, "physical"
+            )
 
 
 class Viktor(Champion):
