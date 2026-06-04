@@ -29,7 +29,7 @@ with st.sidebar:
     # Role
     role = st.selectbox(
             'Role',
-             [Role.CASTER.value, Role.MARKSMAN.value], key="rolez", index=0)
+             [Role.MAGIC_CASTER.value, Role.MAGIC_MARKSMAN.value], key="rolez", index=0)
     
     castTime = st.number_input("Cast Time", min_value=0.0, max_value=3.0, value=0.5, key="casts")
 

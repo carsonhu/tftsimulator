@@ -1,5 +1,4 @@
 from item import Item
-from role import Role
 
 import status
 
@@ -175,7 +174,7 @@ class VoyagerEmblem(Emblem):
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
-            if champion.role not in [Role.TANK, Role.FIGHTER, Role.ASSASSIN]:
+            if champion.role.archetype not in ["Tank", "Fighter", "Assassin"]:
                 champion.aspd.addStat(10)
 
 
@@ -650,7 +649,7 @@ class GS(Item):
         self.giant_amp = 0.15
 
     def is_giant(self, target):
-        return target.role == Role.TANK
+        return target.role.archetype == "Tank"
 
     def performAbility(self, phase, time, champion, input_):
         # input_ is target
@@ -720,7 +719,7 @@ class SympatheticImplant(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         if time >= self.next_bonus:
-            if champion.role == Role.CASTER:
+            if champion.role.is_magic:
                 champion.manaRegen.addStat(1)
             else:
                 champion.aspd.addStat(15)
@@ -1199,7 +1198,7 @@ class RadiantGS(GS):
         self.giant_amp = 0.3
 
     def is_giant(self, target):
-        return target.role == Role.TANK
+        return target.role.archetype == "Tank"
 
 
 class RadiantRabadons(Rabadons):

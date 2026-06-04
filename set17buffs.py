@@ -5,9 +5,9 @@ from collections import deque
 from item import Item
 from role import Role
 from stats import Attack, JhinBonusAD
+from utils import lucky_chance
 
 import status
-from utils import lucky_chance
 
 
 def get_classes_from_file(file_path):
@@ -39,6 +39,9 @@ class_buffs = [
     "Shepherd",
     "Replicator",
     "SpaceGroove",
+    "StargazerHuntress",
+    "StargazerMedallion",
+    "StargazerFountain",
 ]
 
 augments = [
@@ -470,17 +473,18 @@ class HexMech(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.pilot:
-            if champion.pilot == Role.FIGHTER:
+            archetype = champion.pilot.archetype
+            if archetype == "Fighter":
                 champion.bonus_ad.addStat(self.adScaling[self.pilot_star_level - 1])
-            elif champion.pilot == Role.MARKSMAN:
+            elif archetype == "Marksman":
                 champion.dmgMultiplier.addStat(
                     self.dmgAmpScaling[self.pilot_star_level - 1]
                 )
-            elif champion.pilot == Role.CASTER:
+            elif archetype == "Caster":
                 champion.manaRegen.addStat(
                     self.manaRegenScaling[self.pilot_star_level - 1]
                 )
-            elif champion.pilot == Role.ASSASSIN:
+            elif archetype == "Assassin":
                 champion.crit.addStat(self.critScaling[self.pilot_star_level - 1])
         return 0
 
@@ -969,7 +973,7 @@ class KaisaUlt(Buff):
                 champion.manaRegen.addStat(-2)
                 champion.manaPerAttack.addStat(3)
                 champion.manalockDuration = 5
-                champion.role = Role.MARKSMAN
+                champion.role = Role.ATTACK_MARKSMAN
                 champion.castTime = 0
                 champion.curMana = 10  # need to change curmana to be a stat
                 champion.fullMana.base = 30
@@ -2111,7 +2115,7 @@ class Voyager(Buff):
         self.is_voyager = is_voyager
 
     def performAbility(self, phase, time, champion, input_=0):
-        if champion.role not in [Role.TANK, Role.FIGHTER]:
+        if champion.role.archetype not in ["Tank", "Fighter"]:
             bonus = self.scaling.get(self.level, 0)
             if self.is_voyager:
                 bonus *= 2
@@ -2423,8 +2427,8 @@ class SpaceGroove(Buff):
             ad_ap_tick = 5.0
 
         if self.level >= 7:
-            as_bonus = as_bonus * 1.1
-            ad_ap_tick = 5.5
+            as_bonus = as_bonus * 1.15
+            ad_ap_tick = ad_ap_tick * 1.15
 
         champion.space_groove_params = {"as_bonus": as_bonus, "ad_ap_tick": ad_ap_tick}
 
@@ -2432,6 +2436,74 @@ class SpaceGroove(Buff):
             champion.applyStatus(
                 status.TheGrooveStatus(), self, time, 3.0, champion.space_groove_params
             )
+        return 0
+
+
+class StargazerHuntress(Buff):
+    levels = [0, 3, 5, 7]
+    display_name = "Stargazer (Huntress)"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+        )
+        self.scaling = {3: 15, 5: 45, 7: 70}
+        self.is_stargazer = 0
+        self.extraBuff(params)
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(15)
+        if self.is_stargazer and self.level in self.scaling:
+            champion.aspd.addStat(self.scaling[self.level])
+        return 0
+
+    def extraParameters():
+        return {"Title": "Is Stargazer", "Min": 0, "Max": 1, "Default": 1}
+
+    def extraBuff(self, is_stargazer):
+        self.is_stargazer = is_stargazer
+
+
+class StargazerMedallion(Buff):
+    levels = [0, 3]
+    display_name = "Stargazer (Medallion)"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+        )
+        self.num_three_stars = 0
+        self.extraBuff(params)
+
+    def performAbility(self, phase, time, champion, input_=0):
+        amp = 0.15 + 0.05 * self.num_three_stars
+        champion.dmgMultiplier.addStat(amp)
+        return 0
+
+    def extraParameters():
+        return {"Title": "# 3*s", "Min": 0, "Max": 9, "Default": 0}
+
+    def extraBuff(self, num_three_stars):
+        self.num_three_stars = num_three_stars
+
+
+class StargazerFountain(Buff):
+    levels = [0, 3, 5]
+    display_name = "Stargazer (Fountain)"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["onUpdate"]
+        )
+        self.scaling = {3: 4, 5: 9}
+        self.next_tick = 2.0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if time >= self.next_tick:
+            self.next_tick += 2.0
+            amt = self.scaling[self.level]
+            champion.bonus_ad.addStat(amt)
+            champion.ap.addStat(amt)
         return 0
 
 

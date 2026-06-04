@@ -22,7 +22,7 @@ class Champion(object):
         armor,
         mr,
         level,
-        role=Role.TANK,
+        role=Role.ATTACK_TANK,
     ):
         self.name = name
         levels = [1, 1.5, 1.5**2, 1.5**3, 1.5**4]
@@ -50,7 +50,7 @@ class Champion(object):
         self.omnivamp = Stat(0, 1, 0)
 
         if not isinstance(role, Role):
-            self.role = Role.TANK
+            self.role = Role.ATTACK_TANK
         self.role = role
 
         self.nextMana = -0.001  # you get an instant tick

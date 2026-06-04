@@ -1,5 +1,4 @@
 from set17buffs import Buff
-from role import Role
 
 
 class ChampRole(Buff):
@@ -10,14 +9,15 @@ class ChampRole(Buff):
         manaPerAttack = 0
         manaRegen = 0
         fighterAsScaling = {2: 5, 3: 10, 4: 20, 5: 30, 6: 30}
-        if champion.role == Role.CASTER:
+        archetype = champion.role.archetype
+        if archetype == "Caster":
             manaPerAttack = 7
             manaRegen = 2
-        elif champion.role == Role.TANK:
+        elif archetype == "Tank":
             manaPerAttack = 5
-        elif champion.role in [Role.MARKSMAN, Role.FIGHTER, Role.ASSASSIN]:
+        elif archetype in ["Marksman", "Fighter", "Assassin"]:
             manaPerAttack = 10
-        if champion.role in [Role.FIGHTER]:
+        if archetype == "Fighter":
             champion.aspd.addStat(fighterAsScaling[champion.stage])
         champion.manaPerAttack.addStat(manaPerAttack)
         champion.manaRegen.addStat(manaRegen)

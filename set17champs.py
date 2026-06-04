@@ -35,7 +35,11 @@ champ_list = [
     "Kindred",
     "Gnar",
     "AurelionSol",
-    # "Xayah",
+    "Xayah",
+    "LuluHuntress",
+    "LuluMedallion",
+    "LuluFountain",
+    "Samira",
 ]
 
 
@@ -78,7 +82,7 @@ class Caitlyn(Champion):
             armor,
             mr,
             level,
-            Role.SPECIALIST,
+            Role.ATTACK_SPECIALIST,
         )
         self.default_traits = ["NOVA", "Fateweaver"]
         self.items.append(buffs.CaitlynUlt())
@@ -91,7 +95,7 @@ class Caitlyn(Champion):
 class Ezreal(Champion):
     def __init__(self, level):
         hp = 450
-        atk = 40
+        atk = 45
         curMana = 0
         fullMana = 30
         aspd = 0.70
@@ -107,7 +111,7 @@ class Ezreal(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.ATTACK_CASTER,
         )
         self.default_traits = ["Timebreaker", "Sniper"]
         self.castTime = 1.0  # 1 second cast time
@@ -149,7 +153,7 @@ class Jinx(Champion):
             armor,
             mr,
             level,
-            Role.MARKSMAN,
+            Role.ATTACK_MARKSMAN,
         )
         self.default_traits = ["Anima", "Challenger"]
         self.castTime = 2.0
@@ -196,7 +200,7 @@ class Pyke(Champion):
             armor,
             mr,
             level,
-            Role.ASSASSIN,
+            Role.ATTACK_ASSASSIN,
         )
         self.default_traits = ["Psionic", "Voyager"]
         self.castTime = 2.5  # 2.5 second cast time
@@ -416,7 +420,7 @@ class Corki(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.ATTACK_CASTER,
         )
         self.default_traits = ["Meeple", "Fateweaver"]
         self.castTime = 4.0
@@ -477,7 +481,7 @@ class MasterYi(Champion):
             armor,
             mr,
             level,
-            Role.FIGHTER,
+            Role.ATTACK_FIGHTER,
         )
         self.default_traits = ["Psionic", "Marauder"]
         self.castTime = 1.0
@@ -522,7 +526,7 @@ class Kaisa(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.ATTACK_CASTER,
         )
         self.default_traits = ["Dark Star", "Rogue"]
         self.castTime = 2.0  # 2 second cast time
@@ -556,7 +560,7 @@ class MissFortuneConduit(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.ATTACK_CASTER,
         )
         self.default_traits = ["Conduit"]
         self.castTime = 3.0
@@ -593,7 +597,7 @@ class MissFortuneChallenger(Champion):
             armor,
             mr,
             level,
-            Role.MARKSMAN,
+            Role.ATTACK_MARKSMAN,
         )
         self.default_traits = ["Challenger"]
         self.castTime = 0.5
@@ -642,7 +646,7 @@ class Viktor(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.MAGIC_CASTER,
         )
         self.default_traits = ["Psionic", "Conduit"]
         self.castTime = 4.5
@@ -683,7 +687,7 @@ class Leblanc(Champion):
             armor,
             mr,
             level,
-            Role.MARKSMAN,
+            Role.MAGIC_MARKSMAN,
         )
         self.default_traits = ["Arbiter", "Shepherd"]
         self.castTime = 0.6
@@ -734,7 +738,7 @@ class Karma(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.MAGIC_CASTER,
         )
         self.default_traits = ["Dark Star", "Voyager"]
         self.castTime = 2
@@ -780,7 +784,7 @@ class Lissandra(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.MAGIC_CASTER,
         )
         self.default_traits = ["Dark Star", "Shepherd", "Replicator"]
         self.castTime = 1.5
@@ -853,7 +857,7 @@ class Nami(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.MAGIC_CASTER,
         )
         self.default_traits = ["Space Groove", "Replicator"]
         self.castTime = 1.0
@@ -982,7 +986,7 @@ class Bard(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.MAGIC_CASTER,
         )
         self.default_traits = ["Meeple", "Conduit"]
         self.castTime = 4.5
@@ -1067,7 +1071,7 @@ class TwistedFate(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.MAGIC_CASTER,
         )
         self.default_traits = ["Stargazer", "Fateweaver"]
         self.castTime = 1.0
@@ -1117,7 +1121,7 @@ class Veigar(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.MAGIC_CASTER,
         )
         self.default_traits = ["Meeple", "Replicator"]
         self.castTime = 1.0
@@ -1175,7 +1179,7 @@ class Sona(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.MAGIC_CASTER,
         )
         self.default_traits = ["Psionic", "Shepherd"]
         self.castTime = 1.5
@@ -1233,7 +1237,7 @@ class Vex(Champion):
             armor,
             mr,
             level,
-            Role.MARKSMAN,
+            Role.MAGIC_MARKSMAN,
         )
         self.default_traits = ["Doomer"]
         self.castTime = 0
@@ -1244,7 +1248,7 @@ class Vex(Champion):
         self.items.append(buffs.VexUlt())
 
     passiveScaling = create_ability_scaling(
-        [0, 0, 0], [30, 45, 250], func_name="vexPassiveScaling"
+        [0, 0, 0], [27, 40, 250], func_name="vexPassiveScaling"
     )
     activeScaling = create_ability_scaling(
         [0, 0, 0], [130, 195, 1000], func_name="vexActiveScaling"
@@ -1298,7 +1302,7 @@ class Milio(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.MAGIC_CASTER,
         )
         self.default_traits = ["Timebreaker", "Fateweaver"]
         self.castTime = 1.0
@@ -1357,7 +1361,7 @@ class Kindred(Champion):
             armor,
             mr,
             level,
-            Role.MARKSMAN,
+            Role.ATTACK_MARKSMAN,
         )
         self.default_traits = ["NOVA", "Challenger"]
         self.items.append(buffs.KindredUlt())
@@ -1428,7 +1432,7 @@ class Gnar(Champion):
             armor,
             mr,
             level,
-            Role.MARKSMAN,
+            Role.ATTACK_SPECIALIST,
         )
         self.default_traits = ["Meeple", "Sniper"]
         self.castTime = 1.0
@@ -1517,7 +1521,7 @@ class AurelionSol(Champion):
             armor,
             mr,
             level,
-            Role.CASTER,
+            Role.MAGIC_CASTER,
         )
         self.default_traits = ["Mecha", "Conduit"]
         self.castTime = 4.0
@@ -1543,7 +1547,7 @@ class AurelionSol(Champion):
 class Xayah(Champion):
     def __init__(self, level):
         hp = 850
-        atk = 52
+        atk = 49
         curMana = 0
         fullMana = 50
         aspd = 0.75
@@ -1559,7 +1563,7 @@ class Xayah(Champion):
             armor,
             mr,
             level,
-            Role.MARKSMAN,
+            Role.ATTACK_MARKSMAN,
         )
         self.default_traits = ["Stargazer", "Sniper"]
         self.castTime = 1.0
@@ -1630,3 +1634,123 @@ class Xayah(Champion):
         self.ultAttacksLeft = 6
         self.aspd.addStat(75)
         self.manalockDuration = 9999
+
+
+class Lulu(Champion):
+    def __init__(self, name, level):
+        super().__init__(
+            name,
+            hp=650,
+            atk=30,
+            curMana=0,
+            fullMana=55,
+            aspd=0.75,
+            armor=25,
+            mr=25,
+            level=level,
+            role=Role.MAGIC_CASTER,
+        )
+        self.castTime = 1.0
+
+    def _cast_with_replicator(self, opponents, items, time, scaling_func):
+        self.multiTargetSpell(opponents, items, time, 3, scaling_func, "magical")
+        rep = getattr(self, "replicator_scaling", 0)
+        if rep > 0:
+
+            def scaled(level, bonusAD, AP):
+                return rep * scaling_func(level, bonusAD, AP)
+
+            self.multiTargetSpell(opponents, items, time, 3, scaled, "magical")
+
+
+class LuluHuntress(Lulu):
+    def __init__(self, level):
+        super().__init__("Lulu (Huntress)", level)
+        self.default_traits = ["StargazerHuntress", "Replicator"]
+
+    abilityScaling = create_ability_scaling(
+        [0, 0, 0], [145, 220, 360], func_name="luluHuntressAbilityScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        self._cast_with_replicator(opponents, items, time, self.abilityScaling)
+        return 0
+
+
+class LuluMedallion(Lulu):
+    def __init__(self, level):
+        super().__init__("Lulu (Medallion)", level)
+        self.default_traits = ["StargazerMedallion", "Replicator"]
+
+    abilityScaling = create_ability_scaling(
+        [0, 0, 0], [160, 240, 400], func_name="luluMedallionAbilityScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        self._cast_with_replicator(opponents, items, time, self.abilityScaling)
+        return 0
+
+
+class LuluFountain(Lulu):
+    def __init__(self, level):
+        super().__init__("Lulu (Fountain)", level)
+        self.default_traits = ["StargazerFountain", "Replicator"]
+
+    primaryScaling = create_ability_scaling(
+        [0, 0, 0], [150, 225, 375], func_name="luluFountainPrimaryScaling"
+    )
+    secondaryScaling = create_ability_scaling(
+        [0, 0, 0], [50, 75, 125], func_name="luluFountainSecondaryScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        self._cast_with_replicator(opponents, items, time, self.primaryScaling)
+        self._cast_with_replicator(opponents, items, time, self.secondaryScaling)
+        return 0
+
+
+class Samira(Champion):
+    def __init__(self, level):
+        hp = 650
+        atk = 50
+        curMana = 0
+        fullMana = 60
+        aspd = 0.75
+        armor = 25
+        mr = 25
+        super().__init__(
+            "Samira",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_CASTER,
+        )
+        self.default_traits = ["Space Groove", "Sniper"]
+        self.castTime = 1.0
+
+    # Active: volley of bullets dealing 375/560/900 physical damage + knock up 1.25s
+    activeScaling = create_ability_scaling(
+        [375, 560, 900], [0, 0, 0], func_name="samiraActiveScaling"
+    )
+    # Passive: shoot knocked-up enemies for 65/95/155 physical damage
+    passiveScaling = create_ability_scaling(
+        [65, 95, 155], [0, 0, 0], func_name="samiraPassiveScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        # Enter The Groove for 3 seconds after cast completes
+        groove_params = getattr(
+            self, "space_groove_params", {"as_bonus": 0, "ad_ap_tick": 0}
+        )
+        self.applyStatus(status.TheGrooveStatus(), self, time, 3.0, groove_params)
+
+        # Active: volley at target
+        self.multiTargetSpell(opponents, items, time, 1, self.activeScaling, "physical")
+
+        # Passive proc: knocked-up target is shot once
+        self.multiTargetSpell(opponents, items, time, 1, self.passiveScaling, "physical")
