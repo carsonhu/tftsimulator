@@ -1546,7 +1546,7 @@ class TinyButDeadly(Buff):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.aspd.addStat(30)
+        champion.aspd.addStat(33)
         return 0
 
 
@@ -1646,7 +1646,7 @@ class EarlyLearnings(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
-        self.base = 1
+        self.base = 8
         self.ad_scaling = 2
         self.ap_scaling = 2
 
@@ -1909,8 +1909,8 @@ class CryMeARiver(Buff):
             champion.manaRegen.addStat(1)
         elif phase == "onUpdate":
             if not self.stage_2_active and time >= 12:
-                # After 12 seconds, increase to 3 (so add 2 more)
-                champion.manaRegen.addStat(2)
+                # After 12 seconds, increase to 4 (so add 3 more)
+                champion.manaRegen.addStat(3)
                 self.stage_2_active = True
         return 0
 
@@ -2427,8 +2427,8 @@ class SpaceGroove(Buff):
             ad_ap_tick = 5.0
 
         if self.level >= 7:
-            as_bonus = as_bonus * 1.15
-            ad_ap_tick = ad_ap_tick * 1.15
+            as_bonus = as_bonus * 1.1
+            ad_ap_tick = ad_ap_tick * 1.1
 
         champion.space_groove_params = {"as_bonus": as_bonus, "ad_ap_tick": ad_ap_tick}
 

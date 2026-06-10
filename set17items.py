@@ -918,7 +918,7 @@ class GoldCollector(Item):
     display_name = "Gold Collector"
 
     def __init__(self):
-        super().__init__(self.display_name, ad=40, crit=20, phases=None)
+        super().__init__(self.display_name, ad=35, crit=20, phases=None)
 
 
 class LichBane(Item):
@@ -1143,7 +1143,7 @@ class RadiantGuinsoosRageblade(GuinsoosRageblade):
     def __init__(self):
         super().__init__()
         self.name = self.display_name
-        self.aspd = 20
+        self.aspd = 25
         self.ap = 20
         self.aspd_bonus = 16
 
@@ -1207,7 +1207,7 @@ class RadiantRabadons(Rabadons):
     def __init__(self):
         super().__init__()
         self.name = self.display_name
-        self.ap = 110
+        self.ap = 100
         self.dmgMultiplier = 0.3
 
 
@@ -1274,7 +1274,7 @@ class RadiantDeathblade(Deathblade):
     def __init__(self):
         super().__init__()
         self.name = self.display_name
-        self.ad = 110
+        self.ad = 100
         self.dmgMultiplier = 0.2
 
 
@@ -1284,7 +1284,7 @@ class RadiantQSS(QSS):
     def __init__(self):
         super().__init__()
         self.name = self.display_name
-        self.aspd = 30
+        self.aspd = 40
         self.crit = 40
         self.mr = 40
         self.asGain = 6
@@ -1296,7 +1296,7 @@ class RadiantRed(Red):
     def __init__(self):
         super().__init__()
         self.name = self.display_name
-        self.aspd = 90
+        self.aspd = 80
         self.dmgMultiplier = 0.06
         self.phases = None
 
@@ -1308,7 +1308,7 @@ class RadiantMorellos(Morellos):
         super().__init__()
         self.name = self.display_name
         self.manaRegen = 2
-        self.ap = 40
+        self.ap = 35
         self.hp = 300
 
 

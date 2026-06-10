@@ -88,8 +88,7 @@ class Caitlyn(Champion):
         self.items.append(buffs.CaitlynUlt())
         self.notes = "NOVA strike, emblems not active yet."
 
-    # AD: 170/255/510, AP: 20/30/45
-    abilityScaling = create_ability_scaling([170, 255, 510], [20, 30, 45])
+    abilityScaling = create_ability_scaling([190, 285, 540], [20, 30, 45])
 
 
 class Ezreal(Champion):
@@ -116,7 +115,7 @@ class Ezreal(Champion):
         self.default_traits = ["Timebreaker", "Sniper"]
         self.castTime = 1.0  # 1 second cast time
 
-    abilityScaling = create_ability_scaling([160, 240, 365], [14, 21, 32])
+    abilityScaling = create_ability_scaling([170, 255, 380], [14, 21, 32])
     droneScaling = create_ability_scaling([8, 12, 18], [0, 0, 0])
 
     def performAbility(self, opponents, items, time):
@@ -709,7 +708,7 @@ class Leblanc(Champion):
 
     # AP: 70/105/750
     def boltScaling(self, level, AD, AP):
-        values = [80, 120, 750]
+        values = [85, 130, 750]
         return values[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -994,7 +993,7 @@ class Bard(Champion):
         self.notes = "30\% bonus dmg to tanks not included"
 
     abilityScaling = create_ability_scaling(
-        [0, 0, 0], [220, 330, 3000], func_name="bardAbilityScaling"
+        [0, 0, 0], [240, 360, 3000], func_name="bardAbilityScaling"
     )
     splashScaling = create_ability_scaling(
         [0, 0, 0], [135, 205, 1500], func_name="bardSplashScaling"
@@ -1126,7 +1125,7 @@ class Veigar(Champion):
         self.default_traits = ["Meeple", "Replicator"]
         self.castTime = 1.0
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [310, 465, 700])
+    abilityScaling = create_ability_scaling([0, 0, 0], [330, 495, 750])
     miniMeepScaling = create_ability_scaling([0, 0, 0], [31, 47, 70])
 
     def performAbility(self, opponents, items, time):
@@ -1251,7 +1250,7 @@ class Vex(Champion):
         [0, 0, 0], [27, 40, 250], func_name="vexPassiveScaling"
     )
     activeScaling = create_ability_scaling(
-        [0, 0, 0], [130, 195, 1000], func_name="vexActiveScaling"
+        [0, 0, 0], [140, 210, 1000], func_name="vexActiveScaling"
     )
 
     def fireShadowStrike(self, opponents, items, time, scaling):
@@ -1345,7 +1344,7 @@ class Milio(Champion):
 class Kindred(Champion):
     def __init__(self, level):
         hp = 850
-        atk = 55
+        atk = 58
         curMana = 0
         fullMana = 40
         aspd = 0.80
@@ -1714,7 +1713,7 @@ class Samira(Champion):
         hp = 650
         atk = 50
         curMana = 0
-        fullMana = 60
+        fullMana = 65
         aspd = 0.75
         armor = 25
         mr = 25
