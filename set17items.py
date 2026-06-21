@@ -350,6 +350,7 @@ class HoJ(Item):
     def performAbility(self, phase, time, champion, input_=0):
         if champion.retribution:
             champion.canSpellCrit = True
+            champion.crit.addStat(.1)
 
 
 class TacticiansCrown(Item):

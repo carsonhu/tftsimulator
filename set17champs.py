@@ -40,6 +40,8 @@ champ_list = [
     "LuluMedallion",
     "LuluFountain",
     "Samira",
+    "Graves",
+    "PoppyHero",
 ]
 
 
@@ -652,7 +654,7 @@ class Viktor(Champion):
         self.manalockDuration = 4.0
         self.num_targets = 3
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [190, 290, 500])
+    abilityScaling = create_ability_scaling([0, 0, 0], [200, 300, 530])
 
     def performAbility(self, opponents, items, time):
         # 4 damage ticks over 4 seconds, starting 1s after cast starts
@@ -698,7 +700,7 @@ class Leblanc(Champion):
         self.notes = ""
 
     def passiveScaling(self, level, baseAD, AD, AP):
-        values = [62, 93, 250]
+        values = [66, 99, 250]
         return values[level - 1] * AP
 
     # AP: 25/25/150%
@@ -743,7 +745,7 @@ class Karma(Champion):
         self.castTime = 2
 
     abilityScaling = create_ability_scaling(
-        [0, 0, 0], [570 / 3, 855 / 3, 5000 / 3], func_name="karmaPrimaryScaling"
+        [0, 0, 0], [630 / 3, 945 / 3, 5000 / 3], func_name="karmaPrimaryScaling"
     )
     secondaryScaling = create_ability_scaling(
         [0, 0, 0], [180, 270, 1000], func_name="karmaSecondaryScaling"
@@ -1415,7 +1417,7 @@ class Kindred(Champion):
 class Gnar(Champion):
     def __init__(self, level):
         hp = 550
-        atk = 50
+        atk = 48
         curMana = 0
         fullMana = 5
         aspd = 0.75
@@ -1753,3 +1755,87 @@ class Samira(Champion):
 
         # Passive proc: knocked-up target is shot once
         self.multiTargetSpell(opponents, items, time, 1, self.passiveScaling, "physical")
+
+
+class Graves(Champion):
+    def __init__(self, level):
+        hp = 900
+        atk = 60
+        curMana = 0
+        fullMana = 60
+        aspd = 0.75
+        armor = 40
+        mr = 40
+        super().__init__(
+            "Graves",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_MARKSMAN,
+        )
+        self.default_traits = ["Factory New"]
+        self.bullets = 5
+        self.num_targets = 2
+        self.cast_time = 1
+
+    def bulletsScaling(self, level, baseAD, AD, AP):
+        # 5 bullets each dealing 0.33 AD, consolidated into one damage instance
+        return self.bullets * 0.33 * baseAD * AD
+
+    primaryScaling = create_ability_scaling(
+        [390, 585, 5555], [0, 0, 0], func_name="gravesPrimaryScaling"
+    )
+    secondaryScaling = create_ability_scaling(
+        [135, 200, 3333], [30, 45, 777], func_name="gravesSecondaryScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items, time, 1, self.primaryScaling, "physical")
+        if len(opponents) > 1:
+            self.multiTargetSpell(
+                opponents[1:], items, time, self.num_targets - 1, self.secondaryScaling, "physical"
+            )
+
+
+class PoppyHero(Champion):
+    def __init__(self, level):
+        hp = 700
+        atk = 60
+        curMana = 10
+        fullMana = 55
+        aspd = 0.75
+        armor = 45
+        mr = 45
+        super().__init__(
+            "Poppy",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_CASTER,
+        )
+        self.default_traits = ["Bastion", "Meeple"]
+        self.castTime = 2.0
+
+    ad_values = [340, 510, 850]
+    armor_values = [1, 1.5, 2.5]
+
+    def performAbility(self, opponents, items, time):
+        meeps = getattr(self, "meep", 0)
+        meep_bonus = 1 + 0.15 * meeps
+        ad_vals = self.ad_values
+        armor_stat = self.armor.stat
+
+        def poppy_scaling(level, bonusAD, AP):
+            return (ad_vals[level - 1] * bonusAD + self.armor_values[level - 1] * armor_stat) * meep_bonus
+
+        self.multiTargetSpell(opponents, items, time, 1, poppy_scaling, "physical")

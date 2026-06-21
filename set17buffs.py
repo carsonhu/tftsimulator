@@ -35,10 +35,12 @@ class_buffs = [
     "Rogue",
     "Conduit",
     "Meeple",
+    "Bastion",
     "Arbiter",
     "Shepherd",
     "Replicator",
     "SpaceGroove",
+    "FactoryNew",
     "StargazerHuntress",
     "StargazerMedallion",
     "StargazerFountain",
@@ -1497,7 +1499,8 @@ class BestFriendsI(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(10)
-        champion.armor.addStat(13)
+        champion.armor.addStat(9)
+        champion.mr.addStat(9)
         return 0
 
 
@@ -1510,7 +1513,9 @@ class BestFriendsII(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(15)
-        champion.armor.addStat(22)
+        champion.armor.addStat(14)
+        champion.armor.addStat(14)
+
         return 0
 
 
@@ -1646,7 +1651,7 @@ class EarlyLearnings(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
-        self.base = 8
+        self.base = 5
         self.ad_scaling = 2
         self.ap_scaling = 2
 
@@ -2337,6 +2342,45 @@ class ArbiterStarLevel(Buff):
         return 0
 
 
+class Bastion(Buff):
+    levels = [0, 2, 4, 6]
+    display_name = "Bastion"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat", "onUpdate"]
+        )
+        self.bastion_scaling = {2: 16, 4: 40, 6: 60}
+        self.is_bastion = 0
+        self.doubled_removed = False
+        self.extraBuff(params)
+
+    def extraParameters():
+        return {"Title": "Is Bastion", "Min": 0, "Max": 1, "Default": 1}
+
+    def extraBuff(self, is_bastion):
+        self.is_bastion = is_bastion
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.armor.addStat(15)
+            champion.mr.addStat(15)
+            if self.is_bastion and self.level >= 2:
+                # Doubled during first 10 seconds of combat
+                champion.armor.addStat(self.bastion_scaling[self.level] * 2)
+                champion.mr.addStat(self.bastion_scaling[self.level] * 2)
+            elif not self.is_bastion and self.level >= 6:
+                champion.armor.addStat(20)
+                champion.mr.addStat(20)
+        elif phase == "onUpdate":
+            if self.is_bastion and self.level >= 2 and not self.doubled_removed and time >= 10:
+                self.doubled_removed = True
+                bonus = self.bastion_scaling[self.level]
+                champion.armor.addStat(-bonus)
+                champion.mr.addStat(-bonus)
+        return 0
+
+
 class Shepherd(Buff):
     levels = [0]
     display_name = "Shepherd"
@@ -2437,6 +2481,22 @@ class SpaceGroove(Buff):
                 status.TheGrooveStatus(), self, time, 3.0, champion.space_groove_params
             )
         return 0
+
+
+class FactoryNew(Buff):
+    levels = [0, 1]
+    display_name = "Factory New"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preAttack"]
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preAttack" and hasattr(champion, "bulletsScaling"):
+            # Graves: each attack fires a volley of bullets instead of a normal auto
+            input_.scaling = champion.bulletsScaling
+        return input_
 
 
 class StargazerHuntress(Buff):
