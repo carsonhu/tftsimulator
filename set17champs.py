@@ -490,7 +490,7 @@ class MasterYi(Champion):
         self.attack_counter = 0
 
     passiveScaling = create_ability_scaling([70, 105, 550], [0, 0, 0])
-    projectionScaling = create_ability_scaling([50, 75, 600], [20, 30, 200])
+    projectionScaling = create_ability_scaling([55, 85, 600], [20, 30, 200])
 
     def startAttack(self, opponents, items, time):
         self.attack_counter += 1
@@ -710,7 +710,7 @@ class Leblanc(Champion):
 
     # AP: 70/105/750
     def boltScaling(self, level, AD, AP):
-        values = [85, 130, 750]
+        values = [95, 145, 750]
         return values[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -867,10 +867,10 @@ class Nami(Champion):
         )
 
     abilityScaling = create_ability_scaling(
-        [0, 0, 0], [440, 660, 5000], func_name="namiPrimaryScaling"
+        [0, 0, 0], [460, 690, 5000], func_name="namiPrimaryScaling"
     )
     secondaryScaling = create_ability_scaling(
-        [0, 0, 0], [110, 165, 1000], func_name="namiSecondaryScaling"
+        [0, 0, 0], [125, 185, 1000], func_name="namiSecondaryScaling"
     )
 
     def performAbility(self, opponents, items, time):
@@ -1530,7 +1530,7 @@ class AurelionSol(Champion):
         self.num_targets = 2
 
     abilityScaling = create_ability_scaling(
-        [0, 0, 0], [320, 480, 2000], func_name="aurelionsolAbilityScaling"
+        [0, 0, 0], [335, 505, 2000], func_name="aurelionsolAbilityScaling"
     )
     aurelionsolAbilityScaling = abilityScaling
 
