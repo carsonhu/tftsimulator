@@ -83,6 +83,7 @@ augments = [
     "AccelerationHexEmpowered",
     "StarlightHex",
     "StarlightHexEmpowered",
+    "Concentration",
 ]
 
 stat_buffs = ["ASBuff"]
@@ -1716,6 +1717,22 @@ class StarlightHexEmpowered(Buff):
         return 0
 
 
+class Concentration(Buff):
+    levels = [1]
+    display_name = "Concentration"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["postPreCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "postPreCombat":
+            if "Conduit" in getattr(champion, "default_traits", []):
+                champion.castTime += 1
+                champion.manalockDuration += 1
+                champion.concentration = True
+        return 0
+
+
 class AdaptiveStyle(Buff):
     levels = [1]
     display_name = "AdaptiveStyle"
@@ -2737,7 +2754,7 @@ class CorkiUlt(Buff):
 
 class MechaAurelionSolPassive(Buff):
     """Periodic passive for mecha-transformed Aurelion Sol.
-    Every 0.75s: grants mana and fires fighters (3 during overdrive, 1 otherwise).
+    Every 0.75s: grants mana and fires fighters (1 per 0.25s during overdrive, 1 per tick otherwise).
     """
 
     levels = [1]
@@ -2747,20 +2764,20 @@ class MechaAurelionSolPassive(Buff):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
         self.interval = 0.75
         self.next_tick = 0.75
+        self.overdrive_interval = 0.25
+        self.next_overdrive_fighter = 0.0
 
     def performAbility(self, phase, time, champion, input_=0):
-        if phase == "onUpdate" and time >= self.next_tick and champion.opponents:
-            self.next_tick += self.interval
-
-            mana_gain = 5.0 + 0.8 * champion.aspd.add / 20.0
-            champion.addMana(mana_gain)
-
+        if phase == "onUpdate" and champion.opponents:
             overdrive_end = getattr(champion, "mechaOverdriveEnd", -1)
-            fighters_left = getattr(champion, "mechaOverdriveFightersLeft", 0)
+            in_overdrive = time <= overdrive_end
 
-            if time <= overdrive_end and fighters_left > 0:
-                to_fire = min(3, fighters_left)
-                for _ in range(to_fire):
+            if time >= self.next_tick:
+                self.next_tick += self.interval
+                mana_gain = 5.0 + 0.8 * champion.aspd.add / 20.0
+                champion.addMana(mana_gain)
+
+                if not in_overdrive:
                     champion.multiTargetSpell(
                         champion.opponents,
                         champion.items,
@@ -2768,10 +2785,10 @@ class MechaAurelionSolPassive(Buff):
                         1,
                         champion.fighterScaling,
                         "magical",
-                        ability_mr_pierce=0.30,
                     )
-                champion.mechaOverdriveFightersLeft -= to_fire
-            else:
+
+            if in_overdrive and time >= self.next_overdrive_fighter:
+                self.next_overdrive_fighter = time + self.overdrive_interval
                 champion.multiTargetSpell(
                     champion.opponents,
                     champion.items,
@@ -2779,6 +2796,7 @@ class MechaAurelionSolPassive(Buff):
                     1,
                     champion.fighterScaling,
                     "magical",
+                    ability_mr_pierce=0.30,
                 )
         return 0
 

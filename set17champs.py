@@ -274,12 +274,12 @@ class PsionicStormStatus(status.Status):
 
     def applicationEffect(self, champion, time, duration, params):
         self.next_proc = time + 1.0
-        self.ticks_remaining = 4
+        self.ticks_remaining = 4 + params
         return True
 
     def reapplicationEffect(self, champion, time, duration, params):
         self.next_proc = time + 1.0
-        self.ticks_remaining = 4
+        self.ticks_remaining = 4 + params
         return True
 
     def update(self, champion, time):
@@ -329,12 +329,12 @@ class UltraFriendlyObjectStatus(status.Status):
 
     def applicationEffect(self, champion, time, duration, params):
         self.next_proc = time + 1.0
-        self.ticks_remaining = 4
+        self.ticks_remaining = 4 + params
         return True
 
     def reapplicationEffect(self, champion, time, duration, params):
         self.next_proc = time + 1.0
-        self.ticks_remaining = 4
+        self.ticks_remaining = 4 + params
         return True
 
     def update(self, champion, time):
@@ -570,8 +570,8 @@ class MissFortuneConduit(Champion):
     abilityScaling = create_ability_scaling([72, 108, 173], [10, 15, 25])
 
     def performAbility(self, opponents, items, time):
-        # Hits nearest 2 enemies with a 2.5s burst at the start of the cast
-        burst_multiplier = 2.5
+        # Hits nearest 2 enemies with a burst; duration scales with manalockDuration
+        burst_multiplier = self.manalockDuration
 
         def burst_scaling(level, bonusAD, AP):
             return burst_multiplier * self.abilityScaling(level, bonusAD, AP)
@@ -658,14 +658,16 @@ class Viktor(Champion):
 
     def performAbility(self, opponents, items, time):
         # 4 damage ticks over 4 seconds, starting 1s after cast starts
+        # Concentration adds 1 extra tick
+        extra_ticks = 1 if getattr(self, "concentration", False) else 0
         self.applyStatus(
             PsionicStormStatus(
                 scaling=self.abilityScaling, num_targets=self.num_targets
             ),
             self,
             time,
-            5.0,  # duration to cover 4 ticks starting at +1s
-            0,
+            5.0 + extra_ticks,
+            extra_ticks,
         )
 
 
@@ -1010,14 +1012,16 @@ class Bard(Champion):
 
     def performAbility(self, opponents, items, time):
         # 4 damage ticks over 4 seconds, starting 1s after cast starts
+        # Concentration adds 1 extra tick
+        extra_ticks = 1 if getattr(self, "concentration", False) else 0
         self.applyStatus(
             UltraFriendlyObjectStatus(
                 baseScaling=self.abilityScaling, splashScaling=self.splashScaling
             ),
             self,
             time,
-            5.0,  # duration to cover 4 ticks starting at +1s
-            0,
+            5.0 + extra_ticks,
+            extra_ticks,
         )
 
 
@@ -1471,12 +1475,12 @@ class DeathbeamStatus(status.Status):
 
     def applicationEffect(self, champion, time, duration, params):
         self.next_proc = time
-        self.ticks_remaining = 4
+        self.ticks_remaining = 4 + params
         return True
 
     def reapplicationEffect(self, champion, time, duration, params):
         self.next_proc = time
-        self.ticks_remaining = 4
+        self.ticks_remaining = 4 + params
         return True
 
     def update(self, champion, time):
@@ -1532,7 +1536,6 @@ class AurelionSol(Champion):
         self.mecha_transformed = False
         self.is_mecha_unit = True
         self.mechaOverdriveEnd = -1
-        self.mechaOverdriveFightersLeft = 0
 
     fighterScaling = create_ability_scaling(
         [0, 0, 0], [86, 130, 275], func_name="aurelionsolFighterScaling"
@@ -1561,16 +1564,17 @@ class AurelionSol(Champion):
 
     def performAbility(self, opponents, items, time):
         if self.mecha_transformed:
-            # Activate overdrive: 3 fighters per 0.75s tick, max 12, 30% MR pierce
-            self.mechaOverdriveEnd = time + 3.0
-            self.mechaOverdriveFightersLeft = 12
+            # Activate overdrive: 1 fighter per 0.25s with 30% MR pierce
+            self.mechaOverdriveEnd = time + self.manalockDuration
         else:
+            # 4 ticks starting immediately, 1s apart; Concentration adds 1 extra tick
+            extra_ticks = 1 if getattr(self, "concentration", False) else 0
             self.applyStatus(
                 DeathbeamStatus(scaling=self.abilityScaling, num_targets=self.num_targets),
                 self,
                 time,
-                4.0,
-                0,
+                4.0 + extra_ticks,
+                extra_ticks,
             )
         return 0
 
