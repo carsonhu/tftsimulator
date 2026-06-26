@@ -44,6 +44,7 @@ class_buffs = [
     "StargazerHuntress",
     "StargazerMedallion",
     "StargazerFountain",
+    "Mecha",
 ]
 
 augments = [
@@ -78,6 +79,10 @@ augments = [
     "BaronsLair",
     "PartialAscension",
     "EarlyLearnings",
+    "AccelerationHex",
+    "AccelerationHexEmpowered",
+    "StarlightHex",
+    "StarlightHexEmpowered",
 ]
 
 stat_buffs = ["ASBuff"]
@@ -1663,6 +1668,54 @@ class EarlyLearnings(Buff):
         return 0
 
 
+class AccelerationHex(Buff):
+    levels = [1]
+    display_name = "Acceleration Hex"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(30)
+        return 0
+
+
+class AccelerationHexEmpowered(Buff):
+    levels = [1]
+    display_name = "Acceleration Hex (Empowered)"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(45)
+        return 0
+
+
+class StarlightHex(Buff):
+    levels = [1]
+    display_name = "Starlight Hex"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.manaRegen.addStat(3)
+        return 0
+
+
+class StarlightHexEmpowered(Buff):
+    levels = [1]
+    display_name = "Starlight Hex (Empowered)"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.manaRegen.addStat(4.5)
+        return 0
+
+
 class AdaptiveStyle(Buff):
     levels = [1]
     display_name = "AdaptiveStyle"
@@ -2679,6 +2732,84 @@ class CorkiUlt(Buff):
                 )
                 self.next_rocket = time + 8 * (1 - 0.1 * champion.meep)
                 print("Firing rocket at time {}".format(time))
+        return 0
+
+
+class MechaAurelionSolPassive(Buff):
+    """Periodic passive for mecha-transformed Aurelion Sol.
+    Every 0.75s: grants mana and fires fighters (3 during overdrive, 1 otherwise).
+    """
+
+    levels = [1]
+    display_name = "Mecha A-Sol Passive"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["onUpdate"])
+        self.interval = 0.75
+        self.next_tick = 0.75
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate" and time >= self.next_tick and champion.opponents:
+            self.next_tick += self.interval
+
+            mana_gain = 5.0 + 0.8 * champion.aspd.add / 20.0
+            champion.addMana(mana_gain)
+
+            overdrive_end = getattr(champion, "mechaOverdriveEnd", -1)
+            fighters_left = getattr(champion, "mechaOverdriveFightersLeft", 0)
+
+            if time <= overdrive_end and fighters_left > 0:
+                to_fire = min(3, fighters_left)
+                for _ in range(to_fire):
+                    champion.multiTargetSpell(
+                        champion.opponents,
+                        champion.items,
+                        time,
+                        1,
+                        champion.fighterScaling,
+                        "magical",
+                        ability_mr_pierce=0.30,
+                    )
+                champion.mechaOverdriveFightersLeft -= to_fire
+            else:
+                champion.multiTargetSpell(
+                    champion.opponents,
+                    champion.items,
+                    time,
+                    1,
+                    champion.fighterScaling,
+                    "magical",
+                )
+        return 0
+
+
+class Mecha(Buff):
+    levels = [0, 3, 4, 6]
+    display_name = "Mecha"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+        )
+        self.ad_ap_scaling = {0: 0, 3: 25, 4: 40, 6: 40}
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat" and self.level >= 3:
+            amt = self.ad_ap_scaling.get(self.level, 0)
+            champion.bonus_ad.addStat(amt)
+            champion.ap.addStat(amt)
+
+            if getattr(champion, "is_mecha_unit", False):
+                champion.mecha_transformed = True
+                champion.castTime = 3.0
+                champion.manalockDuration = 3.0
+                # Remove the caster-role mana regen (2/s); mana comes from passive only
+                champion.manaRegen.addStat(-2)
+                if not any(
+                    isinstance(item, MechaAurelionSolPassive)
+                    for item in champion.items
+                ):
+                    champion.items.append(MechaAurelionSolPassive())
         return 0
 
 

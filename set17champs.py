@@ -1528,20 +1528,50 @@ class AurelionSol(Champion):
         self.castTime = 4.0
         self.manalockDuration = 3.5
         self.num_targets = 2
+        # Mecha transform state (set True by Mecha buff at level 3+)
+        self.mecha_transformed = False
+        self.is_mecha_unit = True
+        self.mechaOverdriveEnd = -1
+        self.mechaOverdriveFightersLeft = 0
 
+    fighterScaling = create_ability_scaling(
+        [0, 0, 0], [86, 130, 275], func_name="aurelionsolFighterScaling"
+    )
     abilityScaling = create_ability_scaling(
         [0, 0, 0], [335, 505, 2000], func_name="aurelionsolAbilityScaling"
     )
     aurelionsolAbilityScaling = abilityScaling
 
+    def canCast(self, time):
+        if self.mecha_transformed:
+            return (
+                self.curMana >= self.fullMana.stat
+                and self.fullMana.stat > -1
+                and self.manalockTime <= time
+            )
+        return super().canCast(time)
+
+    def startAttack(self, opponents, items, time):
+        if self.mecha_transformed:
+            # No regular attacks; advance timers to prevent a tight loop
+            self.nextAttackTime = min(self.nextAttackTime, time) + self.attackTime()
+            self.attackWindupLockout = time + self.attackTime() * self.attackWindupRatio
+        else:
+            super().startAttack(opponents, items, time)
+
     def performAbility(self, opponents, items, time):
-        self.applyStatus(
-            DeathbeamStatus(scaling=self.abilityScaling, num_targets=self.num_targets),
-            self,
-            time,
-            4.0,
-            0,
-        )
+        if self.mecha_transformed:
+            # Activate overdrive: 3 fighters per 0.75s tick, max 12, 30% MR pierce
+            self.mechaOverdriveEnd = time + 3.0
+            self.mechaOverdriveFightersLeft = 12
+        else:
+            self.applyStatus(
+                DeathbeamStatus(scaling=self.abilityScaling, num_targets=self.num_targets),
+                self,
+                time,
+                4.0,
+                0,
+            )
         return 0
 
 
