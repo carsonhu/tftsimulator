@@ -2071,6 +2071,14 @@ class NOVA(Buff):
                 champion.aspd.addStat(20)
             if novas.get("Akali"):
                 champion.addPrecision()
+        if self.level >= 5 and champion.name == "Akali":
+            champion.applyStatus(
+                status.AkaliNovaStrikeStatus(),
+                champion,
+                time,
+                999,
+                (champion.novaStrikeScaling, champion.nova_strike_targets),
+            )
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":

@@ -13,6 +13,7 @@ from champion import Champion
 
 champ_list = [
     "Caitlyn",
+    "Akali",
     "Ezreal",
     "Jinx",
     "Pyke",
@@ -93,6 +94,59 @@ class Caitlyn(Champion):
     abilityScaling = create_ability_scaling([190, 285, 540], [20, 30, 45])
 
 
+class Akali(Champion):
+    def __init__(self, level):
+        hp = 750
+        atk = 45
+        curMana = 0
+        fullMana = 30
+        aspd = 0.80
+        armor = 45
+        mr = 45
+        super().__init__(
+            "Akali",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_FIGHTER,
+        )
+        self.default_traits = ["NOVA", "Marauder"]
+        self.castTime = 1.0
+        self.num_targets = 2  # kunai pierce onto secondary targets
+        self.nova_strike_targets = 8  # N.O.V.A. Strike hits (almost) all enemies
+
+    # Star Strike: 5 piercing kunai, consolidated into one damage instance each
+    # for the primary target and for the (reduced-damage) pierced targets.
+    # Armor removal on kunai hits/crits is ignored.
+    abilityScaling = create_ability_scaling(
+        [215, 325, 485], [0, 0, 0], func_name="abilityScaling"
+    )
+    secondaryScaling = create_ability_scaling(
+        [85, 130, 195], [0, 0, 0], func_name="secondaryScaling"
+    )
+    # N.O.V.A. Strike bleed tick (kunai's +12% bleed damage is ignored)
+    novaStrikeScaling = create_ability_scaling(
+        [15, 22, 28], [0, 0, 0], func_name="novaStrikeScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "physical")
+        if len(opponents) > 1:
+            self.multiTargetSpell(
+                opponents[1:],
+                items,
+                time,
+                self.num_targets - 1,
+                self.secondaryScaling,
+                "physical",
+            )
+
+
 class Ezreal(Champion):
     def __init__(self, level):
         hp = 450
@@ -159,12 +213,19 @@ class Jinx(Champion):
         self.default_traits = ["Anima", "Challenger"]
         self.castTime = 2.0
         self.notes = "Challenger is 1.25x the given value to account for dash"
+        self.rocket_swarm = False
 
     abilityScaling = create_ability_scaling([29, 44, 70], [3, 5, 7])
 
     def performAbility(self, opponents, items, time):
         # Rockets: 15 + 1 per 35% bonus AS
         num_rockets = 16 + int(self.aspd.add / 35.0)
+
+        if self.rocket_swarm:
+            base = self.abilityScaling
+            scaling = lambda level, AD, AP: base(level, AD, AP) * 1.4
+        else:
+            scaling = self.abilityScaling
 
         # Fires num_rockets rockets using multiTargetSpell
         # Counts as 3 attacks (numAttacks=3)
@@ -176,7 +237,7 @@ class Jinx(Champion):
                 items,
                 time,
                 1,
-                self.abilityScaling,
+                scaling,
                 "physical",
                 numAttacks=na,
             )

@@ -98,7 +98,7 @@ emblems = [
     "VoyagerEmblem",
 ]
 
-animas = ["UwUBlaster", "EchoingBatblades", "BattleBunnyCrossbow"]
+animas = ["UwUBlaster", "EchoingBatblades", "BattleBunnyCrossbow", "RocketSwarm"]
 
 no_item = ["NoItem"]
 
@@ -894,6 +894,40 @@ class BattleBunnyCrossbow(Item):
                                 is_spell=False,
                                 source_item=self,
                             )
+
+
+class RocketSwarm(Item):
+    display_name = "Rocket Swarm"
+
+    def __init__(self):
+        super().__init__(
+            self.display_name,
+            ad=15,
+            manaRegen=3,
+            phases=["preCombat", "postAbility"],
+        )
+        self.mana_spent = 0
+        self.rocket_ratio = 0.30
+        self.rocket_count = 4
+        self.mana_threshold = 30
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            if champion.name == "Jinx":
+                champion.rocket_swarm = True
+        elif phase == "postAbility":
+            if champion.name == "Jinx":
+                return
+            mana_cost = champion.fullMana.stat - champion.startingMana
+            self.mana_spent += mana_cost
+            while self.mana_spent >= self.mana_threshold:
+                self.mana_spent -= self.mana_threshold
+                dmg = champion.atk.stat * champion.bonus_ad.stat * self.rocket_ratio
+                if champion.opponents:
+                    for _ in range(self.rocket_count):
+                        champion.doDamage(
+                            champion.opponents[0], [], 0, dmg, dmg, "physical", time
+                        )
 
 
 class Mittens(Item):

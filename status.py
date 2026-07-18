@@ -541,6 +541,36 @@ class AccelerationGateStatus(Status):
         super().update(champion, time)
 
 
+class AkaliNovaStrikeStatus(Status):
+    # N.O.V.A. Strike: after the power surge, Akali slices all enemies with a
+    # bleed dealing physical damage each second for the rest of combat.
+    def __init__(self, name="N.O.V.A. Strike"):
+        super().__init__(name)
+        self.scaling = zero_scaling
+        self.num_targets = 0
+        self.interval = 1.0
+        self.next_proc = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.scaling, self.num_targets = params
+        self.next_proc = time + self.interval
+        return True
+
+    def update(self, champion, time):
+        if self.active and time >= self.next_proc:
+            if champion.opponents:
+                champion.multiTargetSpell(
+                    champion.opponents,
+                    champion.items,
+                    time,
+                    self.num_targets,
+                    self.scaling,
+                    "physical",
+                )
+            self.next_proc += self.interval
+        super().update(champion, time)
+
+
 class TheGrooveStatus(Status):
     def __init__(self):
         super().__init__("The Groove")
