@@ -1,10 +1,13 @@
 name: Ploomber Cloud
 
+# Push trigger temporarily disabled -- see deploy.yaml for why. Re-enable by
+# restoring:
+#   on:
+#     push:
+#       branches:
+#         - main
 on:
-  push:
-    branches:
-      # only deploy from the main branch
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy-to-ploomber-cloud:

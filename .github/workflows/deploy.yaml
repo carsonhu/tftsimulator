@@ -1,9 +1,15 @@
 name: Deploy to Droplet
 
+# Push trigger temporarily disabled: a batch of changes is landing on main
+# (perf work + bugfixes + a new GitHub Pages workflow) and the push that
+# carries them shouldn't also auto-redeploy the droplet in the same motion.
+# Re-enable by restoring:
+#   on:
+#     push:
+#       branches:
+#         - main
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
