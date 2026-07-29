@@ -3,12 +3,12 @@ import random
 import set17roles
 import utils
 from role import Role
-from stats import AD, AP, ArmorPierce, Aspd, Attack, Resist, Stat
+from stats import AD, AP, ArmorPierce, Aspd, Attack, FastDeepCopy, Resist, Stat
 
 import status
 
 
-class Champion(object):
+class Champion(FastDeepCopy):
     canFourStar = False
 
     def __init__(
@@ -70,6 +70,9 @@ class Champion(object):
         self.items = [set17roles.ChampRole()]
 
         self.statuses = {}  # current statuses
+        # Earliest next_update across self.statuses; lets the frame loop skip
+        # the whole status pass while everything is just waiting.
+        self.nextStatusUpdate = -1
         self.nextAttackTime = 0
         self.opponents = []
         self.dmgVector = []
@@ -100,6 +103,10 @@ class Champion(object):
         self.num_targets = 0
         self.num_extra_targets = 0
         self.item_count = 0  # number of craftables
+        # Trait-count-scaling buffs read this. The Champion Selector page sets
+        # it from a widget, but other pages don't, so it needs a default or
+        # those buffs raise AttributeError.
+        self.num_traits = 6
 
         self.critCounter = 0
         self.numAttacks = 0
@@ -109,9 +116,13 @@ class Champion(object):
 
         self.attacksOnLastCast = -1  # Can't cast if we haven't attacked yet
 
+        # Items subscribed to the "onUpdate" phase. Filled in by the Simulator
+        # once combat starts; None means "ask every item", which is what
+        # callers outside the simulator loop get.
+        self.onUpdateItems = None
+
     def hashFunction(self):
         # Hash to cache champion data
-        print(self.items)
         items_tuple = tuple(item.hashFunction() for item in self.items)
         stat_tuple = (
             self.name,
@@ -180,6 +191,8 @@ class Champion(object):
                 self.statuses[status.name].reapplication(
                     self, champion, time, duration, params
                 )
+        # Schedule changed; make the next frame look at the statuses again.
+        self.nextStatusUpdate = -1
 
     def addPrecision(self):
         if self.canSpellCrit:
@@ -296,12 +309,33 @@ class Champion(object):
         self.nextAttackTime = min(self.nextAttackTime, time) + self.attackTime()
         self.attackWindupLockout = time + self.attackTime() * self.attackWindupRatio
 
+    def updateStatuses(self, time):
+        """Tick this champion's statuses and nothing else.
+
+        The opponents in a simulation are inert damage sponges: the simulator
+        pushes their next attack past the end of combat, they hold no items, and
+        nothing reads their mana or attack counters. Shred/corrosion/DoT
+        statuses on them still have to tick, so this is the only part of
+        update() they need.
+        """
+        # List copy to avoid RuntimeError: dictionary changed size during iteration
+        for statusa in list(self.statuses.values()):
+            if time >= statusa.next_update:
+                statusa.update(self, time)
+
+        # Recompute from the live dict: a status that just ticked has moved its
+        # own schedule on, and one may have added another status.
+        soonest = float("inf")
+        for statusa in self.statuses.values():
+            if statusa.next_update < soonest:
+                soonest = statusa.next_update
+        self.nextStatusUpdate = soonest
+
     def update(self, opponents, items, time):
         self.opponents = opponents
         # Update each status
-        # List copy to avoid RuntimeError: dictionary changed size during iteration
-        for statusa in list(self.statuses.values()):
-            statusa.update(self, time)
+        if self.statuses and time >= self.nextStatusUpdate:
+            self.updateStatuses(time)
 
         # mana regeneration
         if time >= self.nextMana:
@@ -313,14 +347,20 @@ class Champion(object):
             #         (time, (0, "physical"), self.aspd.stat, self.curMana)
             #     )
 
-        # Call any items which activate on each update
-        for item in items:
+        # Call any items which activate on each update. onUpdateItems is the
+        # subset of items that subscribe to this phase, precomputed once per
+        # combat by the Simulator; without it every item is asked on every
+        # frame just to answer "no".
+        for item in self.onUpdateItems if self.onUpdateItems is not None else items:
             item.ability("onUpdate", time, self)
-        if self.canAttack(time) and not self.canCast(time):
+        canCast = self.canCast(time)
+        if self.canAttack(time) and not canCast:
             # if they can cast it overrides the 1st auto
             if opponents:
                 self.startAttack(opponents, items, time)
-        if self.canCast(time):
+                # startAttack can leave the champion able to cast
+                canCast = self.canCast(time)
+        if canCast:
             self.numCasts += 1
             for item in items:
                 item.ability("preAbility", time, self)

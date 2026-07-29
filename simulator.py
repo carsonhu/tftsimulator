@@ -7,12 +7,9 @@ class Simulator(object):
     def itemStats(self, items, champion):
         for item in items:
             champion.addStats(item)
-        for item in items:  # mb.
-            item.ability("prePreCombat", 0, champion)
-        for item in items:
-            item.ability("preCombat", 0, champion)
-        for item in items:
-            item.ability("postPreCombat", 0, champion)
+        for phase in ("prePreCombat", "preCombat", "postPreCombat"):
+            for item in items:
+                item.ability(phase, 0, champion)
 
     def simulate(self, items, buffs, champion, opponents, duration, frameRate=30):
         # there's no real distinction between items and buffs
@@ -25,12 +22,31 @@ class Simulator(object):
         self.itemStats(items, champion)
         self.current_time = 0
 
+        # preCombat can append items (Arbiter, Mecha), so this has to come
+        # after itemStats. Nothing appends once the frame loop is running.
+        champion.onUpdateItems = [
+            item
+            for item in items
+            if getattr(item, "phases", None) and "onUpdate" in item.phases
+        ]
+
         for opponent in opponents:
             opponent.nextAttackTime = duration * 2
+            # normally set by update(); done here so it still holds on the
+            # frames we skip below
+            opponent.opponents = champion
+
         while self.current_time < duration:
             champion.update(opponents, items, self.current_time)
             for opponent in opponents:
-                opponent.update(champion, [], self.current_time)
+                # Opponents carry no items and never act: nextAttackTime is
+                # pushed past the end of combat and nothing reads their mana or
+                # attack counters. Only their statuses (shred, corrosion, a DoT)
+                # need ticking. Doing just that instead of a full update is what
+                # keeps this loop from spending 8/9 of its time on the dummies
+                # rather than the champion being measured.
+                if opponent.statuses and self.current_time >= opponent.nextStatusUpdate:
+                    opponent.updateStatuses(self.current_time)
             self.current_time += self.frameTime
         return champion.dmgVector
 

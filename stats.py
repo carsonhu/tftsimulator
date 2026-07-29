@@ -1,4 +1,40 @@
-class Stat(object):
+from copy import deepcopy as _deepcopy
+
+# Values that can be shared between a copy and its original instead of being
+# recursed into. Functions are included because scaling callables are stateless
+# and copy.deepcopy already returns them unchanged.
+_IMMUTABLE_TYPES = frozenset(
+    (int, float, bool, str, bytes, complex, type(None), type(_deepcopy))
+)
+
+
+class FastDeepCopy(object):
+    """Mixin providing a cheaper copy.deepcopy for plain attribute containers.
+
+    Every simulation deep-copies a champion, its ~18 Stat objects and 8
+    opponents, which made copy.deepcopy's generic __reduce_ex__ machinery the
+    single most expensive thing in the simulator. Copying __dict__ directly and
+    passing scalars through by reference does the same job for these classes.
+    The memo is still threaded through so shared references (e.g. the Aspd that
+    JhinBonusAD holds onto) stay shared in the copy.
+    """
+
+    __slots__ = ()
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        new = cls.__new__(cls)
+        memo[id(self)] = new
+        new_dict = new.__dict__
+        for key, value in self.__dict__.items():
+            if type(value) in _IMMUTABLE_TYPES:
+                new_dict[key] = value
+            else:
+                new_dict[key] = _deepcopy(value, memo)
+        return new
+
+
+class Stat(FastDeepCopy):
     """Object for each stat, (AD, HP, Armor, etc.)
 
     Attributes:

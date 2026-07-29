@@ -1,7 +1,9 @@
 import math
 
+from stats import FastDeepCopy
 
-class Status(object):
+
+class Status(FastDeepCopy):
     """Holds champion status effects:
     1. name
     2. wearoff time
@@ -9,11 +11,26 @@ class Status(object):
     4. wearoff effect
     """
 
+    # Earliest time update() could do anything. The frame loop polls every
+    # status on all ~900 frames of a combat, and most statuses (a 30s shred
+    # applied at combat start, say) are only waiting to expire, so there is
+    # nothing to look at until wearoff_time. -1 means "poll every frame",
+    # which is what any subclass with its own update() gets.
+    next_update = -1
+
     def __init__(self, name):
         self.wearoff_time = -1
         self.name = name
         self.active = False
         self.opponent = None
+
+    def _reschedule(self):
+        """Recompute next_update after wearoff_time changes."""
+        if type(self).update is Status.update:
+            self.next_update = self.wearoff_time
+        else:
+            # Subclass does periodic work of its own; keep polling it.
+            self.next_update = -1
 
     def application(self, champion, opponent, time, duration, params):
         # opponent applies the status
@@ -21,6 +38,7 @@ class Status(object):
         self.active = True
         self.wearoff_time = time + duration
         self.applicationEffect(champion, time, duration, params)
+        self._reschedule()
 
     def applicationEffect(self, champion, time, duration, params):
         return 0
@@ -30,6 +48,7 @@ class Status(object):
         self.active = True
         if self.reapplicationEffect(champion, time, duration, params):
             self.wearoff_time = time + duration
+        self._reschedule()
 
     def reapplicationEffect(self, champion, time, duration, params):
         return 0
@@ -38,6 +57,9 @@ class Status(object):
         self.active = False
         self.wearoffEffect(champion, time)
         self.opponent = None
+        if type(self).update is Status.update:
+            # Nothing left to do unless it gets reapplied.
+            self.next_update = float("inf")
 
     def wearoffEffect(self, champion, time):
         return 0
@@ -165,7 +187,6 @@ class SilverBolts(Status):
         return True
 
     def wearoffEffect(self, champion, time):
-        print("shouldnt be wearing off")
         self.stacks = 0
         return True
 
@@ -424,20 +445,20 @@ class ASModifier(Status):
 
 
 class ArmorReduction(Status):
-    # reduce MR by N%
+    # reduce armor by N%
     def __init__(self, name):
         super().__init__("Armor Reduction {}".format(name))
         self.reduction = 1
 
     def applicationEffect(self, champion, time, duration, params):
         # if it's not a bigger shred, do nothing
-        champion.armor.mult = min(champion.mr.mult, params)
+        champion.armor.mult = min(champion.armor.mult, params)
         self.reduction = params
         return True
 
     def reapplicationEffect(self, champion, time, duration, params):
         if self.reduction >= params:
-            champion.armor.mult = min(champion.mr.mult, self.reduction)
+            champion.armor.mult = min(champion.armor.mult, self.reduction)
             return True
         else:
             # if it's weaker, doesnt work
@@ -479,7 +500,7 @@ class MRReduction(Status):
                 and status.active
                 and status_name != self.name
             ):
-                champion.mr.mult = min(champion.armor.mult, status.reduction)
+                champion.mr.mult = min(champion.mr.mult, status.reduction)
         return True
 
 
@@ -503,12 +524,20 @@ class CorrosionStatus(Status):
         # champion.mr.addStat(self.total_reduction)
         return True
 
+    def _reschedule(self):
+        # Ticks on a fixed interval and deliberately has no wearoff, so the
+        # next tick is the only time it needs looking at. Corrosion sits on
+        # every opponent for whole fights, so polling it every frame was one of
+        # the most expensive things in the simulator.
+        self.next_update = self.next_proc
+
     def update(self, champion, time):
         if time >= self.next_proc:
             champion.armor.addStat(-self.amount)
             champion.mr.addStat(-self.amount)
             self.total_reduction += self.amount
             self.next_proc += self.interval
+        self.next_update = self.next_proc
         super().update(champion, time)
 
 

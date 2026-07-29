@@ -1,5 +1,8 @@
-class Item(object):
-    def __init__(self, name, hp=0, ad=0, ap=0, 
+from stats import FastDeepCopy
+
+
+class Item(FastDeepCopy):
+    def __init__(self, name, hp=0, ad=0, ap=0,
                  aspd=0, armor=0, mr=0, crit=0,
                  dodge=0, manaRegen=0, mana=0, dmgMultiplier=0, omnivamp=0, has_radiant=False, item_type='Craftable', phases=None):
         self.name = name
@@ -31,4 +34,4 @@ class Item(object):
         return (self.name,)
 
     def __hash__(self):
-        return hash(self.hash_function())
+        return hash(self.hashFunction())

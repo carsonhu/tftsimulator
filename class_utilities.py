@@ -3,6 +3,7 @@
 # import plotly.graph_objects as go
 import json
 import os
+import sys
 
 from pathlib import Path
 from typing import List, Optional
@@ -17,8 +18,12 @@ from set17buffs import *
 from set17champs import *
 from set17items import *
 
-# Detect stlite/Pyodide (stlite sets this env var)
-IS_STLITE = os.environ.get("PYODIDE_BASE_URL") is not None
+# Detect stlite/Pyodide. sys.platform == "emscripten" is the documented check
+# (https://pyodide.org runs under Emscripten); PYODIDE_BASE_URL is a pyodide
+# build-time variable that's deprecated upstream and was never guaranteed to
+# be set inside stlite's sandbox, so it's kept only as a fallback in case some
+# stlite version does set it.
+IS_STLITE = sys.platform == "emscripten" or os.environ.get("PYODIDE_BASE_URL") is not None
 
 
 def select_rows_fallback(df: pd.DataFrame, label="Trials to plot"):
@@ -254,22 +259,42 @@ def write_champion(champ):
         st.write("Notes: " + champ.notes)
 
 
+def _data_editor_select(df: pd.DataFrame) -> list:
+    """The real editable-table checkbox column. Raises if the runtime can't
+    render it, so callers can fall back."""
+    df = df.copy()
+    df["To Plot"] = False
+    df_edit = st.data_editor(
+        df,
+        column_config={
+            "To Plot": st.column_config.CheckboxColumn(
+                "To Plot", help="Which trials to plot", default=False
+            )
+        },
+        hide_index=False,
+        use_container_width=False,
+    )
+    return df_edit.index[df_edit["To Plot"]].tolist()
+
+
 def plot_df(df, simLists):
     # --- selection UI ---
-    if not IS_STLITE:
-        df["To Plot"] = False
-        df_edit = st.data_editor(
-            df,
-            column_config={
-                "To Plot": st.column_config.CheckboxColumn(
-                    "To Plot", help="Which trials to plot", default=False
-                )
-            },
-            hide_index=False,
-            use_container_width=False,
-        )
-        indices_to_plot = df_edit.index[df_edit["To Plot"]].tolist()
+    # data_editor's CheckboxColumn was broken under an earlier stlite version
+    # (whitphx/stlite's own docs list only minor Parquet-vs-Arrow dtype
+    # differences as a limitation now, and a plain bool column isn't one of
+    # the affected types), so try the real widget everywhere and only drop to
+    # the manual checkbox list if it actually throws. Confirmed live against
+    # stlite 0.85.1: the checkbox column renders and is clickable.
+    indices_to_plot = None
+    if IS_STLITE:
+        try:
+            indices_to_plot = _data_editor_select(df)
+        except Exception:
+            indices_to_plot = None
     else:
+        indices_to_plot = _data_editor_select(df)
+
+    if indices_to_plot is None:
         indices_to_plot = checkbox_select_fallback(df, label="Trials to plot")
 
     # --- build series dict ---

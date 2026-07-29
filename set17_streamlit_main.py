@@ -5,15 +5,20 @@ from collections import defaultdict, deque
 import numpy as np
 import pandas as pd
 import streamlit as st
-import xlsxwriter
 from set17buffs import *
 from set17champs import *
 from set17items import *
 from simulator import Simulator
-import requests
 import base64
 import pickle
 import os
+
+try:
+    import requests
+except ImportError:
+    # Not available under Pyodide/stlite. Only needed to offload work to the
+    # SIM_API_URL backend; without it everything runs locally.
+    requests = None
 from sim_core import do_experiment_one_extra as do_experiment_one_extra_local
 
 from champion import Champion
@@ -99,6 +104,11 @@ def createDPSChart(simList):
 
 
 def createUltDamageCSV(simLists):
+    # Imported here rather than at module scope: this is the only other user of
+    # xlsxwriter, and keeping it local means a browser/stlite build does not
+    # have to ship the wheel just to import this module.
+    import xlsxwriter
+
     headers_arr = [
         "Champion",
         "Level",
@@ -234,6 +244,8 @@ def createDPScsv(simLists):
     Args:
         simLists (List): list of simulation results
     """
+    import xlsxwriter
+
     headers_arr = [
         "Champion",
         "Level",
@@ -526,7 +538,14 @@ def radiantRefactor(champions, opponent, itemList, t):
     return 0
 
 
-@st.cache_data(ttl=3600)
+# max_entries bounds this: without it, entries only age out after ttl, so a
+# burst of distinct configs (different champs/items/buffs/stages) from any
+# number of concurrent visitors -- this cache is process-wide, not
+# per-session -- can pile up unbounded within that hour. One measured entry
+# (a 2-item champ swept against ~80 items/buffs) pickles to ~1.5MB, so 100
+# entries is a soft ceiling around 150-300MB depending on champion
+# complexity. Tune to the deployment's actual memory budget.
+@st.cache_data(ttl=3600, max_entries=100)
 def doExperimentOneExtraWrapped(
     champion_pickle: str,
     opponent_pickle: str,
@@ -538,7 +557,7 @@ def doExperimentOneExtraWrapped(
     # API URL
     api_url = os.getenv("SIM_API_URL")
 
-    if api_url:
+    if api_url and requests is not None:
         payload = {
             "champion_pickle": champion_pickle,
             "opponent_pickle": opponent_pickle,

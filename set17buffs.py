@@ -591,6 +591,10 @@ class IoniaEnlightened(Buff):
         self.extraBuff(params)
 
     def performAbility(self, phase, time, champion, input_=0):
+        # The override has to be applied here, not in extraBuff: buffs are
+        # constructed before they are ever handed a champion.
+        if self.level_override:
+            champion.level = self.level_override
         amt_to_add = (
             self.scaling[self.level] + self.lvl_scaling[self.level] * champion.level
         )
@@ -603,8 +607,7 @@ class IoniaEnlightened(Buff):
         return {"Title": "Lvl Override", "Min": 0, "Max": 10, "Default": 0}
 
     def extraBuff(self, level):
-        if level != 0:
-            champion.level = level
+        self.level_override = level
 
 
 class IoniaProsperous(Buff):
@@ -1069,7 +1072,6 @@ class THexUlt(Buff):
                 champion.curMana = champion.fullMana.stat
             if champion.curMana > 0:
                 if time > champion.nextDrain:
-                    print("Draining THex ult: {} {}".format(time, champion.curMana))
                     champion.nextDrain += 0.25
                     champion.curMana -= self.mana_drain / 4
                     for i in range(champion.num_targets):
@@ -1097,7 +1099,6 @@ class THexUlt(Buff):
                     self.missiles_to_send += champion.missilesPerTick
                     while self.missiles_to_send > 1:
                         self.missile_count += 1
-                        print("Sending missile {}".format(self.missile_count))
                         self.missiles_to_send -= 1
                         champion.multiTargetSpell(
                             champion.opponents,
@@ -2756,7 +2757,6 @@ class CorkiUlt(Buff):
                     "physical",
                 )
                 self.next_rocket = time + 8 * (1 - 0.1 * champion.meep)
-                print("Firing rocket at time {}".format(time))
         return 0
 
 

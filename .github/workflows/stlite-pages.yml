@@ -1,0 +1,53 @@
+name: Deploy stlite build to GitHub Pages
+
+# Publishes the whole repo as a static site so index.html (repo root) can
+# fetch its sibling .py files (app.py, champion.py, pages/*.py, ...) by
+# relative URL at runtime. This is a *second*, independent deployment target
+# next to the droplet (deploy.yaml) and Ploomber Cloud (ploomber-cloud.yaml)
+# — it doesn't touch either of them. The droplet at tftsimulator.app stays
+# the live/primary URL until DNS is deliberately repointed at this site; see
+# stlite_app/README.md for the cutover steps.
+#
+# One-time setup before this can run: repo Settings > Pages > Source must be
+# set to "GitHub Actions", and (once ready to switch the custom domain) the
+# domain field set to tftsimulator.app.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
