@@ -4,6 +4,23 @@
 
 import streamlit as st
 
+# Deep-linking: on the stlite/GitHub Pages build, only index.html actually
+# exists as a file, so a bookmark/refresh/shared link to a page (Streamlit's
+# frontend writes /ChampionSelector into the address bar on in-app
+# navigation, but doesn't read that path back on boot) would otherwise
+# always land here on the root page. 404.html redirects those into
+# ?page=<name>; this is the other half, run before st.set_page_config since
+# switch_page must be the first thing that happens if it's going to happen
+# at all. Also works identically on the droplet (st.query_params/
+# st.switch_page aren't stlite-specific), so it's a free bonus there too.
+_DEEP_LINK_PAGES = {
+    "ChampionSelector": "pages/ChampionSelector.py",
+    "ManaGeneration": "pages/ManaGeneration.py",
+}
+_target_page = st.query_params.get("page")
+if _target_page in _DEEP_LINK_PAGES:
+    st.switch_page(_DEEP_LINK_PAGES[_target_page])
+
 st.set_page_config(
     page_title="Darth Noob's TFT Simulator",
     page_icon="👋",

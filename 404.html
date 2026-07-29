@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+    <script>
+      // GitHub Pages serves this file for any request path that isn't a
+      // real one -- which is every Streamlit page path except the root,
+      // since only index.html actually exists. Streamlit's frontend updates
+      // the address bar with pushState when you click between pages (e.g.
+      // /ChampionSelector), but -- confirmed by testing, not assumed --
+      // does NOT read that path back on boot, so a plain "restore the
+      // pathname before mounting" trick doesn't work here. Instead this
+      // redirects into ?page=<name>, which app.py reads via
+      // st.query_params and turns into an explicit st.switch_page() call:
+      // see the comment there.
+      //
+      // pathSegmentsToKeep: how many leading path segments are the site's
+      // own base path rather than part of the app route. 1 while this is
+      // served at github.io/tftsimulator/ (the "tftsimulator" segment) --
+      // change to 0 if/when this moves to serving from a domain root (e.g.
+      // after the tftsimulator.app custom-domain cutover).
+      var pathSegmentsToKeep = 1;
+
+      var loc = window.location;
+      var segments = loc.pathname.split("/").slice(1);
+      var base = "/" + segments.slice(0, pathSegmentsToKeep).join("/") + "/";
+      var appPath = segments.slice(pathSegmentsToKeep).join("/");
+
+      loc.replace(
+        base +
+          "?page=" +
+          encodeURIComponent(appPath) +
+          (loc.search ? "&" + loc.search.slice(1) : "") +
+          loc.hash
+      );
+    </script>
+  </head>
+  <body>Redirecting&hellip;</body>
+</html>
