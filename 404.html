@@ -23,7 +23,12 @@
 
       var loc = window.location;
       var segments = loc.pathname.split("/").slice(1);
-      var base = "/" + segments.slice(0, pathSegmentsToKeep).join("/") + "/";
+      var baseSegments = segments.slice(0, pathSegmentsToKeep);
+      // Joining zero segments still needs the leading "/" -- naively
+      // appending a trailing "/" after an empty join produces "//", which
+      // location.replace() parses as a protocol-relative URL (host-relative,
+      // not path-relative) and silently fails to navigate.
+      var base = baseSegments.length ? "/" + baseSegments.join("/") + "/" : "/";
       var appPath = segments.slice(pathSegmentsToKeep).join("/");
 
       loc.replace(
