@@ -16,11 +16,10 @@
       // see the comment there.
       //
       // pathSegmentsToKeep: how many leading path segments are the site's
-      // own base path rather than part of the app route. 1 while this is
-      // served at github.io/tftsimulator/ (the "tftsimulator" segment) --
-      // change to 0 if/when this moves to serving from a domain root (e.g.
-      // after the tftsimulator.app custom-domain cutover).
-      var pathSegmentsToKeep = 1;
+      // own base path rather than part of the app route. 0 now that this
+      // serves from the tftsimulator.app domain root (was 1 while served
+      // at github.io/tftsimulator/, where "tftsimulator" was the segment).
+      var pathSegmentsToKeep = 0;
 
       var loc = window.location;
       var segments = loc.pathname.split("/").slice(1);
