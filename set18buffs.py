@@ -201,13 +201,17 @@ class Rapidfire(Buff):
             champion.aspd.addStat(10)
         if phase == "postAttack":
             # Rapidfire champions gain more on every attack, up to 10 stacks
-            if (
-                self.stacks < self.max_stacks
-                and "Rapidfire" in getattr(champion, "default_traits", [])
-            ):
+            if self.stacks < self.max_stacks and self._is_rapidfire(champion):
                 self.stacks += 1
                 champion.aspd.addStat(self.per_attack_scaling[self.level])
         return 0
+
+    def _is_rapidfire(self, champion):
+        # A Rapidfire Emblem makes its holder a full trait member too, not
+        # just an innate Rapidfire champion (default_traits).
+        if "Rapidfire" in getattr(champion, "default_traits", []):
+            return True
+        return any(getattr(item, "trait", None) == "Rapidfire" for item in champion.items)
 
 
 class Blossom(Buff):

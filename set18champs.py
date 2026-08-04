@@ -178,7 +178,10 @@ class Yunara(Champion):
             Role.ATTACK_CASTER,
         )
         self.default_traits = ["Blossom", "Executioner"]
-        self.castTime = 2.0
+        # Full dash + cast duration, measured from a real replay (average of
+        # two cast cycles: ~0.82s and ~0.75s). Varies slightly in-game with
+        # dash distance; this is the sim's fixed average.
+        self.castTime = 0.8
         self.num_targets = 1
         self.num_extra_targets = 2
 
@@ -221,3 +224,12 @@ class Yunara(Champion):
                 time,
                 is_spell=True,
             )
+
+        # The cast itself counts as an attack for on-attack effects (e.g.
+        # Rapidfire's per-attack AS stacking), per design -- just the
+        # attack-accounting side effects, not a redundant basic-attack hit
+        # or extra manaPerAttack generation (the cast's own mana reset
+        # below already handles that).
+        self.numAttacks += 1
+        for item in items:
+            item.ability("postAttack", time, self)
