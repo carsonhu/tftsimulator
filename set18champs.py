@@ -1,4 +1,5 @@
 from role import Role
+
 from champion import Champion
 
 champ_list = [
@@ -102,8 +103,8 @@ class SuperDummyTank(Champion):
 
 class Varus(Champion):
     def __init__(self, level):
-        hp = 650
-        atk = 55
+        hp = 500
+        atk = 40
         curMana = 30
         fullMana = 120
         aspd = 0.7
