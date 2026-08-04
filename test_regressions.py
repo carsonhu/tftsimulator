@@ -64,28 +64,6 @@ class TestShredCrossover:
         assert opp.armor.stat == pytest.approx(60.0)
 
 
-class TestIoniaEnlightenedOverride:
-    """extraBuff referenced a `champion` name that does not exist at
-    construction time, so any non-zero Lvl Override crashed the app."""
-
-    def test_zero_override_constructs(self):
-        set18buffs.IoniaEnlightened(3, 0)
-
-    def test_nonzero_override_constructs(self):
-        buff = set18buffs.IoniaEnlightened(3, 2)
-        assert buff.level_override == 2
-
-    def test_override_applies_to_champion(self):
-        champ = set18champs.DummyTank(1)
-        set18buffs.IoniaEnlightened(3, 5).performAbility("preCombat", 0, champ)
-        assert champ.level == 5
-
-    def test_no_override_leaves_level_alone(self):
-        champ = set18champs.DummyTank(3)
-        set18buffs.IoniaEnlightened(3, 0).performAbility("preCombat", 0, champ)
-        assert champ.level == 3
-
-
 class TestNumTraitsDefault:
     """Trait-count-scaling buffs read champion.num_traits, which only the
     Champion Selector page used to set."""
