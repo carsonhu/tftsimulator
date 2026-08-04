@@ -74,6 +74,15 @@ class Champion(FastDeepCopy):
         # the whole status pass while everything is just waiting.
         self.nextStatusUpdate = -1
         self.nextAttackTime = 0
+        # Fraction of the current attack windup completed, accumulated
+        # continuously at the current attack speed (see canAttack/update),
+        # so an AS change mid-swing speeds up or slows down the swing
+        # already in progress instead of only affecting the next one.
+        # Starts at 1.0 to match the pre-existing "instant first tick"
+        # behavior (nextAttackTime used to start at 0, allowing an attack
+        # at time 0 with no windup).
+        self.attack_progress = 1.0
+        self.lastProgressTime = 0
         self.opponents = []
         self.dmgVector = []
         self.dmgDealt = 0 # no need to serialize
@@ -232,7 +241,18 @@ class Champion(FastDeepCopy):
         )
 
     def canAttack(self, time):
-        return time >= self.nextAttackTime
+        return time >= self.nextAttackTime and self.attack_progress >= 1.0
+
+    def updateAttackProgress(self, time):
+        # nextAttackTime is still a hard floor (post-cast lockout, disabling
+        # opponents in the sim loop); progress only accrues once past it, so
+        # a lockout doesn't leave a backlog of "windup" for canAttack to
+        # cash in the instant it ends.
+        if time >= self.nextAttackTime:
+            dt = time - self.lastProgressTime
+            if dt > 0:
+                self.attack_progress += dt * self.aspd.stat
+        self.lastProgressTime = time
 
     def addMana(self, amount, time=None) -> None:
         if time is None or time > self.manalockTime:
@@ -305,8 +325,10 @@ class Champion(FastDeepCopy):
         self.numAttacks += 1
         self.performAttack(opponents, items, time, Stat(0, 1, 0))
 
-        # in case it's accelerated by vayne
-        self.nextAttackTime = min(self.nextAttackTime, time) + self.attackTime()
+        # carry any overshoot past 1.0 into the next swing instead of
+        # dropping it, so this doesn't itself become a source of drift
+        self.attack_progress = max(0.0, self.attack_progress - 1.0)
+        self.nextAttackTime = time
         self.attackWindupLockout = time + self.attackTime() * self.attackWindupRatio
 
     def updateStatuses(self, time):
@@ -353,6 +375,7 @@ class Champion(FastDeepCopy):
         # frame just to answer "no".
         for item in self.onUpdateItems if self.onUpdateItems is not None else items:
             item.ability("onUpdate", time, self)
+        self.updateAttackProgress(time)
         canCast = self.canCast(time)
         if self.canAttack(time) and not canCast:
             # if they can cast it overrides the 1st auto
@@ -382,6 +405,9 @@ class Champion(FastDeepCopy):
             # basically, can't attack before cast time up.
             # this logic might be slightly incorrect
             self.nextAttackTime = max(self.nextAttackTime, time + self.castTime)
+            # windup doesn't carry across a cast; the next swing starts fresh
+            # once nextAttackTime's lockout ends
+            self.attack_progress = 0.0
             for item in items:
                 item.ability("postAbility", time, self)
 
