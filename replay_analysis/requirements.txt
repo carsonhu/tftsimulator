@@ -1,0 +1,9 @@
+numpy
+Pillow
+pytesseract
+matplotlib
+
+# Also required, but not pip-installable:
+# - ffmpeg on PATH (https://ffmpeg.org)
+# - Tesseract OCR engine on PATH (https://github.com/UB-Mannheim/tesseract/wiki
+#   for Windows builds) -- pytesseract just calls out to the tesseract binary.
