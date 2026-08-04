@@ -87,6 +87,7 @@ class Champion(FastDeepCopy):
         self.dmgVector = []
         self.dmgDealt = 0 # no need to serialize
         self.alive = True
+        self.lastDamagedOpponent = None
 
         # notes for user
         self.notes = ""
@@ -505,6 +506,11 @@ class Champion(FastDeepCopy):
 
         avgDmg = self.damage(avgDmg, dtype, opponent, ability_armor_pierce, ability_mr_pierce)
         self.dmgDealt += avgDmg[0]
+        # PostOnDealDamage's input_ carries the damage amount but not who it
+        # hit; on-hit effects that need the specific target (e.g. Executioner
+        # applying a bleed) read this instead of threading a new param
+        # through every item.ability() call.
+        self.lastDamagedOpponent = opponent
         for item in items:
             # if you need to track how much dmg was actually dealt
             item.ability("PostOnDealDamage", time, self, avgDmg)

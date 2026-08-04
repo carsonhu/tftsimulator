@@ -24,6 +24,8 @@ def get_classes_from_file(file_path):
 
 class_buffs = [
     "Rapidfire",
+    "Blossom",
+    "Executioner",
 ]
 
 augments = [
@@ -205,6 +207,62 @@ class Rapidfire(Buff):
             ):
                 self.stacks += 1
                 champion.aspd.addStat(self.per_attack_scaling[self.level])
+        return 0
+
+
+class Blossom(Buff):
+    levels = [0, 3, 5, 7, 9, 11]
+    display_name = "Blossom"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+        )
+        # "After combat, your Wisps are empowered" and the shop-side Wisp
+        # mechanics are out of scope for a combat simulator -- only the
+        # AD/AP grant is modeled.
+        self.scaling = {0: 0, 3: 12, 5: 30, 7: 45, 9: 60, 11: 100}
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            amt = self.scaling[self.level]
+            champion.bonus_ad.addStat(amt)
+            champion.ap.addStat(amt)
+        return 0
+
+
+class Executioner(Buff):
+    levels = [0, 2, 3, 4]
+    display_name = "Executioner"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}",
+            level,
+            params,
+            phases=["preCombat", "PostOnDealDamage"],
+        )
+        self.crit_bonus = 0.35
+        # (2) grants Precision + crit only; bleed starts at (3)
+        self.bleed_scaling = {0: 0, 2: 0, 3: 0.30, 4: 0.50}
+        self.bleed_duration = 3.0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            if self.level >= 2:
+                champion.crit.addStat(self.crit_bonus)
+                champion.addPrecision()
+        if phase == "PostOnDealDamage":
+            bleed_pct = self.bleed_scaling.get(self.level, 0)
+            target = champion.lastDamagedOpponent
+            if bleed_pct > 0 and target is not None and input_:
+                target.applyStatus(
+                    status.ExecutionerBleedStatus(),
+                    champion,
+                    time,
+                    self.bleed_duration,
+                    input_[0] * bleed_pct,
+                )
         return 0
 
 

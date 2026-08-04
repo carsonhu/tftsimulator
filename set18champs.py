@@ -4,6 +4,7 @@ from champion import Champion
 
 champ_list = [
     "Varus",
+    "Yunara",
 ]
 
 
@@ -153,3 +154,70 @@ class Varus(Champion):
                 is_spell=True,
             )
             pierce_multiplier = max(0.4, pierce_multiplier * 0.6)
+
+
+class Yunara(Champion):
+    def __init__(self, level):
+        hp = 550
+        atk = 42
+        curMana = 0
+        fullMana = 35
+        aspd = 0.75
+        armor = 30
+        mr = 30
+        super().__init__(
+            "Yunara",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_CASTER,
+        )
+        self.default_traits = ["Blossom", "Executioner"]
+        self.castTime = 2.0
+        self.num_targets = 1
+        self.num_extra_targets = 2
+
+    abilityScaling = create_ability_scaling([170, 255, 400], [10, 15, 25])
+    splash_ratio = 0.35
+
+    def performAbility(self, opponents, items, time):
+        # Cultivation of Spirit: dash, then launch an orb dealing physical
+        # damage to the current target, splitting 35% of that damage to
+        # num_extra_targets nearby enemies.
+        if not opponents:
+            return
+        baseDmg = self.abilityScaling(self.level, self.bonus_ad.stat, self.ap.stat)
+        baseCritDmg = baseDmg
+        if self.canSpellCrit:
+            baseCritDmg *= self.critDamage()
+        critChance = self.crit.stat if self.canSpellCrit else 0
+        dmgMult = self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+
+        self.doDamage(
+            opponents[0],
+            items,
+            critChance,
+            baseCritDmg * dmgMult,
+            baseDmg * dmgMult,
+            "physical",
+            time,
+            is_spell=True,
+        )
+        splash_dmg = baseDmg * dmgMult * self.splash_ratio
+        splash_crit_dmg = baseCritDmg * dmgMult * self.splash_ratio
+        for opponent in opponents[1 : 1 + self.num_extra_targets]:
+            self.doDamage(
+                opponent,
+                items,
+                critChance,
+                splash_crit_dmg,
+                splash_dmg,
+                "physical",
+                time,
+                is_spell=True,
+            )

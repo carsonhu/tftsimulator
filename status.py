@@ -631,3 +631,37 @@ class TheGrooveStatus(Status):
                 self.total_ad_ap_added += self.ad_ap_per_tick
             self.next_proc += 1.0
         super().update(champion, time)
+
+
+class ExecutionerBleedStatus(Status):
+    # Executioner: any damage the source deals bleeds the target for a % of
+    # that hit's damage, split evenly as true damage over `duration`. Each
+    # new hit's bleed replaces whatever's left of the current one rather
+    # than stacking, since Yunara can retrigger this every attack/cast.
+    def __init__(self):
+        super().__init__("Executioner Bleed")
+        self.damage_per_tick = 0
+        self.interval = 1.0
+        self.next_proc = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        # params: total bleed damage, to be split over `duration`
+        self.damage_per_tick = params / duration * self.interval
+        self.next_proc = time + self.interval
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        self.damage_per_tick = params / duration * self.interval
+        self.next_proc = time + self.interval
+        return True
+
+    def update(self, champion, time):
+        if self.active and time >= self.next_proc:
+            if self.opponent is not None:
+                self.opponent.doDamage(
+                    champion, [], 0,
+                    self.damage_per_tick, self.damage_per_tick,
+                    "true", time,
+                )
+            self.next_proc += self.interval
+        super().update(champion, time)
