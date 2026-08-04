@@ -106,7 +106,7 @@ class Varus(Champion):
         atk = 55
         curMana = 30
         fullMana = 120
-        aspd = 0.75
+        aspd = 0.7
         armor = 25
         mr = 25
         super().__init__(
