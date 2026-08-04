@@ -172,40 +172,29 @@ class Yunara(Champion):
         # 1.8s assumes medium/long dashes are the common case. Revisit if
         # short dashes turn out to be more frequent in practice.
         self.castTime = 1.8
-        self.num_targets = 1
-        self.num_extra_targets = 2
 
     abilityScaling = create_ability_scaling([170, 255, 400], [10, 15, 25])
     splash_ratio = 0.35
+    splash_targets = 2
 
     def performAbility(self, opponents, items, time):
         # Cultivation of Spirit: dash, then launch an orb dealing physical
         # damage to the current target, splitting 35% of that damage to
-        # num_extra_targets nearby enemies. numAttacks=1 on the main hit
-        # makes the cast count as an attack for on-attack effects (e.g.
-        # Rapidfire's per-attack AS stacking), without a redundant
-        # basic-attack hit or extra manaPerAttack generation (the cast's
-        # own mana reset already handles that).
+        # splash_targets nearby enemies. Always 1 main target + 2 splash --
+        # not user-adjustable, so no num_targets/num_extra_targets here.
+        # numAttacks=1 on the main hit makes the cast count as an attack for
+        # on-attack effects (e.g. Rapidfire's per-attack AS stacking),
+        # without a redundant basic-attack hit or extra manaPerAttack
+        # generation (the cast's own mana reset already handles that).
         if not opponents:
             return
         self.multiTargetSpell(
-            opponents[: self.num_targets],
-            items,
-            time,
-            self.num_targets,
-            self.abilityScaling,
-            "physical",
-            numAttacks=1,
+            opponents[:1], items, time, 1, self.abilityScaling, "physical", numAttacks=1
         )
 
         def splash_scaling(level, AD, AP):
             return self.splash_ratio * self.abilityScaling(level, AD, AP)
 
         self.multiTargetSpell(
-            opponents[self.num_targets :],
-            items,
-            time,
-            self.num_extra_targets,
-            splash_scaling,
-            "physical",
+            opponents[1:], items, time, self.splash_targets, splash_scaling, "physical"
         )
