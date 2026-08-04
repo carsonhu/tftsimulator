@@ -189,12 +189,23 @@ class Yunara(Champion):
         if not opponents:
             return
         self.multiTargetSpell(
-            opponents[:1], items, time, 1, self.abilityScaling, "physical", numAttacks=1
+            opponents[: self.num_targets],
+            items,
+            time,
+            self.num_targets,
+            self.abilityScaling,
+            "physical",
+            numAttacks=1,
         )
 
         def splash_scaling(level, AD, AP):
             return self.splash_ratio * self.abilityScaling(level, AD, AP)
 
         self.multiTargetSpell(
-            opponents[1:], items, time, self.num_extra_targets, splash_scaling, "physical"
+            opponents[self.num_targets :],
+            items,
+            time,
+            self.num_extra_targets,
+            splash_scaling,
+            "physical",
         )
