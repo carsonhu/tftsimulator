@@ -132,27 +132,14 @@ class Varus(Champion):
     def performAbility(self, opponents, items, time):
         # Piercing Arrow: hits the first num_targets enemies in line; damage is
         # reduced by 40% for each enemy already pierced (minimum 40% of base).
-        baseDmg = self.abilityScaling(self.level, self.bonus_ad.stat, self.ap.stat)
-        baseCritDmg = baseDmg
-        if self.canSpellCrit:
-            baseCritDmg *= self.critDamage()
-        critChance = self.crit.stat if self.canSpellCrit else 0
-
         pierce_multiplier = 1.0
         for opponent in opponents[: self.num_targets]:
-            dmgMult = (
-                pierce_multiplier * self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
-            )
-            self.doDamage(
-                opponent,
-                items,
-                critChance,
-                baseCritDmg * dmgMult,
-                baseDmg * dmgMult,
-                "physical",
-                time,
-                is_spell=True,
-            )
+            mult = pierce_multiplier
+
+            def pierce_scaling(level, AD, AP, mult=mult):
+                return mult * self.abilityScaling(level, AD, AP)
+
+            self.multiTargetSpell([opponent], items, time, 1, pierce_scaling, "physical")
             pierce_multiplier = max(0.4, pierce_multiplier * 0.6)
 
 
@@ -194,45 +181,20 @@ class Yunara(Champion):
     def performAbility(self, opponents, items, time):
         # Cultivation of Spirit: dash, then launch an orb dealing physical
         # damage to the current target, splitting 35% of that damage to
-        # num_extra_targets nearby enemies.
+        # num_extra_targets nearby enemies. numAttacks=1 on the main hit
+        # makes the cast count as an attack for on-attack effects (e.g.
+        # Rapidfire's per-attack AS stacking), without a redundant
+        # basic-attack hit or extra manaPerAttack generation (the cast's
+        # own mana reset already handles that).
         if not opponents:
             return
-        baseDmg = self.abilityScaling(self.level, self.bonus_ad.stat, self.ap.stat)
-        baseCritDmg = baseDmg
-        if self.canSpellCrit:
-            baseCritDmg *= self.critDamage()
-        critChance = self.crit.stat if self.canSpellCrit else 0
-        dmgMult = self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
-
-        self.doDamage(
-            opponents[0],
-            items,
-            critChance,
-            baseCritDmg * dmgMult,
-            baseDmg * dmgMult,
-            "physical",
-            time,
-            is_spell=True,
+        self.multiTargetSpell(
+            opponents[:1], items, time, 1, self.abilityScaling, "physical", numAttacks=1
         )
-        splash_dmg = baseDmg * dmgMult * self.splash_ratio
-        splash_crit_dmg = baseCritDmg * dmgMult * self.splash_ratio
-        for opponent in opponents[1 : 1 + self.num_extra_targets]:
-            self.doDamage(
-                opponent,
-                items,
-                critChance,
-                splash_crit_dmg,
-                splash_dmg,
-                "physical",
-                time,
-                is_spell=True,
-            )
 
-        # The cast itself counts as an attack for on-attack effects (e.g.
-        # Rapidfire's per-attack AS stacking), per design -- just the
-        # attack-accounting side effects, not a redundant basic-attack hit
-        # or extra manaPerAttack generation (the cast's own mana reset
-        # below already handles that).
-        self.numAttacks += 1
-        for item in items:
-            item.ability("postAttack", time, self)
+        def splash_scaling(level, AD, AP):
+            return self.splash_ratio * self.abilityScaling(level, AD, AP)
+
+        self.multiTargetSpell(
+            opponents[1:], items, time, self.num_extra_targets, splash_scaling, "physical"
+        )
