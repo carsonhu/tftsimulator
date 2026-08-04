@@ -178,10 +178,13 @@ class Yunara(Champion):
             Role.ATTACK_CASTER,
         )
         self.default_traits = ["Blossom", "Executioner"]
-        # Full dash + cast duration, measured from a real replay (average of
-        # two cast cycles: ~0.82s and ~0.75s). Varies slightly in-game with
-        # dash distance; this is the sim's fixed average.
-        self.castTime = 0.8
+        # Full dash + orb-throw duration: maps directly to the real
+        # cast-trigger-to-next-attack gap (no separate windup on top -- see
+        # champion.py's post-cast attack_progress reset). Measured ~1.27-1.49s
+        # for near-zero-distance dashes and ~1.8s for a full-board dash;
+        # 1.8s assumes medium/long dashes are the common case. Revisit if
+        # short dashes turn out to be more frequent in practice.
+        self.castTime = 1.8
         self.num_targets = 1
         self.num_extra_targets = 2
 

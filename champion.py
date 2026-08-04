@@ -406,9 +406,12 @@ class Champion(FastDeepCopy):
             # basically, can't attack before cast time up.
             # this logic might be slightly incorrect
             self.nextAttackTime = max(self.nextAttackTime, time + self.castTime)
-            # windup doesn't carry across a cast; the next swing starts fresh
-            # once nextAttackTime's lockout ends
-            self.attack_progress = 0.0
+            # No extra windup after a cast -- the next attack fires the
+            # instant nextAttackTime's lockout ends (matches the pre-dynamic-
+            # retiming model, and confirmed against real cast-to-cast gaps:
+            # they map directly to castTime with nothing left over for a
+            # separate windup).
+            self.attack_progress = 1.0
             for item in items:
                 item.ability("postAbility", time, self)
 
