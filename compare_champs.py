@@ -5,8 +5,8 @@ import sys
 # Add the parent directory to sys.path to allow importing modules from there
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import set17.set17champs as set17champs
-from set17.champion import Champion
+import set18.set18champs as set18champs
+from set18.champion import Champion
 
 def load_json_data(champ_name):
     # Normalize name for file search (lowercase, remove spaces/punctuation if needed)
@@ -62,10 +62,10 @@ def compare_champion(champ_name):
 
     # 2. Instantiate Python Class
     try:
-        champ_class = getattr(set17champs, champ_name.replace(" ", "").replace("'", "").replace(".", ""))
+        champ_class = getattr(set18champs, champ_name.replace(" ", "").replace("'", "").replace(".", ""))
         champ = champ_class(level=1)
     except AttributeError:
-        print(f"Error: Class not found for {champ_name} in set17champs.py")
+        print(f"Error: Class not found for {champ_name} in set18champs.py")
         return
     except Exception as e:
         print(f"Error instantiating {champ_name}: {e}")
@@ -267,10 +267,10 @@ def compare_champion(champ_name):
 
 def main():
     # List of champions to check
-    # We can get this from set17champs.champ_list
+    # We can get this from set18champs.champ_list
     
     print("Starting comparison...")
-    for champ_name in set17champs.champ_list:
+    for champ_name in set18champs.champ_list:
         # Skip commented out ones or special headers if any (champ_list is just strings)
         compare_champion(champ_name)
 

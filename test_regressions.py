@@ -5,15 +5,15 @@ porting to a new set.
 """
 import pytest
 
-import set17buffs
-import set17champs
-import set17items
+import set18buffs
+import set18champs
+import set18items
 import status
 from simulator import Simulator
 
 
 def make_dummy(armor=100, mr=100):
-    d = set17champs.DummyTank(1)
+    d = set18champs.DummyTank(1)
     d.armor.base = armor
     d.mr.base = mr
     return d
@@ -69,20 +69,20 @@ class TestIoniaEnlightenedOverride:
     construction time, so any non-zero Lvl Override crashed the app."""
 
     def test_zero_override_constructs(self):
-        set17buffs.IoniaEnlightened(3, 0)
+        set18buffs.IoniaEnlightened(3, 0)
 
     def test_nonzero_override_constructs(self):
-        buff = set17buffs.IoniaEnlightened(3, 2)
+        buff = set18buffs.IoniaEnlightened(3, 2)
         assert buff.level_override == 2
 
     def test_override_applies_to_champion(self):
-        champ = set17champs.DummyTank(1)
-        set17buffs.IoniaEnlightened(3, 5).performAbility("preCombat", 0, champ)
+        champ = set18champs.DummyTank(1)
+        set18buffs.IoniaEnlightened(3, 5).performAbility("preCombat", 0, champ)
         assert champ.level == 5
 
     def test_no_override_leaves_level_alone(self):
-        champ = set17champs.DummyTank(3)
-        set17buffs.IoniaEnlightened(3, 0).performAbility("preCombat", 0, champ)
+        champ = set18champs.DummyTank(3)
+        set18buffs.IoniaEnlightened(3, 0).performAbility("preCombat", 0, champ)
         assert champ.level == 3
 
 
@@ -91,14 +91,14 @@ class TestNumTraitsDefault:
     Champion Selector page used to set."""
 
     def test_champion_has_num_traits(self):
-        assert set17champs.DummyTank(1).num_traits == 6
+        assert set18champs.DummyTank(1).num_traits == 6
 
 
 class TestItemHash:
     """Item.__hash__ called a hash_function() that never existed."""
 
     def test_item_is_hashable(self):
-        assert isinstance(hash(set17items.InfinityEdge()), int)
+        assert isinstance(hash(set18items.InfinityEdge()), int)
 
 
 class TestOpponentsStayInert:
@@ -106,7 +106,7 @@ class TestOpponentsStayInert:
     act. Assert that stays true."""
 
     def test_opponents_never_attack_or_cast(self):
-        champ = set17champs.Jinx(2)
+        champ = set18champs.Varus(2)
         opponents = [make_dummy() for _ in range(8)]
         Simulator().simulate([], [], champ, opponents, 10.0, frameRate=30)
         for opp in opponents:
@@ -114,20 +114,20 @@ class TestOpponentsStayInert:
             assert opp.numCasts == 0
 
     def test_shred_still_reaches_every_opponent(self):
-        champ = set17champs.Jinx(2)
+        champ = set18champs.Varus(2)
         opponents = [make_dummy() for _ in range(8)]
         Simulator().simulate(
-            [], [set17buffs.Shred30(1, 0)], champ, opponents, 10.0, frameRate=30
+            [], [set18buffs.Shred30(1, 0)], champ, opponents, 10.0, frameRate=30
         )
         for opp in opponents:
             assert opp.armor.stat == pytest.approx(70.0)
             assert opp.mr.stat == pytest.approx(70.0)
 
     def test_corrosion_still_ticks_down_resists(self):
-        champ = set17champs.Jinx(2)
+        champ = set18champs.Varus(2)
         opponents = [make_dummy() for _ in range(8)]
         Simulator().simulate(
-            [], [set17buffs.Corrosion(1, 0)], champ, opponents, 10.0, frameRate=30
+            [], [set18buffs.Corrosion(1, 0)], champ, opponents, 10.0, frameRate=30
         )
         # 4 armour/MR per 2s tick, so it must have dropped well below 100
         for opp in opponents:

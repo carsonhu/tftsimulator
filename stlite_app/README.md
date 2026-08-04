@@ -41,11 +41,11 @@ below for the actual steps when you're ready.
 
 Browsers block ES module `<script>` tags and cross-origin `fetch()` on
 `file://` URLs, so opening `index.html` by double-clicking it will not work
-— you need a static file server, started from **`set17/`** (the repo root,
+— you need a static file server, started from **`set18/`** (the repo root,
 so relative fetches resolve):
 
 ```bash
-cd set17
+cd set18
 python -m http.server 8000
 ```
 

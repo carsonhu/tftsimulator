@@ -1,6 +1,6 @@
 """Make pytest resolve this set's modules rather than the parent folder's.
 
-`set17/__init__.py` makes this directory a package, so pytest's default
+`set18/__init__.py` makes this directory a package, so pytest's default
 "prepend" import mode walks up past it and puts the PARENT (tft_calculator/) on
 sys.path instead of this directory. That parent still contains the set-5-era
 champion.py, status.py and buffs.py, so `import champion` inside a test picked

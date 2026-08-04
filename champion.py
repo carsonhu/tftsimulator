@@ -1,6 +1,6 @@
 import random
 
-import set17roles
+import set18roles
 import utils
 from role import Role
 from stats import AD, AP, ArmorPierce, Aspd, Attack, FastDeepCopy, Resist, Stat
@@ -67,7 +67,7 @@ class Champion(FastDeepCopy):
             -1
         )  # attack windup: can only cast after attack windup is finished
         self.attackWindupRatio = .3
-        self.items = [set17roles.ChampRole()]
+        self.items = [set18roles.ChampRole()]
 
         self.statuses = {}  # current statuses
         # Earliest next_update across self.statuses; lets the frame loop skip

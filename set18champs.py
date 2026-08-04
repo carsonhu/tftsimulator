@@ -1,0 +1,154 @@
+from role import Role
+from champion import Champion
+
+champ_list = [
+    "Varus",
+]
+
+
+def create_ability_scaling(ad_values, ap_values, func_name="abilityScaling"):
+    """
+    Factory function to create ability scaling functions.
+
+    Args:
+        ad_values: List of 3 AD scaling values [level1, level2, level3]
+        ap_values: List of 3 AP scaling values [level1, level2, level3]
+        func_name: The name of the function to be created (must match attribute name for pickling)
+
+    Returns:
+        A function that calculates ability damage based on level, AD, and AP
+    """
+
+    def scaling(_self, level, AD, AP):
+        return ap_values[level - 1] * AP + ad_values[level - 1] * AD
+
+    scaling.__name__ = func_name
+    return scaling
+
+
+class BaseChamp(Champion):
+    def __init__(self, level):
+        hp = 1000
+        atk = 70
+        curMana = 10
+        fullMana = 100
+        aspd = 0.85
+        armor = 0
+        mr = 0
+        super().__init__(
+            "Base Champ", hp, atk, curMana, fullMana, aspd, armor, mr, level
+        )
+        self.ap_scale = 1
+        self.castTime = 0.5
+
+    def abilityScaling(self, level, AD, AP):
+        # Dynamic AP scaling based on self.ap_scale
+        base_scaling = create_ability_scaling(
+            [0, 0, 0], [self.ap_scale, self.ap_scale, self.ap_scale]
+        )
+        return base_scaling(None, level, AD, AP)
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items, time, 1, self.abilityScaling, "magical")
+
+
+class ZeroResistance(Champion):
+    def __init__(self, level):
+        hp = 1000
+        atk = 70
+        curMana = 10
+        fullMana = 100
+        aspd = 0.85
+        armor = 0
+        mr = 0
+        super().__init__("Tankman", hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        self.castTime = 0.5
+
+    def performAbility(self, opponents, items, time):
+        return 0
+
+
+class DummyTank(Champion):
+    def __init__(self, level):
+        hp = 1000
+        atk = 70
+        curMana = 10
+        fullMana = 100
+        aspd = 0.85
+        armor = 100
+        mr = 100
+        super().__init__("Tankman", hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        self.castTime = 0.5
+
+    def performAbility(self, opponents, items, time):
+        return 0
+
+
+class SuperDummyTank(Champion):
+    def __init__(self, level):
+        hp = 2000
+        atk = 70
+        curMana = 10
+        fullMana = 100
+        aspd = 0.85
+        armor = 200
+        mr = 200
+        super().__init__("Tankman", hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        self.castTime = 0.5
+
+    def performAbility(self, opponents, items, time):
+        return 0
+
+
+class Varus(Champion):
+    def __init__(self, level):
+        hp = 650
+        atk = 55
+        curMana = 30
+        fullMana = 120
+        aspd = 0.75
+        armor = 25
+        mr = 25
+        super().__init__(
+            "Varus",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_CASTER,
+        )
+        self.default_traits = ["Rapidfire"]
+        self.castTime = 2.0
+        self.num_targets = 2
+
+    abilityScaling = create_ability_scaling([350, 525, 790], [30, 45, 70])
+
+    def performAbility(self, opponents, items, time):
+        # Piercing Arrow: hits the first num_targets enemies in line; damage is
+        # reduced by 40% for each enemy already pierced (minimum 40% of base).
+        baseDmg = self.abilityScaling(self.level, self.bonus_ad.stat, self.ap.stat)
+        baseCritDmg = baseDmg
+        if self.canSpellCrit:
+            baseCritDmg *= self.critDamage()
+        critChance = self.crit.stat if self.canSpellCrit else 0
+
+        pierce_multiplier = 1.0
+        for opponent in opponents[: self.num_targets]:
+            dmgMult = (
+                pierce_multiplier * self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+            )
+            self.doDamage(
+                opponent,
+                items,
+                critChance,
+                baseCritDmg * dmgMult,
+                baseDmg * dmgMult,
+                "physical",
+                time,
+                is_spell=True,
+            )
+            pierce_multiplier = max(0.4, pierce_multiplier * 0.6)

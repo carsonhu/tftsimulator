@@ -10,10 +10,10 @@ import class_utilities
 # import metrics_panel
 import numpy as np
 import pandas as pd
-import set17_streamlit_main
-import set17buffs
-import set17champs
-import set17items
+import set18_streamlit_main
+import set18buffs
+import set18champs
+import set18items
 import streamlit as st
 import utils
 
@@ -24,30 +24,30 @@ simLists = []
 simDict = {}
 
 
-champ_list = sorted(set17champs.champ_list)
+champ_list = sorted(set18champs.champ_list)
 
 # all_items = []
 all_buffs = sorted(
-    set17buffs.class_buffs
-    + set17buffs.augments
-    + set17buffs.no_buff
-    + set17buffs.stat_buffs
+    set18buffs.class_buffs
+    + set18buffs.augments
+    + set18buffs.no_buff
+    + set18buffs.stat_buffs
 )
 
 all_items = sorted(
-    set17items.offensive_craftables
-    + set17items.artifacts
-    + set17items.radiants
-    + set17items.emblems
-    + set17items.animas
-    + set17items.no_item
+    set18items.offensive_craftables
+    + set18items.artifacts
+    + set18items.radiants
+    + set18items.emblems
+    + set18items.animas
+    + set18items.no_item
 )
 
 sidebar_items = sorted(all_items)
 
-craftables = set17items.offensive_craftables
+craftables = set18items.offensive_craftables
 
-aug_buffs = sorted(set17buffs.augments)
+aug_buffs = sorted(set18buffs.augments)
 
 champ_before_sims = None
 
@@ -124,11 +124,11 @@ with st.sidebar:
     extra_buffs = []
     for buff in buffs:
         # Buff: ("Name", level, param)
-        levels = utils.class_for_name("set17buffs", buff[0]).levels
+        levels = utils.class_for_name("set18buffs", buff[0]).levels
         for level in levels:
             if level != buff[1]:
                 extra_buffs.append(
-                    utils.class_for_name("set17buffs", buff[0])(level, buff[2])
+                    utils.class_for_name("set18buffs", buff[0])(level, buff[2])
                 )
 
     if "NOVA" in [b[0] for b in buffs]:
@@ -143,7 +143,7 @@ with st.sidebar:
     # Add items to Champion
     for item in items:
         if item != "NoItem":
-            champ.items.append(utils.class_for_name("set17items", item)())
+            champ.items.append(utils.class_for_name("set18items", item)())
             champ.item_count += 1
     class_utilities.add_buffs(champ, buffs)
 
@@ -167,11 +167,11 @@ with st.sidebar:
 
     simulation_items = all_items
 
-    simLists, source = set17_streamlit_main.doExperimentOneExtra(
+    simLists, source = set18_streamlit_main.doExperimentOneExtra(
         champ,
         enemy,
-        utils.convertStrList("set17items", simulation_items),
-        utils.convertStrList("set17buffs", aug_buffs) + extra_buffs,
+        utils.convertStrList("set18items", simulation_items),
+        utils.convertStrList("set18buffs", aug_buffs) + extra_buffs,
         t,
         framerate,
     )
@@ -198,7 +198,7 @@ with tab1:
         r"Most cast times/manalock times are guesses. Units can cast after they have completed 30% of an autoattack. Champs must attack at least once between casts (should only affect Samira). Simulator is probably not very accurate to true gameplay at high attack speeds."
     )
 
-    itemSimulator = set17_streamlit_main.Simulator()
+    itemSimulator = set18_streamlit_main.Simulator()
     itemSimulator.itemStats(champ_before_sims.items, champ_before_sims)
 
     class_utilities.write_champion(champ_before_sims)
@@ -222,7 +222,7 @@ with tab1:
 
     radio_value = st.radio("", options, index=0, horizontal=True)
 
-    df = set17_streamlit_main.createSelectorDPSTable(simLists)
+    df = set18_streamlit_main.createSelectorDPSTable(simLists)
     df_flt = df
 
 
@@ -231,19 +231,19 @@ with tab1:
         df_flt = df_flt[df_flt["Extra class name"].isin(current_craftables + ["NoItem"])]
     if radio_value == "Artifact":
         df_flt = df_flt[
-            df_flt["Extra class name"].isin(set17items.artifacts + ["NoItem"])
+            df_flt["Extra class name"].isin(set18items.artifacts + ["NoItem"])
         ]
     if radio_value == "Radiant":
         df_flt = df_flt[
-            df_flt["Extra class name"].isin(set17items.radiants + ["NoItem"])
+            df_flt["Extra class name"].isin(set18items.radiants + ["NoItem"])
         ]
     if radio_value == "Emblem":
         df_flt = df_flt[
-            df_flt["Extra class name"].isin(set17items.emblems + ["NoItem"])
+            df_flt["Extra class name"].isin(set18items.emblems + ["NoItem"])
         ]
     if radio_value == "Anima":
         df_flt = df_flt[
-            df_flt["Extra class name"].isin(set17items.animas + ["NoItem"])
+            df_flt["Extra class name"].isin(set18items.animas + ["NoItem"])
         ]
     if radio_value == "Trait":
         df_flt = df_flt[
@@ -251,7 +251,7 @@ with tab1:
         ]
     if radio_value == "Augment/Buff":
         df_flt = df_flt[
-            df_flt["Extra class name"].isin(set17buffs.augments + ["NoItem"])
+            df_flt["Extra class name"].isin(set18buffs.augments + ["NoItem"])
         ]
     if radio_value == "Arbiter":
         # Arbiter combinations use simple names like "Attack 3 times | Gain AS"

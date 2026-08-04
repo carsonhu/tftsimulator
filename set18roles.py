@@ -1,4 +1,4 @@
-from set17buffs import Buff
+from set18buffs import Buff
 
 
 class ChampRole(Buff):

@@ -11,7 +11,7 @@ def download_data():
 
     BASE_URL = "https://raw.communitydragon.org/pbe/game/characters/"
     # Use absolute path to ensure we write to the correct location
-    TARGET_DIR = r"c:\Users\carso\Google Drive\Homework\tftSim\tft_calculator\set17\data_reference"
+    TARGET_DIR = r"c:\Users\carso\Google Drive\Homework\tftSim\tft_calculator\set18\data_reference"
 
     if not os.path.exists(TARGET_DIR):
         os.makedirs(TARGET_DIR)

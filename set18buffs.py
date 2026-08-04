@@ -45,6 +45,7 @@ class_buffs = [
     "StargazerMedallion",
     "StargazerFountain",
     "Mecha",
+    "Rapidfire",
 ]
 
 augments = [
@@ -2177,6 +2178,36 @@ class Challenger(Buff):
             if self.level in scaling:
                 bonus_as = scaling[self.level] * 1.25
                 champion.aspd.addStat(bonus_as)
+        return 0
+
+
+class Rapidfire(Buff):
+    levels = [0, 2, 3, 4, 5]
+    display_name = "Rapidfire"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}",
+            level,
+            params,
+            phases=["preCombat", "postAttack"],
+        )
+        self.per_attack_scaling = {0: 0, 2: 3, 3: 5, 4: 9, 5: 15}
+        self.max_stacks = 10
+        self.stacks = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            # Team gains 10% Attack Speed
+            champion.aspd.addStat(10)
+        if phase == "postAttack":
+            # Rapidfire champions gain more on every attack, up to 10 stacks
+            if (
+                self.stacks < self.max_stacks
+                and "Rapidfire" in getattr(champion, "default_traits", [])
+            ):
+                self.stacks += 1
+                champion.aspd.addStat(self.per_attack_scaling[self.level])
         return 0
 
 

@@ -5,9 +5,9 @@ from collections import defaultdict, deque
 import numpy as np
 import pandas as pd
 import streamlit as st
-from set17buffs import *
-from set17champs import *
-from set17items import *
+from set18buffs import *
+from set18champs import *
+from set18items import *
 from simulator import Simulator
 import base64
 import pickle

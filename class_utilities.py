@@ -10,13 +10,13 @@ from typing import List, Optional
 
 import pandas as pd
 import plotly.graph_objects as go
-import set17buffs
+import set18buffs
 import streamlit as st
 import utils
 from helpers import buff_display_map, buff_display_names, item_display_map
-from set17buffs import *
-from set17champs import *
-from set17items import *
+from set18buffs import *
+from set18champs import *
+from set18items import *
 
 # Detect stlite/Pyodide. sys.platform == "emscripten" is the documented check
 # (https://pyodide.org runs under Emscripten); PYODIDE_BASE_URL is a pyodide
@@ -135,11 +135,11 @@ def buff_bar(
         with item_cols[1]:
             buff1level = st.selectbox(
                 "Level",
-                utils.class_for_name("set17buffs", buff1).levels,
+                utils.class_for_name("set18buffs", buff1).levels,
                 key=f"Buff_lvl_{n}_{champ_name}",
             )
         with item_cols[2]:
-            extraParams = utils.class_for_name("set17buffs", buff1).extraParameters()
+            extraParams = utils.class_for_name("set18buffs", buff1).extraParameters()
             if extraParams != 0:
                 buff1Extra = st.number_input(
                     extraParams["Title"],
@@ -169,7 +169,7 @@ def _load_powerups():
 def get_valid_powerups(champ, powerups):
     data = _load_powerups()
     if champ.name in data:
-        valid_powerups = data[champ.name] + set17buffs.no_buff
+        valid_powerups = data[champ.name] + set18buffs.no_buff
         return [item for item in powerups if item in valid_powerups]
     return []
 
@@ -779,12 +779,12 @@ def add_buffs(champ, buffs, add_noitem=False):
     ) in buffs:
         if buff != "NoBuff" or add_noitem:
             champ.items.append(
-                utils.class_for_name("set17buffs", buff)(level, extraParams)
+                utils.class_for_name("set18buffs", buff)(level, extraParams)
             )
 
 
 def add_powerup(champ, powerup):
-    champ.items.append(utils.class_for_name("set17powerups", powerup)(1, []))
+    champ.items.append(utils.class_for_name("set18powerups", powerup)(1, []))
 
 
 def mentor_selector(champion):
@@ -892,7 +892,7 @@ def void_buff_selector(champion):
     """
     st.header("Void Buff")
     
-    void_buff_options = set17buffs.no_buff + set17buffs.void_buffs
+    void_buff_options = set18buffs.no_buff + set18buffs.void_buffs
     
     selected_buff = st.selectbox(
         "Select Void Buff",
@@ -921,9 +921,9 @@ def champ_selector(champ_list):
         champ = st.selectbox("Champion", champ_list, index=0)
     with item_cols[1]:
         levels = [1, 2, 3]
-        if utils.class_for_name("set17champs", champ).canFourStar:
+        if utils.class_for_name("set18champs", champ).canFourStar:
             levels.append(4)
         champlevel = st.selectbox("Level", levels, index=0)
 
-    new_champ = utils.class_for_name("set17champs", champ)(champlevel)
+    new_champ = utils.class_for_name("set18champs", champ)(champlevel)
     return new_champ

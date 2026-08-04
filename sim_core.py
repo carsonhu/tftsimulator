@@ -3,9 +3,9 @@
 import copy
 from typing import Any, Dict, List
 
-import set17items
-import set17buffs
-from set17buffs import Buff, class_buffs  # or wherever Buff lives
+import set18items
+import set18buffs
+from set18buffs import Buff, class_buffs  # or wherever Buff lives
 from simulator import Simulator
 from role import Role
 
@@ -27,13 +27,13 @@ def do_experiment_one_extra(
 
     # items first
     for item in item_list:
-        if isinstance(item, set17items.Emblem):
+        if isinstance(item, set18items.Emblem):
             # 0. Check if Emblem item is already on champion
             if any(i.name == item.name for i in champion.items):
                 continue
             
             # 1. Check if trait is already on champion
-            trait_cls = getattr(set17buffs, item.trait)
+            trait_cls = getattr(set18buffs, item.trait)
             existing_buffs = [b for b in champion.items if isinstance(b, trait_cls)]
             
             # Helper to get default params
