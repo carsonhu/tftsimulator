@@ -195,8 +195,14 @@ class Rapidfire(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
-            # Team gains 10% Attack Speed
-            champion.aspd.addStat(10)
+            # Tooltip says "Team gains 10% Attack Speed", but this is
+            # currently bugged out client-side and not actually granted --
+            # confirmed against a 2026-08-03 replay (Varus w/ Guinsoo's +
+            # QSS): observed starting AS matched base*(1+guinsoo%+qss%)
+            # with no +10 from Rapidfire, and adding it back in reproduced
+            # a consistent ~7-9% AS overestimate for the whole fight.
+            # Re-enable once Riot fixes it.
+            pass
         if phase == "postAttack":
             # Rapidfire champions gain more on every attack, up to 10 stacks
             if (
