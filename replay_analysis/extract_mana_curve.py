@@ -1,13 +1,15 @@
-"""Extract a mana(t) curve for a right-clicked champion from a TFT replay video.
+"""Extract mana(t) and attack-speed(t) curves for a right-clicked champion
+from a TFT replay video.
 
 Reads frames from an OBS replay via ffmpeg, and for each frame where the
 champion detail panel is open (right-click held), OCRs the "current / max"
-mana readout and the champion name. Panel-closed stretches are recorded as
-gaps rather than guessed.
+mana readout, the current attack speed stat, and the champion name.
+Panel-closed stretches are recorded as gaps rather than guessed.
 
 Calibrated against 1920x1080 recordings of the TFT client. If your replays
-are a different resolution, the ROI/NAME_BOX/MANA_BOX/HP_CHECK_PIXEL
-constants below need to be re-measured first -- see README.md.
+are a different resolution, the ROI/NAME_BOX/MANA_BOX/AS_BOX/
+HP_CHECK_PIXEL constants below need to be re-measured first -- see
+README.md.
 
 Requires ffmpeg on PATH and Tesseract OCR installed (see requirements.txt).
 
@@ -30,18 +32,26 @@ from PIL import Image
 # Panel region-of-interest, calibrated at 1920x1080 (see README.md).
 # Crop is [x, y, w, h] in source-video pixels; extraction only decodes this
 # small region instead of the full frame, which is what makes this fast
-# enough to run at several fps over a long replay.
-ROI = {"x": 1650, "y": 345, "w": 270, "h": 80}
+# enough to run at several fps over a long replay. Tall enough to cover the
+# name/HP/mana rows near the top of the panel *and* the attack-speed stat
+# near the bottom, with a lot of dead space (ability icons) in between.
+ROI = {"x": 1650, "y": 345, "w": 270, "h": 545}
 
 # Sub-regions within the ROI crop (relative pixel coords).
 NAME_BOX = (20, 4, 250, 28)
 MANA_BOX = (30, 55, 250, 78)
+AS_BOX = (38, 513, 80, 535)  # first stat in the second row: current AS
 HP_CHECK_PIXEL = (32, 44)  # must read as green whenever the panel is open
 
 MANA_RE = re.compile(r"(\d+)\s*/\s*(\d+)")
+ASPD_RE = re.compile(r"(\d+\.\d+)")
 # Champion name only: the crop's right edge catches part of the star-cost
 # icon, which OCRs as trailing junk ("Veigar )", "Varus 32", ...).
 NAME_RE = re.compile(r"^[A-Za-z' ]+")
+
+# Sanity bounds for the AS OCR read; anything outside this is a misread, not
+# a real in-game attack speed.
+ASPD_MIN, ASPD_MAX = 0.1, 6.0
 
 
 def is_panel_open(frame: np.ndarray) -> bool:
@@ -50,16 +60,27 @@ def is_panel_open(frame: np.ndarray) -> bool:
     return int(g) > 140 and int(g) - int(r) > 40 and int(g) - int(b) > 40
 
 
-def ocr_mana(frame_img: Image.Image) -> tuple[int, int] | None:
-    box = frame_img.crop(MANA_BOX)
-    box = box.resize((box.width * 3, box.height * 3), Image.LANCZOS)
-    text = pytesseract.image_to_string(
-        box, config="--psm 7 -c tessedit_char_whitelist=0123456789/"
+def _ocr_digits(frame_img: Image.Image, box, whitelist: str) -> str:
+    crop = frame_img.crop(box)
+    crop = crop.resize((crop.width * 3, crop.height * 3), Image.LANCZOS)
+    return pytesseract.image_to_string(
+        crop, config=f"--psm 7 -c tessedit_char_whitelist={whitelist}"
     )
+
+
+def ocr_mana(frame_img: Image.Image) -> tuple[int, int] | None:
+    text = _ocr_digits(frame_img, MANA_BOX, "0123456789/")
     m = MANA_RE.search(text)
+    return (int(m.group(1)), int(m.group(2))) if m else None
+
+
+def ocr_aspd(frame_img: Image.Image) -> float | None:
+    text = _ocr_digits(frame_img, AS_BOX, "0123456789.")
+    m = ASPD_RE.search(text)
     if not m:
         return None
-    return int(m.group(1)), int(m.group(2))
+    value = float(m.group(1))
+    return value if ASPD_MIN <= value <= ASPD_MAX else None
 
 
 def ocr_name(frame_img: Image.Image) -> str:
@@ -113,22 +134,27 @@ def main():
         img = Image.open(fp).convert("RGB")
         arr = np.array(img)
         open_ = is_panel_open(arr)
-        champ, cur, mx = "", None, None
+        row = {
+            "t": t, "open": open_, "champ": "",
+            "cur": None, "mx": None, "aspd": None,
+        }
         if open_:
-            champ = ocr_name(img)
+            row["champ"] = ocr_name(img)
             parsed = ocr_mana(img)
             if parsed:
-                cur, mx = parsed
-        rows.append((t, open_, champ, cur, mx))
+                row["cur"], row["mx"] = parsed
+            row["aspd"] = ocr_aspd(img)
+        rows.append(row)
 
     rows = clean_rows(rows)
 
     with open(args.out, "w", encoding="utf-8") as f:
-        f.write("time_s,panel_open,champion,cur_mana,max_mana\n")
-        for t, open_, champ, cur, mx in rows:
-            cur_s = "" if cur is None else str(cur)
-            mx_s = "" if mx is None else str(mx)
-            f.write(f"{t:.3f},{open_},{champ},{cur_s},{mx_s}\n")
+        f.write("time_s,panel_open,champion,cur_mana,max_mana,aspd\n")
+        for r in rows:
+            cur_s = "" if r["cur"] is None else str(r["cur"])
+            mx_s = "" if r["mx"] is None else str(r["mx"])
+            aspd_s = "" if r["aspd"] is None else f"{r['aspd']:.3f}"
+            f.write(f"{r['t']:.3f},{r['open']},{r['champ']},{cur_s},{mx_s},{aspd_s}\n")
     print(f"Wrote {args.out}")
 
     if args.plot:
@@ -149,25 +175,29 @@ def clean_rows(rows):
     Within each contiguous panel-open block, max_mana is corrected to the
     block's most common reading, and any cur_mana wildly outside that
     max_mana is dropped (set back to a gap) rather than guessed at.
+
+    aspd doesn't get the same block-invariant treatment (it genuinely
+    changes every attack/stack) -- out-of-range reads are already dropped
+    at OCR time by ocr_aspd's sanity bounds.
     """
-    cleaned = list(rows)
+    cleaned = [dict(r) for r in rows]
     block_start = None
-    for i, (t, open_, champ, cur, mx) in enumerate(cleaned + [(None, False, "", None, None)]):
-        if open_ and block_start is None:
+    sentinel = {"t": None, "open": False, "champ": "", "cur": None, "mx": None, "aspd": None}
+    for i, r in enumerate(cleaned + [sentinel]):
+        if r["open"] and block_start is None:
             block_start = i
-        elif not open_ and block_start is not None:
+        elif not r["open"] and block_start is not None:
             block = cleaned[block_start:i]
             mx_counts = {}
-            for _, _, _, _, bmx in block:
-                if bmx is not None:
-                    mx_counts[bmx] = mx_counts.get(bmx, 0) + 1
+            for b in block:
+                if b["mx"] is not None:
+                    mx_counts[b["mx"]] = mx_counts.get(b["mx"], 0) + 1
             if mx_counts:
                 true_mx = max(mx_counts, key=mx_counts.get)
                 for j in range(block_start, i):
-                    bt, bopen, bchamp, bcur, bmx = cleaned[j]
-                    if bcur is not None and bcur > true_mx * 1.5:
-                        bcur = None
-                    cleaned[j] = (bt, bopen, bchamp, bcur, true_mx)
+                    if cleaned[j]["cur"] is not None and cleaned[j]["cur"] > true_mx * 1.5:
+                        cleaned[j]["cur"] = None
+                    cleaned[j]["mx"] = true_mx
             block_start = None
     return cleaned
 
@@ -175,31 +205,34 @@ def clean_rows(rows):
 def plot_curve(rows, out_path: Path):
     import matplotlib.pyplot as plt
 
-    ts = [r[0] for r in rows if r[3] is not None]
-    manas = [r[3] for r in rows if r[3] is not None]
-    champs = [r[2] for r in rows if r[3] is not None]
+    mana_rows = [r for r in rows if r["cur"] is not None]
+    aspd_rows = [r for r in rows if r["aspd"] is not None]
 
-    fig, ax = plt.subplots(figsize=(14, 5))
-    # Break the line at champion-selection changes so segments aren't
-    # connected across a different unit's mana pool.
-    seg_t, seg_m = [], []
-    prev_champ = None
-    for t, m, c in zip(ts, manas, champs):
-        if c != prev_champ and seg_t:
-            ax.plot(seg_t, seg_m, marker=".", markersize=2)
-            seg_t, seg_m = [], []
-        seg_t.append(t)
-        seg_m.append(m)
-        prev_champ = c
-    if seg_t:
-        ax.plot(seg_t, seg_m, marker=".", markersize=2)
-
-    ax.set_xlabel("time (s)")
-    ax.set_ylabel("mana")
-    ax.set_title(str(Path(out_path).stem))
+    fig, axes = plt.subplots(2, 1, figsize=(14, 8), sharex=True)
+    _plot_segmented(axes[0], mana_rows, "cur", "mana")
+    _plot_segmented(axes[1], aspd_rows, "aspd", "attack speed")
+    axes[1].set_xlabel("time (s)")
+    axes[0].set_title(str(Path(out_path).stem))
     fig.tight_layout()
     fig.savefig(out_path, dpi=150)
     print(f"Wrote {out_path}")
+
+
+def _plot_segmented(ax, rows, value_key, ylabel):
+    # Break the line at champion-selection changes so segments aren't
+    # connected across a different unit's stats.
+    seg_t, seg_v = [], []
+    prev_champ = None
+    for r in rows:
+        if r["champ"] != prev_champ and seg_t:
+            ax.plot(seg_t, seg_v, marker=".", markersize=2)
+            seg_t, seg_v = [], []
+        seg_t.append(r["t"])
+        seg_v.append(r[value_key])
+        prev_champ = r["champ"]
+    if seg_t:
+        ax.plot(seg_t, seg_v, marker=".", markersize=2)
+    ax.set_ylabel(ylabel)
 
 
 if __name__ == "__main__":

@@ -107,7 +107,7 @@ def main():
         plot_comparison(log, args.real_csv, args.plot_out)
 
 
-def plot_comparison(sim_log, real_csv_path, out_path):
+def plot_comparison(sim_log, real_csv_path, out_path, window=(232.6, 241.0)):
     import csv
     import matplotlib.pyplot as plt
 
@@ -116,25 +116,47 @@ def plot_comparison(sim_log, real_csv_path, out_path):
 
     # Real window: last frame still at 30 mana before the climb, through the
     # cast back to (near) 0. Hand-picked from the 2026-08-03 clip.
-    real_pts = [
-        (float(r["time_s"]), int(r["cur_mana"]))
-        for r in rows
-        if r["cur_mana"] and 232.6 <= float(r["time_s"]) <= 241.0
+    in_window = [r for r in rows if window[0] <= float(r["time_s"]) <= window[1]]
+    t0 = float(in_window[0]["time_s"])
+
+    real_mana_pts = [
+        (float(r["time_s"]) - t0, int(r["cur_mana"])) for r in in_window if r["cur_mana"]
     ]
-    t0 = real_pts[0][0]
-    real_t = [t - t0 for t, _ in real_pts]
-    real_m = [m for _, m in real_pts]
+    real_aspd_pts = [
+        (float(r["time_s"]) - t0, float(r["aspd"]))
+        for r in in_window
+        if r.get("aspd")
+    ]
 
-    sim_t = [t for t, _, _ in sim_log if t <= 8.5]
-    sim_m = [m for t, m, _ in sim_log if t <= 8.5]
+    sim_window = [row for row in sim_log if row[0] <= window[1] - t0 + 1]
 
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.step(real_t, real_m, where="post", marker=".", label="real replay (OCR)")
-    ax.step(sim_t, sim_m, where="post", marker=".", label="simulator")
-    ax.set_xlabel("time since combat start (s)")
-    ax.set_ylabel("mana")
-    ax.set_title("Varus mana: real replay vs simulator")
-    ax.legend()
+    fig, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+
+    axes[0].step(
+        [t for t, _ in real_mana_pts], [m for _, m in real_mana_pts],
+        where="post", marker=".", label="real replay (OCR)",
+    )
+    axes[0].step(
+        [t for t, _, _ in sim_window], [m for _, m, _ in sim_window],
+        where="post", marker=".", label="simulator",
+    )
+    axes[0].set_ylabel("mana")
+    axes[0].legend()
+
+    if real_aspd_pts:
+        axes[1].step(
+            [t for t, _ in real_aspd_pts], [a for _, a in real_aspd_pts],
+            where="post", marker=".", label="real replay (OCR)",
+        )
+    axes[1].step(
+        [t for t, _, _ in sim_window], [a for _, _, a in sim_window],
+        where="post", marker=".", label="simulator",
+    )
+    axes[1].set_ylabel("attack speed")
+    axes[1].set_xlabel("time since combat start (s)")
+    axes[1].legend()
+
+    axes[0].set_title("Varus mana & attack speed: real replay vs simulator")
     fig.tight_layout()
     fig.savefig(out_path, dpi=150)
     print(f"Wrote {out_path}")
