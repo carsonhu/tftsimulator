@@ -131,8 +131,6 @@ with st.sidebar:
                     utils.class_for_name("set18buffs", buff[0])(level, buff[2])
                 )
 
-    class_utilities.arbiter_selector(champ, buffs)
-
     enemy = class_utilities.enemy_list("Champ selector")
 
     framerate = class_utilities.frameRate("Frame Rate")
@@ -208,12 +206,6 @@ with tab1:
     if len([item for item in items if item != "NoItem"]) >= 3:
         options = ["Trait", "Augment/Buff"]
 
-    if any(b[0] == "Arbiter" for b in buffs):
-        options.append("Arbiter")
-
-    if champ.name == "Ezreal":
-        options.append("Takedowns")
-
     radio_value = st.radio("", options, index=0, horizontal=True)
 
     df = set18_streamlit_main.createSelectorDPSTable(simLists)
@@ -243,19 +235,6 @@ with tab1:
         df_flt = df_flt[
             df_flt["Extra class name"].isin(set18buffs.augments + ["NoItem"])
         ]
-    if radio_value == "Arbiter":
-        # Arbiter combinations use simple names like "Attack 3 times | Gain AS"
-        # We also want to include the current baseline "NoItem" for comparison
-        # And any row that doesn't have an "Extra class name" (which our custom Buffs won't)
-        # Actually, createSelectorDPSTable sets "Extra" to the name.
-        df_flt = df_flt[
-            ((df_flt["Extra"].str.contains(" | ", regex=False)) & ~df_flt["Extra"].str.endswith("Gain mana") & ~df_flt["Extra"].str.startswith("Deal Damage 10 times")) | (df_flt["Extra"] == "Other") | (df_flt["Extra"] == "NoItem")
-        ]
-    if radio_value == "Takedowns":
-        df_flt = df_flt[
-            df_flt["Extra"].str.startswith("Takedowns: ") | (df_flt["Extra"] == "NoItem")
-        ]
-
     new_df = df_flt.drop(["Extra class name", "Name", "Level"], axis=1)
 
     if not display_dps:

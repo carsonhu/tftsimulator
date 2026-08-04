@@ -830,56 +830,6 @@ def starguardian_selector(champion):
     champion.star_guardians = star_guardians
 
 
-def nova_selector(champion):
-    st.header("N.O.V.A. Buffs")
-    item_cols = st.columns(3)
-
-    novas = {
-        "Aatrox": False,
-        "Caitlyn": False,
-        "Akali": False,
-        "Emblem 1": False,
-        "Emblem 2": False,
-    }
-
-    for index, name in enumerate(list(novas.keys())):
-        with item_cols[index % 3]:
-            champ_novas = champion.name == name
-            novas[name] = st.checkbox(name, value=champ_novas, key=f"nova_{name}")
-    champion.novas = novas
-
-
-def arbiter_selector(champion, buffs):
-    # Check if Arbiter is active (level > 0)
-    arbiter_active = False
-    for buff_name, level, _ in buffs:
-        if buff_name == "Arbiter":
-            arbiter_active = True
-            break
-
-    if arbiter_active:
-        st.header("Arbiter")
-        causes = [
-            "When an Arbiter attacks 3 times",
-            "Combat Start: For each Arbiter star level",
-            "When an Arbiter deals damage 10 times",
-            "Combat Start: For each interest you would gain",
-            "Every 4 seconds",
-            "When an Arbiter spends 50 mana",
-            "Combat start: If you rerolled",
-        ]
-        effects = ["Gain AS", "Gain AP", "Gain mana", "Other"]
-
-        # Default cause is "Combat Start: For each Arbiter star level" (index 1)
-        # Default effect is "Other" (index 3)
-        champion.cause = st.selectbox(
-            "Cause", causes, index=1, key=f"arbiter_cause_{champion.name}"
-        )
-        champion.effect = st.selectbox(
-            "Effect", effects, index=3, key=f"arbiter_effect_{champion.name}"
-        )
-
-
 def void_buff_selector(champion):
     """Select which Void buff to apply
 
