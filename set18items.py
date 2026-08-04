@@ -78,6 +78,7 @@ radiants = [
     "RadiantTitans",
     "RadiantStrikersFlail",
     "RadiantHoJ",
+    "RadiantHoJ",
     "RadiantRed",
     "RadiantMorellos",
     "RadiantQSS",
@@ -86,7 +87,7 @@ radiants = [
     "RadiantGuinsoosRageblade",
 ]
 
-emblems = []
+emblems = ["RapidfireEmblem"]
 
 animas = []
 
@@ -99,6 +100,13 @@ class Emblem(Item):
     def __init__(self, display_name, trait, **kwargs):
         super().__init__(display_name, **kwargs)
         self.trait = trait
+
+
+class RapidfireEmblem(Emblem):
+    display_name = "Rapidfire Emblem"
+
+    def __init__(self):
+        super().__init__(self.display_name, trait="Rapidfire", aspd=20, phases=None)
 
 
 class NoItem(Item):
