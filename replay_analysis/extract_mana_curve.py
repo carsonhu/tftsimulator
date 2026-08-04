@@ -121,6 +121,8 @@ def main():
                 cur, mx = parsed
         rows.append((t, open_, champ, cur, mx))
 
+    rows = clean_rows(rows)
+
     with open(args.out, "w", encoding="utf-8") as f:
         f.write("time_s,panel_open,champion,cur_mana,max_mana\n")
         for t, open_, champ, cur, mx in rows:
@@ -135,6 +137,39 @@ def main():
     if args.keep_frames is None:
         import shutil
         shutil.rmtree(frame_dir, ignore_errors=True)
+
+
+def clean_rows(rows):
+    """Fix OCR misreads using the fact that max_mana can't change while the
+    same champion stays selected.
+
+    Tesseract occasionally sticks an extra digit onto a reading (120 ->
+    1202), and when an ability tooltip overlaps the panel it can misread
+    cur_mana as garbage (seen in testing: 60 max mana read as cur_mana=7410).
+    Within each contiguous panel-open block, max_mana is corrected to the
+    block's most common reading, and any cur_mana wildly outside that
+    max_mana is dropped (set back to a gap) rather than guessed at.
+    """
+    cleaned = list(rows)
+    block_start = None
+    for i, (t, open_, champ, cur, mx) in enumerate(cleaned + [(None, False, "", None, None)]):
+        if open_ and block_start is None:
+            block_start = i
+        elif not open_ and block_start is not None:
+            block = cleaned[block_start:i]
+            mx_counts = {}
+            for _, _, _, _, bmx in block:
+                if bmx is not None:
+                    mx_counts[bmx] = mx_counts.get(bmx, 0) + 1
+            if mx_counts:
+                true_mx = max(mx_counts, key=mx_counts.get)
+                for j in range(block_start, i):
+                    bt, bopen, bchamp, bcur, bmx = cleaned[j]
+                    if bcur is not None and bcur > true_mx * 1.5:
+                        bcur = None
+                    cleaned[j] = (bt, bopen, bchamp, bcur, true_mx)
+            block_start = None
+    return cleaned
 
 
 def plot_curve(rows, out_path: Path):
