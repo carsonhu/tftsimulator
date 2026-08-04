@@ -131,9 +131,6 @@ with st.sidebar:
                     utils.class_for_name("set18buffs", buff[0])(level, buff[2])
                 )
 
-    if "NOVA" in [b[0] for b in buffs]:
-        class_utilities.nova_selector(champ)
-
     class_utilities.arbiter_selector(champ, buffs)
 
     enemy = class_utilities.enemy_list("Champ selector")
@@ -207,12 +204,9 @@ with tab1:
 
     display_dps = st.checkbox("Display DPS", value=False)
 
-    options = ["Craftable", "Artifact", "Radiant", "Emblem", "Anima", "Trait", "Augment/Buff"]
+    options = ["Craftable", "Artifact", "Radiant", "Emblem", "Trait", "Augment/Buff"]
     if len([item for item in items if item != "NoItem"]) >= 3:
         options = ["Trait", "Augment/Buff"]
-
-    if "NOVA" in [b[0] for b in buffs]:
-        options.append("NOVA")
 
     if any(b[0] == "Arbiter" for b in buffs):
         options.append("Arbiter")
@@ -241,10 +235,6 @@ with tab1:
         df_flt = df_flt[
             df_flt["Extra class name"].isin(set18items.emblems + ["NoItem"])
         ]
-    if radio_value == "Anima":
-        df_flt = df_flt[
-            df_flt["Extra class name"].isin(set18items.animas + ["NoItem"])
-        ]
     if radio_value == "Trait":
         df_flt = df_flt[
             df_flt["Extra class name"].isin([x[0] for x in buffs] + ["NoItem"])
@@ -260,10 +250,6 @@ with tab1:
         # Actually, createSelectorDPSTable sets "Extra" to the name.
         df_flt = df_flt[
             ((df_flt["Extra"].str.contains(" | ", regex=False)) & ~df_flt["Extra"].str.endswith("Gain mana") & ~df_flt["Extra"].str.startswith("Deal Damage 10 times")) | (df_flt["Extra"] == "Other") | (df_flt["Extra"] == "NoItem")
-        ]
-    if radio_value == "NOVA":
-        df_flt = df_flt[
-            df_flt["Extra"].str.startswith("NOVA (") | (df_flt["Extra"] == "NoItem")
         ]
     if radio_value == "Takedowns":
         df_flt = df_flt[
