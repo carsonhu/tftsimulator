@@ -712,6 +712,11 @@ def createSelectorDPSTable(simLists):
         new_entry["Extra"] = sim["Extra"].name
         # print(new_entry["Extra"])
         new_entry["Extra class name"] = type(sim["Extra"]).__name__
+        # Blackthorn rows carry the sacrifice broken out into its own columns;
+        # the ChampionSelector shows those in place of "Extra". Rows from any
+        # other sweep leave them blank.
+        for column, value in sim.get("Blackthorn", {}).items():
+            new_entry[column] = value
         # DPS at 5s
         for t in [5, 10, 15, 20, 25]:
             res = getDPS(sim["Results"], t)

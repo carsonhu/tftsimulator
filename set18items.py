@@ -31,7 +31,6 @@ offensive_craftables = [
     "VoidStaff",
     "KrakensFury",
     "EdgeOfNight",
-    "SympatheticImplant",
 ]
 
 mana_items = [
@@ -40,7 +39,6 @@ mana_items = [
     "GuinsoosRageblade",
     "Nashors",
     "Adaptive",
-    "SympatheticImplant",
 ]
 
 artifacts = [
@@ -614,29 +612,6 @@ class Blue(Item):
     def performAbility(self, phase, time, champion, input_):
         champion.ap.addMultiplier += self.multScaling
         champion.bonus_ad.addMultiplier += self.multScaling
-
-
-class SympatheticImplant(Item):
-    display_name = "Sympathetic Implant (no 4 psionic yet)"
-
-    def __init__(self):
-        super().__init__(
-            self.display_name,
-            dmgMultiplier=0.1,
-            aspd=15,
-            manaRegen=2,
-            phases=["onUpdate"],
-        )
-        self.next_bonus = 5
-
-    def performAbility(self, phase, time, champion, input_=0):
-        if time >= self.next_bonus:
-            if champion.role.is_magic:
-                champion.manaRegen.addStat(1)
-            else:
-                champion.aspd.addStat(15)
-            self.next_bonus += 5
-
 
 ### ARTIFACTS
 

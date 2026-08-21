@@ -830,6 +830,55 @@ def starguardian_selector(champion):
     champion.star_guardians = star_guardians
 
 
+def blackthorn_selector(champion, buffs):
+    """Pick the ally sitting on the Blackthorn hex.
+
+    Only shows up once Blackthorn is in the buff bar, the way set 17's
+    arbiter_selector did. The three choices land on the champion rather than
+    on the buff so that sim_core can sweep them by deep-copying the champion
+    (see the Blackthorn block in do_experiment_one_extra).
+
+    Args:
+        champion (Champion): champion selected
+        buffs (list): (name, level, params) tuples from buff_bar
+    """
+    if not any(buff_name == "Blackthorn" for buff_name, _, _ in buffs):
+        return
+
+    st.header("Blackthorn Sacrifice")
+    blackthorn = set18buffs.Blackthorn
+    cols = st.columns(3)
+
+    with cols[0]:
+        champion.blackthorn_role = st.selectbox(
+            "Role",
+            blackthorn.selectable_roles,
+            index=0,
+            key=f"blackthorn_role_{champion.name}",
+        )
+    # Cost is read before the star box is drawn -- which star levels a
+    # sacrifice can turn up at depends on it. Writing into cols[2] first keeps
+    # the on-screen order role | star | cost regardless.
+    with cols[2]:
+        champion.blackthorn_cost = st.selectbox(
+            "Cost",
+            blackthorn.costs,
+            index=0,
+            format_func=blackthorn.costLabel,
+            key=f"blackthorn_cost_{champion.name}",
+        )
+    with cols[1]:
+        champion.blackthorn_star = st.selectbox(
+            "Star level",
+            blackthorn.starLevels(champion.blackthorn_cost),
+            index=0,
+            format_func=blackthorn.starLabel,
+            # Cost is in the key so that narrowing the star list can't leave
+            # the widget holding a value that is no longer an option.
+            key=f"blackthorn_star_{champion.name}_{champion.blackthorn_cost}",
+        )
+
+
 def void_buff_selector(champion):
     """Select which Void buff to apply
 

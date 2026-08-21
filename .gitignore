@@ -171,3 +171,9 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+
+# Raw CommunityDragon downloads for tft_data.py. ~130MB and re-fetchable;
+# the parsed output in reference/ is what gets committed.
+.tft_cache/
+test_*.py 
+verify_*.py 

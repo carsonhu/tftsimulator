@@ -665,3 +665,189 @@ class ExecutionerBleedStatus(Status):
                 )
             self.next_proc += self.interval
         super().update(champion, time)
+
+
+class CassiopeiaPoisonStatus(Status):
+    # Noxious Blast: total magic damage split into per-second ticks over
+    # `duration`. Poisons stack, so unlike ExecutionerBleedStatus this must
+    # never merge into an existing instance -- the caller (set18champs.
+    # Cassiopeia) gives every cast's application a unique status name so
+    # each one lives as its own dict entry instead of reapplying.
+    def __init__(self, name):
+        super().__init__(name)
+        self.damage_per_tick = 0
+        self.interval = 1.0
+        self.next_proc = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        # params: total poison damage, to be split over `duration`
+        self.damage_per_tick = params / duration * self.interval
+        self.next_proc = time + self.interval
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        self.damage_per_tick = params / duration * self.interval
+        self.next_proc = time + self.interval
+        return True
+
+    def update(self, champion, time):
+        if self.active and time >= self.next_proc:
+            if self.opponent is not None:
+                self.opponent.doDamage(
+                    champion, [], 0,
+                    self.damage_per_tick, self.damage_per_tick,
+                    "magical", time,
+                )
+            self.next_proc += self.interval
+        super().update(champion, time)
+
+
+class GrompBubbleStatus(Status):
+    # Belchy Bubble's AP-version splash: the listed 145/220/345 is a total
+    # dealt over 3s, so it's locked in at cast time (like
+    # CassiopeiaPoisonStatus) and split into per-second ticks rather than
+    # re-scaling off the caster's AP as it grows mid-DoT.
+    #
+    # Unlike Cassiopeia's poison this does NOT stack: one status name per
+    # target, so a recast inside the window refreshes the splash instead of
+    # layering a second copy.
+    def __init__(self, name="Gromp Bubble"):
+        super().__init__(name)
+        self.damage_per_tick = 0
+        self.interval = 1.0
+        self.next_proc = 0
+
+    def _start(self, time, duration, params):
+        # params: total splash damage, to be split over `duration`
+        self.damage_per_tick = params / duration * self.interval
+        self.next_proc = time + self.interval
+        return True
+
+    def applicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def update(self, champion, time):
+        if self.active and time >= self.next_proc:
+            if self.opponent is not None:
+                self.opponent.doDamage(
+                    champion, [], 0,
+                    self.damage_per_tick, self.damage_per_tick,
+                    "magical", time,
+                )
+            self.next_proc += self.interval
+        super().update(champion, time)
+
+
+class KarmaTetherStatus(Status):
+    # Karmic Bond: a tether on one target dealing its listed total in even
+    # ticks over `duration`, then a burst on the target and the enemies
+    # around it. Both halves go out through the caster's multiTargetSpell
+    # (rather than CassiopeiaPoisonStatus's raw doDamage) because each tick
+    # is its own damage instance in game -- so each one crits on its own with
+    # Jeweled Gauntlet and feeds on-spell-damage item effects.
+    #
+    # The burst lives here rather than in performAbility so it lands at the
+    # END of the tether, 1.5s after the cast, which is also why it re-reads
+    # the caster's current opponents instead of the list captured at cast.
+    def __init__(self, name):
+        super().__init__(name)
+        self.scaling = zero_scaling
+        self.burst_scaling = zero_scaling
+        self.interval = 0.5
+        self.next_proc = 0
+        self.ticks_total = 1
+        self.ticks_remaining = 0
+        self.burst_targets = 0
+        self.burst_pending = False
+
+    def _start(self, time, duration, params):
+        # params: (tether scaling, tick interval, tick count, burst scaling,
+        #          burst targets)
+        (
+            self.scaling,
+            self.interval,
+            self.ticks_total,
+            self.burst_scaling,
+            self.burst_targets,
+        ) = params
+        self.ticks_remaining = self.ticks_total
+        self.next_proc = time + self.interval
+        self.burst_pending = True
+        return True
+
+    def applicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def tickScaling(self, level, AD, AP):
+        # The tether's listed damage is a total, so each tick is an even
+        # share of it. Evaluated per tick (not locked at cast) since it goes
+        # through multiTargetSpell, which reads the caster's live AD/AP.
+        return self.scaling(level, AD, AP) / self.ticks_total
+
+    def update(self, champion, time):
+        caster = self.opponent
+        if self.active and caster is not None:
+            while self.ticks_remaining > 0 and time >= self.next_proc:
+                caster.multiTargetSpell(
+                    [champion], caster.items, time, 1, self.tickScaling, "magical"
+                )
+                self.ticks_remaining -= 1
+                self.next_proc += self.interval
+            # Same frame as the final tick: the tether's last damage and the
+            # burst go off together at the end of the channel.
+            if self.burst_pending and self.ticks_remaining == 0:
+                self.burst_pending = False
+                if caster.opponents:
+                    caster.multiTargetSpell(
+                        caster.opponents,
+                        caster.items,
+                        time,
+                        self.burst_targets,
+                        self.burst_scaling,
+                        "magical",
+                    )
+        super().update(champion, time)
+
+
+class ZyraPlantStatus(Status):
+    # Rampant Growth: a summoned plant, self-applied to the caster
+    # (DoTEffect-style -- "champion" and "opponent" are both the caster),
+    # ticking a magic-damage multiTargetSpell at the caster's current first
+    # target every `interval` seconds for a fixed attack COUNT rather than a
+    # fixed duration, since Summoner adds extra attacks, not extra time.
+    def __init__(self, name):
+        super().__init__(name)
+        self.scaling = zero_scaling
+        self.interval = 0.8
+        self.next_proc = 0
+        self.attacks_remaining = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        # params: (scaling function, interval, num_attacks)
+        self.scaling, self.interval, self.attacks_remaining = params
+        self.next_proc = time + self.interval
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return True
+
+    def update(self, champion, time):
+        if self.active and self.attacks_remaining > 0 and time >= self.next_proc:
+            if self.opponent is not None and self.opponent.opponents:
+                self.opponent.multiTargetSpell(
+                    self.opponent.opponents,
+                    self.opponent.items,
+                    time,
+                    1,
+                    self.scaling,
+                    "magical",
+                )
+            self.attacks_remaining -= 1
+            self.next_proc += self.interval
+        super().update(champion, time)

@@ -32,6 +32,7 @@ all_buffs = sorted(
     + set18buffs.augments
     + set18buffs.no_buff
     + set18buffs.stat_buffs
+    + set18buffs.wisps
 )
 
 all_items = sorted(
@@ -48,6 +49,8 @@ sidebar_items = sorted(all_items)
 craftables = set18items.offensive_craftables
 
 aug_buffs = sorted(set18buffs.augments)
+
+wisp_buffs = sorted(set18buffs.wisps)
 
 champ_before_sims = None
 
@@ -131,6 +134,8 @@ with st.sidebar:
                     utils.class_for_name("set18buffs", buff[0])(level, buff[2])
                 )
 
+    class_utilities.blackthorn_selector(champ, buffs)
+
     enemy = class_utilities.enemy_list("Champ selector")
 
     framerate = class_utilities.frameRate("Frame Rate")
@@ -166,7 +171,9 @@ with st.sidebar:
         champ,
         enemy,
         utils.convertStrList("set18items", simulation_items),
-        utils.convertStrList("set18buffs", aug_buffs) + extra_buffs,
+        utils.convertStrList("set18buffs", aug_buffs)
+        + utils.convertStrList("set18buffs", wisp_buffs)
+        + extra_buffs,
         t,
         framerate,
     )
@@ -202,9 +209,12 @@ with tab1:
 
     display_dps = st.checkbox("Display DPS", value=False)
 
-    options = ["Craftable", "Artifact", "Radiant", "Emblem", "Trait", "Augment/Buff"]
+    options = ["Craftable", "Artifact", "Radiant", "Emblem", "Trait", "Augment/Buff", "Wisp"]
     if len([item for item in items if item != "NoItem"]) >= 3:
-        options = ["Trait", "Augment/Buff"]
+        options = ["Trait", "Augment/Buff", "Wisp"]
+
+    if any(b[0] == "Blackthorn" for b in buffs):
+        options.append("Blackthorn")
 
     radio_value = st.radio("", options, index=0, horizontal=True)
 
@@ -235,7 +245,25 @@ with tab1:
         df_flt = df_flt[
             df_flt["Extra class name"].isin(set18buffs.augments + ["NoItem"])
         ]
+    if radio_value == "Wisp":
+        df_flt = df_flt[
+            df_flt["Extra class name"].isin(set18buffs.wisps + ["NoItem"])
+        ]
+    if radio_value == "Blackthorn":
+        # One row per sacrifice; the empty hex stands in for the NoItem row.
+        df_flt = df_flt[df_flt["Extra"].str.startswith("Blackthorn: ")]
     new_df = df_flt.drop(["Extra class name", "Name", "Level"], axis=1)
+
+    # The sacrifice's Role/Star Level/Cost replace the row name under the
+    # Blackthorn radio, and are dead weight under every other one.
+    blackthorn_cols = [c for c in ("Role", "Star Level", "Cost") if c in new_df.columns]
+    if radio_value == "Blackthorn":
+        new_df = new_df.drop(["Extra"], axis=1)
+        new_df = new_df[
+            blackthorn_cols + [c for c in new_df.columns if c not in blackthorn_cols]
+        ]
+    elif blackthorn_cols:
+        new_df = new_df.drop(blackthorn_cols, axis=1)
 
     if not display_dps:
         new_df = new_df.drop(

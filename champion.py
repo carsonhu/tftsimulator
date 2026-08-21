@@ -42,9 +42,11 @@ class Champion(FastDeepCopy):
         self.manaGainMultiplier = Stat(1, 1, 0)
         self.level = level
         self.dmgMultiplier = Stat(1, 1, 0)
-        self.extraDmgMultiplier = Stat(
-            1, 1, 0
-        )  # 2nd dmg multiplier for 'increased dmg against'
+        # 2nd damage multiplier, multiplied against dmgMultiplier rather than
+        # summed into it -- for amps that stack multiplicatively with the
+        # item/augment amp pool (Ravager). Sources here are still additive with
+        # each other, so a third independent multiplier needs its own Stat.
+        self.extraDmgMultiplier = Stat(1, 1, 0)
         self.crit = Stat(0.25, 1, 0)
         self.critDmg = Stat(1.4, 1, 0)
         self.omnivamp = Stat(0, 1, 0)
@@ -101,6 +103,14 @@ class Champion(FastDeepCopy):
         
         # Meep
         self.meep = 0
+
+        # Blackthorn: the sacrificed ally on the hex. Role/Star Level/Cost
+        # decide which stat package the trait hands over and how big it is;
+        # set by class_utilities.blackthorn_selector. Cost 0 is "No Tier";
+        # role "None" is an empty hex, i.e. no sacrifice and no effect.
+        self.blackthorn_role = "None"
+        self.blackthorn_star = 1
+        self.blackthorn_cost = 1
 
         # Augments
         self.seraphim = False
@@ -169,6 +179,9 @@ class Champion(FastDeepCopy):
             self.cause,
             self.effect,
             self.meep,
+            self.blackthorn_role,
+            self.blackthorn_star,
+            self.blackthorn_cost,
         )
         # return stat_tuple
         return items_tuple + stat_tuple
@@ -362,13 +375,9 @@ class Champion(FastDeepCopy):
 
         # mana regeneration
         if time >= self.nextMana:
-            self.nextMana += 0.5
+            self.nextMana += 0.25
             # time provided = will check for manalock
-            self.addMana(self.manaRegen.stat / 2, time)
-            # if self.manaRegen.stat > 0:
-            #     self.dmgVector.append(
-            #         (time, (0, "physical"), self.aspd.stat, self.curMana)
-            #     )
+            self.addMana(self.manaRegen.stat / 4, time)
 
         # Call any items which activate on each update. onUpdateItems is the
         # subset of items that subscribe to this phase, precomputed once per

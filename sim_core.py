@@ -156,17 +156,28 @@ def do_experiment_one_extra(
             nova_buff = Buff(f"NOVA ({plus}{nova_unit})", 1, 0, None)
             sim_list.append({"Champ": champ, "Extra": nova_buff, "Results": results})
 
-    # Ezreal Takedown iterations
-    if champion.name == "Ezreal":
-        t_vals = [0, 25, 50, 100]
-        current = getattr(champion, 'takedowns', 0)
-        if current not in t_vals:
-            t_vals.append(current)
-        t_vals.sort()
-        
-        for t_val in t_vals:
+    # Blackthorn sacrifice combinations: every (Role, Star Level, Cost) a
+    # sacrifice can actually be, plus the empty hex. 3- and 4-star sacrifices
+    # only exist on a 1-cost, so the pricier tiers contribute 1- and 2-star
+    # rows only. The trait reads all three off the champion, so deep-copying
+    # it and overwriting them is enough.
+    blackthorn = next(
+        (b for b in champion.items if type(b).__name__ == "Blackthorn"), None
+    )
+    if blackthorn is not None and blackthorn.level > 0:
+        trait = set18buffs.Blackthorn
+        sacrifices = [(trait.ROLE_NONE, None, None)]
+        for role in trait.roles:
+            for cost in trait.costs:
+                for star in trait.starLevels(cost):
+                    sacrifices.append((role, star, cost))
+
+        for role, star, cost in sacrifices:
             champ = copy.deepcopy(champion)
-            champ.takedowns = t_val
+            champ.blackthorn_role = role
+            if star is not None:
+                champ.blackthorn_star = star
+                champ.blackthorn_cost = cost
 
             results = simulator.simulate(
                 [],
@@ -176,8 +187,30 @@ def do_experiment_one_extra(
                 duration,
                 frameRate=frame_rate,
             )
-            tk_buff = Buff(f"Takedowns: {t_val}", 1, 0, None)
-            sim_list.append({"Champ": champ, "Extra": tk_buff, "Results": results})
+
+            if star is None:
+                name = f"Blackthorn: {role}"
+                columns = {"Role": role, "Star Level": "-", "Cost": "-"}
+            else:
+                star_label = trait.starLabel(star)
+                cost_label = trait.costLabel(cost)
+                name = f"Blackthorn: {role} {star_label} ({cost_label})"
+                columns = {
+                    "Role": role,
+                    "Star Level": star_label,
+                    "Cost": cost_label,
+                }
+
+            sim_list.append(
+                {
+                    "Champ": champ,
+                    "Extra": Buff(name, 1, 0, None),
+                    "Results": results,
+                    # Rendered as their own columns in place of "Extra" when
+                    # the Blackthorn radio is on (see createSelectorDPSTable).
+                    "Blackthorn": columns,
+                }
+            )
 
     # Arbiter iterations
     arbiter_trait = next((b for b in champion.items if b.name.startswith("Arbiter")), None)
