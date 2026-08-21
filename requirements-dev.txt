@@ -1,0 +1,10 @@
+# Local development only -- never installed on the droplet or in the browser
+# build. Install with:  pip install -r requirements.txt -r requirements-dev.txt
+-r requirements.txt
+
+# The test suite (pytest.ini configures import mode and file patterns).
+pytest>=8.0
+
+# Only the verify_*.py one-off scripts and replay_analysis/ import this; the
+# app itself never does, so it does not belong in the deployed image.
+matplotlib>=3.9

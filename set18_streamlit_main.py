@@ -541,11 +541,21 @@ def radiantRefactor(champions, opponent, itemList, t):
 # max_entries bounds this: without it, entries only age out after ttl, so a
 # burst of distinct configs (different champs/items/buffs/stages) from any
 # number of concurrent visitors -- this cache is process-wide, not
-# per-session -- can pile up unbounded within that hour. One measured entry
-# (a 2-item champ swept against ~80 items/buffs) pickles to ~1.5MB, so 100
-# entries is a soft ceiling around 150-300MB depending on champion
-# complexity. Tune to the deployment's actual memory budget.
-@st.cache_data(ttl=3600, max_entries=100)
+# per-session -- can pile up unbounded within that hour.
+#
+# 10, not 100: the only thing this cache has to hold is "the slices the
+# ChampionSelector is currently showing", so that clicking between radio
+# options doesn't recompute. Stale entries past that are worth nothing, and
+# under stlite this lives in the visitor's browser tab, where memory is the
+# scarce resource -- 100 entries was a ceiling in the hundreds of MB on
+# hardware that may not have it.
+#
+# The floor is the number of radio options (8 with Blackthorn fielded).
+# ChampionSelector's WARM_OTHER_SLICES loop writes one entry per slice after
+# each render, so anything below that count would evict the slice on screen
+# and make every click a fresh sweep. 10 leaves a little headroom; measured,
+# all 8 slices for one champion total ~0.5MB.
+@st.cache_data(ttl=3600, max_entries=10)
 def doExperimentOneExtraWrapped(
     champion_pickle: str,
     opponent_pickle: str,
@@ -553,6 +563,7 @@ def doExperimentOneExtraWrapped(
     buff_list_pickle: str,
     t: float,
     frameRate: int,
+    run_blackthorn: bool = True,
 ):
     # API URL
     api_url = os.getenv("SIM_API_URL")
@@ -565,6 +576,10 @@ def doExperimentOneExtraWrapped(
             "buff_list_pickle": buff_list_pickle,
             "t": t,
             "frame_rate": frameRate,
+            # Older sim_api deployments ignore this and return the Blackthorn
+            # rows regardless; harmless (extra rows the slice filters out),
+            # and the local path below is what stlite always takes.
+            "run_blackthorn": run_blackthorn,
         }
 
         try:
@@ -585,14 +600,21 @@ def doExperimentOneExtraWrapped(
 
     # Fallback to local computation using sim_core
     results = do_experiment_one_extra_local(
-        champion_obj, opponent_obj, _itemList, _buffList, t, frameRate
+        champion_obj, opponent_obj, _itemList, _buffList, t, frameRate,
+        run_blackthorn=run_blackthorn,
     )
     return results, "Local"
 
 
 # @st.cache_data(hash_funcs={Champion: hash_func})
 def doExperimentOneExtra(
-    champion: Champion, opponent: Champion, itemList, buffList, t, frameRate=30
+    champion: Champion,
+    opponent: Champion,
+    itemList,
+    buffList,
+    t,
+    frameRate=30,
+    run_blackthorn=True,
 ):
     # Serialize before calling cached function
     champion_pickle = base64.b64encode(pickle.dumps(champion)).decode("utf-8")
@@ -601,7 +623,13 @@ def doExperimentOneExtra(
     buff_list_pickle = base64.b64encode(pickle.dumps(buffList)).decode("utf-8")
 
     return doExperimentOneExtraWrapped(
-        champion_pickle, opponent_pickle, item_list_pickle, buff_list_pickle, t, frameRate
+        champion_pickle,
+        opponent_pickle,
+        item_list_pickle,
+        buff_list_pickle,
+        t,
+        frameRate,
+        run_blackthorn,
     )
     # this is done with champ already with a set of items
     # simulator = Simulator()

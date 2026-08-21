@@ -23,6 +23,10 @@ t = 30
 simLists = []
 simDict = {}
 
+# Shared between the pre-render "which slice do I simulate?" read in the
+# sidebar and the st.radio call in tab1 that actually draws the control.
+RESULTS_RADIO_KEY = "results_radio"
+
 
 champ_list = sorted(set18champs.champ_list)
 
@@ -165,18 +169,75 @@ with st.sidebar:
 
 # # End metrics
 
-    simulation_items = all_items
+    # The table only ever shows one radio slice at a time, so only the visible
+    # slice is simulated up front. Sweeping everything was ~135 sims per widget
+    # change; a slice is at most ~30. Every slice carries NoItem, because
+    # createSelectorDPSTable's "Extra DPS" column is a ratio against that row.
+    #
+    # WARM_OTHER_SLICES (bottom of this file) then fills the cache with the
+    # rest *after* the visible table has rendered, so clicking another radio
+    # option is a cache hit rather than a fresh sweep. That moves the wait
+    # after first paint rather than removing it -- set it False to genuinely
+    # do less work per interaction, at the cost of a pause on each radio
+    # click. That is the better setting for low-end phones under stlite.
+    WARM_OTHER_SLICES = True
 
-    simLists, source = set18_streamlit_main.doExperimentOneExtra(
-        champ,
-        enemy,
-        utils.convertStrList("set18items", simulation_items),
-        utils.convertStrList("set18buffs", aug_buffs)
-        + utils.convertStrList("set18buffs", wisp_buffs)
-        + extra_buffs,
-        t,
-        framerate,
-    )
+    def slice_inputs(name):
+        """(item names, buff objects, run_blackthorn) for one radio option."""
+        if name == "Craftable":
+            return craftables, [], False
+        if name == "Artifact":
+            return set18items.artifacts, [], False
+        if name == "Radiant":
+            return set18items.radiants, [], False
+        if name == "Emblem":
+            return set18items.emblems, [], False
+        if name == "Anima":
+            return set18items.animas, [], False
+        if name == "Trait":
+            return [], extra_buffs, False
+        if name == "Augment/Buff":
+            return [], utils.convertStrList("set18buffs", aug_buffs), False
+        if name == "Wisp":
+            return [], utils.convertStrList("set18buffs", wisp_buffs), False
+        if name == "Blackthorn":
+            # No items or buffs of its own -- the sweep lives in sim_core and
+            # keys off the champion already carrying the trait.
+            return [], [], True
+        return [], [], False
+
+    def run_slice(name):
+        slice_items, slice_buffs, run_blackthorn = slice_inputs(name)
+        return set18_streamlit_main.doExperimentOneExtra(
+            champ,
+            enemy,
+            utils.convertStrList("set18items", list(slice_items) + set18items.no_item),
+            slice_buffs,
+            t,
+            framerate,
+            run_blackthorn=run_blackthorn,
+        )
+
+    # The radio widget is created down in tab1, so this reads the value it left
+    # in session_state on the previous run -- the whole point being to know
+    # which slice to simulate before anything renders. Clicking the radio
+    # reruns the script with the new value already in place, so the right slice
+    # is computed on that same rerun.
+    options = ["Craftable", "Artifact", "Radiant", "Emblem", "Trait", "Augment/Buff", "Wisp"]
+    if len([item for item in items if item != "NoItem"]) >= 3:
+        options = ["Trait", "Augment/Buff", "Wisp"]
+    if any(b[0] == "Blackthorn" for b in buffs):
+        options.append("Blackthorn")
+
+    # A stored pick can fall out of `options` when the sidebar changes (a third
+    # item added, the Blackthorn trait dropped). Re-seeding session_state here
+    # keeps st.radio from being handed a value it can't show.
+    radio_value = st.session_state.get(RESULTS_RADIO_KEY)
+    if radio_value not in options:
+        radio_value = options[0]
+        st.session_state[RESULTS_RADIO_KEY] = radio_value
+
+    simLists, source = run_slice(radio_value)
 
 tab1, tab2 = st.tabs(["Items", "Radiant Refractor"])
 
@@ -209,46 +270,25 @@ with tab1:
 
     display_dps = st.checkbox("Display DPS", value=False)
 
-    options = ["Craftable", "Artifact", "Radiant", "Emblem", "Trait", "Augment/Buff", "Wisp"]
-    if len([item for item in items if item != "NoItem"]) >= 3:
-        options = ["Trait", "Augment/Buff", "Wisp"]
-
-    if any(b[0] == "Blackthorn" for b in buffs):
-        options.append("Blackthorn")
-
-    radio_value = st.radio("", options, index=0, horizontal=True)
+    # `options` and the current pick were both resolved in the sidebar, before
+    # the sim ran; this only draws the control.
+    radio_value = st.radio(
+        "",
+        options,
+        index=options.index(radio_value),
+        key=RESULTS_RADIO_KEY,
+        horizontal=True,
+    )
 
     df = set18_streamlit_main.createSelectorDPSTable(simLists)
     df_flt = df
 
 
-    if radio_value == "Craftable":
-        current_craftables = craftables
-        df_flt = df_flt[df_flt["Extra class name"].isin(current_craftables + ["NoItem"])]
-    if radio_value == "Artifact":
-        df_flt = df_flt[
-            df_flt["Extra class name"].isin(set18items.artifacts + ["NoItem"])
-        ]
-    if radio_value == "Radiant":
-        df_flt = df_flt[
-            df_flt["Extra class name"].isin(set18items.radiants + ["NoItem"])
-        ]
-    if radio_value == "Emblem":
-        df_flt = df_flt[
-            df_flt["Extra class name"].isin(set18items.emblems + ["NoItem"])
-        ]
-    if radio_value == "Trait":
-        df_flt = df_flt[
-            df_flt["Extra class name"].isin([x[0] for x in buffs] + ["NoItem"])
-        ]
-    if radio_value == "Augment/Buff":
-        df_flt = df_flt[
-            df_flt["Extra class name"].isin(set18buffs.augments + ["NoItem"])
-        ]
-    if radio_value == "Wisp":
-        df_flt = df_flt[
-            df_flt["Extra class name"].isin(set18buffs.wisps + ["NoItem"])
-        ]
+    # simLists now holds this slice alone, plus the NoItem row every slice
+    # carries for the Extra DPS ratio, so the per-option .isin() filters that
+    # used to live here have nothing left to remove. Blackthorn stays: its
+    # "None" row is the baseline to display, so NoItem drops out of the table
+    # (it stays in simLists, where the ratio needs it).
     if radio_value == "Blackthorn":
         # One row per sacrifice; the empty hex stands in for the NoItem row.
         df_flt = df_flt[df_flt["Extra"].str.startswith("Blackthorn: ")]
@@ -277,3 +317,13 @@ with tab1:
     class_utilities.plot_df(new_df, simLists)
 
 st.caption(f"Simulation computed via: {source}")
+
+# Everything above has rendered by now, so this is the "load the rest in the
+# background" half: warm the cache for the radio options the visitor didn't
+# pick. Streamlit streams output as the script runs, so the table is already on
+# screen while this works through the remaining slices, and touching any widget
+# abandons this run rather than waiting on it.
+if WARM_OTHER_SLICES:
+    for slice_name in options:
+        if slice_name != radio_value:
+            run_slice(slice_name)

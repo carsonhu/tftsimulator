@@ -18,6 +18,8 @@ class SimulationRequest(BaseModel):
     buff_list_pickle: str
     t: float
     frame_rate: int
+    # Defaulted so an older client that doesn't send it still works.
+    run_blackthorn: bool = True
 
 
 @app.post("/simulate")
@@ -35,6 +37,7 @@ def simulate(request: SimulationRequest):
             buff_list,
             request.t,
             request.frame_rate,
+            run_blackthorn=request.run_blackthorn,
         )
 
         # Pickle the results to send back

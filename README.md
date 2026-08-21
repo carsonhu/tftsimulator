@@ -13,34 +13,44 @@ The sidebar allows you to configure the base settings, and the user can then plo
 # Getting Started
 
 ## Prerequisites
-1.  **Install Python**: Ensure you have a stable version of Python installed (**3.10, 3.11, or 3.12**).
-    *   *Note: Do not use Python 3.13 or 3.14 yet, as some libraries are not compatible.*
+1.  **Install Python 3.12 or newer**.
     *   **Recommended**: [Download Python 3.12 Installer](https://www.python.org/ftp/python/3.12.8/python-3.12.8-amd64.exe) (Direct Link)
     *   Or visit [python.org downloads](https://www.python.org/downloads/).
+    *   Tick **"Add python.exe to PATH"** in the installer.
 2.  **Download Code**: Download this repository to your local machine.
 
 ## Quick Start (Windows)
 
-1.  **One-time Setup**:
-    *   Double-click `setup.bat`.
-    *   This will create a virtual environment (`.venv`) and install all necessary libraries. You only need to do this once.
+**Double-click `run_app.bat`.** That is the whole thing.
 
-2.  **Run the App**:
-    *   Double-click `run_app.bat`.
-    *   This will launch the **TFT Simulator** in your web browser.
+On the first launch it creates the virtual environment (`.venv`) and installs
+everything; after that it goes straight to starting the app. It also notices
+when `requirements.txt` changes and reinstalls on its own, so you never have
+to remember to. The **TFT Simulator** then opens in your browser.
+
+### Contributing / running the tests
+
+Double-click `setup.bat` instead. It does everything above, plus installs the
+development extras (pytest, matplotlib) and runs the test suite. After that:
+
+```sh
+.venv\Scripts\python -m pytest
+```
 
 ## Manual Setup
 
 If you prefer to run commands manually:
 
-1.  Install dependencies:
+1.  Create a virtual environment and install dependencies:
     ```sh
-    pip install -r requirements.txt
+    py -3.12 -m venv .venv
+    .venv\Scripts\python -m pip install -r requirements.txt
     ```
+    Add `-r requirements-dev.txt` instead if you want the test tooling too.
 
 2.  Run the Streamlit app:
     ```sh
-    streamlit run app.py
+    .venv\Scripts\python -m streamlit run app.py
     ```
 
 Then navigate to the 'ChampionSelector' page in the app.

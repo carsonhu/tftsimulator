@@ -64,7 +64,6 @@ augments = [
     "AccelerationHexEmpowered",
     "StarlightHex",
     "StarlightHexEmpowered",
-    "Concentration",
 ]
 
 stat_buffs = ["ASBuff"]
@@ -264,7 +263,7 @@ class Executioner(Buff):
             params,
             phases=["preCombat", "PostOnDealDamage"],
         )
-        self.crit_bonus = 0.35
+        self.crit_bonus = 0.15
         # (2) grants Precision + crit only; bleed starts at (3)
         self.bleed_scaling = {0: 0, 2: 0, 3: 0.30, 4: 0.50}
         self.bleed_duration = 3.0
@@ -2005,22 +2004,6 @@ class StarlightHexEmpowered(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.manaRegen.addStat(4.5)
-        return 0
-
-
-class Concentration(Buff):
-    levels = [1]
-    display_name = "Concentration"
-
-    def __init__(self, level=1, params=0):
-        super().__init__(self.display_name, level, params, phases=["postPreCombat"])
-
-    def performAbility(self, phase, time, champion, input_=0):
-        if phase == "postPreCombat":
-            if "Conduit" in getattr(champion, "default_traits", []):
-                champion.castTime += 1
-                champion.manalockDuration += 1
-                champion.concentration = True
         return 0
 
 
