@@ -32,6 +32,8 @@ class_buffs = [
     "Adaptor",
     "Ravager",
     "Blackthorn",
+    "Lunar",
+    "Primal",
 ]
 
 augments = [
@@ -116,6 +118,19 @@ class ScaledChampionAbilityScaling2:
 
     def __call__(self, level, bonusAD, AP):
         return self.scale_factor * self.champion.abilityScaling(level, bonusAD, AP)
+
+
+class ChampionEmpoweredAbilityScaling:
+    """Picklable wrapper for a champion's empoweredScaling (its second damage
+    row), for attack replacements whose empowered hit isn't a constant
+    multiple of abilityScaling (so ScaledChampionAbilityScaling can't
+    express it)."""
+
+    def __init__(self, champion):
+        self.champion = champion
+
+    def __call__(self, level, AD, bonusAD, AP):
+        return self.champion.empoweredScaling(level, bonusAD, AP)
 
 
 class Buff(Item):
@@ -477,6 +492,80 @@ class Ravager(Buff):
         if phase == "preCombat":
             champion.extraDmgMultiplier.addStat(self.scaling.get(self.level, 0))
             champion.omnivamp.addStat(self.omnivamp_bonus)
+        return 0
+
+
+class Lunar(Buff):
+    """Lunar: Attack Speed and Ability Power, doubled on Lunar champions.
+
+    "Lunar champions and adjacent allies gain..." is a single aura, not one
+    per neighbour -- you get it once whether it came from yourself or from the
+    unit beside you. So the trait level only selects which row of the table
+    applies; it does not multiply. What "Lunar champions gain 100% more" buys
+    is the x2, which is what the Is Lunar param picks out (1 = the holder is
+    itself Lunar, 0 = it is an adjacent ally riding the aura).
+
+    Both halves are the same number, and both are additive with every other
+    source: aspd.addStat is percentage points of base AS, ap.addStat is AP
+    points against the 100 base, so "7%" is +7 to each.
+    """
+
+    levels = [0, 2, 3, 4, 5]
+    display_name = "Lunar"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+        )
+        self.scaling = {0: 0, 2: 7, 3: 10, 4: 14, 5: 18}
+        self.lunar_multiplier = 2
+
+    def extraParameters():
+        return {"Title": "Is Lunar", "Min": 0, "Max": 1, "Default": 1}
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase != "preCombat":
+            return 0
+        amount = self.scaling.get(self.level, 0)
+        if self.params == 1:
+            amount *= self.lunar_multiplier
+        champion.aspd.addStat(amount)
+        champion.ap.addStat(amount)
+        return 0
+
+
+class Primal(Buff):
+    """Primal: Blessing of the Tiger only.
+
+    In game the trait is (0/2/4) and each breakpoint hands out blessings, but
+    most of them are non-combat; the only one a DPS sim can price is the
+    Blessing of the Tiger's delayed Attack Speed, so the trait collapses to
+    on/off ([0, 1]) here. The Is Primal param picks which half of the blessing
+    the holder gets (1 = a Primal champion's 35%, 0 = a teammate's 15% --
+    "instead", not stacked).
+    """
+
+    levels = [0, 1]
+    display_name = "Primal"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["onUpdate"]
+        )
+        self.trigger_time = 6
+        self.primal_as = 35
+        self.team_as = 15
+        self.triggered = False
+
+    def extraParameters():
+        return {"Title": "Is Primal", "Min": 0, "Max": 1, "Default": 1}
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onUpdate" and not self.triggered and time >= self.trigger_time:
+            self.triggered = True
+            champion.aspd.addStat(
+                self.primal_as if self.params == 1 else self.team_as
+            )
         return 0
 
 
@@ -885,7 +974,9 @@ class AdaptorInnate(Buff):
     Also applies the base-AD swap for the Adaptors whose two versions don't
     share a base AD (Master Yi 70/15, Akali 40/30). They advertise it as
     ap_base_atk, already star-scaled; units whose versions share a base AD
-    just don't set the attribute.
+    just don't set the attribute. ad_base_atk is the mirror image, for units
+    whose card stats are the AP version (Nidalee, whose AD version is a
+    0-AD stub for now).
     """
 
     levels = [1]
@@ -895,7 +986,10 @@ class AdaptorInnate(Buff):
         super().__init__(self.display_name, level, params, phases=["postPreCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        if not resolveAdaptorVersion(champion) and hasattr(champion, "ap_base_atk"):
+        if resolveAdaptorVersion(champion):
+            if hasattr(champion, "ad_base_atk"):
+                champion.atk.base = champion.ad_base_atk
+        elif hasattr(champion, "ap_base_atk"):
             champion.atk.base = champion.ap_base_atk
         return 0
 
@@ -928,6 +1022,67 @@ class GrompPurpleBuff(Buff):
                 champion.bonus_ad.addStat(self.amount)
             else:
                 champion.ap.addStat(self.amount)
+        return 0
+
+
+class AttunedInnate(Buff):
+    """Attuned: the moon advances one phase before each of Alune's casts.
+
+    A one-unit trait and a permanent part of her kit, so it lives on the unit
+    (like AdaptorInnate) rather than being something you pick in the buff bar.
+
+    preAbility, not postAbility, per request. The phase the cast lands under is
+    the one it *arrives* at, and Moonfall's damage is instant -- so advancing
+    first is what makes the Damage Amp apply to the cast that earned it.
+    multiTargetSpell reads dmgMultiplier when it fires, and update() runs every
+    item's preAbility before performAbility, so the ordering holds without any
+    extra sequencing.
+
+    The five phases cycle New Moon -> ... -> Full Moon and back. The first
+    three are "at or below half full" and give Durability, which is not
+    modeled: nothing in this simulator damages the champion being measured.
+    The last two give Damage Amp, so casts 4 and 5 of every cycle are amped.
+    Cast 5 is Full Moon, which is also the cast Alune crashes the moon on.
+    """
+
+    levels = [1]
+    display_name = "Attuned"
+
+    # Index in this list == (numCasts - 1) % 5, so cast 1 is New Moon.
+    moon_phases = [
+        "New Moon",
+        "Waxing Crescent",
+        "Half Moon",
+        "Waxing Gibbous",
+        "Full Moon",
+    ]
+    # "While above [half full]" -- the two phases that amp instead of shielding.
+    amp_phases = ("Waxing Gibbous", "Full Moon")
+    damage_amp = 0.07
+    # Durability is the other half of the trait; unmodeled, kept for reference.
+    durability = 0.07
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preAbility"])
+        # Whether damage_amp is currently added to dmgMultiplier. The amp is a
+        # property of the current phase, not a stack, so leaving the amped
+        # phases has to take it back off again.
+        self.amp_applied = False
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase != "preAbility":
+            return 0
+        # numCasts is incremented before preAbility runs, so this is the
+        # 1-indexed number of the cast about to fire.
+        index = (champion.numCasts - 1) % len(self.moon_phases)
+        champion.moon_phase = self.moon_phases[index]
+
+        wants_amp = champion.moon_phase in self.amp_phases
+        if wants_amp != self.amp_applied:
+            champion.dmgMultiplier.addStat(
+                self.damage_amp if wants_amp else -self.damage_amp
+            )
+            self.amp_applied = wants_amp
         return 0
 
 
@@ -1031,6 +1186,74 @@ class AriseBuff(Buff):
                 # of leaving the accrued value, which can be >1.0) zeroes
                 # that carryover out so the wait for the 7th attack starts
                 # fresh, fully under normal AS with no leftover head start.
+                champion.attack_progress = min(champion.attack_progress, 1.0)
+        return 0
+
+
+class NidaleeUlt(Buff):
+    """Javelin Toss (AP version): +150% Attack Speed for the next 3 attacks,
+    each replaced with a javelin dealing magic damage; the 3rd javelin uses
+    the bigger empoweredScaling row instead.
+
+    Same shape as AriseBuff (gain AS, manalock, replace the next N attacks
+    from preAttack), so the manalock/unlock and attack_progress handling
+    mirror it exactly. The 3rd javelin's real targeting (furthest enemy with
+    the least items) is meaningless against this sim's identical dummies, so
+    it hits the current target like the other two.
+
+    On AD-version Nidalee (see set18champs.Nidalee: currently a 0-AD,
+    0-damage stub) the whole buff no-ops -- casts fire but do nothing.
+    """
+
+    levels = [1]
+    display_name = "Javelin Toss"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name,
+            level,
+            params,
+            phases=["postAbility", "preAttack", "postAttack"],
+        )
+        self.as_bonus = 150
+        self.num_javelins = 3
+        self.attacks_remaining = 0
+        self.active = False
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if getattr(champion, "ad_version", False):
+            return 0
+        if phase == "postAbility":
+            champion.aspd.addStat(self.as_bonus)
+            self.attacks_remaining = self.num_javelins
+            self.active = True
+            # Manalocked until all num_javelins land -- pinned far ahead
+            # rather than duration-estimated, since the AS gain changes the
+            # attack cadence the instant this fires. Unlocked explicitly in
+            # postAttack below once the count hits zero (same as AriseBuff).
+            champion.manalockTime = time + 9999
+        elif phase == "preAttack" and self.active and input_.regularAuto:
+            input_.canOnHit = True
+            input_.canCrit = champion.canSpellCrit
+            input_.attackType = "magical"
+            # The last of the 3 javelins is the empowered one.
+            input_.scaling = (
+                ChampionEmpoweredAbilityScaling(champion)
+                if self.attacks_remaining == 1
+                else ChampionAbilityScaling(champion)
+            )
+        elif phase == "postAttack" and self.active:
+            # Runs after performAttack's own mana-gen check for this same
+            # attack, so ending the ult here means the 3rd javelin still
+            # generates no mana and only the first normal attack after does.
+            self.attacks_remaining -= 1
+            if self.attacks_remaining <= 0:
+                self.active = False
+                champion.aspd.addStat(-self.as_bonus)
+                champion.manalockTime = time
+                # Zero out windup overshoot accrued under the +150% AS so the
+                # next attack's wait starts fresh under normal AS -- see
+                # AriseBuff's postAttack for the full walkthrough.
                 champion.attack_progress = min(champion.attack_progress, 1.0)
         return 0
 
