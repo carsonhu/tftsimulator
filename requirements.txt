@@ -1,9 +1,9 @@
 matplotlib>=3.8.2
 numpy>=1.23.5
 pandas>=2.1.0
-streamlit>=1.35.0
+streamlit>=1.40
 XlsxWriter==3.1.9
-plotly==5.24.1
+plotly==6.9.0
 fastapi
 uvicorn
 requests
