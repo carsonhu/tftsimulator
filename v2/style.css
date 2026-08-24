@@ -90,10 +90,34 @@ body {
   flex: 0 0 340px;
   padding: 16px;
   background: #262730;
-  min-height: 100vh;
+  /* Pinned to the viewport and scrolling internally, so the controls stay
+     reachable however far down the results the page is scrolled. */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+/* Slim scrollbar so the pinned sidebar doesn't lose width to it. */
+#sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: #4a4d5a transparent;
+}
+
+#sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+  background: #4a4d5a;
+  border-radius: 4px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 #content {
@@ -109,7 +133,12 @@ body {
   #sidebar {
     width: 100%;
     flex: none;
+    /* Stacked layout: the sidebar is a section of the page again, so
+       pinning it to the viewport would eat the whole screen. */
+    position: static;
+    height: auto;
     min-height: 0;
+    overflow-y: visible;
   }
 }
 
