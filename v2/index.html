@@ -131,28 +131,46 @@
         </section>
 
         <section>
-          <h2>Enemy</h2>
-          <div class="row">
-            <label class="grow">Enemy HP
-              <input type="number" id="enemyHp" min="1" max="99999" value="1800" />
-            </label>
-            <label class="grow">Enemy Armor
-              <input type="number" id="enemyArmor" min="0" max="99999" value="100" />
-            </label>
-            <label class="grow">Enemy MR
-              <input type="number" id="enemyMr" min="0" max="99999" value="100" />
-            </label>
-          </div>
-        </section>
-
-        <section>
           <span class="field-label">Frame Rate (60 = double the runtime): Leave at 30 fps</span>
           <div class="pills" id="frameRatePills"></div>
         </section>
       </aside>
 
       <main id="content">
-        <h1 id="header"></h1>
+        <!-- The enemy's stats are edited in place here rather than in their
+             own sidebar section: they read as part of the sentence, so the
+             sentence is where you change them. -->
+        <h1 id="header">
+          <span id="headerChamp"></span>
+          <span>vs</span>
+          <input
+            type="number"
+            id="enemyHp"
+            class="inline-num"
+            min="1"
+            max="99999"
+            value="1800"
+            aria-label="Enemy HP"
+          /><span>HP,</span>
+          <input
+            type="number"
+            id="enemyArmor"
+            class="inline-num"
+            min="0"
+            max="99999"
+            value="100"
+            aria-label="Enemy Armor"
+          /><span>Armor,</span>
+          <input
+            type="number"
+            id="enemyMr"
+            class="inline-num"
+            min="0"
+            max="99999"
+            value="100"
+            aria-label="Enemy MR"
+          /><span>MR</span>
+        </h1>
         <p class="disclaimer">
           Most cast times/manalock times are guesses. Units can cast after
           they have completed 30% of an autoattack. Champs must attack at
@@ -160,21 +178,12 @@
           probably not very accurate to true gameplay at high attack speeds.
         </p>
 
-        <!-- Left column runs from Base stats down to the slice pills; the
-             Team Traits column beside it stretches over all of that, so the
-             top-right is filled from the top of the page to the table. -->
+        <!-- Team Traits sits beside Base stats and matches its height: the
+             table options below stay clear of it, full width. -->
         <div class="stats-row">
           <div class="stats-block">
             <h3>Base stats</h3>
             <div id="statsPanel" class="stats-panel"></div>
-            <p id="champNotes" class="notes" hidden></p>
-
-            <label class="checkbox-row">
-              <input type="checkbox" id="displayDps" />
-              Display DPS
-            </label>
-
-            <div class="pills" id="sliceRadio"></div>
           </div>
           <div id="teamTraitsPanel" class="team-block" hidden>
             <h3>Team Traits</h3>
@@ -185,6 +194,14 @@
             <div id="teamTraits" class="team-traits"></div>
           </div>
         </div>
+        <p id="champNotes" class="notes" hidden></p>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="displayDps" />
+          Display DPS
+        </label>
+
+        <div class="pills" id="sliceRadio"></div>
         <div id="runStatus" class="run-status" hidden></div>
 
         <div class="table-wrap">

@@ -235,8 +235,15 @@ function buildStaticControls() {
     ["enemyArmor", "armor"],
     ["enemyMr", "mr"],
   ]) {
-    $(id).onchange = () => {
-      state.cfg.enemy[key] = clampInput($(id));
+    const input = $(id);
+    input.value = state.cfg.enemy[key];
+    sizeInlineNumber(input);
+    // Width tracks the digits as they are typed so the title reads as a
+    // sentence rather than as three boxes with slack in them.
+    input.oninput = () => sizeInlineNumber(input);
+    input.onchange = () => {
+      state.cfg.enemy[key] = clampInput(input);
+      sizeInlineNumber(input);
       onConfigChanged();
     };
   }
@@ -250,6 +257,10 @@ function buildStaticControls() {
     state.displayDps = $("displayDps").checked;
     renderResults();
   };
+}
+
+function sizeInlineNumber(input) {
+  input.style.width = Math.max(2, String(input.value).length) + 1 + "ch";
 }
 
 function clampInput(input) {
@@ -668,17 +679,10 @@ function setRunStatus(text) {
 // ---------------------------------------------------------------------------
 
 function renderHeader() {
-  $("header").textContent =
-    state.cfg.champ +
-    " " +
-    state.cfg.level +
-    " vs " +
-    state.cfg.enemy.hp +
-    " HP, " +
-    state.cfg.enemy.armor +
-    " Armor, " +
-    state.cfg.enemy.mr +
-    " MR";
+  // Only the champion half is rewritten -- the enemy numbers in this heading
+  // are live inputs, and replacing the heading's contents would blow them
+  // away (and the caret with them, mid-typing).
+  $("headerChamp").textContent = state.cfg.champ + " " + state.cfg.level;
   $("footerCaption").textContent =
     "Simulation computed in your browser" +
     (bootMs != null ? " · engine booted in " + (bootMs / 1000).toFixed(1) + "s" : "");
@@ -709,23 +713,32 @@ async function updateStatsPanel(gen) {
       ? "AP: " + b(r2(s.ap.stat)) + " = " + s.ap.base + " + " + g(r2(s.ap.add) + " AP")
       : "AP: " + b(r2(s.ap.stat)) + " = " + s.ap.base + " + " + r(s.ap.addMultiplier) + " * " + g(r2(s.ap.add) + " AP");
 
-  // One cell per stat in a flow grid: the same lines as before, but wrapping
-  // into as many columns as the window allows instead of two tall columns.
-  const cells = [
+  // Two columns, each read top to bottom, in the order write_champion used:
+  // offence and mana on the left, attack speed and crit on the right. Laying
+  // these out as one flat grid instead reflows them across the columns and
+  // scrambles that order.
+  const left = [
     ad,
     ap,
     "DmgAmp: " + b(r2(s.dmgAmp.stat)) + " = " + s.dmgAmp.base + " + " + g(r4(s.dmgAmp.add) + " DmgAmp"),
     "Mana: " + b(r2(s.curMana)) + " / " + b(r2(s.fullMana)),
     "Mana Regen: " + b(r2(s.manaRegen.stat)) + " = " + s.manaRegen.base + " + " + g(r2(s.manaRegen.add) + " Mana"),
-    "Cast Time: " + b(s.castTime + "s"),
+    "Cast Time: " + b(s.castTime + " seconds"),
+  ];
+  const right = [
     "AS: " + b(r3(s.aspd.stat)) + " = " + s.aspd.base + " * (1 + " + g(r4(s.aspd.add) + " AS") + ")",
     "Crit Chance: " + b(r3(s.crit.stat)) + " = " + s.crit.base + " + " + g(r4(s.crit.add) + " Crit"),
     "Crit Dmg: " + b(r2(s.critDmg.stat)) + " = " + s.critDmg.base + " + " + g(r4(s.critDmg.add) + " CritDmg"),
     "ManaPerAttack: " + b(r2(s.manaPerAttack.stat)) + " = " + s.manaPerAttack.base + " + " + g(r2(s.manaPerAttack.add) + " Mana"),
     "Role: " + b(s.role),
-    "Can SpellCrit: " + b(s.canSpellCrit),
+    "Can SpellCrit: " + b(s.canSpellCrit ? "True" : "False"),
   ];
-  $("statsPanel").innerHTML = cells.map((c) => "<div>" + c + "</div>").join("");
+  $("statsPanel").innerHTML =
+    '<div class="stats-col">' +
+    left.join("<br>") +
+    '</div><div class="stats-col">' +
+    right.join("<br>") +
+    "</div>";
 
   const notes = $("champNotes");
   notes.hidden = !s.notes;

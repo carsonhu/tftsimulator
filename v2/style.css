@@ -316,6 +316,47 @@ select:disabled {
 h1 {
   font-size: 1.7em;
   margin: 0 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
+}
+
+/* Enemy stats, edited in place in the heading. The id-scoped selector is
+   deliberate: the generic input[type="number"] rule above would otherwise
+   win on specificity and give these the full-width sidebar treatment. */
+#header input.inline-num {
+  font: inherit;
+  color: #ff4b4b;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed #4a4d5a;
+  border-radius: 0;
+  padding: 0 2px;
+  text-align: right;
+  width: 5ch;
+}
+
+#header input.inline-num:hover {
+  border-bottom-color: #ff4b4b;
+}
+
+#header input.inline-num:focus {
+  outline: none;
+  border-bottom: 1px solid #ff4b4b;
+  background: #1a1c23;
+}
+
+/* Spinners would crowd the text and shift it as the value grows. */
+#header input.inline-num::-webkit-outer-spin-button,
+#header input.inline-num::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+#header input.inline-num {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 h3 {
@@ -344,9 +385,7 @@ h3 {
 }
 
 .stats-block {
-  /* Sized to the stats panel's own content, unchanged by anything on the
-     right, so the table below keeps the width it had. */
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   display: flex;
   flex-direction: column;
 }
@@ -362,18 +401,21 @@ h3 {
 
 .stats-panel {
   display: grid;
-  /* Two columns, as before -- the panel sits beside Team Traits now, so the
-     space to its right is spoken for. */
-  grid-template-columns: repeat(2, max-content);
-  gap: 2px 28px;
+  /* Two roomy columns, each filled top to bottom by app.js. */
+  grid-template-columns: repeat(2, minmax(290px, 1fr));
+  gap: 2px 32px;
   background: #1a1c23;
   border: 1px solid #31333f;
   border-radius: 8px;
   padding: 8px 14px;
   font-size: 0.84em;
-  line-height: 1.5;
+  line-height: 1.6;
   width: fit-content;
   max-width: 100%;
+}
+
+.stats-col {
+  min-width: 0;
 }
 
 .c-blue {
