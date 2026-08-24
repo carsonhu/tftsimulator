@@ -41,6 +41,60 @@ _SUPPORTS_RUN_BLACKTHORN = (
     in inspect.signature(sim_core.do_experiment_one_extra).parameters
 )
 
+# Stats a trait's team-wide half could plausibly move. Compared alongside the
+# damage vector when deciding whether a team trait's level matters.
+_PROBE_STATS = (
+    "atk", "bonus_ad", "ap", "aspd", "crit", "critDmg",
+    "dmgMultiplier", "manaRegen", "manaPerAttack", "fullMana",
+)
+
+
+def _team_level_matters(cls):
+    """Does this trait's team-wide half change with its level?
+
+    For most traits it does not: Rapidfire's aura is a flat 10% Attack Speed
+    and Spellweaver's a flat 10 AP at every breakpoint -- only the members'
+    own bonus scales, and a non-member never gets that. Lunar is the
+    exception, where the shared aura itself steps 7/10/14/18. The UI shows a
+    plain on/off checkbox for the flat ones and a level picker only where the
+    level actually changes the answer.
+
+    Decided by running the trait at each level with the membership flag off
+    and comparing what came out, rather than by a hardcoded list, so a trait
+    added later is classified correctly without touching this file. The
+    reference champion is fixed (first in sorted order) because the question
+    is about the trait, not about any particular unit.
+    """
+    reference = getattr(set18champs, sorted(set18champs.champ_list)[0])
+    signatures = set()
+    for level in cls.levels:
+        if level == 0:
+            continue
+        try:
+            champ = reference(1)
+            results = Simulator().simulate(
+                [],
+                [cls(level, 0)],
+                champ,
+                [set18champs.DummyTank(1) for _ in range(8)],
+                10,
+                frameRate=30,
+            )
+        except Exception:
+            # A trait that cannot run headless here is left as a level
+            # picker: showing one control too many is the safe failure.
+            return True
+        signatures.add(
+            (
+                tuple(round(getattr(champ, s).stat, 9) for s in _PROBE_STATS),
+                tuple((round(r[0], 9), round(r[1][0], 9), r[1][1]) for r in results),
+            )
+        )
+        if len(signatures) > 1:
+            return True
+    return False
+
+
 _ITEM_SLICES = {
     "Craftable": lambda: set18items.offensive_craftables,
     "Artifact": lambda: set18items.artifacts,
@@ -120,14 +174,20 @@ def get_catalog():
             continue
         if not extra or (extra.get("Min"), extra.get("Max")) != (0, 1):
             continue
+        levels = list(cls.levels)
+        scales = _team_level_matters(cls)
         team_buffs.append(
             {
                 "cls": cls_name,
                 "name": getattr(cls, "display_name", cls_name),
                 # 0 is "trait not active" and is the off position, so it is
                 # offered as a level like any other.
-                "levels": list(cls.levels),
+                "levels": levels,
                 "paramTitle": extra["Title"],
+                # False -> the UI shows a checkbox and uses onLevel; True ->
+                # it shows a level picker.
+                "scales": scales,
+                "onLevel": next((l for l in levels if l > 0), 0),
             }
         )
 

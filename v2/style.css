@@ -228,8 +228,43 @@ details > label {
 
 .team-traits {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 6px 8px;
+  /* Packed left rather than stretched: with two traits on screen today and
+     more to come, columns should fill in, not spread out. */
+  grid-template-columns: repeat(auto-fill, minmax(130px, max-content));
+  justify-content: start;
+  gap: 6px 18px;
+  background: #1a1c23;
+  border: 1px solid #31333f;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.team-trait {
+  gap: 4px;
+}
+
+/* Flat traits are a plain on/off tick, so the box sits inline with the name
+   instead of below a caption. */
+.team-trait.flat {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.team-trait.flat input {
+  accent-color: #ff4b4b;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.section-head h2 {
+  margin: 0;
 }
 
 .hint {
@@ -289,12 +324,30 @@ h3 {
   max-width: 60em;
 }
 
+.stats-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.stats-block h3,
+.team-block h3 {
+  margin: 14px 0 6px;
+}
+
+.team-block {
+  flex: 1 1 260px;
+  min-width: 240px;
+  max-width: 520px;
+}
+
 .stats-panel {
   display: grid;
-  /* Flows into as many columns as fit rather than two tall ones, which is
-     what kept the panel pushing the table below the fold. */
-  grid-template-columns: repeat(auto-fit, minmax(240px, max-content));
-  gap: 2px 24px;
+  /* Two columns, as before -- the panel sits beside Team Traits now, so the
+     space to its right is spoken for. */
+  grid-template-columns: repeat(2, max-content);
+  gap: 2px 28px;
   background: #1a1c23;
   border: 1px solid #31333f;
   border-radius: 8px;

@@ -99,9 +99,11 @@
         </section>
 
         <section>
-          <h2>Global Items</h2>
+          <div class="section-head">
+            <h2>Global Items</h2>
+            <button id="resetItems" type="button">Reset items</button>
+          </div>
           <div id="itemRows"></div>
-          <button id="resetItems" type="button">Reset items</button>
         </section>
 
         <section>
@@ -111,15 +113,6 @@
             <span class="slider-value" id="numBuffsValue"></span>
           </label>
           <div id="buffRows"></div>
-        </section>
-
-        <section id="teamTraitsPanel" hidden>
-          <h2>Team Traits</h2>
-          <p class="hint">
-            Traits your board runs that this champion is not a member of &mdash;
-            the team-wide half only.
-          </p>
-          <div id="teamTraits" class="team-traits"></div>
         </section>
 
         <section id="blackthornPanel" hidden>
@@ -167,8 +160,20 @@
           probably not very accurate to true gameplay at high attack speeds.
         </p>
 
-        <h3>Base stats</h3>
-        <div id="statsPanel" class="stats-panel"></div>
+        <div class="stats-row">
+          <div class="stats-block">
+            <h3>Base stats</h3>
+            <div id="statsPanel" class="stats-panel"></div>
+          </div>
+          <div id="teamTraitsPanel" class="team-block" hidden>
+            <h3>Team Traits</h3>
+            <p class="hint">
+              Traits your board runs that this champion is not a member of
+              &mdash; the team-wide half only.
+            </p>
+            <div id="teamTraits" class="team-traits"></div>
+          </div>
+        </div>
         <p id="champNotes" class="notes" hidden></p>
 
         <label class="checkbox-row">

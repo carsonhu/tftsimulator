@@ -497,28 +497,51 @@ function renderTeamTraits() {
     );
     if (inBuffBar) state.teamBuffs.delete(trait.cls);
 
+    const current = state.teamBuffs.get(trait.cls) ?? 0;
     const label = document.createElement("label");
-    const caption = document.createElement("span");
-    caption.className = "col-label";
-    caption.textContent = trait.name;
-    const sel = document.createElement("select");
-    for (const level of trait.levels) {
-      sel.add(new Option(level === 0 ? "—" : String(level), String(level)));
-    }
-    sel.value = String(state.teamBuffs.get(trait.cls) ?? 0);
-    sel.disabled = inBuffBar;
+    label.className = trait.scales ? "team-trait" : "team-trait flat";
     label.title = inBuffBar
       ? trait.name + " is in the buff bar above, which sets its own " + trait.paramTitle
       : "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)";
-    sel.onchange = () => {
-      const level = Number(sel.value);
-      if (level > 0) state.teamBuffs.set(trait.cls, level);
-      else state.teamBuffs.delete(trait.cls);
-      onConfigChanged();
-    };
 
-    label.appendChild(caption);
-    label.appendChild(sel);
+    const caption = document.createElement("span");
+    caption.className = "col-label";
+    caption.textContent = trait.name;
+
+    if (trait.scales) {
+      // The aura itself steps per breakpoint (Lunar), so the level is a real
+      // question and gets a picker.
+      const sel = document.createElement("select");
+      for (const level of trait.levels) {
+        sel.add(new Option(level === 0 ? "—" : String(level), String(level)));
+      }
+      sel.value = String(current);
+      sel.disabled = inBuffBar;
+      sel.onchange = () => {
+        const level = Number(sel.value);
+        if (level > 0) state.teamBuffs.set(trait.cls, level);
+        else state.teamBuffs.delete(trait.cls);
+        onConfigChanged();
+      };
+      label.appendChild(caption);
+      label.appendChild(sel);
+    } else {
+      // A non-member gets the same bonus at every breakpoint, so asking for
+      // one would be asking a question with no answer: on/off is the whole
+      // decision. onLevel is simply the first active breakpoint.
+      const check = document.createElement("input");
+      check.type = "checkbox";
+      check.checked = current > 0;
+      check.disabled = inBuffBar;
+      check.onchange = () => {
+        if (check.checked) state.teamBuffs.set(trait.cls, trait.onLevel);
+        else state.teamBuffs.delete(trait.cls);
+        onConfigChanged();
+      };
+      label.appendChild(check);
+      label.appendChild(caption);
+    }
+
     container.appendChild(label);
   }
 }
