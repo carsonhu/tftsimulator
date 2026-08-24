@@ -325,11 +325,13 @@ h3 {
   border: 1px solid #31333f;
   border-radius: 8px;
   margin: 10px 0;
+  /* Shrink-wrap the table instead of stretching columns across the page. */
+  width: fit-content;
+  max-width: 100%;
 }
 
 table {
   border-collapse: collapse;
-  width: 100%;
   font-size: 0.88em;
   white-space: nowrap;
 }
@@ -341,7 +343,7 @@ thead {
 }
 
 td {
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-bottom: 1px solid #22242e;
   text-align: right;
 }
@@ -352,13 +354,19 @@ thead td {
   text-align: right;
 }
 
-td:first-child,
-thead td:first-child {
+/* Results table: label column on the left, the To Plot checkbox column on
+   the far right. */
+#resultsTable td:first-child,
+#resultsTable thead td:first-child {
+  text-align: left;
+}
+
+#resultsTable td:last-child,
+#resultsTable thead td:last-child {
   text-align: center;
 }
 
-td:nth-child(2),
-thead td:nth-child(2) {
+#logTable td:nth-child(3) {
   text-align: left;
 }
 

@@ -366,6 +366,28 @@ function renderBuffRows() {
     const paramInput = document.createElement("input");
     paramInput.type = "number";
 
+    // Column headers per row, like buff_bar's widget labels: the third one
+    // is the buff's own parameter title (Stacks, Casts, ...) and follows the
+    // selected buff.
+    const column = (text, control) => {
+      const label = document.createElement("label");
+      const caption = document.createElement("span");
+      caption.className = "col-label";
+      caption.textContent = text;
+      label.appendChild(caption);
+      label.appendChild(control);
+      return label;
+    };
+    const nameCol = column("Name", buffSel);
+    const levelCol = column("Level", levelSel);
+    const paramCol = column("Param", paramInput);
+    const paramCaption = paramCol.querySelector(".col-label");
+
+    const syncParamColumn = (meta) => {
+      paramCol.style.visibility = meta.extra ? "visible" : "hidden";
+      paramCaption.textContent = meta.extra ? meta.extra.Title : "Param";
+    };
+
     const syncRow = (resetToDefaults) => {
       const meta = state.buffMeta.get(buffSel.value);
       // Rebuilding the options resets the browser's selection, so hold on to
@@ -381,14 +403,11 @@ function renderBuffRows() {
         levelSel.value = previousLevel;
       }
       if (meta.extra) {
-        paramInput.hidden = false;
         paramInput.min = meta.extra.Min;
         paramInput.max = meta.extra.Max;
         paramInput.title = meta.extra.Title;
-        paramInput.placeholder = meta.extra.Title;
-      } else {
-        paramInput.hidden = true;
       }
+      syncParamColumn(meta);
       state.cfg.buffs[i] = [
         buffSel.value,
         Number(levelSel.value),
@@ -419,14 +438,12 @@ function renderBuffRows() {
       paramInput.min = meta.extra.Min;
       paramInput.max = meta.extra.Max;
       paramInput.title = meta.extra.Title;
-      paramInput.placeholder = meta.extra.Title;
-    } else {
-      paramInput.hidden = true;
     }
+    syncParamColumn(meta);
 
-    row.appendChild(buffSel);
-    row.appendChild(levelSel);
-    row.appendChild(paramInput);
+    row.appendChild(nameCol);
+    row.appendChild(levelCol);
+    row.appendChild(paramCol);
     container.appendChild(row);
   });
   updateBlackthornPanel();
@@ -642,28 +659,17 @@ function renderResults() {
   table.innerHTML = "";
   const thead = table.createTHead();
   const headRow = thead.insertRow();
-  headRow.insertCell().textContent = "Plot";
   if (isBlackthorn) {
     for (const label of ["Role", "Star Level", "Cost"]) headRow.insertCell().textContent = label;
   } else {
     headRow.insertCell().textContent = "Extra";
   }
   for (const col of dpsCols) headRow.insertCell().textContent = col.label;
+  headRow.insertCell().textContent = "To Plot";
 
   const tbody = table.createTBody();
   for (const row of payload.rows) {
     const tr = tbody.insertRow();
-    const checkCell = tr.insertCell();
-    const check = document.createElement("input");
-    check.type = "checkbox";
-    check.checked = selection.has(row.idx);
-    check.onchange = () => {
-      if (check.checked) selection.add(row.idx);
-      else selection.delete(row.idx);
-      renderPlot();
-    };
-    checkCell.appendChild(check);
-
     if (isBlackthorn) {
       const bt = row.blackthorn || {};
       tr.insertCell().textContent = bt["Role"] ?? "";
@@ -675,6 +681,17 @@ function renderResults() {
     for (const col of dpsCols) {
       tr.insertCell().textContent = formatNumber(col.get(row));
     }
+
+    const checkCell = tr.insertCell();
+    const check = document.createElement("input");
+    check.type = "checkbox";
+    check.checked = selection.has(row.idx);
+    check.onchange = () => {
+      if (check.checked) selection.add(row.idx);
+      else selection.delete(row.idx);
+      renderPlot();
+    };
+    checkCell.appendChild(check);
   }
 
   renderPlot();
