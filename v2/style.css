@@ -337,9 +337,11 @@ h3 {
 }
 
 .team-block {
+  /* Grows into whatever is left of the row: Base stats is sized to its own
+     content, so this is what fills the top-right rather than leaving a gap
+     at the window edge. */
   flex: 1 1 260px;
   min-width: 240px;
-  max-width: 520px;
 }
 
 .stats-panel {
