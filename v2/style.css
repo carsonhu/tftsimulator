@@ -601,28 +601,50 @@ thead {
   background: #262730;
 }
 
-td {
+td,
+th {
   padding: 2px 10px;
   border-bottom: 1px solid #22242e;
   text-align: right;
 }
 
-thead td {
+thead td,
+thead th {
   font-weight: 600;
   color: #c7cad6;
   text-align: right;
+  white-space: nowrap;
 }
 
 /* Results table: label column on the left, the To Plot checkbox column on
    the far right. */
 #resultsTable td:first-child,
-#resultsTable thead td:first-child {
+#resultsTable thead :first-child {
   text-align: left;
 }
 
 #resultsTable td:last-child,
-#resultsTable thead td:last-child {
+#resultsTable thead :last-child {
   text-align: center;
+}
+
+/* Sortable headers. */
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+th.sortable:hover {
+  color: #fafafa;
+  background: #31333f;
+}
+
+th.sorted {
+  color: #ff4b4b;
+}
+
+.sort-arrow {
+  font-size: 0.85em;
 }
 
 #logTable td:nth-child(3) {

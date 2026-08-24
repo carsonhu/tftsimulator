@@ -107,6 +107,9 @@ const state = {
   slice: "Craftable",
   displayDps: false,
   colorScale: true,
+  // Which header the table is sorted by. key null = the order sim_entry
+  // delivered, which is already ratio-at-25s descending.
+  sort: { key: null, dir: "desc" },
   // Payload for the slice on screen, and per-slice plot selections. Any
   // config change (not a slice change) clears selections, like a Streamlit
   // rerun resetting the checkbox column.
@@ -863,52 +866,69 @@ function renderResults() {
         { label: "Extra DPS (25s)", get: (row) => row.ratio["25"] },
       ]);
 
+  // The label columns differ per slice, but sorting shouldn't care: every
+  // column is described the same way, so the header handler is written once.
+  const labelCols = isBlackthorn
+    ? ["Role", "Star Level", "Cost"].map((name) => ({
+        label: name,
+        text: true,
+        get: (row) => (row.blackthorn || {})[name] ?? "",
+      }))
+    : [{ label: "Extra", text: true, get: (row) => row.extra }];
+  const columns = labelCols.concat(dpsCols.map((col) => ({ ...col, shade: true })));
+
   // Column-wise magnitude scale. Each DPS interval is normalised against its
   // own column, which is the whole point: it answers "what is unusually good
   // *at 10 seconds*", a question a table-wide scale cannot ask because the
   // late columns are numerically larger and would own the top of the ramp.
-  const scales = dpsCols.map((col) => {
+  const scales = new Map();
+  dpsCols.forEach((col) => {
     const values = payload.rows
       .map((row) => Number(col.get(row)))
       .filter((v) => Number.isFinite(v));
     const sorted = [...values].sort((a, z) => z - a);
-    return {
+    scales.set(col.label, {
       min: Math.min(...values),
       max: Math.max(...values),
       rank: (v) => sorted.indexOf(v) + 1,
       count: values.length,
-    };
+    });
   });
+
+  // Sorting is a view concern: the payload is left alone so that clearing the
+  // sort returns to the order sim_entry delivered (ratio at 25s, descending).
+  let rows = payload.rows;
+  const sortCol = columns.find((col) => col.label === state.sort.key);
+  if (sortCol) {
+    const dir = state.sort.dir === "asc" ? 1 : -1;
+    rows = [...rows].sort((a, b) => {
+      const va = sortCol.get(a);
+      const vb = sortCol.get(b);
+      if (sortCol.text) return dir * String(va).localeCompare(String(vb));
+      return dir * (Number(va) - Number(vb));
+    });
+  }
 
   const table = $("resultsTable");
   table.innerHTML = "";
   const thead = table.createTHead();
   const headRow = thead.insertRow();
-  if (isBlackthorn) {
-    for (const label of ["Role", "Star Level", "Cost"]) headRow.insertCell().textContent = label;
-  } else {
-    headRow.insertCell().textContent = "Extra";
-  }
-  for (const col of dpsCols) headRow.insertCell().textContent = col.label;
-  headRow.insertCell().textContent = "To Plot";
+  for (const col of columns) headRow.appendChild(sortableHeader(col));
+  const plotHead = document.createElement("th");
+  plotHead.textContent = "To Plot";
+  headRow.appendChild(plotHead);
 
   const tbody = table.createTBody();
-  for (const row of payload.rows) {
+  for (const row of rows) {
     const tr = tbody.insertRow();
-    if (isBlackthorn) {
-      const bt = row.blackthorn || {};
-      tr.insertCell().textContent = bt["Role"] ?? "";
-      tr.insertCell().textContent = bt["Star Level"] ?? "";
-      tr.insertCell().textContent = bt["Cost"] ?? "";
-    } else {
-      tr.insertCell().textContent = row.extra;
-    }
-    dpsCols.forEach((col, j) => {
+    for (const col of columns) {
       const cell = tr.insertCell();
       const value = col.get(row);
-      cell.textContent = formatNumber(value);
-      if (state.colorScale) shadeCell(cell, Number(value), scales[j], col.label);
-    });
+      cell.textContent = col.text ? value : formatNumber(value);
+      if (col.shade && state.colorScale) {
+        shadeCell(cell, Number(value), scales.get(col.label), col.label);
+      }
+    }
 
     const checkCell = tr.insertCell();
     const check = document.createElement("input");
@@ -923,6 +943,35 @@ function renderResults() {
   }
 
   renderPlot();
+}
+
+function sortableHeader(col) {
+  const th = document.createElement("th");
+  th.className = "sortable";
+  th.textContent = col.label;
+
+  const active = state.sort.key === col.label;
+  if (active) {
+    th.classList.add("sorted");
+    // Screen readers get the state from aria-sort; the arrow is for everyone
+    // else. Kept in its own span so it can't be picked up as cell text.
+    th.setAttribute("aria-sort", state.sort.dir === "asc" ? "ascending" : "descending");
+    const arrow = document.createElement("span");
+    arrow.className = "sort-arrow";
+    arrow.textContent = state.sort.dir === "asc" ? " ▲" : " ▼";
+    th.appendChild(arrow);
+  }
+
+  th.onclick = () => {
+    if (state.sort.key === col.label) {
+      state.sort = { key: col.label, dir: state.sort.dir === "desc" ? "asc" : "desc" };
+    } else {
+      // Numbers open with the best row first; names open A to Z.
+      state.sort = { key: col.label, dir: col.text ? "asc" : "desc" };
+    }
+    renderResults();
+  };
+  return th;
 }
 
 // Sequential fill: one hue, the page surface at the column's minimum rising
