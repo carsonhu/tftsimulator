@@ -168,10 +168,23 @@
         </div>
         <p id="champNotes" class="notes" hidden></p>
 
-        <label class="checkbox-row">
-          <input type="checkbox" id="displayDps" />
-          Display DPS
-        </label>
+        <div class="option-row">
+          <label class="checkbox-row">
+            <input type="checkbox" id="displayDps" />
+            Display DPS
+          </label>
+          <label class="checkbox-row">
+            <input type="checkbox" id="colorScale" checked />
+            Colour scale
+          </label>
+          <!-- Sequential encoding ships with its scale legend. -->
+          <span id="scaleLegend" class="scale-legend">
+            <span>low</span>
+            <span class="ramp"></span>
+            <span>high</span>
+            <span class="scale-note">shaded within each column</span>
+          </span>
+        </div>
 
         <div class="pills" id="sliceRadio"></div>
         <div id="runStatus" class="run-status" hidden></div>

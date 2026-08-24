@@ -106,6 +106,7 @@ const state = {
   teamBuffs: new Map(),
   slice: "Craftable",
   displayDps: false,
+  colorScale: true,
   // Payload for the slice on screen, and per-slice plot selections. Any
   // config change (not a slice change) clears selections, like a Streamlit
   // rerun resetting the checkbox column.
@@ -254,6 +255,14 @@ function buildStaticControls() {
   // No frame-rate control: cfg.frame_rate stays at the 30 the sim expects.
   $("displayDps").onchange = () => {
     state.displayDps = $("displayDps").checked;
+    renderResults();
+  };
+
+  const colorScale = $("colorScale");
+  colorScale.checked = state.colorScale;
+  colorScale.onchange = () => {
+    state.colorScale = colorScale.checked;
+    $("scaleLegend").hidden = !state.colorScale;
     renderResults();
   };
 }
@@ -854,6 +863,23 @@ function renderResults() {
         { label: "Extra DPS (25s)", get: (row) => row.ratio["25"] },
       ]);
 
+  // Column-wise magnitude scale. Each DPS interval is normalised against its
+  // own column, which is the whole point: it answers "what is unusually good
+  // *at 10 seconds*", a question a table-wide scale cannot ask because the
+  // late columns are numerically larger and would own the top of the ramp.
+  const scales = dpsCols.map((col) => {
+    const values = payload.rows
+      .map((row) => Number(col.get(row)))
+      .filter((v) => Number.isFinite(v));
+    const sorted = [...values].sort((a, z) => z - a);
+    return {
+      min: Math.min(...values),
+      max: Math.max(...values),
+      rank: (v) => sorted.indexOf(v) + 1,
+      count: values.length,
+    };
+  });
+
   const table = $("resultsTable");
   table.innerHTML = "";
   const thead = table.createTHead();
@@ -877,9 +903,12 @@ function renderResults() {
     } else {
       tr.insertCell().textContent = row.extra;
     }
-    for (const col of dpsCols) {
-      tr.insertCell().textContent = formatNumber(col.get(row));
-    }
+    dpsCols.forEach((col, j) => {
+      const cell = tr.insertCell();
+      const value = col.get(row);
+      cell.textContent = formatNumber(value);
+      if (state.colorScale) shadeCell(cell, Number(value), scales[j], col.label);
+    });
 
     const checkCell = tr.insertCell();
     const check = document.createElement("input");
@@ -894,6 +923,26 @@ function renderResults() {
   }
 
   renderPlot();
+}
+
+// Sequential fill: one hue, the page surface at the column's minimum rising
+// to blue step 500 at its maximum. Step 500 is where the ramp stops because
+// it is the brightest step that still carries #fafafa text at 4.5:1 (5.17:1;
+// step 450 is 4.23:1, which fails), and it clears 3:1 against the surface, so
+// every cell stays readable without ever flipping the ink colour. Painting
+// with alpha over the surface *is* the ramp -- rgba(37,106,191,1) is exactly
+// #256abf -- which keeps the steps monotone by construction.
+const SCALE_RGB = "37, 106, 191";
+
+function shadeCell(cell, value, scale, label) {
+  if (!Number.isFinite(value)) return;
+  const span = scale.max - scale.min;
+  // A column with no spread carries no information to encode; leave it bare
+  // rather than painting every cell the same shade.
+  const t = span > 0 ? (value - scale.min) / span : 0;
+  cell.style.backgroundColor = "rgba(" + SCALE_RGB + ", " + t.toFixed(3) + ")";
+  // The number is already printed, so hover adds the standing it can't show.
+  cell.title = label + ": rank " + scale.rank(value) + " of " + scale.count;
 }
 
 function formatNumber(v) {

@@ -519,12 +519,50 @@ h3 {
   font-size: 0.9em;
 }
 
+.option-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 14px 0 4px;
+}
+
 .checkbox-row {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 14px 0 4px;
   cursor: pointer;
+}
+
+.option-row .checkbox-row {
+  margin: 0;
+}
+
+/* Legend for the table's sequential fill. */
+.scale-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8em;
+  color: #9aa0b0;
+}
+
+.scale-legend .ramp {
+  width: 90px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid #31333f;
+  /* The same surface->step-500 ramp the cells paint with. */
+  background: linear-gradient(
+    90deg,
+    rgba(37, 106, 191, 0) 0%,
+    rgba(37, 106, 191, 1) 100%
+  );
+}
+
+.scale-legend .scale-note {
+  color: #7a7f8f;
 }
 
 .checkbox-row input {
@@ -593,6 +631,14 @@ thead td {
 
 tbody tr:hover {
   background: #1a1c23;
+}
+
+/* A shaded cell paints over the row's hover background, so the hover cue is
+   drawn on the cells themselves as rules above and below. */
+tbody tr:hover td {
+  box-shadow:
+    inset 0 1px 0 #6b7183,
+    inset 0 -1px 0 #6b7183;
 }
 
 td input[type="checkbox"] {
