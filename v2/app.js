@@ -254,6 +254,7 @@ function buildStaticControls() {
       sizeInlineNumber(input);
       onConfigChanged();
     };
+    selectZeroOnFocus(input);
   }
 
   buildPills($("frameRatePills"), cat.defaults.frameRates, state.cfg.frame_rate, (v) => {
@@ -265,6 +266,27 @@ function buildStaticControls() {
     state.displayDps = $("displayDps").checked;
     renderResults();
   };
+}
+
+function selectZeroOnFocus(input) {
+  // A 0 is a placeholder rather than a value: select it so the next
+  // keystroke replaces it, instead of the caret landing beside it and
+  // turning a typed 5 into 50. Anything non-zero is a real number the user
+  // is more likely adjusting than retyping (an enemy's 100 armor, a bonus
+  // already set to 50), so its caret is left where it was clicked.
+  let selected = false;
+  input.addEventListener("focus", () => {
+    selected = Number(input.value) === 0;
+    if (selected) input.select();
+  });
+  // Chromium collapses the selection on the mouseup following the click
+  // that moved focus, which would undo the select() above.
+  input.addEventListener("mouseup", (event) => {
+    if (selected) {
+      event.preventDefault();
+      selected = false;
+    }
+  });
 }
 
 function sizeInlineNumber(input) {
@@ -729,6 +751,7 @@ function buildStatsPanel(leftBonus, rightBonus) {
           state.cfg.bonus[key] = clampInput(input);
           onConfigChanged();
         };
+        selectZeroOnFocus(input);
         wrap.appendChild(input);
         row.appendChild(wrap);
       }
@@ -771,8 +794,10 @@ async function updateStatsPanel(gen) {
     ad,
     ap,
     "DmgAmp: " + b(r2(s.dmgAmp.stat)) + " = " + s.dmgAmp.base + " + " + g(r4(s.dmgAmp.add) + " DmgAmp"),
-    "Mana: " + b(r2(s.curMana)) + " / " + b(r2(s.fullMana)),
+    // Mana Regen sits above Mana here, unlike write_champion, so the line
+    // carrying an input isn't stranded below the one that doesn't.
     "Mana Regen: " + b(r2(s.manaRegen.stat)) + " = " + s.manaRegen.base + " + " + g(r2(s.manaRegen.add) + " Mana"),
+    "Mana: " + b(r2(s.curMana)) + " / " + b(r2(s.fullMana)),
     "Cast Time: " + b(s.castTime + " seconds"),
   ];
   const rightText = [
@@ -785,7 +810,7 @@ async function updateStatsPanel(gen) {
   ];
 
   // Which stat line carries which additive input. null = nothing to add.
-  const leftBonus = ["ad", "ap", "dmgamp", null, "manaregen", null];
+  const leftBonus = ["ad", "ap", "dmgamp", "manaregen", null, null];
   const rightBonus = ["as", "crit", "critdmg", "mpa", null, null];
 
   buildStatsPanel(leftBonus, rightBonus);
