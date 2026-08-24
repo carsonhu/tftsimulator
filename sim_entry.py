@@ -105,6 +105,32 @@ def get_catalog():
             }
         )
 
+    # Team traits: the class buffs whose extra parameter is an "Is X" 0/1
+    # membership flag. Passing 0 is what "my team has this trait but this
+    # champion isn't one of them" means -- the aura half applies, the
+    # member-only half doesn't. Discovered from the classes rather than
+    # listed by name so a trait added later (Lunar, on the set18 branch)
+    # turns up here on its own.
+    team_buffs = []
+    for cls_name in set18buffs.class_buffs:
+        cls = getattr(set18buffs, cls_name)
+        try:
+            extra = cls.extraParameters()
+        except Exception:
+            continue
+        if not extra or (extra.get("Min"), extra.get("Max")) != (0, 1):
+            continue
+        team_buffs.append(
+            {
+                "cls": cls_name,
+                "name": getattr(cls, "display_name", cls_name),
+                # 0 is "trait not active" and is the off position, so it is
+                # offered as a level like any other.
+                "levels": list(cls.levels),
+                "paramTitle": extra["Title"],
+            }
+        )
+
     blackthorn = None
     bt = getattr(set18buffs, "Blackthorn", None)
     if bt is not None:
@@ -124,6 +150,7 @@ def get_catalog():
         "champions": champions,
         "sidebarItems": item_group(all_items),
         "buffs": buffs,
+        "teamBuffs": team_buffs,
         "slices": [
             "Craftable",
             "Artifact",

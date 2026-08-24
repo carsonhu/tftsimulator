@@ -221,6 +221,28 @@ details > label {
   margin-bottom: 6px;
 }
 
+.col-label {
+  font-size: 0.82em;
+  color: #9aa0b0;
+}
+
+.team-traits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 6px 8px;
+}
+
+.hint {
+  margin: 0 0 4px;
+  font-size: 0.8em;
+  color: #9aa0b0;
+}
+
+select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .buff-row input[hidden] {
   display: none;
 }
@@ -269,15 +291,18 @@ h3 {
 
 .stats-panel {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 8px 32px;
+  /* Flows into as many columns as fit rather than two tall ones, which is
+     what kept the panel pushing the table below the fold. */
+  grid-template-columns: repeat(auto-fit, minmax(240px, max-content));
+  gap: 2px 24px;
   background: #1a1c23;
   border: 1px solid #31333f;
   border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 0.9em;
-  line-height: 1.7;
-  max-width: 60em;
+  padding: 8px 14px;
+  font-size: 0.84em;
+  line-height: 1.5;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .c-blue {
@@ -321,7 +346,7 @@ h3 {
 .table-wrap {
   overflow-x: auto;
   overflow-y: auto;
-  max-height: 420px;
+  max-height: 300px;
   border: 1px solid #31333f;
   border-radius: 8px;
   margin: 10px 0;
@@ -343,7 +368,7 @@ thead {
 }
 
 td {
-  padding: 4px 10px;
+  padding: 2px 10px;
   border-bottom: 1px solid #22242e;
   text-align: right;
 }

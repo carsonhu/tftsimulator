@@ -84,6 +84,12 @@ const state = {
     frame_rate: 30,
     t: 30,
   },
+  // Team traits the champion is NOT a member of: cls -> level. Kept out of
+  // cfg.buffs so the buff bar stays the buff bar; merged in by cfgForSlice
+  // with params 0, which is what the "Is X" flag means. Being real entries
+  // in cfg.buffs from there on means the Trait slice sweeps their other
+  // breakpoints too, same as any hand-picked buff.
+  teamBuffs: new Map(),
   slice: "Craftable",
   displayDps: false,
   // Payload for the slice on screen, and per-slice plot selections. Any
@@ -98,9 +104,25 @@ const state = {
 const $ = (id) => document.getElementById(id);
 
 function cfgForSlice(sliceName) {
-  return Object.assign(JSON.parse(JSON.stringify(state.cfg)), {
+  const cfg = Object.assign(JSON.parse(JSON.stringify(state.cfg)), {
     slice: sliceName,
   });
+  for (const [cls, level] of state.teamBuffs) {
+    if (level <= 0) continue;
+    const at = cfg.buffs.findIndex(([c]) => c === cls);
+    if (at < 0) {
+      cfg.buffs.push([cls, level, 0]);
+    } else if (cfg.buffs[at][1] === 0) {
+      // A level-0 buff-bar row is the trait switched off (Buff.ability
+      // returns immediately at level 0), so the team setting takes the slot
+      // rather than adding a second entry for the same class -- two entries
+      // would also give the Trait slice two rows per breakpoint.
+      cfg.buffs[at] = [cls, level, 0];
+    }
+    // An active buff-bar row wins outright; renderTeamTraits disables the
+    // control in that case so this branch is only reachable transiently.
+  }
+  return cfg;
 }
 
 // ---------------------------------------------------------------------------
@@ -450,6 +472,58 @@ function renderBuffRows() {
 }
 
 // ---------------------------------------------------------------------------
+// Team traits ("my team runs this, but this champion isn't one of them")
+// ---------------------------------------------------------------------------
+
+function renderTeamTraits() {
+  const container = $("teamTraits");
+  const traits = state.catalog.teamBuffs || [];
+  if (!traits.length) {
+    $("teamTraitsPanel").hidden = true;
+    return;
+  }
+  $("teamTraitsPanel").hidden = false;
+  container.innerHTML = "";
+
+  for (const trait of traits) {
+    // An *active* buff-bar row carries its own level and Is-X flag; adding
+    // the team version too would apply the aura twice, so the buff bar wins
+    // and this row says so instead of silently doing nothing. A level-0 row
+    // is the trait switched off and doesn't block anything -- champions
+    // carry their own traits in the buff bar by default (Ahri's Spellweaver
+    // sits there at 0), and those are exactly the ones worth setting here.
+    const inBuffBar = state.cfg.buffs.some(
+      ([cls, level]) => cls === trait.cls && level > 0
+    );
+    if (inBuffBar) state.teamBuffs.delete(trait.cls);
+
+    const label = document.createElement("label");
+    const caption = document.createElement("span");
+    caption.className = "col-label";
+    caption.textContent = trait.name;
+    const sel = document.createElement("select");
+    for (const level of trait.levels) {
+      sel.add(new Option(level === 0 ? "—" : String(level), String(level)));
+    }
+    sel.value = String(state.teamBuffs.get(trait.cls) ?? 0);
+    sel.disabled = inBuffBar;
+    label.title = inBuffBar
+      ? trait.name + " is in the buff bar above, which sets its own " + trait.paramTitle
+      : "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)";
+    sel.onchange = () => {
+      const level = Number(sel.value);
+      if (level > 0) state.teamBuffs.set(trait.cls, level);
+      else state.teamBuffs.delete(trait.cls);
+      onConfigChanged();
+    };
+
+    label.appendChild(caption);
+    label.appendChild(sel);
+    container.appendChild(label);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Blackthorn panel
 // ---------------------------------------------------------------------------
 
@@ -511,6 +585,9 @@ function sliceOptions() {
 
 function onConfigChanged() {
   updateBlackthornPanel();
+  // Re-rendered here rather than from renderBuffRows so that picking a trait
+  // in the buff bar immediately disables its team-trait row.
+  renderTeamTraits();
   state.selections.clear();
   refresh();
 }
@@ -609,15 +686,15 @@ async function updateStatsPanel(gen) {
       ? "AP: " + b(r2(s.ap.stat)) + " = " + s.ap.base + " + " + g(r2(s.ap.add) + " AP")
       : "AP: " + b(r2(s.ap.stat)) + " = " + s.ap.base + " + " + r(s.ap.addMultiplier) + " * " + g(r2(s.ap.add) + " AP");
 
-  const left = [
+  // One cell per stat in a flow grid: the same lines as before, but wrapping
+  // into as many columns as the window allows instead of two tall columns.
+  const cells = [
     ad,
     ap,
     "DmgAmp: " + b(r2(s.dmgAmp.stat)) + " = " + s.dmgAmp.base + " + " + g(r4(s.dmgAmp.add) + " DmgAmp"),
     "Mana: " + b(r2(s.curMana)) + " / " + b(r2(s.fullMana)),
     "Mana Regen: " + b(r2(s.manaRegen.stat)) + " = " + s.manaRegen.base + " + " + g(r2(s.manaRegen.add) + " Mana"),
-    "Cast Time: " + b(s.castTime + " seconds"),
-  ];
-  const right = [
+    "Cast Time: " + b(s.castTime + "s"),
     "AS: " + b(r3(s.aspd.stat)) + " = " + s.aspd.base + " * (1 + " + g(r4(s.aspd.add) + " AS") + ")",
     "Crit Chance: " + b(r3(s.crit.stat)) + " = " + s.crit.base + " + " + g(r4(s.crit.add) + " Crit"),
     "Crit Dmg: " + b(r2(s.critDmg.stat)) + " = " + s.critDmg.base + " + " + g(r4(s.critDmg.add) + " CritDmg"),
@@ -625,8 +702,7 @@ async function updateStatsPanel(gen) {
     "Role: " + b(s.role),
     "Can SpellCrit: " + b(s.canSpellCrit),
   ];
-  $("statsPanel").innerHTML =
-    '<div>' + left.join("<br>") + "</div><div>" + right.join("<br>") + "</div>";
+  $("statsPanel").innerHTML = cells.map((c) => "<div>" + c + "</div>").join("");
 
   const notes = $("champNotes");
   notes.hidden = !s.notes;
