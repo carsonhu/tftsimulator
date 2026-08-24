@@ -25,8 +25,8 @@
       <div>Loading TFT Simulator&hellip;</div>
       <div class="detail">
         First visit downloads the Python runtime (~7&nbsp;MB, cached by the
-        browser afterwards). No packages get installed &mdash; this build
-        boots straight into the simulator.
+        browser afterwards). No packages get installed &mdash; this build boots
+        straight into the simulator.
       </div>
     </div>
 
@@ -35,18 +35,22 @@
         <section>
           <h2>Champion</h2>
           <div class="row">
-            <label class="grow">Champion
+            <label class="grow"
+              >Champion
               <select id="champ"></select>
             </label>
-            <label>Level
+            <label
+              >Level
               <select id="level"></select>
             </label>
           </div>
-          <label id="numTargetsRow" hidden>Number of targets
+          <label id="numTargetsRow" hidden
+            >Number of targets
             <input type="range" id="numTargets" min="1" max="3" step="1" />
             <span class="slider-value" id="numTargetsValue"></span>
           </label>
-          <label id="numExtraTargetsRow" hidden>Number of extra targets
+          <label id="numExtraTargetsRow" hidden
+            >Number of extra targets
             <input type="range" id="numExtraTargets" min="1" max="3" step="1" />
             <span class="slider-value" id="numExtraTargetsValue"></span>
           </label>
@@ -54,10 +58,12 @@
 
         <details>
           <summary>Extra options</summary>
-          <label>Total takedowns
+          <label
+            >Total takedowns
             <input type="number" id="takedowns" min="0" max="100" value="0" />
           </label>
-          <label>Number of active traits
+          <label
+            >Number of active traits
             <input type="number" id="numTraits" min="0" max="12" value="6" />
           </label>
           <!-- The bonus-stat inputs live in the Base stats panel now, each
@@ -65,11 +71,20 @@
         </details>
 
         <section>
-          <label>Current stage
+          <label
+            >Current stage
             <select id="stage"></select>
           </label>
-          <label>Tactician Level
-            <input type="range" id="tactician" min="3" max="10" step="1" value="4" />
+          <label
+            >Tactician Level
+            <input
+              type="range"
+              id="tactician"
+              min="3"
+              max="10"
+              step="1"
+              value="4"
+            />
             <span class="slider-value" id="tacticianValue">4</span>
           </label>
         </section>
@@ -84,7 +99,8 @@
 
         <section>
           <h2>Global Buffs</h2>
-          <label>Number of Buffs
+          <label
+            >Number of Buffs
             <input type="range" id="numBuffs" min="1" max="10" step="1" />
             <span class="slider-value" id="numBuffsValue"></span>
           </label>
@@ -94,18 +110,20 @@
         <section id="blackthornPanel" hidden>
           <h2>Blackthorn Sacrifice</h2>
           <div class="row">
-            <label class="grow">Role
+            <label class="grow"
+              >Role
               <select id="btRole"></select>
             </label>
-            <label class="grow">Star level
+            <label class="grow"
+              >Star level
               <select id="btStar"></select>
             </label>
-            <label class="grow">Cost
+            <label class="grow"
+              >Cost
               <select id="btCost"></select>
             </label>
           </div>
         </section>
-
       </aside>
 
       <main id="content">
@@ -144,10 +162,8 @@
           /><span>MR</span>
         </h1>
         <p class="disclaimer">
-          Most cast times/manalock times are guesses. Units can cast after
-          they have completed 30% of an autoattack. Champs must attack at
-          least once between casts (should only affect Samira). Simulator is
-          probably not very accurate to true gameplay at high attack speeds.
+          Most cast times/manalock times are guesses. Units can cast after they
+          have completed 30% of an autoattack.
         </p>
 
         <!-- Team Traits sits beside Base stats and matches its height: the
@@ -194,11 +210,12 @@
         </div>
 
         <div id="plotArea">
-          <p id="plotHint">Tick one or more rows to plot.</p>
+          <p id="plotHint">Click a row in the table to plot it.</p>
           <div id="plotColumns" hidden>
             <div id="chart"></div>
             <div id="logColumn">
-              <label>Index Log
+              <label
+                >Index Log
                 <select id="logSelect"></select>
               </label>
               <div class="table-wrap log-wrap">

@@ -849,8 +849,28 @@ async function updateStatsPanel(gen) {
 // ---------------------------------------------------------------------------
 
 function currentSelection() {
-  if (!state.selections.has(state.slice)) state.selections.set(state.slice, new Set());
+  if (!state.selections.has(state.slice)) state.selections.set(state.slice, new Map());
   return state.selections.get(state.slice);
+}
+
+// A plotted row owns its colour slot until it is unplotted. Assigning by
+// position instead would repaint every line whenever the table is re-sorted
+// or a row above is removed, so the colour would identify a rank rather than
+// an item -- and the swatch in the table would drift from the line it names.
+function togglePlotted(idx) {
+  const selection = currentSelection();
+  if (selection.has(idx)) {
+    selection.delete(idx);
+    return;
+  }
+  const taken = new Set(selection.values());
+  let slot = 0;
+  while (taken.has(slot)) slot++;
+  selection.set(idx, slot);
+}
+
+function seriesColor(slot) {
+  return COLORS[slot % COLORS.length];
 }
 
 function renderResults() {
@@ -914,13 +934,31 @@ function renderResults() {
   const thead = table.createTHead();
   const headRow = thead.insertRow();
   for (const col of columns) headRow.appendChild(sortableHeader(col));
-  const plotHead = document.createElement("th");
-  plotHead.textContent = "To Plot";
-  headRow.appendChild(plotHead);
 
   const tbody = table.createTBody();
   for (const row of rows) {
     const tr = tbody.insertRow();
+    const slot = selection.get(row.idx);
+    if (slot !== undefined) {
+      tr.classList.add("plotted");
+      // Drives the accent bar on the first cell, so the table's mark and the
+      // chart's line are literally the same value.
+      tr.style.setProperty("--series", seriesColor(slot));
+    }
+    tr.tabIndex = 0;
+    tr.setAttribute("aria-pressed", slot !== undefined ? "true" : "false");
+    tr.title = slot !== undefined ? "Click to remove from the chart" : "Click to plot";
+    const toggle = () => {
+      togglePlotted(row.idx);
+      renderResults();
+    };
+    tr.onclick = toggle;
+    tr.onkeydown = (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        toggle();
+      }
+    };
     for (const col of columns) {
       const cell = tr.insertCell();
       const value = col.get(row);
@@ -929,17 +967,6 @@ function renderResults() {
         shadeCell(cell, Number(value), scales.get(col.label), col.label);
       }
     }
-
-    const checkCell = tr.insertCell();
-    const check = document.createElement("input");
-    check.type = "checkbox";
-    check.checked = selection.has(row.idx);
-    check.onchange = () => {
-      if (check.checked) selection.add(row.idx);
-      else selection.delete(row.idx);
-      renderPlot();
-    };
-    checkCell.appendChild(check);
   }
 
   renderPlot();
@@ -1014,12 +1041,19 @@ function selectedRows() {
   const payload = state.current;
   if (!payload) return [];
   const selection = currentSelection();
-  return payload.rows.filter((row) => selection.has(row.idx));
+  const byIdx = new Map(payload.rows.map((row) => [row.idx, row]));
+  // Ordered by slot, i.e. by when each row was added, so the legend doesn't
+  // reshuffle when the table is sorted.
+  return [...selection.entries()]
+    .sort((a, b) => a[1] - b[1])
+    .map(([idx, slot]) => ({ row: byIdx.get(idx), slot }))
+    .filter((entry) => entry.row);
 }
 
 function renderPlot() {
-  const rows = selectedRows();
-  const hasRows = rows.length > 0;
+  const entries = selectedRows();
+  const rows = entries.map((entry) => entry.row);
+  const hasRows = entries.length > 0;
   $("plotHint").hidden = hasRows;
   $("plotColumns").hidden = !hasRows;
   if (!hasRows) {
@@ -1030,10 +1064,12 @@ function renderPlot() {
 
   const payload = state.current;
   const traces = [];
-  rows.forEach((row, i) => {
+  entries.forEach(({ row, slot }) => {
     const tl = payload.timelines[String(row.idx)];
-    const label = row.idx + ": " + row.extra;
-    const color = COLORS[i % COLORS.length];
+    const label = row.extra;
+    // The slot, not the loop index: the line keeps the colour its table row
+    // is wearing however the table is sorted.
+    const color = seriesColor(slot);
     traces.push({
       x: tl.t,
       y: tl.cum,
@@ -1135,7 +1171,7 @@ function renderLogControls(rows) {
   const logSel = $("logSelect");
   const previous = logSel.value;
   logSel.innerHTML = "";
-  for (const row of rows) logSel.add(new Option(row.idx + ": " + row.extra, row.idx));
+  for (const row of rows) logSel.add(new Option(row.extra, row.idx));
   if ([...logSel.options].some((o) => o.value === previous)) logSel.value = previous;
   logSel.onchange = () => renderLog(Number(logSel.value));
   renderLog(Number(logSel.value));

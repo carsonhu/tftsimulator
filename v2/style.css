@@ -663,6 +663,31 @@ tbody tr:hover td {
     inset 0 -1px 0 #6b7183;
 }
 
+/* Rows are the plot control now. */
+#resultsTable tbody tr {
+  cursor: pointer;
+}
+
+#resultsTable tbody tr:focus-visible {
+  outline: 2px solid #ff4b4b;
+  outline-offset: -2px;
+}
+
+/* A plotted row wears its series colour as a bar beside the name, never as
+   the text colour -- the label stays in ink and the mark carries identity.
+   --series is set per row in app.js from the same value the line uses. */
+#resultsTable tbody tr.plotted td:first-child {
+  box-shadow: inset 4px 0 0 var(--series);
+  font-weight: 600;
+}
+
+#resultsTable tbody tr.plotted:hover td:first-child {
+  box-shadow:
+    inset 4px 0 0 var(--series),
+    inset 0 1px 0 #6b7183,
+    inset 0 -1px 0 #6b7183;
+}
+
 td input[type="checkbox"] {
   accent-color: #ff4b4b;
 }
