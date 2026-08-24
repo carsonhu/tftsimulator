@@ -250,6 +250,16 @@ details > label {
   margin-bottom: 6px;
 }
 
+/* No buff in the bar takes a parameter: drop the third column entirely so
+   Name and Level use the full sidebar width. */
+#buffRows.no-param .buff-row {
+  grid-template-columns: 2fr 1fr;
+}
+
+#buffRows.no-param .buff-row > label:nth-child(3) {
+  display: none;
+}
+
 .col-label {
   font-size: 0.82em;
   color: #9aa0b0;

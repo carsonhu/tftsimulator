@@ -123,18 +123,12 @@ function cfgForSlice(sliceName) {
   });
   for (const [cls, level] of state.teamBuffs) {
     if (level <= 0) continue;
-    const at = cfg.buffs.findIndex(([c]) => c === cls);
-    if (at < 0) {
-      cfg.buffs.push([cls, level, 0]);
-    } else if (cfg.buffs[at][1] === 0) {
-      // A level-0 buff-bar row is the trait switched off (Buff.ability
-      // returns immediately at level 0), so the team setting takes the slot
-      // rather than adding a second entry for the same class -- two entries
-      // would also give the Trait slice two rows per breakpoint.
-      cfg.buffs[at] = [cls, level, 0];
-    }
-    // An active buff-bar row wins outright; renderTeamTraits disables the
-    // control in that case so this branch is only reachable transiently.
+    // renderTeamTraits drops any trait that is in the buff bar, so this can
+    // only collide in the instant between the two updates. The buff bar's
+    // entry wins; a second entry for one class would also give the Trait
+    // slice two rows per breakpoint.
+    if (cfg.buffs.some(([c]) => c === cls)) continue;
+    cfg.buffs.push([cls, level, 0]);
   }
   return cfg;
 }
@@ -257,11 +251,7 @@ function buildStaticControls() {
     selectZeroOnFocus(input);
   }
 
-  buildPills($("frameRatePills"), cat.defaults.frameRates, state.cfg.frame_rate, (v) => {
-    state.cfg.frame_rate = Number(v);
-    onConfigChanged();
-  });
-
+  // No frame-rate control: cfg.frame_rate stays at the 30 the sim expects.
   $("displayDps").onchange = () => {
     state.displayDps = $("displayDps").checked;
     renderResults();
@@ -447,6 +437,8 @@ function renderBuffRows() {
     const paramCaption = paramCol.querySelector(".col-label");
 
     const syncParamColumn = (meta) => {
+      // Hidden rather than removed: rows keep their columns aligned when
+      // some buffs in the bar take a parameter and others don't.
       paramCol.style.visibility = meta.extra ? "visible" : "hidden";
       paramCaption.textContent = meta.extra ? meta.extra.Title : "Param";
     };
@@ -476,6 +468,10 @@ function renderBuffRows() {
         Number(levelSel.value),
         meta.extra ? Number(paramInput.value) : 0,
       ];
+      // After the write, not before: the layout is decided by reading every
+      // row out of state.cfg.buffs, so running it first sees this row's
+      // previous buff and lands one change behind.
+      updateBuffParamLayout();
     };
 
     buffSel.onchange = () => {
@@ -509,7 +505,18 @@ function renderBuffRows() {
     row.appendChild(paramCol);
     container.appendChild(row);
   });
+  updateBuffParamLayout();
   updateBlackthornPanel();
+}
+
+function updateBuffParamLayout() {
+  // When nothing in the bar takes a parameter there is no third column to
+  // align against, so Name and Level take the whole width instead of
+  // leaving a permanent empty gutter.
+  const anyParam = state.cfg.buffs.some(
+    ([cls]) => state.buffMeta.get(cls) && state.buffMeta.get(cls).extra
+  );
+  $("buffRows").classList.toggle("no-param", !anyParam);
 }
 
 // ---------------------------------------------------------------------------
@@ -523,27 +530,24 @@ function renderTeamTraits() {
     $("teamTraitsPanel").hidden = true;
     return;
   }
-  $("teamTraitsPanel").hidden = false;
   container.innerHTML = "";
+  let shown = 0;
 
   for (const trait of traits) {
-    // An *active* buff-bar row carries its own level and Is-X flag; adding
-    // the team version too would apply the aura twice, so the buff bar wins
-    // and this row says so instead of silently doing nothing. A level-0 row
-    // is the trait switched off and doesn't block anything -- champions
-    // carry their own traits in the buff bar by default (Ahri's Spellweaver
-    // sits there at 0), and those are exactly the ones worth setting here.
-    const inBuffBar = state.cfg.buffs.some(
-      ([cls, level]) => cls === trait.cls && level > 0
-    );
-    if (inBuffBar) state.teamBuffs.delete(trait.cls);
+    // A trait picked in Global Buffs is configured there, with its own level
+    // and Is-X flag, so it is not offered here at all -- two controls for
+    // one trait invites setting it twice.
+    if (state.cfg.buffs.some(([cls]) => cls === trait.cls)) {
+      state.teamBuffs.delete(trait.cls);
+      continue;
+    }
+    shown++;
 
     const current = state.teamBuffs.get(trait.cls) ?? 0;
     const label = document.createElement("label");
     label.className = trait.scales ? "team-trait" : "team-trait flat";
-    label.title = inBuffBar
-      ? trait.name + " is in the buff bar above, which sets its own " + trait.paramTitle
-      : "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)";
+    label.title =
+      "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)";
 
     const caption = document.createElement("span");
     caption.className = "col-label";
@@ -557,7 +561,6 @@ function renderTeamTraits() {
         sel.add(new Option(level === 0 ? "—" : String(level), String(level)));
       }
       sel.value = String(current);
-      sel.disabled = inBuffBar;
       sel.onchange = () => {
         const level = Number(sel.value);
         if (level > 0) state.teamBuffs.set(trait.cls, level);
@@ -573,7 +576,6 @@ function renderTeamTraits() {
       const check = document.createElement("input");
       check.type = "checkbox";
       check.checked = current > 0;
-      check.disabled = inBuffBar;
       check.onchange = () => {
         if (check.checked) state.teamBuffs.set(trait.cls, trait.onLevel);
         else state.teamBuffs.delete(trait.cls);
@@ -585,6 +587,10 @@ function renderTeamTraits() {
 
     container.appendChild(label);
   }
+
+  // Every team trait is already in the buff bar: an empty panel would just
+  // be a labelled box with nothing in it.
+  $("teamTraitsPanel").hidden = shown === 0;
 }
 
 // ---------------------------------------------------------------------------
