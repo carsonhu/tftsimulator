@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Darth Noob's TFT Simulator</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <!-- Pinned to the plotly.js that plotly.py 6.9.0 bundles, so charts here
+         render identically to the stlite/droplet builds. jsdelivr versioned
+         URLs are immutable-cached for a year, unlike anything served from
+         this GitHub Pages origin (max-age=600). -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@3.7.0/plotly.min.js"
+      defer
+    ></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div id="boot-status">
+      <div class="spinner"></div>
+      <div>Loading TFT Simulator&hellip;</div>
+      <div class="detail">
+        First visit downloads the Python runtime (~7&nbsp;MB, cached by the
+        browser afterwards). No packages get installed &mdash; this build
+        boots straight into the simulator.
+      </div>
+    </div>
+
+    <div id="layout" hidden>
+      <aside id="sidebar">
+        <section>
+          <h2>Champion</h2>
+          <div class="row">
+            <label class="grow">Champion
+              <select id="champ"></select>
+            </label>
+            <label>Level
+              <select id="level"></select>
+            </label>
+          </div>
+          <label id="numTargetsRow" hidden>Number of targets
+            <input type="range" id="numTargets" min="1" max="3" step="1" />
+            <span class="slider-value" id="numTargetsValue"></span>
+          </label>
+          <label id="numExtraTargetsRow" hidden>Number of extra targets
+            <input type="range" id="numExtraTargets" min="1" max="3" step="1" />
+            <span class="slider-value" id="numExtraTargetsValue"></span>
+          </label>
+        </section>
+
+        <details>
+          <summary>Extra options / bonus stats</summary>
+          <label>Total takedowns
+            <input type="number" id="takedowns" min="0" max="100" value="0" />
+          </label>
+          <label>Number of active traits
+            <input type="number" id="numTraits" min="0" max="12" value="6" />
+          </label>
+          <div class="grid3" id="bonusGrid">
+            <label>Bonus AD
+              <input type="number" data-bonus="ad" min="0" max="2000" value="0" />
+            </label>
+            <label>Bonus AP
+              <input type="number" data-bonus="ap" min="0" max="2000" value="0" />
+            </label>
+            <label>Bonus AS
+              <input type="number" data-bonus="as" min="0" max="200" value="0" />
+            </label>
+            <label>DmgAmp
+              <input type="number" data-bonus="dmgamp" min="0" max="1000" value="0" />
+            </label>
+            <label>Bonus Crit
+              <input type="number" data-bonus="crit" min="0" max="200" value="0" />
+            </label>
+            <label>CritDmg
+              <input type="number" data-bonus="critdmg" min="0" max="200" value="0" />
+            </label>
+            <label>ManaRegen
+              <input type="number" data-bonus="manaregen" min="0" max="10" value="0" />
+            </label>
+            <label>ManaPerAuto
+              <input type="number" data-bonus="mpa" min="0" max="15" value="0" />
+            </label>
+          </div>
+        </details>
+
+        <section>
+          <label>Current stage
+            <select id="stage"></select>
+          </label>
+          <label>Tactician Level
+            <input type="range" id="tactician" min="3" max="10" step="1" value="4" />
+            <span class="slider-value" id="tacticianValue">4</span>
+          </label>
+        </section>
+
+        <section>
+          <h2>Global Items</h2>
+          <div id="itemRows"></div>
+          <button id="resetItems" type="button">Reset items</button>
+        </section>
+
+        <section>
+          <h2>Global Buffs</h2>
+          <label>Number of Buffs
+            <input type="range" id="numBuffs" min="1" max="10" step="1" />
+            <span class="slider-value" id="numBuffsValue"></span>
+          </label>
+          <div id="buffRows"></div>
+        </section>
+
+        <section id="blackthornPanel" hidden>
+          <h2>Blackthorn Sacrifice</h2>
+          <div class="row">
+            <label class="grow">Role
+              <select id="btRole"></select>
+            </label>
+            <label class="grow">Star level
+              <select id="btStar"></select>
+            </label>
+            <label class="grow">Cost
+              <select id="btCost"></select>
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <h2>Enemy</h2>
+          <div class="row">
+            <label class="grow">Enemy HP
+              <input type="number" id="enemyHp" min="1" max="99999" value="1800" />
+            </label>
+            <label class="grow">Enemy Armor
+              <input type="number" id="enemyArmor" min="0" max="99999" value="100" />
+            </label>
+            <label class="grow">Enemy MR
+              <input type="number" id="enemyMr" min="0" max="99999" value="100" />
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <span class="field-label">Frame Rate (60 = double the runtime): Leave at 30 fps</span>
+          <div class="pills" id="frameRatePills"></div>
+        </section>
+      </aside>
+
+      <main id="content">
+        <h1 id="header"></h1>
+        <p class="disclaimer">
+          Most cast times/manalock times are guesses. Units can cast after
+          they have completed 30% of an autoattack. Champs must attack at
+          least once between casts (should only affect Samira). Simulator is
+          probably not very accurate to true gameplay at high attack speeds.
+        </p>
+
+        <h3>Base stats</h3>
+        <div id="statsPanel" class="stats-panel"></div>
+        <p id="champNotes" class="notes" hidden></p>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="displayDps" />
+          Display DPS
+        </label>
+
+        <div class="pills" id="sliceRadio"></div>
+        <div id="runStatus" class="run-status" hidden></div>
+
+        <div class="table-wrap">
+          <table id="resultsTable"></table>
+        </div>
+
+        <div id="plotArea">
+          <p id="plotHint">Tick one or more rows to plot.</p>
+          <div id="plotColumns" hidden>
+            <div id="chart"></div>
+            <div id="logColumn">
+              <label>Index Log
+                <select id="logSelect"></select>
+              </label>
+              <div class="table-wrap log-wrap">
+                <table id="logTable"></table>
+              </div>
+              <div id="pie"></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="caption" id="footerCaption"></p>
+      </main>
+    </div>
+  </body>
+</html>

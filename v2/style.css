@@ -1,0 +1,427 @@
+/* v2/style.css — dark theme matching the stlite build's look
+   (#0e1117 ground, #fafafa text, #ff4b4b accent). */
+
+* {
+  box-sizing: border-box;
+}
+
+/* Several containers below set display:flex/grid, which would beat the UA
+   stylesheet's [hidden] { display:none } on specificity and quietly un-hide
+   them (the Blackthorn panel did exactly that). */
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #0e1117;
+  color: #fafafa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+}
+
+/* ---------------- boot overlay ---------------- */
+
+#boot-status {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  padding: 24px;
+  background: #0e1117;
+  z-index: 10;
+}
+
+#boot-status[hidden] {
+  display: none;
+}
+
+#boot-status .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #31333f;
+  border-top-color: #ff4b4b;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+#boot-status .detail {
+  color: #a3a8b8;
+  font-size: 0.9em;
+  max-width: 32em;
+}
+
+#boot-status .error {
+  color: #ff4b4b;
+  white-space: pre-wrap;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8em;
+  text-align: left;
+  max-width: 48em;
+  max-height: 40vh;
+  overflow: auto;
+  background: #1a1c23;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------- layout ---------------- */
+
+#layout {
+  display: flex;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+#sidebar {
+  width: 340px;
+  flex: 0 0 340px;
+  padding: 16px;
+  background: #262730;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+#content {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 20px 28px 40px;
+}
+
+@media (max-width: 900px) {
+  #layout {
+    flex-direction: column;
+  }
+  #sidebar {
+    width: 100%;
+    flex: none;
+    min-height: 0;
+  }
+}
+
+/* ---------------- sidebar controls ---------------- */
+
+#sidebar h2 {
+  font-size: 1.05em;
+  margin: 0 0 8px;
+}
+
+#sidebar section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#sidebar label,
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85em;
+  color: #c7cad6;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.row .grow {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+select,
+input[type="number"] {
+  width: 100%;
+  padding: 6px 8px;
+  background: #0e1117;
+  color: #fafafa;
+  border: 1px solid #31333f;
+  border-radius: 6px;
+  font: inherit;
+}
+
+select:focus,
+input:focus {
+  outline: 1px solid #ff4b4b;
+}
+
+input[type="range"] {
+  accent-color: #ff4b4b;
+  width: 100%;
+}
+
+.slider-value {
+  color: #ff4b4b;
+  font-weight: 600;
+}
+
+button {
+  padding: 6px 14px;
+  background: #0e1117;
+  color: #fafafa;
+  border: 1px solid #31333f;
+  border-radius: 6px;
+  font: inherit;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+button:hover {
+  border-color: #ff4b4b;
+  color: #ff4b4b;
+}
+
+details {
+  background: #1a1c23;
+  border: 1px solid #31333f;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+details summary {
+  cursor: pointer;
+  font-size: 0.9em;
+  color: #c7cad6;
+}
+
+details[open] summary {
+  margin-bottom: 8px;
+}
+
+details > label {
+  margin-bottom: 8px;
+}
+
+.buff-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.buff-row input[hidden] {
+  display: none;
+}
+
+/* ---------------- pills (radio groups) ---------------- */
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.pill {
+  border-radius: 999px;
+  padding: 5px 14px;
+  align-self: auto;
+}
+
+.pill.active {
+  background: #ff4b4b;
+  border-color: #ff4b4b;
+  color: #fff;
+}
+
+.pill.active:hover {
+  color: #fff;
+}
+
+/* ---------------- content ---------------- */
+
+h1 {
+  font-size: 1.7em;
+  margin: 0 0 10px;
+}
+
+h3 {
+  margin: 18px 0 8px;
+}
+
+.disclaimer {
+  color: #a3a8b8;
+  font-size: 0.9em;
+  max-width: 60em;
+}
+
+.stats-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 8px 32px;
+  background: #1a1c23;
+  border: 1px solid #31333f;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.9em;
+  line-height: 1.7;
+  max-width: 60em;
+}
+
+.c-blue {
+  color: #4da3ff;
+  font-weight: 600;
+}
+
+.c-green {
+  color: #21c354;
+}
+
+.c-red {
+  color: #ff4b4b;
+}
+
+.notes {
+  color: #c7cad6;
+  font-size: 0.9em;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 4px;
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  accent-color: #ff4b4b;
+}
+
+.run-status {
+  color: #ffd166;
+  margin: 6px 0;
+  font-size: 0.9em;
+}
+
+/* ---------------- tables ---------------- */
+
+.table-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 420px;
+  border: 1px solid #31333f;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.88em;
+  white-space: nowrap;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  background: #262730;
+}
+
+td {
+  padding: 5px 12px;
+  border-bottom: 1px solid #22242e;
+  text-align: right;
+}
+
+thead td {
+  font-weight: 600;
+  color: #c7cad6;
+  text-align: right;
+}
+
+td:first-child,
+thead td:first-child {
+  text-align: center;
+}
+
+td:nth-child(2),
+thead td:nth-child(2) {
+  text-align: left;
+}
+
+tbody tr:hover {
+  background: #1a1c23;
+}
+
+td input[type="checkbox"] {
+  accent-color: #ff4b4b;
+}
+
+/* ---------------- plot area ---------------- */
+
+#plotHint {
+  color: #a3a8b8;
+  background: #1a1c23;
+  border: 1px solid #31333f;
+  border-radius: 8px;
+  padding: 10px 14px;
+  max-width: 30em;
+}
+
+#plotColumns {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+#chart {
+  flex: 3 1 0;
+  min-width: 0;
+  height: 480px;
+}
+
+#logColumn {
+  flex: 1 1 0;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.85em;
+  color: #c7cad6;
+}
+
+.log-wrap {
+  max-height: 300px;
+}
+
+@media (max-width: 1100px) {
+  #plotColumns {
+    flex-direction: column;
+  }
+  #chart {
+    width: 100%;
+    flex: none;
+  }
+  #logColumn {
+    width: 100%;
+  }
+}
+
+.caption {
+  color: #7a7f8f;
+  font-size: 0.8em;
+  margin-top: 24px;
+}
