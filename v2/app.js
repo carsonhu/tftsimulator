@@ -64,6 +64,20 @@ function showBootError(text) {
 
 const DPS_TIMES = [5, 10, 15, 20, 25];
 
+// Bonus stats, keyed as sim_entry expects them. Ranges are the ones the
+// Streamlit sidebar used. Each is rendered beside the stat it feeds in the
+// Base stats panel.
+const BONUS_FIELDS = {
+  ad: { label: "Bonus AD", min: 0, max: 2000 },
+  ap: { label: "Bonus AP", min: 0, max: 2000 },
+  as: { label: "Bonus AS", min: 0, max: 200 },
+  dmgamp: { label: "DmgAmp", min: 0, max: 1000 },
+  crit: { label: "Bonus Crit", min: 0, max: 200 },
+  critdmg: { label: "CritDmg", min: 0, max: 200 },
+  manaregen: { label: "ManaRegen", min: 0, max: 10 },
+  mpa: { label: "ManaPerAuto", min: 0, max: 15 },
+};
+
 const state = {
   catalog: null,
   buffMeta: null, // cls -> {name, levels, extra}
@@ -175,12 +189,6 @@ function buildStaticControls() {
     state.cfg.num_traits = clampInput($("numTraits"));
     onConfigChanged();
   };
-  for (const input of document.querySelectorAll("#bonusGrid input")) {
-    input.onchange = () => {
-      state.cfg.bonus[input.dataset.bonus] = clampInput(input);
-      onConfigChanged();
-    };
-  }
 
   // Item selectors.
   const itemRows = $("itemRows");
@@ -688,6 +696,48 @@ function renderHeader() {
     (bootMs != null ? " · engine booted in " + (bootMs / 1000).toFixed(1) + "s" : "");
 }
 
+function buildStatsPanel(leftBonus, rightBonus) {
+  const panel = $("statsPanel");
+  if (panel.dataset.built) return;
+  panel.dataset.built = "1";
+  panel.innerHTML = "";
+
+  for (const keys of [leftBonus, rightBonus]) {
+    const col = document.createElement("div");
+    col.className = "stats-col";
+    for (const key of keys) {
+      const row = document.createElement("div");
+      row.className = "stat-row";
+
+      const text = document.createElement("span");
+      text.className = "stat-text";
+      row.appendChild(text);
+
+      if (key) {
+        const field = BONUS_FIELDS[key];
+        const wrap = document.createElement("span");
+        wrap.className = "stat-bonus";
+        wrap.textContent = "+";
+        const input = document.createElement("input");
+        input.type = "number";
+        input.min = field.min;
+        input.max = field.max;
+        input.value = state.cfg.bonus[key] ?? 0;
+        input.title = field.label;
+        input.setAttribute("aria-label", field.label);
+        input.onchange = () => {
+          state.cfg.bonus[key] = clampInput(input);
+          onConfigChanged();
+        };
+        wrap.appendChild(input);
+        row.appendChild(wrap);
+      }
+      col.appendChild(row);
+    }
+    panel.appendChild(col);
+  }
+}
+
 async function updateStatsPanel(gen) {
   let info;
   try {
@@ -717,7 +767,7 @@ async function updateStatsPanel(gen) {
   // offence and mana on the left, attack speed and crit on the right. Laying
   // these out as one flat grid instead reflows them across the columns and
   // scrambles that order.
-  const left = [
+  const leftText = [
     ad,
     ap,
     "DmgAmp: " + b(r2(s.dmgAmp.stat)) + " = " + s.dmgAmp.base + " + " + g(r4(s.dmgAmp.add) + " DmgAmp"),
@@ -725,7 +775,7 @@ async function updateStatsPanel(gen) {
     "Mana Regen: " + b(r2(s.manaRegen.stat)) + " = " + s.manaRegen.base + " + " + g(r2(s.manaRegen.add) + " Mana"),
     "Cast Time: " + b(s.castTime + " seconds"),
   ];
-  const right = [
+  const rightText = [
     "AS: " + b(r3(s.aspd.stat)) + " = " + s.aspd.base + " * (1 + " + g(r4(s.aspd.add) + " AS") + ")",
     "Crit Chance: " + b(r3(s.crit.stat)) + " = " + s.crit.base + " + " + g(r4(s.crit.add) + " Crit"),
     "Crit Dmg: " + b(r2(s.critDmg.stat)) + " = " + s.critDmg.base + " + " + g(r4(s.critDmg.add) + " CritDmg"),
@@ -733,12 +783,18 @@ async function updateStatsPanel(gen) {
     "Role: " + b(s.role),
     "Can SpellCrit: " + b(s.canSpellCrit ? "True" : "False"),
   ];
-  $("statsPanel").innerHTML =
-    '<div class="stats-col">' +
-    left.join("<br>") +
-    '</div><div class="stats-col">' +
-    right.join("<br>") +
-    "</div>";
+
+  // Which stat line carries which additive input. null = nothing to add.
+  const leftBonus = ["ad", "ap", "dmgamp", null, "manaregen", null];
+  const rightBonus = ["as", "crit", "critdmg", "mpa", null, null];
+
+  buildStatsPanel(leftBonus, rightBonus);
+  // Only the text is rewritten on refresh: the inputs are long-lived, and
+  // replacing them would drop whatever is being typed (and the caret).
+  const texts = leftText.concat(rightText);
+  document.querySelectorAll("#statsPanel .stat-text").forEach((el, i) => {
+    el.innerHTML = texts[i];
+  });
 
   const notes = $("champNotes");
   notes.hidden = !s.notes;

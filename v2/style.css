@@ -447,6 +447,50 @@ h3 {
   min-width: 0;
 }
 
+/* Each stat line, with its additive input pushed to the column's right edge
+   so the inputs form a single aligned run. */
+.stat-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 1.9em;
+}
+
+.stat-bonus {
+  color: #7a7f8f;
+  flex: 0 0 auto;
+}
+
+.stats-panel input[type="number"] {
+  width: 4.5ch;
+  padding: 1px 4px;
+  margin-left: 2px;
+  font: inherit;
+  color: #fafafa;
+  background: #0e1117;
+  border: 1px solid #31333f;
+  border-radius: 4px;
+  text-align: right;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.stats-panel input[type="number"]::-webkit-outer-spin-button,
+.stats-panel input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.stats-panel input[type="number"]:hover {
+  border-color: #4a4d5a;
+}
+
+.stats-panel input[type="number"]:focus {
+  outline: none;
+  border-color: #ff4b4b;
+}
+
 .c-blue {
   color: #4da3ff;
   font-weight: 600;
