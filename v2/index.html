@@ -160,10 +160,21 @@
           probably not very accurate to true gameplay at high attack speeds.
         </p>
 
+        <!-- Left column runs from Base stats down to the slice pills; the
+             Team Traits column beside it stretches over all of that, so the
+             top-right is filled from the top of the page to the table. -->
         <div class="stats-row">
           <div class="stats-block">
             <h3>Base stats</h3>
             <div id="statsPanel" class="stats-panel"></div>
+            <p id="champNotes" class="notes" hidden></p>
+
+            <label class="checkbox-row">
+              <input type="checkbox" id="displayDps" />
+              Display DPS
+            </label>
+
+            <div class="pills" id="sliceRadio"></div>
           </div>
           <div id="teamTraitsPanel" class="team-block" hidden>
             <h3>Team Traits</h3>
@@ -174,14 +185,6 @@
             <div id="teamTraits" class="team-traits"></div>
           </div>
         </div>
-        <p id="champNotes" class="notes" hidden></p>
-
-        <label class="checkbox-row">
-          <input type="checkbox" id="displayDps" />
-          Display DPS
-        </label>
-
-        <div class="pills" id="sliceRadio"></div>
         <div id="runStatus" class="run-status" hidden></div>
 
         <div class="table-wrap">

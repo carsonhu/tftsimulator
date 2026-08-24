@@ -232,6 +232,10 @@ details > label {
      more to come, columns should fill in, not spread out. */
   grid-template-columns: repeat(auto-fill, minmax(130px, max-content));
   justify-content: start;
+  /* Fills the column's remaining height, with the traits themselves parked
+     at the top rather than spread down it. */
+  flex: 1 1 auto;
+  align-content: start;
   gap: 6px 18px;
   background: #1a1c23;
   border: 1px solid #31333f;
@@ -326,7 +330,10 @@ h3 {
 
 .stats-row {
   display: flex;
-  align-items: flex-start;
+  /* stretch, not flex-start: the Team Traits column is meant to run the full
+     height of the left column (stats + Display DPS + slice pills), so it
+     covers the top-right corner down to the table. */
+  align-items: stretch;
   gap: 20px;
   flex-wrap: wrap;
 }
@@ -336,12 +343,21 @@ h3 {
   margin: 14px 0 6px;
 }
 
+.stats-block {
+  /* Sized to the stats panel's own content, unchanged by anything on the
+     right, so the table below keeps the width it had. */
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
 .team-block {
-  /* Grows into whatever is left of the row: Base stats is sized to its own
-     content, so this is what fills the top-right rather than leaving a gap
-     at the window edge. */
+  /* Takes whatever is left horizontally, and its inner box takes whatever is
+     left vertically. */
   flex: 1 1 260px;
   min-width: 240px;
+  display: flex;
+  flex-direction: column;
 }
 
 .stats-panel {
