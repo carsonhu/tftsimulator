@@ -10,6 +10,7 @@ from set18buffs import (
     GrompPurpleBuff,
     MasterYiUlt,
     NidaleeUlt,
+    SivirBounces,
     TinyBeaksBuff,
 )
 
@@ -32,6 +33,7 @@ champ_list = [
     "Alune",
     "Camille",
     "Nidalee",
+    "Sivir",
 ]
 
 
@@ -1152,4 +1154,62 @@ class Nidalee(Champion):
         # Javelin Toss: no direct cast damage -- NidaleeUlt (see __init__)
         # handles the +150% AS, the manalock-until-3-attacks gate, and
         # replacing the next 3 attacks with javelins.
+        return 0
+
+
+class Sivir(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 50
+        curMana = 0
+        fullMana = 40
+        aspd = 0.8
+        armor = 40
+        mr = 40
+        super().__init__(
+            "Sivir",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_CASTER,
+        )
+        # Hunter has no buff class, so it is dropped from the buff bar rather
+        # than filling a slot that cannot be set -- same as Caitlyn, the other
+        # Hunter.
+        self.default_traits = ["Primal", "Hunter"]
+        self.castTime = 1.0  # per request
+        self.items.append(SivirBounces())
+        self.notes = (
+            "Boomerang Blade is unauthored in the reference bin (still the "
+            "0.25s placeholder template), so the numbers and the 1s cast time "
+            "come off the champion card. The 8 bounces land at +1s through "
+            "+2.75s rather than on the cast. The 3 extra bounces on a kill "
+            "are not modeled -- nothing dies in this sim."
+        )
+
+    # The card's 205/305/1150 is one row, but its breakdown is two: an
+    # AD-scaled part and an AP-scaled part (190 + 15 = 205, 285 + 20 = 305,
+    # 1050 + 100 = 1150). Note the 3-star row is a spike, not the usual x1.5
+    # step -- that is what the card says.
+    abilityScaling = create_ability_scaling([190, 285, 1050], [15, 20, 100])
+    # Each bounce is 20%/20%/40% of that, taken off both halves so the split
+    # stays proportional: 38 + 3 = 41, 57 + 4 = 61, 420 + 40 = 460, which is
+    # the card's bounce row exactly.
+    bounceScaling = create_ability_scaling(
+        [38, 57, 420], [3, 4, 40], func_name="bounceScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        if not opponents:
+            return 0
+        # The blade's own hit. SivirBounces (see __init__) schedules the 8
+        # bounces off postAbility, which fires immediately after this.
+        self.multiTargetSpell(
+            opponents[:1], items, time, 1, self.abilityScaling, "physical"
+        )
         return 0

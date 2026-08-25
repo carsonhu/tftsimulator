@@ -543,7 +543,10 @@ class Primal(Buff):
     """
 
     levels = [0, 1]
-    display_name = "Primal"
+    # Named for the blessing rather than the trait: Primal hands out several,
+    # and the Tiger's Attack Speed is the only one this prices. Seeing which
+    # one is on the row matters more than matching the trait's in-game name.
+    display_name = "Primal (Tiger)"
 
     def __init__(self, level, params):
         super().__init__(
@@ -555,7 +558,7 @@ class Primal(Buff):
         self.triggered = False
 
     def extraParameters():
-        return {"Title": "Is Primal", "Min": 0, "Max": 1, "Default": 1}
+        return {"Title": "Is Primal (Tiger)", "Min": 0, "Max": 1, "Default": 1}
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "onUpdate" and not self.triggered and time >= self.trigger_time:
@@ -1252,6 +1255,61 @@ class NidaleeUlt(Buff):
                 # next attack's wait starts fresh under normal AS -- see
                 # AriseBuff's postAttack for the full walkthrough.
                 champion.attack_progress = min(champion.attack_progress, 1.0)
+        return 0
+
+
+class SivirBounces(Buff):
+    """Boomerang Blade's 8 bounces, which arrive after the cast, not with it.
+
+    The blade's first hit lands on the cast like every other spell here. The
+    bounces are a schedule instead: postAbility queues 8 of them at +1.0s,
+    +1.25s ... +2.75s, and onUpdate pays each one out as the frame clock
+    reaches it. That spread is the whole reason this is a buff rather than
+    another line in performAbility -- eight hits dealt at cast time would put
+    ~40% of a cast's damage two seconds early, which is most of the DPS
+    question for a unit measured at 5 and 10 seconds.
+
+    "When this kills an enemy, bounce 3 additional times" is deliberately not
+    modeled: nothing dies in this sim, so the extra bounces would be a guess
+    about a board rather than a property of the champion.
+    """
+
+    levels = [1]
+    display_name = "Boomerang Blade"
+
+    first_bounce = 1.0
+    interval = 0.25
+    bounces = 8
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name, level, params, phases=["postAbility", "onUpdate"]
+        )
+        self.pending = []
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "postAbility":
+            first = time + self.first_bounce
+            self.pending.extend(
+                first + step * self.interval for step in range(self.bounces)
+            )
+            # A recast before the last bounce lands leaves two blades in the
+            # air; sorting keeps them paying out in the order they arrive.
+            self.pending.sort()
+        elif phase == "onUpdate":
+            # A frame is 1/30s and the bounces are 0.25s apart, so this
+            # normally fires at most one per frame -- the loop is for the
+            # overlapping-blades case above.
+            while self.pending and time >= self.pending[0]:
+                self.pending.pop(0)
+                champion.multiTargetSpell(
+                    champion.opponents,
+                    champion.items,
+                    time,
+                    1,
+                    champion.bounceScaling,
+                    "physical",
+                )
         return 0
 
 
