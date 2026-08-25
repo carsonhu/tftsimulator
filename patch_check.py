@@ -107,6 +107,7 @@ class Report:
         self.unbacked = []   # nothing in the reference can confirm it
         self.broken = []     # the hook itself no longer resolves
         self.unverified = []  # a card value nobody has checked against a patch
+        self.published = []  # cdragon now has real spell data for this unit
         self.checked = 0
 
     def compare(self, key, code, ref, ack, detail=""):
@@ -277,6 +278,30 @@ def check_card_values(report, pin):
             report.unverified.append(key)
 
 
+def check_spell_data_published(data, report, pin):
+    """Has Riot started shipping real spell numbers for anyone we model?
+
+    Every ability number here was read off a card because the champion bins
+    carry the template's placeholder DataValues (0/1/2/10...). That is a fact
+    about right now, not forever: bins get authored, and a set that goes live
+    has them. The moment one flips, its ability numbers stop being a hand-read
+    CARD value and become checkable like everything else -- so this looks every
+    run rather than leaving the assumption to rot.
+
+    It reports rather than compares. A published bin names its values
+    (PrimaryMagicDamage, MagicDamage) but says nothing about which tooltip line
+    each feeds or how the card splits them, and this simulator's scalings are
+    shaped by the card. Matching the two up is a reading job.
+    """
+    known = set(pin.get("spell_data_published") or [])
+    for name, api_name in sorted(CHAMPION_API.items()):
+        record = champion_record(data, api_name)
+        spell = (record or {}).get("spell") or {}
+        if not spell.get("dataValues") or spell.get("dataValuesArePlaceholder"):
+            continue
+        report.published.append((name, sorted(spell["dataValues"]), name in known))
+
+
 def coverage(data, pin):
     """Modeled things with no hook pointing at them."""
     hooked = {h[0] for h in TRAIT_HOOKS} | {h[0] for h in DERIVED_TRAIT_HOOKS}
@@ -303,6 +328,7 @@ def main(argv=None):
     check_derived(data, report, ack)
     check_champions(data, report, ack)
     check_card_values(report, pin)
+    check_spell_data_published(data, report, pin)
     for cls_name, attrs in sorted(TRAIT_CARD_ONLY.items()):
         for attr in attrs:
             report.unbacked.append(
@@ -316,6 +342,7 @@ def main(argv=None):
             "acknowledged": [list(a) for a in report.acknowledged],
             "unbacked": report.unbacked,
             "unverified": report.unverified,
+            "published": [[p[0], p[1]] for p in report.published if not p[2]],
             "broken": report.broken,
         }, indent=1))
         return 1 if report.drift or report.broken else 0
@@ -344,6 +371,16 @@ def main(argv=None):
         print(f"acknowledged ({len(report.acknowledged)}) -- deliberate, see patch_pin.json:")
         for key, code, ref, why in report.acknowledged:
             print(f"  {key:38} {code} vs {ref}  {why}")
+        print()
+
+    fresh = [p for p in report.published if not p[2]]
+    if fresh:
+        print(f"SPELL DATA NOW PUBLISHED ({len(fresh)}) -- CommunityDragon has real")
+        print("DataValues for these, so their ability numbers no longer have to be")
+        print("hand-read. Compare them against the card, then add the name to")
+        print("patch_pin.json's spell_data_published to stop this notice:")
+        for name, keys, _ in fresh:
+            print(f"  {name:12} {', '.join(keys)}")
         print()
 
     if report.unverified:

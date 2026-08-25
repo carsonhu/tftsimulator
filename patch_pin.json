@@ -12,7 +12,11 @@
     "card_values: numbers CommunityDragon does not carry -- ability damage and",
     "cast times -- read off the champion card by a person on the patch named.",
     "The checker confirms the code still says this; only you can confirm the",
-    "card still does."
+    "",
+    "spell_data_published: champions whose bin now carries real spell",
+    "DataValues instead of the template's placeholders, and whose numbers have",
+    "since been read against them. The checker names any that are published but",
+    "not listed here -- that is the prompt to go and look, not a failure."
   ],
   "channel": "pbe",
   "patch": "PBE 18.1g",
@@ -34,6 +38,7 @@
       "why": "Changed to 0/45 on PBE; cdragon's dump still says 40. Its PBE data can lag the live PBE build, and a confirmed card reading wins when it does."
     }
   },
+  "spell_data_published": [],
   "card_values": {
     "Ahri.abilityScaling": {
       "ad": [0, 0, 0],
