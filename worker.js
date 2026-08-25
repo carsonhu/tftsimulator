@@ -41,8 +41,20 @@ async function boot() {
   const [pyodide, sources] = await Promise.all([
     loadPyodide({ indexURL: PYODIDE_BASE }),
     Promise.all(
+      // "no-cache" means revalidate, not bypass: the browser still keeps the
+      // file and still gets a 304 when it hasn't moved, so this costs one
+      // conditional request per source against a boot the Pyodide runtime
+      // download already dominates.
+      //
+      // Without it these are the one thing on the page that can go stale
+      // invisibly. Nothing here is content-hashed, so a plain fetch() is
+      // served straight from cache with no request at all -- a local edit
+      // never appears no matter how many times the server restarts, and in
+      // production a returning visitor inside the 10-minute max-age can pair
+      // a fresh worker.js with a stale set18champs.py, which is worse than
+      // stale: it is two halves of different builds.
       PY_FILES.map(async (path) => {
-        const resp = await fetch(path);
+        const resp = await fetch(path, { cache: "no-cache" });
         if (!resp.ok) throw new Error("fetch " + path + ": HTTP " + resp.status);
         return [path, await resp.text()];
       })
