@@ -98,11 +98,12 @@ const state = {
     frame_rate: 30,
     t: 30,
   },
-  // Team traits the champion is NOT a member of: cls -> level. Kept out of
-  // cfg.buffs so the buff bar stays the buff bar; merged in by cfgForSlice
-  // with params 0, which is what the "Is X" flag means. Being real entries
-  // in cfg.buffs from there on means the Trait slice sweeps their other
-  // breakpoints too, same as any hand-picked buff.
+  // Team traits the champion is NOT a member of: cls -> {level, params}.
+  // Kept out of cfg.buffs so the buff bar stays the buff bar; merged in by
+  // cfgForSlice. params is 0 for the "Is X" traits, which is what the flag
+  // means, and the chosen index for one that asks (Greenfather's Hex). Being
+  // real entries in cfg.buffs from there on means the Trait slice sweeps
+  // their other breakpoints too, same as any hand-picked buff.
   teamBuffs: new Map(),
   slice: "Craftable",
   displayDps: false,
@@ -131,14 +132,14 @@ function cfgForSlice(sliceName) {
   const cfg = Object.assign(JSON.parse(JSON.stringify(state.cfg)), {
     slice: sliceName,
   });
-  for (const [cls, level] of state.teamBuffs) {
-    if (level <= 0) continue;
+  for (const [cls, pick] of state.teamBuffs) {
+    if (!pick || pick.level <= 0) continue;
     // renderTeamTraits drops any trait that is in the buff bar, so this can
     // only collide in the instant between the two updates. The buff bar's
     // entry wins; a second entry for one class would also give the Trait
     // slice two rows per breakpoint.
     if (cfg.buffs.some(([c]) => c === cls)) continue;
-    cfg.buffs.push([cls, level, 0]);
+    cfg.buffs.push([cls, pick.level, pick.params]);
   }
   return cfg;
 }
@@ -657,11 +658,21 @@ function renderTeamTraits() {
     }
     shown++;
 
-    const current = state.teamBuffs.get(trait.cls) ?? 0;
+    const picked = state.teamBuffs.get(trait.cls);
+    const current = picked ? picked.level : 0;
+    // 0 for an "Is X" flag is the whole point of this panel -- not a member.
+    // Only a trait that asks a real question starts on its own default.
+    const params = picked
+      ? picked.params
+      : trait.options
+        ? trait.paramDefault
+        : 0;
     const label = document.createElement("label");
     label.className = trait.scales ? "team-trait" : "team-trait flat";
-    label.title =
-      "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)";
+    if (trait.options) label.classList.add("with-option");
+    label.title = trait.options
+      ? trait.name + " on the board, at Ivern's star level"
+      : "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)";
 
     const caption = document.createElement("span");
     caption.className = "col-label";
@@ -672,23 +683,43 @@ function renderTeamTraits() {
     // than going colourless, which would read as "no icon" instead of "off".
     const badge = traitBadge(trait.cls, current || trait.onLevel);
 
+    // Level 0 is kept rather than deleted so that choosing the Hex before
+    // switching the trait on doesn't throw the choice away: cfgForSlice skips
+    // anything at level 0, so an off entry costs nothing but its memory.
+    const store = (level, param) => {
+      state.teamBuffs.set(trait.cls, { level, params: param });
+      onConfigChanged();
+    };
+
     if (trait.scales) {
-      // The aura itself steps per breakpoint (Lunar), so the level is a real
-      // question and gets a picker.
+      // The aura itself steps per breakpoint (Lunar), or the trait has no
+      // team-wide half to compare and its level is simply a real question
+      // (Greenfather's star level). Either way it gets a picker.
       const sel = document.createElement("select");
       for (const level of trait.levels) {
         sel.add(new Option(level === 0 ? "—" : String(level), String(level)));
       }
       sel.value = String(current);
-      sel.onchange = () => {
-        const level = Number(sel.value);
-        if (level > 0) state.teamBuffs.set(trait.cls, level);
-        else state.teamBuffs.delete(trait.cls);
-        onConfigChanged();
-      };
-      label.appendChild(sel);
       if (badge) label.appendChild(badge);
       label.appendChild(caption);
+      label.appendChild(sel);
+
+      // A trait whose parameter is a real choice rather than a flag to zero
+      // asks it here, since nowhere else in this panel can.
+      let optionSel = null;
+      if (trait.options) {
+        optionSel = document.createElement("select");
+        optionSel.className = "team-option";
+        trait.options.forEach((name, index) => {
+          optionSel.add(new Option(name, String(index)));
+        });
+        optionSel.value = String(params);
+        optionSel.title = trait.paramTitle;
+        optionSel.onchange = () => store(Number(sel.value), Number(optionSel.value));
+        label.appendChild(optionSel);
+      }
+      sel.onchange = () =>
+        store(Number(sel.value), optionSel ? Number(optionSel.value) : 0);
     } else {
       // A non-member gets the same bonus at every breakpoint, so asking for
       // one would be asking a question with no answer: on/off is the whole
@@ -696,14 +727,10 @@ function renderTeamTraits() {
       const check = document.createElement("input");
       check.type = "checkbox";
       check.checked = current > 0;
-      check.onchange = () => {
-        if (check.checked) state.teamBuffs.set(trait.cls, trait.onLevel);
-        else state.teamBuffs.delete(trait.cls);
-        onConfigChanged();
-      };
-      label.appendChild(check);
+      check.onchange = () => store(check.checked ? trait.onLevel : 0, 0);
       if (badge) label.appendChild(badge);
       label.appendChild(caption);
+      label.appendChild(check);
     }
 
     container.appendChild(label);

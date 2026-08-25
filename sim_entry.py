@@ -159,12 +159,17 @@ def get_catalog():
             }
         )
 
-    # Team traits: the class buffs whose extra parameter is an "Is X" 0/1
-    # membership flag. Passing 0 is what "my team has this trait but this
-    # champion isn't one of them" means -- the aura half applies, the
-    # member-only half doesn't. Discovered from the classes rather than
-    # listed by name so a trait added later (Lunar, on the set18 branch)
-    # turns up here on its own.
+    # Team traits: a trait your board runs that this champion is not part of.
+    # Two shapes qualify, and both are discovered from the classes rather than
+    # listed by name, so a trait added later turns up here on its own.
+    #
+    #   * an "Is X" 0/1 membership flag. Passing 0 is what "my team has this
+    #     trait but this champion isn't one of them" means -- the aura half
+    #     applies, the member-only half doesn't.
+    #   * a named choice (Greenfather's Hex). There is no membership to
+    #     disclaim: whoever stands on Ivern's hex gets what the hex gives,
+    #     Ivern or not. The parameter is a real question rather than a flag to
+    #     zero, so the panel has to ask it.
     team_buffs = []
     for cls_name in set18buffs.class_buffs:
         cls = getattr(set18buffs, cls_name)
@@ -172,10 +177,17 @@ def get_catalog():
             extra = cls.extraParameters()
         except Exception:
             continue
-        if not extra or (extra.get("Min"), extra.get("Max")) != (0, 1):
+        if not extra:
+            continue
+        options = extra.get("Options")
+        if not options and (extra.get("Min"), extra.get("Max")) != (0, 1):
             continue
         levels = list(cls.levels)
-        scales = _team_level_matters(cls)
+        # A trait that asks which variant is on always needs its level asked
+        # too -- the probe below answers "does the team-wide half differ per
+        # breakpoint", which is not the question when there is no team-wide
+        # half to compare.
+        scales = True if options else _team_level_matters(cls)
         team_buffs.append(
             {
                 "cls": cls_name,
@@ -184,6 +196,10 @@ def get_catalog():
                 # offered as a level like any other.
                 "levels": levels,
                 "paramTitle": extra["Title"],
+                # None -> the param is the 0/1 flag and the panel passes 0.
+                # A list -> the panel offers these and passes the index.
+                "options": list(options) if options else None,
+                "paramDefault": extra.get("Default", 0),
                 # False -> the UI shows a checkbox and uses onLevel; True ->
                 # it shows a level picker.
                 "scales": scales,
