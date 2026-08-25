@@ -288,30 +288,31 @@ details > label {
 /* This panel is in <main>, not the sidebar, so it misses the `#sidebar label`
    rule that makes a label a flex box -- without display here, every line below
    was inline text and the picker sat hard against its own caption. */
-/* Three columns, not a flex run: badge, name, then the control on the right.
-   Every row ends with its control at the same edge, so a tick box and a level
-   picker line up down the panel instead of one leading and one trailing. The
-   name column takes the slack, which is what pins the controls right. */
+/* Badge, name, then the control immediately after it -- a control belongs to
+   the trait it names, so it sits against the name rather than out at the
+   cell's edge where the next trait starts. The trailing 1fr holds nothing and
+   exists only to soak up the cell's spare width; without it the auto tracks
+   would stretch and push the control away again. */
 .team-trait {
   display: grid;
-  grid-template-columns: 22px 1fr auto;
+  grid-template-columns: 22px auto auto 1fr;
   align-items: center;
   gap: 8px;
   cursor: pointer;
 }
 
 /* One trait asks which variant is on as well as how big it is (Greenfather's
-   Hex), so it needs a fourth column. It spans two cells rather than squeezing
+   Hex), so it needs one more column. It spans two cells rather than squeezing
    two pickers and a name into one -- at 190px the name would have nowhere to
-   go. */
+   go, and Greenfather is far and away the widest thing this panel shows. */
 .team-trait.with-option {
-  grid-template-columns: 22px 1fr auto auto;
+  grid-template-columns: 22px auto auto auto 1fr;
   grid-column: span 2;
 }
 
 .team-trait select {
   /* The generic sidebar rule stretches selects to 100%; these are sized by
-     their content, at the right-hand edge. */
+     their content instead. */
   width: auto;
   min-width: 3.4em;
   padding: 1px 2px;
@@ -320,7 +321,7 @@ details > label {
 
 .team-trait input[type="checkbox"] {
   accent-color: #ff4b4b;
-  justify-self: end;
+  justify-self: start;
   margin: 0;
 }
 
