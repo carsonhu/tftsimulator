@@ -1379,6 +1379,80 @@ class SivirBounces(Buff):
         return 0
 
 
+class AsheTrail(Buff):
+    """Spirit Rift's trail: a 4s zone that ticks once a second after the cast.
+
+    The arrow's own hit lands in performAbility like any other spell. The
+    trail is a schedule instead -- postAbility keeps one expiry, onUpdate pays
+    out a tick per second while the trail is still on the ground -- because
+    four seconds of damage handed over at cast time would land most of a
+    cast's trail damage before the trail exists, and this sim is read at 5 and
+    10 seconds.
+
+    A recast refreshes rather than stacks: there is only ever one trail, so a
+    second cast pushes the expiry out and nothing else. The tick cadence
+    deliberately keeps running across that refresh instead of restarting at
+    +1s. The card promises damage every second for as long as the trail is
+    down, and restarting the clock on each cast would pay a fast-casting Ashe
+    *less* than one tick per second -- a recast at +0.9s would cancel a tick
+    that was 0.1s from landing. Refreshing only the expiry keeps the rate at
+    exactly one tick per second of uptime, which is the number the card
+    describes.
+
+    The 20% Slow is not modeled: the dummy never attacks, so slowing its
+    attack speed changes nothing.
+    """
+
+    levels = [1]
+    display_name = "Spirit Rift Trail"
+
+    duration = 4.0
+    interval = 1.0
+    # "2% max Health" reads off the target's max HP, not Ashe's.
+    health_ratio = 0.02
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name, level, params, phases=["postAbility", "onUpdate"]
+        )
+        # No trail yet: -inf makes the first cast take the "nothing on the
+        # ground" branch without a separate first-cast flag, and keeps the
+        # onUpdate loop inert until then.
+        self.expires = float("-inf")
+        self.next_tick = 0.0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "postAbility":
+            if time > self.expires:
+                # Nothing on the ground, so the new trail starts its own clock.
+                self.next_tick = time + self.interval
+            self.expires = time + self.duration
+        elif phase == "onUpdate":
+            # A frame is 1/30s and the ticks are 1s apart, so this pays out at
+            # most one per frame; the loop is only for safety at low frame
+            # rates. The epsilon is for the last tick, which is due at exactly
+            # the expiry and would otherwise be lost to accumulated +1.0s.
+            while time >= self.next_tick and self.next_tick <= self.expires + 1e-6:
+                self.tick(champion, time)
+                self.next_tick += self.interval
+        return 0
+
+    def tick(self, champion, time):
+        # The arrow pierces num_targets enemies; the trail it leaves behind
+        # catches one fewer.
+        for opponent in champion.opponents[: max(0, champion.num_targets - 1)]:
+            # The %max-HP part is per-target, so each one needs its own
+            # scaling closure rather than a single multiTargetSpell call.
+            flat = self.health_ratio * opponent.hp.stat
+
+            def scaling(level, AD, AP, flat=flat):
+                return champion.trailScaling(level, AD, AP) + flat
+
+            champion.multiTargetSpell(
+                [opponent], champion.items, time, 1, scaling, "physical"
+            )
+
+
 class CaitlynHeadshotBuff(Buff):
     levels = [1]
     display_name = "Headshot"

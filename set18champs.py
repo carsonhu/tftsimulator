@@ -5,6 +5,7 @@ from champion import Champion
 from set18buffs import (
     AdaptorInnate,
     AriseBuff,
+    AsheTrail,
     AttunedInnate,
     CaitlynHeadshotBuff,
     GrompPurpleBuff,
@@ -34,6 +35,7 @@ champ_list = [
     "Camille",
     "Nidalee",
     "Sivir",
+    "Ashe",
 ]
 
 
@@ -1212,4 +1214,67 @@ class Sivir(Champion):
         self.multiTargetSpell(
             opponents[:1], items, time, 1, self.abilityScaling, "physical"
         )
+        return 0
+
+
+class Ashe(Champion):
+    def __init__(self, level):
+        hp = 900
+        atk = 75
+        curMana = 20
+        fullMana = 80
+        aspd = 0.8
+        armor = 45
+        mr = 45
+        super().__init__(
+            "Ashe",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_CASTER,
+        )
+        # Hunter has no buff class, so it drops off the buff bar rather than
+        # filling a slot that cannot be set -- same as Caitlyn and Sivir.
+        self.default_traits = ["Blossom", "Hunter"]
+        self.castTime = 1.0  # per request
+        # The arrow pierces 5 by default; the trail catches num_targets - 1.
+        self.num_targets = 5
+        self.items.append(AsheTrail())
+        self.notes = (
+            "The trail's damage arrives 1s at a time over the 4s after each "
+            "cast, not on the cast, and a recast refreshes it rather than "
+            "stacking it. Its 2% max Health part reads off the enemy HP above, "
+            "so raising that raises Ashe's damage. The 20% Slow is not modeled."
+        )
+
+    # Pure AD on the card: 440/660/1000 x AD, no AP half.
+    abilityScaling = create_ability_scaling([440, 660, 1000], [0, 0, 0])
+    # The card's 7/11/220 trail row is two halves, same as Sivir's: 5 + 2 = 7,
+    # 8 + 3 = 11, 200 + 20 = 220. The 2% max Health rides on top of this and is
+    # added per-target in AsheTrail, since it depends on who is being hit.
+    trailScaling = create_ability_scaling(
+        [5, 8, 200], [2, 3, 20], func_name="trailScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        # Spirit Rift: the arrow pierces num_targets enemies in a line. "-80%
+        # per enemy hit, minimum 20%" bottoms out on the very first reduction
+        # (1.0 -> 0.2, and 0.2 is the floor), so it is full damage on the
+        # first target and a flat 20% for everyone behind it.
+        for i, opponent in enumerate(opponents[: self.num_targets]):
+            mult = 1.0 if i == 0 else 0.2
+
+            def arrow_scaling(level, AD, AP, mult=mult):
+                return mult * self.abilityScaling(level, AD, AP)
+
+            self.multiTargetSpell(
+                [opponent], items, time, 1, arrow_scaling, "physical"
+            )
+        # AsheTrail (see __init__) handles the 4s trail off postAbility, which
+        # fires immediately after this.
         return 0
