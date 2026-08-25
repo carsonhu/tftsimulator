@@ -498,29 +498,50 @@ function renderBuffRows() {
     const levelSel = document.createElement("select");
     const paramInput = document.createElement("input");
     paramInput.type = "number";
+    // A parameter whose values are names, not a count (Greenfather's Hex).
+    // The stored value is still the index, so nothing downstream changes --
+    // only what the row shows for it.
+    const paramSelect = document.createElement("select");
 
     // Column headers per row, like buff_bar's widget labels: the third one
     // is the buff's own parameter title (Stacks, Casts, ...) and follows the
     // selected buff.
-    const column = (text, control) => {
+    const column = (text, ...controls) => {
       const label = document.createElement("label");
       const caption = document.createElement("span");
       caption.className = "col-label";
       caption.textContent = text;
       label.appendChild(caption);
-      label.appendChild(control);
+      for (const control of controls) label.appendChild(control);
       return label;
     };
     const nameCol = column("Name", buffSel);
     const levelCol = column("Level", levelSel);
-    const paramCol = column("Param", paramInput);
+    const paramCol = column("Param", paramInput, paramSelect);
     const paramCaption = paramCol.querySelector(".col-label");
+
+    const paramValue = (meta) => {
+      if (!meta.extra) return 0;
+      return Number(meta.extra.Options ? paramSelect.value : paramInput.value);
+    };
 
     const syncParamColumn = (meta) => {
       // Hidden rather than removed: rows keep their columns aligned when
       // some buffs in the bar take a parameter and others don't.
       paramCol.style.visibility = meta.extra ? "visible" : "hidden";
       paramCaption.textContent = meta.extra ? meta.extra.Title : "Param";
+      const named = Boolean(meta.extra && meta.extra.Options);
+      paramInput.hidden = named;
+      paramSelect.hidden = !named;
+      if (!named) return;
+      const previous = paramSelect.value;
+      paramSelect.innerHTML = "";
+      meta.extra.Options.forEach((name, index) => {
+        paramSelect.add(new Option(name, String(index)));
+      });
+      if ([...paramSelect.options].some((o) => o.value === previous)) {
+        paramSelect.value = previous;
+      }
     };
 
     const syncRow = (resetToDefaults) => {
@@ -534,6 +555,7 @@ function renderBuffRows() {
       if (resetToDefaults) {
         levelSel.value = meta.levels[0];
         paramInput.value = meta.extra ? meta.extra.Default : 0;
+        paramSelect.value = String(meta.extra ? meta.extra.Default : 0);
       } else if ([...levelSel.options].some((o) => o.value === previousLevel)) {
         levelSel.value = previousLevel;
       }
@@ -541,12 +563,18 @@ function renderBuffRows() {
         paramInput.min = meta.extra.Min;
         paramInput.max = meta.extra.Max;
         paramInput.title = meta.extra.Title;
+        paramSelect.title = meta.extra.Title;
       }
+      // Before reading the value: for a named parameter this is what fills
+      // the options, and reading an empty select gives "".
       syncParamColumn(meta);
+      if (resetToDefaults && meta.extra && meta.extra.Options) {
+        paramSelect.value = String(meta.extra.Default);
+      }
       state.cfg.buffs[i] = [
         buffSel.value,
         Number(levelSel.value),
-        meta.extra ? Number(paramInput.value) : 0,
+        paramValue(meta),
       ];
       // After the write, not before: the layout is decided by reading every
       // row out of state.cfg.buffs, so running it first sees this row's
@@ -567,6 +595,10 @@ function renderBuffRows() {
       syncRow(false);
       onConfigChanged();
     };
+    paramSelect.onchange = () => {
+      syncRow(false);
+      onConfigChanged();
+    };
 
     // Initial fill from the stored tuple.
     const meta = state.buffMeta.get(tuple[0]);
@@ -577,8 +609,10 @@ function renderBuffRows() {
       paramInput.min = meta.extra.Min;
       paramInput.max = meta.extra.Max;
       paramInput.title = meta.extra.Title;
+      paramSelect.title = meta.extra.Title;
     }
     syncParamColumn(meta);
+    paramSelect.value = String(tuple[2]);
 
     row.appendChild(nameCol);
     row.appendChild(levelCol);
@@ -652,9 +686,9 @@ function renderTeamTraits() {
         else state.teamBuffs.delete(trait.cls);
         onConfigChanged();
       };
+      label.appendChild(sel);
       if (badge) label.appendChild(badge);
       label.appendChild(caption);
-      label.appendChild(sel);
     } else {
       // A non-member gets the same bonus at every breakpoint, so asking for
       // one would be asking a question with no answer: on/off is the whole

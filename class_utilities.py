@@ -140,7 +140,18 @@ def buff_bar(
             )
         with item_cols[2]:
             extraParams = utils.class_for_name("set18buffs", buff1).extraParameters()
-            if extraParams != 0:
+            if extraParams != 0 and extraParams.get("Options"):
+                # A parameter whose values are names rather than a count. The
+                # stored value is still the index, so the two builds agree.
+                buff1Extra = extraParams["Options"].index(
+                    st.selectbox(
+                        extraParams["Title"],
+                        extraParams["Options"],
+                        index=extraParams["Default"],
+                        key=f"{extraParams['Title']}_{n}_{champ_name}",
+                    )
+                )
+            elif extraParams != 0:
                 buff1Extra = st.number_input(
                     extraParams["Title"],
                     min_value=extraParams["Min"],

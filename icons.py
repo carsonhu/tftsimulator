@@ -139,6 +139,13 @@ TIER_COLOURS = {
 }
 
 
+# A sim level that is not a unit count at all, so the breakpoints below cannot
+# resolve it. Greenfather is one unit in Riot's data (a single style-4
+# breakpoint); the sim's levels are Ivern's star level, and three stars read
+# as bronze/silver/gold.
+TIER_OVERRIDES = {"Greenfather": {"1": "bronze", "2": "silver", "3": "gold"}}
+
+
 def trait_tiers(resolved, written):
     """{class: {level: tier}} for exactly the levels the sim offers.
 
@@ -155,6 +162,9 @@ def trait_tiers(resolved, written):
 
     payload, notes = {}, []
     for cls_name in written:
+        if cls_name in TIER_OVERRIDES:
+            payload[cls_name] = TIER_OVERRIDES[cls_name]
+            continue
         _display, _api, _icon, _mismatch, record = resolved[cls_name]
         steps = sorted(
             (e["minUnits"], STYLE_TIERS.get(e["style"]))

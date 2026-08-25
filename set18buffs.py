@@ -34,6 +34,7 @@ class_buffs = [
     "Blackthorn",
     "Lunar",
     "Primal",
+    "Greenfather",
 ]
 
 augments = [
@@ -566,6 +567,71 @@ class Primal(Buff):
             champion.aspd.addStat(
                 self.primal_as if self.params == 1 else self.team_as
             )
+        return 0
+
+
+class Greenfather(Buff):
+    """Greenfather: the bonus the grown hex gives whoever stands on it.
+
+    Ivern spends seeds to grow one hex, and its type decides which stat the
+    occupant gets. Only one hex exists at a time, so this is one buff with a
+    Hex parameter rather than three that could all be ticked at once -- the
+    choice is the point.
+
+    The level is Ivern's star level, not a trait breakpoint: Greenfather is a
+    one-unit trait, and how much the hex gives depends on how big he is.
+
+    Rocks (Armor/MR) and Trees (Health) are the other two hex types and are
+    not offered here: nothing in this sim damages the champion being measured,
+    so both would price at exactly zero.
+    """
+
+    levels = [0, 1, 2, 3]
+    display_name = "Greenfather"
+
+    # Ordered as the parameter's options, so params indexes straight in.
+    hexes = ["Flower", "Mushroom", "Water"]
+    # Per Ivern star. The 3-star row really is that much larger than the
+    # 2-star; that is what the champion card says.
+    flower_aspd = [10, 15, 200]  # % Attack Speed
+    mushroom_amp = [0.08, 0.12, 2.00]  # damage amp
+    water_mana_regen = [1, 2, 30]
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level} ({self.hexName(params)})",
+            level,
+            params,
+            phases=["preCombat"],
+        )
+
+    @classmethod
+    def hexName(cls, params):
+        try:
+            return cls.hexes[int(params)]
+        except (IndexError, TypeError, ValueError):
+            return cls.hexes[0]
+
+    def extraParameters():
+        return {
+            "Title": "Hex",
+            "Min": 0,
+            "Max": 2,
+            "Default": 0,
+            "Options": Greenfather.hexes,
+        }
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase != "preCombat":
+            return 0
+        star = self.level - 1
+        hex_type = self.hexName(self.params)
+        if hex_type == "Flower":
+            champion.aspd.addStat(self.flower_aspd[star])
+        elif hex_type == "Mushroom":
+            champion.dmgMultiplier.addStat(self.mushroom_amp[star])
+        else:
+            champion.manaRegen.addStat(self.water_mana_regen[star])
         return 0
 
 
