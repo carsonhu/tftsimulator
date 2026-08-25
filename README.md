@@ -1,4 +1,10 @@
-https://tftsimulator.app/ChampionSelector
+https://tftsimulator.app/
+
+The site is a static page: it runs this repo's simulator directly in the
+browser under Pyodide, with no packages to install on load. `stlite.html` is
+the previous Streamlit-in-the-browser build, kept for the pages the static one
+does not cover yet (Mana Generation). Both fetch the same `.py` files from this
+repo, so neither can drift from the simulator the tests exercise.
 
 # About the Project
 

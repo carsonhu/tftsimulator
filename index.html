@@ -2,231 +2,240 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <title>Darth Noob's TFT Simulator (stlite)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Darth Noob's TFT Simulator</title>
     <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@stlite/browser@0.85.1/build/stlite.css"
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>"
     />
-    <style>
-      /* Shown until stlite mounts the real Streamlit app, and if mounting
-         throws before Streamlit gets a chance to render anything itself. */
-      html,
-      body {
-        margin: 0;
-        height: 100%;
-        background: #0e1117; /* matches .streamlit/config.toml theme.base = "dark" */
-        color: #fafafa;
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      }
-      #boot-status {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        text-align: center;
-        padding: 24px;
-      }
-      #boot-status.hidden {
-        display: none;
-      }
-      #boot-status .spinner {
-        width: 32px;
-        height: 32px;
-        border: 3px solid #31333f;
-        border-top-color: #ff4b4b;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-      }
-      #boot-status .detail {
-        color: #a3a8b8;
-        font-size: 0.9em;
-        max-width: 32em;
-      }
-      #boot-status .error {
-        color: #ff4b4b;
-        white-space: pre-wrap;
-        font-family: ui-monospace, monospace;
-        font-size: 0.8em;
-        text-align: left;
-        max-width: 48em;
-        max-height: 40vh;
-        overflow: auto;
-        background: #1a1c23;
-        border-radius: 6px;
-        padding: 12px;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Pinned to the plotly.js that plotly.py 6.9.0 bundles, so charts here
+         render identically to the stlite/droplet builds. jsdelivr versioned
+         URLs are immutable-cached for a year, unlike anything served from
+         this GitHub Pages origin (max-age=600). -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@3.7.0/plotly.min.js"
+      defer
+    ></script>
+    <script src="app.js" defer></script>
   </head>
   <body>
     <div id="boot-status">
       <div class="spinner"></div>
       <div>Loading TFT Simulator&hellip;</div>
       <div class="detail">
-        First load pulls the Pyodide runtime plus numpy/pandas/plotly. This
-        is cached by the browser after the first visit.
+        First visit downloads the Python runtime (~7&nbsp;MB, cached by the
+        browser afterwards). No packages get installed &mdash; this build boots
+        straight into the simulator.
       </div>
     </div>
-    <div id="root"></div>
 
-    <script type="module">
-      import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@0.85.1/build/stlite.js";
-
-      const bootStatus = document.getElementById("boot-status");
-
-      function showError(context, err) {
-        bootStatus.classList.remove("hidden");
-        bootStatus.innerHTML = `
-          <div>Failed to start the simulator (${context}).</div>
-          <div class="detail">
-            This is the in-browser build; the droplet-hosted version is
-            unaffected. Check the browser console for the full trace.
+    <div id="layout" hidden>
+      <aside id="sidebar">
+        <section>
+          <h2>Champion</h2>
+          <div class="row">
+            <label class="grow"
+              >Champion
+              <select id="champ"></select>
+            </label>
+            <label
+              >Level
+              <select id="level"></select>
+            </label>
           </div>
-          <pre class="error">${String(err && err.stack ? err.stack : err)}</pre>
-        `;
-      }
+          <label id="numTargetsRow" hidden
+            >Number of targets
+            <input type="range" id="numTargets" min="1" max="3" step="1" />
+            <span class="slider-value" id="numTargetsValue"></span>
+          </label>
+          <label id="numExtraTargetsRow" hidden
+            >Number of extra targets
+            <input type="range" id="numExtraTargets" min="1" max="3" step="1" />
+            <span class="slider-value" id="numExtraTargetsValue"></span>
+          </label>
+        </section>
 
-      // This page IS the site root -- every .py file it fetches lives
-      // right alongside it, same directory. Nothing here is duplicated:
-      // it fetches the same source the droplet deployment runs, so the
-      // two never drift apart. Destination path (inside the Pyodide
-      // virtual FS) -> source file relative to this HTML file.
-      const SOURCE_FILES = [
-        ["app.py", "app.py"],
-        ["champion.py", "champion.py"],
-        ["class_utilities.py", "class_utilities.py"],
-        ["item.py", "item.py"],
-        ["role.py", "role.py"],
-        ["set18_streamlit_main.py", "set18_streamlit_main.py"],
-        ["set18buffs.py", "set18buffs.py"],
-        ["set18champs.py", "set18champs.py"],
-        ["set18items.py", "set18items.py"],
-        ["set18roles.py", "set18roles.py"],
-        ["sim_core.py", "sim_core.py"],
-        ["simulator.py", "simulator.py"],
-        ["stats.py", "stats.py"],
-        ["status.py", "status.py"],
-        ["utils.py", "utils.py"],
-        ["pages/ChampionSelector.py", "pages/ChampionSelector.py"],
-        ["pages/ManaGeneration.py", "pages/ManaGeneration.py"],
-        ["helpers/__init__.py", "helpers/__init__.py"],
-        ["helpers/display_name.py", "helpers/display_name.py"],
-      ];
+        <details>
+          <summary>Extra options</summary>
+          <label
+            >Total takedowns
+            <input type="number" id="takedowns" min="0" max="100" value="0" />
+          </label>
+          <label
+            >Number of active traits
+            <input type="number" id="numTraits" min="0" max="12" value="6" />
+          </label>
+          <!-- The bonus-stat inputs live in the Base stats panel now, each
+               one beside the stat it feeds. -->
+        </details>
 
-      const files = {};
-      for (const [dest, src] of SOURCE_FILES) {
-        files[dest] = { url: src };
-      }
+        <section>
+          <label
+            >Current stage
+            <select id="stage"></select>
+          </label>
+          <label
+            >Tactician Level
+            <input
+              type="range"
+              id="tactician"
+              min="3"
+              max="10"
+              step="1"
+              value="4"
+            />
+            <span class="slider-value" id="tacticianValue">4</span>
+          </label>
+        </section>
 
-      // Catches errors mount() itself doesn't surface as a rejected promise
-      // (e.g. thrown during worker startup, before Streamlit renders
-      // anything into #root). The README documents `install()` on the
-      // returned controller but no startup-promise/event API, so this page
-      // detects readiness by watching the DOM instead of relying on
-      // undocumented internals.
-      window.addEventListener("error", (event) => {
-        if (!bootStatus.classList.contains("hidden")) {
-          showError("runtime", event.error || event.message);
-        }
-      });
-      window.addEventListener("unhandledrejection", (event) => {
-        if (!bootStatus.classList.contains("hidden")) {
-          showError("runtime", event.reason);
-        }
-      });
+        <section>
+          <div class="section-head">
+            <h2>Global Items</h2>
+            <button id="resetItems" type="button">Reset items</button>
+          </div>
+          <div id="itemRows"></div>
+        </section>
 
-      try {
-        mount(
-          {
-            requirements: [
-              "numpy",
-              "pandas",
-              // Pinned, and the pin matters for boot time more than anything
-              // else on this page: plotly 5.x shipped a 19 MB wheel holding
-              // ~15,300 files (the whole plotly.validators tree), every one
-              // of which micropip had to unzip into Pyodide's in-memory FS
-              // on *every* visit -- the browser cache only saves the
-              // download, not that unpack, which is what the long
-              // "Installing packages." phase was. 6.x dropped the validators
-              // package: 9.9 MB / ~1,660 files, and imports lazily on top.
-              // Its only runtime deps (narwhals, packaging) are Pyodide
-              // built-ins, so nothing else gets fetched from PyPI. Pinned
-              // exactly (rather than a floor) because unpinned plotly trips
-              // micropip's resolver (whitphx/stlite#1302), and because
-              // requirements.txt pins the same version for the droplet so
-              // both deployments render with identical plotly.
-              "plotly==6.9.0",
-            ],
-            entrypoint: "app.py",
-            files,
-            streamlitConfig: {
-              // Mirrors .streamlit/config.toml.
-              "theme.base": "dark",
-              // "Deploy" in the toolbar targets Streamlit Community Cloud,
-              // which is meaningless for a page that is already statically
-              // hosted; viewer mode just drops that menu.
-              "client.toolbarMode": "viewer",
-            },
-          },
-          document.getElementById("root"),
-        );
+        <section>
+          <h2>Global Buffs</h2>
+          <label
+            >Number of Buffs
+            <input type="range" id="numBuffs" min="1" max="10" step="1" />
+            <span class="slider-value" id="numBuffsValue"></span>
+          </label>
+          <div id="buffRows"></div>
+        </section>
 
-        const root = document.getElementById("root");
+        <section id="blackthornPanel" hidden>
+          <h2>Blackthorn Sacrifice</h2>
+          <div class="row">
+            <label class="grow"
+              >Role
+              <select id="btRole"></select>
+            </label>
+            <label class="grow"
+              >Star level
+              <select id="btStar"></select>
+            </label>
+            <label class="grow"
+              >Cost
+              <select id="btCost"></select>
+            </label>
+          </div>
+        </section>
+      </aside>
 
-        // #root gets its first children (Streamlit's own app shell) well
-        // before the app is actually usable -- Pyodide is still installing
-        // numpy/pandas/plotly at that point, which stlite shows as its own
-        // "Mounting files." / "Unpacking archives." / "Mocking some
-        // packages." / "Installing packages." toasts. Hiding on first child
-        // (the original version of this check) revealed those mid-install,
-        // which look broken since they're unstyled relative to this page.
-        // So: wait for both "#root has content" AND "none of stlite's known
-        // bootstrap toasts are still on screen." Matched on visible text
-        // rather than a class/data-testid because none of those toasts
-        // exposed a stable selector to key off. A five-minute ceiling means
-        // a future stlite wording change degrades this to "hides a bit
-        // early" again, not "hides never."
-        const BOOTSTRAP_PHRASES =
-          /Mounting files|Unpacking archives|Mocking some packages|Installing packages/;
-        const revealDeadline = Date.now() + 5 * 60 * 1000;
+      <main id="content">
+        <!-- The enemy's stats are edited in place here rather than in their
+             own sidebar section: they read as part of the sentence, so the
+             sentence is where you change them. -->
+        <h1 id="header">
+          <span id="headerChamp"></span>
+          <span>vs</span>
+          <input
+            type="number"
+            id="enemyHp"
+            class="inline-num"
+            min="1"
+            max="99999"
+            value="1800"
+            aria-label="Enemy HP"
+          /><span>HP,</span>
+          <input
+            type="number"
+            id="enemyArmor"
+            class="inline-num"
+            min="0"
+            max="99999"
+            value="100"
+            aria-label="Enemy Armor"
+          /><span>Armor,</span>
+          <input
+            type="number"
+            id="enemyMr"
+            class="inline-num"
+            min="0"
+            max="99999"
+            value="100"
+            aria-label="Enemy MR"
+          /><span>MR</span>
+        </h1>
+        <p class="disclaimer">
+          Most cast times/manalock times are guesses. Units can cast after they
+          have completed 30% of an autoattack.
+        </p>
 
-        function tryReveal() {
-          // innerText (not textContent): reflects only rendered/visible
-          // text, so it naturally excludes this very <script> tag's own
-          // source -- which textContent does not, and which would otherwise
-          // make BOOTSTRAP_PHRASES match this comment forever.
-          const ready =
-            root.childElementCount > 0 &&
-            !BOOTSTRAP_PHRASES.test(document.body.innerText || "");
-          if (ready || Date.now() > revealDeadline) {
-            bootStatus.classList.add("hidden");
-            observer.disconnect();
-            clearInterval(pollId);
-          }
-        }
+        <!-- Team Traits sits beside Base stats and matches its height: the
+             table options below stay clear of it, full width. -->
+        <div class="stats-row">
+          <div class="stats-block">
+            <h3>Base stats</h3>
+            <div id="statsPanel" class="stats-panel"></div>
+          </div>
+          <div id="teamTraitsPanel" class="team-block" hidden>
+            <h3>Team Traits</h3>
+            <p class="hint">
+              Traits your board runs that this champion is not a member of
+              &mdash; the team-wide half only.
+            </p>
+            <div id="teamTraits" class="team-traits"></div>
+          </div>
+        </div>
+        <p id="champNotes" class="notes" hidden></p>
 
-        const observer = new MutationObserver(tryReveal);
-        observer.observe(document.body, { childList: true, subtree: true });
-        // The toasts get added/removed outside of #root's own subtree in
-        // some cases, so a small poll backs up the observer rather than
-        // relying on it alone.
-        const pollId = setInterval(tryReveal, 300);
-      } catch (err) {
-        showError("mount", err);
-      }
-    </script>
+        <div class="option-row">
+          <label class="checkbox-row">
+            <input type="checkbox" id="displayDps" />
+            Display DPS
+          </label>
+          <label class="checkbox-row">
+            <input type="checkbox" id="colorScale" checked />
+            Colour scale
+          </label>
+          <!-- Sequential encoding ships with its scale legend. -->
+          <span id="scaleLegend" class="scale-legend">
+            <span>low</span>
+            <span class="ramp"></span>
+            <span>high</span>
+            <span class="scale-note">shaded within each column</span>
+          </span>
+        </div>
+
+        <div class="pills" id="sliceRadio"></div>
+        <div id="runStatus" class="run-status" hidden></div>
+
+        <div class="table-wrap">
+          <table id="resultsTable"></table>
+        </div>
+
+        <div id="plotArea">
+          <p id="plotHint">Click a row in the table to plot it.</p>
+          <div id="plotColumns" hidden>
+            <div id="chart"></div>
+            <div id="logColumn">
+              <label
+                >Index Log
+                <select id="logSelect"></select>
+              </label>
+              <div class="table-wrap log-wrap">
+                <table id="logTable"></table>
+              </div>
+              <div id="pie"></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="caption">
+          <span id="footerCaption"></span>
+          <!-- Mana Generation has no equivalent here yet, so it stays
+               reachable in the Streamlit build rather than disappearing with
+               the swap. 404.html routes /ManaGeneration to the same place. -->
+          &middot;
+          <a href="stlite.html?page=ManaGeneration">Mana Generation</a> and the
+          <a href="stlite.html">previous build</a>
+        </p>
+      </main>
+    </div>
   </body>
 </html>

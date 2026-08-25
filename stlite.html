@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Darth Noob's TFT Simulator (stlite)</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@stlite/browser@0.85.1/build/stlite.css"
+    />
+    <style>
+      /* Shown until stlite mounts the real Streamlit app, and if mounting
+         throws before Streamlit gets a chance to render anything itself. */
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0e1117; /* matches .streamlit/config.toml theme.base = "dark" */
+        color: #fafafa;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      #boot-status {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        text-align: center;
+        padding: 24px;
+      }
+      #boot-status.hidden {
+        display: none;
+      }
+      #boot-status .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #31333f;
+        border-top-color: #ff4b4b;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      #boot-status .detail {
+        color: #a3a8b8;
+        font-size: 0.9em;
+        max-width: 32em;
+      }
+      #boot-status .error {
+        color: #ff4b4b;
+        white-space: pre-wrap;
+        font-family: ui-monospace, monospace;
+        font-size: 0.8em;
+        text-align: left;
+        max-width: 48em;
+        max-height: 40vh;
+        overflow: auto;
+        background: #1a1c23;
+        border-radius: 6px;
+        padding: 12px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="boot-status">
+      <div class="spinner"></div>
+      <div>Loading TFT Simulator&hellip;</div>
+      <div class="detail">
+        First load pulls the Pyodide runtime plus numpy/pandas/plotly. This
+        is cached by the browser after the first visit.
+      </div>
+    </div>
+    <div id="root"></div>
+
+    <script type="module">
+      import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@0.85.1/build/stlite.js";
+
+      const bootStatus = document.getElementById("boot-status");
+
+      function showError(context, err) {
+        bootStatus.classList.remove("hidden");
+        bootStatus.innerHTML = `
+          <div>Failed to start the simulator (${context}).</div>
+          <div class="detail">
+            This is the in-browser build; the droplet-hosted version is
+            unaffected. Check the browser console for the full trace.
+          </div>
+          <pre class="error">${String(err && err.stack ? err.stack : err)}</pre>
+        `;
+      }
+
+      // This page IS the site root -- every .py file it fetches lives
+      // right alongside it, same directory. Nothing here is duplicated:
+      // it fetches the same source the droplet deployment runs, so the
+      // two never drift apart. Destination path (inside the Pyodide
+      // virtual FS) -> source file relative to this HTML file.
+      const SOURCE_FILES = [
+        ["app.py", "app.py"],
+        ["champion.py", "champion.py"],
+        ["class_utilities.py", "class_utilities.py"],
+        ["item.py", "item.py"],
+        ["role.py", "role.py"],
+        ["set18_streamlit_main.py", "set18_streamlit_main.py"],
+        ["set18buffs.py", "set18buffs.py"],
+        ["set18champs.py", "set18champs.py"],
+        ["set18items.py", "set18items.py"],
+        ["set18roles.py", "set18roles.py"],
+        ["sim_core.py", "sim_core.py"],
+        ["simulator.py", "simulator.py"],
+        ["stats.py", "stats.py"],
+        ["status.py", "status.py"],
+        ["utils.py", "utils.py"],
+        ["pages/ChampionSelector.py", "pages/ChampionSelector.py"],
+        ["pages/ManaGeneration.py", "pages/ManaGeneration.py"],
+        ["helpers/__init__.py", "helpers/__init__.py"],
+        ["helpers/display_name.py", "helpers/display_name.py"],
+      ];
+
+      const files = {};
+      for (const [dest, src] of SOURCE_FILES) {
+        files[dest] = { url: src };
+      }
+
+      // Catches errors mount() itself doesn't surface as a rejected promise
+      // (e.g. thrown during worker startup, before Streamlit renders
+      // anything into #root). The README documents `install()` on the
+      // returned controller but no startup-promise/event API, so this page
+      // detects readiness by watching the DOM instead of relying on
+      // undocumented internals.
+      window.addEventListener("error", (event) => {
+        if (!bootStatus.classList.contains("hidden")) {
+          showError("runtime", event.error || event.message);
+        }
+      });
+      window.addEventListener("unhandledrejection", (event) => {
+        if (!bootStatus.classList.contains("hidden")) {
+          showError("runtime", event.reason);
+        }
+      });
+
+      try {
+        mount(
+          {
+            requirements: [
+              "numpy",
+              "pandas",
+              // Pinned, and the pin matters for boot time more than anything
+              // else on this page: plotly 5.x shipped a 19 MB wheel holding
+              // ~15,300 files (the whole plotly.validators tree), every one
+              // of which micropip had to unzip into Pyodide's in-memory FS
+              // on *every* visit -- the browser cache only saves the
+              // download, not that unpack, which is what the long
+              // "Installing packages." phase was. 6.x dropped the validators
+              // package: 9.9 MB / ~1,660 files, and imports lazily on top.
+              // Its only runtime deps (narwhals, packaging) are Pyodide
+              // built-ins, so nothing else gets fetched from PyPI. Pinned
+              // exactly (rather than a floor) because unpinned plotly trips
+              // micropip's resolver (whitphx/stlite#1302), and because
+              // requirements.txt pins the same version for the droplet so
+              // both deployments render with identical plotly.
+              "plotly==6.9.0",
+            ],
+            entrypoint: "app.py",
+            files,
+            streamlitConfig: {
+              // Mirrors .streamlit/config.toml.
+              "theme.base": "dark",
+              // "Deploy" in the toolbar targets Streamlit Community Cloud,
+              // which is meaningless for a page that is already statically
+              // hosted; viewer mode just drops that menu.
+              "client.toolbarMode": "viewer",
+            },
+          },
+          document.getElementById("root"),
+        );
+
+        const root = document.getElementById("root");
+
+        // #root gets its first children (Streamlit's own app shell) well
+        // before the app is actually usable -- Pyodide is still installing
+        // numpy/pandas/plotly at that point, which stlite shows as its own
+        // "Mounting files." / "Unpacking archives." / "Mocking some
+        // packages." / "Installing packages." toasts. Hiding on first child
+        // (the original version of this check) revealed those mid-install,
+        // which look broken since they're unstyled relative to this page.
+        // So: wait for both "#root has content" AND "none of stlite's known
+        // bootstrap toasts are still on screen." Matched on visible text
+        // rather than a class/data-testid because none of those toasts
+        // exposed a stable selector to key off. A five-minute ceiling means
+        // a future stlite wording change degrades this to "hides a bit
+        // early" again, not "hides never."
+        const BOOTSTRAP_PHRASES =
+          /Mounting files|Unpacking archives|Mocking some packages|Installing packages/;
+        const revealDeadline = Date.now() + 5 * 60 * 1000;
+
+        function tryReveal() {
+          // innerText (not textContent): reflects only rendered/visible
+          // text, so it naturally excludes this very <script> tag's own
+          // source -- which textContent does not, and which would otherwise
+          // make BOOTSTRAP_PHRASES match this comment forever.
+          const ready =
+            root.childElementCount > 0 &&
+            !BOOTSTRAP_PHRASES.test(document.body.innerText || "");
+          if (ready || Date.now() > revealDeadline) {
+            bootStatus.classList.add("hidden");
+            observer.disconnect();
+            clearInterval(pollId);
+          }
+        }
+
+        const observer = new MutationObserver(tryReveal);
+        observer.observe(document.body, { childList: true, subtree: true });
+        // The toasts get added/removed outside of #root's own subtree in
+        // some cases, so a small poll backs up the observer rather than
+        // relying on it alone.
+        const pollId = setInterval(tryReveal, 300);
+      } catch (err) {
+        showError("mount", err);
+      }
+    </script>
+  </body>
+</html>

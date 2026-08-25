@@ -1,4 +1,4 @@
-// v2/worker.js
+// worker.js
 //
 // The only place Python runs in the v2 frontend. Boots Pyodide (no packages
 // -- the sim is pure stdlib, which is the entire speed story vs stlite),
@@ -12,10 +12,10 @@
 const PYODIDE_BASE = "https://cdn.jsdelivr.net/pyodide/v0.27.6/full/";
 importScripts(PYODIDE_BASE + "pyodide.js");
 
-// Destination inside the Pyodide FS -> sibling file relative to the site
-// root (this worker lives in v2/, the sources one level up). Same idea as
-// the stlite index.html manifest: the deployed site serves the same .py
-// files the droplet runs, so nothing is duplicated.
+// Destination inside the Pyodide FS -> the file's path on the site, which is
+// also its path in the repo: this page is served from the repo root, so it
+// fetches the very same .py files the droplet runs. Nothing is duplicated,
+// and the two deployments cannot drift.
 const PY_FILES = [
   "champion.py",
   "helpers/__init__.py",
@@ -42,7 +42,7 @@ async function boot() {
     loadPyodide({ indexURL: PYODIDE_BASE }),
     Promise.all(
       PY_FILES.map(async (path) => {
-        const resp = await fetch("../" + path);
+        const resp = await fetch(path);
         if (!resp.ok) throw new Error("fetch " + path + ": HTTP " + resp.status);
         return [path, await resp.text()];
       })

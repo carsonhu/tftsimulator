@@ -1,4 +1,4 @@
-/* v2/style.css — dark theme matching the stlite build's look
+/* style.css — dark theme matching the stlite build's look
    (#0e1117 ground, #fafafa text, #ff4b4b accent). */
 
 * {
@@ -746,4 +746,12 @@ td input[type="checkbox"] {
   color: #7a7f8f;
   font-size: 0.8em;
   margin-top: 24px;
+}
+
+.caption a {
+  color: #9aa0b0;
+}
+
+.caption a:hover {
+  color: #ff4b4b;
 }

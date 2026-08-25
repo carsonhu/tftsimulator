@@ -1,12 +1,13 @@
-name: Deploy stlite build to GitHub Pages
+name: Deploy the static site to GitHub Pages
 
 # Publishes the whole repo as a static site so index.html (repo root) can
-# fetch its sibling .py files (app.py, champion.py, pages/*.py, ...) by
-# relative URL at runtime. This is a *second*, independent deployment target
-# next to the droplet (deploy.yaml) and Ploomber Cloud (ploomber-cloud.yaml)
-# — it doesn't touch either of them. The droplet at tftsimulator.app stays
-# the live/primary URL until DNS is deliberately repointed at this site; see
-# stlite_app/README.md for the cutover steps.
+# fetch its sibling .py files (champion.py, sim_entry.py, ...) by relative URL
+# at runtime. index.html is the plain HTML/JS build that runs the simulator
+# under bare Pyodide; stlite.html is the previous Streamlit-in-the-browser
+# build, kept for the pages the new one does not cover yet.
+#
+# This is an independent deployment target next to the droplet (deploy.yaml)
+# and Ploomber Cloud (ploomber-cloud.yaml) — it doesn't touch either.
 #
 # One-time setup before this can run: repo Settings > Pages > Source must be
 # set to "GitHub Actions", and (once ready to switch the custom domain) the

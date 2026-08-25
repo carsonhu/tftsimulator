@@ -1,4 +1,4 @@
-// v2/app.js
+// app.js
 //
 // UI logic for the static frontend. All simulation happens in worker.js
 // (Pyodide); this file only builds controls from the catalog, assembles the

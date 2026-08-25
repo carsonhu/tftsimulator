@@ -4,40 +4,37 @@
     <meta charset="utf-8" />
     <title>Redirecting…</title>
     <script>
-      // GitHub Pages serves this file for any request path that isn't a
-      // real one -- which is every Streamlit page path except the root,
-      // since only index.html actually exists. Streamlit's frontend updates
-      // the address bar with pushState when you click between pages (e.g.
-      // /ChampionSelector), but -- confirmed by testing, not assumed --
-      // does NOT read that path back on boot, so a plain "restore the
-      // pathname before mounting" trick doesn't work here. Instead this
-      // redirects into ?page=<name>, which app.py reads via
-      // st.query_params and turns into an explicit st.switch_page() call:
-      // see the comment there.
+      // GitHub Pages serves this file for any path that isn't a real file,
+      // which is every in-app route: only index.html and stlite.html exist.
       //
-      // pathSegmentsToKeep: how many leading path segments are the site's
-      // own base path rather than part of the app route. 0 now that this
-      // serves from the tftsimulator.app domain root (was 1 while served
-      // at github.io/tftsimulator/, where "tftsimulator" was the segment).
-      var pathSegmentsToKeep = 0;
+      // The root is now the static build, which is the Champion Selector, so
+      // a bookmark of /ChampionSelector simply lands on "/". The pages that
+      // still live only in the Streamlit build keep working by routing to
+      // stlite.html?page=<name>, which app.py reads via st.query_params and
+      // turns into an st.switch_page() call -- Streamlit's frontend writes
+      // that path into the address bar on navigation but (confirmed by
+      // testing) never reads it back on boot, so the query param is what
+      // carries the destination.
+      var STLITE_ONLY = ["ManaGeneration", "TankCalculator"];
 
       var loc = window.location;
-      var segments = loc.pathname.split("/").slice(1);
-      var baseSegments = segments.slice(0, pathSegmentsToKeep);
-      // Joining zero segments still needs the leading "/" -- naively
-      // appending a trailing "/" after an empty join produces "//", which
-      // location.replace() parses as a protocol-relative URL (host-relative,
-      // not path-relative) and silently fails to navigate.
-      var base = baseSegments.length ? "/" + baseSegments.join("/") + "/" : "/";
-      var appPath = segments.slice(pathSegmentsToKeep).join("/");
+      // Everything after the leading "/". The site is served from the domain
+      // root (tftsimulator.app), so there is no base path to strip; it was 1
+      // segment back when this served from github.io/tftsimulator/.
+      var route = loc.pathname.split("/").slice(1).join("/");
+      var extra = loc.search ? "&" + loc.search.slice(1) : "";
 
-      loc.replace(
-        base +
-          "?page=" +
-          encodeURIComponent(appPath) +
-          (loc.search ? "&" + loc.search.slice(1) : "") +
-          loc.hash
-      );
+      if (STLITE_ONLY.indexOf(route) !== -1) {
+        loc.replace(
+          "/stlite.html?page=" + encodeURIComponent(route) + extra + loc.hash
+        );
+      } else {
+        // Joining zero segments still needs the leading "/" -- appending a
+        // trailing "/" to an empty join produces "//", which
+        // location.replace() reads as protocol-relative (host-relative, not
+        // path-relative) and silently fails to navigate.
+        loc.replace("/" + (loc.search || "") + loc.hash);
+      }
     </script>
   </head>
   <body>Redirecting&hellip;</body>
