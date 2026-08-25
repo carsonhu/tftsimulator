@@ -596,23 +596,35 @@ h3 {
 .table-wrap {
   overflow-x: auto;
   overflow-y: auto;
-  /* Grows with the window instead of taking a fixed slice of it: the table
-     starts around 390px down, so this ends it just above the fold on a
-     laptop and shows a whole item slice on a tall monitor. The floor keeps
-     it usable if the panels above ever grow. */
-  max-height: max(320px, calc(100vh - 415px));
+  max-height: 380px;
   border: 1px solid #31333f;
   border-radius: 8px;
   margin: 10px 0;
-  /* Shrink-wrap the table instead of stretching columns across the page. */
-  width: fit-content;
-  max-width: 100%;
+  width: 100%;
 }
 
 table {
   border-collapse: collapse;
-  font-size: 0.95em;
   white-space: nowrap;
+}
+
+/* Full width and larger type: the numbers are the reason this page exists,
+   so they get the room rather than the empty margin beside them. Scoped to
+   the results table -- the index log lives in a narrow column beside the
+   chart and would just overflow it. */
+#resultsTable {
+  width: 100%;
+  font-size: 1.05em;
+}
+
+#logTable {
+  width: 100%;
+  font-size: 0.86em;
+}
+
+#logTable td,
+#logTable th {
+  padding: 3px 8px;
 }
 
 thead {
@@ -623,7 +635,7 @@ thead {
 
 td,
 th {
-  padding: 4px 12px;
+  padding: 4px 14px;
   border-bottom: 1px solid #22242e;
   text-align: right;
 }
@@ -747,7 +759,6 @@ td input[type="checkbox"] {
 
 .log-wrap {
   max-height: 300px;
-  font-size: 0.9em;
 }
 
 @media (max-width: 1100px) {
