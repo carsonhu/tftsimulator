@@ -267,9 +267,9 @@ details > label {
 
 .team-traits {
   display: grid;
-  /* Packed left rather than stretched: with two traits on screen today and
-     more to come, columns should fill in, not spread out. */
-  grid-template-columns: repeat(auto-fill, minmax(130px, max-content));
+  /* One fixed cell width for every trait, packed left: a trait with a level
+     picker must not claim more room than a trait with a tick box. */
+  grid-template-columns: repeat(auto-fill, 150px);
   justify-content: start;
   /* Fills the column's remaining height, with the traits themselves parked
      at the top rather than spread down it. */
@@ -282,17 +282,33 @@ details > label {
   padding: 10px 14px;
 }
 
+/* Every trait is one line: the label, then its control. Left as a column,
+   the level picker stacked its caption above a full-width select and towered
+   over the tick boxes beside it. */
 .team-trait {
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.team-trait select {
+  /* The generic sidebar rule stretches selects to 100%; here the cell width
+     is doing that job. */
+  width: auto;
+  min-width: 3.5em;
+  padding: 1px 4px;
+  font-size: 0.9em;
 }
 
 /* Flat traits are a plain on/off tick, so the box sits inline with the name
    instead of below a caption. */
+/* A tick box reads as a prefix to the name, so it leads rather than sitting
+   out at the cell's right edge where the pickers are. */
 .team-trait.flat {
-  flex-direction: row;
-  align-items: center;
+  justify-content: flex-start;
   gap: 8px;
-  cursor: pointer;
 }
 
 .team-trait.flat input {
