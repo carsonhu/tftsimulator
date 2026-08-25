@@ -33,9 +33,30 @@ BOX = 24.0  # the viewBox app.js uses
 MIN_BLOB_FRACTION = 0.004  # ignore specks: JPEG noise, anti-aliasing crumbs
 
 
-def load_mask(path, invert):
+def lift_mask(image):
+    """Separate a pale glyph from the coloured plate it is printed on.
+
+    Riot's Booster icons are a cream glyph on a saturated gold square. Neither
+    brightness nor saturation splits them cleanly -- the glyph is shaded, so
+    its dark corners are dimmer than the plate's lit ones -- but hue does: the
+    glyph is near-neutral (blue about 0.7 of red) and the gold is not (about
+    0.2). The plate's own rim catches the light and reads as glyph, so the
+    border is trimmed; no glyph runs to the edge of its own icon.
+    """
+    pixels = np.array(image.convert("RGB")).astype(float)
+    red, blue = pixels[..., 0], pixels[..., 2]
+    mask = (blue / (red + 1) > 0.35) & (red > 90)
+    pad = int(0.13 * mask.shape[0])
+    mask[:pad, :] = mask[-pad:, :] = False
+    mask[:, :pad] = mask[:, -pad:] = False
+    return mask
+
+
+def load_mask(path, invert, lift=False):
     """A boolean array, True where the glyph is."""
     image = Image.open(path).convert("RGBA")
+    if lift:
+        return lift_mask(image)
     alpha = np.array(image.getchannel("A"))
     if alpha.min() < 250:
         # A real alpha channel: the glyph is what is opaque.
@@ -156,14 +177,36 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("image")
     parser.add_argument("--invert", action="store_true", help="dark glyph on light")
+    parser.add_argument(
+        "--lift",
+        action="store_true",
+        help="pull a pale glyph off a coloured plate (Riot's framed icons)",
+    )
     parser.add_argument("--tolerance", type=float, default=0.6, help="in source pixels")
+    parser.add_argument(
+        "--top",
+        type=int,
+        help="keep only the N largest shapes -- lifting a glyph off a framed "
+        "icon leaves rim highlights behind, and they are always the small ones",
+    )
     parser.add_argument("--preview", help="write the traced shape back out as a PNG")
     args = parser.parse_args()
 
-    mask = load_mask(args.image, args.invert)
+    mask = load_mask(args.image, args.invert, args.lift)
     if not mask.any():
         print("nothing above the threshold -- try --invert", file=sys.stderr)
         return 1
+
+    floor = mask.sum() * MIN_BLOB_FRACTION
+    blobs = [b for b in label_blobs(mask) if len(b) >= floor]
+    if args.top:
+        blobs = blobs[: args.top]
+        # Re-fit the box to what survived: a rim highlight left in the corner
+        # would otherwise stretch the bounds and squash the real glyph.
+        mask = np.zeros_like(mask)
+        for blob in blobs:
+            for y, x in blob:
+                mask[y, x] = True
 
     ys, xs = np.nonzero(mask)
     origin = (ys.min(), xs.min())
@@ -173,8 +216,6 @@ def main():
     pad_x = (BOX - (xs.max() - xs.min() + 1) * scale) / 2
     pad_y = (BOX - (ys.max() - ys.min() + 1) * scale) / 2
 
-    floor = mask.sum() * MIN_BLOB_FRACTION
-    blobs = [b for b in label_blobs(mask) if len(b) >= floor]
     print(f"# {args.image}: {len(blobs)} shape(s), {span}px across", file=sys.stderr)
 
     for blob in blobs:

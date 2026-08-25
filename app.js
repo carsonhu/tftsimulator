@@ -233,13 +233,16 @@ const STAT_ICONS = {
   scaleAS: {
     label: "Attack Speed",
     colour: "#f0c04a",
+    // Riot's own art rather than a redrawing. Regenerate with:
+    //   python trace_glyph.py tft18_speedbooster.png --lift --top 4
+    //     --tolerance 0.5
+    // (--lift pulls the cream glyph off the gold plate; --top 4 drops the
+    // plate's own rim highlights, which lift the same way the glyph does.)
     paths: [
-      { d: "M8.9 12.5 L20.2 1.2 L23.0 4.0 L11.7 15.3 Z" }, // blade
-      { d: "M4.4 21.3 L11.4 14.3 L12.6 15.5 L5.6 22.5 Z" }, // grip
-      { d: "M4.0 15.8 L11.3 23.1 L12.5 21.9 L5.2 14.6 Z" }, // crossguard
-      // Two speed lines, their right ends cut on the blade's angle.
-      { d: "M1.4 3.2 L14.6 3.2 L12.0 5.8 L1.4 5.8 Z" },
-      { d: "M1.4 7.6 L11.4 7.6 L8.8 10.2 L1.4 10.2 Z" },
+      { d: "M18.55 0.18 L23.64 0.18 L23.64 5.27 L10.18 17.27 L10.18 15.09 L9.82 14.73 L9.82 14.00 L9.45 13.63 L6.55 13.63 L18.18 0.54 Z" }, // blade
+      { d: "M1.45 12.54 L1.82 12.54 L11.27 22.00 L10.55 22.73 L10.18 22.00 L9.09 22.00 L8.73 22.73 L6.18 20.18 L5.82 20.18 L2.55 23.45 L1.82 23.45 L0.00 21.63 L1.82 19.82 L1.82 19.45 L2.18 19.45 L3.27 18.36 L3.64 17.63 L2.91 17.27 L2.18 16.54 L2.18 16.18 L1.45 15.82 L0.00 14.36 L0.00 14.00 L1.09 12.91 Z" }, // hilt
+      { d: "M0.00 0.18 L14.91 0.18 L12.36 2.73 L0.00 2.73 L0.00 0.54 Z" }, // speed line
+      { d: "M0.00 4.54 L10.91 4.54 L8.36 7.09 L0.00 7.09 L0.00 4.91 Z" }, // speed line
     ],
   },
   // A droplet with the regen plus set above and behind it, which is what
