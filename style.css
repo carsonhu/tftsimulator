@@ -285,11 +285,18 @@ details > label {
 /* Every trait is one line: the label, then its control. Left as a column,
    the level picker stacked its caption above a full-width select and towered
    over the tick boxes beside it. */
+/* This panel is in <main>, not the sidebar, so it misses the `#sidebar label`
+   rule that makes a label a flex box -- without display here, every line below
+   was inline text and the picker sat hard against its own caption. */
 .team-trait {
+  display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  gap: 6px;
+  /* Packed left, not spread: space-between parks the picker on the cell's
+     right edge, where it reads as belonging to the trait in the next column
+     rather than to its own caption. The spare width goes on the end. */
+  justify-content: flex-start;
+  gap: 10px;
   cursor: pointer;
 }
 
