@@ -8,8 +8,14 @@
 Writes one 48x48 PNG per class into icons/<group>/, named after the class in
 set18items / set18buffs (Archangels.png, GlassCannonI.png, ...), plus an
 index.json listing what exists. app.js reads those indexes and only renders an
-<img> for a row whose class is in one, so the trait and wisp rows -- which have
-no icon -- cost no failed requests.
+icon for a row whose class is in one, so the wisp rows -- which have none --
+cost no failed requests.
+
+Traits also get a tiers.json, because a trait icon is not one picture: Riot
+ships a white glyph and the game colours the hexagon behind it by the tier the
+breakpoint sits at. The tier per breakpoint is in the data (`style`); the
+colours are not, anywhere -- they belong to the client's UI, so TIER_COLOURS
+below is the one part of this file that is taste rather than data.
 
 Matching is by display name against CommunityDragon's en_us.json, normalised to
 ignore case, punctuation and the parenthetical qualifiers this project adds
@@ -54,6 +60,7 @@ import urllib.request
 from PIL import Image, ImageDraw
 
 CHANNEL = "pbe"
+SET = "18"
 CACHE = os.path.join(".tft_cache", CHANNEL, "en_us.json")
 DATA_URL = f"https://raw.communitydragon.org/{CHANNEL}/cdragon/tft/en_us.json"
 GAME_URL = f"https://raw.communitydragon.org/{CHANNEL}/game/"
@@ -84,6 +91,13 @@ def augment_entries():
     return _entries(set18buffs, set18buffs.augments)
 
 
+def trait_entries():
+    """(class name, display name) for every trait the Trait slice sweeps."""
+    import set18buffs
+
+    return _entries(set18buffs, set18buffs.class_buffs)
+
+
 def _entries(module, names):
     out = []
     for cls_name in names:
@@ -92,9 +106,81 @@ def _entries(module, names):
     return out
 
 
+def all_items(catalog):
+    return catalog["items"]
+
+
+def set18_traits(catalog):
+    return catalog["sets"][SET]["traits"]
+
+
+# Every trait breakpoint carries a `style`, which is the tier the game paints
+# its hexagon. The numbering is not dense -- Set 18 uses 1/3/5/6 for the four
+# ranked tiers and 4 for a unique trait's single breakpoint -- and it is not
+# ordinal either, since 4 sits between silver and gold while meaning neither.
+# Read off the data against the in-game trait list: Summoner is (2) bronze and
+# (3) gold, which is 1 and 5; Blossom's (11) is the only 6 and the only
+# prismatic; the 4s are all the one-unit traits, which show the unique rainbow.
+STYLE_TIERS = {1: "bronze", 3: "silver", 5: "gold", 6: "prismatic", 4: "unique"}
+
+# The colours themselves are NOT in the game data: the hexagon is drawn by the
+# client, so nothing under assets/ carries them and nothing in map22.bin.json
+# names them. These are the canonical TFT tier colours, which is the one part
+# of this file that is taste rather than data -- tune them here and every
+# surface follows.
+TIER_COLOURS = {
+    "bronze": "#b06c3f",
+    "silver": "#9fb0c0",
+    "gold": "#e3bb63",
+    # Both rainbow tiers, kept apart so a future difference is a one-line
+    # change rather than an untangling.
+    "prismatic": "linear-gradient(135deg, #7ee8e0, #b48be4, #f0c27b)",
+    "unique": "linear-gradient(135deg, #7ee8e0, #b48be4, #f0c27b)",
+}
+
+
+def trait_tiers(resolved, written):
+    """{class: {level: tier}} for exactly the levels the sim offers.
+
+    Resolving here rather than in the page means the frontend never has to
+    know what a breakpoint is: it looks up the level it is drawing and gets a
+    tier name back, or nothing.
+
+    A sim level need not be a real breakpoint. Riftbeast offers 3 and 7 out of
+    Riot's 3/5/7/10, which lands exactly. Primal collapses the whole trait to
+    on/off, so its level 1 sits below Riot's first breakpoint (2) -- it takes
+    the first tier, since "on" is the only thing that level means.
+    """
+    import set18buffs
+
+    payload, notes = {}, []
+    for cls_name in written:
+        _display, _api, _icon, _mismatch, record = resolved[cls_name]
+        steps = sorted(
+            (e["minUnits"], STYLE_TIERS.get(e["style"]))
+            for e in record.get("effects", [])
+            if e.get("minUnits") is not None
+        )
+        if not steps:
+            notes.append((cls_name, "no breakpoints in the data; no tier colours"))
+            continue
+        levels = {}
+        for level in getattr(set18buffs, cls_name).levels:
+            if level == 0:
+                continue
+            tier = next(
+                (t for units, t in reversed(steps) if units <= level), steps[0][1]
+            )
+            if tier:
+                levels[str(level)] = tier
+        payload[cls_name] = levels
+    return {"tiers": payload, "colours": TIER_COLOURS}, notes
+
+
 GROUPS = {
     "items": {
         "entries": item_entries,
+        "source": all_items,
         # Item art lives in one of two trees: Icons/Items for the standard
         # ones, Particles/.../Item_Icons for artifacts, region items and trait
         # emblems.
@@ -119,6 +205,7 @@ GROUPS = {
     },
     "augments": {
         "entries": augment_entries,
+        "source": all_items,
         "allowed_paths": ("/icons/augments/",),
         # An augment that has run in several sets appears once per set
         # (TFT6_Augment_Ascension, TFT9_Augment_Commander_Ascension, ...) with
@@ -141,6 +228,20 @@ GROUPS = {
             "Shred20": "a raw shred value, not an augment",
         },
     },
+    "traits": {
+        "entries": trait_entries,
+        # Traits are their own list, not items, so a name can only collide with
+        # another trait in the same set -- there are none, and prefer never
+        # has to break a tie.
+        "source": set18_traits,
+        "allowed_paths": ("/traiticons/",),
+        "prefer": "DA_",
+        "overrides": {},
+        "no_icon": {},
+        # The glyphs are white silhouettes; what colours one is the tier its
+        # level sits at, which comes off the same records.
+        "sidecar": ("tiers.json", trait_tiers),
+    },
 }
 
 
@@ -157,7 +258,7 @@ def load_catalog(refresh):
         with open(CACHE, "wb") as handle:
             handle.write(fetch(DATA_URL))
     with open(CACHE, encoding="utf-8") as handle:
-        return json.load(handle)["items"]
+        return json.load(handle)
 
 
 def normalise(name):
@@ -258,10 +359,11 @@ def recolour(image, want, got):
     return painted
 
 
-def resolve(group, items):
-    by_api = {i["apiName"]: i for i in items}
+def resolve(group, catalog):
+    records = group["source"](catalog)
+    by_api = {i["apiName"]: i for i in records}
     by_name = collections.defaultdict(list)
-    for item in items:
+    for item in records:
         if item.get("name"):
             by_name[normalise(item["name"])].append(item)
 
@@ -300,7 +402,7 @@ def resolve(group, items):
             want, got = mismatch
             art = os.path.basename(icon)
             notes.append((cls_name, f"{want} augment on {got} art ({art}); recoloured"))
-        resolved[cls_name] = (display, api, icon, mismatch)
+        resolved[cls_name] = (display, api, icon, mismatch, match)
     return resolved, missing, notes
 
 
@@ -310,13 +412,13 @@ def icon_url(path):
     return GAME_URL + re.sub(r"\.(tex|dds)$", ".png", path.lower())
 
 
-def build(name, group, items):
+def build(name, group, catalog):
     out_dir = os.path.join("icons", name)
-    resolved, missing, notes = resolve(group, items)
+    resolved, missing, notes = resolve(group, catalog)
     os.makedirs(out_dir, exist_ok=True)
 
     written = []
-    for cls_name, (display, api, path, mismatch) in sorted(resolved.items()):
+    for cls_name, (display, api, path, mismatch, _record) in sorted(resolved.items()):
         url = icon_url(path)
         try:
             raw = fetch(url)
@@ -338,6 +440,13 @@ def build(name, group, items):
 
     with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8") as handle:
         json.dump(sorted(written), handle, indent=0)
+
+    if group.get("sidecar"):
+        sidecar_name, build_sidecar = group["sidecar"]
+        payload, sidecar_notes = build_sidecar(resolved, written)
+        notes.extend(sidecar_notes)
+        with open(os.path.join(out_dir, sidecar_name), "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=0, sort_keys=True)
 
     total = sum(os.path.getsize(os.path.join(out_dir, f)) for f in os.listdir(out_dir))
     print(f"{name}: wrote {len(written)} icons to {out_dir} ({total / 1024:.0f} KB)")
@@ -368,8 +477,10 @@ def contact_sheet(sheets):
         for index, cls_name in enumerate(sorted(written)):
             x = (index % columns) * (cell + 8) + 4
             y = (index // columns) * (cell + pad)
-            icon = Image.open(os.path.join(out_dir, cls_name + ".png"))
-            sheet.paste(icon, (x, y), None)
+            icon = Image.open(os.path.join(out_dir, cls_name + ".png")).convert("RGBA")
+            # Its own alpha as the mask: the trait glyphs are white-on-nothing,
+            # and pasted flat they are white squares rather than art.
+            sheet.paste(icon, (x, y), icon)
             draw.text((x, y + cell + 2), cls_name[:14], fill=(220, 224, 230))
         path = out_dir + "_sheet.png"
         sheet.save(path)
@@ -384,10 +495,10 @@ def main():
     parser.add_argument("--contact-sheet", action="store_true", help="check by eye")
     args = parser.parse_args()
 
-    items = load_catalog(args.refresh)
+    catalog = load_catalog(args.refresh)
     sheets, failed = [], 0
     for name in args.groups or GROUPS:
-        out_dir, written, missing = build(name, GROUPS[name], items)
+        out_dir, written, missing = build(name, GROUPS[name], catalog)
         sheets.append((out_dir, written))
         failed += len(missing)
 

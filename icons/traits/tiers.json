@@ -1,0 +1,66 @@
+{
+"colours": {
+"bronze": "#b06c3f",
+"gold": "#e3bb63",
+"prismatic": "linear-gradient(135deg, #7ee8e0, #b48be4, #f0c27b)",
+"silver": "#9fb0c0",
+"unique": "linear-gradient(135deg, #7ee8e0, #b48be4, #f0c27b)"
+},
+"tiers": {
+"Adaptor": {
+"2": "bronze",
+"3": "silver",
+"4": "gold"
+},
+"Blackthorn": {
+"2": "bronze",
+"4": "silver",
+"6": "gold"
+},
+"Blossom": {
+"11": "prismatic",
+"3": "bronze",
+"5": "silver",
+"7": "gold",
+"9": "gold"
+},
+"Executioner": {
+"2": "bronze",
+"3": "silver",
+"4": "gold"
+},
+"Lunar": {
+"2": "bronze",
+"3": "silver",
+"4": "silver",
+"5": "gold"
+},
+"Primal": {
+"1": "bronze"
+},
+"Rapidfire": {
+"2": "bronze",
+"3": "silver",
+"4": "silver",
+"5": "gold"
+},
+"Ravager": {
+"2": "bronze",
+"4": "silver",
+"6": "gold"
+},
+"Riftbeast": {
+"3": "bronze",
+"7": "gold"
+},
+"Spellweaver": {
+"2": "bronze",
+"4": "silver",
+"6": "gold"
+},
+"Summoner": {
+"2": "bronze",
+"3": "gold"
+}
+}
+}

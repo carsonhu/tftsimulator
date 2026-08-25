@@ -108,9 +108,11 @@ const state = {
   displayDps: false,
   colorScale: true,
   // Class name -> icon URL, from the per-group index.json files. A row draws
-  // art only if its class is in here, so the trait and wisp rows -- which have
-  // none -- cost no failed requests.
+  // art only if its class is in here, so the wisp rows -- which have none --
+  // cost no failed requests.
   icons: new Map(),
+  // icons/traits/tiers.json: {tiers: {cls: {level: tier}}, colours: {...}}.
+  traitTiers: null,
   // Which header the table is sorted by. key null = the order sim_entry
   // delivered, which is already ratio-at-25s descending.
   sort: { key: null, dir: "desc" },
@@ -161,7 +163,7 @@ async function init() {
 
 // icons.py writes one directory per group. Class names are unique across the
 // modules they come from, so a flat class -> URL map is enough.
-const ICON_GROUPS = ["items", "augments"];
+const ICON_GROUPS = ["items", "augments", "traits"];
 
 async function loadIcons() {
   await Promise.all(
@@ -177,7 +179,45 @@ async function loadIcons() {
       }
     })
   );
+  try {
+    // Traits alone need a second file: their glyphs are white silhouettes, and
+    // the tier a breakpoint sits at is what gives one its colour. icons.py has
+    // already resolved level -> tier, so nothing here knows what a breakpoint
+    // is -- it looks up the level it is drawing.
+    const response = await fetch("icons/traits/tiers.json");
+    if (response.ok) state.traitTiers = await response.json();
+  } catch (err) {
+    // Without it the glyphs still draw, just in the neutral colour.
+  }
+  // This resolves after the first render (it is deliberately not awaited at
+  // boot), so anything that draws an icon has to be told to draw again.
+  if (state.catalog) renderTeamTraits();
   if (state.current) renderResults();
+}
+
+// A trait's glyph in a hexagon coloured by the tier that breakpoint sits at,
+// which is how the game itself distinguishes them. Falls back to the plain
+// glyph when the level has no tier (or tiers.json never loaded), so this is
+// never the reason a trait goes unlabelled.
+function traitBadge(cls, level) {
+  const src = state.icons.get(cls);
+  if (!src) return null;
+  const badge = document.createElement("span");
+  badge.className = "trait-badge";
+  const tier = state.traitTiers?.tiers?.[cls]?.[String(level)];
+  const colour = tier && state.traitTiers.colours[tier];
+  if (colour) {
+    badge.style.background = colour;
+    badge.dataset.tier = tier;
+  }
+  const glyph = document.createElement("span");
+  glyph.className = "trait-glyph";
+  // Masked rather than an <img>: the glyph is white-on-nothing, and a mask
+  // lets one file sit on any tier colour without shipping a copy per tier.
+  glyph.style.webkitMaskImage = `url("${src}")`;
+  glyph.style.maskImage = `url("${src}")`;
+  badge.appendChild(glyph);
+  return badge;
 }
 
 function buildStaticControls() {
@@ -593,6 +633,11 @@ function renderTeamTraits() {
     caption.className = "col-label";
     caption.textContent = trait.name;
 
+    // Coloured by the level actually selected, so the badge tracks the picker
+    // beside it; an unselected trait shows its first breakpoint's tier rather
+    // than going colourless, which would read as "no icon" instead of "off".
+    const badge = traitBadge(trait.cls, current || trait.onLevel);
+
     if (trait.scales) {
       // The aura itself steps per breakpoint (Lunar), so the level is a real
       // question and gets a picker.
@@ -607,6 +652,7 @@ function renderTeamTraits() {
         else state.teamBuffs.delete(trait.cls);
         onConfigChanged();
       };
+      if (badge) label.appendChild(badge);
       label.appendChild(caption);
       label.appendChild(sel);
     } else {
@@ -622,6 +668,7 @@ function renderTeamTraits() {
         onConfigChanged();
       };
       label.appendChild(check);
+      if (badge) label.appendChild(badge);
       label.appendChild(caption);
     }
 
@@ -929,7 +976,11 @@ function renderResults() {
           get: (row) => row.extra,
           render: (cell, row) => {
             const src = state.icons.get(row.extraCls);
-            if (src) {
+            const isTrait = state.traitTiers?.tiers?.[row.extraCls];
+            if (isTrait) {
+              const badge = traitBadge(row.extraCls, row.extraLevel);
+              if (badge) cell.appendChild(badge);
+            } else if (src) {
               const icon = document.createElement("img");
               icon.className = "row-icon";
               icon.src = src;

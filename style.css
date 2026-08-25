@@ -677,6 +677,41 @@ thead th {
   border-radius: 3px;
 }
 
+/* A trait is a hexagon coloured by its tier with a white glyph inside, the
+   way the game draws it. The glyph ships as one white-on-nothing PNG per
+   trait and is painted by a mask, so a tier change is a colour change rather
+   than another file. */
+.trait-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 24px;
+  flex: none;
+  vertical-align: middle;
+  margin-right: 8px;
+  background: #4a5061; /* no tier: still a badge, just an unranked one */
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.trait-glyph {
+  width: 15px;
+  height: 15px;
+  background: #14161c;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* Bronze is dark enough that a dark glyph disappears into it. */
+.trait-badge[data-tier="bronze"] .trait-glyph,
+.trait-badge:not([data-tier]) .trait-glyph {
+  background: #f4f1ee;
+}
+
 /* Sortable headers. */
 th.sortable {
   cursor: pointer;

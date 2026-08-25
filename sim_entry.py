@@ -408,6 +408,9 @@ def _table_entries(sim_list):
             "level": sim["Champ"].level,
             "extra": sim["Extra"].name,
             "extraCls": type(sim["Extra"]).__name__,
+            # Which breakpoint a trait row is, so the page can colour its icon
+            # by tier. Items are not levelled and report None.
+            "extraLevel": getattr(sim["Extra"], "level", None),
             "blackthorn": sim.get("Blackthorn"),
         }
         xs, ys = _cumulative_points(sim["Results"])
