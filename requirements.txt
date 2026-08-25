@@ -1,10 +1,31 @@
-matplotlib>=3.8.2
-numpy>=1.23.5
-pandas>=2.1.0
+# Runtime deps for both services the droplet runs off this file (see
+# deploy.sh): `streamlit run app.py`, and sim_api.py under uvicorn.
+#
+# Floors, not pins, except where a pin is load-bearing. Test/analysis-only
+# packages live in requirements-dev.txt so they stay out of the deployed image.
+
+# --- Streamlit app ---
 streamlit>=1.40
-XlsxWriter==3.1.9
+pandas>=2.2
+numpy>=1.26
+XlsxWriter>=3.2
+# Pinned deliberately, and not only for the droplet: stlite.html pins the same
+# version for the Streamlit-in-the-browser build, and the two must move
+# together or the browser and server render with different plotly. 6.x rather
+# than 5.x is load-bearing there -- the 5.x wheel was ~15,300 files that
+# Pyodide unpacked on every visit, against ~1,660 for 6.x. (The static root
+# build doesn't use this package at all; it loads plotly.js from a CDN, pinned
+# to the version this one bundles.)
 plotly==6.9.0
-fastapi
-uvicorn
-requests
-pydantic
+
+# --- sim_api.py, the optional simulation-offload server ---
+# Not used by either browser build (SIM_API_URL is unset there), but the
+# droplet runs it as its own systemd service.
+fastapi>=0.115
+uvicorn>=0.30
+pydantic>=2.7
+
+# --- shared ---
+# set18_streamlit_main uses this to reach SIM_API_URL, and fails over to local
+# computation when it is absent (which is what happens in the browser).
+requests>=2.32

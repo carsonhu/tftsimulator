@@ -10,6 +10,34 @@ from simulator import Simulator
 from role import Role
 
 
+class ChampLabel:
+    """The two fields a result row's champion is ever asked for.
+
+    Each row used to carry its whole post-combat Champion -- item graph,
+    statuses and all -- but every consumer (createSelectorDPSTable,
+    createUnitDPSTable, class_utilities.plot_df) reads only .name and .level.
+    Since st.cache_data pickles what it stores, keeping the full objects cost
+    ~1.2MB and ~100ms of (un)pickling per cached sweep to serve two scalars.
+
+    Note this is the *result* row, not the cache key: the key is the pickled
+    input champion built in doExperimentOneExtra, which still carries every
+    item, buff and bonus stat. Trimming here can't weaken it.
+
+    The cost of the trim is diagnostic -- per-row final stacks, statuses and
+    numCasts are gone. Per-instant AS and mana survive in Results, whose
+    entries are (time, damage, aspd, curMana, fullMana).
+    """
+
+    __slots__ = ("name", "level")
+
+    def __init__(self, name, level):
+        self.name = name
+        self.level = level
+
+    def __repr__(self):
+        return f"ChampLabel({self.name!r}, {self.level!r})"
+
+
 def do_experiment_one_extra(
     champion,
     opponent,
@@ -17,6 +45,7 @@ def do_experiment_one_extra(
     buff_list,
     duration: float,
     frame_rate: int,
+    run_blackthorn: bool = True,
 ) -> List[Dict[str, Any]]:
     """
     Core sim logic, lifted from doExperimentOneExtraWrapped but with no Streamlit
@@ -62,7 +91,7 @@ def do_experiment_one_extra(
                     duration,
                     frameRate=frame_rate,
                 )
-                sim_list.append({"Champ": champ, "Extra": flavor_item, "Results": results})
+                sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": flavor_item, "Results": results})
 
             elif existing_buffs[0].level == 0:
                 # Case B: Trait present but level 0 (NoBuff). Simulate ALL levels.
@@ -88,7 +117,7 @@ def do_experiment_one_extra(
                         duration,
                         frameRate=frame_rate,
                     )
-                    sim_list.append({"Champ": champ, "Extra": flavor_item, "Results": results})
+                    sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": flavor_item, "Results": results})
             else:
                 # Case C: Trait present and active. Skip.
                 continue
@@ -104,7 +133,7 @@ def do_experiment_one_extra(
             duration,
             frameRate=frame_rate,
         )
-        sim_list.append({"Champ": champ, "Extra": item, "Results": results})
+        sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": item, "Results": results})
 
     # then buffs
     for buff in buff_list:
@@ -136,7 +165,7 @@ def do_experiment_one_extra(
             frameRate=frame_rate,
         )
 
-        sim_list.append({"Champ": champ, "Extra": buff, "Results": results})
+        sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": buff, "Results": results})
 
     # NOVA toggles
     if any(buff.name.startswith("N.O.V.A.") for buff in champion.items):
@@ -154,17 +183,19 @@ def do_experiment_one_extra(
             )
             plus = "+" if champ.novas[nova_unit] else "-"
             nova_buff = Buff(f"NOVA ({plus}{nova_unit})", 1, 0, None)
-            sim_list.append({"Champ": champ, "Extra": nova_buff, "Results": results})
+            sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": nova_buff, "Results": results})
 
     # Blackthorn sacrifice combinations: every (Role, Star Level, Cost) a
     # sacrifice can actually be, plus the empty hex. 3- and 4-star sacrifices
     # only exist on a 1-cost, so the pricier tiers contribute 1- and 2-star
     # rows only. The trait reads all three off the champion, so deep-copying
-    # it and overwriting them is enough.
+    # it and overwriting them is enough. run_blackthorn lets the
+    # ChampionSelector ask for this sweep on its own -- or skip it -- when it
+    # computes one radio slice at a time.
     blackthorn = next(
         (b for b in champion.items if type(b).__name__ == "Blackthorn"), None
     )
-    if blackthorn is not None and blackthorn.level > 0:
+    if run_blackthorn and blackthorn is not None and blackthorn.level > 0:
         trait = set18buffs.Blackthorn
         sacrifices = [(trait.ROLE_NONE, None, None)]
         for role in trait.roles:
@@ -203,7 +234,7 @@ def do_experiment_one_extra(
 
             sim_list.append(
                 {
-                    "Champ": champ,
+                    "Champ": ChampLabel(champ.name, champ.level),
                     "Extra": Buff(name, 1, 0, None),
                     "Results": results,
                     # Rendered as their own columns in place of "Extra" when
@@ -271,7 +302,7 @@ def do_experiment_one_extra(
                     display_name = f"{short_cause} | {effect}"
                 
                 arb_buff = Buff(display_name, 1, 0, None)
-                sim_list.append({"Champ": champ, "Extra": arb_buff, "Results": results})
+                sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": arb_buff, "Results": results})
 
     return sim_list
 

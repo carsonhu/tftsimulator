@@ -5,9 +5,11 @@ from champion import Champion
 from set18buffs import (
     AdaptorInnate,
     AriseBuff,
+    AttunedInnate,
     CaitlynHeadshotBuff,
     GrompPurpleBuff,
     MasterYiUlt,
+    NidaleeUlt,
     TinyBeaksBuff,
 )
 
@@ -27,6 +29,9 @@ champ_list = [
     "Akali",
     "Ezreal",
     "Warwick",
+    "Alune",
+    "Camille",
+    "Nidalee",
 ]
 
 
@@ -957,4 +962,194 @@ class Warwick(Champion):
             opponents[:1], items, time, 1, self.abilityScaling, "physical"
         )
         self.aspd.addStat(self.aspd_per_cast)
+        return 0
+
+
+class Alune(Champion):
+    # Moonfall: four rains of moonshards, then the moon itself on the fifth.
+    casts_per_cycle = 5
+    normal_cast_time = 2.0
+    full_moon_cast_time = 4.0
+    moonshards = 9
+    # "the 3 nearest enemies" -- fixed by the spell, so no num_targets slider.
+    targets = 3
+
+    def __init__(self, level):
+        hp = 900
+        atk = 40
+        curMana = 0
+        fullMana = 35
+        aspd = 0.8
+        armor = 45
+        mr = 45
+        super().__init__(
+            "Alune",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MAGIC_CASTER,
+        )
+        # Attuned is deliberately absent: it is a one-unit trait and a
+        # permanent part of her kit, so it rides along as an item below rather
+        # than being something you would toggle in the buff bar.
+        self.default_traits = ["Lunar", "Spellweaver"]
+        self.castTime = self.normal_cast_time
+        self.items.append(AttunedInnate())
+        self.notes = (
+            "Moonfall's tooltip is authored in the reference bin but its data "
+            "block belongs to some other spell (it carries ShredPercent and "
+            "AttackSpeed rows that appear nowhere in the tooltip), so these "
+            "come off the champion card. The card says the Full Moon cast is "
+            "split among ALL enemies; per request it is split among the same "
+            "3 as the normal cast. Attuned's Durability half is not modeled -- "
+            "nothing here damages the champion being measured."
+        )
+
+    # Per moonshard, before the 9x and the split.
+    moonshardScaling = create_ability_scaling(
+        [0, 0, 0], [50, 75, 500], func_name="moonshardScaling"
+    )
+    # The whole moon, before the split.
+    fullMoonScaling = create_ability_scaling(
+        [0, 0, 0], [2350, 3600, 7500], func_name="fullMoonScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        if not opponents:
+            return 0
+        # Split across however many are actually there, so a short bench does
+        # not quietly lose the missing shards' damage.
+        split = min(self.targets, len(opponents))
+        # numCasts is incremented before performAbility, so this is the
+        # 1-indexed cast; every 5th is the Full Moon one. AttunedInnate has
+        # already advanced the phase (and applied its amp) in preAbility.
+        if self.numCasts % self.casts_per_cycle == 0:
+            self.castTime = self.full_moon_cast_time
+
+            def moon_scaling(level, AD, AP, split=split):
+                return self.fullMoonScaling(level, AD, AP) / split
+
+            scaling = moon_scaling
+        else:
+            self.castTime = self.normal_cast_time
+
+            def shard_scaling(level, AD, AP, split=split):
+                return (
+                    self.moonshards * self.moonshardScaling(level, AD, AP) / split
+                )
+
+            scaling = shard_scaling
+
+        self.multiTargetSpell(opponents, items, time, split, scaling, "magical")
+        return 0
+
+
+class Camille(Champion):
+    def __init__(self, level):
+        hp = 700
+        atk = 40
+        curMana = 0
+        fullMana = 25
+        aspd = 0.75
+        armor = 40
+        mr = 40
+        super().__init__(
+            "Camille",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_FIGHTER,
+        )
+        # Her other trait is Coven, which does nothing in combat and so has no
+        # buff class; leaving it out of this list keeps it from eating a buff
+        # bar slot that can't be filled (same as Akali and Inferno). The bin
+        # still pairs her with Slayer instead of Ravager, a patch behind the
+        # card -- and Slayer isn't a set-18 trait at all.
+        self.default_traits = ["Ravager"]
+        self.castTime = 1.0  # per request
+        self.notes = (
+            "Defensive Sweep is unauthored in the reference bin (still the "
+            "0.25s placeholder template), so these come off the champion "
+            "card. The 60 Shield for 2s is not modeled -- nothing in this "
+            "simulator damages the champion being measured. Coven is not "
+            "implemented: it has no combat effect."
+        )
+
+    # The card's 170/255/435 is one row, but its breakdown is two: an AD-scaled
+    # part and an AP-scaled part (160 + 10 = 170, 240 + 15 = 255, 410 + 25 =
+    # 435), which is what makes AP worth anything on her.
+    abilityScaling = create_ability_scaling([160, 240, 410], [10, 15, 25])
+
+    def performAbility(self, opponents, items, time):
+        if not opponents:
+            return 0
+        self.multiTargetSpell(
+            opponents[:1], items, time, 1, self.abilityScaling, "physical"
+        )
+        return 0
+
+
+class Nidalee(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 35
+        curMana = 0
+        fullMana = 40
+        aspd = 0.8
+        armor = 30
+        mr = 30
+        super().__init__(
+            "Nidalee",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MAGIC_MARKSMAN,
+        )
+        self.default_traits = ["Primal", "Adaptor"]
+        self.castTime = 0.5  # per request
+        # Set at combat start by AdaptorInnate; True = the physical version.
+        # Nidalee is one of the two Adaptors (with Gromp) that starts on its
+        # AP version when nothing has pushed either stat ahead.
+        self.ad_version = False
+        self.adaptor_resolved = False
+        self.adaptor_ties_to_ad = False
+        # The AD version (Cougar Form) is uncoded, so it's a deliberate stub:
+        # 0 base AD and a no-op ability (NidaleeUlt bails when ad_version),
+        # so the collapsed numbers flag that stacking AD at combat start
+        # turns her into AD Nidalee rather than silently mispricing it.
+        self.ad_base_atk = 0
+        self.items.append(AdaptorInnate())
+        self.items.append(NidaleeUlt())
+        self.notes = (
+            "Defaults AP. AD Adaptor (Cougar Form) is uncoded -- resolving to "
+            "the AD version zeroes her out on purpose."
+        )
+
+    # Javelins 1-2, pure AP.
+    abilityScaling = create_ability_scaling([0, 0, 0], [170, 255, 2000])
+    # The 3rd javelin's bigger row; NidaleeUlt picks it via
+    # ChampionEmpoweredAbilityScaling.
+    empoweredScaling = create_ability_scaling(
+        [0, 0, 0], [320, 480, 3000], func_name="empoweredScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        # Javelin Toss: no direct cast damage -- NidaleeUlt (see __init__)
+        # handles the +150% AS, the manalock-until-3-attacks gate, and
+        # replacing the next 3 attacks with javelins.
         return 0

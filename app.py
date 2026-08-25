@@ -51,6 +51,6 @@ st.markdown(
 
     Nonetheless, I use this tool every day and consider to be invaluable to getting better as a TFT player.
 
-    \- Darth Noob
+    \\- Darth Noob
 """
 )

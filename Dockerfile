@@ -1,5 +1,6 @@
-# Use Python base image
-FROM python:3.9-slim
+# Use Python base image (3.12: 3.9 is past end-of-life, and the stlite build
+# already runs this same source on a 3.11/3.12-era CPython under Pyodide)
+FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
