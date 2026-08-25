@@ -107,6 +107,8 @@ const state = {
   slice: "Craftable",
   displayDps: false,
   colorScale: true,
+  // Item classes that have an icon on disk, from icons/items/index.json.
+  itemIcons: new Set(),
   // Which header the table is sorted by. key null = the order sim_entry
   // delivered, which is already ratio-at-25s descending.
   sort: { key: null, dir: "desc" },
@@ -142,6 +144,9 @@ function cfgForSlice(sliceName) {
 // ---------------------------------------------------------------------------
 
 async function init() {
+  // Loaded alongside the catalog rather than before it: a missing or stale
+  // index just means no icons, never a page that fails to start.
+  loadItemIcons();
   state.catalog = await rpc("catalog");
   state.buffMeta = new Map(state.catalog.buffs.map((b) => [b.cls, b]));
 
@@ -150,6 +155,17 @@ async function init() {
 
   $("boot-status").hidden = true;
   $("layout").hidden = false;
+}
+
+async function loadItemIcons() {
+  try {
+    const response = await fetch("icons/items/index.json");
+    if (!response.ok) return;
+    state.itemIcons = new Set(await response.json());
+    if (state.current) renderResults();
+  } catch (err) {
+    // No icons; the names still say everything the table needs to.
+  }
 }
 
 function buildStaticControls() {
@@ -894,7 +910,26 @@ function renderResults() {
         text: true,
         get: (row) => (row.blackthorn || {})[name] ?? "",
       }))
-    : [{ label: "Extra", text: true, get: (row) => row.extra }];
+    : [
+        {
+          label: "Extra",
+          text: true,
+          get: (row) => row.extra,
+          render: (cell, row) => {
+            if (state.itemIcons.has(row.extraCls)) {
+              const icon = document.createElement("img");
+              icon.className = "item-icon";
+              icon.src = "icons/items/" + row.extraCls + ".png";
+              // Decorative: the item's name sits right beside it, so a
+              // screen reader announcing the file too would only repeat.
+              icon.alt = "";
+              icon.loading = "lazy";
+              cell.appendChild(icon);
+            }
+            cell.appendChild(document.createTextNode(row.extra));
+          },
+        },
+      ];
   const columns = labelCols.concat(dpsCols.map((col) => ({ ...col, shade: true })));
 
   // Column-wise magnitude scale. Each DPS interval is normalised against its
@@ -962,7 +997,8 @@ function renderResults() {
     for (const col of columns) {
       const cell = tr.insertCell();
       const value = col.get(row);
-      cell.textContent = col.text ? value : formatNumber(value);
+      if (col.render) col.render(cell, row);
+      else cell.textContent = col.text ? value : formatNumber(value);
       if (col.shade && state.colorScale) {
         shadeCell(cell, Number(value), scales.get(col.label), col.label);
       }

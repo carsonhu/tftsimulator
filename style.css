@@ -660,6 +660,16 @@ thead th {
   text-align: center;
 }
 
+/* Item art beside the name, like the stats sites. Inline rather than a flex
+   cell so the table's own column sizing still applies. */
+#resultsTable .item-icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  margin-right: 8px;
+  border-radius: 3px;
+}
+
 /* Sortable headers. */
 th.sortable {
   cursor: pointer;
