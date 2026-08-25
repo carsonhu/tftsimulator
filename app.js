@@ -210,23 +210,33 @@ async function loadIcons() {
 // beside rather than by a bitmap, and tinted by the stat rather than by art
 // direction -- gold for speed, red for damage, blue for mana.
 const STAT_ICONS = {
-  // A fan of three blades: the game's damage-amp mark. The outer two are
-  // shorter than the centre and pivot from below it -- equal-length blades
-  // fanned from the same point read as a crown instead of a rising spike.
+  // Three blades rising from a notched base -- one outline rather than three
+  // shapes, so the valleys between them are cut rather than overlapped. The
+  // outer pair are shorter and lean out; equal blades fanned from one point
+  // read as a crown.
   scaleDA: {
     label: "Damage Amp",
     colour: "#e8734a",
     paths: [
-      { d: "M12 1.5 L14.2 17.6 L12 15.1 L9.8 17.6 Z" },
-      { d: "M12 6.4 L13.8 18.3 L12 16.5 L10.2 18.3 Z", rotate: -29 },
-      { d: "M12 6.4 L13.8 18.3 L12 16.5 L10.2 18.3 Z", rotate: 29 },
+      { d: "M12 1.8 L13.15 16.9 L12 15.6 L10.85 16.9 Z" },
+      { d: "M12 6.2 L12.95 17.8 L12 16.7 L11.05 17.8 Z", rotate: -31 },
+      { d: "M12 6.2 L12.95 17.8 L12 16.7 L11.05 17.8 Z", rotate: 31 },
     ],
   },
-  // A bolt, for Attack Speed.
+  // Riot's own Attack Speed motif, from the Set 18 Speed Booster: a
+  // chisel-tipped sword on the diagonal, its hilt crossing into an X, with
+  // three speed lines trailing off the back of the swing.
   scaleAS: {
     label: "Attack Speed",
     colour: "#f0c04a",
-    paths: [{ d: "M13.6 2 L5.2 13.4 h4.9 l-1.9 8.6 8.6-12.2 h-5.1 z" }],
+    paths: [
+      { d: "M9.5 12.2 L17.7 3.6 L19.9 5.6 L11.7 14.2 Z" }, // blade
+      { d: "M6.4 16.3 L10 12.6 L11.2 13.8 L7.6 17.5 Z" }, // grip
+      { d: "M7.4 12.4 L11.7 16.5 L10.7 17.6 L6.3 13.5 Z" }, // crossguard
+      { d: "M3.4 4.9 h7.0 v1.5 h-7.0 Z" },
+      { d: "M3.4 7.4 h6.2 v1.5 h-6.2 Z" },
+      { d: "M3.4 9.9 h5.0 v1.5 h-5.0 Z" },
+    ],
   },
   // A droplet with the regen tick beside it.
   scaleManaRegen: {
