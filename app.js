@@ -196,6 +196,73 @@ async function loadIcons() {
   if (state.current) renderResults();
 }
 
+// The stat each Greenfather hex grants, drawn rather than downloaded.
+//
+// Riot writes these into tooltip text as tokens -- %i:scaleAS%, %i:scaleDA%,
+// %i:scaleManaRegen% -- but ships no image behind them: the in-match client
+// renders them from its own compiled UI, and nothing under game/assets,
+// game/assets/ux/tftmobile or the rcp-fe-lol-tft plugin carries them. The
+// Set 18 "Booster" icons are the nearest real art and cover four of the five
+// hexes, but there is no damage-amp booster, so a mixed set would have had
+// one hex wearing another stat's icon.
+//
+// So: three shapes in the spirit of the originals, sized by the text they sit
+// beside rather than by a bitmap, and tinted by the stat rather than by art
+// direction -- gold for speed, red for damage, blue for mana.
+const STAT_ICONS = {
+  // A fan of three blades: the game's damage-amp mark. The outer two are
+  // shorter than the centre and pivot from below it -- equal-length blades
+  // fanned from the same point read as a crown instead of a rising spike.
+  scaleDA: {
+    label: "Damage Amp",
+    colour: "#e8734a",
+    paths: [
+      { d: "M12 1.5 L14.2 17.6 L12 15.1 L9.8 17.6 Z" },
+      { d: "M12 6.4 L13.8 18.3 L12 16.5 L10.2 18.3 Z", rotate: -29 },
+      { d: "M12 6.4 L13.8 18.3 L12 16.5 L10.2 18.3 Z", rotate: 29 },
+    ],
+  },
+  // A bolt, for Attack Speed.
+  scaleAS: {
+    label: "Attack Speed",
+    colour: "#f0c04a",
+    paths: [{ d: "M13.6 2 L5.2 13.4 h4.9 l-1.9 8.6 8.6-12.2 h-5.1 z" }],
+  },
+  // A droplet with the regen tick beside it.
+  scaleManaRegen: {
+    label: "Mana Regen",
+    colour: "#4aa8e8",
+    paths: [
+      { d: "M12 2.4 C12 2.4 5.4 10.4 5.4 14.6 a6.6 6.6 0 0 0 13.2 0 C18.6 10.4 12 2.4 12 2.4 Z" },
+    ],
+  },
+};
+
+// Which stat each Hex grants, by the option index set18buffs stores.
+const HEX_STATS = ["scaleAS", "scaleDA", "scaleManaRegen"];
+
+function statIcon(key) {
+  const stat = STAT_ICONS[key];
+  if (!stat) return null;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("class", "stat-icon");
+  svg.setAttribute("aria-hidden", "true");
+  svg.style.color = stat.colour;
+  for (const part of stat.paths) {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", part.d);
+    // The two outer blades are the centre one pivoted about a point below the
+    // glyph, which is what fans them rather than sliding them sideways.
+    if (part.rotate) path.setAttribute("transform", `rotate(${part.rotate} 12 20)`);
+    svg.appendChild(path);
+  }
+  const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+  title.textContent = stat.label;
+  svg.appendChild(title);
+  return svg;
+}
+
 // A trait's glyph in a hexagon coloured by the tier that breakpoint sits at,
 // which is how the game itself distinguishes them. Falls back to the plain
 // glyph when the level has no tier (or tiers.json never loaded), so this is
@@ -715,8 +782,24 @@ function renderTeamTraits() {
         });
         optionSel.value = String(params);
         optionSel.title = trait.paramTitle;
-        optionSel.onchange = () => store(Number(sel.value), Number(optionSel.value));
         label.appendChild(optionSel);
+
+        // A native <select> cannot put art inside its options, so the stat
+        // sits beside it and follows the choice -- which is the useful half
+        // anyway: what you want to see is what the hex you picked grants.
+        const slot = document.createElement("span");
+        slot.className = "stat-slot";
+        const drawStat = () => {
+          slot.innerHTML = "";
+          const icon = statIcon(HEX_STATS[Number(optionSel.value)]);
+          if (icon) slot.appendChild(icon);
+        };
+        drawStat();
+        label.appendChild(slot);
+        optionSel.onchange = () => {
+          drawStat();
+          store(Number(sel.value), Number(optionSel.value));
+        };
       }
       sel.onchange = () =>
         store(Number(sel.value), optionSel ? Number(optionSel.value) : 0);

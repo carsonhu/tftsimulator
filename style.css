@@ -306,8 +306,22 @@ details > label {
    two pickers and a name into one -- at 190px the name would have nowhere to
    go, and Greenfather is far and away the widest thing this panel shows. */
 .team-trait.with-option {
-  grid-template-columns: 22px auto auto auto 1fr;
+  grid-template-columns: 22px auto auto auto auto 1fr;
   grid-column: span 2;
+}
+
+/* Sized in em so it tracks the text it sits beside rather than being pinned
+   to a bitmap's dimensions -- the whole reason these are drawn. */
+.stat-slot {
+  display: inline-flex;
+  align-items: center;
+}
+
+.stat-icon {
+  width: 1.15em;
+  height: 1.15em;
+  fill: currentColor;
+  display: block;
 }
 
 .team-trait select {
