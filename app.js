@@ -218,9 +218,13 @@ const STAT_ICONS = {
     label: "Damage Amp",
     colour: "#e8734a",
     paths: [
-      { d: "M12 1.8 L13.15 16.9 L12 15.6 L10.85 16.9 Z" },
-      { d: "M12 6.2 L12.95 17.8 L12 16.7 L11.05 17.8 Z", rotate: -31 },
-      { d: "M12 6.2 L12.95 17.8 L12 16.7 L11.05 17.8 Z", rotate: 31 },
+      // A central chevron -- a triangle with its base notched up -- flanked
+      // by two slivers leaning out from near the top corners. The gaps
+      // between the three are what make it read as blades rather than a
+      // crown, so the centre stays narrow enough to leave them.
+      { d: "M12 1.2 L16.7 21.5 L12 17.0 L7.3 21.5 Z" },
+      { d: "M1.9 3.2 L6.9 21.5 L4.2 21.5 Z" },
+      { d: "M22.1 3.2 L17.1 21.5 L19.8 21.5 Z" },
     ],
   },
   // Riot's own Attack Speed motif, from the Set 18 Speed Booster: a
@@ -230,20 +234,26 @@ const STAT_ICONS = {
     label: "Attack Speed",
     colour: "#f0c04a",
     paths: [
-      { d: "M9.5 12.2 L17.7 3.6 L19.9 5.6 L11.7 14.2 Z" }, // blade
-      { d: "M6.4 16.3 L10 12.6 L11.2 13.8 L7.6 17.5 Z" }, // grip
-      { d: "M7.4 12.4 L11.7 16.5 L10.7 17.6 L6.3 13.5 Z" }, // crossguard
-      { d: "M3.4 4.9 h7.0 v1.5 h-7.0 Z" },
-      { d: "M3.4 7.4 h6.2 v1.5 h-6.2 Z" },
-      { d: "M3.4 9.9 h5.0 v1.5 h-5.0 Z" },
+      { d: "M8.9 12.5 L20.2 1.2 L23.0 4.0 L11.7 15.3 Z" }, // blade
+      { d: "M4.4 21.3 L11.4 14.3 L12.6 15.5 L5.6 22.5 Z" }, // grip
+      { d: "M4.0 15.8 L11.3 23.1 L12.5 21.9 L5.2 14.6 Z" }, // crossguard
+      // Two speed lines, their right ends cut on the blade's angle.
+      { d: "M1.4 3.2 L14.6 3.2 L12.0 5.8 L1.4 5.8 Z" },
+      { d: "M1.4 7.6 L11.4 7.6 L8.8 10.2 L1.4 10.2 Z" },
     ],
   },
-  // A droplet with the regen tick beside it.
+  // A droplet with the regen plus set above and behind it, which is what
+  // separates Mana Regen from plain Mana.
   scaleManaRegen: {
     label: "Mana Regen",
     colour: "#4aa8e8",
     paths: [
-      { d: "M12 2.4 C12 2.4 5.4 10.4 5.4 14.6 a6.6 6.6 0 0 0 13.2 0 C18.6 10.4 12 2.4 12 2.4 Z" },
+      { d: "M5.4 1.2 h2.6 v3.2 h3.2 v2.6 h-3.2 v3.2 h-2.6 v-3.2 h-3.2 v-2.6 h3.2 Z" },
+      {
+        d:
+          "M15.0 6.6 C15.0 6.6 8.7 14.1 8.7 17.4 " +
+          "a6.3 6.3 0 0 0 12.6 0 C21.3 14.1 15.0 6.6 15.0 6.6 Z",
+      },
     ],
   },
 };
