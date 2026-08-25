@@ -45,6 +45,7 @@ augments = [
     "HoldTheLine5",
     "HoldTheLine7",
     "TonsOfStats",
+    "TonsOfStatsPris",
     "JeweledLotusI",
     "JeweledLotusII",
     "SeraphimsStaff",
@@ -62,10 +63,6 @@ augments = [
     "BaronsLair",
     "PartialAscension",
     "EarlyLearnings",
-    "AccelerationHex",
-    "AccelerationHexEmpowered",
-    "StarlightHex",
-    "StarlightHexEmpowered",
 ]
 
 stat_buffs = ["ASBuff"]
@@ -1995,6 +1992,27 @@ class TonsOfStats(Buff):
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
         self.scaling = 4
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.hp.addStat(self.scaling * 11)
+        champion.bonus_ad.addStat(self.scaling)
+        champion.ap.addStat(self.scaling)
+        champion.aspd.addStat(self.scaling)
+        champion.armor.addStat(self.scaling)
+        champion.mr.addStat(self.scaling)
+        # hacky
+        if champion.curMana < champion.fullMana.stat:
+            champion.curMana += self.scaling
+        return 0
+
+
+class TonsOfStatsPris(Buff):
+    levels = [1]
+    display_name = "Tons of Stats (Pris)"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat"])
+        self.scaling = 8
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.hp.addStat(self.scaling * 11)

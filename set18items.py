@@ -76,7 +76,6 @@ radiants = [
     "RadiantTitans",
     "RadiantStrikersFlail",
     "RadiantHoJ",
-    "RadiantHoJ",
     "RadiantRed",
     "RadiantMorellos",
     "RadiantQSS",
