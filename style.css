@@ -632,13 +632,24 @@ table {
   white-space: nowrap;
 }
 
-/* Full width and larger type: the numbers are the reason this page exists,
-   so they get the room rather than the empty margin beside them. Scoped to
-   the results table -- the index log lives in a narrow column beside the
-   chart and would just overflow it. */
+/* Sized to its content, not to the page. Stretching to 100% put ~300px of
+   pure slack into seven columns that had nothing to put there, which pushed
+   "DPS at 5" and "DPS at 25" a third of a metre apart on a wide monitor --
+   the two numbers a reader most wants to compare. Shrink-to-fit closes that
+   gap without dropping a single character. The larger type stays: the numbers
+   are the reason this page exists. Scoped to the results table -- the index
+   log lives in a narrow column beside the chart. */
 #resultsTable {
-  width: 100%;
+  width: auto;
   font-size: 1.05em;
+}
+
+/* The border hugs the table rather than framing the empty space beside it.
+   max-width keeps the scroll behaviour on a narrow window, where the table is
+   wider than the column and .table-wrap's overflow-x takes over. */
+.results-wrap {
+  width: fit-content;
+  max-width: 100%;
 }
 
 #logTable {
@@ -670,6 +681,16 @@ thead th {
   color: #c7cad6;
   text-align: right;
   white-space: nowrap;
+}
+
+/* Tighter gutters than the 14px default, horizontal only -- the 4px above and
+   below is what sets the row height, and that stays put. Each column is a
+   right-aligned number against a shaded cell, so the fill already separates
+   them and the extra gutter was only buying width. */
+#resultsTable td,
+#resultsTable th {
+  padding-left: 9px;
+  padding-right: 9px;
 }
 
 /* Results table: label column on the left, the To Plot checkbox column on
