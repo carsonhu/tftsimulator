@@ -51,6 +51,8 @@ import re
 import sys
 import urllib.request
 
+from PIL import Image, ImageDraw
+
 CHANNEL = "pbe"
 CACHE = os.path.join(".tft_cache", CHANNEL, "en_us.json")
 DATA_URL = f"https://raw.communitydragon.org/{CHANNEL}/cdragon/tft/en_us.json"
@@ -177,6 +179,23 @@ RARITY_SUFFIXES = {
 }
 
 
+# Each rarity paints its art in one narrow band of hue, which is what makes
+# the recolour below possible: sampled as the median over the opaque, coloured
+# pixels of several icons per rarity, they cluster at silver 191-192, gold
+# 53-54, prismatic 253-278. Saturation is a band too, but a much looser one --
+# individual gold icons range from 0.41 to 0.75 -- so the target below is a
+# level to normalise onto rather than a ratio to scale by.
+RARITY_LOOK = {
+    "silver": (191 / 360.0, 0.30),
+    "gold": (53 / 360.0, 0.45),
+    "prismatic": (272 / 360.0, 0.30),
+}
+
+# Below this saturation a pixel is a grey -- a shadow or a white highlight --
+# and carries no hue worth measuring.
+COLOURED = 64
+
+
 def rarity_mismatch(match):
     """('prismatic', 'gold') when the tag and the icon's tier disagree."""
     tags = [RARITY_TAGS[t] for t in match.get("tags", []) if t in RARITY_TAGS]
@@ -185,6 +204,58 @@ def rarity_mismatch(match):
         return None
     art = RARITY_SUFFIXES[suffix.group(1)]
     return None if art == tags[0] else (tags[0], art)
+
+
+def median_saturation(sats, alpha):
+    """Median saturation, 0-1, over this icon's opaque coloured pixels."""
+    opaque = alpha.point(lambda level: 255 if level > 128 else 0)
+    counts = sats.histogram(mask=opaque)[COLOURED + 1:]
+    total = sum(counts)
+    seen = 0
+    for offset, count in enumerate(counts):
+        seen += count
+        if seen * 2 >= total:
+            return (COLOURED + 1 + offset) / 255
+    return None
+
+
+def recolour(image, want, got):
+    """Repaint art drawn for one rarity in the colours of another.
+
+    Only reached when Riot tagged an augment one rarity and pointed it at
+    another's picture, which as of Set 18 is Prismatic Tons of Stats alone: the
+    Prismatic augment is real but no tons-of-stats-iii was ever drawn, so both
+    it and the Gold version would otherwise sit in the table as the same yellow
+    hexagon under near-identical names.
+
+    Hue is replaced rather than rotated -- a rarity's art is one narrow band,
+    so there is no spread worth preserving. Saturation is normalised onto the
+    target rarity's level using this icon's own median, not scaled by a ratio
+    between the two rarities: gold icons are individually anywhere from 0.41 to
+    0.75 saturated, so a fixed ratio leaves a vivid source still vivid after it
+    turns purple, which is exactly what it looked like on the first attempt.
+    Value and alpha are untouched, so the shading and the shape survive; the
+    greys go along for the ride harmlessly, since scaling a saturation of
+    nearly zero leaves it nearly zero.
+    """
+    if want not in RARITY_LOOK or got not in RARITY_LOOK:
+        return None
+    hue, want_sat = RARITY_LOOK[want]
+    hues, sats, values = image.convert("RGB").convert("HSV").split()
+    median = median_saturation(sats, image.getchannel("A"))
+    if not median:
+        return None
+    scale = want_sat / median
+    painted = Image.merge(
+        "HSV",
+        (
+            hues.point(lambda _: round(hue * 255)),
+            sats.point(lambda level: min(255, round(level * scale))),
+            values,
+        ),
+    ).convert("RGB")
+    painted.putalpha(image.getchannel("A"))
+    return painted
 
 
 def resolve(group, items):
@@ -228,8 +299,8 @@ def resolve(group, items):
         if mismatch:
             want, got = mismatch
             art = os.path.basename(icon)
-            notes.append((cls_name, f"{want} augment wearing the {got} art ({art})"))
-        resolved[cls_name] = (display, api, icon)
+            notes.append((cls_name, f"{want} augment on {got} art ({art}); recoloured"))
+        resolved[cls_name] = (display, api, icon, mismatch)
     return resolved, missing, notes
 
 
@@ -239,13 +310,13 @@ def icon_url(path):
     return GAME_URL + re.sub(r"\.(tex|dds)$", ".png", path.lower())
 
 
-def build(name, group, items, Image):
+def build(name, group, items):
     out_dir = os.path.join("icons", name)
     resolved, missing, notes = resolve(group, items)
     os.makedirs(out_dir, exist_ok=True)
 
     written = []
-    for cls_name, (display, api, path) in sorted(resolved.items()):
+    for cls_name, (display, api, path, mismatch) in sorted(resolved.items()):
         url = icon_url(path)
         try:
             raw = fetch(url)
@@ -255,6 +326,10 @@ def build(name, group, items, Image):
             if image.getchannel("A").getextrema()[1] == 0:
                 missing.append((cls_name, f"{display} -> {api} icon is blank"))
                 continue
+            # Recolour before the downscale, so the resample averages the
+            # colours the icon will actually ship in.
+            if mismatch:
+                image = recolour(image, *mismatch) or image
             image = image.resize((SIZE, SIZE), Image.LANCZOS)
             image.save(os.path.join(out_dir, cls_name + ".png"), optimize=True)
             written.append(cls_name)
@@ -277,7 +352,7 @@ def build(name, group, items, Image):
     return out_dir, written, missing
 
 
-def contact_sheet(sheets, Image, ImageDraw):
+def contact_sheet(sheets):
     """One labelled grid per group, to check the matches by eye.
 
     Worth the two minutes: a wrong match is a plausible-looking icon, so the
@@ -309,17 +384,15 @@ def main():
     parser.add_argument("--contact-sheet", action="store_true", help="check by eye")
     args = parser.parse_args()
 
-    from PIL import Image, ImageDraw
-
     items = load_catalog(args.refresh)
     sheets, failed = [], 0
     for name in args.groups or GROUPS:
-        out_dir, written, missing = build(name, GROUPS[name], items, Image)
+        out_dir, written, missing = build(name, GROUPS[name], items)
         sheets.append((out_dir, written))
         failed += len(missing)
 
     if args.contact_sheet:
-        contact_sheet(sheets, Image, ImageDraw)
+        contact_sheet(sheets)
     return 1 if failed else 0
 
 
