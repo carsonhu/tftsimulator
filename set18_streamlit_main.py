@@ -11,14 +11,7 @@ from set18items import *
 from simulator import Simulator
 import base64
 import pickle
-import os
 
-try:
-    import requests
-except ImportError:
-    # Not available under Pyodide/stlite. Only needed to offload work to the
-    # SIM_API_URL backend; without it everything runs locally.
-    requests = None
 from sim_core import do_experiment_one_extra as do_experiment_one_extra_local
 
 from champion import Champion
@@ -565,45 +558,17 @@ def doExperimentOneExtraWrapped(
     frameRate: int,
     run_blackthorn: bool = True,
 ):
-    # API URL
-    api_url = os.getenv("SIM_API_URL")
-
-    if api_url and requests is not None:
-        payload = {
-            "champion_pickle": champion_pickle,
-            "opponent_pickle": opponent_pickle,
-            "item_list_pickle": item_list_pickle,
-            "buff_list_pickle": buff_list_pickle,
-            "t": t,
-            "frame_rate": frameRate,
-            # Older sim_api deployments ignore this and return the Blackthorn
-            # rows regardless; harmless (extra rows the slice filters out),
-            # and the local path below is what stlite always takes.
-            "run_blackthorn": run_blackthorn,
-        }
-
-        try:
-            response = requests.post(api_url, json=payload)
-            response.raise_for_status()
-            result_data = response.json()
-            results = pickle.loads(base64.b64decode(result_data["results_pickle"]))
-            return results, "API"
-        except requests.exceptions.RequestException as e:
-            print(f"API request failed: {e}. Falling back to local computation.")
-    
-    # Fallback or default to local computation
-    # Deserialize for local computation
+    # The arguments arrive pickled because that is what makes them hashable
+    # for st.cache_data, not because they are going anywhere: unpickle and run.
     champion_obj = pickle.loads(base64.b64decode(champion_pickle))
     opponent_obj = pickle.loads(base64.b64decode(opponent_pickle))
     _itemList = pickle.loads(base64.b64decode(item_list_pickle))
     _buffList = pickle.loads(base64.b64decode(buff_list_pickle))
 
-    # Fallback to local computation using sim_core
-    results = do_experiment_one_extra_local(
+    return do_experiment_one_extra_local(
         champion_obj, opponent_obj, _itemList, _buffList, t, frameRate,
         run_blackthorn=run_blackthorn,
     )
-    return results, "Local"
 
 
 # @st.cache_data(hash_funcs={Champion: hash_func})

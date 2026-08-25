@@ -14,8 +14,8 @@ importScripts(PYODIDE_BASE + "pyodide.js");
 
 // Destination inside the Pyodide FS -> the file's path on the site, which is
 // also its path in the repo: this page is served from the repo root, so it
-// fetches the very same .py files the droplet runs. Nothing is duplicated,
-// and the two deployments cannot drift.
+// fetches the very same .py files the tests exercise. Nothing is duplicated,
+// so the simulator on the page cannot drift from the one under test.
 const PY_FILES = [
   "champion.py",
   "helpers/__init__.py",

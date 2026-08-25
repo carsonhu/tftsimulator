@@ -237,7 +237,7 @@ with st.sidebar:
         radio_value = options[0]
         st.session_state[RESULTS_RADIO_KEY] = radio_value
 
-    simLists, source = run_slice(radio_value)
+    simLists = run_slice(radio_value)
 
 tab1, tab2 = st.tabs(["Items", "Radiant Refractor"])
 
@@ -315,8 +315,6 @@ with tab1:
         )
 
     class_utilities.plot_df(new_df, simLists)
-
-st.caption(f"Simulation computed via: {source}")
 
 # Everything above has rendered by now, so this is the "load the rest in the
 # background" half: warm the cache for the radio options the visitor didn't

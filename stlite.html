@@ -92,18 +92,19 @@
         bootStatus.innerHTML = `
           <div>Failed to start the simulator (${context}).</div>
           <div class="detail">
-            This is the in-browser build; the droplet-hosted version is
-            unaffected. Check the browser console for the full trace.
+            The main simulator at <a href="/">tftsimulator.app</a> is a
+            separate build and is unaffected. Check the browser console for
+            the full trace.
           </div>
           <pre class="error">${String(err && err.stack ? err.stack : err)}</pre>
         `;
       }
 
-      // This page IS the site root -- every .py file it fetches lives
-      // right alongside it, same directory. Nothing here is duplicated:
-      // it fetches the same source the droplet deployment runs, so the
-      // two never drift apart. Destination path (inside the Pyodide
-      // virtual FS) -> source file relative to this HTML file.
+      // Every .py file this fetches lives right alongside it, same
+      // directory. Nothing here is duplicated: it fetches the same source
+      // the static build and the tests use, so they cannot drift apart.
+      // Destination path (inside the Pyodide virtual FS) -> source file
+      // relative to this HTML file.
       const SOURCE_FILES = [
         ["app.py", "app.py"],
         ["champion.py", "champion.py"],
@@ -166,8 +167,8 @@
               // built-ins, so nothing else gets fetched from PyPI. Pinned
               // exactly (rather than a floor) because unpinned plotly trips
               // micropip's resolver (whitphx/stlite#1302), and because
-              // requirements.txt pins the same version for the droplet so
-              // both deployments render with identical plotly.
+              // requirements.txt pins the same version, so a local
+              // `streamlit run` and this page render with identical plotly.
               "plotly==6.9.0",
             ],
             entrypoint: "app.py",

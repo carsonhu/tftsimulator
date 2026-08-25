@@ -1,5 +1,5 @@
-# Local development only -- never installed on the droplet or in the browser
-# build. Install with:  pip install -r requirements.txt -r requirements-dev.txt
+# Local development only -- never installed in either browser build.
+# Install with:  pip install -r requirements.txt -r requirements-dev.txt
 -r requirements.txt
 
 # The test suite (pytest.ini configures import mode and file patterns).

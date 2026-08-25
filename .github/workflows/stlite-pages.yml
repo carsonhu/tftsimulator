@@ -6,12 +6,9 @@ name: Deploy the static site to GitHub Pages
 # under bare Pyodide; stlite.html is the previous Streamlit-in-the-browser
 # build, kept for the pages the new one does not cover yet.
 #
-# This is an independent deployment target next to the droplet (deploy.yaml)
-# and Ploomber Cloud (ploomber-cloud.yaml) — it doesn't touch either.
-#
-# One-time setup before this can run: repo Settings > Pages > Source must be
-# set to "GitHub Actions", and (once ready to switch the custom domain) the
-# domain field set to tftsimulator.app.
+# This is the only deployment target. The droplet and Ploomber Cloud
+# workflows that used to sit beside it are gone; git history has them if a
+# server is ever wanted again.
 on:
   push:
     branches:

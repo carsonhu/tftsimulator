@@ -10,7 +10,7 @@
     />
     <link rel="stylesheet" href="style.css" />
     <!-- Pinned to the plotly.js that plotly.py 6.9.0 bundles, so charts here
-         render identically to the stlite/droplet builds. jsdelivr versioned
+         render identically to the stlite build. jsdelivr versioned
          URLs are immutable-cached for a year, unlike anything served from
          this GitHub Pages origin (max-age=600). -->
     <script
@@ -230,10 +230,12 @@
           <span id="footerCaption"></span>
           <!-- Mana Generation has no equivalent here yet, so it stays
                reachable in the Streamlit build rather than disappearing with
-               the swap. 404.html routes /ManaGeneration to the same place. -->
+               the swap. That deep link is the only way in that anyone needs:
+               stlite.html's own landing page is the build this one replaced,
+               so it is not worth a second link inviting people back to it.
+               404.html routes /ManaGeneration to the same place. -->
           &middot;
-          <a href="stlite.html?page=ManaGeneration">Mana Generation</a> and the
-          <a href="stlite.html">previous build</a>
+          <a href="stlite.html?page=ManaGeneration">Mana Generation</a>
         </p>
       </main>
     </div>

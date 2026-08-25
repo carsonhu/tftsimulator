@@ -67,7 +67,7 @@ with st.sidebar:
     enemy = set18champs.ZeroResistance(1)
     champ_before_sims = copy.deepcopy(new_champ)
     set18_streamlit_main.doExperimentOneExtraWrapped.clear()
-simLists, _ = set18_streamlit_main.doExperimentOneExtra(new_champ, enemy,
+simLists = set18_streamlit_main.doExperimentOneExtra(new_champ, enemy,
         utils.convertStrList('set18items', mana_items),
         [], t)
 

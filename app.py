@@ -11,8 +11,8 @@ import streamlit as st
 # always land here on the root page. 404.html redirects those into
 # ?page=<name>; this is the other half, run before st.set_page_config since
 # switch_page must be the first thing that happens if it's going to happen
-# at all. Also works identically on the droplet (st.query_params/
-# st.switch_page aren't stlite-specific), so it's a free bonus there too.
+# at all. Nothing here is stlite-specific (st.query_params/st.switch_page are
+# plain Streamlit), so a local `streamlit run app.py` honours it too.
 _DEEP_LINK_PAGES = {
     "ChampionSelector": "pages/ChampionSelector.py",
     "ManaGeneration": "pages/ManaGeneration.py",
