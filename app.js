@@ -316,6 +316,7 @@ function buildStaticControls() {
   const champSel = $("champ");
   for (const c of cat.champions) champSel.add(new Option(c.name, c.name));
   champSel.onchange = () => selectChampion(champSel.value, { keepLevel: false });
+  makeSearchable(champSel);
 
   $("level").onchange = () => {
     state.cfg.level = Number($("level").value);
@@ -359,6 +360,7 @@ function buildStaticControls() {
       onConfigChanged();
     };
     label.appendChild(sel);
+    makeSearchable(sel);
     itemRows.appendChild(label);
   }
   $("resetItems").onclick = () => {
@@ -469,6 +471,209 @@ function bindSlider(id, valueId, onChange) {
     label.textContent = slider.value;
     onChange(Number(slider.value));
   };
+}
+
+// ---------------------------------------------------------------------------
+// Searchable selects
+// ---------------------------------------------------------------------------
+
+// A native <select> does match what you type, but silently: it jumps the
+// highlight and shows nothing, so on a list of fifty items you are typing into
+// a void. This replaces one with a text box that filters a visible list.
+//
+// The <select> itself stays in the DOM, hidden. Everything else in this file
+// reads sel.value, assigns sel.onchange, and collects rows with
+// querySelectorAll("select"), and all of that keeps working untouched -- the
+// combobox is a skin over the real control rather than a replacement for it.
+function makeSearchable(select) {
+  if (select.dataset.searchable) return;
+  select.dataset.searchable = "1";
+
+  const wrap = document.createElement("div");
+  wrap.className = "combo";
+  select.parentNode.insertBefore(wrap, select);
+  wrap.appendChild(select);
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "combo-input";
+  input.autocomplete = "off";
+  input.setAttribute("role", "combobox");
+  input.setAttribute("aria-expanded", "false");
+  input.setAttribute("aria-autocomplete", "list");
+  const list = document.createElement("div");
+  list.className = "combo-list";
+  list.setAttribute("role", "listbox");
+  list.hidden = true;
+  wrap.append(input, list);
+
+  let active = -1;   // index into `matches`
+  let matches = [];
+
+  const label = () => select.options[select.selectedIndex]?.text ?? "";
+  const sync = () => {
+    input.value = label();
+    input.title = input.value;
+  };
+
+  // Anyone can assign sel.value -- "Reset items" does, and so could code
+  // written later. Rather than making every one of them remember to refresh
+  // the text beside it, the assignment itself carries the refresh.
+  const native = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value");
+  Object.defineProperty(select, "value", {
+    configurable: true,
+    get() {
+      return native.get.call(this);
+    },
+    set(value) {
+      native.set.call(this, value);
+      sync();
+    },
+  });
+
+  function render(query) {
+    const needle = query.trim().toLowerCase();
+    matches = [...select.options].filter(
+      (option) => !needle || option.text.toLowerCase().includes(needle)
+    );
+    list.innerHTML = "";
+    if (!matches.length) {
+      const empty = document.createElement("div");
+      empty.className = "combo-empty";
+      empty.textContent = "No match";
+      list.appendChild(empty);
+      active = -1;
+      return;
+    }
+    // Land on what is already chosen when the box is opened untyped, so
+    // arrowing starts from where you are rather than from the top.
+    active = needle
+      ? 0
+      : Math.max(0, matches.findIndex((option) => option.value === select.value));
+    matches.forEach((option, index) => {
+      const row = document.createElement("div");
+      row.className = "combo-option";
+      row.setAttribute("role", "option");
+      // The art the results table already uses for this row. Names alone are
+      // a wall of text at fifty entries; the icon is what makes it scannable.
+      const src = state.icons.get(option.value);
+      if (src) {
+        const icon = document.createElement("img");
+        icon.className = "combo-icon";
+        icon.src = src;
+        icon.alt = "";
+        row.appendChild(icon);
+      } else if ([...state.icons.keys()].length) {
+        const gap = document.createElement("span");
+        gap.className = "combo-icon combo-icon-blank";
+        row.appendChild(gap);
+      }
+      row.appendChild(document.createTextNode(option.text));
+      // mousedown, not click: blur fires first on click and would close the
+      // list out from under the pointer.
+      row.onmousedown = (event) => {
+        event.preventDefault();
+        commit(index);
+      };
+      row.onmouseenter = () => setActive(index);
+      list.appendChild(row);
+    });
+    paint();
+  }
+
+  function paint() {
+    [...list.children].forEach((row, index) => {
+      row.classList.toggle("active", index === active);
+    });
+    const row = list.children[active];
+    if (row) row.scrollIntoView({ block: "nearest" });
+  }
+
+  function setActive(index) {
+    active = index;
+    paint();
+  }
+
+  function open() {
+    if (!list.hidden) return;
+    render("");
+    list.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+    place();
+    input.select();
+  }
+
+  // The sidebar scrolls internally, so it clips its own children: a list
+  // dropped below a control near the bottom is simply cut off. Measure the
+  // room inside that scroller and drop upward instead when there is more of
+  // it above, which is what a native select does too.
+  function place() {
+    const clip = select.closest("#sidebar") || document.documentElement;
+    const bounds = clip.getBoundingClientRect();
+    const box = input.getBoundingClientRect();
+    const below = bounds.bottom - box.bottom;
+    const above = box.top - bounds.top;
+    const wanted = list.scrollHeight + 4;
+    const flip = below < wanted && above > below;
+    list.classList.toggle("above", flip);
+    // Never taller than the space it actually has; the list scrolls itself.
+    list.style.maxHeight = Math.max(90, Math.min(260, (flip ? above : below) - 8)) + "px";
+  }
+
+  function close() {
+    list.hidden = true;
+    input.setAttribute("aria-expanded", "false");
+    sync();  // never leave a half-typed string sitting in the box
+  }
+
+  function commit(index) {
+    const option = matches[index];
+    if (option && option.value !== select.value) {
+      select.value = option.value;
+      // Assigning .value does not fire change, and the whole page hangs off
+      // these handlers.
+      select.dispatchEvent(new Event("change"));
+    }
+    close();
+  }
+
+  input.onfocus = open;
+  input.onmousedown = () => {
+    // Focus fires before mousedown only when the box was not already focused;
+    // this covers clicking it a second time to reopen.
+    if (document.activeElement === input) open();
+  };
+  input.oninput = () => {
+    if (list.hidden) {
+      list.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+    }
+    render(input.value);
+    // Filtering changes the list's height, so where it fits can change too.
+    place();
+  };
+  input.onblur = close;
+  input.onkeydown = (event) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      if (list.hidden) return open();
+      if (!matches.length) return;
+      const step = event.key === "ArrowDown" ? 1 : -1;
+      setActive((active + step + matches.length) % matches.length);
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      if (!list.hidden) commit(active);
+    } else if (event.key === "Escape") {
+      if (!list.hidden) {
+        event.stopPropagation();
+        close();
+      }
+    } else if (event.key === "Tab") {
+      close();
+    }
+  };
+
+  sync();
 }
 
 function buildPills(container, values, selected, onPick) {
@@ -606,6 +811,7 @@ function renderBuffRows() {
       return label;
     };
     const nameCol = column("Name", buffSel);
+    makeSearchable(buffSel);
     const levelCol = column("Level", levelSel);
     const paramCol = column("Param", paramInput, paramSelect);
     const paramCaption = paramCol.querySelector(".col-label");

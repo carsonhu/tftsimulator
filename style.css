@@ -196,6 +196,88 @@ input:focus {
   outline: 1px solid #ff4b4b;
 }
 
+/* ---------------- searchable select (see makeSearchable) ---------------- */
+
+.combo {
+  position: relative;
+  width: 100%;
+}
+
+/* The real <select> stays in the DOM so sel.value and sel.onchange keep
+   working; it is only the widget that is replaced. */
+.combo select {
+  display: none;
+}
+
+.combo-input {
+  width: 100%;
+  padding: 6px 8px;
+  background: #0e1117;
+  color: #fafafa;
+  border: 1px solid #31333f;
+  border-radius: 6px;
+  font: inherit;
+  cursor: pointer;
+  /* Long item names get an ellipsis rather than widening the sidebar. */
+  text-overflow: ellipsis;
+}
+
+.combo-list {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  /* Above the controls below it, and above the table's sticky header. */
+  z-index: 40;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #14161c;
+  border: 1px solid #3d4152;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+.combo-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  color: #fafafa;
+}
+
+/* One highlight, driven by the keyboard and by hover alike, so arrowing and
+   pointing cannot disagree about which row is about to be picked. */
+.combo-option.active {
+  background: #ff4b4b;
+  color: #fff;
+}
+
+.combo-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  flex: none;
+}
+
+/* Holds the column open for entries with no art, so the names still line up. */
+.combo-icon-blank {
+  visibility: hidden;
+}
+
+/* Dropped upward when the scrolling sidebar has no room below (see place). */
+.combo-list.above {
+  top: auto;
+  bottom: calc(100% + 2px);
+}
+
+.combo-empty {
+  padding: 6px 8px;
+  color: #9aa0ae;
+  font-style: italic;
+}
+
 input[type="range"] {
   accent-color: #ff4b4b;
   width: 100%;
