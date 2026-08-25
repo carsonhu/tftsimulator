@@ -34,6 +34,12 @@
 "2": "silver",
 "3": "gold"
 },
+"Hunter": {
+"2": "bronze",
+"3": "silver",
+"4": "silver",
+"5": "gold"
+},
 "Lunar": {
 "2": "bronze",
 "3": "silver",

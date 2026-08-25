@@ -1,19 +1,10 @@
 from role import Role
+from set18buffs import (AdaptorInnate, AriseBuff, AsheTrail, AttunedInnate,
+                        CaitlynHeadshotBuff, GrompPurpleBuff, MasterYiUlt,
+                        NidaleeUlt, SivirBounces, TinyBeaksBuff)
 
 import status
 from champion import Champion
-from set18buffs import (
-    AdaptorInnate,
-    AriseBuff,
-    AsheTrail,
-    AttunedInnate,
-    CaitlynHeadshotBuff,
-    GrompPurpleBuff,
-    MasterYiUlt,
-    NidaleeUlt,
-    SivirBounces,
-    TinyBeaksBuff,
-)
 
 champ_list = [
     "Varus",
@@ -1004,15 +995,6 @@ class Alune(Champion):
         self.default_traits = ["Lunar", "Spellweaver"]
         self.castTime = self.normal_cast_time
         self.items.append(AttunedInnate())
-        self.notes = (
-            "Moonfall's tooltip is authored in the reference bin but its data "
-            "block belongs to some other spell (it carries ShredPercent and "
-            "AttackSpeed rows that appear nowhere in the tooltip), so these "
-            "come off the champion card. The card says the Full Moon cast is "
-            "split among ALL enemies; per request it is split among the same "
-            "3 as the normal cast. Attuned's Durability half is not modeled -- "
-            "nothing here damages the champion being measured."
-        )
 
     # Per moonshard, before the 9x and the split.
     moonshardScaling = create_ability_scaling(
@@ -1081,13 +1063,6 @@ class Camille(Champion):
         # card -- and Slayer isn't a set-18 trait at all.
         self.default_traits = ["Ravager"]
         self.castTime = 1.0  # per request
-        self.notes = (
-            "Defensive Sweep is unauthored in the reference bin (still the "
-            "0.25s placeholder template), so these come off the champion "
-            "card. The 60 Shield for 2s is not modeled -- nothing in this "
-            "simulator damages the champion being measured. Coven is not "
-            "implemented: it has no combat effect."
-        )
 
     # The card's 170/255/435 is one row, but its breakdown is two: an AD-scaled
     # part and an AP-scaled part (160 + 10 = 170, 240 + 15 = 255, 410 + 25 =
@@ -1180,16 +1155,11 @@ class Sivir(Champion):
             level,
             Role.ATTACK_CASTER,
         )
-        # Hunter has no buff class, so it is dropped from the buff bar rather
-        # than filling a slot that cannot be set -- same as Caitlyn, the other
-        # Hunter.
         self.default_traits = ["Primal", "Hunter"]
         self.castTime = 1.0  # per request
         self.items.append(SivirBounces())
         self.notes = (
-            "Boomerang Blade is unauthored in the reference bin (still the "
-            "0.25s placeholder template), so the numbers and the 1s cast time "
-            "come off the champion card. The 8 bounces land at +1s through "
+            "The 8 bounces land at +1s through "
             "+2.75s rather than on the cast. The 3 extra bounces on a kill "
             "are not modeled -- nothing dies in this sim."
         )
@@ -1238,8 +1208,6 @@ class Ashe(Champion):
             level,
             Role.ATTACK_CASTER,
         )
-        # Hunter has no buff class, so it drops off the buff bar rather than
-        # filling a slot that cannot be set -- same as Caitlyn and Sivir.
         self.default_traits = ["Blossom", "Hunter"]
         self.castTime = 1.0  # per request
         # The arrow pierces 5 by default; the trail catches num_targets - 1.
@@ -1249,7 +1217,7 @@ class Ashe(Champion):
             "The trail's damage arrives 1s at a time over the 4s after each "
             "cast, not on the cast, and a recast refreshes it rather than "
             "stacking it. Its 2% max Health part reads off the enemy HP above, "
-            "so raising that raises Ashe's damage. The 20% Slow is not modeled."
+            "so raising that raises Ashe's damage."
         )
 
     # Pure AD on the card: 440/660/1000 x AD, no AP half.

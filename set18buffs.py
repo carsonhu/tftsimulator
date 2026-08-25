@@ -35,6 +35,7 @@ class_buffs = [
     "Lunar",
     "Primal",
     "Greenfather",
+    "Hunter",
 ]
 
 augments = [
@@ -529,6 +530,37 @@ class Lunar(Buff):
             amount *= self.lunar_multiplier
         champion.aspd.addStat(amount)
         champion.ap.addStat(amount)
+        return 0
+
+
+class Hunter(Buff):
+    """Hunter: the Attack Damage half only.
+
+    The trait's other half -- 10% Damage Amp once a Hunter has held the same
+    target for 4 seconds -- is not modeled, per request. It would be nearly
+    free here anyway: this sim points a champion at a dummy that never dies
+    and never moves, so the condition would be met at t=4 in every single run
+    and the "if" would price as an unconditional amp handed out on a timer.
+    That is a fact about the test harness, not about the trait.
+
+    No extraParameters, and so no row in Team Traits: the AD goes to Hunters,
+    with nothing left over for the rest of the board. A champion who is not a
+    Hunter gets nothing from a team running Hunter, which is exactly what an
+    absent row says.
+    """
+
+    levels = [0, 2, 3, 4, 5]
+    display_name = "Hunter"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+        )
+        self.scaling = {0: 0, 2: 20, 3: 30, 4: 45, 5: 65}
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.bonus_ad.addStat(self.scaling[self.level])
         return 0
 
 
