@@ -390,6 +390,29 @@ select:disabled {
   color: #fff;
 }
 
+/* Wisp slice, with Blossom on: those Wisps are the upgraded ones. Blossom
+   pink rather than the page's red, so it reads as a different kind of mark
+   than "selected" -- and a ring outside the border, so it survives .active
+   painting the border itself red. */
+.pill-blossom {
+  border-color: #ff8ad8;
+  box-shadow: 0 0 0 2px rgba(255, 138, 216, 0.55);
+}
+
+.pill-blossom:not(.active) {
+  color: #ff8ad8;
+}
+
+/* Hover normally repaints the border red, which would erase the mark. */
+.pill-blossom:hover {
+  border-color: #ff8ad8;
+  color: #ff8ad8;
+}
+
+.pill-blossom.active:hover {
+  color: #fff;
+}
+
 /* ---------------- content ---------------- */
 
 h1 {

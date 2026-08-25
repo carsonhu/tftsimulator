@@ -915,6 +915,33 @@ function onConfigChanged() {
   refresh();
 }
 
+// The Blossom level on this champion, from wherever it is set: the buff bar
+// if it is a member, the Team Traits panel if the board runs Blossom without
+// it. 0 when neither.
+function blossomLevel() {
+  const row = state.cfg.buffs.find(([cls]) => cls === "Blossom");
+  if (row) return row[1];
+  const team = state.teamBuffs.get("Blossom");
+  return team ? team.level : 0;
+}
+
+// Several Wisps hand out bigger numbers to a holder whose Blossom is at 3+
+// (_is_blossom_upgraded in set18buffs), so with Blossom on, the Wisp slice is
+// showing a different set of values than it would otherwise -- and nothing on
+// the slice itself says which. The border says it before the click. 3 is both
+// Blossom's first breakpoint and the upgrade threshold; the threshold is what
+// is being drawn, so that is what it tests.
+function markBlossomSlice(container) {
+  const level = blossomLevel();
+  const upgraded = level >= 3;
+  for (const pill of container.children) {
+    if (pill.textContent !== "Wisp") continue;
+    pill.classList.toggle("pill-blossom", upgraded);
+    if (upgraded) pill.title = "Blossom " + level + ": these Wisps are upgraded";
+    else pill.removeAttribute("title");
+  }
+}
+
 async function refresh() {
   const gen = ++state.gen;
   const options = sliceOptions();
@@ -923,6 +950,7 @@ async function refresh() {
     state.slice = v;
     refresh();
   });
+  markBlossomSlice($("sliceRadio"));
 
   renderHeader();
   updateStatsPanel(gen);

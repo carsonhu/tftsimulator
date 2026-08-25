@@ -244,6 +244,14 @@ class Blossom(Buff):
     levels = [0, 3, 5, 7, 9, 11]
     display_name = "Blossom"
 
+    # sim_entry's probe cannot classify this one. It asks "does a non-member's
+    # result change per breakpoint" by running the trait alone, and alone
+    # Blossom does nothing for a non-member -- the level only shows up through
+    # a Wisp reading blossom_level, which the probe does not equip. The level
+    # does matter, so declare it rather than letting the probe collapse the
+    # picker to a checkbox.
+    team_level_matters = True
+
     def __init__(self, level, params):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
@@ -253,11 +261,21 @@ class Blossom(Buff):
         # AD/AP grant is modeled.
         self.scaling = {0: 0, 3: 12, 5: 30, 7: 45, 9: 60, 11: 100}
 
+    def extraParameters():
+        return {"Title": "Is Blossom", "Min": 0, "Max": 1, "Default": 1}
+
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
-            amt = self.scaling[self.level]
-            champion.bonus_ad.addStat(amt)
-            champion.ap.addStat(amt)
+            # The AD/AP is the members' half. The Wisp upgrade below is not:
+            # a Wisp is held by a champion, and the board's Blossom count is
+            # what empowers it, so a non-member holding one still gets the
+            # upgraded version. That split is the whole reason this trait can
+            # sit in Team Traits -- at params 0 the stats stay off and the
+            # Wisps still read the level.
+            if self.params == 1:
+                amt = self.scaling[self.level]
+                champion.bonus_ad.addStat(amt)
+                champion.ap.addStat(amt)
             # Wisps (below) read this during postPreCombat to decide whether
             # their Blossom-upgraded values apply -- postPreCombat runs after
             # every item's preCombat phase, so it's the earliest point a Wisp

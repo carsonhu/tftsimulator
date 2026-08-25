@@ -64,7 +64,17 @@ def _team_level_matters(cls):
     added later is classified correctly without touching this file. The
     reference champion is fixed (first in sorted order) because the question
     is about the trait, not about any particular unit.
+
+    The probe only sees what the trait does on its own, which is not the whole
+    story for a trait whose non-member half is delivered by something else the
+    champion has to be holding -- Blossom's level reaches a non-member only
+    through a Wisp, and the probe equips none. A class that knows the probe
+    cannot see it says so with team_level_matters, and is believed.
     """
+    declared = getattr(cls, "team_level_matters", None)
+    if declared is not None:
+        return declared
+
     reference = getattr(set18champs, sorted(set18champs.champ_list)[0])
     signatures = set()
     for level in cls.levels:
