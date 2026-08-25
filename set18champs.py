@@ -47,6 +47,12 @@ def create_ability_scaling(ad_values, ap_values, func_name="abilityScaling"):
         return ap_values[level - 1] * AP + ad_values[level - 1] * AD
 
     scaling.__name__ = func_name
+    # Hung on the function so the numbers stay readable after the closure
+    # swallows them: patch_check.py needs to compare these against the values
+    # recorded in patch_pin.json, and a closure it cannot see into is a number
+    # nothing can ever check.
+    scaling.ad_values = list(ad_values)
+    scaling.ap_values = list(ap_values)
     return scaling
 
 
@@ -276,7 +282,7 @@ class MamaBeak(Champion):
         hp = 650
         atk = 60
         curMana = 30
-        fullMana = 70
+        fullMana = 60
         aspd = 0.75
         armor = 35
         mr = 35
@@ -336,7 +342,7 @@ class Cassiopeia(Champion):
         self.castTime = 1
         self.poison_duration = 15
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [400, 600, 960])
+    abilityScaling = create_ability_scaling([0, 0, 0], [440, 660, 1050])
 
     def performAbility(self, opponents, items, time):
         # Noxious Blast: poison target 1 and target 2 for total magic damage
@@ -389,7 +395,7 @@ class Zyra(Champion):
         self.plant_attacks = 10
         self.plant_interval = 0.8
 
-    plantScaling = create_ability_scaling([0, 0, 0], [33, 50, 225], func_name="plantScaling")
+    plantScaling = create_ability_scaling([0, 0, 0], [37, 55, 225], func_name="plantScaling")
 
     def performAbility(self, opponents, items, time):
         # Rampant Growth: spawn num_plants plants, each independently
@@ -436,7 +442,7 @@ class Azir(Champion):
         self.castTime = 0.5
         self.items.append(AriseBuff())
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [48, 72, 115])
+    abilityScaling = create_ability_scaling([0, 0, 0], [40, 60, 96])
 
     def performAbility(self, opponents, items, time):
         # Arise!: no direct cast damage -- AriseBuff (see __init__) handles
@@ -577,7 +583,7 @@ class Gromp(Champion):
         [0, 0, 0], [225, 340, 535], func_name="apAbilityScaling"
     )
     apSplashScaling = create_ability_scaling(
-        [0, 0, 0], [145, 220, 345], func_name="apSplashScaling"
+        [0, 0, 0], [160, 240, 360], func_name="apSplashScaling"
     )
     # AD version: burst on the current target, instant splash on the rest.
     adAbilityScaling = create_ability_scaling(
@@ -688,7 +694,7 @@ class Karma(Champion):
 
 class MasterYi(Champion):
     # The AD version's base AD; the AP version is a much weaker autoattacker.
-    AD_VERSION_ATK = 70
+    AD_VERSION_ATK = 65
     AP_VERSION_ATK = 15
 
     def __init__(self, level):
@@ -943,13 +949,39 @@ class Warwick(Champion):
             Role.ATTACK_FIGHTER,
         )
         self.default_traits = ["Blackthorn", "Ravager"]
-        self.castTime = 1.0  # per request
+        # Recomputed per cast in performAbility; this is the value at his base
+        # Attack Speed, which is what the first cast gets.
+        self.castTime = self.cast_time_slow
 
-    abilityScaling = create_ability_scaling([200, 300, 450], [0, 0, 0])
+    abilityScaling = create_ability_scaling([215, 325, 500], [0, 0, 0])
     # Flat on the card -- the only AP-scaled number on it is the heal.
     aspd_per_cast = 20
 
+    # Cast time scales with his own Attack Speed: 1.0s at base, falling
+    # linearly to 0.8s and stopping there. The stopping point is +25% Attack
+    # Speed, which off his 0.75 base is 0.9375 -- the card's "0.94".
+    cast_time_slow = 1.0
+    cast_time_fast = 0.8
+    cast_time_as_cap = 0.25
+
+    def castTimeForAspd(self, aspd):
+        """Cast time at a given total Attack Speed."""
+        # Measured against his own base rather than a hardcoded 0.75, so the
+        # cap stays "+25%" if that base is ever rebalanced. Bonus AS in TFT is
+        # always a fraction of base, so this is the same quantity the card
+        # means by 25%.
+        bonus = aspd / self.aspd.base - 1 if self.aspd.base else 0
+        progress = min(max(bonus, 0.0), self.cast_time_as_cap) / self.cast_time_as_cap
+        return self.cast_time_slow + progress * (self.cast_time_fast - self.cast_time_slow)
+
     def performAbility(self, opponents, items, time):
+        # Set before the bite, for two reasons. The cast time is read straight
+        # after performAbility returns (see Champion.update), so this is the
+        # only place it can be set for *this* cast rather than the next one --
+        # the same idiom Alune and Ezreal use. And it has to be read before the
+        # Attack Speed this cast grants, since a cast cannot be sped up by its
+        # own buff.
+        self.castTime = self.castTimeForAspd(self.aspd.stat)
         # Bite the current target, then keep the Attack Speed for good.
         if not opponents:
             return 0
@@ -1124,7 +1156,7 @@ class Nidalee(Champion):
     # The 3rd javelin's bigger row; NidaleeUlt picks it via
     # ChampionEmpoweredAbilityScaling.
     empoweredScaling = create_ability_scaling(
-        [0, 0, 0], [320, 480, 3000], func_name="empoweredScaling"
+        [0, 0, 0], [285, 425, 3000], func_name="empoweredScaling"
     )
 
     def performAbility(self, opponents, items, time):

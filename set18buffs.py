@@ -220,6 +220,10 @@ class Rapidfire(Buff):
         )
         self.per_attack_scaling = {0: 0, 2: 3, 3: 5, 4: 9, 5: 15}
         self.max_stacks = 10
+        # Named rather than written into performAbility as a literal 10, so
+        # patch_check can point a hook at it. An unnamed constant is one no
+        # patch check can ever see.
+        self.team_as = 10
         self.stacks = 0
 
     def extraParameters():
@@ -228,7 +232,7 @@ class Rapidfire(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             # Team gains 10% Attack Speed
-            champion.aspd.addStat(10)
+            champion.aspd.addStat(self.team_as)
         if phase == "postAttack":
             # Rapidfire champions gain more on every attack, up to 10 stacks.
             # extraParams ("Is Rapidfire") == 1 flags this holder as a full
@@ -251,7 +255,7 @@ class Blossom(Buff):
         # "After combat, your Wisps are empowered" and the shop-side Wisp
         # mechanics are out of scope for a combat simulator -- only the
         # AD/AP grant is modeled.
-        self.scaling = {0: 0, 3: 12, 5: 30, 7: 45, 9: 60, 11: 100}
+        self.scaling = {0: 0, 3: 12, 5: 30, 7: 40, 9: 45, 11: 100}
 
     def extraParameters():
         return {"Title": "Is Blossom", "Min": 0, "Max": 1, "Default": 1}
@@ -295,7 +299,7 @@ class Executioner(Buff):
         )
         self.crit_bonus = 0.15
         # (2) grants Precision + crit only; bleed starts at (3)
-        self.bleed_scaling = {0: 0, 2: 0, 3: 0.30, 4: 0.50}
+        self.bleed_scaling = {0: 0, 2: 0, 3: 0.30, 4: 0.40}
         self.bleed_duration = 3.0
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -327,8 +331,8 @@ class Riftbeast(Buff):
         )
         # (5) shop-overrun and (10) +2 team size are meta/shop mechanics,
         # out of scope for a combat simulator -- only (3) and (7) are modeled.
-        self.stat_scaling = 5  # AD/AS/AP %
-        self.resist_scaling = 3  # Armor/MR
+        self.stat_scaling = 6  # AD/AS/AP %
+        self.resist_scaling = 5  # Armor/MR
         self.hp_scaling = 50
         self.mana_regen_scaling = 1
         self.interval = 5
@@ -457,7 +461,7 @@ class Adaptor(Buff):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["postPreCombat"]
         )
-        self.scaling = {0: 0, 2: 25, 3: 35, 4: 55}
+        self.scaling = {0: 0, 2: 25, 3: 35, 4: 50}
 
     def performAbility(self, phase, time, champion, input_=0):
         # No "Is Adaptor" param: unlike Rapidfire/Spellweaver there's no
@@ -701,11 +705,12 @@ class Blackthorn(Buff):
     to a DPS number here, since nothing in the sim damages the champion being
     measured, and sacrificing a Tank is rare enough not to be worth a row.
 
-    The reference bin disagrees with the champion card here: it has (4) at a
-    0.25 StatMultiplier and (6) at 350 Health with a whole different effect
-    ("the sacrifice doesn't die"), i.e. it is a patch behind. The card's
-    175/300/550 and 0%/30%/60% are used instead, per request. The sacrifice
-    base values and the star/cost scaling table are not in the bin at all.
+    The reference bin used to disagree with the champion card -- (4) at a 0.25
+    StatMultiplier, (6) at 350 Health with a whole different effect ("the
+    sacrifice doesn't die") -- and the card's numbers were used instead. As of
+    PBE 18.1g the bin has caught up and now says 175/300/550 and 0%/30%/60%
+    too, so the two agree and patch_check hooks them. The sacrifice base values
+    and the star/cost scaling table are still not in the bin at all.
     """
 
     levels = [0, 2, 4, 6]

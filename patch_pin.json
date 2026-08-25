@@ -1,0 +1,194 @@
+{
+  "_comment": [
+    "What this simulator is deliberately built against. patch_check.py reads",
+    "it; nothing writes it. Editing it is how you say 'yes, follow PBE' -- and",
+    "leaving it alone is how you say 'not yet', which is the point of it",
+    "existing. Bump `patch` and `accepted` only once you have actually looked.",
+    "",
+    "acknowledged: a value that disagrees with the reference on purpose. Both",
+    "numbers are recorded, so the exemption expires the moment either side",
+    "moves and the disagreement becomes a new one nobody has looked at.",
+    "",
+    "card_values: numbers CommunityDragon does not carry -- ability damage and",
+    "cast times -- read off the champion card by a person on the patch named.",
+    "The checker confirms the code still says this; only you can confirm the",
+    "card still does."
+  ],
+  "channel": "pbe",
+  "patch": "PBE 18.1g",
+  "accepted": "2026-08-24",
+  "acknowledged": {
+    "Caitlyn.maxMana": {
+      "code": -1,
+      "reference": 3,
+      "why": "-1 disables casting entirely (canCast needs fullMana > -1). Headshot is an attack replacement, not a cast, so she must never spend mana."
+    },
+    "MasterYi.maxMana": {
+      "code": -1,
+      "reference": 3,
+      "why": "Same as Caitlyn: Double Strike is a passive third attack, handled by MasterYiUlt, not a real cast."
+    }
+  },
+  "card_values": {
+    "Ahri.abilityScaling": {
+      "ad": [0, 0, 0],
+      "ap": [485, 735, 3500],
+      "read_on": "unverified"
+    },
+    "Akali.adAbilityScaling": {
+      "ad": [145, 220, 345],
+      "ap": [10, 15, 25],
+      "read_on": "unverified"
+    },
+    "Akali.adBurningScaling": {
+      "ad": [35, 52, 80],
+      "ap": [0, 0, 0],
+      "read_on": "unverified"
+    },
+    "Akali.apAbilityScaling": {
+      "ad": [0, 0, 0],
+      "ap": [140, 210, 340],
+      "read_on": "unverified"
+    },
+    "Alune.fullMoonScaling": {
+      "ad": [0, 0, 0],
+      "ap": [2350, 3600, 7500],
+      "read_on": "unverified"
+    },
+    "Alune.moonshardScaling": {
+      "ad": [0, 0, 0],
+      "ap": [50, 75, 500],
+      "read_on": "unverified"
+    },
+    "Ashe.abilityScaling": {
+      "ad": [440, 660, 1000],
+      "ap": [0, 0, 0],
+      "read_on": "unverified"
+    },
+    "Ashe.trailScaling": {
+      "ad": [5, 8, 200],
+      "ap": [2, 3, 20],
+      "read_on": "unverified"
+    },
+    "Azir.abilityScaling": {
+      "ad": [0, 0, 0],
+      "ap": [40, 60, 96],
+      "read_on": "PBE 18.1g"
+    },
+    "Caitlyn.abilityScaling": {
+      "ad": [190, 285, 450],
+      "ap": [20, 30, 45],
+      "read_on": "unverified"
+    },
+    "Camille.abilityScaling": {
+      "ad": [160, 240, 410],
+      "ap": [10, 15, 25],
+      "read_on": "unverified"
+    },
+    "Cassiopeia.abilityScaling": {
+      "ad": [0, 0, 0],
+      "ap": [440, 660, 1050],
+      "read_on": "PBE 18.1g"
+    },
+    "Ezreal.abilityScaling": {
+      "ad": [235, 355, 1200],
+      "ap": [0, 0, 0],
+      "read_on": "unverified"
+    },
+    "Ezreal.blastScaling": {
+      "ad": [385, 580, 2500],
+      "ap": [0, 0, 0],
+      "read_on": "unverified"
+    },
+    "Gromp.adAbilityScaling": {
+      "ad": [305, 460, 725],
+      "ap": [30, 45, 70],
+      "read_on": "unverified"
+    },
+    "Gromp.adSplashScaling": {
+      "ad": [100, 150, 240],
+      "ap": [0, 0, 0],
+      "read_on": "unverified"
+    },
+    "Gromp.apAbilityScaling": {
+      "ad": [0, 0, 0],
+      "ap": [225, 340, 535],
+      "read_on": "unverified"
+    },
+    "Gromp.apSplashScaling": {
+      "ad": [0, 0, 0],
+      "ap": [160, 240, 360],
+      "read_on": "PBE 18.1g"
+    },
+    "Karma.burstScaling": {
+      "ad": [0, 0, 0],
+      "ap": [120, 180, 270],
+      "read_on": "unverified"
+    },
+    "Karma.tetherScaling": {
+      "ad": [0, 0, 0],
+      "ap": [280, 420, 630],
+      "read_on": "unverified"
+    },
+    "LeBlanc.abilityScaling": {
+      "ad": [0, 0, 0],
+      "ap": [250, 375, 565],
+      "read_on": "unverified"
+    },
+    "LeBlanc.splashScaling": {
+      "ad": [0, 0, 0],
+      "ap": [85, 130, 190],
+      "read_on": "unverified"
+    },
+    "MamaBeak.beakScaling": {
+      "ad": [25, 38, 60],
+      "ap": [0, 0, 0],
+      "read_on": "unverified"
+    },
+    "MasterYi.abilityScaling": {
+      "ad": [0, 0, 0],
+      "ap": [155, 235, 375],
+      "read_on": "unverified"
+    },
+    "Nidalee.abilityScaling": {
+      "ad": [0, 0, 0],
+      "ap": [170, 255, 2000],
+      "read_on": "unverified"
+    },
+    "Nidalee.empoweredScaling": {
+      "ad": [0, 0, 0],
+      "ap": [285, 425, 3000],
+      "read_on": "PBE 18.1g"
+    },
+    "Sivir.abilityScaling": {
+      "ad": [190, 285, 1050],
+      "ap": [15, 20, 100],
+      "read_on": "PBE 18.1g"
+    },
+    "Sivir.bounceScaling": {
+      "ad": [38, 57, 420],
+      "ap": [3, 4, 40],
+      "read_on": "PBE 18.1g"
+    },
+    "Varus.abilityScaling": {
+      "ad": [350, 525, 790],
+      "ap": [30, 45, 70],
+      "read_on": "unverified"
+    },
+    "Warwick.abilityScaling": {
+      "ad": [215, 325, 500],
+      "ap": [0, 0, 0],
+      "read_on": "PBE 18.1g"
+    },
+    "Yunara.abilityScaling": {
+      "ad": [170, 255, 400],
+      "ap": [10, 15, 25],
+      "read_on": "unverified"
+    },
+    "Zyra.plantScaling": {
+      "ad": [0, 0, 0],
+      "ap": [37, 55, 225],
+      "read_on": "PBE 18.1g"
+    }
+  }
+}
