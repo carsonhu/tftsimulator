@@ -244,14 +244,6 @@ class Blossom(Buff):
     levels = [0, 3, 5, 7, 9, 11]
     display_name = "Blossom"
 
-    # sim_entry's probe cannot classify this one. It asks "does a non-member's
-    # result change per breakpoint" by running the trait alone, and alone
-    # Blossom does nothing for a non-member -- the level only shows up through
-    # a Wisp reading blossom_level, which the probe does not equip. The level
-    # does matter, so declare it rather than letting the probe collapse the
-    # picker to a checkbox.
-    team_level_matters = True
-
     def __init__(self, level, params):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
@@ -272,6 +264,12 @@ class Blossom(Buff):
             # upgraded version. That split is the whole reason this trait can
             # sit in Team Traits -- at params 0 the stats stay off and the
             # Wisps still read the level.
+            #
+            # Team Traits shows this as a checkbox, not a level picker, and
+            # that is right: what a non-member gets is a threshold
+            # (_is_blossom_upgraded, 3+), and every active breakpoint clears
+            # it, so 3 and 11 hand a non-member exactly the same thing. The
+            # 11-Blossom wisps that would break the tie are not modeled here.
             if self.params == 1:
                 amt = self.scaling[self.level]
                 champion.bonus_ad.addStat(amt)
