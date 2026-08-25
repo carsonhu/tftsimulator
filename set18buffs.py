@@ -733,16 +733,18 @@ class Blackthorn(Buff):
     attack_aspd = 12  # % Attack Speed
 
     star_levels = [1, 2, 3, 4]
-    # 0 is the "No Tier" row -- a sacrifice with no cost tier scales at 1.0
-    # whatever its star level.
-    costs = [1, 2, 3, 4, 5, 0]
+    # Every sacrifice on a real board has a cost tier, so there is no untiered
+    # row: a "No Tier" sacrifice scaled at a flat 1.0 and sat in the middle of
+    # the table looking like a fifth option, without being anything you could
+    # put on the hex. Per request. sacrificeScaling still falls back to 1.0
+    # for a cost it does not know, so nothing depends on the row existing.
+    costs = [1, 2, 3, 4, 5]
     sacrifice_scaling = {
         1: {1: 0.6, 2: 1.0, 3: 1.75, 4: 2.5},
         2: {1: 0.7, 2: 1.4, 3: 2.8, 4: 5.0},
         3: {1: 0.8, 2: 1.8, 3: 3.3, 4: 8.0},
         4: {1: 1.1, 2: 2.25, 3: 50.0, 4: 500.0},
         5: {1: 1.5, 2: 3.0, 3: 100.0, 4: 999.0},
-        0: {1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0},
     }
     # Only a 1-cost realistically reaches 3 or 4 stars, so the rest of the
     # table's high-star rows (the 50/500/100/999 placeholders included) are
@@ -757,7 +759,7 @@ class Blackthorn(Buff):
 
     @classmethod
     def costLabel(cls, cost):
-        return "No Tier" if cost == 0 else f"{cost} cost"
+        return f"{cost} cost"
 
     @classmethod
     def starLabel(cls, star):
