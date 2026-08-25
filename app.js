@@ -107,8 +107,10 @@ const state = {
   slice: "Craftable",
   displayDps: false,
   colorScale: true,
-  // Item classes that have an icon on disk, from icons/items/index.json.
-  itemIcons: new Set(),
+  // Class name -> icon URL, from the per-group index.json files. A row draws
+  // art only if its class is in here, so the trait and wisp rows -- which have
+  // none -- cost no failed requests.
+  icons: new Map(),
   // Which header the table is sorted by. key null = the order sim_entry
   // delivered, which is already ratio-at-25s descending.
   sort: { key: null, dir: "desc" },
@@ -146,7 +148,7 @@ function cfgForSlice(sliceName) {
 async function init() {
   // Loaded alongside the catalog rather than before it: a missing or stale
   // index just means no icons, never a page that fails to start.
-  loadItemIcons();
+  loadIcons();
   state.catalog = await rpc("catalog");
   state.buffMeta = new Map(state.catalog.buffs.map((b) => [b.cls, b]));
 
@@ -157,15 +159,25 @@ async function init() {
   $("layout").hidden = false;
 }
 
-async function loadItemIcons() {
-  try {
-    const response = await fetch("icons/items/index.json");
-    if (!response.ok) return;
-    state.itemIcons = new Set(await response.json());
-    if (state.current) renderResults();
-  } catch (err) {
-    // No icons; the names still say everything the table needs to.
-  }
+// icons.py writes one directory per group. Class names are unique across the
+// modules they come from, so a flat class -> URL map is enough.
+const ICON_GROUPS = ["items", "augments"];
+
+async function loadIcons() {
+  await Promise.all(
+    ICON_GROUPS.map(async (group) => {
+      try {
+        const response = await fetch(`icons/${group}/index.json`);
+        if (!response.ok) return;
+        for (const cls of await response.json())
+          state.icons.set(cls, `icons/${group}/${cls}.png`);
+      } catch (err) {
+        // No icons for this group; the names still say everything the table
+        // needs them to.
+      }
+    })
+  );
+  if (state.current) renderResults();
 }
 
 function buildStaticControls() {
@@ -916,12 +928,13 @@ function renderResults() {
           text: true,
           get: (row) => row.extra,
           render: (cell, row) => {
-            if (state.itemIcons.has(row.extraCls)) {
+            const src = state.icons.get(row.extraCls);
+            if (src) {
               const icon = document.createElement("img");
-              icon.className = "item-icon";
-              icon.src = "icons/items/" + row.extraCls + ".png";
-              // Decorative: the item's name sits right beside it, so a
-              // screen reader announcing the file too would only repeat.
+              icon.className = "row-icon";
+              icon.src = src;
+              // Decorative: the name sits right beside it, so a screen reader
+              // announcing the file too would only repeat.
               icon.alt = "";
               icon.loading = "lazy";
               cell.appendChild(icon);

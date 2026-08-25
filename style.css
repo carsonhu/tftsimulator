@@ -660,9 +660,9 @@ thead th {
   text-align: center;
 }
 
-/* Item art beside the name, like the stats sites. Inline rather than a flex
-   cell so the table's own column sizing still applies. */
-#resultsTable .item-icon {
+/* Item and augment art beside the name, like the stats sites. Inline rather
+   than a flex cell so the table's own column sizing still applies. */
+#resultsTable .row-icon {
   width: 24px;
   height: 24px;
   vertical-align: middle;
