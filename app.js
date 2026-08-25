@@ -217,14 +217,13 @@ const STAT_ICONS = {
   scaleDA: {
     label: "Damage Amp",
     colour: "#e8734a",
+    // Traced from the reference, not redrawn -- three attempts by eye all
+    // came out far too narrow. Regenerate with:
+    //   python trace_glyph.py da.avif --tolerance 1.2
     paths: [
-      // A central chevron -- a triangle with its base notched up -- flanked
-      // by two slivers leaning out from near the top corners. The gaps
-      // between the three are what make it read as blades rather than a
-      // crown, so the centre stays narrow enough to leave them.
-      { d: "M12 1.2 L16.7 21.5 L12 17.0 L7.3 21.5 Z" },
-      { d: "M1.9 3.2 L6.9 21.5 L4.2 21.5 Z" },
-      { d: "M22.1 3.2 L17.1 21.5 L19.8 21.5 Z" },
+      { d: "M11.81 0.09 L22.12 20.34 L16.31 16.21 L14.81 16.21 L14.44 16.59 L12.38 23.71 L11.44 23.71 L9.75 17.71 L9.00 16.21 L7.12 16.40 L1.88 20.34 L11.81 0.28 Z" }, // centre chevron
+      { d: "M15.00 0.09 L23.62 5.71 L21.19 5.71 L21.00 6.09 L23.81 15.47 L22.69 15.65 L15.00 0.28 Z" }, // right blade
+      { d: "M8.62 0.09 L1.12 15.65 L0.00 15.47 L2.81 5.90 L0.19 5.71 L8.44 0.28 Z" }, // left blade
     ],
   },
   // Riot's own Attack Speed motif, from the Set 18 Speed Booster: a
