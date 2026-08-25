@@ -60,3 +60,19 @@ If you prefer to run commands manually:
     ```
 
 Then navigate to the 'ChampionSelector' page in the app.
+
+## Running the static site locally
+
+The site at the repo root is plain HTML/JS and fetches its Python sources over
+HTTP, so it needs a server rather than opening `index.html` from disk:
+
+```sh
+.venv\Scripts\python serve.py
+```
+
+Then open <http://127.0.0.1:8618/>. Use this rather than
+`python -m http.server`: that one sends no `Cache-Control`, so browsers invent
+their own expiry and keep serving the files they already have — an edit to a
+`.py` file then doesn't show up no matter how many times you reload or restart
+the server, because the browser never asks. `serve.py` says "revalidate",
+which costs a `304` per file and nothing else.
