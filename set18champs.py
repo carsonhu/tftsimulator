@@ -1040,8 +1040,15 @@ class Alune(Champion):
         self.items.append(AttunedInnate())
 
     # Per moonshard, before the 9x and the split.
+    #
+    # Alune is the one modeled champion whose bin is authored rather than
+    # placeholder, and it disagrees with her card anyway -- it carries
+    # PrimaryMagicDamage 160/240/380 and MagicDamage 380/570/900, which match
+    # neither of these rows at any patch. The card wins; see
+    # patch_pin.json's spell_data_published. Authored is not the same as
+    # correct, which is worth remembering when the rest of the set's bins land.
     moonshardScaling = create_ability_scaling(
-        [0, 0, 0], [50, 75, 500], func_name="moonshardScaling"
+        [0, 0, 0], [55, 83, 500], func_name="moonshardScaling"
     )
     # The whole moon, before the split.
     fullMoonScaling = create_ability_scaling(

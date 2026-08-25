@@ -38,7 +38,12 @@
       "why": "Changed to 0/45 on PBE; cdragon's dump still says 40. Its PBE data can lag the live PBE build, and a confirmed card reading wins when it does."
     }
   },
-  "spell_data_published": [],
+  "spell_data_published": {
+    "Alune": {
+      "checked_on": "PBE 18.1g",
+      "note": "Authored, and wrong. The bin says PrimaryMagicDamage 160/240/380 and MagicDamage 380/570/900; the card says 55/83/500 per moonshard and 2350/3600/7500 for the full moon, and the card is what the game shows. Authored is not the same as correct."
+    }
+  },
   "card_values": {
     "Ahri.abilityScaling": {
       "ad": [0, 0, 0],
@@ -63,12 +68,12 @@
     "Alune.fullMoonScaling": {
       "ad": [0, 0, 0],
       "ap": [2350, 3600, 7500],
-      "read_on": "unverified"
+      "read_on": "PBE 18.1g"
     },
     "Alune.moonshardScaling": {
       "ad": [0, 0, 0],
-      "ap": [50, 75, 500],
-      "read_on": "unverified"
+      "ap": [55, 83, 500],
+      "read_on": "PBE 18.1g"
     },
     "Ashe.abilityScaling": {
       "ad": [440, 660, 1000],
