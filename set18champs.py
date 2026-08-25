@@ -480,7 +480,7 @@ class Caitlyn(Champion):
         self.items.append(CaitlynHeadshotBuff())
 
     # Physical damage row: 190/285/450 AD-scaled + 20/30/45 AP-scaled.
-    abilityScaling = create_ability_scaling([190, 285, 450], [20, 30, 45])
+    abilityScaling = create_ability_scaling([190, 285, 470], [20, 30, 45])
 
     def performAbility(self, opponents, items, time):
         # Never actually called -- fullMana=-1 keeps canCast() False.
@@ -541,9 +541,17 @@ class Ahri(Champion):
 
 
 class Gromp(Champion):
+    # Gromp's two versions do not share a base AD. He is built from the AP
+    # version's, since that is the one he defaults to and the one the set's
+    # data records (DA_Gromp18_AP); the AD version's 45 is swapped in by
+    # AdaptorInnate, same as Master Yi and Akali but mirrored, because their
+    # card stats are the AD version's and his are the AP version's.
+    AD_VERSION_ATK = 45
+    AP_VERSION_ATK = 30
+
     def __init__(self, level):
         hp = 550
-        atk = 45
+        atk = self.AP_VERSION_ATK
         curMana = 0
         fullMana = 45
         aspd = 0.7
@@ -571,6 +579,9 @@ class Gromp(Champion):
         # Gromp is one of the two Adaptors (with Nidalee) that starts on its
         # AP version when nothing has pushed either stat ahead.
         self.adaptor_ties_to_ad = False
+        # Star-scaled off the AP base already in atk.base, so the ratio holds
+        # at every star level rather than pinning the AD version to 1-star.
+        self.ad_base_atk = self.atk.base * self.AD_VERSION_ATK / self.AP_VERSION_ATK
         # Always-on rather than opt-in buff-bar picks: Belchy Bubble adapts
         # on every Gromp, and the Purple Buff no-ops on its own unless
         # Riftbeast (3) has set the Alpha Mark flag.
@@ -1115,7 +1126,10 @@ class Nidalee(Champion):
         hp = 850
         atk = 35
         curMana = 0
-        fullMana = 40
+        # 0/45. The set's data still says 40 -- cdragon's PBE dump lags the
+        # live PBE build on this one, so it is acknowledged in patch_pin.json
+        # rather than followed.
+        fullMana = 45
         aspd = 0.8
         armor = 30
         mr = 30
