@@ -29,6 +29,11 @@ contact sheet and both now guarded against:
   * Riot ships placeholder art in-band: fully transparent icons, and files
     literally named Missing-T2 / Missing-T3. Both are refused.
 
+An augment additionally gets its rarity cross-checked against the tier suffix
+on its art, which catches a match landing on the wrong tier's picture without
+anyone having to notice by eye. Exactly one Set 18 augment disagrees, and it is
+Riot's own data rather than a bad match -- see the TonsOfStatsPris override.
+
 Two quirks worth knowing rather than rediscovering. The asset path for
 Flickerblades really is misspelled "Flickerplade", and Red Buff is filed under
 RapidFireCannon -- matching on the item's name rather than its icon path is
@@ -120,8 +125,11 @@ GROUPS = {
         # for augments this set did not re-file.
         "prefer": "DA_",
         "overrides": {
-            # Gold and Prismatic Tons of Stats share a name (and, as it turns
-            # out, a single icon), so the name alone cannot separate them.
+            # Gold and Prismatic Tons of Stats share a name, so the name alone
+            # cannot separate them. Both end up on the gold art anyway: the
+            # Prismatic augment is real (DA_TonsOfStatsII, tagged prismatic)
+            # but Riot never drew it a tons-of-stats-iii, and points it at the
+            # gold file instead. rarity_mismatch() reports that every run.
             "TonsOfStatsPris": "DA_TonsOfStatsII",
         },
         # Not augments at all -- bare effects the sweep offers for comparison,
@@ -155,6 +163,30 @@ def normalise(name):
     return re.sub(r"[^a-z0-9]+", "", name)
 
 
+# An augment's rarity is a hashed tag on the item, and its art is filed with a
+# matching tier suffix -- Ascension1 / GlassCannon_I / jeweled-lotus-iii. The
+# two agree for every Set 18 augment except one, so comparing them is a cheap
+# way to notice when a match landed on the wrong tier's art. It is reported as
+# a note rather than a failure: the one disagreement is Riot's, not a bad
+# match, and no override can fix art that was never drawn.
+RARITY_TAGS = {"{d11fd6d5}": "silver", "{ce1fd21c}": "gold", "{cf1fd3af}": "prismatic"}
+RARITY_SUFFIXES = {
+    "i": "silver", "1": "silver",
+    "ii": "gold", "2": "gold",
+    "iii": "prismatic", "3": "prismatic",
+}
+
+
+def rarity_mismatch(match):
+    """('prismatic', 'gold') when the tag and the icon's tier disagree."""
+    tags = [RARITY_TAGS[t] for t in match.get("tags", []) if t in RARITY_TAGS]
+    suffix = re.search(r"[-_]?(i{1,3}|[123])\.(?:tex|dds)$", match["icon"].lower())
+    if len(tags) != 1 or not suffix:
+        return None
+    art = RARITY_SUFFIXES[suffix.group(1)]
+    return None if art == tags[0] else (tags[0], art)
+
+
 def resolve(group, items):
     by_api = {i["apiName"]: i for i in items}
     by_name = collections.defaultdict(list)
@@ -162,7 +194,7 @@ def resolve(group, items):
         if item.get("name"):
             by_name[normalise(item["name"])].append(item)
 
-    resolved, missing = {}, []
+    resolved, missing, notes = {}, [], []
     for cls_name, display in group["entries"]():
         if cls_name in group["no_icon"]:
             continue
@@ -192,8 +224,13 @@ def resolve(group, items):
         if os.path.basename(icon).lower().startswith("missing"):
             missing.append((cls_name, f"{display} -> {api} is placeholder art: {icon}"))
             continue
+        mismatch = rarity_mismatch(match)
+        if mismatch:
+            want, got = mismatch
+            art = os.path.basename(icon)
+            notes.append((cls_name, f"{want} augment wearing the {got} art ({art})"))
         resolved[cls_name] = (display, api, icon)
-    return resolved, missing
+    return resolved, missing, notes
 
 
 def icon_url(path):
@@ -204,7 +241,7 @@ def icon_url(path):
 
 def build(name, group, items, Image):
     out_dir = os.path.join("icons", name)
-    resolved, missing = resolve(group, items)
+    resolved, missing, notes = resolve(group, items)
     os.makedirs(out_dir, exist_ok=True)
 
     written = []
@@ -231,6 +268,8 @@ def build(name, group, items, Image):
     print(f"{name}: wrote {len(written)} icons to {out_dir} ({total / 1024:.0f} KB)")
     for cls_name, why in group["no_icon"].items():
         print(f"  no icon by design: {cls_name} ({why})")
+    for cls_name, why in notes:
+        print(f"  note: {cls_name:24s} {why}")
     if missing:
         print(f"  {len(missing)} unresolved -- add an OVERRIDES entry:")
         for cls_name, why in missing:
@@ -267,7 +306,7 @@ def main():
     groups = list(GROUPS)
     parser.add_argument("groups", nargs="*", choices=groups + [[]], help="default: all")
     parser.add_argument("--refresh", action="store_true", help="re-download the dump")
-    parser.add_argument("--contact-sheet", action="store_true", help="sheet to check by eye")
+    parser.add_argument("--contact-sheet", action="store_true", help="check by eye")
     args = parser.parse_args()
 
     from PIL import Image, ImageDraw
