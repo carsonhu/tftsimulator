@@ -54,6 +54,7 @@ augments = [
     "Retribution",
     "GlassCannonI",
     "GlassCannonII",
+    "ItsMeBaby",
     "NoScoutNoPivot",
     "SoulAwakening",
     "FocusedFire",
@@ -2194,6 +2195,20 @@ class GlassCannonII(Buff):
         return 0
 
 
+class ItsMeBaby(Buff):
+    levels = [1]
+    display_name = "It's Me Baby"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.dmgMultiplier.addStat(0.15)
+        champion.aspd.addStat(15)
+        return 0
+
+
+
 class SoulAwakening(Buff):
     levels = [1]
     display_name = "Soul Awakening"
@@ -2698,7 +2713,7 @@ class CryMeARiver(Buff):
             champion.manaRegen.addStat(1)
         elif phase == "onUpdate":
             if not self.stage_2_active and time >= 12:
-                # After 12 seconds, increase to 3 (so add 2 more)
-                champion.manaRegen.addStat(2)
+                # After 12 seconds, increase to 4 (so add 3 more)
+                champion.manaRegen.addStat(3)
                 self.stage_2_active = True
         return 0
