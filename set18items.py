@@ -57,7 +57,6 @@ artifacts = [
     "CrownOfDemacia",
     "CappaJuice",
     "VarussObsession",
-    "SnipersFocus",
 ]
 
 radiants = [
@@ -636,7 +635,7 @@ class Fishbones(Item):
     display_name = "Fishbones"
 
     def __init__(self):
-        super().__init__(self.display_name, aspd=50, ad=50, phases=None)
+        super().__init__(self.display_name, aspd=25, ad=25, phases=None)
 
 
 class CappaJuice(Item):
@@ -664,7 +663,7 @@ class RFC(Item):
     display_name = "Rapid Firecannon"
 
     def __init__(self):
-        super().__init__(self.display_name, aspd=65, dmgMultiplier=0.05, phases=None)
+        super().__init__(self.display_name, aspd=55, dmgMultiplier=0.05, phases=None)
 
 
 class Mittens(Item):
@@ -723,7 +722,7 @@ class TitanicHydra(Item):
             self.display_name, ad=20, aspd=20, hp=300, phases=["preAttack"]
         )
         self.hp_scaling = 0.04
-        self.ad_scaling = 0.06
+        self.ad_scaling = 0.02
 
     def performAbility(self, phase, time, champion, input_=0):
         dmg = (
@@ -741,7 +740,7 @@ class WitsEnd(Item):
 
     def __init__(self):
         super().__init__(self.display_name, aspd=30, mr=30, hp=300, phases="onAttack")
-        self.dmg = {2: 42, 3: 60, 4: 75, 5: 90, 6: 100}
+        self.dmg = {2: 30, 3: 55, 4: 75, 5: 95, 6: 115}
 
     def performAbility(self, phase, time, champion, input_=0):
         baseDmg = self.dmg[champion.stage]
@@ -756,12 +755,12 @@ class ShivArtifact(Item):
     def __init__(self):
         super().__init__(
             self.display_name,
-            ap=50,
+            ap=40,
             aspd=15,
             phases=["preAttack"],
         )
-        self.shivDmg = 30
-        self.shivTargets = 4
+        self.shivDmg = 15
+        self.shivTargets = 6
         self.counter = 0
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -769,7 +768,7 @@ class ShivArtifact(Item):
         self.counter += 1
         if self.counter == 3:
             self.counter = 0
-            baseDmg = self.shivDmg + champion.ap.stat * 50
+            baseDmg = self.shivDmg + champion.ap.stat * 35
             # only consider dmg to primary target
             for opponent in champion.opponents[0 : self.shivTargets]:
                 champion.doDamage(opponent, [], 0, baseDmg, baseDmg, "magical", time)
@@ -798,9 +797,9 @@ class Dawncore(Item):
     def __init__(self):
         super().__init__(
             self.display_name,
-            ad=15,
-            ap=15,
-            manaRegen=2,
+            ad=20,
+            ap=20,
+            manaRegen=1,
             phases=["preCombat", "postAbility"],
         )
         self.counter = 0
@@ -809,15 +808,15 @@ class Dawncore(Item):
         if phase == "preCombat":
             champion.fullMana.addStat(-10)
         elif phase == "postAbility":
-            if champion.fullMana.stat > 10:
+            if champion.fullMana.stat > 15:
                 # we don't want to use mult since we do want it to round.
-                champion.fullMana.addStat(-1 * (champion.fullMana.stat // 10))
+                champion.fullMana.addStat(-1 * (champion.fullMana.stat // 20))
 
 
 class VarussObsession(Item):
     display_name = "Varus's Obsession"
 
-    def __init__(self):
+    def __init__(self): 
         super().__init__(
             self.display_name,
             dmgMultiplier=0.15,
@@ -830,21 +829,6 @@ class VarussObsession(Item):
             champion.bonus_ad.addStat(3)
             champion.ap.addStat(3)
             self.next_bonus += 1
-
-
-class SnipersFocus(Item):
-    display_name = "Sniper's Focus (4 hex)"
-
-    def __init__(self):
-        super().__init__(
-            self.display_name,
-            ad=20,
-            aspd=20,
-            ap=20,
-            manaRegen=3,
-            dmgMultiplier=0.4,
-            phases=None,
-        )
 
 
 ### RADIANTS
@@ -941,8 +925,8 @@ class RadiantHoJ(HoJ):
         self.name = self.display_name
         self.manaRegen = 2
         self.crit = 40
-        self.ad = 60
-        self.ap = 60
+        self.ad = 70
+        self.ap = 70
         self.omnivamp = 0.24
 
 

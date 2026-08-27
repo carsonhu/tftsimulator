@@ -18,7 +18,7 @@
     "since been read against them. The checker names any that are published but",
     "not listed here -- that is the prompt to go and look, not a failure."
   ],
-  "channel": "pbe",
+  "channel": "latest",
   "patch": "PBE 18.1g",
   "accepted": "2026-08-24",
   "acknowledged": {

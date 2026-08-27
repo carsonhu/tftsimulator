@@ -68,7 +68,9 @@ import time
 import urllib.request
 
 SET_NUMBER = 18
-CHANNEL = "pbe"
+# Set 18 went live 2026-08: the set's own data now comes from the live
+# channel, and pbe is the cross-check.
+CHANNEL = "latest"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE_DIR = os.path.join(HERE, ".tft_cache")
@@ -1026,7 +1028,7 @@ def main(argv=None):
     CHANNEL = args.channel
     if args.out:
         OUT_DIR = os.path.abspath(args.out)
-    elif (SET_NUMBER, CHANNEL) != (18, "pbe"):
+    elif (SET_NUMBER, CHANNEL) != (18, "latest"):
         # Cross-checking another set must not overwrite this folder's own
         # reference data; make the caller name a destination.
         sys.exit("--set/--channel other than 18/pbe needs an explicit --out.")

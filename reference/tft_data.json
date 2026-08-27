@@ -5518,7 +5518,7 @@
    "traits": []
   }
  ],
- "channel": "pbe",
+ "channel": "latest",
  "items": [
   {
    "apiName": "DA_18_AfterShock",

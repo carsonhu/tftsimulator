@@ -155,7 +155,7 @@ class Varus(Champion):
         self.castTime = 2.0
         self.num_targets = 2
 
-    abilityScaling = create_ability_scaling([350, 525, 790], [30, 45, 70])
+    abilityScaling = create_ability_scaling([385, 580, 925], [30, 45, 70])
 
     def performAbility(self, opponents, items, time):
         # Piercing Arrow: hits the first num_targets enemies in line; damage is
@@ -201,7 +201,7 @@ class Yunara(Champion):
         # short dashes turn out to be more frequent in practice.
         self.castTime = 1.8
 
-    abilityScaling = create_ability_scaling([170, 255, 400], [10, 15, 25])
+    abilityScaling = create_ability_scaling([150, 255, 400], [10, 15, 25])
     splash_ratio = 0.35
     splash_targets = 2
 
@@ -306,7 +306,7 @@ class MamaBeak(Champion):
         # than a togglable ultimate.
         self.items.append(TinyBeaksBuff())
 
-    beakScaling = create_ability_scaling([25, 38, 60], [0, 0, 0], func_name="beakScaling")
+    beakScaling = create_ability_scaling([20, 30, 48], [0, 0, 0], func_name="beakScaling")
 
     def performAbility(self, opponents, items, time):
         # Flock Family: the cast itself deals no damage -- it just opens the
@@ -351,7 +351,10 @@ class Cassiopeia(Champion):
         # always uses opponents[1] instead. Poisons stack, so each cast gets
         # its own uniquely named status (see CassiopeiaPoisonStatus) rather
         # than refreshing/replacing whatever's already ticking.
-        total_damage = self.abilityScaling(self.level, self.bonus_ad.stat, self.ap.stat)
+        #
+        # The scaling function goes down instead of a damage number: each
+        # tick re-reads Cass's AP at tick time, so AP gained mid-poison
+        # raises the remaining ticks.
         for i, opponent in enumerate(opponents[:2]):
             opponent.applyStatus(
                 status.CassiopeiaPoisonStatus(
@@ -360,7 +363,7 @@ class Cassiopeia(Champion):
                 self,
                 time,
                 self.poison_duration,
-                total_damage,
+                self.abilityScaling,
             )
 
 
@@ -517,7 +520,7 @@ class Ahri(Champion):
         self.castTime = 1.8
         self.num_targets = 5
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [485, 735, 3500])
+    abilityScaling = create_ability_scaling([0, 0, 0], [450, 675, 3500])
 
     def performAbility(self, opponents, items, time):
         # Spirit Bomb: 1 target at the epicenter (full damage), the next 2
@@ -623,18 +626,16 @@ class Gromp(Champion):
                 opponents[:1], items, time, 1, self.apAbilityScaling, "magical"
             )
             # Splash is a DoT, so it goes out as a status on each victim
-            # (see status.GrompBubbleStatus) rather than an instant hit.
-            total = self.apSplashScaling(self.level, self.bonus_ad.stat, self.ap.stat)
-            # multiTargetSpell would have applied these to an instant hit;
-            # applied here so the two versions' splash amps stay comparable.
-            total *= self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+            # (see status.GrompBubbleStatus) rather than an instant hit. The
+            # scaling function goes down instead of a damage number: AP DoT
+            # ticks re-read the caster's AP (and amps) at tick time.
             for opponent in opponents[1 : 1 + num_splash]:
                 opponent.applyStatus(
                     status.GrompBubbleStatus(),
                     self,
                     time,
                     self.splash_duration,
-                    total,
+                    self.apSplashScaling,
                 )
         return 0
 

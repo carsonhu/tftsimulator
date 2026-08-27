@@ -669,34 +669,43 @@ class ExecutionerBleedStatus(Status):
 
 class CassiopeiaPoisonStatus(Status):
     # Noxious Blast: total magic damage split into per-second ticks over
-    # `duration`. Poisons stack, so unlike ExecutionerBleedStatus this must
-    # never merge into an existing instance -- the caller (set18champs.
-    # Cassiopeia) gives every cast's application a unique status name so
-    # each one lives as its own dict entry instead of reapplying.
+    # `duration`. AP DoTs are NOT snapshotted in game: every tick goes out
+    # through the caster's multiTargetSpell, which re-reads her live AP (so
+    # AP gained mid-poison grows the remaining ticks) and makes each tick a
+    # real damage instance -- it crits with Jeweled Gauntlet, takes damage
+    # amps, and feeds on-spell-damage item effects. Hence params is the
+    # caster's scaling function, not a damage number locked in at cast.
+    #
+    # Poisons stack, so unlike ExecutionerBleedStatus this must never merge
+    # into an existing instance -- the caller (set18champs.Cassiopeia) gives
+    # every cast's application a unique status name so each one lives as its
+    # own dict entry instead of reapplying.
     def __init__(self, name):
         super().__init__(name)
-        self.damage_per_tick = 0
+        self.scaling = zero_scaling
+        self.duration = 1.0
         self.interval = 1.0
         self.next_proc = 0
 
     def applicationEffect(self, champion, time, duration, params):
-        # params: total poison damage, to be split over `duration`
-        self.damage_per_tick = params / duration * self.interval
+        # params: the caster's total-damage scaling function, whose value is
+        # split over `duration` and re-evaluated at every tick
+        self.scaling = params
+        self.duration = duration
         self.next_proc = time + self.interval
         return True
 
-    def reapplicationEffect(self, champion, time, duration, params):
-        self.damage_per_tick = params / duration * self.interval
-        self.next_proc = time + self.interval
-        return True
+    def tickScaling(self, level, AD, AP):
+        # The listed damage is a total over `duration`, so each tick is one
+        # interval's share of it, off whatever AP the caster has right now.
+        return self.scaling(level, AD, AP) / self.duration * self.interval
 
     def update(self, champion, time):
         if self.active and time >= self.next_proc:
-            if self.opponent is not None:
-                self.opponent.doDamage(
-                    champion, [], 0,
-                    self.damage_per_tick, self.damage_per_tick,
-                    "magical", time,
+            caster = self.opponent
+            if caster is not None:
+                caster.multiTargetSpell(
+                    [champion], caster.items, time, 1, self.tickScaling, "magical"
                 )
             self.next_proc += self.interval
         super().update(champion, time)
@@ -704,22 +713,26 @@ class CassiopeiaPoisonStatus(Status):
 
 class GrompBubbleStatus(Status):
     # Belchy Bubble's AP-version splash: the listed 145/220/345 is a total
-    # dealt over 3s, so it's locked in at cast time (like
-    # CassiopeiaPoisonStatus) and split into per-second ticks rather than
-    # re-scaling off the caster's AP as it grows mid-DoT.
+    # dealt over 3s, split into per-second ticks. Like CassiopeiaPoisonStatus
+    # (AP DoTs are not snapshotted in game) each tick goes out through the
+    # caster's multiTargetSpell, re-reading his live AP and amps, so params
+    # is the splash scaling function rather than a number locked in at cast.
     #
     # Unlike Cassiopeia's poison this does NOT stack: one status name per
     # target, so a recast inside the window refreshes the splash instead of
     # layering a second copy.
     def __init__(self, name="Gromp Bubble"):
         super().__init__(name)
-        self.damage_per_tick = 0
+        self.scaling = zero_scaling
+        self.duration = 1.0
         self.interval = 1.0
         self.next_proc = 0
 
     def _start(self, time, duration, params):
-        # params: total splash damage, to be split over `duration`
-        self.damage_per_tick = params / duration * self.interval
+        # params: the splash's total-damage scaling function, whose value is
+        # split over `duration` and re-evaluated at every tick
+        self.scaling = params
+        self.duration = duration
         self.next_proc = time + self.interval
         return True
 
@@ -729,13 +742,16 @@ class GrompBubbleStatus(Status):
     def reapplicationEffect(self, champion, time, duration, params):
         return self._start(time, duration, params)
 
+    def tickScaling(self, level, AD, AP):
+        # One interval's share of the splash total, off the caster's live AP.
+        return self.scaling(level, AD, AP) / self.duration * self.interval
+
     def update(self, champion, time):
         if self.active and time >= self.next_proc:
-            if self.opponent is not None:
-                self.opponent.doDamage(
-                    champion, [], 0,
-                    self.damage_per_tick, self.damage_per_tick,
-                    "magical", time,
+            caster = self.opponent
+            if caster is not None:
+                caster.multiTargetSpell(
+                    [champion], caster.items, time, 1, self.tickScaling, "magical"
                 )
             self.next_proc += self.interval
         super().update(champion, time)
@@ -745,8 +761,8 @@ class KarmaTetherStatus(Status):
     # Karmic Bond: a tether on one target dealing its listed total in even
     # ticks over `duration`, then a burst on the target and the enemies
     # around it. Both halves go out through the caster's multiTargetSpell
-    # (rather than CassiopeiaPoisonStatus's raw doDamage) because each tick
-    # is its own damage instance in game -- so each one crits on its own with
+    # (like CassiopeiaPoisonStatus's ticks) because each tick is its own
+    # damage instance in game -- so each one crits on its own with
     # Jeweled Gauntlet and feeds on-spell-damage item effects.
     #
     # The burst lives here rather than in performAbility so it lands at the
