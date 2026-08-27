@@ -31,6 +31,18 @@
     </div>
 
     <div id="layout" hidden>
+      <!-- Mobile only (see style.css): the sidebar becomes a drawer that
+           slides over the content, Streamlit-style, instead of stacking as a
+           page-long block of controls above the results. -->
+      <button
+        id="sidebarToggle"
+        type="button"
+        aria-label="Toggle settings"
+        aria-expanded="false"
+      >
+        &#9776;
+      </button>
+      <div id="sidebarBackdrop"></div>
       <aside id="sidebar">
         <section>
           <h2>Champion</h2>

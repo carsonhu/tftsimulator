@@ -313,6 +313,23 @@ function traitBadge(cls, level) {
 function buildStaticControls() {
   const cat = state.catalog;
 
+  // Mobile drawer (CSS turns all of this on below 900px; on desktop the
+  // toggle and backdrop are display:none and the class is inert).
+  const toggle = $("sidebarToggle");
+  const setSidebar = (open) => {
+    document.body.classList.toggle("sidebar-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.innerHTML = open ? "&times;" : "&#9776;";
+  };
+  toggle.onclick = () =>
+    setSidebar(!document.body.classList.contains("sidebar-open"));
+  $("sidebarBackdrop").onclick = () => setSidebar(false);
+  document.addEventListener("keydown", (event) => {
+    // The combo boxes stopPropagation on the Escape that closes their own
+    // list, so this only fires once nothing narrower wants the key.
+    if (event.key === "Escape") setSidebar(false);
+  });
+
   const champSel = $("champ");
   for (const c of cat.champions) champSel.add(new Option(c.name, c.name));
   champSel.onchange = () => selectChampion(champSel.value, { keepLevel: false });

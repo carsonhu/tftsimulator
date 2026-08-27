@@ -126,19 +126,60 @@ body {
   padding: 20px 28px 40px;
 }
 
+/* Hidden on desktop; the drawer machinery only exists on narrow screens. */
+#sidebarToggle,
+#sidebarBackdrop {
+  display: none;
+}
+
 @media (max-width: 900px) {
-  #layout {
-    flex-direction: column;
-  }
+  /* Streamlit-style drawer: the content gets the full width and the sidebar
+     slides in from the left over it, rather than stacking as a page-long
+     block of controls the results sit underneath. */
   #sidebar {
-    width: 100%;
-    flex: none;
-    /* Stacked layout: the sidebar is a section of the page again, so
-       pinning it to the viewport would eat the whole screen. */
-    position: static;
-    height: auto;
-    min-height: 0;
-    overflow-y: visible;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    height: 100dvh; /* keeps the bottom reachable under mobile browser bars */
+    width: min(85vw, 340px);
+    z-index: 30;
+    transform: translateX(-105%); /* 105: keep the shadow off-screen too */
+    transition: transform 0.2s ease;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.5);
+  }
+  body.sidebar-open #sidebar {
+    transform: translateX(0);
+  }
+
+  #sidebarToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 40; /* above the drawer, so it stays tappable to close it */
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font-size: 1.2em;
+    color: #fafafa;
+    background: #262730;
+    border: 1px solid #4a4d5a;
+    border-radius: 8px;
+  }
+  body.sidebar-open #sidebarBackdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  /* Clear the fixed toggle button so it doesn't sit on the header. */
+  #content {
+    padding: 60px 14px 40px;
   }
 }
 

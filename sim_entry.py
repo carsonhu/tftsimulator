@@ -118,20 +118,25 @@ def get_catalog():
         champions.append({"name": name, "levels": levels})
 
     def item_group(class_names):
-        # item_display_map returns {display: cls} in the order given; the
-        # sidebar sorts by class name, same as pages/ChampionSelector.py.
+        # item_display_map returns {display: cls} in the order given, and that
+        # order is exactly what the sidebar shows -- see all_items below.
         return [
             {"cls": cls, "name": disp}
-            for disp, cls in item_display_map(sorted(class_names)).items()
+            for disp, cls in item_display_map(class_names).items()
         ]
 
+    # Tier order, alphabetical within each tier -- NOT one global sort. The
+    # sidebar combo's search filter preserves this order, so typing "spear" or
+    # "shojin" surfaces the craftable Spear of Shojin ahead of the Radiant
+    # one instead of alphabetically burying it. pages/ChampionSelector.py
+    # orders its sidebar the same way.
     all_items = (
-        set18items.offensive_craftables
-        + set18items.artifacts
-        + set18items.radiants
-        + set18items.emblems
-        + set18items.animas
-        + set18items.no_item
+        set18items.no_item
+        + sorted(set18items.offensive_craftables)
+        + sorted(set18items.artifacts)
+        + sorted(set18items.radiants)
+        + sorted(set18items.emblems)
+        + sorted(set18items.animas)
     )
 
     all_buffs = sorted(

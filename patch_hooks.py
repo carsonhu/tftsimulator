@@ -48,6 +48,7 @@ CHAMPION_API = {
     "Caitlyn": "DA_18_Caitlyn",
     "Camille": "DA_18_Camille",
     "Cassiopeia": "DA_18_Cassiopeia",
+    "Cinderling": "DA_Cinderling18",
     "Ezreal": "DA_18_Ezreal",
     "Gromp": "DA_Gromp18_AP",
     "Karma": "DA_Karma18",

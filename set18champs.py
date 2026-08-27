@@ -1,7 +1,8 @@
 from role import Role
 from set18buffs import (AdaptorInnate, AriseBuff, AsheTrail, AttunedInnate,
-                        CaitlynHeadshotBuff, GrompPurpleBuff, MasterYiUlt,
-                        NidaleeUlt, SivirBounces, TinyBeaksBuff)
+                        CaitlynHeadshotBuff, CinderlingScarletBuff,
+                        GrompPurpleBuff, MasterYiUlt, NidaleeUlt, SivirBounces,
+                        TinyBeaksBuff)
 
 import status
 from champion import Champion
@@ -27,6 +28,7 @@ champ_list = [
     "Nidalee",
     "Sivir",
     "Ashe",
+    "Cinderling",
 ]
 
 
@@ -280,7 +282,7 @@ class LeBlanc(Champion):
 class MamaBeak(Champion):
     def __init__(self, level):
         hp = 650
-        atk = 60
+        atk = 50
         curMana = 30
         fullMana = 60
         aspd = 0.75
@@ -1274,7 +1276,6 @@ class Ashe(Champion):
             "so raising that raises Ashe's damage."
         )
 
-    # Pure AD on the card: 440/660/1000 x AD, no AP half.
     abilityScaling = create_ability_scaling([440, 660, 1000], [0, 0, 0])
     # The card's 7/11/220 trail row is two halves, same as Sivir's: 5 + 2 = 7,
     # 8 + 3 = 11, 200 + 20 = 220. The 2% max Health rides on top of this and is
@@ -1299,4 +1300,44 @@ class Ashe(Champion):
             )
         # AsheTrail (see __init__) handles the 4s trail off postAbility, which
         # fires immediately after this.
+        return 0
+
+
+class Cinderling(Champion):
+    def __init__(self, level):
+        hp = 500
+        atk = 45
+        curMana = 0
+        fullMana = 50
+        aspd = 0.7
+        armor = 25
+        mr = 25
+        super().__init__(
+            "Cinderling",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_CASTER,
+        )
+        self.default_traits = ["Riftbeast", "Hunter"]
+        self.castTime = 1.5
+        self.items.append(CinderlingScarletBuff())
+        self.notes = "Wound and Burn are not modeled."
+
+    abilityScaling = create_ability_scaling([340, 510, 765], [30, 45, 70])
+
+    def performAbility(self, opponents, items, time):
+        # Razor Leaves: five leaves converge on the current target; modeled as
+        # a single hit for their combined total, per request. The 20% Wound
+        # and 1% Burn are not modeled (see notes).
+        if not opponents:
+            return 0
+        self.multiTargetSpell(
+            opponents[:1], items, time, 1, self.abilityScaling, "physical"
+        )
         return 0

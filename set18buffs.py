@@ -1147,6 +1147,29 @@ class GrompPurpleBuff(Buff):
         return 0
 
 
+class CinderlingScarletBuff(Buff):
+    """Cinderling's Riftbeast unique buff: +22% Attack Damage each cast.
+
+    Unlocked by Riftbeast (3)'s Alpha Mark, so like GrompPurpleBuff this
+    checks the riftbeast_alpha_mark flag and no-ops without it. postAbility:
+    "gains ... each cast" is a reward for the cast, so the cast that earned
+    the AD goes out at the old value and the next one benefits.
+    """
+
+    levels = [1]
+    display_name = "Scarlet Buff"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(self.display_name, level, params, phases=["postAbility"])
+        self.ad_per_cast = 22
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if not getattr(champion, "riftbeast_alpha_mark", False):
+            return 0
+        champion.bonus_ad.addStat(self.ad_per_cast)
+        return 0
+
+
 class AttunedInnate(Buff):
     """Attuned: the moon advances one phase before each of Alune's casts.
 

@@ -39,16 +39,19 @@ all_buffs = sorted(
     + set18buffs.wisps
 )
 
-all_items = sorted(
-    set18items.offensive_craftables
-    + set18items.artifacts
-    + set18items.radiants
-    + set18items.emblems
-    + set18items.animas
-    + set18items.no_item
+# Tier order, alphabetical within each tier, same as sim_entry.py: the
+# selectbox search keeps this order, so the craftable Spear of Shojin comes
+# up before the Radiant one.
+all_items = (
+    set18items.no_item
+    + sorted(set18items.offensive_craftables)
+    + sorted(set18items.artifacts)
+    + sorted(set18items.radiants)
+    + sorted(set18items.emblems)
+    + sorted(set18items.animas)
 )
 
-sidebar_items = sorted(all_items)
+sidebar_items = all_items
 
 craftables = set18items.offensive_craftables
 
