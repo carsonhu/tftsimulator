@@ -1,8 +1,8 @@
 from role import Role
 from set18buffs import (AdaptorInnate, AriseBuff, AsheTrail, AttunedInnate,
                         CaitlynHeadshotBuff, CinderlingScarletBuff,
-                        GrompPurpleBuff, MasterYiUlt, NidaleeUlt, SivirBounces,
-                        TinyBeaksBuff)
+                        GrompPurpleBuff, MasterYiUlt, NidaleeUlt,
+                        PebblesChannel, SivirBounces, TinyBeaksBuff)
 
 import status
 from champion import Champion
@@ -29,6 +29,8 @@ champ_list = [
     "Sivir",
     "Ashe",
     "Cinderling",
+    "Teemo",
+    "Pebbles",
 ]
 
 
@@ -1340,4 +1342,106 @@ class Cinderling(Champion):
         self.multiTargetSpell(
             opponents[:1], items, time, 1, self.abilityScaling, "physical"
         )
+        return 0
+
+
+class Teemo(Champion):
+    def __init__(self, level):
+        hp = 550
+        atk = 35
+        curMana = 0
+        fullMana = 50
+        aspd = 0.75
+        armor = 30
+        mr = 30
+        super().__init__(
+            "Teemo",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MAGIC_CASTER,
+        )
+        # His other trait is Sprykin, which is unimplemented for now; leaving
+        # it out keeps it from eating a buff bar slot that can't be filled
+        # (same as Camille's Coven).
+        self.default_traits = ["Invoker"]
+        self.castTime = 1.5  # per request
+        self.num_targets = 3
+        self.notes = (
+            "Foraging is not modeled: the rerolls, Tactician Health and XP a "
+            "foraged mushroom gives are all out of combat."
+        )
+
+    # The mushroom clusters, on the nearest num_targets.
+    abilityScaling = create_ability_scaling([0, 0, 0], [60, 90, 135])
+    # The giant mushroom that follows, on the current target only.
+    giantScaling = create_ability_scaling(
+        [0, 0, 0], [135, 200, 310], func_name="giantScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        # Fungus Among Us: mushroom clusters on the 3 nearest enemies, then a
+        # giant mushroom on the current target. The card's "2 clusters" is not
+        # two applications of the 60/90/135 row -- in game that row is split
+        # between the pair -- so the clusters go out as a single hit for the
+        # card's number, per request.
+        if not opponents:
+            return 0
+        self.multiTargetSpell(
+            opponents, items, time, self.num_targets, self.abilityScaling, "magical"
+        )
+        self.multiTargetSpell(
+            opponents[:1], items, time, 1, self.giantScaling, "magical"
+        )
+        return 0
+
+
+class Pebbles(Champion):
+    def __init__(self, level):
+        hp = 500
+        atk = 35
+        curMana = 30
+        fullMana = 70
+        aspd = 0.80
+        armor = 25
+        mr = 25
+        super().__init__(
+            "Pebbles",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MAGIC_CASTER,
+        )
+        self.default_traits = ["Riftbeast", "Invoker"]
+        # Not a real cast time: Azure Laser is a channel whose length is
+        # emergent (mana divided by the net drain), so PebblesChannel owns the
+        # attack lockout and releases it when the channel empties. Leaving
+        # this at 0 keeps update()'s own lockout from fighting it.
+        self.castTime = 0
+        self.items.append(PebblesChannel())
+        self.notes = (
+            "Azure Laser channels rather than casting: PebblesChannel drains "
+            "35% max mana a second and ticks damage once a second until he is "
+            "empty. The 3 flat Magic Resist per tick is not modeled, and the "
+            "first tick's timing is the card read literally, not measured."
+        )
+
+    # Per damage tick. The card also carries a 4th row (615) that this
+    # simulator has nowhere to put -- levels stop at 3 stars.
+    abilityScaling = create_ability_scaling([0, 0, 0], [160, 240, 360])
+
+    def performAbility(self, opponents, items, time):
+        # The cast itself deals nothing: it opens the channel, and
+        # PebblesChannel (see __init__) meters out every point of damage and
+        # every point of mana from there.
         return 0

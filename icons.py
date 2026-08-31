@@ -59,7 +59,9 @@ import urllib.request
 
 from PIL import Image, ImageDraw
 
-CHANNEL = "pbe"
+# Set 18 went live 2026-08: the set's own art now comes from the live channel,
+# same as tft_data.py.
+CHANNEL = "latest"
 SET = "18"
 CACHE = os.path.join(".tft_cache", CHANNEL, "en_us.json")
 DATA_URL = f"https://raw.communitydragon.org/{CHANNEL}/cdragon/tft/en_us.json"
@@ -230,6 +232,12 @@ GROUPS = {
             # but Riot never drew it a tons-of-stats-iii, and points it at the
             # gold file instead. rarity_mismatch() reports that every run.
             "TonsOfStatsPris": "DA_TonsOfStatsII",
+            # Riot never drew It's Me, Baby an icon: its record points at the
+            # generic missing-t2 placeholder on every channel, so that
+            # placeholder is exactly what the game client shows for it.
+            # Pinning it here ships what the client shows; resolve() lets
+            # placeholder art through only on a pin like this one.
+            "ItsMeBaby": "DA_ItsMeBaby",
         },
         # Not augments at all -- bare effects the sweep offers for comparison,
         # with nothing in Riot's data to point at.
@@ -405,8 +413,18 @@ def resolve(group, catalog):
             missing.append((cls_name, f"{display} -> {api} is not in {trees}: {icon}"))
             continue
         if os.path.basename(icon).lower().startswith("missing"):
-            missing.append((cls_name, f"{display} -> {api} is placeholder art: {icon}"))
-            continue
+            # A blind name match landing on placeholder art is a miss. An
+            # explicit override landing on it is a person saying "this really
+            # is what the client shows" (see ItsMeBaby) -- let it through,
+            # loudly.
+            if cls_name not in group["overrides"]:
+                missing.append(
+                    (cls_name, f"{display} -> {api} is placeholder art: {icon}")
+                )
+                continue
+            notes.append(
+                (cls_name, f"pinned to placeholder art ({os.path.basename(icon)})")
+            )
         mismatch = rarity_mismatch(match)
         if mismatch:
             want, got = mismatch

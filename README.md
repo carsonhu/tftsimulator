@@ -64,7 +64,25 @@ Then navigate to the 'ChampionSelector' page in the app.
 ## Running the static site locally
 
 The site at the repo root is plain HTML/JS and fetches its Python sources over
-HTTP, so it needs a server rather than opening `index.html` from disk:
+HTTP, so it needs a server rather than opening `index.html` from disk.
+
+**Double-click `serve.bat`.** It starts the server and opens the page. Nothing
+to install first — `serve.py` is standard library only, and the site runs the
+simulator under Pyodide in the browser, so none of `requirements.txt` is
+involved.
+
+```sh
+serve.bat            REM http://127.0.0.1:8618/
+serve.bat 9000       REM a different port
+serve.bat 9000 nb    REM don't open a browser
+```
+
+It refuses to start when that port already has a server, which matters more
+than it sounds: Windows would otherwise let the second one share the port,
+leaving two servers splitting the requests between them: exactly the sort of
+half-stale page the next paragraph is about.
+
+Or run it yourself:
 
 ```sh
 .venv\Scripts\python serve.py

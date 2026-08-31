@@ -337,9 +337,12 @@ function buildStaticControls() {
 
   $("level").onchange = () => {
     state.cfg.level = Number($("level").value);
-    // Level changes re-read the champ's own defaults, like re-running
-    // champ_selector does.
-    selectChampion(state.cfg.champ, { keepLevel: true });
+    // Re-read the champ's own defaults, but keep what you configured: it is
+    // the same champion, so nothing about a star level can make the buffs or
+    // target count you picked the wrong ones. Re-seeding here used to throw
+    // them away -- setting the level last, after configuring the bar, reset
+    // every trait to its first level and every slider to its default.
+    selectChampion(state.cfg.champ, { keepLevel: true, keepConfig: true });
   };
 
   const stageSel = $("stage");
@@ -713,7 +716,7 @@ function buildPills(container, values, selected, onPick) {
 // Champion selection & buff bar
 // ---------------------------------------------------------------------------
 
-async function selectChampion(name, { keepLevel }) {
+async function selectChampion(name, { keepLevel, keepConfig = false }) {
   const cat = state.catalog;
   const meta = cat.champions.find((c) => c.name === name);
   state.cfg.champ = name;
@@ -728,6 +731,13 @@ async function selectChampion(name, { keepLevel }) {
     levelSel.value = state.cfg.level;
   }
 
+  // null means "whatever the champion's own default is", so these have to be
+  // cleared before the probe below or it would describe the overrides instead
+  // of the unit. A level change is no reason to lose a hand-set target count,
+  // though, so hold them across the probe and put them back after it.
+  const heldTargets = keepConfig
+    ? [state.cfg.num_targets, state.cfg.num_extra_targets]
+    : [null, null];
   state.cfg.num_targets = null;
   state.cfg.num_extra_targets = null;
 
@@ -738,26 +748,42 @@ async function selectChampion(name, { keepLevel }) {
   probe.buffs = [];
   const info = await rpc("champInfo", JSON.stringify(probe));
 
-  setupTargetSlider("numTargets", info.numTargets, (v) => {
-    state.cfg.num_targets = v;
-    onConfigChanged();
-  });
-  setupTargetSlider("numExtraTargets", info.numExtraTargets, (v) => {
-    state.cfg.num_extra_targets = v;
-    onConfigChanged();
-  });
+  // setupTargetSlider reports back what it could actually show, so an
+  // override that no longer fits the slider's range cannot leave the config
+  // claiming a number the UI never displayed.
+  state.cfg.num_targets = setupTargetSlider(
+    "numTargets",
+    info.numTargets,
+    heldTargets[0],
+    (v) => {
+      state.cfg.num_targets = v;
+      onConfigChanged();
+    }
+  );
+  state.cfg.num_extra_targets = setupTargetSlider(
+    "numExtraTargets",
+    info.numExtraTargets,
+    heldTargets[1],
+    (v) => {
+      state.cfg.num_extra_targets = v;
+      onConfigChanged();
+    }
+  );
 
   // Buff bar: default traits at their first listed level, min two rows.
-  const defaults = info.defaultTraits.classNames.filter((c) => state.buffMeta.has(c));
-  const rows = Math.max(state.catalog.defaults.numBuffs.default, defaults.length);
-  state.cfg.buffs = [];
-  for (let i = 0; i < rows; i++) {
-    const cls = i < defaults.length ? defaults[i] : "NoBuff";
-    state.cfg.buffs.push(defaultBuffTuple(cls));
+  // Skipped when only the star level moved -- see the level handler.
+  if (!keepConfig) {
+    const defaults = info.defaultTraits.classNames.filter((c) => state.buffMeta.has(c));
+    const rows = Math.max(state.catalog.defaults.numBuffs.default, defaults.length);
+    state.cfg.buffs = [];
+    for (let i = 0; i < rows; i++) {
+      const cls = i < defaults.length ? defaults[i] : "NoBuff";
+      state.cfg.buffs.push(defaultBuffTuple(cls));
+    }
+    $("numBuffs").value = rows;
+    $("numBuffsValue").textContent = rows;
+    renderBuffRows();
   }
-  $("numBuffs").value = rows;
-  $("numBuffsValue").textContent = rows;
-  renderBuffRows();
 
   onConfigChanged();
 }
@@ -768,24 +794,34 @@ function defaultBuffTuple(cls) {
   return [cls, meta.levels[0], params];
 }
 
-function setupTargetSlider(id, defaultValue, onChange) {
+// `held` is a count the user already picked and that is being carried across
+// a level change; null means show the champion's own default. Returns the
+// override the config should now hold -- null when there isn't one, so the
+// champion's default keeps being whatever champInfo says it is.
+function setupTargetSlider(id, defaultValue, held, onChange) {
   const row = $(id + "Row");
   const slider = $(id);
   const label = $(id + "Value");
   if (!defaultValue || defaultValue <= 0) {
     row.hidden = true;
-    return;
+    return null;
   }
   row.hidden = false;
   slider.min = 1;
   slider.max = Math.max(3, defaultValue + 1);
-  slider.value = defaultValue;
-  label.textContent = defaultValue;
+  // The range only depends on the champion, so a held value chosen from this
+  // same slider still fits it; the clamp is for the case where it somehow
+  // does not, and the return keeps the config honest about the result.
+  const shown =
+    held == null ? defaultValue : Math.min(Math.max(held, 1), slider.max);
+  slider.value = shown;
+  label.textContent = shown;
   slider.oninput = () => (label.textContent = slider.value);
   slider.onchange = () => {
     label.textContent = slider.value;
     onChange(Number(slider.value));
   };
+  return held == null ? null : shown;
 }
 
 function resizeBuffRows(count) {

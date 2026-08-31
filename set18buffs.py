@@ -36,6 +36,7 @@ class_buffs = [
     "Primal",
     "Greenfather",
     "Hunter",
+    "Invoker",
 ]
 
 augments = [
@@ -325,10 +326,18 @@ class Executioner(Buff):
 class Riftbeast(Buff):
     levels = [0, 3, 7]
     display_name = "Riftbeast"
+    # "Is Alpha" is which single champion holds the Alpha Mark, not team
+    # membership, so this trait must not be offered in the Team Traits panel
+    # despite carrying a 0/1 parameter (see sim_entry's team_buffs discovery).
+    team_trait = False
 
     def __init__(self, level, params):
+        alpha_label = "Alpha" if params == 1 else "Not Alpha"
         super().__init__(
-            f"{self.display_name} {level}", level, params, phases=["preCombat", "onUpdate"]
+            f"{self.display_name} {level} ({alpha_label})",
+            level,
+            params,
+            phases=["preCombat", "onUpdate"],
         )
         # (5) shop-overrun and (10) +2 team size are meta/shop mechanics,
         # out of scope for a combat simulator -- only (3) and (7) are modeled.
@@ -339,9 +348,12 @@ class Riftbeast(Buff):
         self.interval = 5
         self.next_bonus = 0
 
+    def extraParameters():
+        return {"Title": "Is Alpha", "Min": 0, "Max": 1, "Default": 1}
+
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
-            if self.level >= 3:
+            if self.level >= 3 and self.params == 1:
                 # (3) Alpha Mark grants its holder a champion-specific unique
                 # buff. Only the boolean flag is modeled here -- the actual
                 # unique buffs (e.g. Mama Beak's Orange Buff armor shred) are
@@ -582,6 +594,43 @@ class Hunter(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             champion.bonus_ad.addStat(self.scaling[self.level])
+        return 0
+
+
+class Invoker(Buff):
+    """Invoker: Mana Regen for the whole team, more for Invokers.
+
+    "increased for Invokers" is instead-of, not on-top-of: the card's two
+    numbers ("1 | 3") are what a teammate gets and what an Invoker gets, so
+    an Invoker at (2) regens 3, not 1 + 3. The Is Invoker param picks which
+    half the holder is on.
+
+    Both halves step with the breakpoint, so the trait's level is a real
+    question even for a non-Invoker -- which is why it earns a level row in
+    Team Traits rather than a bare on/off.
+    """
+
+    levels = [0, 2, 3, 4, 5]
+    display_name = "Invoker"
+
+    def __init__(self, level, params):
+        super().__init__(
+            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+        )
+        # (2) 1 | 3, (3) 1 | 4, (4) 2 | 6, (5) 2 | 9
+        self.team_mana_regen = {0: 0, 2: 1, 3: 1, 4: 2, 5: 2}
+        self.invoker_mana_regen = {0: 0, 2: 3, 3: 4, 4: 6, 5: 9}
+
+    def extraParameters():
+        return {"Title": "Is Invoker", "Min": 0, "Max": 1, "Default": 1}
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase != "preCombat":
+            return 0
+        table = (
+            self.invoker_mana_regen if self.params == 1 else self.team_mana_regen
+        )
+        champion.manaRegen.addStat(table.get(self.level, 0))
         return 0
 
 
@@ -1170,6 +1219,139 @@ class CinderlingScarletBuff(Buff):
         return 0
 
 
+class PebblesChannel(Buff):
+    """Azure Laser: a channel that burns mana instead of spending it.
+
+    Every other cast in this simulator is instantaneous -- update() drops mana
+    to startingMana and moves on. Pebbles' does not: the cast opens a channel
+    that drains 35% of his *max* mana per second until he is empty, dealing
+    damage once a second while it runs. So the shape of the thing is a
+    postAbility that takes the mana back over (update() has already applied
+    the normal cast drain by then) and an onUpdate that meters it out.
+
+    The numbers are measured, not guessed -- see
+    replay_analysis/pebbles_channel_mana.py, which fits all of this against a
+    30fps clip and lands 102 of 106 channel frames exactly:
+
+      * the drain is 4 ticks a second, 0.35 * maxMana * 0.25 each. Scanning
+        the fraction peaks hard at 0.350, so the card's 35% is literal.
+      * mana regen keeps flowing the whole time. That is why nothing here
+        manalocks: a manalock would gate addMana() and stall the regen that
+        the clip plainly shows ticking through the channel.
+      * the Teal Buff's "2 Mana Regen for every 4 seconds channeled" is not
+        granted in 2-point lumps every 4 seconds. The rate climbs smoothly at
+        +0.5/s of channeling; the panel's integer readout is what makes it
+        look chunky, stepping 5 -> 6 -> 7 at exactly 2.000s intervals. The
+        continuous model beats a 2s staircase 102 fits to 87, and the
+        tooltip's literal 4s staircase 102 to 81.
+      * the bonus is never removed. It survives the channel that earned it
+        (the readout holds after mana bottoms out) and stacks across casts.
+
+    Two things are deliberately left out. The 3 flat Magic Resist the laser
+    shreds per tick is not modeled, per request. And the damage tick *phase*
+    -- whether the first tick lands on the cast or a second into it -- is the
+    one number the clip cannot settle, since the beam and the rest of the
+    board wash out any attempt to time the damage popups. `first_tick` below
+    takes the card's "each second while casting" literally, at one second in;
+    it is a named constant precisely because it is the piece most likely to
+    be wrong.
+
+    A caution about the emergent case: net drain is 0.35*maxMana - regen, and
+    the Teal Buff grows regen without bound while the channel runs. Give
+    Pebbles enough starting regen and the drain never wins, so he channels
+    for the rest of combat and never auto-attacks again. That is what the
+    numbers say rather than a modelling artifact, but it makes his DPS curve
+    turn discontinuous, so it is worth knowing before reading a result.
+    """
+
+    levels = [1]
+    display_name = "Azure Laser"
+
+    drain_fraction = 0.35  # of max mana, per second
+    tick = 0.25  # both the drain and the Teal Buff grant land here
+    damage_interval = 1.0
+    first_tick = 1.0  # unverified -- see the class docstring
+    # "2 Mana Regen for every 4 seconds channeled", as the per-second rate it
+    # actually is.
+    regen_growth_per_s = 0.5
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name, level, params, phases=["postAbility", "onUpdate"]
+        )
+        self.active = False
+        self.next_drain = 0.0
+        self.next_damage = 0.0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "postAbility":
+            self.start(time, champion)
+        elif phase == "onUpdate" and self.active:
+            self.run(time, champion)
+        return 0
+
+    def start(self, time, champion):
+        self.active = True
+        self.next_drain = time
+        self.next_damage = time + self.first_tick
+        # update() has already run the ordinary cast drain
+        # (curMana -= fullMana, += startingMana). The channel is what spends
+        # this cast's mana, so hand it back and let the ticks below take it.
+        champion.curMana = champion.fullMana.stat
+        # No manalock: regen is observed running throughout the channel, and
+        # addMana() refuses to pay out while manalockTime is ahead of now.
+        champion.manalockTime = -1
+        # He cannot auto-attack mid-channel. Pinned far ahead rather than
+        # estimated, since the channel's length is emergent -- released in
+        # finish() below, the same way NidaleeUlt releases its manalock.
+        champion.nextAttackTime = time + 9999
+
+    def run(self, time, champion):
+        """Pay out whichever ticks this frame has reached, in time order.
+
+        The two schedules collide constantly rather than occasionally: a
+        damage tick is one second, which is exactly four drain ticks, so every
+        damage tick lands on a drain tick. That makes their order a real
+        decision and not a detail. Damage goes first, so a tick due at the
+        instant the drain empties him still lands -- he was channelling right
+        up to that instant. Draining first would silently eat that tick, and
+        since the channel tends to end near a whole second it would eat it
+        systematically, not rarely.
+        """
+        while self.active:
+            due = min(self.next_drain, self.next_damage)
+            if time < due:
+                break
+            if self.next_damage <= self.next_drain:
+                self.next_damage += self.damage_interval
+                if champion.opponents:
+                    champion.multiTargetSpell(
+                        champion.opponents[:1],
+                        champion.items,
+                        time,
+                        1,
+                        champion.abilityScaling,
+                        "magical",
+                    )
+            else:
+                self.next_drain += self.tick
+                champion.curMana -= (
+                    self.drain_fraction * champion.fullMana.stat * self.tick
+                )
+                if getattr(champion, "riftbeast_alpha_mark", False):
+                    champion.manaRegen.addStat(self.regen_growth_per_s * self.tick)
+                if champion.curMana <= 0:
+                    self.finish(time, champion)
+
+    def finish(self, time, champion):
+        self.active = False
+        champion.curMana = 0
+        # The manalock ends with the channel, so he is free to attack and to
+        # start banking mana again on the same frame.
+        champion.nextAttackTime = time
+        champion.attack_progress = 1.0
+
+
 class AttunedInnate(Buff):
     """Attuned: the moon advances one phase before each of Alune's casts.
 
@@ -1605,10 +1787,7 @@ class MasterYiUlt(Buff):
             # (which would advance the count) or generate mana.
             champion.doAttack(attack, champion.items, time)
             if champion.ad_version:
-                champion.aspd.addStat(
-                    self.hits_per_strike
-                    * (self.as_per_hit + self.as_per_hit_scaling * champion.ap.stat)
-                )
+                champion.aspd.addStat(self.as_per_hit + self.as_per_hit_scaling * champion.ap.stat)
             else:
                 for _ in range(self.hits_per_strike):
                     champion.multiTargetSpell(

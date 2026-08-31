@@ -14,6 +14,7 @@ import set18_streamlit_main
 import set18buffs
 import set18champs
 import set18items
+import sim_entry
 import streamlit as st
 import utils
 
@@ -131,15 +132,10 @@ with st.sidebar:
         all_buffs, max_buffs=10, num_buffs=2, starting_buffs=champ.default_traits, champ_name=champ.name
     )
 
-    extra_buffs = []
-    for buff in buffs:
-        # Buff: ("Name", level, param)
-        levels = utils.class_for_name("set18buffs", buff[0]).levels
-        for level in levels:
-            if level != buff[1]:
-                extra_buffs.append(
-                    utils.class_for_name("set18buffs", buff[0])(level, buff[2])
-                )
+    # Buff: ("Name", level, param). Shared with the static frontend rather
+    # than spelled out twice -- sim_entry.trait_sweep_buffs explains why that
+    # one is the exception to the mirroring everything else here follows.
+    extra_buffs = sim_entry.trait_sweep_buffs(buffs)
 
     class_utilities.blackthorn_selector(champ, buffs)
 

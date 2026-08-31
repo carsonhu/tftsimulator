@@ -42,6 +42,16 @@
       "reference": 40,
       "why": "The live client's card says 45/68/101; cdragon's dump still says 40. Same lag as Nidalee.maxMana: the client is what the game shows, so the card reading wins."
     },
+    "Pebbles.ad": {
+      "code": 35,
+      "reference": 30,
+      "why": "The card says 35/53/79 and its own DPS row says 28/42/63, and 35 x 0.8 attack speed is exactly 28 where cdragon's 30 would give 24. The card is self-consistent and the dump is behind, same lag as Cinderling.ad."
+    },
+    "Pebbles.maxMana": {
+      "code": 70,
+      "reference": 65,
+      "why": "Card says 30/70, and the pebblesmana.mp4 channel confirms it independently: Azure Laser's drain fits 35% of 70 (6.125 a tick) on 99 of 106 frames, where 35% of 65 would be 5.69 a tick and fits 10. See replay_analysis/pebbles_channel_mana.py."
+    },
     "MamaBeak.ad": {
       "code": 50,
       "reference": 60,
@@ -190,6 +200,11 @@
       "ap": [285, 425, 3000],
       "read_on": "PBE 18.1g"
     },
+    "Pebbles.abilityScaling": {
+      "ad": [0, 0, 0],
+      "ap": [160, 240, 360],
+      "read_on": "live 2026-08-27 (champion card)"
+    },
     "Sivir.abilityScaling": {
       "ad": [190, 285, 1050],
       "ap": [15, 20, 100],
@@ -199,6 +214,16 @@
       "ad": [38, 57, 420],
       "ap": [3, 4, 40],
       "read_on": "PBE 18.1g"
+    },
+    "Teemo.abilityScaling": {
+      "ad": [0, 0, 0],
+      "ap": [60, 90, 135],
+      "read_on": "live 2026-08-27 (champion card)"
+    },
+    "Teemo.giantScaling": {
+      "ad": [0, 0, 0],
+      "ap": [135, 200, 310],
+      "read_on": "live 2026-08-27 (champion card)"
     },
     "Varus.abilityScaling": {
       "ad": [385, 580, 925],

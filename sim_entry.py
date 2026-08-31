@@ -178,6 +178,11 @@ def get_catalog():
     team_buffs = []
     for cls_name in set18buffs.class_buffs:
         cls = getattr(set18buffs, cls_name)
+        # team_trait = False opts a trait out even though its parameter shape
+        # would qualify: Riftbeast's "Is Alpha" is which champion holds the
+        # Alpha Mark, a champion-specific question, not team membership.
+        if not getattr(cls, "team_trait", True):
+            continue
         try:
             extra = cls.extraParameters()
         except Exception:
@@ -380,6 +385,66 @@ def _dps_at(xs, ys, t):
 # Slices and rows
 # ---------------------------------------------------------------------------
 
+def _champion_specific_flag(cls):
+    """True when a buff's 0/1 parameter asks about *this champion*.
+
+    The Team Traits panel discovers the mirror image of this: 0/1 params that
+    ask whether the board runs a trait this champion is not a member of. A
+    trait setting team_trait = False has opted out of that panel precisely
+    because its flag is not about membership -- Riftbeast's is which champion
+    carries the Alpha Mark, which is a fact about the unit in front of you.
+
+    That opt-out left those toggles with nowhere at all to be explored: not in
+    Team Traits, and not in the level sweep, which holds params fixed. So the
+    Trait slice picks them up, and "is this the Alpha?" becomes a row you can
+    compare against instead of a checkbox you have to flip and re-run.
+    """
+    if getattr(cls, "team_trait", True):
+        return False
+    try:
+        extra = cls.extraParameters()
+    except Exception:
+        return False
+    if not extra or extra.get("Options"):
+        return False
+    return (extra.get("Min"), extra.get("Max")) == (0, 1)
+
+
+def trait_sweep_buffs(buff_specs):
+    """The buff rows the Trait slice runs, for a bar of (name, level, params).
+
+    Imported by pages/ChampionSelector.py rather than mirrored there. The rest
+    of this file deliberately re-implements the pages so the two can be
+    compared, but that only works while the thing being compared is simple.
+    This one stopped being simple the moment it grew a second axis, and two
+    copies of a two-axis rule is how the frontends end up disagreeing about
+    which rows even exist -- which is a difference test_sim_entry's
+    number-for-number comparison would report as a missing row rather than as
+    the drift it is.
+    """
+    extra = []
+    for name, level, params in buff_specs:
+        cls = getattr(set18buffs, name)
+        # Every *other* level of the buff, at the flag it is already on.
+        for lvl in cls.levels:
+            if lvl != level:
+                extra.append(cls(lvl, params))
+        # And for a champion-specific flag like Riftbeast's Alpha Mark, the
+        # same levels with the flag flipped, so what the Mark is worth is a
+        # row you can read off against the others rather than something you
+        # have to toggle and re-run to see.
+        if _champion_specific_flag(cls):
+            flipped = 0 if params else 1
+            for lvl in cls.levels:
+                # Level 0 is the trait switched off, where the flag changes
+                # nothing: Buff.ability() returns before performAbility ever
+                # sees it. A flipped level-0 row would duplicate the one just
+                # added, differing only in a name that claims otherwise.
+                if lvl != 0:
+                    extra.append(cls(lvl, flipped))
+    return extra
+
+
 def _slice_inputs(slice_name, cfg):
     """(item objects, buff objects, run_blackthorn) for one radio option.
 
@@ -393,14 +458,7 @@ def _slice_inputs(slice_name, cfg):
         return [getattr(set18items, c)() for c in classes] + no_item, [], False
 
     if slice_name == "Trait":
-        # Every *other* level of each buff currently in the buff bar.
-        extra = []
-        for name, level, params in cfg.get("buffs", []):
-            cls = getattr(set18buffs, name)
-            for lvl in cls.levels:
-                if lvl != level:
-                    extra.append(cls(lvl, params))
-        return no_item, extra, False
+        return no_item, trait_sweep_buffs(cfg.get("buffs", [])), False
 
     if slice_name == "Augment/Buff":
         classes = sorted(set18buffs.augments)
