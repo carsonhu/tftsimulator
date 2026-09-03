@@ -1,7 +1,10 @@
+import math
+
 from role import Role
-from set18buffs import (AdaptorInnate, AriseBuff, AsheTrail, AttunedInnate,
-                        CaitlynHeadshotBuff, CinderlingScarletBuff,
-                        GrompPurpleBuff, MasterYiUlt, NidaleeUlt,
+from set18buffs import (AdaptorInnate, ApheliosOnslaught, AriseBuff, AsheTrail,
+                        AttunedInnate, CaitlynHeadshotBuff,
+                        CinderlingScarletBuff, GrompPurpleBuff,
+                        KayleAscensions, MasterYiUlt, NidaleeUlt,
                         PebblesChannel, SivirBounces, TinyBeaksBuff)
 
 import status
@@ -31,6 +34,8 @@ champ_list = [
     "Cinderling",
     "Teemo",
     "Pebbles",
+    "Aphelios",
+    "Kayle",
 ]
 
 
@@ -346,7 +351,7 @@ class Cassiopeia(Champion):
         self.castTime = 1
         self.poison_duration = 15
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [440, 660, 1050])
+    abilityScaling = create_ability_scaling([0, 0, 0], [400, 600, 950])
 
     def performAbility(self, opponents, items, time):
         # Noxious Blast: poison target 1 and target 2 for total magic damage
@@ -524,7 +529,7 @@ class Ahri(Champion):
         self.castTime = 1.8
         self.num_targets = 5
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [450, 675, 3500])
+    abilityScaling = create_ability_scaling([0, 0, 0], [425, 640, 3500])
 
     def performAbility(self, opponents, items, time):
         # Spirit Bomb: 1 target at the epicenter (full damage), the next 2
@@ -1111,17 +1116,9 @@ class Camille(Champion):
             level,
             Role.ATTACK_FIGHTER,
         )
-        # Her other trait is Coven, which does nothing in combat and so has no
-        # buff class; leaving it out of this list keeps it from eating a buff
-        # bar slot that can't be filled (same as Akali and Inferno). The bin
-        # still pairs her with Slayer instead of Ravager, a patch behind the
-        # card -- and Slayer isn't a set-18 trait at all.
         self.default_traits = ["Ravager"]
-        self.castTime = 1.0  # per request
+        self.castTime = 1.1
 
-    # The card's 170/255/435 is one row, but its breakdown is two: an AD-scaled
-    # part and an AP-scaled part (160 + 10 = 170, 240 + 15 = 255, 410 + 25 =
-    # 435), which is what makes AP worth anything on her.
     abilityScaling = create_ability_scaling([160, 240, 410], [10, 15, 25])
 
     def performAbility(self, opponents, items, time):
@@ -1308,7 +1305,7 @@ class Ashe(Champion):
 class Cinderling(Champion):
     def __init__(self, level):
         hp = 500
-        atk = 45
+        atk = 40
         curMana = 0
         fullMana = 50
         aspd = 0.7
@@ -1331,7 +1328,7 @@ class Cinderling(Champion):
         self.items.append(CinderlingScarletBuff())
         self.notes = "Wound and Burn are not modeled."
 
-    abilityScaling = create_ability_scaling([340, 510, 765], [30, 45, 70])
+    abilityScaling = create_ability_scaling([310, 465, 700], [30, 45, 70])
 
     def performAbility(self, opponents, items, time):
         # Razor Leaves: five leaves converge on the current target; modeled as
@@ -1444,4 +1441,158 @@ class Pebbles(Champion):
         # The cast itself deals nothing: it opens the channel, and
         # PebblesChannel (see __init__) meters out every point of damage and
         # every point of mana from there.
+        return 0
+
+
+class Aphelios(Champion):
+    """Moonlight's Onslaught: 2s of Severum swipes, then a blast.
+
+    The cast is 3.5s, but almost nothing about it happens at cast time. The
+    swipes are a DoT on the target (status.ApheliosSeverumStatus); the two
+    attacks the onslaught counts as, and the blast that follows it, are a
+    schedule on Aphelios (ApheliosOnslaught, see __init__).
+    """
+
+    # The onslaught's length, which is not the cast time.
+    swipe_window = 2.0
+    # Swipes at 0 bonus Attack Speed. The card's count is "%i:scaleAS%", i.e.
+    # this many times (1 + bonus AS), floored, off the Attack Speed at the
+    # START of the cast. The one reading available is 8 swipes at +65%, and 5
+    # is the only whole number that produces it (5 x 1.65 = 8.25); +65% sits
+    # in the middle of the [+60%, +80%) band that gives 8, so it is not a
+    # near-miss for 4 or 6 either. A reading at some other Attack Speed is
+    # what would settle it, and this is the constant to move if one disagrees.
+    base_swipes = 5
+
+    def __init__(self, level):
+        hp = 850
+        atk = 60
+        curMana = 20
+        fullMana = 70
+        aspd = 0.8
+        armor = 40
+        mr = 40
+        super().__init__(
+            "Aphelios",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_MARKSMAN,
+        )
+        self.default_traits = ["Lunar", "Rapidfire"]
+        self.castTime = 3.5
+        self.items.append(ApheliosOnslaught())
+
+    # Per swipe. Pure AD: the card's only AP row is on the blast.
+    swipeScaling = create_ability_scaling(
+        [70, 105, 850], [0, 0, 0], func_name="swipeScaling"
+    )
+    # The blast, as two halves like Sivir's and Ashe's: 450 + 40 = 490,
+    # 675 + 60 = 735, 5000 + 225 = 5225, which is the card's row exactly. The
+    # 3-star row is a spike rather than the usual step -- that is what the card
+    # says.
+    blastScaling = create_ability_scaling(
+        [450, 675, 5000], [40, 60, 225], func_name="blastScaling"
+    )
+
+    def swipeCount(self):
+        """Swipes this onslaught lands, off the current Attack Speed."""
+        # Measured against his own base rather than a hardcoded 0.8, the same
+        # way Warwick's cast time is, so this stays "bonus AS" if that base is
+        # ever rebalanced. Reading .stat picks up both halves of Aspd (the
+        # additive % and any multiplier), which is what the card means by
+        # attack speed.
+        ratio = self.aspd.stat / self.aspd.base if self.aspd.base else 1
+        # One swipe is the floor: a slow can shorten the onslaught, but the
+        # card promises swipes, so it can never zero it out.
+        return max(1, math.floor(self.base_swipes * ratio))
+
+    def performAbility(self, opponents, items, time):
+        # Equip Severum: the swipes go on the current target as a DoT, spread
+        # across the 2s window. The count is fixed here, at cast time, so
+        # attack speed gained during the onslaught buys no extra swipes.
+        #
+        # Nothing else happens now -- ApheliosOnslaught (see __init__) pays the
+        # two attack credits at +0.75s/+1.5s and fires the blast at +2s, off
+        # postAbility, which runs immediately after this.
+        if not opponents:
+            return 0
+        opponents[0].applyStatus(
+            status.ApheliosSeverumStatus(),
+            self,
+            time,
+            self.swipe_window,
+            (self.swipeScaling, self.swipeCount()),
+        )
+        return 0
+
+
+class Kayle(Champion):
+    """Solar Judgement: a passive that grows with her own star level.
+
+    Nothing about Kayle is a cast -- her card reads 0/0 mana -- so fullMana is
+    -1 (canCast() needs fullMana > -1) and KayleAscensions owns the whole
+    ability. Her 10 base AD is not a typo either: the attack is a delivery
+    mechanism for the magic damage bolted to it.
+    """
+
+    # 3rd Ascension only: how many units the wave catches. Left at 0 below
+    # 3-star so the page does not offer a slider for a wave that does not
+    # exist yet.
+    wave_targets = 2
+
+    def __init__(self, level):
+        hp = 550
+        atk = 10
+        curMana = 0
+        # The card says 0/0 mana. 0 would make canCast() true on the first
+        # frame and every frame after (curMana >= fullMana, and fullMana > -1);
+        # -1 is this simulator's way of saying "never casts", the same as
+        # Caitlyn and Master Yi. See patch_pin.json's acknowledged list.
+        fullMana = -1
+        aspd = 0.75
+        armor = 30
+        mr = 30
+        super().__init__(
+            "Kayle",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MAGIC_SPECIALIST,
+        )
+        self.default_traits = ["Solar", "Rapidfire"]
+        self.num_targets = self.wave_targets if level >= KayleAscensions.wave_from else 0
+        self.items.append(KayleAscensions())
+        self.notes = (
+            "Her ascensions come from her star level and stack: every Kayle "
+            "gets the bonus magic damage on attacks, a 2-star adds the Shred, "
+            "a 3-star adds the wave. The Shred is modeled as a flat 20% Magic "
+            "Resist reduction on every enemy from combat start rather than a "
+            "2s window re-applied per attack. The 4th ascension needs a "
+            "4-star and is not modeled."
+        )
+
+    # 1st Ascension: the magic damage every attack carries, at every star.
+    ascensionScaling = create_ability_scaling(
+        [0, 0, 0], [56, 84, 98], func_name="ascensionScaling"
+    )
+    # 3rd Ascension: the wave, per unit it catches. Flat across stars -- the
+    # card really does say 40/40/40.
+    waveScaling = create_ability_scaling(
+        [0, 0, 0], [40, 40, 40], func_name="waveScaling"
+    )
+
+    def performAbility(self, opponents, items, time):
+        # Never actually called -- fullMana = -1 keeps canCast() False. Solar
+        # Judgement is a passive, handled by KayleAscensions (see __init__).
         return 0

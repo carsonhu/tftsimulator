@@ -8,6 +8,7 @@ class Role(Enum):
     ATTACK_ASSASSIN = "Attack Assassin"
     ATTACK_MARKSMAN = "Attack Marksman"
     ATTACK_CASTER = "Attack Caster"
+    MAGIC_SPECIALIST = "Magic Specialist"
     MAGIC_TANK = "Magic Tank"
     MAGIC_CASTER = "Magic Caster"
     MAGIC_ASSASSIN = "Magic Assassin"

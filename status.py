@@ -866,4 +866,58 @@ class ZyraPlantStatus(Status):
                 )
             self.attacks_remaining -= 1
             self.next_proc += self.interval
+        super().update(champion, time)
+
+
+class ApheliosSeverumStatus(Status):
+    # Moonlight's Onslaught's swipes: a fixed COUNT of Severum hits spread
+    # evenly across the 2s onslaught, not a listed total split over a
+    # duration. Each swipe is its own damage instance in game, so like
+    # CassiopeiaPoisonStatus every tick goes out through the caster's
+    # multiTargetSpell -- it reads his live AD, takes amps, and feeds
+    # on-spell-damage item effects rather than being locked in at cast.
+    #
+    # The count is decided at cast time (set18champs.Aphelios.swipeCount) and
+    # passed in rather than recomputed here, because it floors off his Attack
+    # Speed at the START of the cast: attack speed gained during the onslaught
+    # buys no extra swipes.
+    #
+    # This does not stack -- one status name, so a recast refreshes it. The
+    # 3.5s cast is longer than the 2s window anyway, so the two can never
+    # actually overlap unless something starts shortening casts.
+    def __init__(self, name="Aphelios Severum"):
+        super().__init__(name)
+        self.scaling = zero_scaling
+        self.interval = 0.25
+        self.next_proc = 0
+        self.swipes_remaining = 0
+
+    def _start(self, time, duration, params):
+        # params: (per-swipe scaling, swipe count). The swipes are evenly
+        # spaced across the window, so the interval falls out of the count
+        # rather than being a constant.
+        self.scaling, swipes = params
+        self.swipes_remaining = swipes
+        self.interval = duration / swipes if swipes else duration
+        self.next_proc = time + self.interval
+        return True
+
+    def applicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def update(self, champion, time):
+        caster = self.opponent
+        if self.active and caster is not None:
+            # Ticking before super().update() is what makes the last swipe
+            # land: it comes due at exactly the wearoff time, and on a frame
+            # that is past both, this pays it out before the status expires.
+            while self.swipes_remaining > 0 and time >= self.next_proc:
+                caster.multiTargetSpell(
+                    [champion], caster.items, time, 1, self.scaling, "physical"
+                )
+                self.swipes_remaining -= 1
+                self.next_proc += self.interval
         super().update(champion, time)

@@ -209,6 +209,9 @@ def get_catalog():
                 # None -> the param is the 0/1 flag and the panel passes 0.
                 # A list -> the panel offers these and passes the index.
                 "options": list(options) if options else None,
+                # Per-option stat icons, when the trait has art to show for
+                # each choice (Greenfather's hexes). None -> just the picker.
+                "optionIcons": list(getattr(cls, "option_stats", []) or []) or None,
                 "paramDefault": extra.get("Default", 0),
                 # False -> the UI shows a checkbox and uses onLevel; True ->
                 # it shows a level picker.
@@ -425,6 +428,20 @@ def trait_sweep_buffs(buff_specs):
     extra = []
     for name, level, params in buff_specs:
         cls = getattr(set18buffs, name)
+        # A trait whose parameter is the real dial rather than a flag sweeps
+        # that instead: Solar has one breakpoint, so its levels are just on and
+        # off, and what the tab is being asked is what each 3-star is worth.
+        if getattr(cls, "sweep_params", False):
+            for lvl in cls.levels:
+                for opt in range(len(cls.extraParameters()["Options"])):
+                    # With the trait off the parameter changes nothing, so it
+                    # contributes one row, not one per option -- and neither
+                    # branch re-runs the combination already configured, which
+                    # is the baseline every row is read against.
+                    if (lvl, opt) == (level, params) or (lvl == 0 and opt != params):
+                        continue
+                    extra.append(cls(lvl, opt))
+            continue
         # Every *other* level of the buff, at the flag it is already on.
         for lvl in cls.levels:
             if lvl != level:

@@ -33,6 +33,7 @@ class_buffs = [
     "Ravager",
     "Blackthorn",
     "Lunar",
+    "Solar",
     "Primal",
     "Greenfather",
     "Hunter",
@@ -566,6 +567,136 @@ class Lunar(Buff):
         return 0
 
 
+class Solar(Buff):
+    """Solar: bonus magic damage on everything, scaled by 3-star Solars.
+
+    Solar has a single breakpoint, (3), so its level is on/off and the real
+    dial is how many unique 3-star Solar champions the board runs. That is the
+    parameter -- and it is what the Trait slice sweeps, since sweeping a
+    one-breakpoint level answers nothing.
+
+    The bonus is a share of the damage that triggered it, taken PRE-mitigation
+    and dealt as its own magic instance: 7% of a 100-damage hit is 7 magic
+    damage, which the target's Magic Resist then reduces. That is not the same
+    thing as a 7% damage amp, and the difference is not small -- an amp would
+    be reduced by the *Armor* an attack was already being reduced by. The two
+    only agree when a target's Armor and Magic Resist are equal, which is why
+    this splits the hit in two rather than adding to dmgMultiplier.
+
+    Two rows of the card are deliberately not modeled. The 5% max Health
+    shield protects the champion being measured, and nothing in this sim
+    damages it, so it would price at exactly zero. And the 8-three-star row (a
+    3-star ascending to 4-star every 4s) is out of reach on purpose: the
+    parameter stops at 5, and 4-star ascension is not modeled anywhere.
+    """
+
+    levels = [0, 3]
+    display_name = "Solar"
+    # The Trait slice varies the parameter instead of the level. Solar has one
+    # breakpoint, so its level rows are just on and off, while "how many
+    # 3-stars" is the question the tab exists to answer.
+    sweep_params = True
+
+    # The parameter's options. They are the count itself, so params indexes
+    # straight in and `int(params)` is the number of 3-stars.
+    three_star_counts = ["0", "1", "2", "3", "4", "5"]
+
+    # Team-wide, at every breakpoint: a share of damage dealt, again as damage.
+    bonus_magic_damage = 0.07
+    # Added to that share (and to the shield) by each unique 3-star Solar.
+    per_three_star = 0.015
+    # 3-stars needed for the Attack Speed and resist row...
+    threshold1 = 3
+    threshold1_aspd = 18
+    threshold1_resists = 15
+    # ...and for half the bonus to become true damage.
+    threshold2 = 5
+    threshold2_true_conversion = 0.5
+    # Not modeled (see the class docstring); named so patch_check can still
+    # see the number and report it moving.
+    shield_ratio = 0.05
+
+    def __init__(self, level, params):
+        # The count is meaningless with the trait off, and six identical
+        # "off" rows differing only in a name that claims otherwise would be
+        # worse than one.
+        name = (
+            f"{self.display_name} {level}"
+            if level == 0
+            else f"{self.display_name} {level} ({self.threeStars(params)}x 3-star)"
+        )
+        super().__init__(
+            name,
+            level,
+            params,
+            phases=["preCombat", "onDealDamage", "PostOnDealDamage"],
+        )
+        # Set on onDealDamage, spent on PostOnDealDamage -- see performAbility.
+        self.pending = 0.0
+
+    @classmethod
+    def threeStars(cls, params):
+        try:
+            return max(0, min(int(params), len(cls.three_star_counts) - 1))
+        except (TypeError, ValueError):
+            return 0
+
+    def extraParameters():
+        return {
+            "Title": "# of 3-stars",
+            "Min": 0,
+            "Max": len(Solar.three_star_counts) - 1,
+            "Default": 0,
+            "Options": Solar.three_star_counts,
+        }
+
+    def bonusRatio(self):
+        """The share of each hit that comes back as bonus damage."""
+        return self.bonus_magic_damage + self.per_three_star * self.threeStars(
+            self.params
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            if self.threeStars(self.params) >= self.threshold1:
+                champion.aspd.addStat(self.threshold1_aspd)
+                champion.armor.addStat(self.threshold1_resists)
+                champion.mr.addStat(self.threshold1_resists)
+            return 0
+
+        if phase == "onDealDamage":
+            # input_ is the damage BEFORE resists, which is the base the card
+            # takes its percentage of. Only remembered here: the target of
+            # this instance is not known until doDamage records it, one line
+            # further down, so the payout waits for PostOnDealDamage.
+            self.pending = input_ * self.bonusRatio()
+            return input_
+
+        # PostOnDealDamage: lastDamagedOpponent is now this instance's target.
+        bonus, self.pending = self.pending, 0.0
+        target = champion.lastDamagedOpponent
+        if bonus <= 0 or target is None:
+            return 0
+        # Above the second threshold half of it arrives as true damage
+        # instead, which is a different mitigation, not a bigger number.
+        true_share = (
+            self.threshold2_true_conversion
+            if self.threeStars(self.params) >= self.threshold2
+            else 0.0
+        )
+        for amount, dtype in (
+            (bonus * (1 - true_share), "magical"),
+            (bonus * true_share, "true"),
+        ):
+            if amount <= 0:
+                continue
+            # No items: this is damage caused by a damage instance, and
+            # letting it back through the on-damage phases would have it
+            # trigger itself. Same reason SoulAwakening passes [] here.
+            champion.doDamage(target, [], 0, amount, amount, dtype, time)
+        return 0
+
+
 class Hunter(Buff):
     """Hunter: the Attack Damage half only.
 
@@ -693,6 +824,10 @@ class Greenfather(Buff):
 
     # Ordered as the parameter's options, so params indexes straight in.
     hexes = ["Flower", "Mushroom", "Water"]
+    # The stat each hex grants, for the icon the Team Traits panel draws
+    # beside the picker. Declared here rather than hardcoded in the frontend:
+    # which stat a Flower gives is a fact about this trait, not about the UI.
+    option_stats = ["scaleAS", "scaleDA", "scaleManaRegen"]
     # Per Ivern star. The 3-star row really is that much larger than the
     # 2-star; that is what the champion card says.
     flower_aspd = [10, 15, 200]  # % Attack Speed
@@ -1714,6 +1849,86 @@ class AsheTrail(Buff):
             )
 
 
+class ApheliosOnslaught(Buff):
+    """Moonlight's Onslaught's schedule: two attack credits, then the blast.
+
+    The swipes themselves are a DoT on the target
+    (status.ApheliosSeverumStatus). What is left is Aphelios's own side of the
+    cast, and both halves of it are a schedule rather than something that can
+    happen at cast time -- which is why this is a buff and not more lines in
+    performAbility.
+
+      * The onslaught counts as 2 attacks, however many swipes it lands, and
+        they are paid at +0.75s and +1.5s. Everything that reads an attack is
+        a rate -- Rapidfire's stacks, Guinsoo's ramp, an on-hit item -- so
+        handing both over on the cast would credit them up to 1.5s early on a
+        unit measured at 5 and 10 seconds.
+      * The blast fires "after the onslaught finishes", i.e. at the end of the
+        2s swipe window, not at the end of the 3.5s cast. It re-reads his
+        current opponents instead of the list captured at cast, for the same
+        reason KarmaTetherStatus's burst does.
+    """
+
+    levels = [1]
+    display_name = "Moonlight's Onslaught"
+
+    # Offsets from the cast.
+    attack_credits = (0.75, 1.5)
+    blast_at = 2.0
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name, level, params, phases=["postAbility", "onUpdate"]
+        )
+        self.pending_attacks = []
+        self.pending_blasts = []
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "postAbility":
+            self.pending_attacks.extend(
+                time + offset for offset in self.attack_credits
+            )
+            self.pending_attacks.sort()
+            self.pending_blasts.append(time + self.blast_at)
+            self.pending_blasts.sort()
+        elif phase == "onUpdate":
+            # A frame is 1/30s and nothing here is closer together than
+            # 0.5s, so these normally pay out at most one apiece per frame;
+            # the loops are for the overlapping-cast case the sorts allow.
+            while self.pending_attacks and time >= self.pending_attacks[0]:
+                self.pending_attacks.pop(0)
+                self.creditAttack(champion, time)
+            while self.pending_blasts and time >= self.pending_blasts[0]:
+                self.pending_blasts.pop(0)
+                if champion.opponents:
+                    champion.multiTargetSpell(
+                        champion.opponents,
+                        champion.items,
+                        time,
+                        1,
+                        champion.blastScaling,
+                        "physical",
+                    )
+        return 0
+
+    def creditAttack(self, champion, time):
+        # An attack for bookkeeping only. Its damage is already accounted for
+        # -- it is one of the swipes the DoT is ticking out -- but it still has
+        # to advance numAttacks and fire the pre/postAttack item phases, which
+        # is what Rapidfire, Guinsoo and the on-hit items actually count.
+        # multiTargetSpell with 0 targets is exactly that: the attack
+        # bookkeeping with no second helping of damage.
+        champion.multiTargetSpell(
+            champion.opponents,
+            champion.items,
+            time,
+            0,
+            status.zero_scaling,
+            "physical",
+            numAttacks=1,
+        )
+
+
 class CaitlynHeadshotBuff(Buff):
     levels = [1]
     display_name = "Headshot"
@@ -1799,6 +2014,83 @@ class MasterYiUlt(Buff):
                         "magical",
                     )
         return input_
+
+
+class KayleAscensions(Buff):
+    """Solar Judgement: the ascensions Kayle's star level turns on.
+
+    Not a cast -- Kayle has no mana at all, and fullMana = -1 keeps canCast()
+    false -- so the whole ability lives here, the way MasterYiUlt and
+    CaitlynHeadshotBuff do. The ascensions stack rather than replace: a 3-star
+    has all three at once.
+
+      1st (always)  every attack lands a second instance for the card's magic
+                    damage. It goes out through multiTargetSpell rather than a
+                    bare doDamage so it reads her live Ability Power, takes
+                    amps, and is a real damage instance -- which for a champion
+                    whose AD is 10 is not a detail, it is nearly all of her.
+      2nd (2-star)  the card Shreds whoever the attack hit for 2 seconds. Per
+                    request this is a flat 20% on every enemy from combat
+                    start, which is where a champion attacking once a second
+                    into a 2s Shred lands anyway, minus the first attack.
+      3rd (3-star)  the attack also fires a wave for the card's flat secondary
+                    damage. "All other units hit" is modeled as num_targets
+                    units (default 2): every opponent in this sim is the same
+                    dummy, so which of them the wave catches is not a
+                    distinction it can make -- only how many.
+
+    The 4th ascension (infinite range, every 3rd wave enlarged) is not modeled:
+    it needs a 4-star, and nothing here ascends anyone past 3.
+    """
+
+    levels = [1]
+    display_name = "Solar Judgement"
+
+    # 2nd Ascension. The card's 2s duration is not used -- see the class
+    # docstring; the status is applied once and never lapses.
+    shred = 0.20
+    shred_from = 2
+    wave_from = 3
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name, level, params, phases=["preCombat", "onAttack"]
+        )
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            if champion.level >= self.shred_from:
+                for opponent in champion.opponents:
+                    opponent.applyStatus(
+                        status.MRReduction("Kayle Shred"),
+                        champion,
+                        time,
+                        # Longer than any combat this sim runs: the Shred is
+                        # permanent here, so an expiry would only be a bug
+                        # waiting for someone to raise the duration slider.
+                        9999,
+                        1 - self.shred,
+                    )
+            return 0
+
+        # onAttack: input_ is the attack's opponent list, and the bonus lands
+        # on whoever it hit.
+        opponents = input_ if input_ else champion.opponents
+        if not opponents:
+            return 0
+        champion.multiTargetSpell(
+            opponents, champion.items, time, 1, champion.ascensionScaling, "magical"
+        )
+        if champion.level >= self.wave_from and champion.num_targets > 0:
+            champion.multiTargetSpell(
+                opponents,
+                champion.items,
+                time,
+                champion.num_targets,
+                champion.waveScaling,
+                "magical",
+            )
+        return 0
 
 
 class RumbleUlt(Buff):

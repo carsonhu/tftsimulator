@@ -27,6 +27,11 @@
       "reference": 3,
       "why": "-1 disables casting entirely (canCast needs fullMana > -1). Headshot is an attack replacement, not a cast, so she must never spend mana."
     },
+    "Kayle.maxMana": {
+      "code": -1,
+      "reference": 0,
+      "why": "Her card reads 0/0 mana -- she has no ability resource at all. 0 would make canCast() true on every frame (curMana >= fullMana, and fullMana > -1), so -1 is the only value that means what the card does. Solar Judgement is a passive, handled by KayleAscensions."
+    },
     "MasterYi.maxMana": {
       "code": -1,
       "reference": 3,
@@ -69,6 +74,16 @@
       "ad": [0, 0, 0],
       "ap": [450, 675, 3500],
       "read_on": "live 2026-08-26 (tactics.tools)"
+    },
+    "Aphelios.blastScaling": {
+      "ad": [450, 675, 5000],
+      "ap": [40, 60, 225],
+      "read_on": "live 2026-09-03 (champion card)"
+    },
+    "Aphelios.swipeScaling": {
+      "ad": [70, 105, 850],
+      "ap": [0, 0, 0],
+      "read_on": "live 2026-09-03 (champion card)"
     },
     "Akali.adAbilityScaling": {
       "ad": [145, 220, 345],
@@ -169,6 +184,16 @@
       "ad": [0, 0, 0],
       "ap": [280, 420, 630],
       "read_on": "unverified"
+    },
+    "Kayle.ascensionScaling": {
+      "ad": [0, 0, 0],
+      "ap": [56, 84, 98],
+      "read_on": "live 2026-09-03 (champion card)"
+    },
+    "Kayle.waveScaling": {
+      "ad": [0, 0, 0],
+      "ap": [40, 40, 40],
+      "read_on": "live 2026-09-03 (champion card)"
     },
     "LeBlanc.abilityScaling": {
       "ad": [0, 0, 0],

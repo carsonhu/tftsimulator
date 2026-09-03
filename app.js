@@ -260,9 +260,6 @@ const STAT_ICONS = {
   },
 };
 
-// Which stat each Hex grants, by the option index set18buffs stores.
-const HEX_STATS = ["scaleAS", "scaleDA", "scaleManaRegen"];
-
 function statIcon(key) {
   const stat = STAT_ICONS[key];
   if (!stat) return null;
@@ -1068,17 +1065,22 @@ function renderTeamTraits() {
         // A native <select> cannot put art inside its options, so the stat
         // sits beside it and follows the choice -- which is the useful half
         // anyway: what you want to see is what the hex you picked grants.
-        const slot = document.createElement("span");
-        slot.className = "stat-slot";
-        const drawStat = () => {
-          slot.innerHTML = "";
-          const icon = statIcon(HEX_STATS[Number(optionSel.value)]);
-          if (icon) slot.appendChild(icon);
-        };
-        drawStat();
-        label.appendChild(slot);
-        optionSel.onchange = () => {
+        // Only for a trait whose options each stand for a stat: Solar's are a
+        // count, and a count has no icon to draw.
+        let drawStat = null;
+        if (trait.optionIcons) {
+          const slot = document.createElement("span");
+          slot.className = "stat-slot";
+          drawStat = () => {
+            slot.innerHTML = "";
+            const icon = statIcon(trait.optionIcons[Number(optionSel.value)]);
+            if (icon) slot.appendChild(icon);
+          };
           drawStat();
+          label.appendChild(slot);
+        }
+        optionSel.onchange = () => {
+          if (drawStat) drawStat();
           store(Number(sel.value), Number(optionSel.value));
         };
       }
