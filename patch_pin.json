@@ -19,8 +19,8 @@
     "not listed here -- that is the prompt to go and look, not a failure."
   ],
   "channel": "latest",
-  "patch": "live 2026-08-26 (tactics.tools)",
-  "accepted": "2026-08-26",
+  "patch": "live 18.1d (tactics.tools)",
+  "accepted": "2026-09-03",
   "acknowledged": {
     "Caitlyn.maxMana": {
       "code": -1,
@@ -72,8 +72,8 @@
   "card_values": {
     "Ahri.abilityScaling": {
       "ad": [0, 0, 0],
-      "ap": [450, 675, 3500],
-      "read_on": "live 2026-08-26 (tactics.tools)"
+      "ap": [425, 640, 3500],
+      "read_on": "live 18.1d (tactics.tools)"
     },
     "Aphelios.blastScaling": {
       "ad": [450, 675, 5000],
@@ -137,13 +137,13 @@
     },
     "Cassiopeia.abilityScaling": {
       "ad": [0, 0, 0],
-      "ap": [440, 660, 1050],
-      "read_on": "PBE 18.1g"
+      "ap": [400, 600, 950],
+      "read_on": "live 18.1d (tactics.tools)"
     },
     "Cinderling.abilityScaling": {
-      "ad": [340, 510, 765],
+      "ad": [310, 465, 700],
       "ap": [30, 45, 70],
-      "read_on": "live 2026-08-26"
+      "read_on": "live 18.1d (tactics.tools)"
     },
     "Ezreal.abilityScaling": {
       "ad": [235, 355, 1200],
@@ -259,6 +259,11 @@
       "ad": [215, 325, 500],
       "ap": [0, 0, 0],
       "read_on": "PBE 18.1g"
+    },
+    "Xayah.abilityScaling": {
+      "ad": [72, 108, 165],
+      "ap": [0, 0, 0],
+      "read_on": "live 2026-09-03 (champion card)"
     },
     "Yunara.abilityScaling": {
       "ad": [150, 255, 400],

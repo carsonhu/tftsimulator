@@ -5,7 +5,8 @@ from set18buffs import (AdaptorInnate, ApheliosOnslaught, AriseBuff, AsheTrail,
                         AttunedInnate, CaitlynHeadshotBuff,
                         CinderlingScarletBuff, GrompPurpleBuff,
                         KayleAscensions, MasterYiUlt, NidaleeUlt,
-                        PebblesChannel, SivirBounces, TinyBeaksBuff)
+                        PebblesChannel, SivirBounces, TinyBeaksBuff,
+                        XayahFeathers)
 
 import status
 from champion import Champion
@@ -36,6 +37,7 @@ champ_list = [
     "Pebbles",
     "Aphelios",
     "Kayle",
+    "Xayah",
 ]
 
 
@@ -1595,4 +1597,47 @@ class Kayle(Champion):
     def performAbility(self, opponents, items, time):
         # Never actually called -- fullMana = -1 keeps canCast() False. Solar
         # Judgement is a passive, handled by KayleAscensions (see __init__).
+        return 0
+
+
+class Xayah(Champion):
+    def __init__(self, level):
+        hp = 450
+        atk = 45
+        curMana = 0
+        fullMana = 50
+        aspd = 0.7
+        armor = 25
+        mr = 25
+        super().__init__(
+            "Xayah",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_MARKSMAN,
+        )
+        # Elderwood is deliberately absent: it grants placeable plants, which
+        # are separate units on the board and nothing this simulator can
+        # price. Leaving it out keeps it from eating a buff bar slot that
+        # can't be filled (same as Teemo's Sprykin and Camille's Coven).
+        self.default_traits = ["Fae", "Rapidfire"]
+        self.castTime = 0.7  # per request
+        self.items.append(XayahFeathers())
+        self.notes = (
+            "The feathers' 2 Armor reduction is not modeled, and neither is "
+            "Elderwood -- its plants are separate units."
+        )
+
+    # Per feather.
+    abilityScaling = create_ability_scaling([72, 108, 165], [0, 0, 0])
+
+    def performAbility(self, opponents, items, time):
+        # Deadly Plumage: no direct cast damage -- XayahFeathers (see
+        # __init__) handles the +50% Attack Speed, the manalock-until-5-
+        # attacks gate, and replacing the next 5 attacks with feathers.
         return 0

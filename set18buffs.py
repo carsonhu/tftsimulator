@@ -25,6 +25,7 @@ def get_classes_from_file(file_path):
 class_buffs = [
     "Rapidfire",
     "Blossom",
+    "Fae",
     "Executioner",
     "Riftbeast",
     "Summoner",
@@ -694,6 +695,64 @@ class Solar(Buff):
             # letting it back through the on-damage phases would have it
             # trigger itself. Same reason SoulAwakening passes [] here.
             champion.doDamage(target, [], 0, amount, amount, dtype, time)
+        return 0
+
+
+class Fae(Buff):
+    """Fae: Attack Damage and Ability Power per Pixie, for Fae champions.
+
+    The level picks the rate and the Pixie count multiplies it, which is why
+    the count is the parameter: Pixies are attracted by the whole team's
+    damage, healing and shielding, so how many are out is a fact about the
+    board's fight rather than something this simulator can derive from the one
+    champion in front of it. It defaults to 7 because that is where the count
+    stops buying stats -- past 7 the Pixies turn Golden and grant gold instead.
+
+    There is no Team Traits row for this. The stats go to Fae champions only,
+    so a board running Fae hands a non-Fae champion nothing at all, and a
+    trait with no team-wide half has no membership to disclaim. The parameter
+    shape (0-7 rather than a 0/1 flag) keeps it out of that panel on its own.
+
+    The heal -- 2%/4% per Pixie once below 50% Health -- is not modeled:
+    nothing in this sim damages the champion being measured, so it would price
+    at exactly zero, same as Solar's shield.
+    """
+
+    levels = [0, 2, 4]
+    display_name = "Fae"
+
+    # % Attack Damage and Ability Power per Pixie.
+    scaling = {0: 0, 2: 5, 4: 8}
+    max_pixies = 7
+
+    def __init__(self, level, params):
+        # The count buys nothing with the trait off, so an off row says so
+        # once rather than seven times over.
+        name = (
+            f"{self.display_name} {level}"
+            if level == 0
+            else f"{self.display_name} {level} ({self.pixies(params)} Pixies)"
+        )
+        super().__init__(name, level, params, phases=["preCombat"])
+
+    @classmethod
+    def pixies(cls, params):
+        try:
+            return max(0, min(int(params), cls.max_pixies))
+        except (TypeError, ValueError):
+            return 0
+
+    def extraParameters():
+        return {"Title": "Pixies", "Min": 0, "Max": Fae.max_pixies, "Default": 7}
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            # Both halves are the same number and both are additive with every
+            # other source: bonus_ad and ap are each read as (100 + add) / 100,
+            # so "8% per Pixie" at 7 Pixies is +56 to each.
+            amount = self.scaling.get(self.level, 0) * self.pixies(self.params)
+            champion.bonus_ad.addStat(amount)
+            champion.ap.addStat(amount)
         return 0
 
 
@@ -1958,8 +2017,11 @@ class MasterYiUlt(Buff):
     Adaptor version then gets its own per-hit rider:
       AP: bonus magic damage per hit (the heal off it isn't modeled -- nothing
           in the sim damages the champion being measured).
-      AD: stacking AS per hit -- a flat 12% plus 3% that scales with AP, i.e.
-          the 15% the card shows at Master Yi's 100 base AP.
+      AD: stacking AS per Double Strike -- a flat 12% plus 3% that scales
+          with AP, i.e. the 15% the card shows at Master Yi's 100 base AP.
+          Once per strike, not once per hit: the card's subject is "Double
+          Strikes grant ... stacking Attack Speed", so the replayed hit adds
+          damage but no second stack.
 
     The AP version's much weaker base AD (15 instead of 70) is applied by
     AdaptorInnate, not here.
@@ -1978,9 +2040,9 @@ class MasterYiUlt(Buff):
         self.attack_count = 0
         self.attacks_per_strike = 3
         self.hits_per_strike = 2
-        # AD version, per Double Strike hit: 12% AS flat + 3% AP-scaled.
-        self.as_per_hit = 12
-        self.as_per_hit_scaling = 3
+        # AD version, per Double Strike: 12% AS flat + 3% AP-scaled.
+        self.as_per_strike = 12
+        self.as_per_strike_scaling = 3
         # Set in preAttack, consumed in postAttack; the Attack object it holds
         # is created fresh per performAttack, so replaying it can't outlive the
         # swing it belongs to.
@@ -2002,7 +2064,9 @@ class MasterYiUlt(Buff):
             # (which would advance the count) or generate mana.
             champion.doAttack(attack, champion.items, time)
             if champion.ad_version:
-                champion.aspd.addStat(self.as_per_hit + self.as_per_hit_scaling * champion.ap.stat)
+                champion.aspd.addStat(
+                    self.as_per_strike + self.as_per_strike_scaling * champion.ap.stat
+                )
             else:
                 for _ in range(self.hits_per_strike):
                     champion.multiTargetSpell(
@@ -2090,6 +2154,65 @@ class KayleAscensions(Buff):
                 champion.waveScaling,
                 "magical",
             )
+        return 0
+
+
+class XayahFeathers(Buff):
+    """Deadly Plumage: +50% Attack Speed for the next 5 attacks, each replaced
+    with a feather dealing the card's physical damage.
+
+    Same shape as AriseBuff and NidaleeUlt -- gain AS, manalock until the
+    count runs out, swap the Attack's scaling from preAttack -- so the
+    manalock/unlock and attack_progress handling mirror them exactly.
+
+    The feathers' "reduce Armor by 2" is not modeled, per request.
+    """
+
+    levels = [1]
+    display_name = "Deadly Plumage"
+
+    def __init__(self, level=1, params=0):
+        super().__init__(
+            self.display_name,
+            level,
+            params,
+            phases=["postAbility", "preAttack", "postAttack"],
+        )
+        self.as_bonus = 50
+        self.num_feathers = 5
+        self.attacks_remaining = 0
+        self.active = False
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "postAbility":
+            champion.aspd.addStat(self.as_bonus)
+            self.attacks_remaining = self.num_feathers
+            self.active = True
+            # Manalocked until all num_feathers land -- pinned far ahead
+            # rather than duration-estimated, since the AS gain changes the
+            # attack cadence the instant this fires. Unlocked explicitly in
+            # postAttack below once the count hits zero (same as AriseBuff).
+            champion.manalockTime = time + 9999
+        elif phase == "preAttack" and self.active and input_.regularAuto:
+            # A feather is still an attack for on-hit purposes, but its damage
+            # is the ability's, so it crits only where spell damage would.
+            input_.canOnHit = True
+            input_.canCrit = champion.canSpellCrit
+            input_.attackType = "physical"
+            input_.scaling = ChampionAbilityScaling(champion)
+        elif phase == "postAttack" and self.active:
+            # Runs after performAttack's own mana-gen check for this same
+            # attack, so ending the ult here means the 5th feather still
+            # generates no mana and only the first normal attack after does.
+            self.attacks_remaining -= 1
+            if self.attacks_remaining <= 0:
+                self.active = False
+                champion.aspd.addStat(-self.as_bonus)
+                champion.manalockTime = time
+                # Zero out windup overshoot accrued under the +50% AS so the
+                # next attack's wait starts fresh under normal AS -- see
+                # AriseBuff's postAttack for the full walkthrough.
+                champion.attack_progress = min(champion.attack_progress, 1.0)
         return 0
 
 

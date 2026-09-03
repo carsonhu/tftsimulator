@@ -64,6 +64,7 @@ CHAMPION_API = {
     "Teemo": "DA_18_Teemo",
     "Varus": "DA_18_Varus",
     "Warwick": "DA_18_Warwick",
+    "Xayah": "DA_18_Xayah",
     "Yunara": "DA_18_Yunara",
     "Zyra": "DA_18_Zyra",
 }
@@ -96,6 +97,7 @@ TRAIT_HOOKS = [
     ("Rapidfire", "team_as", "DA_18_Rapidfire", "TeamAS", 100),
     ("Rapidfire", "max_stacks", "DA_18_Rapidfire", "MaxStacks", 1),
     ("Blossom", "scaling", "DA_18_Blossom", "ADAP", 100),
+    ("Fae", "scaling", "DA_18_Fae", "ADAP", 1),
     ("Hunter", "scaling", "DA_18_Hunter", "HunterAD", 100),
     ("Invoker", "team_mana_regen", "DA_18_Invoker", "TeamManaRegen", 1),
     ("Invoker", "invoker_mana_regen", "DA_18_Invoker", "InvokerManaBonus", 1),
