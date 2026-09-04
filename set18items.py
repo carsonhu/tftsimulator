@@ -420,7 +420,7 @@ class Adaptive(Item):
         self.mult = 0.15
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.manaGainMultiplier.addStat(0.15)
+        champion.manaGainMultiplier.addStat(self.mult)
 
 
 class KrakensFury(Item):
