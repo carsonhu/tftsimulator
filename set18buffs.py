@@ -1847,12 +1847,12 @@ class SivirBounces(Buff):
 
 
 class AsheTrail(Buff):
-    """Spirit Rift's trail: a 4s zone that ticks once a second after the cast.
+    """Spirit Rift's trail: a 3s zone that ticks once a second after the cast.
 
     The arrow's own hit lands in performAbility like any other spell. The
     trail is a schedule instead -- postAbility keeps one expiry, onUpdate pays
     out a tick per second while the trail is still on the ground -- because
-    four seconds of damage handed over at cast time would land most of a
+    three seconds of damage handed over at cast time would land most of a
     cast's trail damage before the trail exists, and this sim is read at 5 and
     10 seconds.
 
@@ -1873,7 +1873,9 @@ class AsheTrail(Buff):
     levels = [1]
     display_name = "Spirit Rift Trail"
 
-    duration = 4.0
+    # 18.2b: 4s => 3s. The card reads 3/3/20, so a 3-star trail really lasts
+    # 20s; this stays flat at the 1/2-star value, as it did at 4s.
+    duration = 3.0
     interval = 1.0
     # "2% max Health" reads off the target's max HP, not Ashe's.
     health_ratio = 0.02
@@ -2699,18 +2701,24 @@ class Retribution(Buff):
     display_name = "Retribution"
 
     def __init__(self, level=1, params=0):
+        # prePreCombat, not preCombat: the simulator runs items before buffs
+        # within a phase, so a flag set in preCombat lands after HoJ has
+        # already read it. An earlier phase is the only way the item sees it.
         super().__init__(
             self.display_name,
             level,
             params,
-            phases=["preCombat"],
+            phases=["prePreCombat"],
         )
-        self.crit_scaling = 0.15
 
     def performAbility(self, phase, time, champion, input_=0):
-        if phase == "preCombat":
+        if phase == "prePreCombat":
+            # The augment grants nothing by itself: the card gives Precision
+            # and the crit chance to "allies equipped with Hand of Justice",
+            # so HoJ pays it out -- once, however many copies are on the unit.
+            # The flat crit that used to live here dated from when HoJ only
+            # added 10%, and applied with no HoJ equipped at all.
             champion.retribution = True
-            champion.crit.addStat(self.crit_scaling)
         return 0
 
 

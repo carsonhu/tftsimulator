@@ -19,8 +19,8 @@
     "not listed here -- that is the prompt to go and look, not a failure."
   ],
   "channel": "pbe",
-  "patch": "18.2 (official patch notes 2026-09-09 + lolchess live card; cdragon pbe)",
-  "accepted": "2026-09-09",
+  "patch": "18.2b (official mid-patch notes 2026-09-14 + lolchess live card; cdragon pbe)",
+  "accepted": "2026-09-14",
   "acknowledged": {
     "Caitlyn.maxMana": {
       "code": -1,
@@ -93,7 +93,7 @@
     "Akali.apAbilityScaling": {
       "ad": [0, 0, 0],
       "ap": [140, 210, 340],
-      "read_on": "unverified"
+      "read_on": "unverified. Riot publishes only one entry per Adaptor champion and Akali's is the AD form (DA_18_Akali_AD), so neither cdragon nor any card site carries this row -- it has to come off the client with AP items on her. This is also what blocks canFourStar on Akali: the AD rows have their 4-star column (645 AD + 40 AP, 135 AD Burning) but this one does not."
     },
     "Alune.fullMoonScaling": {
       "ad": [0, 0, 0],
@@ -111,9 +111,9 @@
       "read_on": "live 18.2 (official patch notes confirm the PBE 18.2 value)"
     },
     "Ashe.trailScaling": {
-      "ad": [5, 8, 200],
+      "ad": [9, 14, 200],
       "ap": [2, 3, 20],
-      "read_on": "live 18.2 (official patch notes confirm the PBE 18.2 value)"
+      "read_on": "live 18.2b (official mid-patch notes 2026-09-14)"
     },
     "Azir.abilityScaling": {
       "ad": [0, 0, 0],
@@ -126,9 +126,9 @@
       "read_on": "PBE 18.1g"
     },
     "Camille.abilityScaling": {
-      "ad": [160, 240, 410],
-      "ap": [10, 15, 25],
-      "read_on": "live 18.2 (official patch notes confirm the PBE 18.2 value)"
+      "ad": [150, 225, 375, 640],
+      "ap": [10, 15, 25, 40],
+      "read_on": "live 18.2b (official mid-patch notes 2026-09-14; the AP half and the 4-star column off the 18.2 card text)"
     },
     "Cassiopeia.abilityScaling": {
       "ad": [0, 0, 0],
@@ -136,9 +136,9 @@
       "read_on": "live 18.1d (tactics.tools)"
     },
     "Cinderling.abilityScaling": {
-      "ad": [310, 465, 700],
-      "ap": [30, 45, 70],
-      "read_on": "live 18.1d (tactics.tools)"
+      "ad": [310, 465, 700, 1200],
+      "ap": [30, 45, 70, 115],
+      "read_on": "live 18.2 (tactics.tools set-18 card text; 1-3 star cross-checked against lolchess)"
     },
     "Ezreal.abilityScaling": {
       "ad": [250, 375, 1200],
@@ -171,14 +171,14 @@
       "read_on": "PBE 18.1g"
     },
     "Karma.burstScaling": {
-      "ad": [0, 0, 0],
-      "ap": [120, 180, 270],
-      "read_on": "live 18.1 (lolchess champion card)"
+      "ad": [0, 0, 0, 0],
+      "ap": [120, 180, 270, 460],
+      "read_on": "live 18.2 (tactics.tools set-18 card text; 1-3 star cross-checked against lolchess)"
     },
     "Karma.tetherScaling": {
-      "ad": [0, 0, 0],
-      "ap": [280, 420, 630],
-      "read_on": "live 18.1 (lolchess champion card)"
+      "ad": [0, 0, 0, 0],
+      "ap": [280, 420, 630, 1070],
+      "read_on": "live 18.2 (tactics.tools set-18 card text; 1-3 star cross-checked against lolchess)"
     },
     "Kayle.ascensionScaling": {
       "ad": [0, 0, 0],
@@ -221,9 +221,9 @@
       "read_on": "live 18.2 (official patch notes confirm the PBE 18.2 value)"
     },
     "Pebbles.abilityScaling": {
-      "ad": [0, 0, 0],
-      "ap": [160, 240, 360],
-      "read_on": "live 2026-08-27 (champion card)"
+      "ad": [0, 0, 0, 0],
+      "ap": [160, 240, 360, 615],
+      "read_on": "live 18.2 (tactics.tools set-18 card text; 1-3 star cross-checked against lolchess)"
     },
     "Sivir.abilityScaling": {
       "ad": [190, 285, 1050],
@@ -237,18 +237,23 @@
     },
     "Teemo.abilityScaling": {
       "ad": [0, 0, 0],
-      "ap": [60, 90, 135],
-      "read_on": "live 2026-08-27 (champion card)"
+      "ap": [55, 82, 130],
+      "read_on": "live 18.2b (official mid-patch notes 2026-09-14)"
     },
     "Teemo.giantScaling": {
       "ad": [0, 0, 0],
       "ap": [135, 200, 310],
       "read_on": "live 2026-08-27 (champion card)"
     },
+    "Veigar.abilityScaling": {
+      "ad": [0, 0, 0, 0],
+      "ap": [175, 265, 395, 670],
+      "read_on": "live 18.2b (champion card)"
+    },
     "Varus.abilityScaling": {
-      "ad": [415, 625, 1000],
-      "ap": [30, 45, 70],
-      "read_on": "live 18.2 (official patch notes confirm the PBE 18.2 value)"
+      "ad": [415, 625, 1000, 1700],
+      "ap": [30, 45, 70, 115],
+      "read_on": "live 18.2 (tactics.tools set-18 card text; 1-3 star cross-checked against lolchess)"
     },
     "Warwick.abilityScaling": {
       "ad": [215, 325, 500],
@@ -256,9 +261,9 @@
       "read_on": "live 18.2 (lolchess card)"
     },
     "Xayah.abilityScaling": {
-      "ad": [72, 108, 165],
-      "ap": [0, 0, 0],
-      "read_on": "live 2026-09-03 (champion card)"
+      "ad": [68, 102, 155, 165],
+      "ap": [0, 0, 0, 0],
+      "read_on": "live 18.2 (tactics.tools set-18 card text; 1-3 star cross-checked against lolchess). Supersedes a 2026-09-03 card read of 72/108/165, which was ~6% high at every star -- a buff was running when it was read."
     },
     "Yunara.abilityScaling": {
       "ad": [160, 240, 370],

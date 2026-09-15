@@ -63,6 +63,7 @@ CHAMPION_API = {
     "Sivir": "DA_18_Sivir",
     "Teemo": "DA_18_Teemo",
     "Varus": "DA_18_Varus",
+    "Veigar": "DA_18_Veigar",
     "Warwick": "DA_18_Warwick",
     "Xayah": "DA_18_Xayah",
     "Yunara": "DA_18_Yunara",

@@ -38,6 +38,7 @@ champ_list = [
     "Aphelios",
     "Kayle",
     "Xayah",
+    "Veigar",
 ]
 
 
@@ -142,6 +143,8 @@ class SuperDummyTank(Champion):
 
 
 class Varus(Champion):
+    canFourStar = True
+
     def __init__(self, level):
         hp = 500
         atk = 40
@@ -166,7 +169,9 @@ class Varus(Champion):
         self.castTime = 2.0
         self.num_targets = 2
 
-    abilityScaling = create_ability_scaling([415, 625, 1000], [30, 45, 70])
+    abilityScaling = create_ability_scaling(
+        [415, 625, 1000, 1700], [30, 45, 70, 115]
+    )
 
     def performAbility(self, opponents, items, time):
         # Piercing Arrow: hits the first num_targets enemies in line; damage is
@@ -654,6 +659,8 @@ class Gromp(Champion):
 
 
 class Karma(Champion):
+    canFourStar = True
+
     def __init__(self, level):
         hp = 500
         atk = 25
@@ -683,10 +690,10 @@ class Karma(Champion):
         self.tether_interval = 0.5
 
     tetherScaling = create_ability_scaling(
-        [0, 0, 0], [280, 420, 630], func_name="tetherScaling"
+        [0, 0, 0, 0], [280, 420, 630, 1070], func_name="tetherScaling"
     )
     burstScaling = create_ability_scaling(
-        [0, 0, 0], [120, 180, 270], func_name="burstScaling"
+        [0, 0, 0, 0], [120, 180, 270, 460], func_name="burstScaling"
     )
 
     def performAbility(self, opponents, items, time):
@@ -1104,6 +1111,8 @@ class Alune(Champion):
 
 
 class Camille(Champion):
+    canFourStar = True
+
     def __init__(self, level):
         hp = 700
         atk = 40
@@ -1127,7 +1136,11 @@ class Camille(Champion):
         self.default_traits = ["Ravager"]
         self.castTime = 1.1
 
-    abilityScaling = create_ability_scaling([160, 240, 410], [10, 15, 25])
+    # The 4-star AD half is the 18.2b note's fourth value (700 -> 640); the AP
+    # half's 40 is unchanged, off the 18.2 card.
+    abilityScaling = create_ability_scaling(
+        [150, 225, 375, 640], [10, 15, 25, 40]
+    )
 
     def performAbility(self, opponents, items, time):
         if not opponents:
@@ -1277,18 +1290,20 @@ class Ashe(Champion):
         self.num_targets = 5
         self.items.append(AsheTrail())
         self.notes = (
-            "The trail's damage arrives 1s at a time over the 4s after each "
+            "The trail's damage arrives 1s at a time over the 3s after each "
             "cast, not on the cast, and a recast refreshes it rather than "
             "stacking it. Its 2% max Health part reads off the enemy HP above, "
             "so raising that raises Ashe's damage."
         )
 
     abilityScaling = create_ability_scaling([465, 700, 1000], [0, 0, 0])
-    # The card's 7/11/220 trail row is two halves, same as Sivir's: 5 + 2 = 7,
-    # 8 + 3 = 11, 200 + 20 = 220. The 2% max Health rides on top of this and is
-    # added per-target in AsheTrail, since it depends on who is being hit.
+    # The card's trail row is two halves, same as Sivir's: 9 + 2 = 11,
+    # 14 + 3 = 17, 200 + 20 = 220. 18.2b moved only the AD half, and only at
+    # 1 and 2 star ("5/8 AD => 9/14 AD"); the 3-star 200 and the AP halves are
+    # untouched. The 2% max Health rides on top of this and is added
+    # per-target in AsheTrail, since it depends on who is being hit.
     trailScaling = create_ability_scaling(
-        [5, 8, 200], [2, 3, 20], func_name="trailScaling"
+        [9, 14, 200], [2, 3, 20], func_name="trailScaling"
     )
 
     def performAbility(self, opponents, items, time):
@@ -1311,6 +1326,8 @@ class Ashe(Champion):
 
 
 class Cinderling(Champion):
+    canFourStar = True
+
     def __init__(self, level):
         hp = 500
         atk = 40
@@ -1336,7 +1353,9 @@ class Cinderling(Champion):
         self.items.append(CinderlingScarletBuff())
         self.notes = "Wound and Burn are not modeled."
 
-    abilityScaling = create_ability_scaling([310, 465, 700], [30, 45, 70])
+    abilityScaling = create_ability_scaling(
+        [310, 465, 700, 1200], [30, 45, 70, 115]
+    )
 
     def performAbility(self, opponents, items, time):
         # Razor Leaves: five leaves converge on the current target; modeled as
@@ -1383,7 +1402,7 @@ class Teemo(Champion):
         )
 
     # The mushroom clusters, on the nearest num_targets.
-    abilityScaling = create_ability_scaling([0, 0, 0], [60, 90, 135])
+    abilityScaling = create_ability_scaling([0, 0, 0], [55, 82, 130])
     # The giant mushroom that follows, on the current target only.
     giantScaling = create_ability_scaling(
         [0, 0, 0], [135, 200, 310], func_name="giantScaling"
@@ -1407,6 +1426,8 @@ class Teemo(Champion):
 
 
 class Pebbles(Champion):
+    canFourStar = True
+
     def __init__(self, level):
         hp = 500
         atk = 35
@@ -1443,7 +1464,9 @@ class Pebbles(Champion):
 
     # Per damage tick. The card also carries a 4th row (615) that this
     # simulator has nowhere to put -- levels stop at 3 stars.
-    abilityScaling = create_ability_scaling([0, 0, 0], [160, 240, 360])
+    abilityScaling = create_ability_scaling(
+        [0, 0, 0, 0], [160, 240, 360, 615]
+    )
 
     def performAbility(self, opponents, items, time):
         # The cast itself deals nothing: it opens the channel, and
@@ -1607,6 +1630,8 @@ class Kayle(Champion):
 
 
 class Xayah(Champion):
+    canFourStar = True
+
     def __init__(self, level):
         hp = 450
         atk = 45
@@ -1639,11 +1664,67 @@ class Xayah(Champion):
             "Elderwood -- its plants are separate units."
         )
 
-    # Per feather.
-    abilityScaling = create_ability_scaling([72, 108, 165], [0, 0, 0])
+    # Per feather. The earlier 72/108/165 was ~6% high at every star, which
+    # is what a card read with a damage buff running looks like -- tactics.
+    # tools and lolchess both publish 68/102/155, and no patch note has ever
+    # moved this row.
+    abilityScaling = create_ability_scaling(
+        [68, 102, 155, 165], [0, 0, 0, 0]
+    )
 
     def performAbility(self, opponents, items, time):
         # Deadly Plumage: no direct cast damage -- XayahFeathers (see
         # __init__) handles the +50% Attack Speed, the manalock-until-5-
         # attacks gate, and replacing the next 5 attacks with feathers.
+        return 0
+
+
+class Veigar(Champion):
+    canFourStar = True
+
+    def __init__(self, level):
+        hp = 500
+        atk = 25
+        curMana = 0
+        fullMana = 30
+        aspd = 0.7
+        armor = 25
+        mr = 25
+        super().__init__(
+            "Veigar",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MAGIC_CASTER,
+        )
+        # Sprykin is unimplemented, so it is left out rather than eating a
+        # buff bar slot that can't be filled (same as Teemo).
+        self.default_traits = ["Blackthorn", "Spellweaver"]
+        self.castTime = 0.9  # per request
+        self.notes = (
+            "The execute row is not modeled, per request: the card's "
+            "265/400/595/1015 only applies below 30% max Health, and the "
+            "dummy's Health is a dial rather than something that falls. The "
+            "permanent 3% Ability Power per kill is out too -- nothing here "
+            "dies."
+        )
+
+    abilityScaling = create_ability_scaling(
+        [0, 0, 0, 0], [175, 265, 395, 670]
+    )
+
+    def performAbility(self, opponents, items, time):
+        # Primordial Burst: a single blast on the current target. The
+        # below-30%-Health row (see notes) is deliberately not modeled, so
+        # this is always the base number.
+        if not opponents:
+            return 0
+        self.multiTargetSpell(
+            opponents[:1], items, time, 1, self.abilityScaling, "magical"
+        )
         return 0

@@ -329,10 +329,24 @@ class HoJ(Item):
             phases=["preCombat"],
         )
 
+    # Retribution grants "Precision and 25% Critical Strike Chance" to allies
+    # *equipped with* Hand of Justice -- a per-unit grant keyed off holding the
+    # item, not a per-copy one. A second Hand of Justice re-applies the same
+    # bonus rather than doubling it, so only the first copy on the unit pays
+    # out. addPrecision() then handles what the extra Precision is worth: 10%
+    # Critical Strike Damage if the unit already had it from somewhere else.
+    retribution_crit = 0.25
+
     def performAbility(self, phase, time, champion, input_=0):
-        if champion.retribution:
-            champion.canSpellCrit = True
-            champion.crit.addStat(.25)
+        if not champion.retribution:
+            return
+        copies = [
+            item for item in getattr(champion, "items", []) if isinstance(item, HoJ)
+        ]
+        if copies and copies[0] is not self:
+            return
+        champion.addPrecision()
+        champion.crit.addStat(self.retribution_crit)
 
 
 class TacticiansCrown(Item):
