@@ -966,6 +966,9 @@ class Blackthorn(Buff):
     base values and the star/cost scaling table are still not in the bin at
     all. The official 18.2 notes (not on PBE) moved the AD sacrifice's
     Attack Speed 12 -> 14% and the AP sacrifice's Mana Regen 1.7 -> 2.
+    The scaling table was checked against two community sources in Sep 2026
+    (a data-site table and littlebuddybot's per-cell stat chart, which
+    agree): 3-cost 2* is 1.75, 4-cost 2* is 2.1, 5-cost 1* is 1.4.
     """
 
     levels = [0, 2, 4, 6]
@@ -1002,14 +1005,14 @@ class Blackthorn(Buff):
     sacrifice_scaling = {
         1: {1: 0.6, 2: 1.0, 3: 1.75, 4: 2.5},
         2: {1: 0.7, 2: 1.4, 3: 2.8, 4: 5.0},
-        3: {1: 0.8, 2: 1.8, 3: 3.3, 4: 8.0},
-        4: {1: 1.1, 2: 2.25, 3: 50.0, 4: 500.0},
-        5: {1: 1.5, 2: 3.0, 3: 100.0, 4: 999.0},
+        3: {1: 0.8, 2: 1.75, 3: 3.3, 4: 8.0},
+        4: {1: 1.1, 2: 2.1, 3: 50.0, 4: 500.0},
+        5: {1: 1.4, 2: 3.0, 3: 100.0, 4: 999.0},
     }
-    # Only a 1-cost realistically reaches 3 or 4 stars, so the rest of the
-    # table's high-star rows (the 50/500/100/999 placeholders included) are
-    # kept as data but never offered. Per request.
-    max_star_by_cost = {1: 4}
+    # A 1-cost realistically reaches 4 stars and a 2- or 3-cost 3 stars, so
+    # the rest of the table's high-star rows (the 50/500/100/999 placeholders
+    # included) are kept as data but never offered. Per request.
+    max_star_by_cost = {1: 4, 2: 3, 3: 3}
     default_max_star = 2
 
     def __init__(self, level, params):

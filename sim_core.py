@@ -186,9 +186,10 @@ def do_experiment_one_extra(
             sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": nova_buff, "Results": results})
 
     # Blackthorn sacrifice combinations: every (Role, Star Level, Cost) a
-    # sacrifice can actually be, plus the empty hex. 3- and 4-star sacrifices
-    # only exist on a 1-cost, so the pricier tiers contribute 1- and 2-star
-    # rows only. The trait reads all three off the champion, so deep-copying
+    # sacrifice can actually be, plus the empty hex. 4-star sacrifices only
+    # exist on a 1-cost and 3-star ones stop at 3-costs (see
+    # Blackthorn.max_star_by_cost), so 4- and 5-costs contribute 1- and
+    # 2-star rows only. The trait reads all three off the champion, so deep-copying
     # it and overwriting them is enough. run_blackthorn lets the
     # ChampionSelector ask for this sweep on its own -- or skip it -- when it
     # computes one radio slice at a time.
