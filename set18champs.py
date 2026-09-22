@@ -1402,10 +1402,6 @@ class Teemo(Champion):
         self.default_traits = ["Invoker"]
         self.castTime = 1.5  # per request
         self.num_targets = 3
-        self.notes = (
-            "Foraging is not modeled: the rerolls, Tactician Health and XP a "
-            "foraged mushroom gives are all out of combat."
-        )
 
     # The mushroom clusters, on the nearest num_targets.
     abilityScaling = create_ability_scaling([0, 0, 0], [55, 82, 130])
@@ -1713,11 +1709,7 @@ class Veigar(Champion):
         self.default_traits = ["Blackthorn", "Spellweaver"]
         self.castTime = 0.9  # per request
         self.notes = (
-            "The execute row is not modeled, per request: the card's "
-            "265/400/595/1015 only applies below 30% max Health, and the "
-            "dummy's Health is a dial rather than something that falls. The "
-            "permanent 3% Ability Power per kill is out too -- nothing here "
-            "dies."
+            "Add AP manually"
         )
 
     abilityScaling = create_ability_scaling(
