@@ -1356,6 +1356,11 @@ class AdaptorInnate(Buff):
     just don't set the attribute. ad_base_atk is the mirror image, for units
     whose card stats are the AP version (Nidalee, whose AD version is a
     0-AD stub for now).
+
+    Same deal for the mana bar: a unit whose AD version has its own
+    starting/max mana advertises ad_start_mana / ad_full_mana (Gromp, 20/80
+    against the AP version's 0/45). fullMana.base is swapped, not the stat,
+    so preCombat max-mana changes such as Dawncore's -10 survive the swap.
     """
 
     levels = [1]
@@ -1368,6 +1373,10 @@ class AdaptorInnate(Buff):
         if resolveAdaptorVersion(champion):
             if hasattr(champion, "ad_base_atk"):
                 champion.atk.base = champion.ad_base_atk
+            if hasattr(champion, "ad_full_mana"):
+                champion.fullMana.base = champion.ad_full_mana
+            if hasattr(champion, "ad_start_mana"):
+                champion.curMana = champion.ad_start_mana
         elif hasattr(champion, "ap_base_atk"):
             champion.atk.base = champion.ap_base_atk
         return 0

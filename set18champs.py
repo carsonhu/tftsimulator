@@ -569,6 +569,10 @@ class Gromp(Champion):
     # card stats are the AD version's and his are the AP version's.
     AD_VERSION_ATK = 45
     AP_VERSION_ATK = 30
+    # Nor do they share a mana bar: the AP version is 0/45, the AD version
+    # 20/80. Same swap point as the AD (AdaptorInnate, postPreCombat).
+    AD_VERSION_START_MANA = 20
+    AD_VERSION_FULL_MANA = 80
 
     def __init__(self, level):
         hp = 550
@@ -603,6 +607,8 @@ class Gromp(Champion):
         # Star-scaled off the AP base already in atk.base, so the ratio holds
         # at every star level rather than pinning the AD version to 1-star.
         self.ad_base_atk = self.atk.base * self.AD_VERSION_ATK / self.AP_VERSION_ATK
+        self.ad_start_mana = self.AD_VERSION_START_MANA
+        self.ad_full_mana = self.AD_VERSION_FULL_MANA
         # Always-on rather than opt-in buff-bar picks: Belchy Bubble adapts
         # on every Gromp, and the Purple Buff no-ops on its own unless
         # Riftbeast (3) has set the Alpha Mark flag.
