@@ -132,7 +132,7 @@ class ExecutionerEmblem(Emblem):
 
 
 class InvokerEmblem(Emblem):
-    """+3 Mana Regen; on cast, gain AP equal to 8% of the mana spent.
+    """+2 Mana Regen (18.3: 3 -> 2); on cast, gain AP equal to 8% of the mana spent.
 
     preAbility rather than postAbility, per request: the AP from a cast is
     meant to be in the cast it came from. The mana spent is the cast cost
@@ -143,7 +143,7 @@ class InvokerEmblem(Emblem):
 
     def __init__(self):
         super().__init__(
-            self.display_name, trait="Invoker", manaRegen=3, phases=["preAbility"]
+            self.display_name, trait="Invoker", manaRegen=2, phases=["preAbility"]
         )
         self.ap_per_mana = 0.08
 
@@ -842,11 +842,13 @@ class WitsEnd(Item):
 class ShivArtifact(Item):
     display_name = "Statikk Shiv (Artifact)"
 
+    # Card: 25% AP (18.3: 15 -> 25), 40% AS; every 3rd attack 15 + 35% AP
+    # magic damage to 6 enemies. cdragon's bin for this item is stale.
     def __init__(self):
         super().__init__(
             self.display_name,
-            ap=40,
-            aspd=15,
+            ap=25,
+            aspd=40,
             phases=["preAttack"],
         )
         self.shivDmg = 15

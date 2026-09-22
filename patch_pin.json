@@ -19,8 +19,8 @@
     "not listed here -- that is the prompt to go and look, not a failure."
   ],
   "channel": "pbe",
-  "patch": "18.2b (official mid-patch notes 2026-09-14 + lolchess live card; cdragon pbe)",
-  "accepted": "2026-09-14",
+  "patch": "18.3 (official patch notes 2026-09-22; cdragon pbe)",
+  "accepted": "2026-09-22",
   "acknowledged": {
     "Caitlyn.maxMana": {
       "code": -1,
@@ -56,6 +56,21 @@
       "code": 60,
       "reference": 62,
       "why": "Official 18.2 notes and the live lolchess card say 60 (was 65); cdragon's pbe dump lags the live build and reads 62."
+    },
+    "Hunter.scaling[4]": {
+      "code": 40,
+      "reference": 45,
+      "why": "Official 18.3 notes: Hunter AD 20/30/45/65% -> 20/30/40/60%. cdragon lags the live build on both channels and still reads 45."
+    },
+    "Hunter.scaling[5]": {
+      "code": 60,
+      "reference": 65,
+      "why": "Official 18.3 notes: Hunter AD 20/30/45/65% -> 20/30/40/60%. cdragon lags the live build on both channels and still reads 65."
+    },
+    "Invoker.invoker_mana_regen[5]": {
+      "code": 8,
+      "reference": 9,
+      "why": "Official 18.3 notes: Invoker mana regen 3/4/6/9 -> 3/4/6/8. The pinned pbe reference still reads 9; the 2026-09-22 pbe dump has moved past it to 2/3/5/8 (a further PBE change, not live), so the live 8 is deliberate."
     }
   },
   "spell_data_published": {
@@ -117,8 +132,8 @@
     },
     "Azir.abilityScaling": {
       "ad": [0, 0, 0],
-      "ap": [43, 65, 103],
-      "read_on": "live 18.2 (official patch notes confirm the PBE 18.2 value)"
+      "ap": [46, 69, 110],
+      "read_on": "live 18.3 (official patch notes 2026-09-22)"
     },
     "Caitlyn.abilityScaling": {
       "ad": [190, 285, 470],
@@ -132,8 +147,8 @@
     },
     "Cassiopeia.abilityScaling": {
       "ad": [0, 0, 0],
-      "ap": [400, 600, 950],
-      "read_on": "live 18.1d (tactics.tools)"
+      "ap": [425, 630, 1020],
+      "read_on": "live 18.3 (official patch notes 2026-09-22)"
     },
     "Cinderling.abilityScaling": {
       "ad": [310, 465, 700, 1200],
@@ -167,13 +182,13 @@
     },
     "Gromp.apSplashScaling": {
       "ad": [0, 0, 0],
-      "ap": [160, 240, 360],
-      "read_on": "PBE 18.1g"
+      "ap": [175, 265, 410],
+      "read_on": "live 18.3 (official patch notes 2026-09-22)"
     },
     "Karma.burstScaling": {
       "ad": [0, 0, 0, 0],
-      "ap": [120, 180, 270, 460],
-      "read_on": "live 18.2 (tactics.tools set-18 card text; 1-3 star cross-checked against lolchess)"
+      "ap": [125, 185, 300, 515],
+      "read_on": "live 18.3 (official patch notes 2026-09-22)"
     },
     "Karma.tetherScaling": {
       "ad": [0, 0, 0, 0],
@@ -217,8 +232,8 @@
     },
     "Nidalee.empoweredScaling": {
       "ad": [0, 0, 0],
-      "ap": [300, 450, 3000],
-      "read_on": "live 18.2 (official patch notes confirm the PBE 18.2 value)"
+      "ap": [330, 500, 3000],
+      "read_on": "live 18.3 (official patch notes 2026-09-22)"
     },
     "Pebbles.abilityScaling": {
       "ad": [0, 0, 0, 0],
@@ -247,8 +262,8 @@
     },
     "Veigar.abilityScaling": {
       "ad": [0, 0, 0, 0],
-      "ap": [175, 265, 395, 670],
-      "read_on": "live 18.2b (champion card)"
+      "ap": [200, 300, 450, 765],
+      "read_on": "live 18.3 (official patch notes 2026-09-22)"
     },
     "Varus.abilityScaling": {
       "ad": [415, 625, 1000, 1700],
@@ -256,9 +271,9 @@
       "read_on": "live 18.2 (tactics.tools set-18 card text; 1-3 star cross-checked against lolchess)"
     },
     "Warwick.abilityScaling": {
-      "ad": [215, 325, 500],
+      "ad": [230, 345, 535],
       "ap": [0, 0, 0],
-      "read_on": "live 18.2 (lolchess card)"
+      "read_on": "live 18.3 (official patch notes 2026-09-22)"
     },
     "Xayah.abilityScaling": {
       "ad": [68, 102, 155, 165],

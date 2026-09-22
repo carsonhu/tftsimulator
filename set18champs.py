@@ -358,7 +358,7 @@ class Cassiopeia(Champion):
         self.castTime = 1
         self.poison_duration = 15
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [400, 600, 950])
+    abilityScaling = create_ability_scaling([0, 0, 0], [425, 630, 1020])
 
     def performAbility(self, opponents, items, time):
         # Noxious Blast: poison target 1 and target 2 for total magic damage
@@ -461,7 +461,7 @@ class Azir(Champion):
         self.castTime = 0.5
         self.items.append(AriseBuff())
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [43, 65, 103])
+    abilityScaling = create_ability_scaling([0, 0, 0], [46, 69, 110])
 
     def performAbility(self, opponents, items, time):
         # Arise!: no direct cast damage -- AriseBuff (see __init__) handles
@@ -567,8 +567,12 @@ class Gromp(Champion):
     # data records (DA_Gromp18_AP); the AD version's 45 is swapped in by
     # AdaptorInnate, same as Master Yi and Akali but mirrored, because their
     # card stats are the AD version's and his are the AP version's.
-    AD_VERSION_ATK = 45
+    # 18.3: AD version 45 -> 50.
+    AD_VERSION_ATK = 50
     AP_VERSION_ATK = 30
+    # 18.3 also split the Attack Speed: the AD version went 0.7 -> 0.75
+    # while the AP version stayed at 0.7. Swapped by AdaptorInnate like the AD.
+    AD_VERSION_ASPD = 0.75
     # Nor do they share a mana bar: the AP version is 0/45, the AD version
     # 20/80. Same swap point as the AD (AdaptorInnate, postPreCombat).
     AD_VERSION_START_MANA = 20
@@ -609,6 +613,7 @@ class Gromp(Champion):
         self.ad_base_atk = self.atk.base * self.AD_VERSION_ATK / self.AP_VERSION_ATK
         self.ad_start_mana = self.AD_VERSION_START_MANA
         self.ad_full_mana = self.AD_VERSION_FULL_MANA
+        self.ad_base_aspd = self.AD_VERSION_ASPD
         # Always-on rather than opt-in buff-bar picks: Belchy Bubble adapts
         # on every Gromp, and the Purple Buff no-ops on its own unless
         # Riftbeast (3) has set the Alpha Mark flag.
@@ -621,7 +626,7 @@ class Gromp(Champion):
         [0, 0, 0], [225, 340, 535], func_name="apAbilityScaling"
     )
     apSplashScaling = create_ability_scaling(
-        [0, 0, 0], [160, 240, 360], func_name="apSplashScaling"
+        [0, 0, 0], [175, 265, 410], func_name="apSplashScaling"
     )
     # AD version: burst on the current target, instant splash on the rest.
     adAbilityScaling = create_ability_scaling(
@@ -699,7 +704,7 @@ class Karma(Champion):
         [0, 0, 0, 0], [280, 420, 630, 1070], func_name="tetherScaling"
     )
     burstScaling = create_ability_scaling(
-        [0, 0, 0, 0], [120, 180, 270, 460], func_name="burstScaling"
+        [0, 0, 0, 0], [125, 185, 300, 515], func_name="burstScaling"
     )
 
     def performAbility(self, opponents, items, time):
@@ -995,7 +1000,7 @@ class Warwick(Champion):
         # Attack Speed, which is what the first cast gets.
         self.castTime = self.cast_time_slow
 
-    abilityScaling = create_ability_scaling([215, 325, 500], [0, 0, 0])
+    abilityScaling = create_ability_scaling([230, 345, 535], [0, 0, 0])
     # Flat on the card -- the only AP-scaled number on it is the heal.
     aspd_per_cast = 20
 
@@ -1206,7 +1211,7 @@ class Nidalee(Champion):
     # The 3rd javelin's bigger row; NidaleeUlt picks it via
     # ChampionEmpoweredAbilityScaling.
     empoweredScaling = create_ability_scaling(
-        [0, 0, 0], [300, 450, 3000], func_name="empoweredScaling"
+        [0, 0, 0], [330, 500, 3000], func_name="empoweredScaling"
     )
 
     def performAbility(self, opponents, items, time):
@@ -1713,7 +1718,7 @@ class Veigar(Champion):
         )
 
     abilityScaling = create_ability_scaling(
-        [0, 0, 0, 0], [175, 265, 395, 670]
+        [0, 0, 0, 0], [200, 300, 450, 765]
     )
 
     def performAbility(self, opponents, items, time):

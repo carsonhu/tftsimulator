@@ -788,7 +788,9 @@ class Hunter(Buff):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
-        self.scaling = {0: 0, 2: 20, 3: 30, 4: 45, 5: 65}
+        # 18.3 (official notes, not on cdragon yet): 20/30/45/65 -> 20/30/40/60.
+        # Acknowledged in patch_pin.json.
+        self.scaling = {0: 0, 2: 20, 3: 30, 4: 40, 5: 60}
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -816,9 +818,12 @@ class Invoker(Buff):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
-        # (2) 1 | 3, (3) 1 | 4, (4) 2 | 6, (5) 2 | 9
+        # (2) 1 | 3, (3) 1 | 4, (4) 2 | 6, (5) 2 | 8
+        # 18.3 (official notes): Invoker regen 3/4/6/9 -> 3/4/6/8. cdragon's
+        # pbe dump has since moved past it to 2/3/5/8; acknowledged in
+        # patch_pin.json.
         self.team_mana_regen = {0: 0, 2: 1, 3: 1, 4: 2, 5: 2}
-        self.invoker_mana_regen = {0: 0, 2: 3, 3: 4, 4: 6, 5: 9}
+        self.invoker_mana_regen = {0: 0, 2: 3, 3: 4, 4: 6, 5: 8}
 
     def extraParameters():
         return {"Title": "Is Invoker", "Min": 0, "Max": 1, "Default": 1}
@@ -1375,6 +1380,10 @@ class AdaptorInnate(Buff):
                 champion.atk.base = champion.ad_base_atk
             if hasattr(champion, "ad_full_mana"):
                 champion.fullMana.base = champion.ad_full_mana
+            # Gromp's AD version also has its own base Attack Speed (0.75
+            # against the AP version's 0.7 since 18.3).
+            if hasattr(champion, "ad_base_aspd"):
+                champion.aspd.base = champion.ad_base_aspd
             if hasattr(champion, "ad_start_mana"):
                 champion.curMana = champion.ad_start_mana
         elif hasattr(champion, "ap_base_atk"):
