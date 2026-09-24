@@ -970,7 +970,8 @@ class Blackthorn(Buff):
     hooks them; PBE 18.2 moved the Health rows to 175/350/600. The sacrifice
     base values and the star/cost scaling table are still not in the bin at
     all. The official 18.2 notes (not on PBE) moved the AD sacrifice's
-    Attack Speed 12 -> 14% and the AP sacrifice's Mana Regen 1.7 -> 2.
+    Attack Speed 12 -> 14% and the AP sacrifice's Mana Regen 1.7 -> 2;
+    the 18.3b notes moved the AP sacrifice's damage amp 14 -> 12%.
     The scaling table was checked against two community sources in Sep 2026
     (a data-site table and littlebuddybot's per-cell stat chart, which
     agree): 3-cost 2* is 1.75, 4-cost 2* is 2.1, 5-cost 1* is 1.4.
@@ -996,7 +997,7 @@ class Blackthorn(Buff):
 
     # Sacrifice base values, before either scaling.
     magic_mana_regen = 2.0
-    magic_amp = 0.14  # damage amp
+    magic_amp = 0.12  # damage amp. 18.3b: 14% -> 12%.
     attack_ad = 24  # % AD
     attack_aspd = 14  # % Attack Speed
 

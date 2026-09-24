@@ -39,6 +39,7 @@ champ_list = [
     "Kayle",
     "Xayah",
     "Veigar",
+    "Diana",
 ]
 
 
@@ -1730,4 +1731,59 @@ class Veigar(Champion):
         self.multiTargetSpell(
             opponents[:1], items, time, 1, self.abilityScaling, "magical"
         )
+        return 0
+
+
+class Diana(Champion):
+    def __init__(self, level):
+        hp = 850
+        atk = 30
+        curMana = 0
+        fullMana = 40
+        aspd = 0.8
+        armor = 50
+        mr = 50
+        super().__init__(
+            "Diana",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.MAGIC_TANK,
+        )
+        # Vanguard has no combat effect and no buff class, so it is left out
+        # rather than eating a buff bar slot that can't be filled (same as
+        # Camille's Coven).
+        self.default_traits = ["Lunar", "Ravager"]
+        # The cast animation is 0.66s and she attacks again as soon as it
+        # ends, but her manalock is longer: 2.3s from the cast. Attacks in the
+        # gap land normally and just generate no mana (performAttack and the
+        # mana-regen tick both check manalockTime; nextAttackTime only checks
+        # castTime), which is exactly the split the two fields exist for.
+        self.castTime = 0.66
+        self.manalockDuration = 2.3
+        self.notes = "Shield is not modeled."
+
+    # Per orb. The card's "Damage: 115" row is the per-orb number, not the
+    # total; the six orbs together are 450/690/1080.
+    abilityScaling = create_ability_scaling([0, 0, 0], [75, 115, 180])
+    num_orbs = 6
+
+    def performAbility(self, opponents, items, time):
+        # Pale Barrier: six orbs "spread among enemies within 2 hexes". Dealt
+        # round-robin over the opponents, so each orb lands on a different
+        # enemy when there are at least six and the rest double up. The
+        # shield half of the cast is not modeled (nothing here damages the
+        # measured champion).
+        if not opponents:
+            return 0
+        for i in range(self.num_orbs):
+            self.multiTargetSpell(
+                [opponents[i % len(opponents)]], items, time, 1,
+                self.abilityScaling, "magical",
+            )
         return 0

@@ -52,6 +52,11 @@
       "reference": 15,
       "why": "Official 18.2 notes: three-3-star Armor/MR 15 -> 12. Not on PBE; cdragon's pbe dump lags the live build and still reads 15."
     },
+    "Diana.maxMana": {
+      "code": 40,
+      "reference": 30,
+      "why": "Her live 18.3 card reads 0/40; cdragon's pbe dump still reads 30."
+    },
     "MasterYi.ad": {
       "code": 60,
       "reference": 62,
@@ -149,6 +154,11 @@
       "ad": [0, 0, 0],
       "ap": [425, 630, 1020],
       "read_on": "live 18.3 (official patch notes 2026-09-22)"
+    },
+    "Diana.abilityScaling": {
+      "ad": [0, 0, 0],
+      "ap": [75, 115, 180],
+      "read_on": "live 18.3 (champion card, 2026-09-24). Per orb; six orbs per cast. Cast time 0.66s, manalock 2.3s."
     },
     "Cinderling.abilityScaling": {
       "ad": [310, 465, 700, 1200],
