@@ -2755,7 +2755,7 @@ class JeweledLotusI(Buff):
             params,
             phases=["preCombat"],
         )
-        self.crit_scaling = 0.1
+        self.crit_scaling = 0.15  # 18.3: 10% -> 15%
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -2792,8 +2792,9 @@ class HoldTheLine5(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
-        self.ad_scaling = 9
-        self.ap_scaling = 10
+        # 18.3: AD 9% -> 11%, AP 10% -> 11% per frontliner.
+        self.ad_scaling = 11
+        self.ap_scaling = 11
         self.frontliners = 5
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -2808,8 +2809,9 @@ class HoldTheLine7(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
-        self.ad_scaling = 9
-        self.ap_scaling = 10
+        # 18.3: AD 9% -> 11%, AP 10% -> 11% per frontliner.
+        self.ad_scaling = 11
+        self.ap_scaling = 11
         self.frontliners = 7
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -3115,7 +3117,7 @@ class EarlyLearnings(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
-        self.base = 5
+        self.base = 3  # 18.3: baseline AD/AP 5% -> 3%
         self.ad_scaling = 2
         self.ap_scaling = 2
 
