@@ -26,6 +26,7 @@ offensive_craftables = [
     "Blue",
     "Morellos",
     "TacticiansCrown",
+    "TacticiansCrownURF",
     "Adaptive",
     "GuinsoosRageblade",
     "VoidStaff",
@@ -354,6 +355,15 @@ class TacticiansCrown(Item):
 
     def __init__(self):
         super().__init__(self.display_name, aspd=20, ad=25, ap=30, phases=None)
+
+
+class TacticiansCrownURF(Item):
+    # U.R.F. augment: 20% Attack Speed and 3 Mana Regen per Spatula/Frying Pan
+    # item held, on top of the crown's own 20% AS and 3 Mana Regen.
+    display_name = "Tacticians' Crown (U.R.F.)"
+
+    def __init__(self):
+        super().__init__(self.display_name, aspd=40, manaRegen=6, phases=None)
 
 
 class StrikersFlail(Item):

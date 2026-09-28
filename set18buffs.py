@@ -766,19 +766,19 @@ class Fae(Buff):
 
 
 class Hunter(Buff):
-    """Hunter: the Attack Damage half only.
+    """Hunter: Attack Damage, plus 10% Damage Amp from t=3.
 
-    The trait's other half -- 10% Damage Amp once a Hunter has held the same
-    target for 4 seconds -- is not modeled, per request. It would be nearly
-    free here anyway: this sim points a champion at a dummy that never dies
-    and never moves, so the condition would be met at t=4 in every single run
-    and the "if" would price as an unconditional amp handed out on a timer.
-    That is a fact about the test harness, not about the trait.
+    The amp's condition -- the Hunter hasn't swapped targets for 3 seconds --
+    is modeled as a flat timer: this sim points a champion at a dummy that
+    never dies and never moves, so the condition is met at t=3 in every run.
+    That overstates it for a Hunter whose targets die, but with the window
+    down to 3 seconds it holds for most of a real fight, so a timer is closer
+    to the truth than leaving the amp out.
 
-    No extraParameters, and so no row in Team Traits: the AD goes to Hunters,
-    with nothing left over for the rest of the board. A champion who is not a
-    Hunter gets nothing from a team running Hunter, which is exactly what an
-    absent row says.
+    No extraParameters, and so no row in Team Traits: the AD and the amp go to
+    Hunters, with nothing left over for the rest of the board. A champion who
+    is not a Hunter gets nothing from a team running Hunter, which is exactly
+    what an absent row says.
     """
 
     levels = [0, 2, 3, 4, 5]
@@ -786,15 +786,29 @@ class Hunter(Buff):
 
     def __init__(self, level, params):
         super().__init__(
-            f"{self.display_name} {level}", level, params, phases=["preCombat"]
+            f"{self.display_name} {level}",
+            level,
+            params,
+            phases=["preCombat", "onUpdate"],
         )
         # 18.3 (official notes, not on cdragon yet): 20/30/45/65 -> 20/30/40/60.
         # Acknowledged in patch_pin.json.
         self.scaling = {0: 0, 2: 20, 3: 30, 4: 40, 5: 60}
+        self.trigger_time = 3
+        self.dmg_amp = 0.10
+        self.triggered = False
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             champion.bonus_ad.addStat(self.scaling[self.level])
+        elif (
+            phase == "onUpdate"
+            and self.level > 0
+            and not self.triggered
+            and time >= self.trigger_time
+        ):
+            self.triggered = True
+            champion.dmgMultiplier.addStat(self.dmg_amp)
         return 0
 
 
