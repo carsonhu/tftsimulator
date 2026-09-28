@@ -394,6 +394,9 @@ details > label {
      picker must not claim more room than a trait with a tick box. */
   grid-template-columns: repeat(auto-fill, 190px);
   justify-content: start;
+  /* dense: a single may drop back into a cell a two-wide trait left empty
+     at the end of its row, so no column is ever half-used. */
+  grid-auto-flow: row dense;
   /* Fills the column's remaining height, with the traits themselves parked
      at the top rather than spread down it. */
   flex: 1 1 auto;
@@ -431,6 +434,13 @@ details > label {
 .team-trait.with-option {
   grid-template-columns: 22px auto auto auto auto 1fr;
   grid-column: span 2;
+  /* Laid out before every single-cell trait. Placed in catalog order, a
+     two-wide cell lands wherever the cursor happens to be, and the singles
+     under it then line up with only one of its halves -- Solar in columns 3-4
+     with Invoker alone under column 4. Packed first, the wide cells always
+     start at column 1 in pairs and the singles fill whole cells after them,
+     so every badge sits on a column edge. */
+  order: -1;
 }
 
 /* Sized in em so it tracks the text it sits beside rather than being pinned
