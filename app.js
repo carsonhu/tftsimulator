@@ -374,6 +374,7 @@ function buildStaticControls() {
     sel.value = "NoItem";
     sel.onchange = () => {
       state.cfg.items[n] = sel.value;
+      addEmblemTrait(sel.value);
       onConfigChanged();
     };
     label.appendChild(sel);
@@ -819,6 +820,42 @@ function setupTargetSlider(id, defaultValue, held, onChange) {
     onChange(Number(slider.value));
   };
   return held == null ? null : shown;
+}
+
+// An emblem makes its holder a member of the trait, so picking one puts the
+// trait in the buff bar at its lowest active level. A row that already holds
+// the trait keeps its level unless that level is 0 (off). Removing the emblem
+// leaves the row alone: the trait may be in the bar for its own sake.
+function addEmblemTrait(itemCls) {
+  const item = state.catalog.sidebarItems.find((i) => i.cls === itemCls);
+  const trait = item && item.trait;
+  const meta = trait && state.buffMeta.get(trait);
+  if (!meta) return;
+  const onLevel = meta.levels.find((l) => l > 0);
+  if (onLevel === undefined) return;
+  // "Is Lunar" style membership flags: the emblem is the membership.
+  const isFlag =
+    meta.extra && !meta.extra.Options && meta.extra.Min === 0 && meta.extra.Max === 1;
+
+  const buffs = state.cfg.buffs;
+  const existing = buffs.find(([cls]) => cls === trait);
+  if (existing) {
+    if (existing[1] === 0) existing[1] = onLevel;
+    if (isFlag) existing[2] = 1;
+  } else {
+    const tuple = [trait, onLevel, meta.extra ? meta.extra.Default : 0];
+    const free = buffs.findIndex(([cls]) => cls === "NoBuff");
+    if (free >= 0) {
+      buffs[free] = tuple;
+    } else if (buffs.length < state.catalog.defaults.numBuffs.max) {
+      buffs.push(tuple);
+      $("numBuffs").value = buffs.length;
+      $("numBuffsValue").textContent = buffs.length;
+    } else {
+      return;
+    }
+  }
+  renderBuffRows();
 }
 
 function resizeBuffRows(count) {

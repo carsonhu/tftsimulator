@@ -121,9 +121,17 @@ def get_catalog():
         # item_display_map returns {display: cls} in the order given, and that
         # order is exactly what the sidebar shows -- see all_items below.
         return [
-            {"cls": cls, "name": disp}
+            {"cls": cls, "name": disp, "trait": emblem_traits.get(cls)}
             for disp, cls in item_display_map(class_names).items()
         ]
+
+    # An emblem's trait, so picking one can put that trait in the buff bar.
+    # None for every other item. Only traits the buff bar can show are kept.
+    emblem_traits = {}
+    for cls in set18items.emblems:
+        trait = getattr(getattr(set18items, cls)(), "trait", None)
+        if trait in set18buffs.class_buffs:
+            emblem_traits[cls] = trait
 
     # Tier order, alphabetical within each tier -- NOT one global sort. The
     # sidebar combo's search filter preserves this order, so typing "spear" or

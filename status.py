@@ -634,37 +634,52 @@ class TheGrooveStatus(Status):
 
 
 class ExecutionerBleedStatus(Status):
-    # Executioner: any damage the source deals bleeds the target for a % of
-    # that hit's damage, split evenly as true damage over `duration`. Each
-    # new hit's bleed replaces whatever's left of the current one rather
-    # than stacking, since Yunara can retrigger this every attack/cast.
+    # Executioner: every instance of damage the source deals bleeds the
+    # target for a % of that hit, split evenly as true damage over
+    # `duration`. Each hit is its own independent bleed and they all stack,
+    # so at steady state the bleeds add exactly the listed % on top of the
+    # source's DPS. One status instance holds every live bleed instead of
+    # spawning a uniquely named status per hit: Yunara/Zyra land several
+    # hits a second, which would leave hundreds of dead entries in the
+    # target's status dict being polled every frame.
     def __init__(self):
         super().__init__("Executioner Bleed")
-        self.damage_per_tick = 0
         self.interval = 1.0
-        self.next_proc = 0
+        # [next_proc, ticks_left, damage_per_tick] per live bleed
+        self.bleeds = []
+
+    def _addBleed(self, time, duration, params):
+        # params: total bleed damage, split into per-interval ticks
+        ticks = max(1, int(round(duration / self.interval)))
+        self.bleeds.append([time + self.interval, ticks, params / ticks])
 
     def applicationEffect(self, champion, time, duration, params):
-        # params: total bleed damage, to be split over `duration`
-        self.damage_per_tick = params / duration * self.interval
-        self.next_proc = time + self.interval
+        self.bleeds = []
+        self._addBleed(time, duration, params)
         return True
 
     def reapplicationEffect(self, champion, time, duration, params):
-        self.damage_per_tick = params / duration * self.interval
-        self.next_proc = time + self.interval
+        self._addBleed(time, duration, params)
         return True
 
     def update(self, champion, time):
-        if self.active and time >= self.next_proc:
-            if self.opponent is not None:
-                self.opponent.doDamage(
-                    champion, [], 0,
-                    self.damage_per_tick, self.damage_per_tick,
-                    "true", time,
-                )
-            self.next_proc += self.interval
-        super().update(champion, time)
+        if not self.active:
+            return
+        total = 0
+        for bleed in self.bleeds:
+            while bleed[1] > 0 and time >= bleed[0]:
+                total += bleed[2]
+                bleed[0] += self.interval
+                bleed[1] -= 1
+        self.bleeds = [b for b in self.bleeds if b[1] > 0]
+        if total > 0 and self.opponent is not None:
+            self.opponent.doDamage(
+                champion, [], 0, total, total, "true", time,
+            )
+        # Lifetime is the tick list, not wearoff_time: the last tick lands
+        # exactly at wearoff_time and float drift must not swallow it.
+        if not self.bleeds:
+            self.wearoff(champion, time)
 
 
 class CassiopeiaPoisonStatus(Status):
@@ -676,10 +691,10 @@ class CassiopeiaPoisonStatus(Status):
     # amps, and feeds on-spell-damage item effects. Hence params is the
     # caster's scaling function, not a damage number locked in at cast.
     #
-    # Poisons stack, so unlike ExecutionerBleedStatus this must never merge
-    # into an existing instance -- the caller (set18champs.Cassiopeia) gives
-    # every cast's application a unique status name so each one lives as its
-    # own dict entry instead of reapplying.
+    # Poisons stack and each one needs its own live scaling function, so
+    # this must never merge into an existing instance -- the caller
+    # (set18champs.Cassiopeia) gives every cast's application a unique status
+    # name so each one lives as its own dict entry instead of reapplying.
     def __init__(self, name):
         super().__init__(name)
         self.scaling = zero_scaling
