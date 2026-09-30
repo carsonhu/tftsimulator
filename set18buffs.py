@@ -1672,6 +1672,10 @@ class TinyBeaksBuff(Buff):
             # ap_values do (ap.stat is ~1.0 at 0 bonus AP), per Mama Beak's
             # card ("5" shown with the AP-scaling droplet icon).
             self.active_until = time + self.duration * champion.ap.stat
+            # Manalocked for the whole Tiny Beaks window. Set here rather
+            # than via manalockDuration since the duration scales with AP;
+            # postAbility runs after update() sets the default manalock.
+            champion.manalockTime = self.active_until
         elif phase == "postAttack" and time < self.active_until:
             # Summoner (2)/(3): Tiny Beak damage is boosted +45%/+67.5%.
             mult = getattr(champion, "summoner_dmg_mult", 1.0)

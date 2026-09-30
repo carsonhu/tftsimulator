@@ -342,8 +342,8 @@ class MamaBeak(Champion):
 
     def performAbility(self, opponents, items, time):
         # Flock Family: the cast itself deals no damage -- it just opens the
-        # Tiny Beaks window, handled by TinyBeaksBuff (see __init__) via
-        # postAbility/postAttack. Riftbeast's Orange Buff (armor shred on
+        # Tiny Beaks window (and manalocks her for it), handled by
+        # TinyBeaksBuff (see __init__) via postAbility/postAttack. Riftbeast's Orange Buff (armor shred on
         # physical damage) is unimplemented for now.
         return 0
 
