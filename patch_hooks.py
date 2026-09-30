@@ -46,6 +46,7 @@ CHAMPION_API = {
     "Alune": "DA_18_Alune",
     "Ashe": "DA_18_Ashe",
     "Azir": "DA_18_Azir",
+    "Brambleback": "DA_Brambleback18",
     "Caitlyn": "DA_18_Caitlyn",
     "Camille": "DA_18_Camille",
     "Cassiopeia": "DA_18_Cassiopeia",

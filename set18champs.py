@@ -40,6 +40,7 @@ champ_list = [
     "Xayah",
     "Veigar",
     "Diana",
+    "Brambleback",
 ]
 
 
@@ -67,6 +68,20 @@ def create_ability_scaling(ad_values, ap_values, func_name="abilityScaling"):
     scaling.ad_values = list(ad_values)
     scaling.ap_values = list(ap_values)
     return scaling
+
+
+def aspd_scaled_cast_time(champion, base_time, aspd_cap):
+    """Cast time for a cast animation that plays faster with Attack Speed.
+
+    base_time at the champion's base Attack Speed, shrinking in proportion to
+    it and stopping at aspd_cap -- the shape of every "Cast Time: 0.8s -> 0.4s
+    at 1.5 Attack Speed" card note. Measured against the champion's own base
+    rather than a hardcoded number, so a rebalanced base keeps the card's
+    starting value. Never slower than base_time: an Attack Speed debuff is not
+    something the notes speak to.
+    """
+    aspd = min(max(champion.aspd.stat, champion.aspd.base), aspd_cap)
+    return base_time * champion.aspd.base / aspd
 
 
 class BaseChamp(Champion):
@@ -459,12 +474,24 @@ class Azir(Champion):
             Role.MAGIC_MARKSMAN,
         )
         self.default_traits = ["Blackthorn", "Executioner", "Summoner"]
-        self.castTime = 0.5
+        # Recomputed per cast in performAbility; this is the value at his base
+        # Attack Speed, which is what the first cast gets.
+        self.castTime = self.cast_time_base
         self.items.append(AriseBuff())
 
     abilityScaling = create_ability_scaling([0, 0, 0], [46, 69, 110])
 
+    # 0.8s at his base Attack Speed, down to 0.4s at 1.5 (0.8 * 0.75 / 1.5).
+    cast_time_base = 0.8
+    cast_time_aspd_cap = 1.5
+
     def performAbility(self, opponents, items, time):
+        # Set here because the cast time is read straight after this returns.
+        # Arise's own +150% Attack Speed lands in postAbility, after that
+        # read, so it speeds up the next cast rather than this one.
+        self.castTime = aspd_scaled_cast_time(
+            self, self.cast_time_base, self.cast_time_aspd_cap
+        )
         # Arise!: no direct cast damage -- AriseBuff (see __init__) handles
         # the AS gain, the manalock-until-6-attacks gate, and replacing the
         # next 6 attacks with 2-target magic soldier commands.
@@ -1786,4 +1813,69 @@ class Diana(Champion):
                 [opponents[i % len(opponents)]], items, time, 1,
                 self.abilityScaling, "magical",
             )
+        return 0
+
+
+class Brambleback(Champion):
+    def __init__(self, level):
+        hp = 1100
+        atk = 120
+        curMana = 0
+        fullMana = 40
+        aspd = 0.55
+        armor = 65
+        mr = 65
+        super().__init__(
+            "Brambleback",
+            hp,
+            atk,
+            curMana,
+            fullMana,
+            aspd,
+            armor,
+            mr,
+            level,
+            Role.ATTACK_FIGHTER,
+        )
+        # Riftbeast's Red Buff (Burn and heal) is left out per request, so
+        # only Ravager is preselected.
+        self.default_traits = ["Ravager"]
+        # He attacks again once the cast ends, but gains no mana until the
+        # buff runs out -- so a recast can never land inside the window.
+        # Recomputed per cast in performAbility; this is the value at his base
+        # Attack Speed, which is what the first cast gets.
+        self.castTime = self.cast_time_base
+        self.manalockDuration = self.frenzy_duration
+        self.notes = "Red Buff and the on-kill leap are not modeled."
+
+    # Crimson Fury's active, per star level.
+    frenzy_ad = [80, 80, 300]
+    frenzy_duration = 8
+    # Armor ignore: a flat 15% plus an AP-scaled 30%/30%/70%.
+    ignore_flat = 0.15
+    ignore_ap = [0.3, 0.3, 0.7]
+
+    # 0.83s at his base Attack Speed, down to 0.28s at 1.65
+    # (0.83 * 0.55 / 1.65).
+    cast_time_base = 0.83
+    cast_time_aspd_cap = 1.65
+
+    def performAbility(self, opponents, items, time):
+        # Set here for the same reason as Warwick: the cast time is read
+        # straight after performAbility returns, so this is the only place
+        # it applies to *this* cast.
+        self.castTime = aspd_scaled_cast_time(
+            self, self.cast_time_base, self.cast_time_aspd_cap
+        )
+        # The buff starts at the start of the cast, so the cast eats into its
+        # 8 seconds. The passive's leap on a kill is not modeled: the targets
+        # here are dummies that never die.
+        ignore = self.ignore_flat + self.ignore_ap[self.level - 1] * self.ap.stat
+        self.applyStatus(
+            status.BramblebackFrenzyStatus(),
+            self,
+            time,
+            self.frenzy_duration,
+            (self.frenzy_ad[self.level - 1], ignore),
+        )
         return 0

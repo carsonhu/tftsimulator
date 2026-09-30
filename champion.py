@@ -605,12 +605,14 @@ class Champion(FastDeepCopy):
             dtype (STRING): physical/magical/true
             defender (Champion): recipient
         """
+        # Pierce past 100% ignores no more than 100% does, and shred can't take
+        # a resist below 0 -- so neither end can turn into bonus damage.
         if dtype == "physical":
             total_pierce = self.armorPierce.stat + ability_armor_pierce - self.armorPierce.stat * ability_armor_pierce
-            defense = defender.armor.stat * (1 - total_pierce)
+            defense = max(0, defender.armor.stat) * (1 - min(total_pierce, 1))
         elif dtype == "magical":
             total_pierce = self.mrPierce.stat + ability_mr_pierce - self.mrPierce.stat * ability_mr_pierce
-            defense = defender.mr.stat * (1 - total_pierce)
+            defense = max(0, defender.mr.stat) * (1 - min(total_pierce, 1))
         elif dtype == "true":
             defense = 0
 

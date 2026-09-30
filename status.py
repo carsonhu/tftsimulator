@@ -881,7 +881,8 @@ class ZyraPlantStatus(Status):
                 )
             self.attacks_remaining -= 1
             self.next_proc += self.interval
-        super().update(champion, time)
+        super().update(champion, time)
+
 
 
 class ApheliosSeverumStatus(Status):
@@ -936,3 +937,44 @@ class ApheliosSeverumStatus(Status):
                 self.swipes_remaining -= 1
                 self.next_proc += self.interval
         super().update(champion, time)
+
+
+class BramblebackFrenzyStatus(Status):
+    # Crimson Fury's active: bonus Attack Damage and Armor ignore for 8s,
+    # both on Brambleback himself. params is (AD %, Armor ignore), with the
+    # ignore already resolved against his AP at cast time.
+    #
+    # One status name, so a recast inside the window refreshes the timer
+    # rather than stacking a second copy. A refresh re-reads params, so AP
+    # gained since the last cast lands in the new ignore value.
+    #
+    # The ignore is restored rather than subtracted on wearoff: armorPierce
+    # combines multiplicatively (see stats.ArmorPierce), and a 100% ignore
+    # can't be backed out of that product.
+    def __init__(self, name="Brambleback Frenzy"):
+        super().__init__(name)
+        self.ad = 0
+        self.pierce_before = 0
+
+    def _apply(self, champion, params):
+        self.ad, pierce = params
+        champion.bonus_ad.addStat(self.ad)
+        self.pierce_before = champion.armorPierce.add
+        champion.armorPierce.addStat(pierce)
+
+    def _remove(self, champion):
+        champion.bonus_ad.addStat(-self.ad)
+        champion.armorPierce.add = self.pierce_before
+
+    def applicationEffect(self, champion, time, duration, params):
+        self._apply(champion, params)
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        self._remove(champion)
+        self._apply(champion, params)
+        return True
+
+    def wearoffEffect(self, champion, time):
+        self._remove(champion)
+        return True

@@ -52,6 +52,11 @@
       "reference": 15,
       "why": "Official 18.2 notes: three-3-star Armor/MR 15 -> 12. Not on PBE; cdragon's pbe dump lags the live build and still reads 15."
     },
+    "Brambleback.ad": {
+      "code": 120,
+      "reference": 115,
+      "why": "His live card reads 120/180/270 AD; cdragon's pbe dump still reads 115."
+    },
     "Diana.maxMana": {
       "code": 40,
       "reference": 30,
