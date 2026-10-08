@@ -48,14 +48,14 @@ bin's world units (marked `u`; 890u is 4 hexes).
 | Yunara | `DA_18_Yunara` | 2 | 550 | 42 | 0.75 | 30 | 30 | 35 | 4 | Blossom, Executioner |
 | Azir | `DA_18_Azir` | 3 | 650 | 30 | 0.75 | 35 | 35 | 35 | 4 | Blackthorn, Executioner, Summoner |
 | Cassiopeia | `DA_18_Cassiopeia` | 3 | 650 | 30 | 0.75 | 35 | 35 | 30 | 4 | Coven, Spellweaver |
-| Diana | `DA_18_Diana` | 3 | 850 | 30 | 0.8 | 50 | 50 | 30 | 1 | Lunar, Ravager, Vanguard |
+| Diana | `DA_18_Diana` | 3 | 850 | 30 | 0.8 | 50 | 50 | 40 | 1 | Lunar, Ravager, Vanguard |
 | Fiddlesticks | `DA_Fiddlesticks18` | 3 | 1000 | 50 | 0.65 | 55 | 55 | 90 | 1 | Flora Fatalis, Defender, Spellweaver |
 | Hecarim | `DA_18_Hecarim` | 3 | 1100 | 50 | 0.65 | 50 | 50 | 110 | 1 | Elderwood, Vanguard |
 | Kha'Zix | `DA_18_KhaZix` | 3 | 950 | 40 | 0.85 | 55 | 55 | 25 | 1 | Rival |
 | Kog'Maw | `DA_KogMaw18_AD` | 3 | 650 | 40 | 0.8 | 35 | 35 | 55 | 4 | Caustic, Adaptor, Invoker |
 | Krug | `DA_Krug18` | 3 | 1100 | 55 | 0.6 | 40 | 40 | 135 | 1 | Riftbeast, Brawler |
 | Mama Beak | `DA_CrimsonRaptor18` | 3 | 650 | 55 | 0.75 | 35 | 35 | 60 | 4 | Riftbeast, Summoner, Rapidfire |
-| Master Yi | `DA_18_MasterYi_AD` | 3 | 850 | 62 | 0.8 | 55 | 55 | 3 | 1 | Blossom, Adaptor |
+| Master Yi | `DA_18_MasterYi_AD` | 3 | 850 | 60 | 0.8 | 55 | 55 | 3 | 1 | Blossom, Adaptor |
 | Rammus | `DA_18_Rammus` | 3 | 1100 | 50 | 0.6 | 50 | 50 | 80 | 1 | Sprykin, Defender |
 | Rengar | `DA_18_Rengar` | 3 | 900 | 60 | 0.75 | 55 | 55 | 50 | 1 | Rival |
 | Tristana | `DA_18_Tristana` | 3 | 650 | 55 | 0.75 | 35 | 35 | 60 | 4 | Fae, Sprykin, Hunter |
@@ -63,7 +63,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 | Ahri | `DA_18_Ahri` | 4 | 850 | 40 | 0.8 | 40 | 40 | 100 | 4 | Blossom, Spellweaver |
 | Amumu | `DA_Amumu18` | 4 | 1300 | 70 | 0.7 | 60 | 60 | 125 | 1 | Inferno, Juggernaut |
 | Aphelios | `DA_18_Aphelios` | 4 | 850 | 60 | 0.8 | 40 | 40 | 70 | 4 | Lunar, Rapidfire |
-| Brambleback | `DA_Brambleback18` | 4 | 1100 | 115 | 0.55 | 65 | 65 | 40 | 1 | Riftbeast, Ravager |
+| Brambleback | `DA_Brambleback18` | 4 | 1100 | 120 | 0.55 | 65 | 65 | 40 | 1 | Riftbeast, Ravager |
 | Ezreal | `DA_18_Ezreal` | 4 | 850 | 45 | 0.75 | 40 | 40 | 30 | 4 | Elderwood, Executioner |
 | Lillia | `DA_18_Lillia` | 4 | 1300 | 40 | 0.65 | 60 | 60 | 140 | 1 | Fae, Defender |
 | Malphite | `DA_18_Malphite` | 4 | 1300 | 70 | 0.55 | 70 | 70 | 80 | 1 | Blackthorn, Monolith |
@@ -91,7 +91,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 | Lux (Lunar) | `DA_18_Lux_Moonbeam` | 5 | 900 | 40 | 0.8 | 45 | 45 | 70 | 6 | Lunar, Avatar |
 | Lux (Primal) | `DA_18_Lux_Primal` | 5 | 900 | 40 | 0.8 | 45 | 45 | 70 | 6 | Primal, Avatar |
 | Lux (Solar) | `DA_18_Lux_Sunbeam` | 5 | 900 | 40 | 0.8 | 45 | 45 | 70 | 6 | Solar, Avatar |
-| Maokai | `DA_18_Maokai` | 5 | 1150 | 80 | 0.65 | 60 | 60 | 90 | 1 | Old Growth, Juggernaut |
+| Maokai | `DA_18_Maokai` | 5 | 1150 | 80 | 0.65 | 60 | 60 | 100 | 1 | Old Growth, Juggernaut |
 | Taric | `DA_Taric18` | 5 | 1300 | 55 | 0.75 | 65 | 65 | 65 | 1 | Emerald Aspect, Vanguard |
 | Artifact Item Anvil | `TFT_ArmoryKeyOrnn` | 8 | 10 | 70 | 1 | 10 | 10 | 100 | 0 |  |
 | Completed Item Anvil | `TFT_ArmoryKeyCompleted` | 8 | 10 | 70 | 1 | 10 | 10 | 100 | 0 |  |
@@ -224,7 +224,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 
 **Bellows Breath**
 
-> <Bright>Active:</Bright> Gain @ShieldCalc1@ %i:scaleAP% Shield for @ShieldDuration@ seconds and deal @MagicDamageCalc1@ %i:scaleAP% magic damage to enemies in a cone. \n\n<Bright>Quest:</Bright> Each player combat, Ornn stores damage blocked as Forge Power, doubled at 3-star. Gain an Artifact Anvil each time he gains enough Forge Power. <Rules>(Forge Power: </Rules>@Stack@<Rules> / </Rules>@GenericCalc1@<Rules>)</Rules>
+> <Bright>Active:</Bright> Gain @ShieldCalc1@ %i:scaleAP% Shield for @ShieldDuration@ seconds and deal @MagicDamageCalc1@ %i:scaleAP% magic damage to enemies in a cone. \n\n<Bright>Quest:</Bright> Each player combat, Ornn stores damage blocked as Forge Power, increased by @DamageTaken3StarScalar@ at 3-star. Gain an Artifact Anvil each time he gains enough Forge Power. <Rules>(Forge Power: </Rules>@Stack@<Rules> / </Rules>@GenericCalc1@<Rules>)</Rules>
 
 - cast time: `0.25`
 - **data values are still the bin template's placeholders** (`DataValue`/`OtherValue`), i.e. this spell has not been authored yet -- do not implement from these
@@ -675,7 +675,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 
 **Furious Fists**
 
-> <bright>Passive:</bright> On attack, restore @HealthCalc1@ %i:scaleHealth% Health.\n\n<bright>Active:</bright> Unleash a primal roar, restoring @HealthCalc3@ %i:scaleAP% Health. Then gain @SpellAS@ Attack Speed, @SpellDurability@ Durability, and is Unstoppable for @SpellDuration@ seconds.
+> <bright>Passive:</bright> On attack, restore @HealthCalc1@ %i:scaleHealth% Health.\n\n<bright>Active:</bright> Unleash a primal roar, restoring @HealthCalc3@ %i:scaleAP% Health. Then gain @SpellAS@ Attack Speed, @SpellDurability@ Durability, and is unstoppable for @SpellDuration@ seconds.
 
 - cast time: `0.25`
 - **data values are still the bin template's placeholders** (`DataValue`/`OtherValue`), i.e. this spell has not been authored yet -- do not implement from these
@@ -735,7 +735,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 
 **Forest's Flurry**
 
-> Blink away from the current target, deal @PhysicalDamageCalc1@ %i:scaleAD% physical damage to them, and gain @AttackSpeedCalc1@ %i:scaleAP% Attack Speed. \n\nEvery 4th cast consumes the Attack Speed granted from Nature's Wrath and fires a blast through the largest group of enemies that deals @PhysicalDamageCalc2@ %i:scaleAD% physical damage, reduced by @DamageReductionPerHit@ for each enemy it passes through (minimum @MinDamagePercent@).
+> Blink away from the current target, deal @PhysicalDamageCalc1@ %i:scaleAD% physical damage to them, and gain @AttackSpeedCalc1@ %i:scaleAP% Attack Speed. \n\nEvery 4th cast consumes the Attack Speed granted from Forest's Flurry and fires a blast through the largest group of enemies that deals @PhysicalDamageCalc2@ %i:scaleAD% physical damage, reduced by @DamageReductionPerHit@ for each enemy it passes through (minimum @MinDamagePercent@).
 
 - cast time: `0.25`
 - **data values are still the bin template's placeholders** (`DataValue`/`OtherValue`), i.e. this spell has not been authored yet -- do not implement from these
@@ -870,7 +870,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 
 **Spirit Rift**
 
-> Fire an arrow through the most enemies in a line that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage, reduced by @DamageFalloffPerEnemy@ per enemy hit (minimum @MinDamagePercent@). \n\nThe arrow leaves a trail for @RiftDuration@ seconds that deals @PhysicalDamageCalc2@ %i:scaleAD%%i:scaleAP% + @MaxHealthDamagePerSecond@ max Health physical damage per second to enemies within and @ChillPercent@% <Keyword>Slows</Keyword> them.\n\n<Rules>Slow: Reduce Attack Speed</Rules>
+> Fire an arrow through the most enemies in a line that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage, reduced by @DamageFalloffPerEnemy@ per enemy hit (minimum @MinDamagePercent@). If no enemies are hit refund @ManaRefund@ of mana spent.\n\nThe arrow leaves a trail for @RiftDuration@ seconds that deals @PhysicalDamageCalc2@ %i:scaleAD%%i:scaleAP% + @MaxHealthDamagePerSecond@ max Health physical damage per second to enemies within and @ChillPercent@% <Keyword>Slows</Keyword> them.\n\n<Rules>Slow: Reduce Attack Speed</Rules>
 
 - cast time: `0.25`
 - **data values are still the bin template's placeholders** (`DataValue`/`OtherValue`), i.e. this spell has not been authored yet -- do not implement from these
@@ -882,7 +882,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 
 **Whirling Death**
 
-> <bright>Passive:</bright> Attacks target random enemies in range and apply a bleed that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage over @BleedDuration@ seconds. Every attack has a @GenericCalc1@ %i:scaleAP% chance to deal @SpinningAxeDamageRatio@ bonus physical damage and apply @SpinningAxeBleedStacks@ bleeds instead. \n\n<bright>Active:</bright> Throw two giant axes towards the enemy with the most bleeds. Deal @PhysicalDamageCalc3@ %i:scaleAD% physical damage to enemies hit and consume their bleed, instantly dealing the remaining damage. The axes then return, dealing @GenericCalc2@ %i:scaleAD% physical damage to enemies hit.
+> <bright>Passive:</bright> Attacks target random enemies in range and apply a bleed that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage over @BleedDuration@ seconds. Every attack has a @GenericCalc1@ %i:scaleAP% chance to deal @SpinningAxeDamageRatio@ bonus physical damage and apply @SpinningAxeBleedStacks@ bleeds instead.\n\n<bright>Active:</bright> Throw two giant axes towards the enemy with the most bleeds. Deal @PhysicalDamageCalc3@ %i:scaleAD% physical damage to enemies hit and consume their bleed, instantly dealing the remaining damage. The axes then return, dealing @GenericCalc2@ %i:scaleAD% physical damage to enemies hit. If no enemies are hit refund @ManaRefund@ of mana spent.
 
 - cast time: `0.25`
 - **data values are still the bin template's placeholders** (`DataValue`/`OtherValue`), i.e. this spell has not been authored yet -- do not implement from these
@@ -1010,7 +1010,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 
 **Final Spark**
 
-> <bright>Passive:</bright> On cast, all allies that share a trait with Lux gain @ManaCalc1@ %i:scaleAP% mana. \n\n<bright>Active:</bright> Fire a laser towards the most enemies in a line that deals @MagicDamageCalc1@ %i:scaleAP% magic damage, reduced by @DamageReductionPerUnit@ for each enemy hit (minimum @MinimumFalloffDamageRatio@).\n\n<bright>Solar Bonus:</bright> Deals @SolarBonusDamagePer3StarRadio@ bonus damage for each unique 3-star champion fielded.
+> <bright>Passive:</bright> On cast, all allies that share a trait with Lux gain @ManaCalc1@ %i:scaleAP% mana. \n\n<bright>Active:</bright> Fire a laser towards the most enemies in a line that deals @MagicDamageCalc1@ %i:scaleAP% magic damage, reduced by @DamageReductionPerUnit@ for each enemy hit (minimum @MinimumFalloffDamageRatio@).\n\n<bright>Solar Bonus:</bright> Deal @SolarBonusDamageRatio@ bonus damage. For each unique 3-star champion fielded, deal an additional @SolarBonusDamagePer3StarRadio@ bonus damage.
 
 
 ## Maokai  `DA_18_Maokai`

@@ -262,7 +262,7 @@ class Blossom(Buff):
         # "After combat, your Wisps are empowered" and the shop-side Wisp
         # mechanics are out of scope for a combat simulator -- only the
         # AD/AP grant is modeled.
-        self.scaling = {0: 0, 3: 12, 5: 30, 7: 45, 9: 50, 11: 100}
+        self.scaling = {0: 0, 3: 12, 5: 30, 7: 50, 9: 55, 11: 100}
 
     def extraParameters():
         return {"Title": "Is Blossom", "Min": 0, "Max": 1, "Default": 1}
@@ -306,7 +306,7 @@ class Executioner(Buff):
         )
         self.crit_bonus = 0.15
         # (2) grants Precision + crit only; bleed starts at (3)
-        self.bleed_scaling = {0: 0, 2: 0, 3: 0.30, 4: 0.40}
+        self.bleed_scaling = {0: 0, 2: 0, 3: 0.25, 4: 0.35}
         self.bleed_duration = 3.0
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -346,7 +346,7 @@ class Riftbeast(Buff):
         )
         # (5) shop-overrun and (10) +2 team size are meta/shop mechanics,
         # out of scope for a combat simulator -- only (3) and (7) are modeled.
-        self.stat_scaling = 5  # AD/AS/AP %
+        self.stat_scaling = 6  # AD/AS/AP %
         self.resist_scaling = 5  # Armor/MR
         self.hp_scaling = 50
         self.mana_regen_scaling = 1
@@ -546,9 +546,10 @@ class Lunar(Buff):
     is the x2, which is what the Is Lunar param picks out (1 = the holder is
     itself Lunar, 0 = it is an adjacent ally riding the aura).
 
-    Both halves are the same number, and both are additive with every other
-    source: aspd.addStat is percentage points of base AS, ap.addStat is AP
-    points against the 100 base, so "7%" is +7 to each.
+    The two halves have their own rows (18.4 raised only the AP one), and
+    both are additive with every other source: aspd.addStat is percentage
+    points of base AS, ap.addStat is AP points against the 100 base, so "7%"
+    is +7.
     """
 
     levels = [0, 2, 3, 4, 5]
@@ -558,7 +559,8 @@ class Lunar(Buff):
         super().__init__(
             f"{self.display_name} {level}", level, params, phases=["preCombat"]
         )
-        self.scaling = {0: 0, 2: 7, 3: 10, 4: 14, 5: 18}
+        self.as_scaling = {0: 0, 2: 7, 3: 10, 4: 14, 5: 18}
+        self.ap_scaling = {0: 0, 2: 7, 3: 12, 4: 16, 5: 20}
         self.lunar_multiplier = 2
 
     def extraParameters():
@@ -567,11 +569,9 @@ class Lunar(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         if phase != "preCombat":
             return 0
-        amount = self.scaling.get(self.level, 0)
-        if self.params == 1:
-            amount *= self.lunar_multiplier
-        champion.aspd.addStat(amount)
-        champion.ap.addStat(amount)
+        mult = self.lunar_multiplier if self.params == 1 else 1
+        champion.aspd.addStat(self.as_scaling.get(self.level, 0) * mult)
+        champion.ap.addStat(self.ap_scaling.get(self.level, 0) * mult)
         return 0
 
 
@@ -731,7 +731,7 @@ class Fae(Buff):
     display_name = "Fae"
 
     # % Attack Damage and Ability Power per Pixie.
-    scaling = {0: 0, 2: 5, 4: 8}
+    scaling = {0: 0, 2: 4.5, 4: 7}
     max_pixies = 7
 
     def __init__(self, level, params):
@@ -918,7 +918,7 @@ class Greenfather(Buff):
     # Per Ivern star. The 3-star row really is that much larger than the
     # 2-star; that is what the champion card says.
     flower_aspd = [10, 15, 200]  # % Attack Speed
-    mushroom_amp = [0.08, 0.12, 2.00]  # damage amp
+    mushroom_amp = [0.06, 0.10, 2.00]  # damage amp
     water_mana_regen = [1, 2, 30]
 
     def __init__(self, level, params):
@@ -1341,8 +1341,8 @@ class BackrowStar(Buff):
         super().__init__(self.display_name, level, params, phases=["postPreCombat"])
         # Ignoring the "random back row champion" targeting -- applies
         # directly to the buff holder.
-        self.as_bonus = 85
-        self.as_bonus_upgraded = 115
+        self.as_bonus = 100
+        self.as_bonus_upgraded = 130
         self.duration = 7
         self.duration_upgraded = 8
 
@@ -1917,8 +1917,9 @@ class AsheTrail(Buff):
     # 20s; this stays flat at the 1/2-star value, as it did at 4s.
     duration = 3.0
     interval = 1.0
-    # "2% max Health" reads off the target's max HP, not Ashe's.
-    health_ratio = 0.02
+    # "1.5% max Health" reads off the target's max HP, not Ashe's. The card's
+    # 3-star row is 10%; this stays flat at the 1/2-star value, like duration.
+    health_ratio = 0.015
 
     def __init__(self, level=1, params=0):
         super().__init__(

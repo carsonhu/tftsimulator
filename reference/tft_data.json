@@ -645,7 +645,7 @@
   },
   {
    "ability": {
-    "desc": "<Bright>Active:</Bright> Gain @ShieldCalc1@ %i:scaleAP% Shield for @ShieldDuration@ seconds and deal @MagicDamageCalc1@ %i:scaleAP% magic damage to enemies in a cone. \r\\n\r\\n<Bright>Quest:</Bright> Each player combat, Ornn stores damage blocked as Forge Power, doubled at 3-star. Gain an Artifact Anvil each time he gains enough Forge Power. <Rules>(Forge Power: </Rules>@Stack@<Rules> / </Rules>@GenericCalc1@<Rules>)</Rules>",
+    "desc": "<Bright>Active:</Bright> Gain @ShieldCalc1@ %i:scaleAP% Shield for @ShieldDuration@ seconds and deal @MagicDamageCalc1@ %i:scaleAP% magic damage to enemies in a cone. \r\\n\r\\n<Bright>Quest:</Bright> Each player combat, Ornn stores damage blocked as Forge Power, increased by @DamageTaken3StarScalar@ at 3-star. Gain an Artifact Anvil each time he gains enough Forge Power. <Rules>(Forge Power: </Rules>@Stack@<Rules> / </Rules>@GenericCalc1@<Rules>)</Rules>",
     "name": "Bellows Breath",
     "variables": {}
    },
@@ -687,7 +687,7 @@
     "dataValuesArePlaceholder": true,
     "name": "Bellows Breath",
     "script": "TFT18_OrnnSpell",
-    "text": "<Bright>Active:</Bright> Gain @ShieldCalc1@ %i:scaleAP% Shield for @ShieldDuration@ seconds and deal @MagicDamageCalc1@ %i:scaleAP% magic damage to enemies in a cone. \r\\n\r\\n<Bright>Quest:</Bright> Each player combat, Ornn stores damage blocked as Forge Power, doubled at 3-star. Gain an Artifact Anvil each time he gains enough Forge Power. <Rules>(Forge Power: </Rules>@Stack@<Rules> / </Rules>@GenericCalc1@<Rules>)</Rules>"
+    "text": "<Bright>Active:</Bright> Gain @ShieldCalc1@ %i:scaleAP% Shield for @ShieldDuration@ seconds and deal @MagicDamageCalc1@ %i:scaleAP% magic damage to enemies in a cone. \r\\n\r\\n<Bright>Quest:</Bright> Each player combat, Ornn stores damage blocked as Forge Power, increased by @DamageTaken3StarScalar@ at 3-star. Gain an Artifact Anvil each time he gains enough Forge Power. <Rules>(Forge Power: </Rules>@Stack@<Rules> / </Rules>@GenericCalc1@<Rules>)</Rules>"
    },
    "stats": {
     "ad": 40.0,
@@ -2434,7 +2434,7 @@
     "critDamage": 1.399999976158142,
     "hp": 850.0,
     "manaPerAttack": 0.0,
-    "maxMana": 30.0,
+    "maxMana": 40.0,
     "mr": 50.0,
     "rangeHexes": 1.0,
     "rangeUnits": 180.0,
@@ -2892,7 +2892,7 @@
     "text": "<Bright>Passive:</Bright> Every third attack is a Double Strike. On takedown, gain a burst of movement speed.\r\\n\r\\n<Bright>Adaptor </Bright>%i:scaleAD%: Double Strikes grant @AttackSpeedCalc1@ %i:scaleAP% stacking Attack Speed.\r\\n\r\\n<dim>Adaptor </dim>%i:scaleAP%<dim>: Double Strikes deal bonus damage and heal.</dim>"
    },
    "stats": {
-    "ad": 62.0,
+    "ad": 60.0,
     "armor": 55.0,
     "attackSpeed": 0.800000011920929,
     "critChance": 0.25,
@@ -3111,7 +3111,7 @@
   },
   {
    "ability": {
-    "desc": "<bright>Passive:</bright> On attack, restore @HealthCalc1@ %i:scaleHealth% Health.\r\\n\r\\n<bright>Active:</bright> Unleash a primal roar, restoring @HealthCalc3@ %i:scaleAP% Health. Then gain @SpellAS@ Attack Speed, @SpellDurability@ Durability, and is Unstoppable for @SpellDuration@ seconds.",
+    "desc": "<bright>Passive:</bright> On attack, restore @HealthCalc1@ %i:scaleHealth% Health.\r\\n\r\\n<bright>Active:</bright> Unleash a primal roar, restoring @HealthCalc3@ %i:scaleAP% Health. Then gain @SpellAS@ Attack Speed, @SpellDurability@ Durability, and is unstoppable for @SpellDuration@ seconds.",
     "name": "Furious Fists",
     "variables": {}
    },
@@ -3153,7 +3153,7 @@
     "dataValuesArePlaceholder": true,
     "name": "Furious Fists",
     "script": "TFT18_ViSpell",
-    "text": "<bright>Passive:</bright> On attack, restore @HealthCalc1@ %i:scaleHealth% Health.\r\\n\r\\n<bright>Active:</bright> Unleash a primal roar, restoring @HealthCalc3@ %i:scaleAP% Health. Then gain @SpellAS@ Attack Speed, @SpellDurability@ Durability, and is Unstoppable for @SpellDuration@ seconds."
+    "text": "<bright>Passive:</bright> On attack, restore @HealthCalc1@ %i:scaleHealth% Health.\r\\n\r\\n<bright>Active:</bright> Unleash a primal roar, restoring @HealthCalc3@ %i:scaleAP% Health. Then gain @SpellAS@ Attack Speed, @SpellDurability@ Durability, and is unstoppable for @SpellDuration@ seconds."
    },
    "stats": {
     "ad": 45.0,
@@ -3420,7 +3420,7 @@
     "text": "<bright>Passive:</bright> When the target dies, leap at the next target, dealing @PhysicalDamageCalc1@ %i:scaleAD% physical damage.\r\\n\r\\n<bright>Active:</bright> Gain @FrenzyADPercent@ Attack Damage for @Duration@ seconds. During this time ignore @GenericCalc1@ %i:scaleAP% Armor.\r\\n\r\\nRed Buff: Attacks @BurnAmount@% Burn enemies and heal Brambleback for @TraitMaxHealthHeal@ max Health."
    },
    "stats": {
-    "ad": 115.0,
+    "ad": 120.0,
     "armor": 65.0,
     "attackSpeed": 0.550000011920929,
     "critChance": 0.25,
@@ -3441,7 +3441,7 @@
   },
   {
    "ability": {
-    "desc": "Blink away from the current target, deal @PhysicalDamageCalc1@ %i:scaleAD% physical damage to them, and gain @AttackSpeedCalc1@ %i:scaleAP% Attack Speed. \r\\n\r\\nEvery 4th cast consumes the Attack Speed granted from Nature's Wrath and fires a blast through the largest group of enemies that deals @PhysicalDamageCalc2@ %i:scaleAD% physical damage, reduced by @DamageReductionPerHit@ for each enemy it passes through (minimum @MinDamagePercent@).",
+    "desc": "Blink away from the current target, deal @PhysicalDamageCalc1@ %i:scaleAD% physical damage to them, and gain @AttackSpeedCalc1@ %i:scaleAP% Attack Speed. \r\\n\r\\nEvery 4th cast consumes the Attack Speed granted from Forest's Flurry and fires a blast through the largest group of enemies that deals @PhysicalDamageCalc2@ %i:scaleAD% physical damage, reduced by @DamageReductionPerHit@ for each enemy it passes through (minimum @MinDamagePercent@).",
     "name": "Forest's Flurry",
     "variables": {}
    },
@@ -3483,7 +3483,7 @@
     "dataValuesArePlaceholder": true,
     "name": "Forest's Flurry",
     "script": "TFT18_EzrealSpell",
-    "text": "Blink away from the current target, deal @PhysicalDamageCalc1@ %i:scaleAD% physical damage to them, and gain @AttackSpeedCalc1@ %i:scaleAP% Attack Speed. \r\\n\r\\nEvery 4th cast consumes the Attack Speed granted from Nature's Wrath and fires a blast through the largest group of enemies that deals @PhysicalDamageCalc2@ %i:scaleAD% physical damage, reduced by @DamageReductionPerHit@ for each enemy it passes through (minimum @MinDamagePercent@)."
+    "text": "Blink away from the current target, deal @PhysicalDamageCalc1@ %i:scaleAD% physical damage to them, and gain @AttackSpeedCalc1@ %i:scaleAP% Attack Speed. \r\\n\r\\nEvery 4th cast consumes the Attack Speed granted from Forest's Flurry and fires a blast through the largest group of enemies that deals @PhysicalDamageCalc2@ %i:scaleAD% physical damage, reduced by @DamageReductionPerHit@ for each enemy it passes through (minimum @MinDamagePercent@)."
    },
    "stats": {
     "ad": 45.0,
@@ -4243,7 +4243,7 @@
   },
   {
    "ability": {
-    "desc": "Fire an arrow through the most enemies in a line that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage, reduced by @DamageFalloffPerEnemy@ per enemy hit (minimum @MinDamagePercent@). \r\\n\r\\nThe arrow leaves a trail for @RiftDuration@ seconds that deals @PhysicalDamageCalc2@ %i:scaleAD%%i:scaleAP% + @MaxHealthDamagePerSecond@ max Health physical damage per second to enemies within and @ChillPercent@% <Keyword>Slows</Keyword> them.\r\\n\r\\n<Rules>Slow: Reduce Attack Speed</Rules>",
+    "desc": "Fire an arrow through the most enemies in a line that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage, reduced by @DamageFalloffPerEnemy@ per enemy hit (minimum @MinDamagePercent@). If no enemies are hit refund @ManaRefund@ of mana spent.\r\\n\r\\nThe arrow leaves a trail for @RiftDuration@ seconds that deals @PhysicalDamageCalc2@ %i:scaleAD%%i:scaleAP% + @MaxHealthDamagePerSecond@ max Health physical damage per second to enemies within and @ChillPercent@% <Keyword>Slows</Keyword> them.\r\\n\r\\n<Rules>Slow: Reduce Attack Speed</Rules>",
     "name": "Spirit Rift",
     "variables": {}
    },
@@ -4285,7 +4285,7 @@
     "dataValuesArePlaceholder": true,
     "name": "Spirit Rift",
     "script": "TFT18_AsheSpell",
-    "text": "Fire an arrow through the most enemies in a line that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage, reduced by @DamageFalloffPerEnemy@ per enemy hit (minimum @MinDamagePercent@). \r\\n\r\\nThe arrow leaves a trail for @RiftDuration@ seconds that deals @PhysicalDamageCalc2@ %i:scaleAD%%i:scaleAP% + @MaxHealthDamagePerSecond@ max Health physical damage per second to enemies within and @ChillPercent@% <Keyword>Slows</Keyword> them.\r\\n\r\\n<Rules>Slow: Reduce Attack Speed</Rules>"
+    "text": "Fire an arrow through the most enemies in a line that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage, reduced by @DamageFalloffPerEnemy@ per enemy hit (minimum @MinDamagePercent@). If no enemies are hit refund @ManaRefund@ of mana spent.\r\\n\r\\nThe arrow leaves a trail for @RiftDuration@ seconds that deals @PhysicalDamageCalc2@ %i:scaleAD%%i:scaleAP% + @MaxHealthDamagePerSecond@ max Health physical damage per second to enemies within and @ChillPercent@% <Keyword>Slows</Keyword> them.\r\\n\r\\n<Rules>Slow: Reduce Attack Speed</Rules>"
    },
    "stats": {
     "ad": 75.0,
@@ -4299,7 +4299,7 @@
     "mr": 45.0,
     "rangeHexes": 6.0,
     "rangeUnits": 1130.0,
-    "startMana": 20.0
+    "startMana": 0
    },
    "tier": 5,
    "traits": [
@@ -4309,7 +4309,7 @@
   },
   {
    "ability": {
-    "desc": "<bright>Passive:</bright> Attacks target random enemies in range and apply a bleed that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage over @BleedDuration@ seconds. Every attack has a @GenericCalc1@ %i:scaleAP% chance to deal @SpinningAxeDamageRatio@ bonus physical damage and apply @SpinningAxeBleedStacks@ bleeds instead. \r\\n\r\\n<bright>Active:</bright> Throw two giant axes towards the enemy with the most bleeds. Deal @PhysicalDamageCalc3@ %i:scaleAD% physical damage to enemies hit and consume their bleed, instantly dealing the remaining damage. The axes then return, dealing @GenericCalc2@ %i:scaleAD% physical damage to enemies hit. ",
+    "desc": "<bright>Passive:</bright> Attacks target random enemies in range and apply a bleed that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage over @BleedDuration@ seconds. Every attack has a @GenericCalc1@ %i:scaleAP% chance to deal @SpinningAxeDamageRatio@ bonus physical damage and apply @SpinningAxeBleedStacks@ bleeds instead.\r\\n\r\\n<bright>Active:</bright> Throw two giant axes towards the enemy with the most bleeds. Deal @PhysicalDamageCalc3@ %i:scaleAD% physical damage to enemies hit and consume their bleed, instantly dealing the remaining damage. The axes then return, dealing @GenericCalc2@ %i:scaleAD% physical damage to enemies hit. If no enemies are hit refund @ManaRefund@ of mana spent.",
     "name": "Whirling Death",
     "variables": {}
    },
@@ -4351,7 +4351,7 @@
     "dataValuesArePlaceholder": true,
     "name": "Whirling Death",
     "script": "TFT18_DravenSpell",
-    "text": "<bright>Passive:</bright> Attacks target random enemies in range and apply a bleed that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage over @BleedDuration@ seconds. Every attack has a @GenericCalc1@ %i:scaleAP% chance to deal @SpinningAxeDamageRatio@ bonus physical damage and apply @SpinningAxeBleedStacks@ bleeds instead. \r\\n\r\\n<bright>Active:</bright> Throw two giant axes towards the enemy with the most bleeds. Deal @PhysicalDamageCalc3@ %i:scaleAD% physical damage to enemies hit and consume their bleed, instantly dealing the remaining damage. The axes then return, dealing @GenericCalc2@ %i:scaleAD% physical damage to enemies hit. "
+    "text": "<bright>Passive:</bright> Attacks target random enemies in range and apply a bleed that deals @PhysicalDamageCalc1@ %i:scaleAD% physical damage over @BleedDuration@ seconds. Every attack has a @GenericCalc1@ %i:scaleAP% chance to deal @SpinningAxeDamageRatio@ bonus physical damage and apply @SpinningAxeBleedStacks@ bleeds instead.\r\\n\r\\n<bright>Active:</bright> Throw two giant axes towards the enemy with the most bleeds. Deal @PhysicalDamageCalc3@ %i:scaleAD% physical damage to enemies hit and consume their bleed, instantly dealing the remaining damage. The axes then return, dealing @GenericCalc2@ %i:scaleAD% physical damage to enemies hit. If no enemies are hit refund @ManaRefund@ of mana spent."
    },
    "stats": {
     "ad": 48.0,
@@ -4951,7 +4951,7 @@
   },
   {
    "ability": {
-    "desc": "<bright>Passive:</bright> On cast, all allies that share a trait with Lux gain @ManaCalc1@ %i:scaleAP% mana. \r\\n\r\\n<bright>Active:</bright> Fire a laser towards the most enemies in a line that deals @MagicDamageCalc1@ %i:scaleAP% magic damage, reduced by @DamageReductionPerUnit@ for each enemy hit (minimum @MinimumFalloffDamageRatio@).\r\\n\r\\n<bright>Solar Bonus:</bright> Deals @SolarBonusDamagePer3StarRadio@ bonus damage for each unique 3-star champion fielded.",
+    "desc": "<bright>Passive:</bright> On cast, all allies that share a trait with Lux gain @ManaCalc1@ %i:scaleAP% mana. \r\\n\r\\n<bright>Active:</bright> Fire a laser towards the most enemies in a line that deals @MagicDamageCalc1@ %i:scaleAP% magic damage, reduced by @DamageReductionPerUnit@ for each enemy hit (minimum @MinimumFalloffDamageRatio@).\r\\n\r\\n<bright>Solar Bonus:</bright> Deal @SolarBonusDamageRatio@ bonus damage. For each unique 3-star champion fielded, deal an additional @SolarBonusDamagePer3StarRadio@ bonus damage.",
     "name": "Final Spark",
     "variables": {}
    },
@@ -5034,7 +5034,7 @@
     "critDamage": 1.399999976158142,
     "hp": 1150.0,
     "manaPerAttack": 0.0,
-    "maxMana": 90.0,
+    "maxMana": 100,
     "mr": 60.0,
     "rangeHexes": 1.0,
     "rangeUnits": 180.0,
@@ -6151,6 +6151,30 @@
    "unique": false
   },
   {
+   "apiName": "DA_18_Drizzle",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "After @Delay@ seconds of combat, your team gains @ManaToGain@ Mana.",
+   "effects": {
+    "Delay": 8.0,
+    "ManaToGain": 10.0
+   },
+   "name": "Drizzle",
+   "unique": false
+  },
+  {
+   "apiName": "DA_18_Drizzle_Upgrade",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "After @Delay@ seconds of combat, your team gains @ManaToGainUpgrade@ Mana.",
+   "effects": {
+    "Delay": 8.0,
+    "ManaToGainUpgrade": 15.0
+   },
+   "name": "Drizzle",
+   "unique": false
+  },
+  {
    "apiName": "DA_18_DuoQueue",
    "associatedTraits": [],
    "composition": [],
@@ -6528,24 +6552,6 @@
    "unique": false
   },
   {
-   "apiName": "DA_18_FieldofMice",
-   "associatedTraits": [],
-   "composition": [],
-   "desc": "Gain a Tiny Champion Duplicator for each unique one-cost fielded last round.",
-   "effects": {},
-   "name": "Field of Mice",
-   "unique": false
-  },
-  {
-   "apiName": "DA_18_FieldofMice_Upgrade",
-   "associatedTraits": [],
-   "composition": [],
-   "desc": "Gain a Tiny Duplicator <Set18CharmUpgrade>and a gold</Set18CharmUpgrade> for each unique 1-cost champion you fielded last round.",
-   "effects": {},
-   "name": "Field of Mice",
-   "unique": false
-  },
-  {
    "apiName": "DA_18_FloraFatalisAugment",
    "associatedTraits": [
     "DA_FloraFatalis18"
@@ -6635,6 +6641,30 @@
    "unique": false
   },
   {
+   "apiName": "DA_18_GroveArmor",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Your highest Health champion gains @BonusArmor@ Armor and @BonusMR@ Magic Resist.",
+   "effects": {
+    "BonusArmor": 15.0,
+    "BonusMR": 15.0
+   },
+   "name": "Grove Armor",
+   "unique": false
+  },
+  {
+   "apiName": "DA_18_GroveArmor_Upgrade",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Your highest Health champion gains @BonusArmorUpgrade@ Armor and @BonusMRUpgrade@ Magic Resist.",
+   "effects": {
+    "BonusArmorUpgrade": 25.0,
+    "BonusMRUpgrade": 25.0
+   },
+   "name": "Grove Armor",
+   "unique": false
+  },
+  {
    "apiName": "DA_18_HeatedRivalry",
    "associatedTraits": [],
    "composition": [],
@@ -6651,7 +6681,7 @@
    "composition": [],
    "desc": "Gain a Rengar or a Kha'Zix. They gain @NumStacksUpgrade@ takedowns.",
    "effects": {
-    "NumStacksUpgrade": 7.0
+    "NumStacksUpgrade": 5.0
    },
    "name": "Heated Rivalry",
    "unique": false
@@ -6949,7 +6979,7 @@
    "composition": [],
    "desc": "Gain @DamageAmpUpgrade*100@% Damage Amp for every @PerXGold@ gold you have.",
    "effects": {
-    "DamageAmpUpgrade": 0.04500000178813934,
+    "DamageAmpUpgrade": 0.03999999910593033,
     "PerXGold": 10.0
    },
    "name": "Mercenary Force",
@@ -7296,8 +7326,11 @@
     "DA_Riftbeast18"
    ],
    "composition": [],
-   "desc": "You can now choose a second Alpha Riftbeast. Gain a Scuttlecrab, a Cinderling, and a Pebbles.",
-   "effects": {},
+   "desc": "You can now choose a second Alpha Riftbeast. Alpha Riftbeasts gain @BonusHP*100@% max Health and @BonusAS*100@% Attack Speed. Gain a Scuttlecrab, a Cinderling, and a Pebbles.",
+   "effects": {
+    "BonusAS": 0.12000000476837158,
+    "BonusHP": 0.1499999761581421
+   },
    "name": "Omega Riftbeast",
    "unique": false
   },
@@ -7334,7 +7367,7 @@
    "composition": [],
    "desc": "While Sprykin is active, gain a second BFF summon that is @Effectiveness_DoesntIncludeSummonSpell*100@% as powerful. Gain a Teemo, a Veigar, and a Kobuko.",
    "effects": {
-    "Effectiveness_DoesntIncludeSummonSpell": 0.3499999940395355
+    "Effectiveness_DoesntIncludeSummonSpell": 0.44999998807907104
    },
    "name": "Small Furry Friend",
    "unique": false
@@ -7539,7 +7572,7 @@
    "apiName": "DA_18_WeightTheWorth",
    "associatedTraits": [],
    "composition": [],
-   "desc": "The first time you 3-star a champion, gain a copy of them each round for the rest of the game. 3-starring the same champion again grants additional copies. Gain a Lesser Champion Duplicator and a Tiny Champion Duplicator.",
+   "desc": "The first time you 3-star a champion, gain a copy of them each round for the rest of the game. 3-starring the same champion again grants additional copies. Gain a Lesser Champion Duplicator.",
    "effects": {},
    "name": "Weight The Worth",
    "unique": false
@@ -7687,7 +7720,7 @@
    "desc": "For @UpgradeDuration@ seconds, your shop rerolls for free every @Period@ seconds.",
    "effects": {
     "Period": 2.0,
-    "UpgradeDuration": 26.0
+    "UpgradeDuration": 24.0
    },
    "name": "Animate Shop",
    "unique": false
@@ -7921,7 +7954,7 @@
    "composition": [],
    "desc": "",
    "effects": {},
-   "name": "Mogul'sMail",
+   "name": "Mogul's Mail",
    "unique": false
   },
   {
@@ -8332,9 +8365,9 @@
     "DA_18_Blackthorn"
    ],
    "composition": [],
-   "desc": "The first @NumComponents@ times you sacrifice a champion in the Blackthorn hex, gain a copy of a random component they're holding. Gain a Veigar and a Rek'Sai.",
+   "desc": "The first @NumComponents@ times you sacrifice a champion in the Blackthorn hex, gain a copy of a random component they're holding. Gain an Azir, Veigar, and a Rek'Sai.",
    "effects": {
-    "NumComponents": 4.0
+    "NumComponents": 3.0
    },
    "name": "Item Extraction",
    "unique": false
@@ -8487,7 +8520,7 @@
     "Chance": 0.25,
     "StartingOrbs": 1.0
    },
-   "name": "Bonus Gift",
+   "name": "Bonus Gifts",
    "unique": false
   },
   {
@@ -8499,7 +8532,7 @@
     "Chance": 0.25,
     "StartingOrbs": 2.0
    },
-   "name": "Bonus Gift+",
+   "name": "Bonus Gifts+",
    "unique": false
   },
   {
@@ -8721,6 +8754,17 @@
     "RoundsDuration": 6.0
    },
    "name": "Buried Treasures III",
+   "unique": false
+  },
+  {
+   "apiName": "DA_CalculatedLoss",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "After losing your combat, gain @Gold@ gold and a free Shop reroll.",
+   "effects": {
+    "Gold": 2.0
+   },
+   "name": "Calculated Loss",
    "unique": false
   },
   {
@@ -9047,7 +9091,7 @@
    "composition": [],
    "desc": "Your champions explode on death, dealing @maxHealthExplosionDamage_Upgrade*100@% Max Health magic damage.",
    "effects": {
-    "maxHealthExplosionDamage_Upgrade": 0.2199999988079071
+    "maxHealthExplosionDamage_Upgrade": 0.18000000715255737
    },
    "name": "Combust",
    "unique": false
@@ -9344,7 +9388,7 @@
    "desc": "Open an item store. Items cost 0 to @TooltipMaxCostOfItem@ gold. <Set18CharmUpgrade>Gain </Set18CharmUpgrade>@UpgradeGoldGain@<Set18CharmUpgrade> Gold.</Set18CharmUpgrade>",
    "effects": {
     "TooltipMaxCostOfItem": 15.0,
-    "UpgradeGoldGain": 2.0
+    "UpgradeGoldGain": 1.0
    },
    "name": "Curio Cart",
    "unique": false
@@ -9547,6 +9591,18 @@
     "Upgrade_Boost3_Num": 4.0
    },
    "name": "Doodad Sack",
+   "unique": false
+  },
+  {
+   "apiName": "DA_DoubleTrouble",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "When you field exactly 2 copies of a champion, they both gain @DamageStatAdd*100@% Attack Damage and Ability Power and @DefenseStatAdd@ Armor, and Magic Resist. When you 3-star, gain a 2-star copy.",
+   "effects": {
+    "DamageStatAdd": 0.25,
+    "DefenseStatAdd": 25.0
+   },
+   "name": "Double Trouble",
    "unique": false
   },
   {
@@ -9767,6 +9823,15 @@
    "unique": false
   },
   {
+   "apiName": "DA_ExpectedUnexpectedness",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Now and at the start of the next 2 stages, roll 3 dice. Gain various rewards based on their total.",
+   "effects": {},
+   "name": "Expected Unexpectedness",
+   "unique": false
+  },
+  {
    "apiName": "DA_Expedition",
    "associatedTraits": [],
    "composition": [],
@@ -9897,7 +9962,7 @@
    "apiName": "DA_Flow18",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Your champions are Unstoppable and gain @AttackSpeed*100@% Attack Speed for @Duration@ seconds.",
+   "desc": "Your champions are unstoppable and gain @AttackSpeed*100@% Attack Speed for @Duration@ seconds.",
    "effects": {
     "AttackSpeed": 0.1499999761581421,
     "Duration": 10.0
@@ -9909,7 +9974,7 @@
    "apiName": "DA_Flow18_Upgrade",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Your champions are Unstoppable and gain @AttackSpeed*100@% Attack Speed for @DurationUpgrade@ seconds.",
+   "desc": "Your champions are unstoppable and gain @AttackSpeed*100@% Attack Speed for @DurationUpgrade@ seconds.",
    "effects": {
     "AttackSpeed": 0.1499999761581421,
     "DurationUpgrade": 15.0
@@ -9991,6 +10056,24 @@
     "MoreComponents": 2.0
    },
    "name": "Forged In Strength",
+   "unique": false
+  },
+  {
+   "apiName": "DA_FoundBigFriend18",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Gain a temporary Training Dummy with two Giant's Belts.",
+   "effects": {},
+   "name": "Returning Friend",
+   "unique": false
+  },
+  {
+   "apiName": "DA_FoundBigFriend18_Upgrade",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Gain a Training Dummy with <Set18CharmUpgrade>Three Giant's Belts</Set18CharmUpgrade>.",
+   "effects": {},
+   "name": "Returning Friend",
    "unique": false
   },
   {
@@ -10728,7 +10811,7 @@
    "composition": [],
    "desc": "Your highest Health unit grows, gaining @HealthUpgrade@ Health.",
    "effects": {
-    "HealthUpgrade": 600.0
+    "HealthUpgrade": 500.0
    },
    "name": "Hugify",
    "unique": false
@@ -10962,7 +11045,7 @@
    "apiName": "DA_ItsMeBaby",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Gain a spotlight in the bottom right corner. The champion in it gains @DamageAmpPercent*100@% Damage Amp and @AttackSpeed*100@% Attack Speed, and drops @GoldToGrant@ gold every @TakedownsPerGold@ takedowns.<br><br><rules>Lore & Legends Tactician's Crown, 2026</rules>",
+   "desc": "Gain a championship hex in the bottom right corner. The champion in it gains @DamageAmpPercent*100@% Damage Amp and @AttackSpeed*100@% Attack Speed, and drops @GoldToGrant@ gold every @TakedownsPerGold@ takedowns.<br><br><rules>Lore & Legends Tactician's Crown, 2026</rules>",
    "effects": {
     "AttackSpeed": 0.1499999761581421,
     "DamageAmpPercent": 0.15000000596046448,
@@ -11665,8 +11748,10 @@
    "apiName": "DA_Min_Max",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Gain a Golden Item Remover and 4 random components.",
-   "effects": {},
+   "desc": "Gain a Golden Item Remover, 4 random components, and @GoldAmount@ gold.",
+   "effects": {
+    "GoldAmount": 4.0
+   },
    "name": "Min-Max",
    "unique": false
   },
@@ -11841,30 +11926,6 @@
    "unique": false
   },
   {
-   "apiName": "DA_NestingDollsPlus",
-   "associatedTraits": [],
-   "composition": [],
-   "desc": "After a champion dies in combat, spawn a copy of them one star level lower with @HealthMultiplier*100@% health. Gain @NumRerolls@ free rerolls.",
-   "effects": {
-    "HealthMultiplier": 0.6000000238418579,
-    "NumRerolls": 3.0
-   },
-   "name": "Nesting Dolls",
-   "unique": false
-  },
-  {
-   "apiName": "DA_NestingDollsPlusPlus",
-   "associatedTraits": [],
-   "composition": [],
-   "desc": "After a champion dies in combat, spawn a copy of them one star level lower with @HealthMultiplier*100@% health. Gain @NumRerolls@ free rerolls.",
-   "effects": {
-    "HealthMultiplier": 0.6000000238418579,
-    "NumRerolls": 3.0
-   },
-   "name": "Nesting Dolls",
-   "unique": false
-  },
-  {
    "apiName": "DA_NoScoutNoPivot",
    "associatedTraits": [],
    "composition": [],
@@ -11912,8 +11973,9 @@
    "apiName": "DA_PandorasItemsII",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Round start: items on your bench are randomized. <br><br>Gain @NumberOfComponentsII@ random components.",
+   "desc": "Round start: items on your bench are randomized. <br><br>Gain @NumberOfComponentsII@ random components and @GoldAmountII@ gold.",
    "effects": {
+    "GoldAmountII": 4.0,
     "NumberOfComponentsII": 2.0
    },
    "name": "Pandora's Items II",
@@ -12221,7 +12283,7 @@
    "apiName": "DA_PottedLifebloom18",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Gain a temporary Lifeblossom.",
+   "desc": "Gain a temporary Lifebloom.",
    "effects": {},
    "name": "Potted Lifebloom",
    "unique": false
@@ -12750,9 +12812,9 @@
    "apiName": "DA_ShimmerscaleEssence",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Gain a Mogul's Mail. After @NumberOfRoundsToWait@  player combats, gain a Gamblers Blade.",
+   "desc": "Gain a Gambler's Blade. After @NumberOfRoundsToWait@ player combats, gain a Mogul's Mail.",
    "effects": {
-    "NumberOfRoundsToWait": 8.0
+    "NumberOfRoundsToWait": 6.0
    },
    "name": "Shimmerscale Essence",
    "unique": false
@@ -12761,7 +12823,7 @@
    "apiName": "DA_ShoppingSpree",
    "associatedTraits": [],
    "composition": [],
-   "desc": "When you level up, gain a number of free shop refreshes equal to your level +@BonusRollPerLevel@. Gain @GoldGain@ gold.",
+   "desc": "When you level up, gain a number of Shop refreshes equal to your level +@BonusRollPerLevel@. Gain @GoldGain@ gold.",
    "effects": {
     "BonusRollPerLevel": 1.0,
     "GoldGain": 6.0
@@ -13154,8 +13216,8 @@
    "composition": [],
    "desc": "Champions alone in their row gain @Health_Upgrade*100@% Health and @DamageAmp_Upgrade*100@% Damage Amp.",
    "effects": {
-    "DamageAmp_Upgrade": 0.2199999988079071,
-    "Health_Upgrade": 0.2200000286102295
+    "DamageAmp_Upgrade": 0.20000000298023224,
+    "Health_Upgrade": 0.20000004768371582
    },
    "name": "Stand Alone",
    "unique": false
@@ -13217,7 +13279,7 @@
    "composition": [],
    "desc": "Your @NumChampions@ strongest Fighters or Assassins are untargetable for @UntargetableDuration@ seconds.",
    "effects": {
-    "NumChampions": 2.0,
+    "NumChampions": 3.0,
     "UntargetableDuration": 6.0
    },
    "name": "Stealthy",
@@ -13229,7 +13291,7 @@
    "composition": [],
    "desc": "@NumChampionsUpgrade@ random champions on the back row are untargetable for @UntargetableDurationUpgrade@ seconds.",
    "effects": {
-    "NumChampionsUpgrade": 2.0,
+    "NumChampionsUpgrade": 3.0,
     "UntargetableDurationUpgrade": 10.0
    },
    "name": "Stealthy",
@@ -13652,7 +13714,7 @@
    "apiName": "DA_TradeSector",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Gain a free Shop reroll every round. Gain @NumGold@ gold.",
+   "desc": "Gain a Shop reroll every round. Gain @NumGold@ gold.",
    "effects": {
     "NumGold": 2.0
    },
@@ -13663,7 +13725,7 @@
    "apiName": "DA_TradeSectorPlus",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Gain a free Shop reroll every round. Gain @NumGoldPlus@ gold.",
+   "desc": "Gain a Shop reroll every round. Gain @NumGoldPlus@ gold.",
    "effects": {
     "NumGoldPlus": 8.0
    },
@@ -13755,6 +13817,30 @@
    "unique": false
   },
   {
+   "apiName": "DA_TrueFriendship18",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Gain @GoldForPlayer@ gold and a Magnetic Remover. Your opponent gains @GoldForEnemy@ gold and a Magnetic Remover.",
+   "effects": {
+    "GoldForEnemy": 2.0,
+    "GoldForPlayer": 2.0
+   },
+   "name": "True Friendship",
+   "unique": false
+  },
+  {
+   "apiName": "DA_TrueFriendship18_Upgrade",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Gain @UpgradeGoldForPlayer@ gold and a Magnetic Remover. Your opponent gains @UpgradeGoldForEnemy@ gold and a Magnetic Remover.",
+   "effects": {
+    "UpgradeGoldForEnemy": 2.0,
+    "UpgradeGoldForPlayer": 3.0
+   },
+   "name": "True Friendship",
+   "unique": false
+  },
+  {
    "apiName": "DA_TurtlesVisit18",
    "associatedTraits": [],
    "composition": [],
@@ -13802,11 +13888,11 @@
    "apiName": "DA_UpwardMobility",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Buying XP costs @ReducedXPCost@ less. Gain @HealthOnLevelUp@ Health and @RerollsOnLevelUp@ free reroll whenever you level up.",
+   "desc": "Buying XP costs @ReducedXPCost@ less. Gain @HealthOnLevelUp@ Health and @RerollsOnLevelUp@ Shop rerolls whenever you level up.",
    "effects": {
     "HealthOnLevelUp": 2.0,
     "ReducedXPCost": 1.0,
-    "RerollsOnLevelUp": 1.0
+    "RerollsOnLevelUp": 2.0
    },
    "name": "Upward Mobility",
    "unique": false
@@ -13902,7 +13988,7 @@
    ],
    "desc": "",
    "effects": {},
-   "name": "Warmogs Armor",
+   "name": "Warmog's Armor",
    "unique": false
   },
   {
@@ -23166,7 +23252,7 @@
      "maxUnits": 8,
      "minUnits": 7,
      "variables": {
-      "ADAP": 0.44999998807907104,
+      "ADAP": 0.5,
       "BonusHealth": 0.10000002384185791,
       "GoldPerCharmPurchased": 4.0
      }
@@ -23175,7 +23261,7 @@
      "maxUnits": 10,
      "minUnits": 9,
      "variables": {
-      "ADAP": 0.5,
+      "ADAP": 0.550000011920929,
       "BonusHealth": 0.10000002384185791
      }
     },
@@ -23258,7 +23344,7 @@
      "variables": {
       "EssenceForRitualTooltip": 40.0,
       "EssencePerDeath": 2.0,
-      "EssencePerLoss": 18.0
+      "EssencePerLoss": 22.0
      }
     },
     {
@@ -23267,7 +23353,7 @@
      "variables": {
       "EssenceForRitualTooltip": 40.0,
       "EssencePerDeath": 2.0,
-      "EssencePerLoss": 25.0
+      "EssencePerLoss": 28.0
      }
     },
     {
@@ -23276,7 +23362,7 @@
      "variables": {
       "EssenceForRitualTooltip": 40.0,
       "EssencePerDeath": 3.0,
-      "EssencePerLoss": 32.0
+      "EssencePerLoss": 35.0
      }
     },
     {
@@ -23315,7 +23401,7 @@
      "maxUnits": null,
      "minUnits": 6,
      "variables": {
-      "DefenderDefenseGain": 120.0,
+      "DefenderDefenseGain": 115.0,
       "NonDefenderDefenseGain": 12.0
      }
     }
@@ -23330,7 +23416,7 @@
      "maxUnits": null,
      "minUnits": null,
      "variables": {
-      "DelaySeconds": 10.0,
+      "DelaySeconds": 8.0,
       "EclipseBeamPeriod": 3.5
      }
     }
@@ -23413,14 +23499,14 @@
      "minUnits": 3,
      "variables": {
       "BleedDuration": 3.0,
-      "BonusBleedPercent": 0.30000001192092896
+      "BonusBleedPercent": 0.25
      }
     },
     {
      "maxUnits": null,
      "minUnits": 4,
      "variables": {
-      "BonusBleedPercent": 0.4000000059604645
+      "BonusBleedPercent": 0.3499999940395355
      }
     }
    ],
@@ -23434,7 +23520,7 @@
      "maxUnits": 3,
      "minUnits": 2,
      "variables": {
-      "ADAP": 5.0,
+      "ADAP": 4.5,
       "Heal": 2.5,
       "HealThreshold": 0.5
      }
@@ -23443,7 +23529,7 @@
      "maxUnits": null,
      "minUnits": 4,
      "variables": {
-      "ADAP": 8.0,
+      "ADAP": 7.0,
       "Heal": 4.0,
       "HealThreshold": 0.5
      }
@@ -23524,7 +23610,7 @@
      "minUnits": 5,
      "variables": {
       "DamageAmp": 0.10000000149011612,
-      "HunterAD": 0.6499999761581421,
+      "HunterAD": 0.6000000238418579,
       "HunterDuration": 3.0
      }
     }
@@ -23557,7 +23643,7 @@
      "minUnits": 5,
      "variables": {
       "Duration": 3.0,
-      "HPBurnPerSecond": 3.5,
+      "HPBurnPerSecond": 3.0,
       "LuckySlotCount": 2.0
      }
     },
@@ -23566,7 +23652,7 @@
      "minUnits": 7,
      "variables": {
       "Duration": 3.0,
-      "HPBurnPerSecond": 4.5,
+      "HPBurnPerSecond": 4.0,
       "LuckySlotCount": 4.0
      }
     }
@@ -23605,7 +23691,7 @@
      "maxUnits": null,
      "minUnits": 5,
      "variables": {
-      "InvokerManaBonus": 9.0,
+      "InvokerManaBonus": 8.0,
       "TeamManaRegen": 2.0
      }
     }
@@ -23636,7 +23722,7 @@
      "maxUnits": null,
      "minUnits": 6,
      "variables": {
-      "JuggernautDurability": 0.44999998807907104,
+      "JuggernautDurability": 0.42000001668930054,
       "TeamDurability": 0.07999998331069946
      }
     }
@@ -23661,7 +23747,7 @@
      "minUnits": 3,
      "variables": {
       "AbilityPower": 0.10000000149011612,
-      "AttackSpeed": 0.10000002384185791,
+      "AttackSpeed": 0.12000000476837158,
       "LunarMultiplier": 1.0
      }
     },
@@ -23670,7 +23756,7 @@
      "minUnits": 4,
      "variables": {
       "AbilityPower": 0.14000000059604645,
-      "AttackSpeed": 0.13999998569488525,
+      "AttackSpeed": 0.15999996662139893,
       "LunarMultiplier": 1.0
      }
     },
@@ -23679,7 +23765,7 @@
      "minUnits": 5,
      "variables": {
       "AbilityPower": 0.18000000715255737,
-      "AttackSpeed": 0.1799999475479126,
+      "AttackSpeed": 0.20000004768371582,
       "LunarMultiplier": 1.0
      }
     }
@@ -23758,7 +23844,7 @@
      "maxUnits": 4,
      "minUnits": 4,
      "variables": {
-      "ASperAttack": 0.09000003337860107,
+      "ASperAttack": 0.08000004291534424,
       "MaxStacks": 10.0,
       "TeamAS": 0.10000002384185791
      }
@@ -23767,7 +23853,7 @@
      "maxUnits": null,
      "minUnits": 5,
      "variables": {
-      "ASperAttack": 0.1499999761581421,
+      "ASperAttack": 0.12000000476837158,
       "MaxStacks": 10.0,
       "TeamAS": 0.10000002384185791
      }
@@ -23829,10 +23915,10 @@
      "maxUnits": 9,
      "minUnits": 7,
      "variables": {
-      "CapstoneAD": 0.05000000074505806,
-      "CapstoneAP": 0.05000000074505806,
+      "CapstoneAD": 0.05999999865889549,
+      "CapstoneAP": 0.05999999865889549,
       "CapstoneArmor": 5.0,
-      "CapstoneAspd": 0.04999995231628418,
+      "CapstoneAspd": 0.059999942779541016,
       "CapstoneHealth": 50.0,
       "CapstoneMR": 5.0,
       "CapstoneManaRegen": 1.0
@@ -23889,10 +23975,10 @@
       "BonusMagicDamage": 0.07999999821186066,
       "NumThreeStarThreshold1": 3.0,
       "NumThreeStarThreshold2": 5.0,
-      "NumThreeStarThreshold3": 8.0,
+      "NumThreeStarThreshold3": 7.0,
       "PercentIncreasePer3Star": 0.009999999776482582,
       "ShieldRatio": 0.05000000074505806,
-      "Threshold1ArmorMagicResist": 15.0,
+      "Threshold1ArmorMagicResist": 12.0,
       "Threshold1AttackSpeed": 0.1499999761581421,
       "Threshold2TrueDamageConversion": 0.4000000059604645,
       "Threshold3StarUpPeriod": 4.0

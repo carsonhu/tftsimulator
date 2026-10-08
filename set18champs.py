@@ -164,9 +164,10 @@ class Varus(Champion):
     def __init__(self, level):
         hp = 500
         atk = 40
-        curMana = 30
-        fullMana = 120
-        aspd = 0.7
+        # 18.4b: 30/120 -> 20/110.
+        curMana = 20
+        fullMana = 110
+        aspd = 0.75
         armor = 25
         mr = 25
         super().__init__(
@@ -312,7 +313,7 @@ class LeBlanc(Champion):
 class MamaBeak(Champion):
     def __init__(self, level):
         hp = 650
-        atk = 55
+        atk = 60  # 18.4b: 55 -> 60
         curMana = 20
         fullMana = 60
         aspd = 0.75
@@ -338,7 +339,8 @@ class MamaBeak(Champion):
         # than a togglable ultimate.
         self.items.append(TinyBeaksBuff())
 
-    beakScaling = create_ability_scaling([22, 33, 48], [0, 0, 0], func_name="beakScaling")
+    # 22/30/52 per the 18.4 notes; the lolchess card reads 33 at 2-star.
+    beakScaling = create_ability_scaling([22, 30, 52], [0, 0, 0], func_name="beakScaling")
 
     def performAbility(self, opponents, items, time):
         # Flock Family: the cast itself deals no damage -- it just opens the
@@ -602,9 +604,10 @@ class Gromp(Champion):
     # while the AP version stayed at 0.7. Swapped by AdaptorInnate like the AD.
     AD_VERSION_ASPD = 0.75
     # Nor do they share a mana bar: the AP version is 0/45, the AD version
-    # 20/80. Same swap point as the AD (AdaptorInnate, postPreCombat).
-    AD_VERSION_START_MANA = 20
-    AD_VERSION_FULL_MANA = 80
+    # 0/70 (18.4: 20/80 -> 0/70). Same swap point as the AD (AdaptorInnate,
+    # postPreCombat).
+    AD_VERSION_START_MANA = 0
+    AD_VERSION_FULL_MANA = 70
 
     def __init__(self, level):
         hp = 550
@@ -653,8 +656,11 @@ class Gromp(Champion):
     apAbilityScaling = create_ability_scaling(
         [0, 0, 0], [225, 340, 535], func_name="apAbilityScaling"
     )
+    # 18.4 notes give this as 160/240/360 -> 160/240/375, though 18.3's had
+    # already moved it to 175/265/410; the live card read 160/240/375.
+    # 18.4b: 160/240/375 -> 180/270/435.
     apSplashScaling = create_ability_scaling(
-        [0, 0, 0], [175, 265, 410], func_name="apSplashScaling"
+        [0, 0, 0], [180, 270, 435], func_name="apSplashScaling"
     )
     # AD version: burst on the current target, instant splash on the rest.
     adAbilityScaling = create_ability_scaling(
@@ -955,7 +961,7 @@ class Ezreal(Champion):
         # blast can hand exactly that much back.
         self.natures_wrath_aspd = 0.0
 
-    abilityScaling = create_ability_scaling([250, 375, 1200], [0, 0, 0])
+    abilityScaling = create_ability_scaling([270, 405, 1200], [0, 0, 0])
     blastScaling = create_ability_scaling(
         [385, 580, 2500], [0, 0, 0], func_name="blastScaling"
     )
@@ -1176,9 +1182,11 @@ class Camille(Champion):
         self.castTime = 1.1
 
     # The 4-star AD half is the 18.2b note's fourth value (700 -> 640); the AP
-    # half's 40 is unchanged, off the 18.2 card.
+    # half's 40 is unchanged, off the 18.2 card. 18.4 raised the AD half at 3
+    # and 4 star (375/640 -> 400/665); the lolchess card had not caught up
+    # with that on release day and still read 375.
     abilityScaling = create_ability_scaling(
-        [150, 225, 375, 640], [10, 15, 25, 40]
+        [150, 225, 400, 665], [10, 15, 25, 40]
     )
 
     def performAbility(self, opponents, items, time):
@@ -1235,7 +1243,7 @@ class Nidalee(Champion):
         )
 
     # Javelins 1-2, pure AP.
-    abilityScaling = create_ability_scaling([0, 0, 0], [170, 255, 2000])
+    abilityScaling = create_ability_scaling([0, 0, 0], [185, 275, 2000])
     # The 3rd javelin's bigger row; NidaleeUlt picks it via
     # ChampionEmpoweredAbilityScaling.
     empoweredScaling = create_ability_scaling(
@@ -1279,16 +1287,16 @@ class Sivir(Champion):
             "are not modeled -- nothing dies in this sim."
         )
 
-    # The card's 205/305/1150 is one row, but its breakdown is two: an
-    # AD-scaled part and an AP-scaled part (190 + 15 = 205, 285 + 20 = 305,
+    # The card's 215/320/1150 is one row, but its breakdown is two: an
+    # AD-scaled part and an AP-scaled part (200 + 15 = 215, 300 + 20 = 320,
     # 1050 + 100 = 1150). Note the 3-star row is a spike, not the usual x1.5
     # step -- that is what the card says.
-    abilityScaling = create_ability_scaling([190, 285, 1050], [15, 20, 100])
+    abilityScaling = create_ability_scaling([200, 300, 1050], [15, 20, 100])
     # Each bounce is 20%/20%/40% of that, taken off both halves so the split
-    # stays proportional: 38 + 3 = 41, 57 + 4 = 61, 420 + 40 = 460, which is
+    # stays proportional: 40 + 3 = 43, 60 + 4 = 64, 420 + 40 = 460, which is
     # the card's bounce row exactly.
     bounceScaling = create_ability_scaling(
-        [38, 57, 420], [3, 4, 40], func_name="bounceScaling"
+        [40, 60, 420], [3, 4, 40], func_name="bounceScaling"
     )
 
     def performAbility(self, opponents, items, time):
@@ -1306,7 +1314,7 @@ class Ashe(Champion):
     def __init__(self, level):
         hp = 900
         atk = 75
-        curMana = 20
+        curMana = 0
         fullMana = 80
         aspd = 0.8
         armor = 45
@@ -1331,7 +1339,7 @@ class Ashe(Champion):
         self.notes = (
             "The trail's damage arrives 1s at a time over the 3s after each "
             "cast, not on the cast, and a recast refreshes it rather than "
-            "stacking it. Its 2% max Health part reads off the enemy HP above, "
+            "stacking it. Its 1.5% max Health part reads off the enemy HP above, "
             "so raising that raises Ashe's damage."
         )
 
@@ -1339,7 +1347,7 @@ class Ashe(Champion):
     # The card's trail row is two halves, same as Sivir's: 9 + 2 = 11,
     # 14 + 3 = 17, 200 + 20 = 220. 18.2b moved only the AD half, and only at
     # 1 and 2 star ("5/8 AD => 9/14 AD"); the 3-star 200 and the AP halves are
-    # untouched. The 2% max Health rides on top of this and is added
+    # untouched. The 1.5% max Health rides on top of this and is added
     # per-target in AsheTrail, since it depends on who is being hit.
     trailScaling = create_ability_scaling(
         [9, 14, 200], [2, 3, 20], func_name="trailScaling"
@@ -1437,7 +1445,7 @@ class Teemo(Champion):
         self.num_targets = 3
 
     # The mushroom clusters, on the nearest num_targets.
-    abilityScaling = create_ability_scaling([0, 0, 0], [55, 82, 130])
+    abilityScaling = create_ability_scaling([0, 0, 0], [55, 82, 155])
     # The giant mushroom that follows, on the current target only.
     giantScaling = create_ability_scaling(
         [0, 0, 0], [135, 200, 310], func_name="giantScaling"
@@ -1650,7 +1658,7 @@ class Kayle(Champion):
 
     # 1st Ascension: the magic damage every attack carries, at every star.
     ascensionScaling = create_ability_scaling(
-        [0, 0, 0], [62, 92, 105], func_name="ascensionScaling"
+        [0, 0, 0], [65, 97, 110], func_name="ascensionScaling"
     )
     # 3rd Ascension: the wave, per unit it catches. Flat across stars -- the
     # card really does say 35/35/35 (18.2; was 40/40/40).
@@ -1704,7 +1712,7 @@ class Xayah(Champion):
     # tools and lolchess both publish 68/102/155, and no patch note has ever
     # moved this row.
     abilityScaling = create_ability_scaling(
-        [68, 102, 155, 165], [0, 0, 0, 0]
+        [73, 108, 165, 175], [0, 0, 0, 0]
     )
 
     def performAbility(self, opponents, items, time):
@@ -1746,7 +1754,7 @@ class Veigar(Champion):
         )
 
     abilityScaling = create_ability_scaling(
-        [0, 0, 0, 0], [200, 300, 450, 765]
+        [0, 0, 0, 0], [190, 285, 430, 725]
     )
 
     def performAbility(self, opponents, items, time):
@@ -1849,7 +1857,7 @@ class Brambleback(Champion):
         self.notes = "Red Buff and the on-kill leap are not modeled."
 
     # Crimson Fury's active, per star level.
-    frenzy_ad = [80, 80, 300]
+    frenzy_ad = [100, 100, 300]
     frenzy_duration = 8
     # Armor ignore: a flat 15% plus an AP-scaled 30%/30%/70%.
     ignore_flat = 0.15

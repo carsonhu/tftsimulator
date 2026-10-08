@@ -65,8 +65,8 @@ Breakpoints: 1 (no numeric variables)
 |---|---|---|---|
 | 3-4 | 0.12 | 0.1 |  |
 | 5-6 | 0.3 | 0.1 |  |
-| 7-8 | 0.45 | 0.1 | 4 |
-| 9-10 | 0.5 | 0.1 |  |
+| 7-8 | 0.5 | 0.1 | 4 |
+| 9-10 | 0.55 | 0.1 |  |
 | 11+ | 1 | 0.1 |  |
 
 ## Bounty Seeker  `DA_DravenUniqueTrait18`
@@ -109,9 +109,9 @@ Breakpoints: 1 (no numeric variables)
 
 | units | EssencePerDeath | EssenceForRitualTooltip | EssencePerLoss |
 |---|---|---|---|
-| 3 | 2 | 40 | 18 |
-| 4 | 2 | 40 | 25 |
-| 5-6 | 3 | 40 | 32 |
+| 3 | 2 | 40 | 22 |
+| 4 | 2 | 40 | 28 |
+| 5-6 | 3 | 40 | 35 |
 | 7+ | 10 | 40 | 60 |
 
 ## Defender  `DA_18_Defender`
@@ -125,7 +125,7 @@ Breakpoints: 1 (no numeric variables)
 |---|---|---|
 | 2-3 | 12 | 25 |
 | 4-5 | 12 | 60 |
-| 6+ | 12 | 120 |
+| 6+ | 12 | 115 |
 
 ## Eclipse  `DA_18_Eclipse`
 
@@ -133,7 +133,7 @@ Breakpoints: 1 (no numeric variables)
 
 | units | DelaySeconds | EclipseBeamPeriod |
 |---|---|---|
-| None+ | 10 | 3.5 |
+| None+ | 8 | 3.5 |
 
 ## Elderwood  `DA_18_Elderwood`
 
@@ -167,8 +167,8 @@ Breakpoints: 1 (no numeric variables)
 | units | CritChance | BleedDuration | BonusBleedPercent |
 |---|---|---|---|
 | 2 | 0.15 |  |  |
-| 3 |  | 3 | 0.3 |
-| 4+ |  |  | 0.4 |
+| 3 |  | 3 | 0.25 |
+| 4+ |  |  | 0.35 |
 
 ## Fae  `DA_18_Fae`
 
@@ -179,8 +179,8 @@ Breakpoints: 1 (no numeric variables)
 
 | units | ADAP | Heal | HealThreshold |
 |---|---|---|---|
-| 2-3 | 5 | 2.5 | 0.5 |
-| 4+ | 8 | 4 | 0.5 |
+| 2-3 | 4.5 | 2.5 | 0.5 |
+| 4+ | 7 | 4 | 0.5 |
 
 ## Flora Fatalis  `DA_FloraFatalis18`
 
@@ -216,7 +216,7 @@ Breakpoints: 1 (no numeric variables)
 | 2 | 0.1 | 0.2 | 3 |
 | 3 | 0.1 | 0.3 | 3 |
 | 4 | 0.1 | 0.45 | 3 |
-| 5+ | 0.1 | 0.65 | 3 |
+| 5+ | 0.1 | 0.6 | 3 |
 
 ## Inferno  `DA_18_Inferno`
 
@@ -230,8 +230,8 @@ Breakpoints: 1 (no numeric variables)
 |---|---|---|---|---|
 | 2 | 3 | 33 | 1 |  |
 | 3-4 | 3 |  |  | 1 |
-| 5-6 | 3 |  | 3.5 | 2 |
-| 7+ | 3 |  | 4.5 | 4 |
+| 5-6 | 3 |  | 3 | 2 |
+| 7+ | 3 |  | 4 | 4 |
 
 ## Invoker  `DA_18_Invoker`
 
@@ -246,7 +246,7 @@ Breakpoints: 1 (no numeric variables)
 | 2 | 1 | 3 |
 | 3 | 1 | 4 |
 | 4 | 2 | 6 |
-| 5+ | 2 | 9 |
+| 5+ | 2 | 8 |
 
 ## Juggernaut  `DA_Juggernaut18`
 
@@ -259,7 +259,7 @@ Breakpoints: 1 (no numeric variables)
 |---|---|---|
 | 2-3 | 0.2 | 0.04 |
 | 4-5 | 0.33 | 0.06 |
-| 6+ | 0.45 | 0.08 |
+| 6+ | 0.42 | 0.08 |
 
 ## Lunar  `DA_18_Lunar`
 
@@ -272,9 +272,9 @@ Breakpoints: 1 (no numeric variables)
 | units | AbilityPower | AttackSpeed | LunarMultiplier |
 |---|---|---|---|
 | 2 | 0.07 | 0.07 | 1 |
-| 3 | 0.1 | 0.1 | 1 |
-| 4 | 0.14 | 0.14 | 1 |
-| 5+ | 0.18 | 0.18 | 1 |
+| 3 | 0.1 | 0.12 | 1 |
+| 4 | 0.14 | 0.16 | 1 |
+| 5+ | 0.18 | 0.2 | 1 |
 
 ## Monolith  `DA_18_Battlemage`
 
@@ -313,8 +313,8 @@ Breakpoints: 2, 4 (no numeric variables)
 |---|---|---|---|
 | 2 | 0.03 | 10 | 0.1 |
 | 3 | 0.05 | 10 | 0.1 |
-| 4 | 0.09 | 10 | 0.1 |
-| 5+ | 0.15 | 10 | 0.1 |
+| 4 | 0.08 | 10 | 0.1 |
+| 5+ | 0.12 | 10 | 0.1 |
 
 ## Ravager  `DA_18_Slayer`
 
@@ -342,7 +342,7 @@ Breakpoints: 2, 4 (no numeric variables)
 |---|---|---|---|---|---|---|---|---|---|
 | 3-4 |  |  |  |  |  |  |  |  |  |
 | 5-6 | 3 |  |  |  |  |  |  |  |  |
-| 7-9 |  | 0.05 | 50 | 5 | 0.05 | 1 | 0.05 | 5 |  |
+| 7-9 |  | 0.06 | 50 | 5 | 0.06 | 1 | 0.06 | 5 |  |
 | 10+ |  |  |  |  |  |  |  |  | 2 |
 
 ## Rival  `DA_18_Rival`
@@ -373,7 +373,7 @@ Breakpoints: 2, 4 (no numeric variables)
 
 | units | BonusMagicDamage | ShieldRatio | NumThreeStarThreshold1 | NumThreeStarThreshold2 | NumThreeStarThreshold3 | Threshold2TrueDamageConversion | Threshold1AttackSpeed | Threshold1ArmorMagicResist | PercentIncreasePer3Star | Threshold3StarUpPeriod |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 3+ | 0.08 | 0.05 | 3 | 5 | 8 | 0.4 | 0.15 | 15 | 0.01 | 4 |
+| 3+ | 0.08 | 0.05 | 3 | 5 | 7 | 0.4 | 0.15 | 12 | 0.01 | 4 |
 
 ## Spellweaver  `DA_18_Spellweaver`
 
