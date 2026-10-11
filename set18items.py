@@ -158,7 +158,7 @@ class LunarEmblem(Emblem):
 
     def __init__(self):
         super().__init__(
-            self.display_name, trait="Lunar", ad=20, manaRegen=3, phases=None
+            self.display_name, trait="Lunar", aspd=20, manaRegen=3, phases=None
         )
 
 
@@ -178,7 +178,7 @@ class PrimalEmblem(Emblem):
 
     def __init__(self):
         super().__init__(
-            self.display_name, trait="Primal", aspd=35, hp=250, ap=20, phases=None
+            self.display_name, trait="Primal", aspd=35, hp=250, crit=20, phases=None
         )
 
 
@@ -195,7 +195,7 @@ class Rabadons(Item):
     def __init__(self):
         super().__init__(
             self.display_name,
-            ap=50,
+            ap=55,
             dmgMultiplier=0.15,
             has_radiant=True,
             phases=None,
@@ -206,14 +206,18 @@ class Bloodthirster(Item):
     display_name = "Bloodthirster"
 
     def __init__(self):
-        super().__init__(self.display_name, ad=18, ap=18, omnivamp=0.20, phases=None)
+        super().__init__(
+            self.display_name, ad=18, ap=18, mr=20, omnivamp=0.20, phases=None
+        )
 
 
 class EdgeOfNight(Item):
     display_name = "Edge of Night"
 
     def __init__(self):
-        super().__init__(self.display_name, ad=10, ap=10, aspd=15, phases=None)
+        super().__init__(
+            self.display_name, ad=10, ap=10, aspd=15, armor=20, phases=None
+        )
 
 
 class HextechGunblade(Item):
@@ -600,7 +604,7 @@ class Red(Item):
     display_name = "Red (no burn)"
 
     def __init__(self):
-        super().__init__(self.display_name, aspd=45, dmgMultiplier=0.06, phases=None)
+        super().__init__(self.display_name, aspd=45, dmgMultiplier=0.03, phases=None)
 
 
 class Morellos(Item):
@@ -776,7 +780,7 @@ class GamblersBlade(Item):
     display_name = "Gambler's Blade (30g)"
 
     def __init__(self):
-        super().__init__(self.display_name, aspd=85, ap=10, phases=None)
+        super().__init__(self.display_name, aspd=85, phases=None)
 
 
 class GoldCollector(Item):
@@ -791,7 +795,7 @@ class LichBane(Item):
 
     def __init__(self):
         super().__init__(
-            self.display_name, ap=30, aspd=30, phases=["preAbility", "preAttack"]
+            self.display_name, ap=55, aspd=10, phases=["preAbility", "preAttack"]
         )
         self.dmg = {2: 250, 3: 350, 4: 500, 5: 600, 6: 700}
         self.enhancedAuto = False
@@ -815,8 +819,8 @@ class TitanicHydra(Item):
         super().__init__(
             self.display_name, ad=20, aspd=20, hp=300, phases=["preAttack"]
         )
-        self.hp_scaling = 0.04
-        self.ad_scaling = 0.02
+        self.hp_scaling = 0.02
+        self.ad_scaling = 0.04
 
     def performAbility(self, phase, time, champion, input_=0):
         dmg = (
@@ -833,7 +837,9 @@ class WitsEnd(Item):
     display_name = "Wit's End"
 
     def __init__(self):
-        super().__init__(self.display_name, aspd=30, mr=30, hp=300, phases="onAttack")
+        super().__init__(
+            self.display_name, aspd=25, armor=20, mr=20, hp=300, phases="onAttack"
+        )
         # 18.2: 30/55/75/95/115 -> 25/45/65/85/100 by stage.
         self.dmg = {2: 25, 3: 45, 4: 65, 5: 85, 6: 100}
 
@@ -898,15 +904,19 @@ class Dawncore(Item):
             manaRegen=1,
             phases=["preCombat", "postAbility"],
         )
-        self.counter = 0
+        self.min_mana = 15
+        self.reduction_per_cast = 0.05
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             champion.fullMana.addStat(-10)
         elif phase == "postAbility":
-            if champion.fullMana.stat > 15:
-                # we don't want to use mult since we do want it to round.
-                champion.fullMana.addStat(-1 * (champion.fullMana.stat // 20))
+            cur = champion.fullMana.stat
+            if cur > self.min_mana:
+                # Round to whole mana rather than using mult. Flooring the 5%
+                # (cur // 20) stalled at 19 and never reached the 15 floor.
+                new = max(self.min_mana, round(cur * (1 - self.reduction_per_cast)))
+                champion.fullMana.addStat(new - cur)
 
 
 class VarussObsession(Item):
@@ -946,6 +956,7 @@ class RadiantStrikersFlail(StrikersFlail):
     def __init__(self):
         super().__init__()
         self.name = self.display_name
+        self.hp = 300
         self.crit = 40
         self.aspd = 20
         self.dmgMultiplier = 0.2
@@ -1106,8 +1117,8 @@ class RadiantVoidStaff(VoidStaff):
         super().__init__()
         self.name = self.display_name
         self.manaRegen = 2
-        self.ap = 30
-        self.aspd = 75
+        self.ap = 75
+        self.aspd = 30
 
 
 class RadiantInfinityEdge(InfinityEdge):
@@ -1116,7 +1127,7 @@ class RadiantInfinityEdge(InfinityEdge):
     def __init__(self):
         super().__init__()
         self.name = self.display_name
-        self.ad = 65
+        self.ad = 75
         self.crit = 75
 
 
