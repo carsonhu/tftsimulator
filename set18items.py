@@ -769,12 +769,7 @@ class Mittens(Item):
     display_name = "Mittens"
 
     def __init__(self):
-        super().__init__(
-            self.display_name, aspd=65, dmgMultiplier=0.15, phases="preCombat"
-        )
-
-    def performAbility(self, phase, time, champion, input_):
-        champion.dmgMultiplier.add += 0.15
+        super().__init__(self.display_name, aspd=65, dmgMultiplier=0.15, phases=None)
 
 
 class GamblersBlade(Item):
