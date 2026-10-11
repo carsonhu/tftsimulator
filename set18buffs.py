@@ -2707,7 +2707,8 @@ class Kahunahuna(Buff):
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["postAttack"])
         self.stacks = 0
-        self.scaling = 1.25
+        # Card: 100% of Basic Attack Damage (125% was the set 17 value).
+        self.scaling = 1.0
 
     def performAbility(self, phase, time, champion, input_=0):
         self.stacks += 1
@@ -3136,7 +3137,9 @@ class EarlyLearnings(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preCombat"])
-        self.base = 3  # 18.3: baseline AD/AP 5% -> 3%
+        # 18.3: baseline AD/AP 5% -> 3%. "1-cost champions gain double"
+        # covers the baseline as well as the per-combat 1%, so both are x2.
+        self.base = 3 * 2
         self.ad_scaling = 2
         self.ap_scaling = 2
 
@@ -3285,15 +3288,18 @@ class FocusedFire(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
-        self.adBonus = 10
+        # Card: 10% Attack Damage, then 5% more every 5 seconds.
+        self.adBase = 10
+        self.adBonus = 5
         self.nextBonus = 0
         self.bonusInterval = 5
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "onUpdate":
             if time >= self.nextBonus:
+                amt = self.adBase if self.nextBonus == 0 else self.adBonus
                 self.nextBonus += self.bonusInterval
-                champion.bonus_ad.addStat(self.adBonus)
+                champion.bonus_ad.addStat(amt)
         return 0
 
 

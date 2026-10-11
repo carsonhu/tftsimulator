@@ -528,7 +528,7 @@ class Caitlyn(Champion):
         self.default_traits = ["Hunter"]
         self.items.append(CaitlynHeadshotBuff())
 
-    # Physical damage row: 190/285/450 AD-scaled + 20/30/45 AP-scaled.
+    # Physical damage row: 190/285/470 AD-scaled + 20/30/45 AP-scaled.
     abilityScaling = create_ability_scaling([190, 285, 470], [20, 30, 45])
 
     def performAbility(self, opponents, items, time):
@@ -870,7 +870,7 @@ class Akali(Champion):
         # rather than driven by it. Flip this off to price the dry case.
         self.assume_burning = True
 
-    # AD version, assuming Burning: 145/220/345 AD + 10/15/25 AP for the
+    # AD version, assuming Burning: 145/220/380 AD + 10/15/25 AP for the
     # volley, plus 35/52/80 AD for the Burning rider. Kept as separate rows
     # (as the card shows them) but summed into one damage instance -- same
     # target, same damage type, so splitting would only double-count spell
@@ -966,7 +966,8 @@ class Ezreal(Champion):
         [385, 580, 2500], [0, 0, 0], func_name="blastScaling"
     )
     # Attack Speed per blink at 100 AP; scaled by the AP ratio at cast time.
-    aspd_per_blink = [25, 25, 100]
+    # 30/30/100 on both the lolchess and tactics.tools cards.
+    aspd_per_blink = [30, 30, 100]
     # The blast loses 25% of its damage per enemy pierced, floored at 50%.
     # Multiplicative per enemy, matching Varus's Piercing Arrow.
     blast_falloff = 0.75
@@ -1707,10 +1708,8 @@ class Xayah(Champion):
             "Elderwood -- its plants are separate units."
         )
 
-    # Per feather. The earlier 72/108/165 was ~6% high at every star, which
-    # is what a card read with a damage buff running looks like -- tactics.
-    # tools and lolchess both publish 68/102/155, and no patch note has ever
-    # moved this row.
+    # Per feather. 18.4 (official notes): 68/102/155 -> 73/108/165; the
+    # lolchess card agrees. tactics.tools still shows the 18.2 row.
     abilityScaling = create_ability_scaling(
         [73, 108, 165, 175], [0, 0, 0, 0]
     )
