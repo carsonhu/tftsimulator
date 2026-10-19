@@ -283,13 +283,20 @@ class Archangels(Item):
         self.nextAP = 5
         self.ap_per_interval = 20
         self.seraphimActivated = False
+        # Seraphim's Staff augment: the extra Mana Regen needs this much AP
+        # (ap.stat is 1 + bonus). 18.5 PBE: 90% -> 110%.
+        self.seraphim_ap_threshold = 2.1
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.nextAP:
             champion.ap.addStat(self.ap_per_interval)
             self.nextAP += 5
 
-        if champion.seraphim and not self.seraphimActivated and champion.ap.stat >= 1.9:
+        if (
+            champion.seraphim
+            and not self.seraphimActivated
+            and champion.ap.stat >= self.seraphim_ap_threshold
+        ):
             self.seraphimActivated = True
             champion.manaRegen.addStat(2)
 
@@ -983,8 +990,9 @@ class RadiantBlue(Blue):
         super().__init__()
         self.name = self.display_name
         self.manaRegen = 10
-        self.ap = 30
-        self.ad = 30
+        # 18.5 PBE: 30 -> 25.
+        self.ap = 25
+        self.ad = 25
         self.multScaling = 0.2
 
 
@@ -1181,9 +1189,10 @@ class RadiantAdaptive(Adaptive):
     def __init__(self):
         super().__init__()
         self.name = self.display_name
-        self.manaRegen = 7
-        self.ad = 40
-        self.ap = 40
+        # 18.5 PBE: Mana Regen 7 -> 6, AD/AP 40 -> 35.
+        self.manaRegen = 6
+        self.ad = 35
+        self.ap = 35
         self.mult = 0.3
 
 

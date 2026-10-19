@@ -28,7 +28,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 | Rift Herald | `TFT_RiftHerald` | 1 | 10000 | 600 | 1 | 100 | 100 |  | 1 |  |
 | Rift Scuttler | `TFT9_SLIME_Crab` | 1 |  | 20 | 0.8 | 10 | 10 | 100 | 1 |  |
 | Training Dummy | `TFT_TrainingDummy` | 1 | 550 | 50 | 0.5 | 40 | 40 |  | 1 |  |
-| Varus | `DA_18_Varus` | 1 | 500 | 40 | 0.7 | 25 | 25 | 120 | 4 | Inferno, Rapidfire |
+| Varus | `DA_18_Varus` | 1 | 500 | 40 | 0.75 | 25 | 25 | 110 | 4 | Inferno, Rapidfire |
 | Veigar | `DA_18_Veigar` | 1 | 500 | 25 | 0.7 | 25 | 25 | 30 | 4 | Blackthorn, Sprykin, Spellweaver |
 | Voidspawn | `TFT_Voidspawn` | 1 |  |  | 0.75 | 30 | 30 |  | 1 |  |
 | Xayah | `DA_18_Xayah` | 1 | 450 | 45 | 0.7 | 25 | 25 | 50 | 4 | Elderwood, Fae, Rapidfire |
@@ -54,11 +54,11 @@ bin's world units (marked `u`; 890u is 4 hexes).
 | Kha'Zix | `DA_18_KhaZix` | 3 | 950 | 40 | 0.85 | 55 | 55 | 25 | 1 | Rival |
 | Kog'Maw | `DA_KogMaw18_AD` | 3 | 650 | 40 | 0.8 | 35 | 35 | 55 | 4 | Caustic, Adaptor, Invoker |
 | Krug | `DA_Krug18` | 3 | 1100 | 55 | 0.6 | 40 | 40 | 135 | 1 | Riftbeast, Brawler |
-| Mama Beak | `DA_CrimsonRaptor18` | 3 | 650 | 55 | 0.75 | 35 | 35 | 60 | 4 | Riftbeast, Summoner, Rapidfire |
-| Master Yi | `DA_18_MasterYi_AD` | 3 | 850 | 60 | 0.8 | 55 | 55 | 3 | 1 | Blossom, Adaptor |
+| Mama Beak | `DA_CrimsonRaptor18` | 3 | 650 | 60 | 0.75 | 35 | 35 | 60 | 4 | Riftbeast, Summoner, Rapidfire |
+| Master Yi | `DA_18_MasterYi_AD` | 3 | 850 | 63 | 0.8 | 55 | 55 | 3 | 1 | Blossom, Adaptor |
 | Rammus | `DA_18_Rammus` | 3 | 1100 | 50 | 0.6 | 50 | 50 | 80 | 1 | Sprykin, Defender |
 | Rengar | `DA_18_Rengar` | 3 | 900 | 60 | 0.75 | 55 | 55 | 50 | 1 | Rival |
-| Tristana | `DA_18_Tristana` | 3 | 650 | 55 | 0.75 | 35 | 35 | 60 | 4 | Fae, Sprykin, Hunter |
+| Tristana | `DA_18_Tristana` | 3 | 650 | 55 | 0.75 | 35 | 35 | 50 | 4 | Fae, Sprykin, Hunter |
 | Vi | `DA_Vi18` | 3 | 1100 | 45 | 0.75 | 50 | 50 | 60 | 1 | Primal, Juggernaut |
 | Ahri | `DA_18_Ahri` | 4 | 850 | 40 | 0.8 | 40 | 40 | 100 | 4 | Blossom, Spellweaver |
 | Amumu | `DA_Amumu18` | 4 | 1300 | 70 | 0.7 | 60 | 60 | 125 | 1 | Inferno, Juggernaut |
@@ -74,7 +74,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 | Sivir | `DA_18_Sivir` | 4 | 850 | 50 | 0.8 | 40 | 40 | 40 | 4 | Primal, Hunter |
 | Soraka | `DA_18_Soraka` | 4 | 850 | 30 | 0.75 | 40 | 40 | 30 | 4 | Flora Fatalis, Executioner |
 | Zyra | `DA_18_Zyra` | 4 | 850 | 40 | 0.75 | 40 | 40 | 45 | 4 | Thornmaiden, Summoner |
-| Alune | `DA_18_Alune` | 5 | 900 | 40 | 0.8 | 45 | 45 | 35 | 4 | Attuned, Lunar, Spellweaver |
+| Alune | `DA_18_Alune` | 5 | 900 | 40 | 0.85 | 45 | 45 | 35 | 4 | Attuned, Lunar, Spellweaver |
 | Ashe | `DA_18_Ashe` | 5 | 900 | 75 | 0.8 | 45 | 45 | 80 | 6 | Blossom, Hunter |
 | Draven | `DA_Draven18` | 5 | 900 | 48 | 0.85 | 45 | 45 | 110 | 6 | Bounty Seeker |
 | Elder Dragon | `DA_18_ElderDragon` | 5 | 1800 | 125 | 0.5 | 75 | 75 | 60 | 2 | Apex Predator, Riftbeast |
@@ -92,7 +92,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 | Lux (Primal) | `DA_18_Lux_Primal` | 5 | 900 | 40 | 0.8 | 45 | 45 | 70 | 6 | Primal, Avatar |
 | Lux (Solar) | `DA_18_Lux_Sunbeam` | 5 | 900 | 40 | 0.8 | 45 | 45 | 70 | 6 | Solar, Avatar |
 | Maokai | `DA_18_Maokai` | 5 | 1150 | 80 | 0.65 | 60 | 60 | 100 | 1 | Old Growth, Juggernaut |
-| Taric | `DA_Taric18` | 5 | 1300 | 55 | 0.75 | 65 | 65 | 65 | 1 | Emerald Aspect, Vanguard |
+| Taric | `DA_Taric18` | 5 | 1300 | 55 | 0.75 | 65 | 70 | 70 | 1 | Emerald Aspect, Vanguard |
 | Artifact Item Anvil | `TFT_ArmoryKeyOrnn` | 8 | 10 | 70 | 1 | 10 | 10 | 100 | 0 |  |
 | Completed Item Anvil | `TFT_ArmoryKeyCompleted` | 8 | 10 | 70 | 1 | 10 | 10 | 100 | 0 |  |
 | Component Anvil | `TFT_ArmoryKeyComponent` | 8 | 10 | 70 | 1 | 10 | 10 | 100 | 0 |  |

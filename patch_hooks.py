@@ -126,6 +126,7 @@ TRAIT_HOOKS = [
     ("Ravager", "omnivamp_bonus", "DA_18_Slayer", "Omnivamp", 1),
     ("Blackthorn", "team_health", "DA_18_Blackthorn", "Health", 1),
     ("Riftbeast", "stat_scaling", "DA_Riftbeast18", "CapstoneAD", 100),
+    ("Riftbeast", "aspd_scaling", "DA_Riftbeast18", "CapstoneAspd", 100),
     ("Riftbeast", "resist_scaling", "DA_Riftbeast18", "CapstoneArmor", 1),
     ("Riftbeast", "hp_scaling", "DA_Riftbeast18", "CapstoneHealth", 1),
     ("Riftbeast", "mana_regen_scaling", "DA_Riftbeast18", "CapstoneManaRegen", 1),

@@ -1145,16 +1145,16 @@
    "stats": {
     "ad": 40.0,
     "armor": 25.0,
-    "attackSpeed": 0.699999988079071,
+    "attackSpeed": 0.75,
     "critChance": 0.25,
     "critDamage": 1.399999976158142,
     "hp": 500.0,
     "manaPerAttack": 0.0,
-    "maxMana": 120.0,
+    "maxMana": 110.0,
     "mr": 25.0,
     "rangeHexes": 4.0,
     "rangeUnits": 890.0,
-    "startMana": 30.0
+    "startMana": 20.0
    },
    "tier": 1,
    "traits": [
@@ -2572,7 +2572,7 @@
     "mr": 50.0,
     "rangeHexes": 1.0,
     "rangeUnits": 180.0,
-    "startMana": 30.0
+    "startMana": 50.0
    },
    "tier": 3,
    "traits": [
@@ -2825,7 +2825,7 @@
     "text": "Placeholder Tooltip"
    },
    "stats": {
-    "ad": 55.0,
+    "ad": 60.0,
     "armor": 35.0,
     "attackSpeed": 0.75,
     "critChance": 0.25,
@@ -2892,7 +2892,7 @@
     "text": "<Bright>Passive:</Bright> Every third attack is a Double Strike. On takedown, gain a burst of movement speed.\r\\n\r\\n<Bright>Adaptor </Bright>%i:scaleAD%: Double Strikes grant @AttackSpeedCalc1@ %i:scaleAP% stacking Attack Speed.\r\\n\r\\n<dim>Adaptor </dim>%i:scaleAP%<dim>: Double Strikes deal bonus damage and heal.</dim>"
    },
    "stats": {
-    "ad": 60.0,
+    "ad": 63.0,
     "armor": 55.0,
     "attackSpeed": 0.800000011920929,
     "critChance": 0.25,
@@ -3096,7 +3096,7 @@
     "critDamage": 1.399999976158142,
     "hp": 650.0,
     "manaPerAttack": 0.0,
-    "maxMana": 60.0,
+    "maxMana": 50.0,
     "mr": 35.0,
     "rangeHexes": 4.0,
     "rangeUnits": 890.0,
@@ -4223,7 +4223,7 @@
    "stats": {
     "ad": 40.0,
     "armor": 45.0,
-    "attackSpeed": 0.800000011920929,
+    "attackSpeed": 0.8500000238418579,
     "critChance": 0.25,
     "critDamage": 1.399999976158142,
     "hp": 900.0,
@@ -5100,8 +5100,8 @@
     "critDamage": 1.399999976158142,
     "hp": 1300.0,
     "manaPerAttack": 0.0,
-    "maxMana": 65.0,
-    "mr": 65.0,
+    "maxMana": 70.0,
+    "mr": 70.0,
     "rangeHexes": 1.0,
     "rangeUnits": 180.0,
     "startMana": 0
@@ -5940,7 +5940,7 @@
    "desc": "A random back row champion gains @ASMultiplier*100@% Attack Speed for @ASDuration@ seconds.",
    "effects": {
     "ASDuration": 7.0,
-    "ASMultiplier": 0.8500000238418579
+    "ASMultiplier": 1.0
    },
    "name": "Backrow Star",
    "unique": false
@@ -5952,7 +5952,7 @@
    "desc": "A random back row champion gains @ASMultiplierUpgrade*100@% Attack Speed for @ASDurationUpgrade@ seconds.",
    "effects": {
     "ASDurationUpgrade": 8.0,
-    "ASMultiplierUpgrade": 1.1500000953674316
+    "ASMultiplierUpgrade": 1.2999999523162842
    },
    "name": "Backrow Star",
    "unique": false
@@ -6163,7 +6163,7 @@
    "unique": false
   },
   {
-   "apiName": "DA_18_Drizzle_Upgrade",
+   "apiName": "DA_18_DrizzleUpgrade",
    "associatedTraits": [],
    "composition": [],
    "desc": "After @Delay@ seconds of combat, your team gains @ManaToGainUpgrade@ Mana.",
@@ -6611,7 +6611,7 @@
    "composition": [],
    "desc": "Your highest Health unit grows, gaining @HPGain@ Health.",
    "effects": {
-    "HPGain": 750.0
+    "HPGain": 800.0
    },
    "name": "Giant Growth",
    "unique": false
@@ -6622,7 +6622,7 @@
    "composition": [],
    "desc": "Your @NumUnitsUpgrade@ highest Health units grow, gaining @HPGainUpgrade@ Health.",
    "effects": {
-    "HPGainUpgrade": 750.0,
+    "HPGainUpgrade": 800.0,
     "NumUnitsUpgrade": 2.0
    },
    "name": "Giant Growth",
@@ -6653,7 +6653,7 @@
    "unique": false
   },
   {
-   "apiName": "DA_18_GroveArmor_Upgrade",
+   "apiName": "DA_18_GroveArmorUpgrade",
    "associatedTraits": [],
    "composition": [],
    "desc": "Your highest Health champion gains @BonusArmorUpgrade@ Armor and @BonusMRUpgrade@ Magic Resist.",
@@ -6784,7 +6784,7 @@
    "desc": "Fighters execute targets under @ExecuteThreshold@% Health. They gain @OnKillAtkSpdAmount*100@% Attack Speed on kill.",
    "effects": {
     "ExecuteThreshold": 12.0,
-    "OnKillAtkSpdAmount": 0.1499999761581421
+    "OnKillAtkSpdAmount": 0.2999999523162842
    },
    "name": "Killing Frenzy",
    "unique": false
@@ -6795,7 +6795,7 @@
    "composition": [],
    "desc": "Fighters execute targets under @UpgradeExecuteThreshold@<Set18CharmUpgrade>%</Set18CharmUpgrade> Health. They gain @OnKillAtkSpdAmountUpgrade*100@% Attack Speed on kill.",
    "effects": {
-    "OnKillAtkSpdAmountUpgrade": 0.3999999761581421,
+    "OnKillAtkSpdAmountUpgrade": 0.6000000238418579,
     "UpgradeExecuteThreshold": 15.0
    },
    "name": "Killing Frenzy",
@@ -8365,7 +8365,7 @@
     "DA_18_Blackthorn"
    ],
    "composition": [],
-   "desc": "The first @NumComponents@ times you sacrifice a champion in the Blackthorn hex, gain a copy of a random component they're holding. Gain an Azir, Veigar, and a Rek'Sai.",
+   "desc": "The first @NumComponents@ times you sacrifice a champion in the Blackthorn hex, gain a copy of a random component they're holding. Gain an Azir and a Rek'Sai.",
    "effects": {
     "NumComponents": 3.0
    },
@@ -8680,7 +8680,7 @@
    "composition": [],
    "desc": "Your team gains @DamageAmp*100@% Damage Amp and @Armor@ Armor and Magic Resist for each Bronze-tier trait.",
    "effects": {
-    "Armor": 4.0,
+    "Armor": 3.0,
     "DamageAmp": 0.02500000037252903
    },
    "name": "Bronze For Life II",
@@ -8880,7 +8880,7 @@
    "desc": "At the start of combat, allies gain @AttackSpeedMultiplier*100@% Attack Speed for @BuffDuration@ seconds. On takedown, allies dash to their next target and gain this bonus again.",
    "effects": {
     "AttackSpeedMultiplier": 0.25,
-    "BuffDuration": 3.0
+    "BuffDuration": 4.0
    },
    "name": "Challenger's Grace",
    "unique": false
@@ -9069,7 +9069,7 @@
    "composition": [],
    "desc": "Your champions explode on death, dealing @maxHealthExplosionDamage*100@% Max Health magic damage.",
    "effects": {
-    "maxHealthExplosionDamage": 0.11999999731779099
+    "maxHealthExplosionDamage": 0.15000000596046448
    },
    "name": "Combust",
    "unique": false
@@ -9135,7 +9135,7 @@
    "composition": [],
    "desc": "Gain a random component and @NumGold@ gold. The next 7 times you win a player combat, gain a different random component. Afterwards, gain @CompletionGold@ gold.",
    "effects": {
-    "CompletionGold": 5.0,
+    "CompletionGold": 1.0,
     "NumGold": 1.0
    },
    "name": "Component Quest",
@@ -9229,6 +9229,19 @@
    "desc": "",
    "effects": {},
    "name": "Tear Of The Goddess",
+   "unique": false
+  },
+  {
+   "apiName": "DA_ConstructACompanion",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "The next @UnitCost@-cost champion you buy is @ActorLevel@-star. Gain @NumGold@ gold.",
+   "effects": {
+    "ActorLevel": 3.0,
+    "NumGold": 2.0,
+    "UnitCost": 1.0
+   },
+   "name": "Construct a Companion",
    "unique": false
   },
   {
@@ -9594,18 +9607,6 @@
    "unique": false
   },
   {
-   "apiName": "DA_DoubleTrouble",
-   "associatedTraits": [],
-   "composition": [],
-   "desc": "When you field exactly 2 copies of a champion, they both gain @DamageStatAdd*100@% Attack Damage and Ability Power and @DefenseStatAdd@ Armor, and Magic Resist. When you 3-star, gain a 2-star copy.",
-   "effects": {
-    "DamageStatAdd": 0.25,
-    "DefenseStatAdd": 25.0
-   },
-   "name": "Double Trouble",
-   "unique": false
-  },
-  {
    "apiName": "DA_Downpour18",
    "associatedTraits": [],
    "composition": [],
@@ -9677,7 +9678,7 @@
    "composition": [],
    "desc": "Your team gains @InitialStacks@% Attack Damage & Ability Power. This increases by @StacksPerCombat@% after each player combat. 1-cost champions gain double.",
    "effects": {
-    "InitialStacks": 5.0,
+    "InitialStacks": 3.0,
     "StacksPerCombat": 1.0
    },
    "name": "Early Learnings",
@@ -9708,11 +9709,11 @@
    "apiName": "DA_ElectrochargeI",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Every @ProcAttackCount@ attacks an ally takes, they deal @DamageI@-@DamageI_4@ (based on current Stage) magic damage to nearby enemies (@Cooldown@ second cooldown).",
+   "desc": "Every @ProcAttackCount@ attacks an ally takes, they deal @DamageI@-@DamageI_2@ (based on current Stage) magic damage to nearby enemies (@Cooldown@ second cooldown).",
    "effects": {
     "Cooldown": 1.0,
-    "DamageI": 30.0,
-    "DamageI_4": 90.0,
+    "DamageI": 25.0,
+    "DamageI_2": 80.0,
     "ProcAttackCount": 4.0
    },
    "name": "Electrocharge I",
@@ -9860,7 +9861,7 @@
    "composition": [],
    "desc": "Now and at the start of the next @Rounds@ rounds, gain @XPPerRound_Plus@ XP.",
    "effects": {
-    "XPPerRound_Plus": 10.0,
+    "XPPerRound_Plus": 9.0,
     "rounds": 3.0,
     "{822fdcb5}": 3.0
    },
@@ -10044,6 +10045,19 @@
    "unique": false
   },
   {
+   "apiName": "DA_ForgeAFriend",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "The next @UnitCost@-cost champion you buy is @ActorLevel@-star. Gain @NumGold@ gold.",
+   "effects": {
+    "ActorLevel": 3.0,
+    "NumGold": 5.0,
+    "UnitCost": 1.0
+   },
+   "name": "Forge A Friend",
+   "unique": false
+  },
+  {
    "apiName": "DA_ForgedInStrength",
    "associatedTraits": [],
    "composition": [],
@@ -10056,24 +10070,6 @@
     "MoreComponents": 2.0
    },
    "name": "Forged In Strength",
-   "unique": false
-  },
-  {
-   "apiName": "DA_FoundBigFriend18",
-   "associatedTraits": [],
-   "composition": [],
-   "desc": "Gain a temporary Training Dummy with two Giant's Belts.",
-   "effects": {},
-   "name": "Returning Friend",
-   "unique": false
-  },
-  {
-   "apiName": "DA_FoundBigFriend18_Upgrade",
-   "associatedTraits": [],
-   "composition": [],
-   "desc": "Gain a Training Dummy with <Set18CharmUpgrade>Three Giant's Belts</Set18CharmUpgrade>.",
-   "effects": {},
-   "name": "Returning Friend",
    "unique": false
   },
   {
@@ -10112,7 +10108,7 @@
     "HealthLoss": 20.0,
     "NumChampions": 3.0,
     "NumRounds": 5.0,
-    "RewardGold": 8.0
+    "RewardGold": 5.0
    },
    "name": "Future Focused",
    "unique": false
@@ -10155,7 +10151,7 @@
    "composition": [],
    "desc": "Your team becomes large, gaining @FlatHealth@ Health and @HealthMultiplier*100@% max Health.",
    "effects": {
-    "FlatHealth": 200.0,
+    "FlatHealth": 225.0,
     "HealthMultiplier": 0.10000002384185791
    },
    "name": "Giant and Mighty",
@@ -10401,7 +10397,7 @@
    "composition": [],
    "desc": "Combat start: Champions grant other adjacent champions @Armor_Silver@ Armor and Magic Resist. This effect stacks.",
    "effects": {
-    "Armor_Silver": 6.0
+    "Armor_Silver": 7.0
    },
    "name": "Group Hug I",
    "unique": false
@@ -10412,7 +10408,7 @@
    "composition": [],
    "desc": "Combat start: Champions grant other adjacent champions @Armor_Gold@ Armor and Magic Resist. This effect stacks.",
    "effects": {
-    "Armor_Gold": 9.0
+    "Armor_Gold": 10.0
    },
    "name": "Group Hug II",
    "unique": false
@@ -10564,7 +10560,7 @@
    "apiName": "DA_HealthPotion18_Charm",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Gain a tempoary equippable Health Potion.",
+   "desc": "Gain a temporary equippable Health Potion.",
    "effects": {},
    "name": "Health Potion",
    "unique": false
@@ -10593,7 +10589,7 @@
    "composition": [],
    "desc": "Gain a Steadfast Heart. Every @SurvivePeriodInSeconds@ seconds of combat its holder survives, Steadfast Heart gains additional @MaxHealthGain@ permanent max Health.",
    "effects": {
-    "MaxHealthGain": 16.0,
+    "MaxHealthGain": 18.0,
     "SurvivePeriodInSeconds": 10.0
    },
    "name": "Heart of Steel",
@@ -10634,7 +10630,7 @@
    "composition": [],
    "desc": "Gain 2 Lesser Champion Duplicators. Gain @Gold@ gold.",
    "effects": {
-    "Gold": 4.0
+    "Gold": 6.0
    },
    "name": "Heroic Grab Bag",
    "unique": false
@@ -10752,8 +10748,8 @@
    "composition": [],
    "desc": "Champions in your back 2 rows gain @AbilityPowerPcntPerFrontLiner*100@% Ability Power and @AttackDamagePcntPerFrontLiner*100@% Attack Damage for each champion that starts combat in your front row.",
    "effects": {
-    "AbilityPowerPcntPerFrontLiner": 0.10000000149011612,
-    "AttackDamagePcntPerFrontLiner": 0.09000000357627869
+    "AbilityPowerPcntPerFrontLiner": 0.10999999940395355,
+    "AttackDamagePcntPerFrontLiner": 0.10999999940395355
    },
    "name": "Hold the Line",
    "unique": false
@@ -10928,8 +10924,8 @@
    "composition": [],
    "desc": "Your champions gain @MaxHealthPerInterest@ permanent max health per interest you earn. Your max interest is increased by @MaxInterestInc@. Gain @InstantGold@ gold now.",
    "effects": {
-    "InstantGold": 8.0,
-    "MaxHealthPerInterest": 10.0,
+    "InstantGold": 10.0,
+    "MaxHealthPerInterest": 12.0,
     "MaxInterestInc": 2.0
    },
    "name": "Investment Strategy II",
@@ -10941,8 +10937,8 @@
    "composition": [],
    "desc": "Your champions gain @MaxHealthPerInterest@ permanent max health per interest you earn. Gain @InstantGold@ gold now.",
    "effects": {
-    "InstantGold": 4.0,
-    "MaxHealthPerInterest": 8.0
+    "InstantGold": 6.0,
+    "MaxHealthPerInterest": 9.0
    },
    "name": "Investment Strategy I",
    "unique": false
@@ -11082,7 +11078,7 @@
    "composition": [],
    "desc": "Your team gains @CritChance_I@% Critical Strike Chance and <TFTKeyword>Precision.</TFTKeyword><br><br><rules>Precision: Ability damage can critically strike. Additional Precision grants 10% Critical Strike Damage.</rules>",
    "effects": {
-    "CritChance_I": 10.0
+    "CritChance_I": 15.0
    },
    "name": "Jeweled Lotus I",
    "unique": false
@@ -11417,7 +11413,7 @@
    "desc": "When you buy XP, gain an additional @AdditionalXP@. Gain @InstantXP@ immediately.",
    "effects": {
     "AdditionalXP": 2.0,
-    "InstantXP": 6.0
+    "InstantXP": 10.0
    },
    "name": "Level Up!",
    "unique": false
@@ -11543,7 +11539,7 @@
    "effects": {
     "1StarCost": 5.0,
     "2StarCost": 1.0,
-    "Gold": 3.0,
+    "Gold": 5.0,
     "Stages": 2.0
    },
    "name": "Luxury Subscription",
@@ -11644,7 +11640,7 @@
    "composition": [],
    "desc": "Your Casters have @MaxManaMultiplier*100@% reduced Max Mana.",
    "effects": {
-    "MaxManaMultiplier": 0.18000000715255737
+    "MaxManaMultiplier": 0.1499999761581421
    },
    "name": "Mana-Rich Soil",
    "unique": false
@@ -11655,7 +11651,7 @@
    "composition": [],
    "desc": "Your Casters have @MaxManaMultiplierUpgrade*100@% reduced Max Mana.",
    "effects": {
-    "MaxManaMultiplierUpgrade": 0.25
+    "MaxManaMultiplierUpgrade": 0.19999998807907104
    },
    "name": "Mana-Rich Soil",
    "unique": false
@@ -11970,18 +11966,6 @@
    "unique": false
   },
   {
-   "apiName": "DA_PandorasItemsII",
-   "associatedTraits": [],
-   "composition": [],
-   "desc": "Round start: items on your bench are randomized. <br><br>Gain @NumberOfComponentsII@ random components and @GoldAmountII@ gold.",
-   "effects": {
-    "GoldAmountII": 4.0,
-    "NumberOfComponentsII": 2.0
-   },
-   "name": "Pandora's Items II",
-   "unique": false
-  },
-  {
    "apiName": "DA_PandorasItemsIII",
    "associatedTraits": [],
    "composition": [],
@@ -11990,6 +11974,42 @@
     "NumberOfRadiantItemsIII": 1.0
    },
    "name": "Pandora's Items III",
+   "unique": false
+  },
+  {
+   "apiName": "DA_PandorasItemsIIMinus",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Round start: items on your bench are randomized. <br><br>Gain @NumberOfComponentsII@ random components and @GoldAmountII@ gold.",
+   "effects": {
+    "GoldAmountII": 1.0,
+    "NumberOfComponentsII": 2.0
+   },
+   "name": "Pandora's Items II",
+   "unique": false
+  },
+  {
+   "apiName": "DA_PandorasItemsIIPlus",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Round start: items on your bench are randomized. <br><br>Gain @NumberOfComponentsII@ random components and @GoldAmountIIPlus@ gold.",
+   "effects": {
+    "GoldAmountIIPlus": 4.0,
+    "NumberOfComponentsII": 2.0
+   },
+   "name": "Pandora's Items II+",
+   "unique": false
+  },
+  {
+   "apiName": "DA_PandorasItemsIIPlusPlus",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Round start: items on your bench are randomized. <br><br>Gain @NumberOfComponentsII@ random components and @GoldAmountIIPlusPlus@ gold.",
+   "effects": {
+    "GoldAmountIIPlusPlus": 6.0,
+    "NumberOfComponentsII": 2.0
+   },
+   "name": "Pandora's Items II++",
    "unique": false
   },
   {
@@ -12292,7 +12312,7 @@
    "apiName": "DA_PottedLifebloom18_Upgrade",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Gain a temporary Lifeblossom.",
+   "desc": "Gain a temporary Lifebloom.",
    "effects": {},
    "name": "Potted Lifebloom",
    "unique": false
@@ -12606,10 +12626,28 @@
    "composition": [],
    "desc": "Gain @NumItemsToGrant@ Hands of Justice. Allies equipped with Hand of Justice gain <TFTKeyword>Precision</TFTKeyword> and @CriticalStrikeChance*100@% Critical Strike Chance.<br><br><rules>Precision: Ability damage can critically strike. Additional Precision grants 10% Critical Strike Damage.</rules>",
    "effects": {
-    "CriticalStrikeChance": 0.25,
+    "CriticalStrikeChance": 0.15000000596046448,
     "NumItemsToGrant": 2.0
    },
    "name": "Retribution",
+   "unique": false
+  },
+  {
+   "apiName": "DA_ReturningFriend",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Gain a temporary Training Dummy with two Giant's Belts.",
+   "effects": {},
+   "name": "Returning Friend",
+   "unique": false
+  },
+  {
+   "apiName": "DA_ReturningFriendUpgrade",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Gain a Training Dummy with <Set18CharmUpgrade>Three Giant's Belts</Set18CharmUpgrade>.",
+   "effects": {},
+   "name": "Returning Friend",
    "unique": false
   },
   {
@@ -12712,6 +12750,28 @@
     "Upgrade_WaitTime": 16.0
    },
    "name": "Roly-Polys",
+   "unique": false
+  },
+  {
+   "apiName": "DA_RoomForAShroom",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Gain @ShroomsToGrant@ random mushrooms.",
+   "effects": {
+    "ShroomsToGrant": 2.0
+   },
+   "name": "Room for a Shroom",
+   "unique": false
+  },
+  {
+   "apiName": "DA_RoomForAShroomUpgrade",
+   "associatedTraits": [],
+   "composition": [],
+   "desc": "Gain @ShroomsToGrantUpgrade@ random mushrooms.",
+   "effects": {
+    "ShroomsToGrantUpgrade": 3.0
+   },
+   "name": "Room for a Shroom",
    "unique": false
   },
   {
@@ -13125,7 +13185,7 @@
    "desc": "Gain a Spirit Visage. Every @TimeIntervalSeconds@ seconds, Spirit Visage heals allies within @HexRange@ hex for @PercentMissingHealth*100@% of their missing Health.",
    "effects": {
     "HexRange": 1.0,
-    "PercentMissingHealth": 0.07500000298023224,
+    "PercentMissingHealth": 0.09000000357627869,
     "TimeIntervalSeconds": 5.0
    },
    "name": "Spirit Of Redemption",
@@ -13280,7 +13340,7 @@
    "desc": "Your @NumChampions@ strongest Fighters or Assassins are untargetable for @UntargetableDuration@ seconds.",
    "effects": {
     "NumChampions": 3.0,
-    "UntargetableDuration": 6.0
+    "UntargetableDuration": 8.0
    },
    "name": "Stealthy",
    "unique": false
@@ -13292,7 +13352,7 @@
    "desc": "@NumChampionsUpgrade@ random champions on the back row are untargetable for @UntargetableDurationUpgrade@ seconds.",
    "effects": {
     "NumChampionsUpgrade": 3.0,
-    "UntargetableDurationUpgrade": 10.0
+    "UntargetableDurationUpgrade": 12.0
    },
    "name": "Stealthy",
    "unique": false
@@ -13817,30 +13877,6 @@
    "unique": false
   },
   {
-   "apiName": "DA_TrueFriendship18",
-   "associatedTraits": [],
-   "composition": [],
-   "desc": "Gain @GoldForPlayer@ gold and a Magnetic Remover. Your opponent gains @GoldForEnemy@ gold and a Magnetic Remover.",
-   "effects": {
-    "GoldForEnemy": 2.0,
-    "GoldForPlayer": 2.0
-   },
-   "name": "True Friendship",
-   "unique": false
-  },
-  {
-   "apiName": "DA_TrueFriendship18_Upgrade",
-   "associatedTraits": [],
-   "composition": [],
-   "desc": "Gain @UpgradeGoldForPlayer@ gold and a Magnetic Remover. Your opponent gains @UpgradeGoldForEnemy@ gold and a Magnetic Remover.",
-   "effects": {
-    "UpgradeGoldForEnemy": 2.0,
-    "UpgradeGoldForPlayer": 3.0
-   },
-   "name": "True Friendship",
-   "unique": false
-  },
-  {
    "apiName": "DA_TurtlesVisit18",
    "associatedTraits": [],
    "composition": [],
@@ -13928,7 +13964,7 @@
    "composition": [],
    "desc": "Champions gain @ADAP*100@% Attack Damage, @ADAP*100@% Ability Power, @resists@ Armor, and @resists@ Magic Resist for each ally that shares a trait with them.",
    "effects": {
-    "ADAP": 0.019999999552965164,
+    "ADAP": 0.02500000037252903,
     "Resists": 2.0
    },
    "name": "Verticality II",
@@ -13940,7 +13976,7 @@
    "composition": [],
    "desc": "Champions gain @ADAP*100@% Attack Damage, @ADAP*100@% Ability Power, @resists@ Armor, and @resists@ Magic Resist for each ally that shares a trait with them.",
    "effects": {
-    "ADAP": 0.03500000014901161,
+    "ADAP": 0.03999999910593033,
     "Resists": 3.5
    },
    "name": "Verticality III",
@@ -14015,7 +14051,7 @@
    "apiName": "DA_WeStickTogether",
    "associatedTraits": [],
    "composition": [],
-   "desc": "Gain a random Emblem and a completed item anvil. Allies that share a trait with that Emblem gain @AttackSpeed*100@% Attack Speed. 0 0<br><br><rules>Into The Arcane Tactician's Crown, 2025</rules>",
+   "desc": "Gain an Emblem of a random trait and a completed item anvil. Allies with that trait gain @AttackSpeed*100@% Attack Speed.<br>0 0<br><br><rules>Into The Arcane Tactician's Crown, 2025</rules>",
    "effects": {
     "AttackSpeed": 0.30000001192092896
    },
@@ -23180,7 +23216,7 @@
      "minUnits": 1,
      "variables": {
       "DamageAmp": 0.07000000029802322,
-      "Durability": 0.06999999284744263
+      "Durability": 0.050000011920928955
      }
     }
    ],
@@ -23222,7 +23258,7 @@
      "minUnits": 6,
      "variables": {
       "Health": 600.0,
-      "StatMultiplier": 0.6000000238418579
+      "StatMultiplier": 0.5
      }
     }
    ],
@@ -23521,7 +23557,7 @@
      "minUnits": 2,
      "variables": {
       "ADAP": 4.5,
-      "Heal": 2.5,
+      "Heal": 3.0,
       "HealThreshold": 0.5
      }
     },
@@ -23530,7 +23566,7 @@
      "minUnits": 4,
      "variables": {
       "ADAP": 7.0,
-      "Heal": 4.0,
+      "Heal": 5.0,
       "HealThreshold": 0.5
      }
     }
@@ -23552,7 +23588,7 @@
      "maxUnits": null,
      "minUnits": 2,
      "variables": {
-      "PercentHeal": 0.07999999821186066
+      "PercentHeal": 0.07000000029802322
      }
     }
    ],
@@ -23714,7 +23750,7 @@
      "maxUnits": 5,
      "minUnits": 4,
      "variables": {
-      "JuggernautDurability": 0.32999998331069946,
+      "JuggernautDurability": 0.30000001192092896,
       "TeamDurability": 0.06000000238418579
      }
     },
@@ -23746,8 +23782,8 @@
      "maxUnits": 3,
      "minUnits": 3,
      "variables": {
-      "AbilityPower": 0.10000000149011612,
-      "AttackSpeed": 0.12000000476837158,
+      "AbilityPower": 0.11999999731779099,
+      "AttackSpeed": 0.10000002384185791,
       "LunarMultiplier": 1.0
      }
     },
@@ -23755,8 +23791,8 @@
      "maxUnits": 4,
      "minUnits": 4,
      "variables": {
-      "AbilityPower": 0.14000000059604645,
-      "AttackSpeed": 0.15999996662139893,
+      "AbilityPower": 0.1599999964237213,
+      "AttackSpeed": 0.13999998569488525,
       "LunarMultiplier": 1.0
      }
     },
@@ -23764,8 +23800,8 @@
      "maxUnits": null,
      "minUnits": 5,
      "variables": {
-      "AbilityPower": 0.18000000715255737,
-      "AttackSpeed": 0.20000004768371582,
+      "AbilityPower": 0.20000000298023224,
+      "AttackSpeed": 0.1799999475479126,
       "LunarMultiplier": 1.0
      }
     }
@@ -23844,7 +23880,7 @@
      "maxUnits": 4,
      "minUnits": 4,
      "variables": {
-      "ASperAttack": 0.08000004291534424,
+      "ASperAttack": 0.0700000524520874,
       "MaxStacks": 10.0,
       "TeamAS": 0.10000002384185791
      }
@@ -23853,7 +23889,7 @@
      "maxUnits": null,
      "minUnits": 5,
      "variables": {
-      "ASperAttack": 0.12000000476837158,
+      "ASperAttack": 0.10000002384185791,
       "MaxStacks": 10.0,
       "TeamAS": 0.10000002384185791
      }
@@ -23975,7 +24011,7 @@
       "BonusMagicDamage": 0.07999999821186066,
       "NumThreeStarThreshold1": 3.0,
       "NumThreeStarThreshold2": 5.0,
-      "NumThreeStarThreshold3": 7.0,
+      "NumThreeStarThreshold3": 8.0,
       "PercentIncreasePer3Star": 0.009999999776482582,
       "ShieldRatio": 0.05000000074505806,
       "Threshold1ArmorMagicResist": 12.0,
@@ -24046,8 +24082,8 @@
      "maxUnits": null,
      "minUnits": 7,
      "variables": {
-      "AttackSpeedIncrease": 0.4500000476837158,
-      "HealthIncrease": 0.4500000476837158,
+      "AttackSpeedIncrease": 0.5499999523162842,
+      "HealthIncrease": 0.5499999523162842,
       "TeamwideRatio": 1.0
      }
     }

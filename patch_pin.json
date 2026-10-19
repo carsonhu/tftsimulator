@@ -19,8 +19,8 @@
     "not listed here -- that is the prompt to go and look, not a failure."
   ],
   "channel": "pbe",
-  "patch": "18.4b (official patch notes 2026-10-06, mid-patch update 2026-10-07; cdragon pbe)",
-  "accepted": "2026-10-07",
+  "patch": "18.5 PBE (unofficial notes via tftips.app/en/patches/18.5, read 2026-10-19; cdragon pbe). Mama Beak's 18.5 Tiny Beaks change deliberately not followed.",
+  "accepted": "2026-10-19",
   "acknowledged": {
     "Caitlyn.maxMana": {
       "code": -1,
@@ -42,50 +42,10 @@
       "reference": 45,
       "why": "Official 18.3 notes: Hunter AD 20/30/45/65% -> 20/30/40/60%. cdragon lags the live build on both channels and still reads 45."
     },
-    "Varus.attackSpeed": {
-      "code": 0.75,
-      "reference": 0.7,
-      "why": "Official 18.4 notes: Varus Attack Speed .7 -> .75, and the live lolchess card reads 0.75. cdragon's pbe dump carries the rest of 18.4 but still reads 0.7."
-    },
-    "Varus.maxMana": {
-      "code": 110,
-      "reference": 120,
-      "why": "Official 18.4 mid-patch notes (2026-10-07): Varus Mana 30/120 -> 20/110. cdragon's pbe dump had not picked up the B-patch on the day it shipped."
-    },
-    "MamaBeak.ad": {
-      "code": 60,
-      "reference": 55,
-      "why": "Official 18.4 mid-patch notes (2026-10-07): Mama Beak Base AD 55 -> 60. cdragon's pbe dump had not picked up the B-patch on the day it shipped."
-    },
-    "Lunar.as_scaling[3]": {
-      "code": 10,
-      "reference": 12,
-      "why": "Official 18.4 notes: Lunar Ability Power 7/10/14/18% -> 7/12/16/20%, Attack Speed unchanged; the live lolchess card agrees (AS 7/10/14/18, AP 7/12/16/20) and so does the client (confirmed by the user 2026-10-07). cdragon's pbe dump has the two variables the other way round: AttackSpeed 12/16/20, AbilityPower 10/14/18."
-    },
-    "Lunar.ap_scaling[3]": {
-      "code": 12,
-      "reference": 10,
-      "why": "Official 18.4 notes: Lunar Ability Power 7/10/14/18% -> 7/12/16/20%, Attack Speed unchanged; the live lolchess card agrees (AS 7/10/14/18, AP 7/12/16/20) and so does the client (confirmed by the user 2026-10-07). cdragon's pbe dump has the two variables the other way round: AttackSpeed 12/16/20, AbilityPower 10/14/18."
-    },
-    "Lunar.as_scaling[4]": {
-      "code": 14,
-      "reference": 16,
-      "why": "Official 18.4 notes: Lunar Ability Power 7/10/14/18% -> 7/12/16/20%, Attack Speed unchanged; the live lolchess card agrees (AS 7/10/14/18, AP 7/12/16/20) and so does the client (confirmed by the user 2026-10-07). cdragon's pbe dump has the two variables the other way round: AttackSpeed 12/16/20, AbilityPower 10/14/18."
-    },
-    "Lunar.ap_scaling[4]": {
-      "code": 16,
-      "reference": 14,
-      "why": "Official 18.4 notes: Lunar Ability Power 7/10/14/18% -> 7/12/16/20%, Attack Speed unchanged; the live lolchess card agrees (AS 7/10/14/18, AP 7/12/16/20) and so does the client (confirmed by the user 2026-10-07). cdragon's pbe dump has the two variables the other way round: AttackSpeed 12/16/20, AbilityPower 10/14/18."
-    },
-    "Lunar.as_scaling[5]": {
-      "code": 18,
-      "reference": 20,
-      "why": "Official 18.4 notes: Lunar Ability Power 7/10/14/18% -> 7/12/16/20%, Attack Speed unchanged; the live lolchess card agrees (AS 7/10/14/18, AP 7/12/16/20) and so does the client (confirmed by the user 2026-10-07). cdragon's pbe dump has the two variables the other way round: AttackSpeed 12/16/20, AbilityPower 10/14/18."
-    },
-    "Lunar.ap_scaling[5]": {
-      "code": 20,
-      "reference": 18,
-      "why": "Official 18.4 notes: Lunar Ability Power 7/10/14/18% -> 7/12/16/20%, Attack Speed unchanged; the live lolchess card agrees (AS 7/10/14/18, AP 7/12/16/20) and so does the client (confirmed by the user 2026-10-07). cdragon's pbe dump has the two variables the other way round: AttackSpeed 12/16/20, AbilityPower 10/14/18."
+    "Riftbeast.aspd_scaling": {
+      "code": 5,
+      "reference": 6,
+      "why": "18.5 PBE (tftips.app): Riftbeast (7) Attack Speed 6% -> 5%, AD/AP unchanged at 6%. cdragon's pbe dump still reads CapstoneAspd 0.06, and lags tftips on the rest of 18.5 too (Seraphim's Staff, Cry Me A River, Embiggen still pre-18.5)."
     }
   },
   "spell_data_published": {
@@ -132,8 +92,8 @@
     },
     "Alune.moonshardScaling": {
       "ad": [0, 0, 0],
-      "ap": [55, 83, 500],
-      "read_on": "PBE 18.1g"
+      "ap": [58, 88, 500],
+      "read_on": "PBE 18.5 (tftips.app unofficial notes, 2026-10-19): 55/83/500 -> 58/88/500"
     },
     "Ashe.abilityScaling": {
       "ad": [465, 700, 1000],
@@ -141,19 +101,19 @@
       "read_on": "live 18.2 (official patch notes confirm the PBE 18.2 value)"
     },
     "Ashe.trailScaling": {
-      "ad": [9, 14, 200],
+      "ad": [11, 16, 200],
       "ap": [2, 3, 20],
-      "read_on": "live 18.2b (official mid-patch notes 2026-09-14)"
+      "read_on": "PBE 18.5 (tftips.app unofficial notes, 2026-10-19): card breakdown 9/14 -> 11/16 AD, AP half unchanged (17 -> 19 = 16 + 3 at 2 star)"
     },
     "Azir.abilityScaling": {
       "ad": [0, 0, 0],
-      "ap": [46, 69, 110],
-      "read_on": "live 18.3 (official patch notes 2026-09-22)"
+      "ap": [43, 65, 105],
+      "read_on": "PBE 18.5 (tftips.app unofficial notes, 2026-10-19): 46/69/110 -> 43/65/105"
     },
     "Caitlyn.abilityScaling": {
-      "ad": [190, 285, 470],
+      "ad": [200, 300, 490],
       "ap": [20, 30, 45],
-      "read_on": "PBE 18.1g"
+      "read_on": "PBE 18.5 (tftips.app unofficial notes, 2026-10-19): card breakdown 190/285/470 -> 200/300/490 AD, AP half unchanged (285 -> 300 + 30 at 2 star)"
     },
     "Camille.abilityScaling": {
       "ad": [150, 225, 400, 665],
@@ -238,12 +198,12 @@
     "MamaBeak.beakScaling": {
       "ad": [22, 30, 52],
       "ap": [0, 0, 0],
-      "read_on": "live 18.4 (official patch notes 2026-10-06: 22/30/48 -> 22/30/52. The lolchess card reads 33 at 2-star; the notes were followed per the user, 2026-10-07)"
+      "read_on": "live 18.4 (official patch notes 2026-10-06: 22/30/48 -> 22/30/52. The lolchess card reads 33 at 2-star; the notes were followed per the user, 2026-10-07). 18.5 PBE (tftips.app) shows 22/33/52 -> 20/30/50; not followed -- the user reads it as an unintended revert (2026-10-19)"
     },
     "MasterYi.abilityScaling": {
       "ad": [0, 0, 0],
-      "ap": [125, 190, 285],
-      "read_on": "live 18.2 (official patch notes: 140/210/335 -> 125/190/285; the card prints no number for this line)"
+      "ap": [135, 200, 320],
+      "read_on": "PBE 18.5 (tftips.app unofficial notes, 2026-10-19): 125/190/285 -> 135/200/320; the card prints no number for this line"
     },
     "Nidalee.abilityScaling": {
       "ad": [0, 0, 0],

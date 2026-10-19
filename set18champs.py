@@ -481,7 +481,8 @@ class Azir(Champion):
         self.castTime = self.cast_time_base
         self.items.append(AriseBuff())
 
-    abilityScaling = create_ability_scaling([0, 0, 0], [46, 69, 110])
+    # 18.5 PBE: 46/69/110 -> 43/65/105.
+    abilityScaling = create_ability_scaling([0, 0, 0], [43, 65, 105])
 
     # 0.8s at his base Attack Speed, down to 0.4s at 1.5 (0.8 * 0.75 / 1.5).
     cast_time_base = 0.8
@@ -528,8 +529,10 @@ class Caitlyn(Champion):
         self.default_traits = ["Hunter"]
         self.items.append(CaitlynHeadshotBuff())
 
-    # Physical damage row: 190/285/470 AD-scaled + 20/30/45 AP-scaled.
-    abilityScaling = create_ability_scaling([190, 285, 470], [20, 30, 45])
+    # Physical damage row: 200/300/490 AD-scaled + 20/30/45 AP-scaled.
+    # 18.5 PBE moved only the AD half (190/285/470 -> 200/300/490); the card
+    # reads 285 -> 300 (+30) at 2 star, so the AP half is untouched.
+    abilityScaling = create_ability_scaling([200, 300, 490], [20, 30, 45])
 
     def performAbility(self, opponents, items, time):
         # Never actually called -- fullMana=-1 keeps canCast() False.
@@ -771,9 +774,8 @@ class Karma(Champion):
 
 class MasterYi(Champion):
     # The AD version's base AD; the AP version is a much weaker autoattacker.
-    # 18.2 (official notes): 65 -> 60. The cdragon pbe dump reads 62 and lags
-    # the live build; acknowledged in patch_pin.json.
-    AD_VERSION_ATK = 60
+    # 18.2 (official notes): 65 -> 60. 18.5 PBE: 60 -> 63.
+    AD_VERSION_ATK = 63
     AP_VERSION_ATK = 15
 
     def __init__(self, level):
@@ -813,9 +815,10 @@ class MasterYi(Champion):
         self.items.append(MasterYiUlt())
 
     # AP version: bonus magic damage on each of the two Double Strike hits.
-    # 18.2 (official notes): 140/210/335 -> 125/190/285. The card itself
-    # prints no number for this line, so the notes are the only source.
-    abilityScaling = create_ability_scaling([0, 0, 0], [125, 190, 285])
+    # 18.2 (official notes): 140/210/335 -> 125/190/285. 18.5 PBE:
+    # -> 135/200/320. The card itself prints no number for this line, so the
+    # notes are the only source.
+    abilityScaling = create_ability_scaling([0, 0, 0], [135, 200, 320])
 
     def performAbility(self, opponents, items, time):
         # Never actually called -- fullMana=-1 keeps canCast() False. Wuju
@@ -1088,7 +1091,7 @@ class Alune(Champion):
         atk = 40
         curMana = 0
         fullMana = 35
-        aspd = 0.8
+        aspd = 0.85  # 18.5 PBE: 0.8 -> 0.85
         armor = 45
         mr = 45
         super().__init__(
@@ -1118,8 +1121,9 @@ class Alune(Champion):
     # neither of these rows at any patch. The card wins; see
     # patch_pin.json's spell_data_published. Authored is not the same as
     # correct, which is worth remembering when the rest of the set's bins land.
+    # 18.5 PBE: 55/83/500 -> 58/88/500.
     moonshardScaling = create_ability_scaling(
-        [0, 0, 0], [55, 83, 500], func_name="moonshardScaling"
+        [0, 0, 0], [58, 88, 500], func_name="moonshardScaling"
     )
     # The whole moon, before the split.
     fullMoonScaling = create_ability_scaling(
@@ -1348,10 +1352,11 @@ class Ashe(Champion):
     # The card's trail row is two halves, same as Sivir's: 9 + 2 = 11,
     # 14 + 3 = 17, 200 + 20 = 220. 18.2b moved only the AD half, and only at
     # 1 and 2 star ("5/8 AD => 9/14 AD"); the 3-star 200 and the AP halves are
-    # untouched. The 1.5% max Health rides on top of this and is added
+    # untouched. 18.5 PBE did the same again: 9/14 -> 11/16 AD, so the card
+    # reads 13/19/220. The 1.5% max Health rides on top of this and is added
     # per-target in AsheTrail, since it depends on who is being hit.
     trailScaling = create_ability_scaling(
-        [9, 14, 200], [2, 3, 20], func_name="trailScaling"
+        [11, 16, 200], [2, 3, 20], func_name="trailScaling"
     )
 
     def performAbility(self, opponents, items, time):

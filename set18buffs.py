@@ -222,10 +222,8 @@ class Rapidfire(Buff):
             params,
             phases=["preCombat", "postAttack"],
         )
-        # 18.2 (official notes, not on PBE): (4)/(5) went 9/15 -> 8/12.
-        # The cdragon pbe dump still reads 9/15 -- acknowledged in
-        # patch_pin.json rather than followed.
-        self.per_attack_scaling = {0: 0, 2: 3, 3: 5, 4: 8, 5: 12}
+        # 18.2 (official notes): (4)/(5) went 9/15 -> 8/12; 18.5 PBE: 7/10.
+        self.per_attack_scaling = {0: 0, 2: 3, 3: 5, 4: 7, 5: 10}
         self.max_stacks = 10
         # Named rather than written into performAbility as a literal 10, so
         # patch_check can point a hook at it. An unnamed constant is one no
@@ -346,7 +344,9 @@ class Riftbeast(Buff):
         )
         # (5) shop-overrun and (10) +2 team size are meta/shop mechanics,
         # out of scope for a combat simulator -- only (3) and (7) are modeled.
-        self.stat_scaling = 6  # AD/AS/AP %
+        self.stat_scaling = 6  # AD/AP %
+        # 18.5 PBE split Attack Speed off the AD/AP row: 6% -> 5%.
+        self.aspd_scaling = 5
         self.resist_scaling = 5  # Armor/MR
         self.hp_scaling = 50
         self.mana_regen_scaling = 1
@@ -368,7 +368,7 @@ class Riftbeast(Buff):
             if self.level >= 7 and time >= self.next_bonus:
                 self.next_bonus += self.interval
                 champion.bonus_ad.addStat(self.stat_scaling)
-                champion.aspd.addStat(self.stat_scaling)
+                champion.aspd.addStat(self.aspd_scaling)
                 champion.ap.addStat(self.stat_scaling)
                 champion.armor.addStat(self.resist_scaling)
                 champion.mr.addStat(self.resist_scaling)
@@ -722,7 +722,7 @@ class Fae(Buff):
     trait with no team-wide half has no membership to disclaim. The parameter
     shape (0-7 rather than a 0/1 flag) keeps it out of that panel on its own.
 
-    The heal -- 2%/4% per Pixie once below 50% Health -- is not modeled:
+    The heal -- 3%/5% per Pixie once below 50% Health -- is not modeled:
     nothing in this sim damages the champion being measured, so it would price
     at exactly zero, same as Solar's shield.
     """
@@ -985,7 +985,8 @@ class Blackthorn(Buff):
     base values and the star/cost scaling table are still not in the bin at
     all. The official 18.2 notes (not on PBE) moved the AD sacrifice's
     Attack Speed 12 -> 14% and the AP sacrifice's Mana Regen 1.7 -> 2;
-    the 18.3b notes moved the AP sacrifice's damage amp 14 -> 12%.
+    the 18.3b notes moved the AP sacrifice's damage amp 14 -> 12%, and 18.5
+    PBE moved it again to 10% and (6)'s bonus 60% -> 50%.
     The scaling table was checked against two community sources in Sep 2026
     (a data-site table and littlebuddybot's per-cell stat chart, which
     agree): 3-cost 2* is 1.75, 4-cost 2* is 2.1, 5-cost 1* is 1.4.
@@ -997,7 +998,7 @@ class Blackthorn(Buff):
     # Health granted to your whole team.
     team_health = {0: 0, 2: 175, 4: 350, 6: 600}
     # "Bonus is X% stronger" -- multiplies the sacrifice's stats only.
-    bonus_scaling = {0: 1.0, 2: 1.0, 4: 1.3, 6: 1.6}
+    bonus_scaling = {0: 1.0, 2: 1.0, 4: 1.3, 6: 1.5}
 
     ROLE_NONE = "None"
     ROLE_MAGIC = "Magic"
@@ -1011,7 +1012,7 @@ class Blackthorn(Buff):
 
     # Sacrifice base values, before either scaling.
     magic_mana_regen = 2.0
-    magic_amp = 0.12  # damage amp. 18.3b: 14% -> 12%.
+    magic_amp = 0.10  # damage amp. 18.3b: 14% -> 12%. 18.5 PBE: -> 10%.
     attack_ad = 24  # % AD
     attack_aspd = 14  # % Attack Speed
 
@@ -1628,7 +1629,8 @@ class AttunedInnate(Buff):
     amp_phases = ("Waxing Gibbous", "Full Moon")
     damage_amp = 0.07
     # Durability is the other half of the trait; unmodeled, kept for reference.
-    durability = 0.07
+    # 18.5 PBE: 7% -> 5%.
+    durability = 0.05
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["preAbility"])
@@ -3399,7 +3401,8 @@ class CryMeARiver(Buff):
             champion.manaRegen.addStat(1)
         elif phase == "onUpdate":
             if not self.stage_2_active and time >= 12:
-                # After 12 seconds, increase to 4 (so add 3 more)
-                champion.manaRegen.addStat(3)
+                # After 12 seconds, increase to 3 (so add 2 more). 18.5 PBE:
+                # was 4.
+                champion.manaRegen.addStat(2)
                 self.stage_2_active = True
         return 0

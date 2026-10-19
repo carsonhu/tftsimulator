@@ -28,7 +28,7 @@ Breakpoints: 1 (no numeric variables)
 
 | units | DamageAmp | Durability |
 |---|---|---|
-| 1+ | 0.07 | 0.07 |
+| 1+ | 0.07 | 0.05 |
 
 ## Avatar  `DA_18_LuxUniqueTrait`
 
@@ -49,7 +49,7 @@ Breakpoints: 1 (no numeric variables)
 |---|---|---|
 | 2-3 | 175 |  |
 | 4-5 | 350 | 0.3 |
-| 6+ | 600 | 0.6 |
+| 6+ | 600 | 0.5 |
 
 ## Blossom  `DA_18_Blossom`
 
@@ -179,8 +179,8 @@ Breakpoints: 1 (no numeric variables)
 
 | units | ADAP | Heal | HealThreshold |
 |---|---|---|---|
-| 2-3 | 4.5 | 2.5 | 0.5 |
-| 4+ | 7 | 4 | 0.5 |
+| 2-3 | 4.5 | 3 | 0.5 |
+| 4+ | 7 | 5 | 0.5 |
 
 ## Flora Fatalis  `DA_FloraFatalis18`
 
@@ -191,7 +191,7 @@ Breakpoints: 1 (no numeric variables)
 | units | Mana | PercentHeal |
 |---|---|---|
 | 1 | 10 |  |
-| 2+ |  | 0.08 |
+| 2+ |  | 0.07 |
 
 ## Greenfather  `DA_18_Greenfather`
 
@@ -258,7 +258,7 @@ Breakpoints: 1 (no numeric variables)
 | units | JuggernautDurability | TeamDurability |
 |---|---|---|
 | 2-3 | 0.2 | 0.04 |
-| 4-5 | 0.33 | 0.06 |
+| 4-5 | 0.3 | 0.06 |
 | 6+ | 0.42 | 0.08 |
 
 ## Lunar  `DA_18_Lunar`
@@ -272,9 +272,9 @@ Breakpoints: 1 (no numeric variables)
 | units | AbilityPower | AttackSpeed | LunarMultiplier |
 |---|---|---|---|
 | 2 | 0.07 | 0.07 | 1 |
-| 3 | 0.1 | 0.12 | 1 |
-| 4 | 0.14 | 0.16 | 1 |
-| 5+ | 0.18 | 0.2 | 1 |
+| 3 | 0.12 | 0.1 | 1 |
+| 4 | 0.16 | 0.14 | 1 |
+| 5+ | 0.2 | 0.18 | 1 |
 
 ## Monolith  `DA_18_Battlemage`
 
@@ -313,8 +313,8 @@ Breakpoints: 2, 4 (no numeric variables)
 |---|---|---|---|
 | 2 | 0.03 | 10 | 0.1 |
 | 3 | 0.05 | 10 | 0.1 |
-| 4 | 0.08 | 10 | 0.1 |
-| 5+ | 0.12 | 10 | 0.1 |
+| 4 | 0.07 | 10 | 0.1 |
+| 5+ | 0.1 | 10 | 0.1 |
 
 ## Ravager  `DA_18_Slayer`
 
@@ -373,7 +373,7 @@ Breakpoints: 2, 4 (no numeric variables)
 
 | units | BonusMagicDamage | ShieldRatio | NumThreeStarThreshold1 | NumThreeStarThreshold2 | NumThreeStarThreshold3 | Threshold2TrueDamageConversion | Threshold1AttackSpeed | Threshold1ArmorMagicResist | PercentIncreasePer3Star | Threshold3StarUpPeriod |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 3+ | 0.08 | 0.05 | 3 | 5 | 7 | 0.4 | 0.15 | 12 | 0.01 | 4 |
+| 3+ | 0.08 | 0.05 | 3 | 5 | 8 | 0.4 | 0.15 | 12 | 0.01 | 4 |
 
 ## Spellweaver  `DA_18_Spellweaver`
 
@@ -400,7 +400,7 @@ Breakpoints: 2, 4 (no numeric variables)
 |---|---|---|---|
 | 3-4 | 0.15 | 0.15 |  |
 | 5-6 | 0.35 | 0.4 | 0.5 |
-| 7+ | 0.45 | 0.45 | 1 |
+| 7+ | 0.55 | 0.55 | 1 |
 
 ## Summoner  `DA_18_Summoner`
 
