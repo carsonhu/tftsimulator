@@ -92,7 +92,7 @@ bin's world units (marked `u`; 890u is 4 hexes).
 | Lux (Primal) | `DA_18_Lux_Primal` | 5 | 900 | 40 | 0.8 | 45 | 45 | 70 | 6 | Primal, Avatar |
 | Lux (Solar) | `DA_18_Lux_Sunbeam` | 5 | 900 | 40 | 0.8 | 45 | 45 | 70 | 6 | Solar, Avatar |
 | Maokai | `DA_18_Maokai` | 5 | 1150 | 80 | 0.65 | 60 | 60 | 100 | 1 | Old Growth, Juggernaut |
-| Taric | `DA_Taric18` | 5 | 1300 | 55 | 0.75 | 65 | 70 | 70 | 1 | Emerald Aspect, Vanguard |
+| Taric | `DA_Taric18` | 5 | 1300 | 55 | 0.75 | 70 | 70 | 65 | 1 | Emerald Aspect, Vanguard |
 | Artifact Item Anvil | `TFT_ArmoryKeyOrnn` | 8 | 10 | 70 | 1 | 10 | 10 | 100 | 0 |  |
 | Completed Item Anvil | `TFT_ArmoryKeyCompleted` | 8 | 10 | 70 | 1 | 10 | 10 | 100 | 0 |  |
 | Component Anvil | `TFT_ArmoryKeyComponent` | 8 | 10 | 70 | 1 | 10 | 10 | 100 | 0 |  |

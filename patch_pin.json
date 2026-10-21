@@ -19,8 +19,8 @@
     "not listed here -- that is the prompt to go and look, not a failure."
   ],
   "channel": "pbe",
-  "patch": "18.5 PBE (unofficial notes via tftips.app/en/patches/18.5, read 2026-10-19; cdragon pbe). Mama Beak's 18.5 Tiny Beaks change deliberately not followed.",
-  "accepted": "2026-10-19",
+  "patch": "18.5 (official patch notes, read 2026-10-21; lolchess card cross-check; cdragon pbe)",
+  "accepted": "2026-10-21",
   "acknowledged": {
     "Caitlyn.maxMana": {
       "code": -1,
@@ -42,10 +42,15 @@
       "reference": 45,
       "why": "Official 18.3 notes: Hunter AD 20/30/45/65% -> 20/30/40/60%. cdragon lags the live build on both channels and still reads 45."
     },
-    "Riftbeast.aspd_scaling": {
+    "Riftbeast.stat_scaling": {
       "code": 5,
       "reference": 6,
-      "why": "18.5 PBE (tftips.app): Riftbeast (7) Attack Speed 6% -> 5%, AD/AP unchanged at 6%. cdragon's pbe dump still reads CapstoneAspd 0.06, and lags tftips on the rest of 18.5 too (Seraphim's Staff, Cry Me A River, Embiggen still pre-18.5)."
+      "why": "Official 18.5 notes: Riftbeast (7) AD/AP 6% -> 5%, and the lolchess card reads 5% AD, 5% AP, 6% AS. cdragon pbe (2026-10-21) and the tftips PBE notes have it the other way round: CapstoneAD/AP 0.06, CapstoneAspd 0.05."
+    },
+    "Riftbeast.aspd_scaling": {
+      "code": 6,
+      "reference": 5,
+      "why": "Official 18.5 notes: Riftbeast (7) AD/AP 6% -> 5%, and the lolchess card reads 5% AD, 5% AP, 6% AS. cdragon pbe (2026-10-21) and the tftips PBE notes have it the other way round: CapstoneAD/AP 0.06, CapstoneAspd 0.05."
     }
   },
   "spell_data_published": {
@@ -93,7 +98,7 @@
     "Alune.moonshardScaling": {
       "ad": [0, 0, 0],
       "ap": [58, 88, 500],
-      "read_on": "PBE 18.5 (tftips.app unofficial notes, 2026-10-19): 55/83/500 -> 58/88/500"
+      "read_on": "live 18.5 (official patch notes 2026-10-21 + lolchess card): 55/83/500 -> 58/88/500"
     },
     "Ashe.abilityScaling": {
       "ad": [465, 700, 1000],
@@ -103,17 +108,17 @@
     "Ashe.trailScaling": {
       "ad": [11, 16, 200],
       "ap": [2, 3, 20],
-      "read_on": "PBE 18.5 (tftips.app unofficial notes, 2026-10-19): card breakdown 9/14 -> 11/16 AD, AP half unchanged (17 -> 19 = 16 + 3 at 2 star)"
+      "read_on": "live 18.5 (official patch notes 2026-10-21: 9/14 -> 11/16 AD; lolchess card 13 = 11 + 2, AP half unchanged)"
     },
     "Azir.abilityScaling": {
       "ad": [0, 0, 0],
       "ap": [43, 65, 105],
-      "read_on": "PBE 18.5 (tftips.app unofficial notes, 2026-10-19): 46/69/110 -> 43/65/105"
+      "read_on": "live 18.5 (official patch notes 2026-10-21 + lolchess card): 46/69/110 -> 43/65/105"
     },
     "Caitlyn.abilityScaling": {
       "ad": [200, 300, 490],
       "ap": [20, 30, 45],
-      "read_on": "PBE 18.5 (tftips.app unofficial notes, 2026-10-19): card breakdown 190/285/470 -> 200/300/490 AD, AP half unchanged (285 -> 300 + 30 at 2 star)"
+      "read_on": "live 18.5 (official patch notes 2026-10-21: 190/285/470 -> 200/300/490 AD; lolchess card 220 = 200 + 20, AP half unchanged)"
     },
     "Camille.abilityScaling": {
       "ad": [150, 225, 400, 665],
@@ -196,14 +201,14 @@
       "read_on": "live 18.2 (official patch notes confirm the PBE 18.2 value)"
     },
     "MamaBeak.beakScaling": {
-      "ad": [22, 30, 52],
+      "ad": [20, 30, 50],
       "ap": [0, 0, 0],
-      "read_on": "live 18.4 (official patch notes 2026-10-06: 22/30/48 -> 22/30/52. The lolchess card reads 33 at 2-star; the notes were followed per the user, 2026-10-07). 18.5 PBE (tftips.app) shows 22/33/52 -> 20/30/50; not followed -- the user reads it as an unintended revert (2026-10-19)"
+      "read_on": "live 18.5 (official patch notes 2026-10-21: 22/33/52 -> 20/30/50; lolchess card agrees). The notes confirm the 18.4 2-star was 33 after all"
     },
     "MasterYi.abilityScaling": {
       "ad": [0, 0, 0],
       "ap": [135, 200, 320],
-      "read_on": "PBE 18.5 (tftips.app unofficial notes, 2026-10-19): 125/190/285 -> 135/200/320; the card prints no number for this line"
+      "read_on": "live 18.5 (official patch notes 2026-10-21): 125/190/285 -> 135/200/320; the card prints no number for this line"
     },
     "Nidalee.abilityScaling": {
       "ad": [0, 0, 0],
@@ -221,14 +226,14 @@
       "read_on": "live 18.2 (tactics.tools set-18 card text; 1-3 star cross-checked against lolchess)"
     },
     "Sivir.abilityScaling": {
-      "ad": [200, 300, 1050],
+      "ad": [220, 330, 1050],
       "ap": [15, 20, 100],
-      "read_on": "live 18.4 (official patch notes 2026-10-06; split off the lolchess card, 200 + 15 = 215)"
+      "read_on": "live 18.5 (official patch notes 2026-10-21: 200/300 -> 220/330 AD; lolchess card 220 + 15 = 235, 3-star 1050 + 100 unchanged)"
     },
     "Sivir.bounceScaling": {
-      "ad": [40, 60, 420],
-      "ap": [3, 4, 40],
-      "read_on": "live 18.4 (official patch notes 2026-10-06; 20%/20%/40% of the main row, matches the lolchess card 43/64/460)"
+      "ad": [39.6, 59.4, 420],
+      "ap": [2.7, 3.6, 40],
+      "read_on": "live 18.5 (official patch notes 2026-10-21: bounce 20% -> 18% of initial; lolchess card 18%/18%/40%, 42 = 18% of 235)"
     },
     "Teemo.abilityScaling": {
       "ad": [0, 0, 0],

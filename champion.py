@@ -115,6 +115,7 @@ class Champion(FastDeepCopy):
         # Augments
         self.seraphim = False
         self.retribution = False
+        self.embiggen = False
 
         self.tactician_level = 4
         self.first_takedown = 5  # time of first takedown
@@ -171,6 +172,7 @@ class Champion(FastDeepCopy):
             self.takedowns,
             self.seraphim,
             self.retribution,
+            self.embiggen,
             self.stage,
             self.num_targets,
             self.num_extra_targets,

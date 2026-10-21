@@ -339,8 +339,10 @@ class MamaBeak(Champion):
         # than a togglable ultimate.
         self.items.append(TinyBeaksBuff())
 
-    # 22/30/52 per the 18.4 notes; the lolchess card reads 33 at 2-star.
-    beakScaling = create_ability_scaling([22, 30, 52], [0, 0, 0], func_name="beakScaling")
+    # 18.5 (official notes): 22/33/52 -> 20/30/50. 18.5 also ends her
+    # manalock when the beaks start to despawn rather than finish; that is
+    # already what TinyBeaksBuff does, since it never modeled the despawn.
+    beakScaling = create_ability_scaling([20, 30, 50], [0, 0, 0], func_name="beakScaling")
 
     def performAbility(self, opponents, items, time):
         # Flock Family: the cast itself deals no damage -- it just opens the
@@ -1292,16 +1294,16 @@ class Sivir(Champion):
             "are not modeled -- nothing dies in this sim."
         )
 
-    # The card's 215/320/1150 is one row, but its breakdown is two: an
-    # AD-scaled part and an AP-scaled part (200 + 15 = 215, 300 + 20 = 320,
+    # The card's 235/350/1150 is one row, but its breakdown is two: an
+    # AD-scaled part and an AP-scaled part (220 + 15 = 235, 330 + 20 = 350,
     # 1050 + 100 = 1150). Note the 3-star row is a spike, not the usual x1.5
-    # step -- that is what the card says.
-    abilityScaling = create_ability_scaling([200, 300, 1050], [15, 20, 100])
-    # Each bounce is 20%/20%/40% of that, taken off both halves so the split
-    # stays proportional: 40 + 3 = 43, 60 + 4 = 64, 420 + 40 = 460, which is
-    # the card's bounce row exactly.
+    # step -- that is what the card says. 18.5: AD half 200/300 -> 220/330.
+    abilityScaling = create_ability_scaling([220, 330, 1050], [15, 20, 100])
+    # Each bounce is 18%/18%/40% of that (18.5: 20% -> 18% at 1 and 2 star),
+    # taken off both halves so the split stays proportional: 39.6 + 2.7 =
+    # 42.3, which the card prints as 42.
     bounceScaling = create_ability_scaling(
-        [40, 60, 420], [3, 4, 40], func_name="bounceScaling"
+        [39.6, 59.4, 420], [2.7, 3.6, 40], func_name="bounceScaling"
     )
 
     def performAbility(self, opponents, items, time):
@@ -1863,9 +1865,10 @@ class Brambleback(Champion):
     # Crimson Fury's active, per star level.
     frenzy_ad = [100, 100, 300]
     frenzy_duration = 8
-    # Armor ignore: a flat 15% plus an AP-scaled 30%/30%/70%.
-    ignore_flat = 0.15
-    ignore_ap = [0.3, 0.3, 0.7]
+    # Armor ignore: a flat 25% plus an AP-scaled 25%/25%/70%. 18.5 (official
+    # notes): 20% + 25% AP -> 25% + 25% AP; the card's totals are 50/50/95.
+    ignore_flat = 0.25
+    ignore_ap = [0.25, 0.25, 0.7]
 
     # 0.83s at his base Attack Speed, down to 0.28s at 1.65
     # (0.83 * 0.55 / 1.65).

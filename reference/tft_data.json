@@ -5094,13 +5094,13 @@
    },
    "stats": {
     "ad": 55.0,
-    "armor": 65.0,
+    "armor": 70.0,
     "attackSpeed": 0.75,
     "critChance": 0.25,
     "critDamage": 1.399999976158142,
     "hp": 1300.0,
     "manaPerAttack": 0.0,
-    "maxMana": 70.0,
+    "maxMana": 65.0,
     "mr": 70.0,
     "rangeHexes": 1.0,
     "rangeUnits": 180.0,
@@ -6499,7 +6499,7 @@
    "desc": "Fae pixies are now larger and grant @BonusMultiplier*100@% more Attack Damage and Ability Power. Fae champions gain @UpfrontADAP*100@% Attack Damage and Ability Power immediately. Gain a Xayah and a Rakan.",
    "effects": {
     "BonusMultiplier": 0.5,
-    "UpfrontADAP": 0.10000000149011612
+    "UpfrontADAP": 0.18000000715255737
    },
    "name": "Embiggen",
    "unique": false
@@ -6559,7 +6559,7 @@
    "composition": [],
    "desc": "Gain a Flora Fatalis emblem. The champion holding the emblem gains @ExtraEffectiveness*100@% increased benefits from Flora Fatalis. Gain @Gold@ gold.",
    "effects": {
-    "ExtraEffectiveness": 0.5,
+    "ExtraEffectiveness": 0.699999988079071,
     "Gold": 3.0
    },
    "name": "Consuming Flora",
@@ -7328,8 +7328,8 @@
    "composition": [],
    "desc": "You can now choose a second Alpha Riftbeast. Alpha Riftbeasts gain @BonusHP*100@% max Health and @BonusAS*100@% Attack Speed. Gain a Scuttlecrab, a Cinderling, and a Pebbles.",
    "effects": {
-    "BonusAS": 0.12000000476837158,
-    "BonusHP": 0.1499999761581421
+    "BonusAS": 0.08000004291534424,
+    "BonusHP": 0.08000004291534424
    },
    "name": "Omega Riftbeast",
    "unique": false
@@ -8262,7 +8262,7 @@
    "composition": [],
    "desc": "The wilds couldn't find a wisp for you this roll. Gain @Gold@ gold.",
    "effects": {
-    "Gold": 3.0
+    "Gold": 2.0
    },
    "name": "Beggar's Wisp",
    "unique": false
@@ -8273,7 +8273,7 @@
    "composition": [],
    "desc": "The wilds couldn't find a wisp for you this roll. Gain @GoldUpgrade@ gold.",
    "effects": {
-    "GoldUpgrade": 5.0
+    "GoldUpgrade": 3.0
    },
    "name": "Beggar's Wisp",
    "unique": false
@@ -8680,7 +8680,7 @@
    "composition": [],
    "desc": "Your team gains @DamageAmp*100@% Damage Amp and @Armor@ Armor and Magic Resist for each Bronze-tier trait.",
    "effects": {
-    "Armor": 3.0,
+    "Armor": 2.5,
     "DamageAmp": 0.02500000037252903
    },
    "name": "Bronze For Life II",
@@ -8693,7 +8693,7 @@
    "desc": "Gain a random @ActorLevel@-star @UnitCost@-cost champion. Gain @NumGold@ gold.",
    "effects": {
     "ActorLevel": 3.0,
-    "NumGold": 6.0,
+    "NumGold": 9.0,
     "UnitCost": 1.0
    },
    "name": "Build A Bud",
@@ -8879,7 +8879,7 @@
    "composition": [],
    "desc": "At the start of combat, allies gain @AttackSpeedMultiplier*100@% Attack Speed for @BuffDuration@ seconds. On takedown, allies dash to their next target and gain this bonus again.",
    "effects": {
-    "AttackSpeedMultiplier": 0.25,
+    "AttackSpeedMultiplier": 0.2999999523162842,
     "BuffDuration": 4.0
    },
    "name": "Challenger's Grace",
@@ -9286,7 +9286,7 @@
    "composition": [],
    "desc": "At the start of each turn, all allies holding a Frying Pan or Spatula item grant the nearest champion @HealthIncrease@ permanent Health. Gain a Frying Pan.",
    "effects": {
-    "HealthIncrease": 60.0
+    "HealthIncrease": 70.0
    },
    "name": "Cooking Pot",
    "unique": false
@@ -9356,7 +9356,7 @@
    "effects": {
     "RegenBonus": 1.0,
     "UpgradeDelay": 12.0,
-    "UpgradedRegenBonus": 4.0
+    "UpgradedRegenBonus": 3.0
    },
    "name": "Cry Me A River",
    "unique": false
@@ -9989,7 +9989,7 @@
    "composition": [],
    "desc": "Gain a Tear of the Goddess. After your champions spend @CompletionManaRequired@ Mana, gain @CompletionNumRewards@ more.",
    "effects": {
-    "CompletionManaRequired": 6500.0,
+    "CompletionManaRequired": 7000.0,
     "CompletionNumRewards": 2.0
    },
    "name": "Flowing Tears",
@@ -11584,7 +11584,7 @@
    "effects": {
     "Duration": 2.0,
     "GoldPerEnemy": 2.0,
-    "InstantGold": 4.0
+    "InstantGold": 6.0
    },
    "name": "Malicious Monetization",
    "unique": false
@@ -11905,7 +11905,7 @@
    "composition": [],
    "desc": "Gain an Artifact Anvil. After you open it, gain a Component Anvil. After you open that, gain @Gold@ gold.",
    "effects": {
-    "Gold": 4.0
+    "Gold": 6.0
    },
    "name": "Nesting Anvils",
    "unique": false
@@ -12031,7 +12031,7 @@
    "desc": "Gain @RerollsUpfront@ rerolls now. Each round, gain @Rerolls@ free reroll if you did not buy a champion last round.",
    "effects": {
     "Rerolls": 1.0,
-    "RerollsUpfront": 4.0
+    "RerollsUpfront": 5.0
    },
    "name": "Patience Is A Virtue",
    "unique": false
@@ -12341,7 +12341,7 @@
    "composition": [],
    "desc": "Gain a random Prismatic Augment and @Gold@ gold.",
    "effects": {
-    "Gold": 4.0
+    "Gold": 2.0
    },
    "name": "Prismatic Destiny",
    "unique": false
@@ -12374,7 +12374,7 @@
    "composition": [],
    "desc": "Gain a Protector's Vow. Protector's Vow grants its holder @IncomingManaIncreasePercentage*100@% additional Mana from all sources and @FlatHP@ max Health.",
    "effects": {
-    "FlatHP": 200.0,
+    "FlatHP": 175.0,
     "IncomingManaIncreasePercentage": 0.20000000298023224
    },
    "name": "Promised Protection",
@@ -12862,7 +12862,7 @@
    "composition": [],
    "desc": "Gain an Archangel's Staff. Archangel's Staff grants @ManaPerSecond@ additional Mana Regen if its holder has @APThreshold*100@% or more Ability Power.",
    "effects": {
-    "APThreshold": 0.8999999761581421,
+    "APThreshold": 1.0999999046325684,
     "ManaPerSecond": 2.0
    },
    "name": "Seraphim's Staff",
@@ -23954,7 +23954,7 @@
       "CapstoneAD": 0.05999999865889549,
       "CapstoneAP": 0.05999999865889549,
       "CapstoneArmor": 5.0,
-      "CapstoneAspd": 0.059999942779541016,
+      "CapstoneAspd": 0.04999995231628418,
       "CapstoneHealth": 50.0,
       "CapstoneMR": 5.0,
       "CapstoneManaRegen": 1.0

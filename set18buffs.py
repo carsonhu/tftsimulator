@@ -69,6 +69,7 @@ augments = [
     "BaronsLair",
     "PartialAscension",
     "EarlyLearnings",
+    "Embiggen",
 ]
 
 stat_buffs = ["ASBuff"]
@@ -344,9 +345,11 @@ class Riftbeast(Buff):
         )
         # (5) shop-overrun and (10) +2 team size are meta/shop mechanics,
         # out of scope for a combat simulator -- only (3) and (7) are modeled.
-        self.stat_scaling = 6  # AD/AP %
-        # 18.5 PBE split Attack Speed off the AD/AP row: 6% -> 5%.
-        self.aspd_scaling = 5
+        # 18.5 split Attack Speed off the AD/AP row. The official notes and
+        # the lolchess card move AD/AP 6% -> 5% and leave Attack Speed at 6%;
+        # the PBE notes and cdragon had it the other way round.
+        self.stat_scaling = 5  # AD/AP %
+        self.aspd_scaling = 6
         self.resist_scaling = 5  # Armor/MR
         self.hp_scaling = 50
         self.mana_regen_scaling = 1
@@ -760,6 +763,8 @@ class Fae(Buff):
             # other source: bonus_ad and ap are each read as (100 + add) / 100,
             # so "8% per Pixie" at 7 Pixies is +56 to each.
             amount = self.scaling.get(self.level, 0) * self.pixies(self.params)
+            if champion.embiggen:
+                amount *= 1 + Embiggen.pixie_bonus
             champion.bonus_ad.addStat(amount)
             champion.ap.addStat(amount)
         return 0
@@ -3383,6 +3388,38 @@ class Corrosion(Buff):
         if phase == "preCombat":
             for opponent in champion.opponents:
                 opponent.applyStatus(status.CorrosionStatus(), champion, time, 30, 0)
+        return 0
+
+
+class Embiggen(Buff):
+    """Embiggen: Fae Pixies grant 50% more, and Fae champions get flat AD/AP.
+
+    The Pixie half lives in Fae, which reads the flag this sets: the bonus
+    scales whatever Fae level and Pixie count the board already has, so with
+    Fae off it is worth nothing. The upfront half needs no trait at all, only
+    the champion being Fae -- by its own traits or by an emblem.
+    """
+
+    levels = [1]
+    display_name = "Embiggen"
+
+    pixie_bonus = 0.5
+    upfront = 18  # 18.5 PBE: 10% -> 18%
+
+    def __init__(self, level=1, params=0):
+        # prePreCombat for the same reason as Retribution: Fae reads the flag
+        # in preCombat, and buffs within a phase run in list order.
+        super().__init__(self.display_name, level, params, phases=["prePreCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "prePreCombat":
+            champion.embiggen = True
+            is_fae = "Fae" in getattr(champion, "default_traits", []) or any(
+                getattr(item, "trait", None) == "Fae" for item in champion.items
+            )
+            if is_fae:
+                champion.bonus_ad.addStat(self.upfront)
+                champion.ap.addStat(self.upfront)
         return 0
 
 
