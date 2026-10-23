@@ -1268,18 +1268,32 @@ async function refresh() {
 
 async function runSlice(sliceName, gen, showStatus) {
   const key = JSON.stringify(cfgForSlice(sliceName));
-  if (state.cache.has(key)) return state.cache.get(key);
+  if (state.cache.has(key)) {
+    // A cache hit still replaces whatever the last run left on screen -- an
+    // old failure must not sit above results that came back fine.
+    if (showStatus) setRunStatus(null);
+    return state.cache.get(key);
+  }
   if (showStatus) setRunStatus("Simulating " + sliceName + "…");
   try {
     const payload = await rpc("run", key);
     if (state.cache.size > 60) state.cache.clear();
     state.cache.set(key, payload);
+    if (showStatus && gen === state.gen) setRunStatus(null);
     return payload;
   } catch (err) {
-    if (showStatus && gen === state.gen) setRunStatus("Simulation failed: " + err.message);
+    // Cleared only on success: this used to clear in a finally, which wiped
+    // the message the instant it was set, so a run that threw just left the
+    // page frozen on its previous results with nothing saying why. The
+    // worker hands over a PythonError's JS stack: the Python traceback, then
+    // the JS frames ("    at ..."). The last line before those frames is the
+    // exception itself, which is what fits on the page.
+    console.error("Simulation failed (" + sliceName + "):\n" + err.message);
+    const lines = err.message.split("\n").filter((l) => l.trim() && !/^\s+at /.test(l));
+    if (showStatus && gen === state.gen) {
+      setRunStatus("Simulation failed: " + (lines[lines.length - 1] || "unknown error"));
+    }
     return null;
-  } finally {
-    if (showStatus && gen === state.gen) setRunStatus(null);
   }
 }
 
