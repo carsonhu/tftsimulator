@@ -1851,9 +1851,9 @@ class Brambleback(Champion):
             level,
             Role.ATTACK_FIGHTER,
         )
-        # Riftbeast's Red Buff (Burn and heal) is left out per request, so
-        # only Ravager is preselected.
-        self.default_traits = ["Ravager"]
+        # Riftbeast's Red Buff (Burn and heal) is not modeled; the trait is
+        # preselected for its stat bonuses.
+        self.default_traits = ["Riftbeast", "Ravager"]
         # He attacks again once the cast ends, but gains no mana until the
         # buff runs out -- so a recast can never land inside the window.
         # Recomputed per cast in performAbility; this is the value at his base
@@ -1865,10 +1865,12 @@ class Brambleback(Champion):
     # Crimson Fury's active, per star level.
     frenzy_ad = [100, 100, 300]
     frenzy_duration = 8
-    # Armor ignore: a flat 25% plus an AP-scaled 25%/25%/70%. 18.5 (official
-    # notes): 20% + 25% AP -> 25% + 25% AP; the card's totals are 50/50/95.
-    ignore_flat = 0.25
-    ignore_ap = [0.25, 0.25, 0.7]
+    # Armor ignore: a flat 30% plus an AP-scaled 10%/10%/70%. 18.5 (official
+    # notes): 20% + 25% AP -> 25% + 25% AP. 18.5c: flat 25% -> 30%, AP 25% ->
+    # 10%. The note gives one AP number, read as the 1-2 star value like the
+    # 18.5 line was; 3-star stays 70%. Totals 40/40/100.
+    ignore_flat = 0.30
+    ignore_ap = [0.10, 0.10, 0.7]
 
     # 0.83s at his base Attack Speed, down to 0.28s at 1.65
     # (0.83 * 0.55 / 1.65).

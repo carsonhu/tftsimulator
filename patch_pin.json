@@ -19,8 +19,8 @@
     "not listed here -- that is the prompt to go and look, not a failure."
   ],
   "channel": "pbe",
-  "patch": "18.5 (official patch notes, read 2026-10-21; lolchess card cross-check; cdragon pbe)",
-  "accepted": "2026-10-21",
+  "patch": "18.5c (official 18.5 notes 2026-10-21 + the 18.5c mid-patch update read 2026-10-27; lolchess card cross-check; cdragon pbe)",
+  "accepted": "2026-10-27",
   "acknowledged": {
     "Caitlyn.maxMana": {
       "code": -1,

@@ -336,7 +336,7 @@ class HoJ(Item):
             crit=20,
             ad=36,
             ap=36,
-            omnivamp=0.15,
+            omnivamp=0.12,  # 18.5c: 15% -> 12%
             has_radiant=True,
             phases=["preCombat"],
         )
@@ -1042,7 +1042,7 @@ class RadiantHoJ(HoJ):
         self.crit = 40
         self.ad = 70
         self.ap = 70
-        self.omnivamp = 0.30
+        self.omnivamp = 0.25  # 18.5c: 30% -> 25%
 
 
 class RadiantLastWhisper(LastWhisper):
