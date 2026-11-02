@@ -10,6 +10,12 @@ import status
 
 class Champion(FastDeepCopy):
     canFourStar = False
+    # Seconds from the end of the cast lockout (castTime) to the first
+    # post-cast hit. After a cast the unit starts a fresh attack from zero,
+    # which takes the full windup (18.5 replays: 0.27-0.40s melee, 0.5-1.1s
+    # ranged; a fixed time that does not shrink with attack speed). Each
+    # champion sets its own; 0 means unmeasured.
+    attackWindup = 0
 
     def __init__(
         self,
@@ -68,7 +74,12 @@ class Champion(FastDeepCopy):
         self.attackWindupLockout = (
             -1
         )  # attack windup: can only cast after attack windup is finished
-        self.attackWindupRatio = .3
+        # 0 = the cast starts on the next tick after the attack that fills the
+        # bar. 18.5 replays (59 TFTheory games): melee casts land 1 tick after
+        # the filling hit, and ranged casts replace the start of the filling
+        # attack, whose projectile still fires during the cast. The old 0.3 of
+        # the attack period held every cast back by ~0.3-0.4s.
+        self.attackWindupRatio = 0
         self.items = [set18roles.ChampRole()]
 
         self.statuses = {}  # current statuses
@@ -416,12 +427,14 @@ class Champion(FastDeepCopy):
             self.attacksOnLastCast = self.numAttacks
             # basically, can't attack before cast time up.
             # this logic might be slightly incorrect
-            self.nextAttackTime = max(self.nextAttackTime, time + self.castTime)
-            # No extra windup after a cast -- the next attack fires the
-            # instant nextAttackTime's lockout ends (matches the pre-dynamic-
-            # retiming model, and confirmed against real cast-to-cast gaps:
-            # they map directly to castTime with nothing left over for a
-            # separate windup).
+            # castTime is the cast animation (cast start -> the next attack
+            # starts); the first hit then lands one fresh-attack windup later.
+            # The windup is capped at one attack period so a very high attack
+            # speed can't make it longer than a normal attack.
+            self.nextAttackTime = max(
+                self.nextAttackTime,
+                time + self.castTime + min(self.attackWindup, self.attackTime()),
+            )
             self.attack_progress = 1.0
             for item in items:
                 item.ability("postAbility", time, self)

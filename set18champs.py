@@ -159,6 +159,8 @@ class SuperDummyTank(Champion):
 
 
 class Varus(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.70
     canFourStar = True
 
     def __init__(self, level):
@@ -205,6 +207,9 @@ class Varus(Champion):
 
 
 class Yunara(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.50
+
     def __init__(self, level):
         hp = 550
         atk = 42
@@ -226,13 +231,14 @@ class Yunara(Champion):
             Role.ATTACK_CASTER,
         )
         self.default_traits = ["Blossom", "Executioner"]
-        # Full dash + orb-throw duration: maps directly to the real
-        # cast-trigger-to-next-attack gap (no separate windup on top -- see
-        # champion.py's post-cast attack_progress reset). Measured ~1.27-1.49s
-        # for near-zero-distance dashes and ~1.8s for a full-board dash;
-        # 1.8s assumes medium/long dashes are the common case. Revisit if
-        # short dashes turn out to be more frequent in practice.
-        self.castTime = 1.8
+        # Dash + orb throw, from the dash (the cast's first event) to her next
+        # attack starting; the first auto then lands attackWindup (0.5s)
+        # later. 18.5 replays, 5.6k casts, split about evenly between the two
+        # dashes: long dash 1.10s to the next attack (1.49s to the first
+        # hit), short dash 0.73s (1.24s). 0.9s is the mix. (Was 1.8s, the
+        # full-board dash including the windup; even long dashes reach 1.6s
+        # to the first hit only at the 75th percentile.)
+        self.castTime = 0.9
 
     abilityScaling = create_ability_scaling([160, 240, 370], [10, 15, 25])
     splash_ratio = 0.35
@@ -262,6 +268,9 @@ class Yunara(Champion):
 
 
 class LeBlanc(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.73
+
     def __init__(self, level):
         hp = 550
         atk = 30
@@ -311,6 +320,9 @@ class LeBlanc(Champion):
 
 
 class MamaBeak(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.70
+
     def __init__(self, level):
         hp = 650
         atk = 60  # 18.4b: 55 -> 60
@@ -353,6 +365,9 @@ class MamaBeak(Champion):
 
 
 class Cassiopeia(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 1.07
+
     def __init__(self, level):
         hp = 650
         atk = 30
@@ -404,6 +419,9 @@ class Cassiopeia(Champion):
 
 
 class Zyra(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.87
+
     def __init__(self, level):
         hp = 850
         atk = 40
@@ -544,6 +562,9 @@ class Caitlyn(Champion):
 
 
 class Ahri(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.87
+
     def __init__(self, level):
         hp = 850
         atk = 40
@@ -597,6 +618,8 @@ class Ahri(Champion):
 
 
 class Gromp(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.77
     # Gromp's two versions do not share a base AD. He is built from the AP
     # version's, since that is the one he defaults to and the one the set's
     # data records (DA_Gromp18_AP); the AD version's 45 is swapped in by
@@ -709,6 +732,8 @@ class Gromp(Champion):
 
 
 class Karma(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.93
     canFourStar = True
 
     def __init__(self, level):
@@ -829,6 +854,8 @@ class MasterYi(Champion):
 
 
 class Akali(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.37
     # The AD version's base AD; the AP version trades 10 of it away.
     AD_VERSION_ATK = 40
     AP_VERSION_ATK = 30
@@ -930,6 +957,8 @@ class Akali(Champion):
 
 
 class Ezreal(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.70
     # Forest's Flurry: three blinks, then a piercing blast on the fourth cast.
     blink_cast_time = 1.0
     blast_cast_time = 2.25
@@ -1015,6 +1044,9 @@ class Ezreal(Champion):
 
 
 class Warwick(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.33
+
     def __init__(self, level):
         hp = 750
         atk = 45
@@ -1080,6 +1112,8 @@ class Warwick(Champion):
 
 
 class Alune(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.77
     # Moonfall: four rains of moonshards, then the moon itself on the fifth.
     casts_per_cycle = 5
     normal_cast_time = 2.0
@@ -1163,6 +1197,8 @@ class Alune(Champion):
 
 
 class Camille(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.37
     canFourStar = True
 
     def __init__(self, level):
@@ -1265,6 +1301,9 @@ class Nidalee(Champion):
 
 
 class Sivir(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.80
+
     def __init__(self, level):
         hp = 850
         atk = 50
@@ -1318,6 +1357,9 @@ class Sivir(Champion):
 
 
 class Ashe(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.67
+
     def __init__(self, level):
         hp = 900
         atk = 75
@@ -1381,6 +1423,8 @@ class Ashe(Champion):
 
 
 class Cinderling(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.73
     canFourStar = True
 
     def __init__(self, level):
@@ -1425,6 +1469,9 @@ class Cinderling(Champion):
 
 
 class Teemo(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.77
+
     def __init__(self, level):
         hp = 550
         atk = 35
@@ -1477,6 +1524,8 @@ class Teemo(Champion):
 
 
 class Pebbles(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.63
     canFourStar = True
 
     def __init__(self, level):
@@ -1527,6 +1576,8 @@ class Pebbles(Champion):
 
 
 class Aphelios(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.50
     """Moonlight's Onslaught: 2s of Severum swipes, then a blast.
 
     The cast is 3.5s, but almost nothing about it happens at cast time. The
@@ -1729,6 +1780,8 @@ class Xayah(Champion):
 
 
 class Veigar(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 1.13
     canFourStar = True
 
     def __init__(self, level):
@@ -1776,6 +1829,9 @@ class Veigar(Champion):
 
 
 class Diana(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.27
+
     def __init__(self, level):
         hp = 850
         atk = 30
@@ -1794,7 +1850,10 @@ class Diana(Champion):
             armor,
             mr,
             level,
-            Role.MAGIC_TANK,
+            # Game data tags her Role.Magic.Fighter. 18.5 replays agree: 10
+            # mana per attack (first cast after 4 attacks in 86% of itemless
+            # rounds, 0% at the tank's 5), and the fighter attack speed.
+            Role.MAGIC_FIGHTER,
         )
         # Vanguard has no combat effect and no buff class, so it is left out
         # rather than eating a buff bar slot that can't be filled (same as
@@ -1831,6 +1890,9 @@ class Diana(Champion):
 
 
 class Brambleback(Champion):
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.40
+
     def __init__(self, level):
         hp = 1100
         atk = 120
