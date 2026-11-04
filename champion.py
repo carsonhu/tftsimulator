@@ -29,6 +29,15 @@ class Champion(FastDeepCopy):
     # instead made every cast cycle 0.3-0.5s too long. 0 = mana on the hit
     # (melee, cancelling casters) or unmeasured.
     attackWindupRepeat = 0
+    # Cast-cancelling casters (Karma, LeBlanc, Veigar, Cinderling,
+    # Cassiopeia) get attack mana on the hit, except from an attack whose
+    # mana fills the bar: that one pays at its start, they cast right
+    # there, and the attack still lands during the cast (18.5 replays:
+    # Karma's next hit comes 0.57s after such a cast). Waiting for the hit
+    # instead held Blue Buff Karma's casts ~0.5s late, and let Shojin's
+    # 12-mana hits overfill and bank the extra. This is a repeat attack's
+    # start -> hit time (Hold -> release); 0 = not a cancelling caster.
+    fillingAttackLead = 0
 
     def __init__(
         self,
@@ -318,6 +327,21 @@ class Champion(FastDeepCopy):
     def attackTime(self):
         return 1 / self.aspd.stat
 
+    def fillingAttackStarted(self, time):
+        """True once a cancelling caster's next attack has started and its
+        mana would fill the bar (see fillingAttackLead)."""
+        if self.fillingAttackLead <= 0 or self.fullMana.stat <= -1:
+            return False
+        if self.manalockTime > time:
+            return False
+        gain = self.manaPerAttack.stat * self.manaGainMultiplier.stat
+        if self.curMana + gain < self.fullMana.stat:
+            return False
+        hit = max(time, self.nextAttackTime) + max(
+            0.0, 1.0 - self.attack_progress
+        ) / self.aspd.stat
+        return time >= hit - self.fillingAttackLead
+
     def freshAttackDelay(self):
         """Seconds from the start of a fresh attack (combat start, or the end
         of a cast) to its attack event: one full windup, or for ranged
@@ -423,7 +447,13 @@ class Champion(FastDeepCopy):
             item.ability("onUpdate", time, self)
         self.updateAttackProgress(time)
         canCast = self.canCast(time)
-        if self.canAttack(time) and not canCast:
+        if not canCast and opponents and self.fillingAttackStarted(time):
+            # The attack that fills the bar pays at its start (see
+            # fillingAttackLead); its damage lands now rather than at the
+            # hit, which is at most ~0.5s early. The cast follows next tick.
+            self.startAttack(opponents, items, time)
+            canCast = self.canCast(time)
+        elif self.canAttack(time) and not canCast:
             # if they can cast it overrides the 1st auto
             if opponents:
                 self.startAttack(opponents, items, time)

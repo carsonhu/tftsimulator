@@ -276,8 +276,12 @@ class Yunara(Champion):
 
 
 class LeBlanc(Champion):
-    # 18.5 replays: post-cast attack start -> first hit (median).
-    attackWindup = 0.73
+    # 18.5 replays: cast -> first post-cast release 1.77s (1,739 itemless casts) minus the
+    # 1.0s cast; her first attack of the fight lands at 0.83s. Was 0.73.
+    attackWindup = 0.77
+    # 18.5 replays: Hold -> release on repeat attacks (8,216 itemless). See
+    # Champion.fillingAttackLead.
+    fillingAttackLead = 0.47
 
     def __init__(self, level):
         hp = 550
@@ -380,6 +384,9 @@ class MamaBeak(Champion):
 class Cassiopeia(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 1.07
+    # 18.5 replays: Hold -> release on repeat attacks (2,196 itemless). See
+    # Champion.fillingAttackLead.
+    fillingAttackLead = 0.54
 
     def __init__(self, level):
         hp = 650
@@ -757,6 +764,9 @@ class Gromp(Champion):
 class Karma(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.93
+    # 18.5 replays: Hold -> release on repeat attacks (4,999 itemless). See
+    # Champion.fillingAttackLead.
+    fillingAttackLead = 0.54
     canFourStar = True
 
     def __init__(self, level):
@@ -1473,6 +1483,9 @@ class Ashe(Champion):
 class Cinderling(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.73
+    # 18.5 replays: Hold -> release on repeat attacks (7,269 itemless). See
+    # Champion.fillingAttackLead.
+    fillingAttackLead = 0.33
     canFourStar = True
 
     def __init__(self, level):
@@ -1845,8 +1858,12 @@ class Xayah(Champion):
 
 
 class Veigar(Champion):
-    # 18.5 replays: post-cast attack start -> first hit (median).
-    attackWindup = 1.13
+    # 18.5 replays: cast -> first post-cast release 2.07s (1,156 itemless casts) minus the
+    # 0.9s cast; his first attack of the fight lands at 1.17s. Was 1.13.
+    attackWindup = 1.17
+    # 18.5 replays: Hold -> release on repeat attacks (3,198 itemless). See
+    # Champion.fillingAttackLead.
+    fillingAttackLead = 0.53
     canFourStar = True
 
     def __init__(self, level):
