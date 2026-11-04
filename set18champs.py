@@ -1323,12 +1323,14 @@ class Nidalee(Champion):
             "the AD version zeroes her out on purpose."
         )
 
-    # Javelins 1-2, pure AP.
-    abilityScaling = create_ability_scaling([0, 0, 0], [185, 275, 2000])
+    # Javelins 1-2, pure AP. 18.6 (official notes, AP Form Empowered Attack
+    # Damage): 185/275/2000 -> 195/295/2000.
+    abilityScaling = create_ability_scaling([0, 0, 0], [195, 295, 2000])
     # The 3rd javelin's bigger row; NidaleeUlt picks it via
-    # ChampionEmpoweredAbilityScaling.
+    # ChampionEmpoweredAbilityScaling. 18.6 (official notes, AP Form Third
+    # Attack Damage): 330/500/3000 -> 350/525/3000.
     empoweredScaling = create_ability_scaling(
-        [0, 0, 0], [330, 500, 3000], func_name="empoweredScaling"
+        [0, 0, 0], [350, 525, 3000], func_name="empoweredScaling"
     )
 
     def performAbility(self, opponents, items, time):

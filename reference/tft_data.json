@@ -10584,18 +10584,6 @@
    "unique": false
   },
   {
-   "apiName": "DA_HeartOfSteel",
-   "associatedTraits": [],
-   "composition": [],
-   "desc": "Gain a Steadfast Heart. Every @SurvivePeriodInSeconds@ seconds of combat its holder survives, Steadfast Heart gains additional @MaxHealthGain@ permanent max Health.",
-   "effects": {
-    "MaxHealthGain": 18.0,
-    "SurvivePeriodInSeconds": 10.0
-   },
-   "name": "Heart of Steel",
-   "unique": false
-  },
-  {
    "apiName": "DA_HedgeFund",
    "associatedTraits": [],
    "composition": [],
@@ -10924,7 +10912,7 @@
    "composition": [],
    "desc": "Your champions gain @MaxHealthPerInterest@ permanent max health per interest you earn. Your max interest is increased by @MaxInterestInc@. Gain @InstantGold@ gold now.",
    "effects": {
-    "InstantGold": 10.0,
+    "InstantGold": 6.0,
     "MaxHealthPerInterest": 12.0,
     "MaxInterestInc": 2.0
    },
@@ -10937,7 +10925,7 @@
    "composition": [],
    "desc": "Your champions gain @MaxHealthPerInterest@ permanent max health per interest you earn. Gain @InstantGold@ gold now.",
    "effects": {
-    "InstantGold": 6.0,
+    "InstantGold": 3.0,
     "MaxHealthPerInterest": 9.0
    },
    "name": "Investment Strategy I",
@@ -11948,7 +11936,7 @@
    "composition": [],
    "desc": "At the start of every round, champions on the @NumBenchSlots@ rightmost bench slots transform into random champions of the same cost. Gain @GoldGain@ gold.",
    "effects": {
-    "GoldGain": 4.0,
+    "GoldGain": 1.0,
     "NumBenchSlots": 3.0
    },
    "name": "Pandora's Bench",
@@ -23951,10 +23939,10 @@
      "maxUnits": 9,
      "minUnits": 7,
      "variables": {
-      "CapstoneAD": 0.05999999865889549,
-      "CapstoneAP": 0.05999999865889549,
+      "CapstoneAD": 0.05000000074505806,
+      "CapstoneAP": 0.05000000074505806,
       "CapstoneArmor": 5.0,
-      "CapstoneAspd": 0.04999995231628418,
+      "CapstoneAspd": 0.059999942779541016,
       "CapstoneHealth": 50.0,
       "CapstoneMR": 5.0,
       "CapstoneManaRegen": 1.0

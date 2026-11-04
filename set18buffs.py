@@ -261,7 +261,9 @@ class Blossom(Buff):
         # "After combat, your Wisps are empowered" and the shop-side Wisp
         # mechanics are out of scope for a combat simulator -- only the
         # AD/AP grant is modeled.
-        self.scaling = {0: 0, 3: 12, 5: 30, 7: 50, 9: 55, 11: 100}
+        # 18.6 (official notes): 12/30/50/55% -> 12/30/55/65%. The note lists
+        # the 3/5/7/9 breakpoints only, so (11) stays 100%.
+        self.scaling = {0: 0, 3: 12, 5: 30, 7: 55, 9: 65, 11: 100}
 
     def extraParameters():
         return {"Title": "Is Blossom", "Min": 0, "Max": 1, "Default": 1}
@@ -3348,7 +3350,7 @@ class ClockworkAccelerator(Buff):
 
     def __init__(self, level=1, params=0):
         super().__init__(self.display_name, level, params, phases=["onUpdate"])
-        self.asBonus = 10
+        self.asBonus = 12  # 18.6 (official notes): 10% -> 12% per proc
         self.nextBonus = 3
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -3392,7 +3394,7 @@ class Corrosion(Buff):
 
 
 class Embiggen(Buff):
-    """Embiggen: Fae Pixies grant 50% more, and Fae champions get flat AD/AP.
+    """Embiggen: Fae Pixies grant 35% more, and Fae champions get flat AD/AP.
 
     The Pixie half lives in Fae, which reads the flag this sets: the bonus
     scales whatever Fae level and Pixie count the board already has, so with
@@ -3403,7 +3405,7 @@ class Embiggen(Buff):
     levels = [1]
     display_name = "Embiggen"
 
-    pixie_bonus = 0.5
+    pixie_bonus = 0.35  # 18.6 (official notes): Bonus Pixie AD/AP 50% -> 35%
     upfront = 18  # 18.5 PBE: 10% -> 18%
 
     def __init__(self, level=1, params=0):
