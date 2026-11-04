@@ -257,7 +257,7 @@ with tab1:
     )
 
     st.write(
-        r"Most cast times/manalock times are guesses. Units can cast after they have completed 30% of an autoattack. Champs must attack at least once between casts (should only affect Samira). Simulator is probably not very accurate to true gameplay at high attack speeds."
+        r"Cast times and attack windups are measured from patch 18.5 replays where available. Units cast right after the attack that fills their mana. Champs must attack at least once between casts (should only affect Samira). Simulator is probably not very accurate to true gameplay at high attack speeds."
     )
 
     itemSimulator = set18_streamlit_main.Simulator()

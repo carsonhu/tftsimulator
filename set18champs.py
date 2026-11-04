@@ -161,6 +161,9 @@ class SuperDummyTank(Champion):
 class Varus(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.70
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.43
     canFourStar = True
 
     def __init__(self, level):
@@ -185,7 +188,9 @@ class Varus(Champion):
             Role.ATTACK_CASTER,
         )
         self.default_traits = ["Rapidfire"]
-        self.castTime = 2.0
+        # 18.5 replays: cast -> first post-cast Hold 2.17s (685 itemless
+        # casts) = castTime + attackWindup - attackWindupRepeat. Was 2.0.
+        self.castTime = 1.9
         self.num_targets = 2
 
     abilityScaling = create_ability_scaling(
@@ -209,6 +214,9 @@ class Varus(Champion):
 class Yunara(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.50
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.33
 
     def __init__(self, level):
         hp = 550
@@ -322,6 +330,9 @@ class LeBlanc(Champion):
 class MamaBeak(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.70
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.30
 
     def __init__(self, level):
         hp = 650
@@ -344,8 +355,10 @@ class MamaBeak(Champion):
             Role.ATTACK_MARKSMAN,
         )
         self.default_traits = ["Riftbeast", "Summoner", "Rapidfire"]
-        # Tentative, needs investigating.
-        self.castTime = 0
+        # 18.5 replays: cast -> first post-cast Hold 1.28s (763 itemless
+        # casts) = castTime + attackWindup - attackWindupRepeat. Was a
+        # tentative 0.
+        self.castTime = 0.88
         # Always-on (not an opt-in buff-bar selection): every attack while
         # active summons Tiny Beak hits, which is core to her kit rather
         # than a togglable ultimate.
@@ -421,6 +434,9 @@ class Cassiopeia(Champion):
 class Zyra(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.87
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.53
 
     def __init__(self, level):
         hp = 850
@@ -443,11 +459,10 @@ class Zyra(Champion):
             Role.MAGIC_CASTER,
         )
         self.default_traits = ["Thornmaiden", "Summoner"]
-        # Measured from 2026-08-04 14-01-14.mkv, t=715-736s: 5/5 clean
-        # cast-reset-to-next-attack gaps all landed at exactly 1.2s (no
-        # variance), overriding the 1.0s tentative guess. Frame-perfect
-        # verification (like LeBlanc got) would sharpen this further.
-        self.castTime = 1.2
+        # 18.5 replays: cast -> first post-cast Hold 1.60s (261 itemless
+        # casts) = castTime + attackWindup - attackWindupRepeat -> 1.27.
+        # (Was 1.2, from 5 cast-to-next-attack gaps in a 2026-08-04 VOD.)
+        self.castTime = 1.27
         self.num_plants = 2
         self.plant_attacks = 10
         self.plant_interval = 0.8
@@ -564,6 +579,9 @@ class Caitlyn(Champion):
 class Ahri(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.87
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.47
 
     def __init__(self, level):
         hp = 850
@@ -620,6 +638,9 @@ class Ahri(Champion):
 class Gromp(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.77
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.33
     # Gromp's two versions do not share a base AD. He is built from the AP
     # version's, since that is the one he defaults to and the one the set's
     # data records (DA_Gromp18_AP); the AD version's 45 is swapped in by
@@ -658,7 +679,9 @@ class Gromp(Champion):
             Role.MAGIC_CASTER,
         )
         self.default_traits = ["Riftbeast", "Adaptor"]
-        self.castTime = 1
+        # 18.5 replays: cast -> first post-cast Hold 1.50s (1,475 itemless
+        # casts) = castTime + attackWindup - attackWindupRepeat. Was 1.
+        self.castTime = 1.07
         self.num_targets = 2
         self.splash_duration = 3
         # Set at combat start by AdaptorInnate; True = the physical version.
@@ -882,11 +905,11 @@ class Akali(Champion):
         )
         # Inferno isn't in the buff list yet, so it isn't preselected.
         self.default_traits = ["Adaptor", "Ravager"]
-        # Guess: Kunai Strike is still a bin placeholder (its 0.25s is the
-        # unauthored-spell template default, shared by every other unauthored
-        # set-18 spell), so this uses the 1.0s the set's other single-target
-        # casters measured out at.
-        self.castTime = 1.0
+        # 18.5 replays (AD version): cast -> first post-cast hit 1.20s
+        # (3,269 itemless casts) = castTime + attackWindup. Was a 1.0 guess
+        # (the bin's Kunai Strike timing is a placeholder). The AP version
+        # has no replay units and shares it.
+        self.castTime = 0.83
         # Base AD to switch to if the AP version wins the Adaptor comparison.
         # Scaled off self.atk.base so the star-level multiplier Champion
         # already applied carries over instead of being re-derived here.
@@ -959,9 +982,15 @@ class Akali(Champion):
 class Ezreal(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.70
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.40
     # Forest's Flurry: three blinks, then a piercing blast on the fourth cast.
-    blink_cast_time = 1.0
-    blast_cast_time = 2.25
+    # 18.5 replays, cast -> first post-cast Hold: 1.34s on most casts and
+    # a second cluster at 2.71s, the blast (4,453 casts). Minus
+    # attackWindup - attackWindupRepeat: 1.04 and 2.41. Were 1.0 and 2.25.
+    blink_cast_time = 1.04
+    blast_cast_time = 2.41
     casts_per_blast = 4
 
     def __init__(self, level):
@@ -1114,10 +1143,17 @@ class Warwick(Champion):
 class Alune(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.77
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.40
     # Moonfall: four rains of moonshards, then the moon itself on the fifth.
     casts_per_cycle = 5
-    normal_cast_time = 2.0
-    full_moon_cast_time = 4.0
+    # 18.5 replays: cast -> first post-cast Hold is 2.6s for 87% of 1,200
+    # casts, every 5th one included, and nothing clusters near the 4.4s a
+    # 4.0s Full Moon would give, so the moon takes the normal cast time.
+    # 2.6 - (attackWindup - attackWindupRepeat) = 2.24. Were 2.0 and 4.0.
+    normal_cast_time = 2.24
+    full_moon_cast_time = 2.24
     moonshards = 9
     # "the 3 nearest enemies" -- fixed by the spell, so no num_targets slider.
     targets = 3
@@ -1222,7 +1258,9 @@ class Camille(Champion):
             Role.ATTACK_FIGHTER,
         )
         self.default_traits = ["Ravager"]
-        self.castTime = 1.1
+        # 18.5 replays: cast -> first post-cast hit 1.54s (3,582 itemless
+        # casts) = castTime + attackWindup. Was 1.1.
+        self.castTime = 1.17
 
     # The 4-star AD half is the 18.2b note's fourth value (700 -> 640); the AP
     # half's 40 is unchanged, off the 18.2 card. 18.4 raised the AD half at 3
@@ -1303,6 +1341,9 @@ class Nidalee(Champion):
 class Sivir(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.80
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.47
 
     def __init__(self, level):
         hp = 850
@@ -1359,6 +1400,9 @@ class Sivir(Champion):
 class Ashe(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.67
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.37
 
     def __init__(self, level):
         hp = 900
@@ -1381,7 +1425,9 @@ class Ashe(Champion):
             Role.ATTACK_CASTER,
         )
         self.default_traits = ["Blossom", "Hunter"]
-        self.castTime = 1.0  # per request
+        # 18.5 replays: cast -> first post-cast Hold 1.94s (575 casts) =
+        # castTime + attackWindup - attackWindupRepeat. Was 1.0 (a guess).
+        self.castTime = 1.64
         # The arrow pierces 5 by default; the trail catches num_targets - 1.
         self.num_targets = 5
         self.items.append(AsheTrail())
@@ -1448,7 +1494,10 @@ class Cinderling(Champion):
             Role.ATTACK_CASTER,
         )
         self.default_traits = ["Riftbeast", "Hunter"]
-        self.castTime = 1.5
+        # Her cast cancels her attack, so her mana comes on the release:
+        # 18.5 replays, cast -> first post-cast release 2.37s (1,633
+        # itemless casts) = castTime + attackWindup. Was 1.5.
+        self.castTime = 1.64
         self.items.append(CinderlingScarletBuff())
         self.notes = "Wound and Burn are not modeled."
 
@@ -1471,6 +1520,9 @@ class Cinderling(Champion):
 class Teemo(Champion):
     # 18.5 replays: post-cast attack start -> first hit (median).
     attackWindup = 0.77
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.40
 
     def __init__(self, level):
         hp = 550
@@ -1496,7 +1548,9 @@ class Teemo(Champion):
         # it out keeps it from eating a buff bar slot that can't be filled
         # (same as Camille's Coven).
         self.default_traits = ["Invoker"]
-        self.castTime = 1.5  # per request
+        # 18.5 replays: cast -> first post-cast Hold 1.97s (253 itemless
+        # casts) = castTime + attackWindup - attackWindupRepeat. Was 1.5.
+        self.castTime = 1.6
         self.num_targets = 3
 
     # The mushroom clusters, on the nearest num_targets.
@@ -1576,8 +1630,6 @@ class Pebbles(Champion):
 
 
 class Aphelios(Champion):
-    # 18.5 replays: post-cast attack start -> first hit (median).
-    attackWindup = 0.50
     """Moonlight's Onslaught: 2s of Severum swipes, then a blast.
 
     The cast is 3.5s, but almost nothing about it happens at cast time. The
@@ -1596,6 +1648,12 @@ class Aphelios(Champion):
     # near-miss for 4 or 6 either. A reading at some other Attack Speed is
     # what would settle it, and this is the constant to move if one disagrees.
     base_swipes = 5
+
+    # 18.5 replays: post-cast attack start -> first hit (median).
+    attackWindup = 0.50
+    # 18.5 replays, repeat attacks: Hold (attack start, when the mana
+    # comes) -> release (median). See Champion.attackWindupRepeat.
+    attackWindupRepeat = 0.27
 
     def __init__(self, level):
         hp = 850
@@ -1618,7 +1676,9 @@ class Aphelios(Champion):
             Role.ATTACK_MARKSMAN,
         )
         self.default_traits = ["Lunar", "Rapidfire"]
-        self.castTime = 3.5
+        # 18.5 replays: cast -> first post-cast Hold 4.08s (117 itemless
+        # casts) = castTime + attackWindup - attackWindupRepeat. Was 3.5.
+        self.castTime = 3.85
         self.items.append(ApheliosOnslaught())
 
     # Per swipe. Pure AD: the card's only AP row is on the blast.
@@ -1759,7 +1819,10 @@ class Xayah(Champion):
         # price. Leaving it out keeps it from eating a buff bar slot that
         # can't be filled (same as Teemo's Sprykin and Camille's Coven).
         self.default_traits = ["Fae", "Rapidfire"]
-        self.castTime = 0.7  # per request
+        # 18.5 replays: cast -> first post-cast Hold (her first feather)
+        # 1.14s, 1,215 itemless casts. Her attackWindup is unmeasured (the
+        # feathers log no release), so this is the whole delay. Was 0.7.
+        self.castTime = 1.14
         self.items.append(XayahFeathers())
         self.notes = (
             "The feathers' 2 Armor reduction is not modeled, and neither is "
@@ -1859,13 +1922,18 @@ class Diana(Champion):
         # rather than eating a buff bar slot that can't be filled (same as
         # Camille's Coven).
         self.default_traits = ["Lunar", "Ravager"]
-        # The cast animation is 0.66s and she attacks again as soon as it
-        # ends, but her manalock is longer: 2.3s from the cast. Attacks in the
-        # gap land normally and just generate no mana (performAttack and the
+        # Her manalock outlasts the cast animation: attacks in the gap land
+        # normally and just generate no mana (performAttack and the
         # mana-regen tick both check manalockTime; nextAttackTime only checks
-        # castTime), which is exactly the split the two fields exist for.
-        self.castTime = 0.66
-        self.manalockDuration = 2.3
+        # castTime). 18.5 replays: 5 attacks between casts in 495 of 608
+        # itemless gaps (4 before the first cast), so exactly one post-cast
+        # attack, the one at 0.97s, gives no mana. That fits the tftflow
+        # card's lock until the cast's release (its cast window is 1.0s).
+        # Was 2.3s, which also locked the 2.2s attack (6 per bar).
+        # 18.5 replays: cast -> first post-cast hit 0.97s (2,483 itemless
+        # casts) = castTime + attackWindup. Was 0.66.
+        self.castTime = 0.70
+        self.manalockDuration = 1.0
         self.notes = "Shield is not modeled."
 
     # Per orb. The card's "Damage: 115" row is the per-orb number, not the
@@ -1936,7 +2004,9 @@ class Brambleback(Champion):
 
     # 0.83s at his base Attack Speed, down to 0.28s at 1.65
     # (0.83 * 0.55 / 1.65).
-    cast_time_base = 0.83
+    # 18.5 replays: cast -> first post-cast hit 1.44s (75 itemless casts)
+    # = cast time + attackWindup -> 1.04 at base Attack Speed. Was 0.83.
+    cast_time_base = 1.04
     cast_time_aspd_cap = 1.65
 
     def performAbility(self, opponents, items, time):

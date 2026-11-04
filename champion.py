@@ -16,6 +16,19 @@ class Champion(FastDeepCopy):
     # ranged; a fixed time that does not shrink with attack speed). Each
     # champion sets its own; 0 means unmeasured.
     attackWindup = 0
+    # Ranged champions whose attack mana comes at the attack start (every
+    # ranged unit except the cast-cancelling casters: Karma, LeBlanc, Veigar,
+    # Cinderling, Cassiopeia). The replays log that start as a Hold event,
+    # this long before the release on a repeat attack. A fresh attack's Hold
+    # comes the same amount before its hit, so the first post-cast Hold lands
+    # castTime + attackWindup - attackWindupRepeat after the cast (18.5
+    # replays: Ahri 2.20s predicted and measured, Sivir 1.30 vs 1.34, Yunara
+    # 1.07 vs 1.07), and the next ones follow every attack period. For these
+    # champions the simulator's attack event (mana and damage) is that Hold,
+    # because the mana is what times the next cast. Counting the full windup
+    # instead made every cast cycle 0.3-0.5s too long. 0 = mana on the hit
+    # (melee, cancelling casters) or unmeasured.
+    attackWindupRepeat = 0
 
     def __init__(
         self,
@@ -91,9 +104,9 @@ class Champion(FastDeepCopy):
         # continuously at the current attack speed (see canAttack/update),
         # so an AS change mid-swing speeds up or slows down the swing
         # already in progress instead of only affecting the next one.
-        # Starts at 1.0 to match the pre-existing "instant first tick"
-        # behavior (nextAttackTime used to start at 0, allowing an attack
-        # at time 0 with no windup).
+        # Starts at 1.0: the first attack's windup is the fresh-attack delay
+        # Simulator.simulate puts on nextAttackTime at combat start, so the
+        # attack fires as soon as that floor passes.
         self.attack_progress = 1.0
         self.lastProgressTime = 0
         self.opponents = []
@@ -305,6 +318,16 @@ class Champion(FastDeepCopy):
     def attackTime(self):
         return 1 / self.aspd.stat
 
+    def freshAttackDelay(self):
+        """Seconds from the start of a fresh attack (combat start, or the end
+        of a cast) to its attack event: one full windup, or for ranged
+        champions with start-of-attack mana, their Hold, attackWindupRepeat
+        before the hit (see the class attributes). The windup is capped at
+        one attack period so a very high attack speed can't make it longer
+        than a normal attack."""
+        windup = min(self.attackWindup, self.attackTime())
+        return max(0.0, windup - self.attackWindupRepeat)
+
     def performAttack(
         self,
         opponents,
@@ -428,12 +451,10 @@ class Champion(FastDeepCopy):
             # basically, can't attack before cast time up.
             # this logic might be slightly incorrect
             # castTime is the cast animation (cast start -> the next attack
-            # starts); the first hit then lands one fresh-attack windup later.
-            # The windup is capped at one attack period so a very high attack
-            # speed can't make it longer than a normal attack.
+            # starts); a fresh attack follows.
             self.nextAttackTime = max(
                 self.nextAttackTime,
-                time + self.castTime + min(self.attackWindup, self.attackTime()),
+                time + self.castTime + self.freshAttackDelay(),
             )
             self.attack_progress = 1.0
             for item in items:

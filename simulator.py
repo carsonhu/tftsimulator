@@ -21,6 +21,18 @@ class Simulator(object):
         champion.opponents = opponents
         self.itemStats(items, champion)
         self.current_time = 0
+        # Combat opens with a fresh attack, not an instant hit: in the 18.5
+        # replays a ranged unit already in range releases its first attack
+        # one windup in (Karma 0.93s for a 0.93s windup, Cassiopeia 1.08 for
+        # 1.07, Varus 0.80 for 0.74). An instant first hit also skewed the
+        # first casts: it put LeBlanc's first bar 7 mana over, which took
+        # four casts to wear off (casts 6.0s apart instead of 7.0s).
+        # Movement is not modeled, so melee units don't get the extra time
+        # they spend closing in (their first hit is ~0.7s in the replays).
+        # After itemStats, so the windup cap sees the final attack speed.
+        champion.nextAttackTime = max(
+            champion.nextAttackTime, champion.freshAttackDelay()
+        )
 
         # preCombat can append items (Arbiter, Mecha), so this has to come
         # after itemStats. Nothing appends once the frame loop is running.
