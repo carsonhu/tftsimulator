@@ -319,16 +319,17 @@ class Champion(FastDeepCopy):
         return self.timing.mana_moment(self.ranged)
 
     def _begin_attack(self, items, time):
-        """An attack starts this tick: count it and pay start mana (T3). A ranged unit whose mana comes later pays
-        at the start an attack whose mana fills the bar (T3, Set 18: Karma, LeBlanc, Veigar, Cinderling,
-        Cassiopeia); returns True if this attack's mana is paid."""
+        """An attack starts this tick: count it, and pay its mana if the unit pays at the start (T3). Returns True if
+        this attack's mana is paid."""
         self.attacks_started += 1
-        moment = self._mana_moment()
-        gain = self.manaPerAttack.stat * self.manaGainMultiplier.stat
-        if moment == 'start' or (self.ranged and self.curMana + gain >= self.fullMana.stat > -1):
+        if self._mana_moment() == 'start':
             self.addMana(self.manaPerAttack.stat)
             return True
         return False
+
+    def _fills_bar(self):
+        gain = self.manaPerAttack.stat * self.manaGainMultiplier.stat
+        return self.curMana + gain >= self.fullMana.stat > -1
 
     def _start_fresh_attack(self, items, time):
         """Combat start, the end of a cast lock, or an attack reset: a fresh attack starts now and releases one
@@ -345,7 +346,9 @@ class Champion(FastDeepCopy):
         current attack's flag; an attack kept through a cast passes its own)."""
         paid = self._paid if paid is None else paid
         moment = self._mana_moment()
-        if moment == 'release' and not paid:
+        # T3: pay at the release; a ranged unit that pays on the hit pays at the release an attack whose mana fills
+        # the bar (Set 18 replays: Karma, LeBlanc, Veigar, Cinderling, Cassiopeia, at the "Hold" event = release)
+        if not paid and (moment == 'release' or (moment == 'hit' and self.ranged and self._fills_bar())):
             self.addMana(self.manaPerAttack.stat)
             paid = True
         if rhythm:

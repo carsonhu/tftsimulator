@@ -34,8 +34,9 @@ class Timing:
                  is longer (G2). 0 = never stretch.
     proj_speed   attack projectile speed (units/s); 0 = the attack lands at the release (melee) (G4)
     distance     hexes to the target for projectile flight; None = the champion's attack range
-    mana_at      when an attack pays its mana: 'start', 'release' or 'hit'. Set 18 replays: most ranged units at the
-                 attack start, melee on the hit (T3)
+    mana_at      when an attack pays its mana: 'start', 'release' or 'hit'. Default (T3): ranged at the release
+                 (Set 19 VOD: Neeko, Draven, Varus; Set 18 replays' "Hold" event, which is the release), melee on
+                 the hit
     cast_lock    cast start -> the earliest next attack start (G5); then a fresh attack begins (T5)
     mana_lock    cast start -> mana can be gained again (G6); None = cast_lock
     lock_scales_with_as  the spell's script reads attack speed: both locks scale by base AS / current AS (G7, a
@@ -105,8 +106,8 @@ class Timing:
         return ticks_up(hexes * HEX_UNITS / self.proj_speed)
 
     def mana_moment(self, ranged):
-        """'start', 'release' or 'hit' (T3 default: ranged at the attack start, melee on the hit)."""
-        return self.mana_at or ('start' if ranged else 'hit')
+        """'start', 'release' or 'hit' (T3 default: ranged at the release, melee on the hit)."""
+        return self.mana_at or ('release' if ranged else 'hit')
 
     def scaled_locks(self, base_as, current_as):
         """(cast lock, mana lock) in seconds at the current attack speed."""

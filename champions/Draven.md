@@ -52,7 +52,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
+- Worksheet status: **in progress (first VOD read 2026-11-17)**
 - Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
 
 ## Questions
@@ -63,14 +63,14 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
 | Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackCaster | predicted | |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackCaster | role 7 / attack not checkable here (items add mana: +9 per attack, extra regen); **paid at the release** | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
-| Q4 | Attack windup at base AS (attack start to hit / release) | 0.2587 s (7.76 ticks) | predicted | |
+| Q4 | Attack windup at base AS (attack start to hit / release) | 0.2587 s (7.76 ticks) | **consistent**: attack start ~f13409, release f13416-13417 (≈ 8 frames; predicted 8) | E2 |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 1600 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 1.7 s (51 ticks) | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | 1.7 s (51 ticks) | **consistent**: next attack started +50 frames after the cast (predicted 51), released +58 (predicted 59) | E2, E3 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.6667 s (50 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.6667 s (50 ticks) | **confirmed**: banked overflow appeared +51 frames after the cast (predicted mana lock 50; the panel shows it the frame after) | E3 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
@@ -83,8 +83,15 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+Source for all rows below: `Outplayed/…PBE_11-17-2026_15-16-17-933.mp4` (owner's PBE recording, Tocker's Trials, 2026-11-17 15:08-15:16; build `rls-19.1.0.5973071`), 1280x720 at 30 fps (1 frame ≈ 1 tick). Mana from `tools/vod_panel.py`; attack frames read from zoomed frame tiles of the white-ringed unit.
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-17 | rls-19.1.0.5973071 | 446.8 s (f13405) | 30 | inspection panel | 1 star, 3 items, AS 1.16, crit 80%; Illbeats 1/2, Trickshot 2/3 | itemised: mana per attack and regen here are not the role's alone | Q1 (not usable) |
+| E2 | 2026-11-17 | rls-19.1.0.5973071 | f13404-13427 (zoomed) and the mana series | 30 | first attack after the cast at f13359 | idle f13404-13408; attack animation from ~f13409; axe leaves f13416-13417; +9 mana at f13417 | mana at the **release**; windup ≈ 8 | Q2, Q4, Q7 |
+| E3 | 2026-11-17 | rls-19.1.0.5973071 | cast f13359 (bar 53.25 → 0); +2.25 at f13410 | 30 | mana lock, overflow | the filling attack (+9) was never displayed; +2.25 appears at +51 = 53.25 + 9 - 60 exactly | overflow is **banked** (G10); the panel shows 0 during the lock and the overflow when it ends | Q9, G10 |
 
 ## Decisions and notes
 
+- 2026-11-17: Draven pays attack mana at the release (E2, seen on screen). His items change his mana per attack
+  and regen, so Q2's role numbers need an itemless fight.

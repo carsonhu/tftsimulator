@@ -63,7 +63,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
 | Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | **confirmed** (1★) | E1 |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster: 7 / attack, 2 / s; T3 default for ranged: attack start | **7 / attack and 2 / s confirmed; paid at the release, not the start** (T3 default refuted for Neeko) | E2, E3, E4 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster: 7 / attack, 2 / s; T3 default for ranged: attack start | **7 / attack and 2 / s confirmed; paid at the release** (the T3 default, corrected 2026-11-17) | E2, E3, E4 |
 | Q3 | First attack at combat start: when does it land? | G3: a fresh attack at combat start, released 13 ticks in | **consistent** (mana at +14 frames from the combat banner ending) | E4 |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.4219 s (12.66 → 13 ticks) | **consistent, indirect**: E3 and E4 both fit a 13-tick windup with mana at the release | E3, E4 |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
@@ -102,10 +102,9 @@ to within 0.3 mana at 9 checked frames).
 
 ## Decisions and notes
 
-- 2026-11-17: Neeko pays attack mana at the **release** (E3, E4). Her spell cancels attacks in progress (script
-  hint), like Set 18's Karma/LeBlanc/Veigar/Cinderling/Cassiopeia, which also paid late. Implement with
-  `Timing.mana_at = 'release'`, source E3/E4. Whether "spell cancels attacks ⇒ mana at release" holds for every
-  such unit is now a global question (T3), to test on the other casters in this VOD (Zoe, Varus, Draven, Lucian,
-  Senna).
+- 2026-11-17: Neeko pays attack mana at the **release** (E3, E4). That is now the T3 default for ranged units
+  (Draven and Varus seen on screen; Set 18's "Hold" event was the release), so she needs no override.
+  The idea that "spell cancels attacks" marks release-payers is withdrawn: every Set 19 spell checked has
+  that flag.
 - Still open: Q5/Q8/Q10 need a fight at clearly higher attack speed; Q13/Q14 need damage numbers (the inspection
   panel doesn't show them; a damage recap or the dummy HP bar is needed).

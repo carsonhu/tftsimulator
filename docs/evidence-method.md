@@ -24,8 +24,13 @@ every frame (layout measured at 1280x720). From the mana series:
 - **regen** shows as +1 every 0.5 s at 2 / s (whole-mana display);
 - **a cast** is the drop to 0; the first regen step after it bounds the **mana lock**; the first attack step after
   it is the next attack's mana, so with the windup known it gives the **cast lock**;
-- a ranged unit's attack mana is paid at the start or at the release (T3): compare the first attack step after
-  combat start (or after a cast) with the windup to tell which.
+- **during a mana lock the bar shows 0**; banked overflow appears when the lock ends, so the first change after a
+  cast (often an odd amount, e.g. +2.25) marks the mana-lock end, not an attack;
+- **the panel never shows a full bar**: the attack or regen step that fills it is not displayed, the bar drops
+  straight to 0 (so it can't tell whether the cast came on the same tick or the next);
+- a ranged unit's attack mana is paid at the release (T3 default): check on screen by zooming the white-ringed unit
+  and matching the mana step to the projectile leaving. In PvE rounds targets walk in, so a ranged unit's first
+  attack need not start at combat start; don't time from combat start without seeing the attack.
 
 Combat start: the frame the round timer flips to the combat timer and the "Combat" banner disappears.
 
