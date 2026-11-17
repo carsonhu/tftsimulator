@@ -43,7 +43,7 @@ def curve_at(points, t, interp='Constant'):
 
 class BuildRole:
     """The champion's role as the build names it (e.g. 'MagicCaster', 'AttackSpecialist_Ammo'). `archetype` is the
-    middle word (Caster, Fighter, ...), which set18 items read as `champion.role.archetype`."""
+    middle word (Caster, Fighter, ...), which items read as `champion.role.archetype`."""
 
     def __init__(self, key):
         self.key = key

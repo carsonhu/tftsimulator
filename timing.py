@@ -41,7 +41,7 @@ class Timing:
     lock_scales_with_as  the spell's script reads attack speed: both locks scale by base AS / current AS (G7, a
                  generic rule; a champion whose script uses its own curve overrides scaled_locks)
     cast_cancels_attack  a ranged attack under way when the cast starts never releases (T4); default: it still releases
-    source       {field: where the value came from}, e.g. 'build rls-19.1.0.5973071', a VOD, or 'set18 compat'
+    source       {field: where the value came from}, e.g. 'build rls-19.1.0.5973071' or a VOD with its timestamp
     """
 
     def __init__(self, launch=0.0, attack_len=0.0, proj_speed=0.0, distance=None, mana_at=None, cast_lock=0.0,

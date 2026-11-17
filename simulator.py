@@ -37,8 +37,7 @@ class Simulator(object):
         ]
 
         for opponent in opponents:
-            # dummies never act; only their statuses tick
-            opponent.nextAttackTime = duration * 2
+            # dummies never act (update() is never called on them); only their statuses tick
             opponent.opponents = champion
 
         n_ticks = math.ceil(duration * TPS - 1e-9)

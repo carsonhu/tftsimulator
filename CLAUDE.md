@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-The TFT **Set 19** damage simulator, being set up. It starts from set18's engine (verbatim import at set18
+The TFT **Set 19** damage simulator, being set up. It started from set18's engine (verbatim import at set18
 859db43, this repo's first commit) and differs in one governing way: **every number comes from a client build the
 user selects**, and every rule about game behaviour is written down with its evidence.
 
@@ -59,33 +59,35 @@ the question table, the evidence log, decisions. Put findings there, never insid
 Question statuses: open / predicted (client data only) / confirmed / refuted / not applicable. Only evidence
 moves a status (see `docs/evidence-method.md`).
 
-## Engine (inherited from set18)
+## Engine
 
-The architecture, registries and conventions below are set18's and still describe the code until adapted.
-Adapting them is tracked in `docs/ASSUMPTIONS.md` (E-entries).
+The engine started as set18's (first commit). Set 18's champions, traits, augments, items, roles, Streamlit pages
+and CommunityDragon patch tools are removed (E16); everything Set 19 is written from the build, one at a time.
 
 ```
 index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
                                                                  |
                               sim_core.do_experiment_one_extra -> simulator.Simulator
                                                                  |
-                              set18champs / set18items / set18buffs / status
+                              set19champs / set19items / set19buffs / status
 ```
 
 - `simulator.Simulator.simulate` runs `prePreCombat -> preCombat -> postPreCombat`, then calls
-  `champion.update()` once per 30 Hz tick. Opponents are dummies: they never attack or die.
+  `champion.update()` once per 30 Hz tick. Opponents are `set19champs.TrainingDummy`: they never attack or die.
 - **Timing core** (`timing.py`, `champion.py` `update`, rules T1-T9 in `docs/ASSUMPTIONS.md`, tests in
-  `test_timing.py`): everything is decided in whole ticks. A Set 19 champion sets `self.timing =
-  Timing.from_build(build.champion(key))` and overrides fields only with cited evidence (record it in
-  `Timing.source`). Delayed spell effects go through `self.schedule(seconds, fn)`, never a hand-made status.
-  Attack damage and on-attack item effects happen when the attack lands. The old set18 timing attributes
-  (`castTime`, `manalockDuration`, `attackWindup`, `nextAttackTime`, `manalockTime`) work only as compatibility
-  for the Set 18 content (C1).
-- Registries: a class is live only when listed (`champ_list`, `class_buffs`, `augments`, item lists).
-  `worker.js` `PY_FILES` lists every module the browser loads; a new module must be added there too.
-- Items/buffs: behaviour in `performAbility(phase, time, champion, input_)` for the phases listed in `phases`.
-  Units differ per stat (item `crit=20` is 20%; `omnivamp=0.15` is a fraction; `ad`, `ap`, `aspd` are percent
-  points).
+  `test_timing.py`): everything is decided in whole ticks. `BuildChampion` sets `self.timing =
+  Timing.from_build(...)`; override a field only with cited evidence and record it in `Timing.source`. Delayed
+  spell effects go through `self.schedule(seconds, fn)`, never a hand-made status. Attack damage and on-attack item
+  effects happen when the attack lands.
+- Registries: a class is live only when listed (`set19champs.champ_list`, `set19buffs.class_buffs` /
+  `augments` / ..., `set19items` lists); all start empty. `worker.js` `PY_FILES` lists every module the browser
+  loads; a new module must be added there too. The browser can't load `builds/` yet (B9).
+- Items/buffs: behaviour in `performAbility(phase, time, champion, input_)` for the phases listed in `phases`
+  (`preCombat`, `onUpdate`, `preAttack`, `onAttack`, `postAttack`, `onCrit`, `preAbility`, `postAbility`,
+  `onDealDamage`, ...). Units differ per stat (item `crit=20` is 20%; `omnivamp=0.15` is a fraction; `ad`, `ap`,
+  `aspd` are percent points).
+- Tests (local, gitignored): `python -m pytest -q` with set18's venv (`../set18/.venv/Scripts/python`) until this
+  repo has its own.
 
 ## Conventions
 

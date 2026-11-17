@@ -1,6 +1,6 @@
 # sim_entry.py
 #
-# JSON boundary between the static v2 frontend (v2/) and the simulator.
+# JSON boundary between the static frontend (index.html + app.js) and the Set 19 simulator.
 # The v2 page runs this file under Pyodide with *no* installed packages, so
 # nothing here (or in anything it imports) may touch streamlit, numpy or
 # pandas -- that restriction is the whole reason v2 boots in a couple of
@@ -12,34 +12,21 @@
 #   champ_info_json(config)   -> stat panel + per-champ UI hints for one config
 #   run_json(config)          -> table rows + plot timelines for one slice
 #
-# The config schema is documented on _build_champion. Where this file mirrors
-# the Streamlit pages (pages/ChampionSelector.py, set18_streamlit_main.py,
-# class_utilities.py), it mirrors them *exactly* -- including the int()
-# truncation in getDPS and np.unique's keep-first-duplicate behavior -- so the
-# two frontends can never disagree about a number. test_sim_entry.py holds the
-# side-by-side comparison.
+# The config schema is documented on _build_champion. The DPS arithmetic keeps
+# set18's Streamlit rules (int() truncation above 10, keep-first duplicates) so
+# numbers stay comparable with the old site.
 
-import inspect
 import json
 from bisect import bisect_right
 
-import set18buffs
-import set18champs
-import set18items
+import set19buffs
+import set19champs
+import set19items
 import sim_core
 from helpers import buff_display_map, buff_display_names, item_display_map
 from simulator import Simulator
 
 DPS_TIMES = [5, 10, 15, 20, 25]
-
-# The branch that computes one radio slice at a time added this kwarg to
-# sim_core; on main it does not exist and the Blackthorn sweep simply runs
-# whenever the champion carries the trait. Detecting it here means this file
-# works unchanged on both sides of that merge.
-_SUPPORTS_RUN_BLACKTHORN = (
-    "run_blackthorn"
-    in inspect.signature(sim_core.do_experiment_one_extra).parameters
-)
 
 # Stats a trait's team-wide half could plausibly move. Compared alongside the
 # damage vector when deciding whether a team trait's level matters.
@@ -65,7 +52,9 @@ def _team_level_matters(cls):
     reference champion is fixed (first in sorted order) because the question
     is about the trait, not about any particular unit.
     """
-    reference = getattr(set18champs, sorted(set18champs.champ_list)[0])
+    if not set19champs.champ_list:
+        return True  # no champion to probe with: show the level picker
+    reference = getattr(set19champs, sorted(set19champs.champ_list)[0])
     signatures = set()
     for level in cls.levels:
         if level == 0:
@@ -76,7 +65,7 @@ def _team_level_matters(cls):
                 [],
                 [cls(level, 0)],
                 champ,
-                [set18champs.DummyTank(1) for _ in range(8)],
+                [set19champs.TrainingDummy(1) for _ in range(8)],
                 10,
                 frameRate=30,
             )
@@ -96,11 +85,11 @@ def _team_level_matters(cls):
 
 
 _ITEM_SLICES = {
-    "Craftable": lambda: set18items.offensive_craftables,
-    "Artifact": lambda: set18items.artifacts,
-    "Radiant": lambda: set18items.radiants,
-    "Emblem": lambda: set18items.emblems,
-    "Anima": lambda: set18items.animas,
+    "Craftable": lambda: set19items.offensive_craftables,
+    "Artifact": lambda: set19items.artifacts,
+    "Radiant": lambda: set19items.radiants,
+    "Emblem": lambda: set19items.emblems,
+    "Anima": lambda: set19items.animas,
 }
 
 
@@ -110,8 +99,8 @@ _ITEM_SLICES = {
 
 def get_catalog():
     champions = []
-    for name in sorted(set18champs.champ_list):
-        cls = getattr(set18champs, name)
+    for name in sorted(set19champs.champ_list):
+        cls = getattr(set19champs, name)
         levels = [1, 2, 3]
         if getattr(cls, "canFourStar", False):
             levels.append(4)
@@ -128,9 +117,9 @@ def get_catalog():
     # An emblem's trait, so picking one can put that trait in the buff bar.
     # None for every other item. Only traits the buff bar can show are kept.
     emblem_traits = {}
-    for cls in set18items.emblems:
-        trait = getattr(getattr(set18items, cls)(), "trait", None)
-        if trait in set18buffs.class_buffs:
+    for cls in set19items.emblems:
+        trait = getattr(getattr(set19items, cls)(), "trait", None)
+        if trait in set19buffs.class_buffs:
             emblem_traits[cls] = trait
 
     # Tier order, alphabetical within each tier -- NOT one global sort. The
@@ -139,24 +128,24 @@ def get_catalog():
     # one instead of alphabetically burying it. pages/ChampionSelector.py
     # orders its sidebar the same way.
     all_items = (
-        set18items.no_item
-        + sorted(set18items.offensive_craftables)
-        + sorted(set18items.artifacts)
-        + sorted(set18items.radiants)
-        + sorted(set18items.emblems)
-        + sorted(set18items.animas)
+        set19items.no_item
+        + sorted(set19items.offensive_craftables)
+        + sorted(set19items.artifacts)
+        + sorted(set19items.radiants)
+        + sorted(set19items.emblems)
+        + sorted(set19items.animas)
     )
 
     all_buffs = sorted(
-        set18buffs.class_buffs
-        + set18buffs.augments
-        + set18buffs.no_buff
-        + set18buffs.stat_buffs
-        + set18buffs.wisps
+        set19buffs.class_buffs
+        + set19buffs.augments
+        + set19buffs.no_buff
+        + set19buffs.stat_buffs
+        + set19buffs.wisps
     )
     buffs = []
     for disp, cls_name in buff_display_map(all_buffs).items():
-        cls = getattr(set18buffs, cls_name)
+        cls = getattr(set19buffs, cls_name)
         try:
             extra = cls.extraParameters()
         except Exception:
@@ -184,8 +173,8 @@ def get_catalog():
     #     Ivern or not. The parameter is a real question rather than a flag to
     #     zero, so the panel has to ask it.
     team_buffs = []
-    for cls_name in set18buffs.class_buffs:
-        cls = getattr(set18buffs, cls_name)
+    for cls_name in set19buffs.class_buffs:
+        cls = getattr(set19buffs, cls_name)
         # team_trait = False opts a trait out even though its parameter shape
         # would qualify: Riftbeast's "Is Alpha" is which champion holds the
         # Alpha Mark, a champion-specific question, not team membership.
@@ -228,21 +217,6 @@ def get_catalog():
             }
         )
 
-    blackthorn = None
-    bt = getattr(set18buffs, "Blackthorn", None)
-    if bt is not None:
-        blackthorn = {
-            "roles": list(bt.selectable_roles),
-            "costs": [{"value": c, "label": bt.costLabel(c)} for c in bt.costs],
-            "starsByCost": {
-                str(c): [
-                    {"value": s, "label": bt.starLabel(s)}
-                    for s in bt.starLevels(c)
-                ]
-                for c in bt.costs
-            },
-        }
-
     return {
         "champions": champions,
         "sidebarItems": item_group(all_items),
@@ -257,13 +231,13 @@ def get_catalog():
             "Augment/Buff",
             "Wisp",
         ],
-        "blackthorn": blackthorn,
+        "blackthorn": None,  # set18 trait; app.js hides its panel when this is None
         "defaults": {
             "enemy": {"hp": 1800, "armor": 100, "mr": 100},
             "stages": ["2-1", "3-1", "4-1", "5-1", "6-1"],
             "stageDefault": "4-1",
             "tactician": {"min": 3, "max": 10, "default": 4},
-            "frameRates": [30, 60],
+            "frameRates": [30],  # the game runs at 30 Hz (T1)
             "duration": 30,
             "numItems": 3,
             "numBuffs": {"min": 1, "max": 10, "default": 2},
@@ -282,17 +256,17 @@ def _build_champion(cfg):
     cfg = {
       "champ": "Ahri", "level": 1,
       "num_targets": int|null, "num_extra_targets": int|null,
-      "takedowns": 0, "num_traits": 6,
+      "takedowns": 0,
       "bonus": {"ad","ap","as","manaregen","mpa","dmgamp","crit","critdmg"},
       "stage": "4-1", "tactician_level": 4,
-      "blackthorn": {"role","star","cost"}|null,
+      "build": "<version>"|null,                   # client build (default: newest)
       "items": ["NoItem","NoItem","NoItem"],       # class names
       "buffs": [["Blossom", 2, 0], ...],           # (class, level, params)
       "enemy": {"hp","armor","mr"},
       "frame_rate": 30, "t": 30, "slice": "Craftable",
     }
     """
-    champ = getattr(set18champs, cfg["champ"])(int(cfg["level"]))
+    champ = _champion_class(cfg)(int(cfg["level"]), build=_build(cfg))
 
     # The sliders only exist for champs whose defaults are non-zero, so a
     # stored value is only applied where the page would have shown a slider.
@@ -302,7 +276,6 @@ def _build_champion(cfg):
         champ.num_extra_targets = int(cfg["num_extra_targets"])
 
     champ.takedowns = int(cfg.get("takedowns", 0))
-    champ.num_traits = int(cfg.get("num_traits", 6))
 
     bonus = cfg.get("bonus", {})
     champ.bonus_ad.addStat(float(bonus.get("ad", 0)))
@@ -318,27 +291,32 @@ def _build_champion(cfg):
     champ.stage = int(str(stage).split("-")[0])
     champ.tactician_level = int(cfg.get("tactician_level", 4))
 
-    bt = cfg.get("blackthorn")
-    if bt:
-        champ.blackthorn_role = bt["role"]
-        champ.blackthorn_cost = int(bt["cost"])
-        champ.blackthorn_star = int(bt["star"])
-
     for item_cls in cfg.get("items", []):
         if item_cls and item_cls != "NoItem":
-            champ.items.append(getattr(set18items, item_cls)())
+            champ.items.append(getattr(set19items, item_cls)())
             champ.item_count += 1
 
     for name, level, params in cfg.get("buffs", []):
         if name != "NoBuff":
-            champ.items.append(getattr(set18buffs, name)(level, params))
+            champ.items.append(getattr(set19buffs, name)(level, params))
 
     return champ
 
 
+def _build(cfg):
+    from buildstore import load_build
+    return load_build(cfg.get("build"))
+
+
+def _champion_class(cfg):
+    if cfg["champ"] not in set19champs.champ_list:
+        raise KeyError(f'{cfg["champ"]} is not a Set 19 champion in set19champs.champ_list')
+    return getattr(set19champs, cfg["champ"])
+
+
 def _build_enemy(cfg):
     enemy_cfg = cfg.get("enemy", {})
-    enemy = set18champs.DummyTank(1)
+    enemy = set19champs.TrainingDummy(1)
     enemy.hp.base = float(enemy_cfg.get("hp", 1800))
     enemy.armor.base = float(enemy_cfg.get("armor", 100))
     enemy.mr.base = float(enemy_cfg.get("mr", 100))
@@ -435,7 +413,7 @@ def trait_sweep_buffs(buff_specs):
     """
     extra = []
     for name, level, params in buff_specs:
-        cls = getattr(set18buffs, name)
+        cls = getattr(set19buffs, name)
         # A trait whose parameter is the real dial rather than a flag sweeps
         # that instead: Solar has one breakpoint, so its levels are just on and
         # off, and what the tab is being asked is what each 3-star is worth.
@@ -471,34 +449,29 @@ def trait_sweep_buffs(buff_specs):
 
 
 def _slice_inputs(slice_name, cfg):
-    """(item objects, buff objects, run_blackthorn) for one radio option.
+    """(item objects, buff objects) for one radio option.
 
     Every slice carries NoItem because the "Extra DPS" columns are ratios
     against that row.
     """
-    no_item = [set18items.NoItem()]
+    no_item = [set19items.NoItem()]
 
     if slice_name in _ITEM_SLICES:
         classes = list(_ITEM_SLICES[slice_name]())
-        return [getattr(set18items, c)() for c in classes] + no_item, [], False
+        return [getattr(set19items, c)() for c in classes] + no_item, []
 
     if slice_name == "Trait":
-        return no_item, trait_sweep_buffs(cfg.get("buffs", [])), False
+        return no_item, trait_sweep_buffs(cfg.get("buffs", []))
 
     if slice_name == "Augment/Buff":
-        classes = sorted(set18buffs.augments)
-        return no_item, [getattr(set18buffs, c)() for c in classes], False
+        classes = sorted(set19buffs.augments)
+        return no_item, [getattr(set19buffs, c)() for c in classes]
 
     if slice_name == "Wisp":
-        classes = sorted(set18buffs.wisps)
-        return no_item, [getattr(set18buffs, c)() for c in classes], False
+        classes = sorted(set19buffs.wisps)
+        return no_item, [getattr(set19buffs, c)() for c in classes]
 
-    if slice_name == "Blackthorn":
-        # The sweep lives in sim_core and keys off the champion carrying the
-        # trait; NoItem still runs for the ratio denominator.
-        return no_item, [], True
-
-    return no_item, [], False
+    return no_item, []
 
 
 def _table_entries(sim_list):
@@ -515,7 +488,6 @@ def _table_entries(sim_list):
             # Which breakpoint a trait row is, so the page can colour its icon
             # by tier. Items are not levelled and report None.
             "extraLevel": getattr(sim["Extra"], "level", None),
-            "blackthorn": sim.get("Blackthorn"),
         }
         xs, ys = _cumulative_points(sim["Results"])
         entry["dps"] = {str(t): _dps_at(xs, ys, t) for t in DPS_TIMES}
@@ -570,25 +542,9 @@ def run_slice(cfg):
     duration = float(cfg.get("t", 30))
     frame_rate = int(cfg.get("frame_rate", 30))
 
-    items, buffs, want_blackthorn = _slice_inputs(slice_name, cfg)
-    kwargs = {}
-    if _SUPPORTS_RUN_BLACKTHORN:
-        kwargs["run_blackthorn"] = want_blackthorn
-
-    sim_list = sim_core.do_experiment_one_extra(
-        champ, enemy, items, buffs, duration, frame_rate, **kwargs
-    )
-
-    entries = _table_entries(sim_list)
-
-    # Same display rule as the page: the Blackthorn radio shows only the
-    # sacrifice rows (its "None" row is the visible baseline; NoItem stays in
-    # the ratio math above but leaves the table). Other slices hide any
-    # sacrifice rows a main-style sim_core produced anyway.
-    if slice_name == "Blackthorn":
-        rows = [e for e in entries if e["extra"].startswith("Blackthorn: ")]
-    else:
-        rows = [e for e in entries if not e["extra"].startswith("Blackthorn: ")]
+    items, buffs = _slice_inputs(slice_name, cfg)
+    sim_list = sim_core.do_experiment_one_extra(champ, enemy, items, buffs, duration, frame_rate)
+    rows = _table_entries(sim_list)
 
     timelines = {
         str(e["idx"]): _timeline(sim_list[e["idx"]]["Results"]) for e in rows
@@ -603,7 +559,7 @@ def run_slice(cfg):
 def get_champ_info(cfg):
     # UI hints come from a fresh instance so slider defaults are the champ's
     # own values, not whatever the config already overrode them to.
-    fresh = getattr(set18champs, cfg["champ"])(int(cfg["level"]))
+    fresh = _champion_class(cfg)(int(cfg["level"]), build=_build(cfg))
     info = {
         "defaultTraits": {
             "classNames": list(fresh.default_traits),
@@ -636,12 +592,13 @@ def get_champ_info(cfg):
         "curMana": champ.curMana,
         "fullMana": champ.fullMana.stat,
         "manaRegen": stat(champ.manaRegen),
-        "castTime": champ.castTime,
+        "castTime": champ.timing.cast_lock,  # cast start -> next attack (T5), from the build
         "aspd": stat(champ.aspd),
         "crit": stat(champ.crit),
         "critDmg": stat(champ.critDmg),
         "manaPerAttack": stat(champ.manaPerAttack),
-        "role": champ.role.value,
+        "role": champ.role.value if champ.role else None,
+        "build": champ.build.version if getattr(champ, "build", None) else None,
         "canSpellCrit": bool(champ.canSpellCrit),
         "notes": champ.notes,
     }

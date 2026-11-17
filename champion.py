@@ -2,9 +2,7 @@ import heapq
 import math
 import random
 
-import set18roles
 import utils
-from role import Role
 from stats import AD, AP, ArmorPierce, Aspd, Attack, FastDeepCopy, Resist, Stat
 from timing import TPS, Timing, ticks, ticks_up
 
@@ -17,13 +15,11 @@ def _round_half_up(x):
 
 
 class Champion(FastDeepCopy):
+    """The engine's unit. Set 19 champions subclass build_champion.BuildChampion, which fills every number from
+    the selected build; this base class takes HP and AD as already scaled to the unit's star level. Timing comes
+    from self.timing (timing.Timing); the tick rules are in update() (docs/ASSUMPTIONS.md T1-T9)."""
     canFourStar = False
-    # set18 compat: the Set 18 content still in this repo times its champions with these (castTime and
-    # manalockDuration are instance attributes below). A Set 19 champion sets self.timing instead (timing.Timing,
-    # normally Timing.from_build). The tick rules are in update(); see docs/ASSUMPTIONS.md T1-T6.
-    attackWindup = 0  # set18: post-cast attack start -> hit; becomes Timing.launch (no stretch)
-    attackWindupRepeat = 0  # set18: > 0 marks a ranged unit with attack-start mana
-    fillingAttackLead = 0  # set18: > 0 marks a ranged unit with on-hit mana (Karma, LeBlanc, ...)
+    default_traits = []  # trait classes the UI preselects for this champion
 
     def __init__(
         self,
@@ -36,14 +32,12 @@ class Champion(FastDeepCopy):
         armor,
         mr,
         level,
-        role=Role.ATTACK_TANK,
     ):
         self.name = name
-        levels = [1, 1.5, 1.5**2, 1.5**3, 1.5**4]
-        hp_levels = [1, 1.8, 1.8**2, 1.8**3, 1.8**4]
-        self.hp = Stat(hp * hp_levels[level - 1], 1, 0)
+        # HP and AD are this star level's values (Set 19: from the build, B1); no scaling here
+        self.hp = Stat(hp, 1, 0)
         self.bonus_ad = AP(0, 1, 0)
-        self.atk = AD(atk * levels[level - 1])
+        self.atk = AD(atk)
         self.curMana = curMana
         self.fullMana = Stat(fullMana, 1, 0)
         self.startingMana = 0
@@ -67,9 +61,7 @@ class Champion(FastDeepCopy):
         # crit chance over 100% becomes crit damage at this ratio (set18 0.5; Set 19 data: CT_ExtraCritChanceToCritDamage)
         self.excess_crit_ratio = 0.5
 
-        if not isinstance(role, Role):
-            self.role = Role.ATTACK_TANK
-        self.role = role
+        self.role = None  # build_champion.BuildRole for Set 19 champions
 
         # mana regen is paid in 0.25 s steps from t = 0 (G17: inherited from set18, open); index of the next step
         self.next_regen = 0
@@ -79,12 +71,9 @@ class Champion(FastDeepCopy):
 
         self.canCrit = True
         self.canSpellCrit = False
-        self.manalockDuration = 0  # set18 compat: mana lock in seconds (0 = castTime)
-        self.castTime = 0  # set18 compat: cast lock in seconds
         self.base_aspd = aspd  # attack speed before items, for locks that scale with AS (G7)
         self.attack_range = 1  # hexes; Set 19 champions set it from the build
-        self.timing = None  # timing.Timing; None = built from the set18 compat attributes at combat start
-        self._compat_timing = False
+        self.timing = None  # timing.Timing (BuildChampion: Timing.from_build); required before combat
         # tick state (update() is the only writer; everything is in whole ticks, T1)
         self.tick = 0
         self.busy_until = 0  # no attack starts before this tick (cast lock, T5)
@@ -98,7 +87,7 @@ class Champion(FastDeepCopy):
         self.full_since = None  # tick the bar became full; a cast comes one tick later (T4)
         self.events = []  # heap of (tick, seq, fn): projectile hits, delayed spell effects (T6)
         self._event_seq = 0
-        self.items = [set18roles.ChampRole()]
+        self.items = []  # role effects, items and buffs (BuildChampion adds its RoleEffects)
 
         self.statuses = {}  # current statuses
         # Earliest next_update across self.statuses; lets the frame loop skip
@@ -113,40 +102,14 @@ class Champion(FastDeepCopy):
         # notes for user
         self.notes = ""
 
-        # Takedowns
+        # scenario inputs the UI sets (not game data)
         self.takedowns = 0
-        
-        # Arbiter
-        self.cause = ""
-        self.effect = ""
-        
-        # Meep
-        self.meep = 0
-
-        # Blackthorn: the sacrificed ally on the hex. Role/Star Level/Cost
-        # decide which stat package the trait hands over and how big it is;
-        # set by class_utilities.blackthorn_selector. Cost 0 is "No Tier";
-        # role "None" is an empty hex, i.e. no sacrifice and no effect.
-        self.blackthorn_role = "None"
-        self.blackthorn_star = 1
-        self.blackthorn_cost = 1
-
-        # Augments
-        self.seraphim = False
-        self.retribution = False
-        self.embiggen = False
-
         self.tactician_level = 4
         self.first_takedown = 5  # time of first takedown
         self.stage = 2  # 2, 3, 4, 5, 6
-
         self.num_targets = 0
         self.num_extra_targets = 0
         self.item_count = 0  # number of craftables
-        # Trait-count-scaling buffs read this. The Champion Selector page sets
-        # it from a widget, but other pages don't, so it needs a default or
-        # those buffs raise AttributeError.
-        self.num_traits = 6
 
         self.critCounter = 0
         self.numAttacks = 0
@@ -186,24 +149,14 @@ class Champion(FastDeepCopy):
             self.omnivamp.stat,
             self.canCrit,
             self.canSpellCrit,
-            self.castTime,
             self.tactician_level,
             self.first_takedown,
             self.takedowns,
-            self.seraphim,
-            self.retribution,
-            self.embiggen,
             self.stage,
             self.num_targets,
             self.num_extra_targets,
             self.item_count,
             self.luckyAbility,
-            self.cause,
-            self.effect,
-            self.meep,
-            self.blackthorn_role,
-            self.blackthorn_star,
-            self.blackthorn_cost,
         )
         # return stat_tuple
         return items_tuple + stat_tuple
@@ -262,37 +215,8 @@ class Champion(FastDeepCopy):
         # separate function good for bad luck + holobow
         getattr(self, stat).addStat(amount)
 
-    # ---------------------------------------------------------------- set18 compat views of the tick state
-    @property
-    def manalockTime(self):
-        return self.mana_locked_until / TPS
-
-    @manalockTime.setter
-    def manalockTime(self, value):
-        self.mana_locked_until = max(0, math.ceil(value * TPS - 1e-6))
-
-    @property
-    def nextAttackTime(self):
-        return self.busy_until / TPS
-
-    @nextAttackTime.setter
-    def nextAttackTime(self, value):
-        # set18 content holds attacks off (time + 9999) and releases them (time): the next attack starts fresh
-        self.busy_until = max(0, math.ceil(value * TPS - 1e-6))
-        self.attacking = False
-
-    @property
-    def attack_progress(self):
-        return 1.0
-
-    @attack_progress.setter
-    def attack_progress(self, value):
-        pass  # set18's continuous swing progress has no meaning on the tick engine
-
     @property
     def ranged(self):
-        if self._compat_timing:
-            return self.attackWindupRepeat > 0 or self.fillingAttackLead > 0
         return self.attack_range > 1
 
     # ---------------------------------------------------------------- casting and mana
@@ -390,12 +314,6 @@ class Champion(FastDeepCopy):
         # abstract method
         return 0
 
-    def startAttack(self, opponents, items, time):
-        """set18 compat: an extra attack that lands at once, outside the attack rhythm, with its mana."""
-        self.numAttacks += 1
-        self.attacks_started += 1
-        self.performAttack(opponents, items, time, Stat(0, 1, 0))
-
     # ---------------------------------------------------------------- the attack rhythm (T2, T3)
     def _mana_moment(self):
         return self.timing.mana_moment(self.ranged)
@@ -464,9 +382,6 @@ class Champion(FastDeepCopy):
         for item in items:
             item.ability("preAbility", time, self)
         self.performAbility(opponents, items, time)
-        if self._compat_timing:
-            self.timing.cast_lock = self.castTime
-            self.timing.mana_lock = self.manalockDuration if self.manalockDuration > 0 else None
         cast_lock, mana_lock = self.timing.scaled_locks(self.base_aspd, self.aspd.stat)
         tick = self.tick
         self.busy_until = tick + max(1, ticks(cast_lock))
@@ -488,14 +403,9 @@ class Champion(FastDeepCopy):
             item.ability("postAbility", time, self)
 
     def prepare_timing(self):
-        """Called once at combat start: set18 content gets a Timing from its compat attributes."""
+        """Called once at combat start."""
         if self.timing is None:
-            self._compat_timing = True
-            self.timing = Timing(
-                launch=self.attackWindup, cast_lock=self.castTime,
-                mana_lock=self.manalockDuration if self.manalockDuration > 0 else None,
-                mana_at=('hit' if self.fillingAttackLead > 0 else ('start' if self.attackWindupRepeat > 0 else 'hit')),
-                source={'all': 'set18 compat attributes'})
+            raise ValueError(f'{self.name} has no timing (BuildChampion sets it from the build)')
 
     def updateStatuses(self, time):
         """Tick this champion's statuses and nothing else.
