@@ -57,6 +57,8 @@ Change a status only with evidence: cite the worksheet evidence row, VOD or repl
 | G14 | The spell timeline predictions assume 2-star (`STAR=2`), base attack speed, one pass through loops, and the script's default branch where it branches on runtime state. | predicted | `spell_timing.py` settings. Units with several cast versions (Ahri basic 0.998 s vs empowered 0.944 s unlock) list every timeline in their worksheet. | per champion |
 | G15 | Fighters' attack speed bonus (5-30% by stage) is computed in game code (`TFTStageMagnitude`); the stage-to-value mapping is not in data. | open | Role data. | needs the in-game role text per stage, or a measurement |
 | G16 | Unlock conditions don't affect the simulation: an unlockable unit is assumed available. | decided | | |
+| G17 | Mana regen (Caster 2 mana/s): paid continuously, per tick, or in steps (set18 used 0.25 s steps), and from t = 0? | open | | VOD: mana bar of an itemless Caster before its first attack |
+| G18 | A unit must attack at least once between casts (set18 engine rule). | open | | VOD: any unit whose mana refills from regen alone |
 
 ## Engine (set18 code carried over)
 
@@ -66,3 +68,27 @@ holds for Set 19.
 | ID | Engine behaviour | Where | Status for Set 19 |
 |---|---|---|---|
 | E1 | set18 per-champion timing constants (attack windup, repeat windup, cast time) were measured on 18.5 replays. | `champion.py` class attributes, `set18champs.py` | Not carried over: Set 19 values come from the build's timelines and VOD evidence per champion. |
+
+Engine review of 2026-11-17 (independent read of the imported engine; items marked *checked* were re-read by a
+second pass). None fixed yet; each needs a decision before the engine is adapted.
+
+| ID | Engine behaviour | Where | Conflict / question |
+|---|---|---|---|
+| E2 | Time is a float advanced by 1/30 each frame; events compare floats, so an event scheduled exactly on a tick can fire a tick late (2864 of 5600 sampled). Attack gaps at AS 1.0 come out 29/30/31 frames. | `simulator.py` frame loop (*checked*), `champion.py` `canAttack`, attack progress | G1: should be an integer tick counter. Owner question: does a fractional attack period carry its remainder to the next attack, or round up each attack? |
+| E3 | The fresh-attack windup is capped by the attack period (`min(attackWindup, attackTime())`), so it shrinks at high AS. | `champion.py` `freshAttackDelay` (*checked*) | G2 says the windup only stretches, never shrinks. |
+| E4 | One event per attack: damage, on-hit and mana all at once, no projectile travel. | `champion.py` `performAttack` | G2/G4: attack start, release/hit and projectile hit are separate times. |
+| E5 | Spell damage lands on the cast frame; a later hit needs a hand-written status. | `champion.py` `update` / `performAbility` | Spell timelines give each effect its own time (e.g. Katarina's second hit at 0.833 s). Needs a scheduled-event queue. |
+| E6 | `manalockDuration = 0` means "use castTime", so a zero mana lock can't be expressed; mana-lock comparisons mix `>` and `<=`. | `champion.py` `update` (*checked*), `addMana`, `canCast` | G6: cast end, lockout and mana-lock removal are separate values. |
+| E7 | Mana regen ticks every 0.25 s from t = -0.001, off the 30 Hz grid, including a tick at t = 0. | `champion.py` | New question G17. |
+| E8 | `multiTargetSpell` builds `Attack(...)` with positional arguments that land in the wrong parameters (`canCrit="physical"`, `canOnHit=1`). | `champion.py` `multiTargetSpell` (*checked*) | Bug: use keyword arguments. |
+| E9 | The crit counter fires on `> 1`, so at 100% crit the first crit effect comes on the second hit. | `champion.py` (*checked*) | Bug: `>= 1`. |
+| E10 | Status bugs: `CritModifier` wear-off subtracts AS; Armor/MR reduction reapply the old value; several status classes raise TypeError (dead); wear-off on `>` (a tick late); DoT ticks snap to whole seconds. | `status.py` | Fix when the statuses are needed. |
+| E11 | Star scaling AD × 1.5, HP × 1.8 hard-coded. | `champion.py` constructor | G12: take HP and AD per star from the build. |
+| E12 | Crit defaults 25% / 140%, excess crit → crit damage, AS cap 5, precision +10%. | `champion.py`, `stats.py` | Not in the build's champion stats: needs a source per value (global data asset, VOD, or owner decision). |
+| E13 | Roles: 13 hard-coded roles with mana 7/5/10, regen 2, Fighter AS table {2:5, 3:10, 4:20, 5:30}; Specialists get 0 mana. | `role.py`, `set18roles.py` | G8/G15: the build has 29 roles; read them from the build. The Fighter table has no data source. |
+| E14 | AS-scaled cast time is per-champion content (`aspd_scaled_cast_time`). | `set18champs.py` | G7: drive it from the spell's `reads_attack_speed`. |
+| E15 | 60 fps is offered; some code hard-codes 1/30. | `sim_entry.py`, `simulator.py`, `status.py` | G1: fix the rate at 30. |
+| E16 | Set 18 content inside the engine (Emblem/Blackthorn/N.O.V.A./Arbiter sweeps, meep/seraphim fields, `set18roles` import, Set 18 dummy tank). | `sim_core.py`, `champion.py`, `sim_entry.py` | Remove when the engine is adapted. |
+| E17 | Overflow mana carries over, and mana gained inside the cast counts before the bar is spent. | `champion.py` `update` | G10, open. |
+| E18 | A unit can cast only after at least one attack since its last cast. | `champion.py` `canCast` | New question G18. |
+| E19 | Timing is spread over eight attributes (`castTime`, `manalockDuration`, `attackWindup`, `attackWindupRepeat`, `fillingAttackLead`, `attackWindupRatio`, `attackWindupLockout`, `freshAttackDelay`). | `champion.py` | Proposal: one `Timing` object per champion, loaded from the build, with per-field overrides citing VOD evidence. |
