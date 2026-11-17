@@ -3,7 +3,7 @@
 <!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
 ## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
 
-- **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive ⟨computed in game: TFTStageMagnitude⟩; MovementSpeed + 200; ManaMax at least 10)
+- **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive ⟨computed in game: TFTStageMagnitude⟩ → FighterAttackSpeed curve; MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Classical, Arcanist
 - **HP** 1150 / 2070 / 3726 · **AD** 40 / 60 / 90 · **AS** 0.75 · **Range** 2 · **Armor** 60 · **MR** 60 · **Mana** 0 / 40
 - **Unlock**: Only 1 Champion in the two front rows of the battlefield.
@@ -48,7 +48,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Vladimir19_3StarCast` | Chronos | 2.5959 | Clap 0.5076, Drop 0.6692, Clap 0.6692, Drop 2 |
+| `CD_Vladimir19_3StarCast` | Chronos | 2.5959 | Clap 0.5076, Clap 0.6692, Drop 0.6692, Drop 2 |
 | `CD_Vladimir19_Attack` | Chronos | 1.0012 | LaunchAttack 0.38, Unlock 0.7495 |
 | `CD_Vladimir19_CastNormal` | Chronos | 0.961 | Cast 0.1425, Unlock 0.9503 |
 | `CD_Vladimir19_CastSpecial` | Chronos | 1.8148 | Unlock 1.8 |

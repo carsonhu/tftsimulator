@@ -52,7 +52,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
+- Worksheet status: **in progress** (first VOD read 2026-11-17)
 - Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
 
 ## Questions
@@ -62,18 +62,18 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster | predicted | |
-| Q3 | First attack at combat start: when does it land? | G3 | open | |
-| Q4 | Attack windup at base AS (attack start to hit / release) | 0.4219 s (12.66 ticks) | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | **confirmed** (1★) | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster: 7 / attack, 2 / s; T3 default for ranged: attack start | **7 / attack and 2 / s confirmed; paid at the release, not the start** (T3 default refuted for Neeko) | E2, E3, E4 |
+| Q3 | First attack at combat start: when does it land? | G3: a fresh attack at combat start, released 13 ticks in | **consistent** (mana at +14 frames from the combat banner ending) | E4 |
+| Q4 | Attack windup at base AS (attack start to hit / release) | 0.4219 s (12.66 → 13 ticks) | **consistent, indirect**: E3 and E4 both fit a 13-tick windup with mana at the release | E3, E4 |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 2000 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 0.8333 s (25 ticks) | predicted | |
-| Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 0.8 s (24 ticks) | predicted | |
-| Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
-| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | 0.8333 s (25 ticks) | **consistent, indirect**: next attack's mana at +38/39 frames = 25 + 13-tick windup | E3 |
+| Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted (only base AS seen) | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 0.8 s (24 ticks) | **consistent**: lock ended between +22.5 and +30 frames | E6 |
+| Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted (only base AS seen) | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | **0 for role mana** (no +7 at or after the cast until the next attack) | E3 |
+| Q12 | Does the cast cancel or reset an attack in progress? | yes (script cancels `Combat.Attacking`) | **consistent**: both casts started ~4 frames after the next attack would have started, and that attack never paid mana | E7 |
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
 | Q14 | Passives and other mechanics that need modelling | see ability text | open | |
 | Q15 | Can this unit be simulated realistically? | | open | |
@@ -83,8 +83,29 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+Source for all rows below: `Outplayed/…PBE_11-17-2026_15-16-17-933.mp4` (owner's PBE recording, Tocker's Trials, recorded 2026-11-17 15:08-15:16; build
+`rls-19.1.0.5973071` installed 13:28 and no newer build snapshotted), 1280x720 at 30 fps, so 1 frame ≈ 1 tick. Neeko 1★, no
+items, no active traits (Encore 1/2, Prodigy 1/2, K/DA 1★/3★), round 1-1. Mana read every frame from the
+inspection panel's bar with `tools/vod_panel.py` (panel shows whole mana; the reading matched the panel's numbers
+to within 0.3 mana at 9 checked frames).
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-17 | rls-19.1.0.5973071 | 106.5 s (f3195) | 30 | inspection panel stats | HP 500/500 at full, mana max 40, AD 30, AS 0.70, armor 25, MR 25, crit 25% | matches the build (and the owner's base crit) | Q1 |
+| E2 | 2026-11-17 | rls-19.1.0.5973071 | 100.5-116 s (f3015-3480) | 30 | mana steps | 8 attack steps of exactly +7; between them +1 every 15 frames (f3095, 3110, 3125, … exact 15-frame spacing) | 7 / attack; 2 / s (display rounds down, so 0.5 per 0.25 s and 1 per 0.5 s look the same) | Q2, G17 |
+| E3 | 2026-11-17 | rls-19.1.0.5973071 | cast f3246 → next +7 at f3285 | 30 | cast start (bar 39 → 0) to the next attack's mana | +39 frames | mana at attack start would be +25 (cast lock); at the release +25 + 13 = +38; on the hit later still (flight ≈ 13 more). **Release fits.** | Q2, Q4, Q7, Q11 |
+| E4 | 2026-11-17 | rls-19.1.0.5973071 | combat start f3068 (round timer flips 0 → 30, "Combat" banner gone; minions move at f3070) → first +7 at f3082 | 30 | first attack's mana | +14 frames | release of a fresh attack at combat start = 13 ticks ✓; mana at the start would be +0 | Q2, Q3, Q4 |
+| E5 | 2026-11-17 | rls-19.1.0.5973071 | +7 steps at f3082, 3126, 3169, 3212; 3285, 3329, 3371, 3414 | 30 | attack period | gaps 44, 43, 43; 44, 42, 43 (mean 43.2) | 1 / 0.7 = 42.86 ticks with the fraction carried (T2) ✓ | Q4, T2 |
+| E6 | 2026-11-17 | rls-19.1.0.5973071 | cast f3246; next +1 at f3283, then every 15 | 30 | mana lock end | regen steps fall on a 7.5-frame grid (…3238.5, 3246, 3253.5, …); the first visible +1 at 3283.5 needs two paid steps, so the lock ended after 3268.5 and by 3276 | lock end in (+22.5, +30] frames; predicted +24 ✓ | Q9 |
+| E7 | 2026-11-17 | rls-19.1.0.5973071 | casts at f3246 and f3448 | 30 | what filled the bar; the attack in progress | both casts on the frame regen reached 40 (39 → 0 directly, no frame at 40); the next attack had started ~4 frames earlier (release-based schedule: 3212 + 43 - 13 = 3242; 3414 + 43 - 13 = 3444) and never paid | a bar filled by regen casts **on the same tick** (T4 predicts the next tick; display-level evidence, n = 2); the attack in progress is cancelled | Q12, T4 |
+| E8 | 2026-11-17 | rls-19.1.0.5973071 | regen grid vs combat start f3068 | 30 | regen phase | grid steps at 3072.5, 3080, … : first step ~4.5 frames after combat start, not 7.5; phase unchanged through both casts | the 0.25 s regen grid is not aligned to combat start | G17 |
 
 ## Decisions and notes
 
+- 2026-11-17: Neeko pays attack mana at the **release** (E3, E4). Her spell cancels attacks in progress (script
+  hint), like Set 18's Karma/LeBlanc/Veigar/Cinderling/Cassiopeia, which also paid late. Implement with
+  `Timing.mana_at = 'release'`, source E3/E4. Whether "spell cancels attacks ⇒ mana at release" holds for every
+  such unit is now a global question (T3), to test on the other casters in this VOD (Zoe, Varus, Draven, Lucian,
+  Senna).
+- Still open: Q5/Q8/Q10 need a fight at clearly higher attack speed; Q13/Q14 need damage numbers (the inspection
+  panel doesn't show them; a damage recap or the dummy HP bar is needed).

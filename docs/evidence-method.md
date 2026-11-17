@@ -14,6 +14,21 @@ compare. Until Set 19 replays exist, VODs are the only direct evidence.
    account for, no stuns. Write down every item, trait and augment active on the unit; they change attack speed
    and mana.
 
+## Reading the inspection panel (mana and HP, every frame)
+
+Right-click a unit to keep its panel open (it also gets a white ring on the board). The panel's mana bar shows
+whole mana, and `tools/vod_panel.py <video> <out.csv>` reads the HP and mana bars and a portrait signature for
+every frame (layout measured at 1280x720). From the mana series:
+
+- **attack mana** shows as a step of the role's amount (+7, +10); its spacing is the attack period;
+- **regen** shows as +1 every 0.5 s at 2 / s (whole-mana display);
+- **a cast** is the drop to 0; the first regen step after it bounds the **mana lock**; the first attack step after
+  it is the next attack's mana, so with the windup known it gives the **cast lock**;
+- a ranged unit's attack mana is paid at the start or at the release (T3): compare the first attack step after
+  combat start (or after a cast) with the windup to tell which.
+
+Combat start: the frame the round timer flips to the combat timer and the "Combat" banner disappears.
+
 ## Events to mark
 
 Mark the frame where each event *first* shows. The display has its own delay; measure differences between two
