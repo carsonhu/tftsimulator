@@ -50,14 +50,14 @@ Change a status only with evidence: cite the worksheet evidence row, VOD or repl
 | G7 | Cast time and mana lock do not scale with attack speed unless the spell script reads attack speed. | Set 18 verified for the scripts that read AS (Warwick, Xayah, Nidalee); predicted for the rest | `reads_attack_speed` in each spell timeline (Set 19: flagged on Ziggs and Ashe in the first build). | open, per champion Q8/Q10 |
 | G8 | Mana per attack and per second come from the unit's role (Caster 7 per attack + 2 per second; Marksman, Fighter, Assassin 10 per attack; Tank 5; Specialists use their own resource). | from data | `roles` in the build (`CT_Role_Stats`). | open, per champion Q2 |
 | G9 | Mana from taking damage is not modelled: the dummies never attack. | decided (inherited from set18) | | |
-| G10 | Excess mana after a cast: what happens to mana above the maximum? | open | | needs one clean VOD check |
+| G10 | Mana above the maximum is kept after a cast: the cast costs exactly max mana (`GE_Unit_ManaCost`: Mana += -1 x ManaMax) and both attack and regen mana bank overflow (`Mana.OverflowBehavior.BankIfOverflow` on `GE_ManaPerAttack`, `GE_ManaPerSecond`). | from data | `globals.cast_mana_cost`, `globals.attack_mana`, `globals.mana_regen` in the build | one VOD check worth doing |
 | G11 | A cast counts as zero attacks for on-attack effects, attack counters and role mana, unless the spell's script launches or simulates an attack (`GE_SimulateLaunchAttack`, `IsAttack`, `AppliesOnHit` in the script hints). | predicted | Script hints in each worksheet. | open, per champion Q11 |
-| G12 | HP by star = base × 1 / 1.8 / 3.24 (`CT_UnitStatMultiplier_PerStarLevel`). AD by star = the champion's own `AutoAttackDamage` row (not a global × 1.5). | from data | | The 3-star 4/5-cost flat bonuses (`CT_ThreeStarSpecialBonuses`) are not applied yet: meaning unverified. |
+| G12 | HP by star = base × 1 / 1.8 / 3.24 (`GE_StatScaling`: HealthMax × the `Health` row of `CT_UnitStatMultiplier_PerStarLevel` at the star level; 4-star 4.68). AD by star = the champion's own `AutoAttackDamage` row (not a global × 1.5). | from data | `globals.star_multipliers` | The 3-star bonuses (`CT_ThreeStarSpecialBonuses`: FourCostHealth 1000, FiveCostHealth 5000, FiveCostScaleMult 1.5, FiveCostManaRegen 25) are applied by a script not yet read (`GA_Unit_ThreeStarBonusStats`); not applied. 4-star values are not extracted. |
 | G13 | Ability damage = curve coefficient × the stat named in the formula (AP and AD are multipliers; base AD = 1.0). | from data | `CalcComponent` formulas. | open, per champion Q13 |
 | G14 | The spell timeline predictions assume 2-star (`STAR=2`), base attack speed, one pass through loops, and the script's default branch where it branches on runtime state. | predicted | `spell_timing.py` settings. Units with several cast versions (Ahri basic 0.998 s vs empowered 0.944 s unlock) list every timeline in their worksheet. | per champion |
-| G15 | Fighters' attack speed bonus (5-30% by stage) is computed in game code (`TFTStageMagnitude`); the stage-to-value mapping is not in data. | open | Role data. | needs the in-game role text per stage, or a measurement |
+| G15 | Fighters' attack speed bonus: `TFTStageMagnitude` looks up the `FighterAttackSpeed` step curve (`CT_Role_Stats`) at the current stage: stage 2 ×1.05, 3 ×1.10, 4 ×1.20, 5+ ×1.30, applied MultiplyAdditive (+5/10/20/30%). | from data (the curve); that the lookup key is the stage number is read from the class name | role `AttackSpeed` modifier `lookup` in the build | identical to set18's table |
 | G16 | Unlock conditions don't affect the simulation: an unlockable unit is assumed available. | decided | | |
-| G17 | Mana regen (Caster 2 mana/s): paid continuously, per tick, or in steps (set18 used 0.25 s steps), and from t = 0? | open | | VOD: mana bar of an itemless Caster before its first attack |
+| G17 | Mana regen: every 0.25 s, 0.25 × ManaPerSecond (`GE_ManaPerSecond`: Period 0.25, no tick on application). Where the 0.25 s grid sits relative to combat start is not in data. | from data (step); phase open | `globals.mana_regen` | VOD: an itemless Caster's mana bar before its first attack |
 | G18 | A unit must attack at least once between casts (set18 engine rule). | open | | VOD: any unit whose mana refills from regen alone |
 
 ## Timing core (2026-11-17)
@@ -79,6 +79,24 @@ test per rule.
 | T8 | G18 is counted on attack starts: a cast needs an attack started since the last cast. | inherited (G18 open) | set18 | G18 |
 | T9 | Locks that scale with attack speed scale by base AS / current AS. | predicted | Generic form of set18's AS-scaled casts; a champion whose script uses its own curve (Set 18: Xayah, Nidalee) overrides `Timing.scaled_locks`. | Q8, Q10 |
 | C1 | set18 content still runs: its `castTime`, `manalockDuration`, `attackWindup` become a Timing at combat start, and its writes to `nextAttackTime`, `manalockTime`, `attack_progress` map onto the tick state. Its numbers and timings are Set 18's, not Set 19 evidence. | compatibility only | | remove with E16 |
+
+## Build-driven champions (2026-11-17)
+
+`build_champion.BuildChampion`: a Set 19 champion class names its data asset (`KEY = 'DA_Ahri19'`) and every
+number below is read from the selected build. `champion.sources` lists where each value came from. Tests:
+`test_build_champion.py` (local).
+
+| ID | Rule as implemented | Status | Source |
+|---|---|---|---|
+| B1 | HP and AD are this star's values from the build (G12); the base class's ×1.5 / ×1.8 scaling is bypassed. Stars 1-3 only; asking for 4 raises. | from data | `hp`, `ad` per star |
+| B2 | Mana start = `ManaStarting` (else `Mana`, else 0); max = `ManaMax`, or -1 (never casts) if the build has none. | from data | attribute map |
+| B3 | Attack range = `AttackRange`; a unit without one is melee (range 1). Every unit without one in this build is a tank, fighter or assassin. | from data; the default of 1 is inferred | attribute map |
+| B4 | Attack speed cap 5.0 (`GE_AttackSpeedMax`, AttackSpeed AddFinal 5 on Channel2: read as a cap from the effect's name). | from data | `globals.attack_speed_cap` |
+| B5 | Role effects at combat start (`RoleEffects`): ManaPerAttack, ManaPerSecond, the ManaMax floor (≥ 10) and the attack speed lookup, from the role's own effect in the build. Movement speed and threat are ignored (no effect on dummies). Specialists get no role mana (their resource is unique: per champion). | from data | `roles` |
+| B6 | Fighter attack speed by `champion.stage` (G15). | from data | role lookup curve |
+| B7 | Crit: chance and damage from the champion's stats if present, else 25% / 140% (set18 defaults). No shared asset sets them. Excess crit converts to crit damage at 0.5 (`CT_ExtraCritChanceToCritDamage`); a second spell-crit source adds 0.1 crit damage (`CT_SpellCritToCritDamageConversion`, linear 1 → 0, 10 → 0.9; matches set18's `addPrecision`). | conversions from data; base crit **open** (E12) | `globals` |
+| B8 | A champion missing a value the engine needs (HP, AD row, a curve row it asks for) raises `BuildDataError` naming the build. In this build: Locke has no `HealthMax`. | decided | |
+| B9 | The browser site can't load builds yet (`buildstore` reads files from disk; `worker.js` doesn't ship `builds/`). Set 19 champions run in Python only until the UI is adapted. | open (UI) | |
 
 ## Engine (set18 code carried over)
 
@@ -103,9 +121,9 @@ second pass). The status column says which are fixed (by the timing core, T-entr
 | E8 | `multiTargetSpell` builds `Attack(...)` with positional arguments that land in the wrong parameters (`canCrit="physical"`, `canOnHit=1`). | `champion.py` `multiTargetSpell` (*checked*) | Bug: use keyword arguments. |
 | E9 | The crit counter fires on `> 1`, so at 100% crit the first crit effect comes on the second hit. | `champion.py` (*checked*) | Bug: `>= 1`. |
 | E10 | Status bugs: `CritModifier` wear-off subtracts AS; Armor/MR reduction reapply the old value; several status classes raise TypeError (dead); wear-off on `>` (a tick late); DoT ticks snap to whole seconds. | `status.py` | Fix when the statuses are needed. |
-| E11 | Star scaling AD × 1.5, HP × 1.8 hard-coded. | `champion.py` constructor | G12: take HP and AD per star from the build. |
-| E12 | Crit defaults 25% / 140%, excess crit → crit damage, AS cap 5, precision +10%. | `champion.py`, `stats.py` | Not in the build's champion stats: needs a source per value (global data asset, VOD, or owner decision). |
-| E13 | Roles: 13 hard-coded roles with mana 7/5/10, regen 2, Fighter AS table {2:5, 3:10, 4:20, 5:30}; Specialists get 0 mana. | `role.py`, `set18roles.py` | G8/G15: the build has 29 roles; read them from the build. The Fighter table has no data source. |
+| E11 | Star scaling AD × 1.5, HP × 1.8 hard-coded. | `champion.py` constructor | **Fixed for Set 19 champions** (B1); kept for set18 content. |
+| E12 | Crit defaults 25% / 140%, excess crit → crit damage, AS cap 5, precision +10%. | `champion.py`, `stats.py` | **AS cap, excess-crit ratio and spell-crit bonus from data** (B4, B7; all equal set18's values). **Base crit 25% / 140% still open**: not in any shared asset (native default); needs a VOD or the owner. |
+| E13 | Roles: 13 hard-coded roles with mana 7/5/10, regen 2, Fighter AS table {2:5, 3:10, 4:20, 5:30}; Specialists get 0 mana. | `role.py`, `set18roles.py` | **Fixed for Set 19 champions** (B5, B6): all 29 roles from the build; the Fighter table has a data source after all (G15) and equals set18's. set18 content keeps `set18roles`. |
 | E14 | AS-scaled cast time is per-champion content (`aspd_scaled_cast_time`). | `set18champs.py` | **Engine support added** (`Timing.lock_scales_with_as`, T9, set from the build); set18 content unchanged. |
 | E15 | 60 fps is offered; some code hard-codes 1/30. | `sim_entry.py`, `simulator.py`, `status.py` | **Engine fixed at 30** (T1); the UI still offers 60 (ignored) until the UI is adapted. |
 | E16 | Set 18 content inside the engine (Emblem/Blackthorn/N.O.V.A./Arbiter sweeps, meep/seraphim fields, `set18roles` import, Set 18 dummy tank). | `sim_core.py`, `champion.py`, `sim_entry.py` | Remove when the engine is adapted. |

@@ -64,6 +64,8 @@ class Champion(FastDeepCopy):
         self.crit = Stat(0.25, 1, 0)
         self.critDmg = Stat(1.4, 1, 0)
         self.omnivamp = Stat(0, 1, 0)
+        # crit chance over 100% becomes crit damage at this ratio (set18 0.5; Set 19 data: CT_ExtraCritChanceToCritDamage)
+        self.excess_crit_ratio = 0.5
 
         if not isinstance(role, Role):
             self.role = Role.ATTACK_TANK
@@ -581,7 +583,7 @@ class Champion(FastDeepCopy):
     def critDamage(self):
         # Crit chance < 1: critdmg.stat
         # Crit chance > 1: add half the overfill crit chance to dmg
-        return self.critDmg.stat + max(0, 0 + (self.crit.stat - 1) / 2)
+        return self.critDmg.stat + max(0, (self.crit.stat - 1) * self.excess_crit_ratio)
 
     def doDamage(
         self,

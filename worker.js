@@ -17,6 +17,8 @@ importScripts(PYODIDE_BASE + "pyodide.js");
 // fetches the very same .py files the tests exercise. Nothing is duplicated,
 // so the simulator on the page cannot drift from the one under test.
 const PY_FILES = [
+  "build_champion.py",
+  "buildstore.py",
   "champion.py",
   "helpers/__init__.py",
   "helpers/display_name.py",

@@ -71,6 +71,7 @@ def convert(src_dir):
                   | {'stat_text': plain(i.get('stat_html'))} for i in d['items']},
         'augments': {a['key']: simple(a, ('key', 'name', 'tier', 'round_variant', 'rows', 'calcs', 'never_select'))
                      for a in d['augments']},
+        'globals': d.get('globals') or {},
         'read_problems': d.get('problems', []),
     }
 

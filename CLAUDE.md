@@ -29,8 +29,10 @@ Read `docs/ASSUMPTIONS.md` before changing any game rule, and the champion's wor
 | Reading a build from Python | `buildstore.py` (`load_build`, `.champion(key).row(name)`, `.role(name).modifier(attr)`) |
 
 Champions are done **one at a time** (decision D5): fill the worksheet's questions with evidence, then implement.
-A champion's numbers are read from the build by curve-row name (`build.champion('DA_Ahri19').row('APDamage')`),
-never typed in. A missing row raises `BuildDataError` naming the build; don't catch it to default to 0.
+A Set 19 champion subclasses `build_champion.BuildChampion` with `KEY = 'DA_<Name>19'`: HP/AD per star, mana,
+attack speed and cap, range, role mana and timing all come from the selected build (ledger B1-B9), and ability
+numbers are read by curve-row name (`self.row('APDamage')`), never typed in. A missing value raises
+`BuildDataError` naming the build; don't catch it to default to 0.
 
 ## Commands
 
