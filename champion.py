@@ -1,43 +1,29 @@
+import heapq
+import math
 import random
 
 import set18roles
 import utils
 from role import Role
 from stats import AD, AP, ArmorPierce, Aspd, Attack, FastDeepCopy, Resist, Stat
+from timing import TPS, Timing, ticks, ticks_up
 
 import status
 
 
+def _round_half_up(x):
+    # tftFightSim rounds release times half away from zero (Rust f32::round); Python's round() is banker's
+    return math.floor(x + 0.5)
+
+
 class Champion(FastDeepCopy):
     canFourStar = False
-    # Seconds from the end of the cast lockout (castTime) to the first
-    # post-cast hit. After a cast the unit starts a fresh attack from zero,
-    # which takes the full windup (18.5 replays: 0.27-0.40s melee, 0.5-1.1s
-    # ranged; a fixed time that does not shrink with attack speed). Each
-    # champion sets its own; 0 means unmeasured.
-    attackWindup = 0
-    # Ranged champions whose attack mana comes at the attack start (every
-    # ranged unit except the cast-cancelling casters: Karma, LeBlanc, Veigar,
-    # Cinderling, Cassiopeia). The replays log that start as a Hold event,
-    # this long before the release on a repeat attack. A fresh attack's Hold
-    # comes the same amount before its hit, so the first post-cast Hold lands
-    # castTime + attackWindup - attackWindupRepeat after the cast (18.5
-    # replays: Ahri 2.20s predicted and measured, Sivir 1.30 vs 1.34, Yunara
-    # 1.07 vs 1.07), and the next ones follow every attack period. For these
-    # champions the simulator's attack event (mana and damage) is that Hold,
-    # because the mana is what times the next cast. Counting the full windup
-    # instead made every cast cycle 0.3-0.5s too long. 0 = mana on the hit
-    # (melee, cancelling casters) or unmeasured.
-    attackWindupRepeat = 0
-    # Cast-cancelling casters (Karma, LeBlanc, Veigar, Cinderling,
-    # Cassiopeia) get attack mana on the hit, except from an attack whose
-    # mana fills the bar: that one pays at its start, they cast right
-    # there, and the attack still lands during the cast (18.5 replays:
-    # Karma's next hit comes 0.57s after such a cast). Waiting for the hit
-    # instead held Blue Buff Karma's casts ~0.5s late, and let Shojin's
-    # 12-mana hits overfill and bank the extra. This is a repeat attack's
-    # start -> hit time (Hold -> release); 0 = not a cancelling caster.
-    fillingAttackLead = 0
+    # set18 compat: the Set 18 content still in this repo times its champions with these (castTime and
+    # manalockDuration are instance attributes below). A Set 19 champion sets self.timing instead (timing.Timing,
+    # normally Timing.from_build). The tick rules are in update(); see docs/ASSUMPTIONS.md T1-T6.
+    attackWindup = 0  # set18: post-cast attack start -> hit; becomes Timing.launch (no stretch)
+    attackWindupRepeat = 0  # set18: > 0 marks a ranged unit with attack-start mana
+    fillingAttackLead = 0  # set18: > 0 marks a ranged unit with on-hit mana (Karma, LeBlanc, ...)
 
     def __init__(
         self,
@@ -83,41 +69,39 @@ class Champion(FastDeepCopy):
             self.role = Role.ATTACK_TANK
         self.role = role
 
-        self.nextMana = -0.001  # you get an instant tick
+        # mana regen is paid in 0.25 s steps from t = 0 (G17: inherited from set18, open); index of the next step
+        self.next_regen = 0
 
         self.armorPierce = ArmorPierce(0, 1, 0)
         self.mrPierce = ArmorPierce(0, 1, 0)
 
         self.canCrit = True
         self.canSpellCrit = False
-        self.manalockTime = -1  # time until unmanalocked
-        self.manalockDuration = 0  # how long manalock lasts
-        self.castTime = 0
-        self.attackWindupLockout = (
-            -1
-        )  # attack windup: can only cast after attack windup is finished
-        # 0 = the cast starts on the next tick after the attack that fills the
-        # bar. 18.5 replays (59 TFTheory games): melee casts land 1 tick after
-        # the filling hit, and ranged casts replace the start of the filling
-        # attack, whose projectile still fires during the cast. The old 0.3 of
-        # the attack period held every cast back by ~0.3-0.4s.
-        self.attackWindupRatio = 0
+        self.manalockDuration = 0  # set18 compat: mana lock in seconds (0 = castTime)
+        self.castTime = 0  # set18 compat: cast lock in seconds
+        self.base_aspd = aspd  # attack speed before items, for locks that scale with AS (G7)
+        self.attack_range = 1  # hexes; Set 19 champions set it from the build
+        self.timing = None  # timing.Timing; None = built from the set18 compat attributes at combat start
+        self._compat_timing = False
+        # tick state (update() is the only writer; everything is in whole ticks, T1)
+        self.tick = 0
+        self.busy_until = 0  # no attack starts before this tick (cast lock, T5)
+        self.mana_locked_until = 0  # no mana gain before this tick (mana lock, T5)
+        self.attacking = False  # an attack rhythm is under way
+        self.attack_start_tick = -1  # start of the current or next attack
+        self.release_tick = -1  # its release (ranged) or hit (melee)
+        self.release_exact = 0.0  # exact release time in ticks: repeat attacks keep the fraction (T2)
+        self.attacks_started = 0
+        self._paid = False  # the current attack's mana is already paid
+        self.full_since = None  # tick the bar became full; a cast comes one tick later (T4)
+        self.events = []  # heap of (tick, seq, fn): projectile hits, delayed spell effects (T6)
+        self._event_seq = 0
         self.items = [set18roles.ChampRole()]
 
         self.statuses = {}  # current statuses
         # Earliest next_update across self.statuses; lets the frame loop skip
         # the whole status pass while everything is just waiting.
         self.nextStatusUpdate = -1
-        self.nextAttackTime = 0
-        # Fraction of the current attack windup completed, accumulated
-        # continuously at the current attack speed (see canAttack/update),
-        # so an AS change mid-swing speeds up or slows down the swing
-        # already in progress instead of only affecting the next one.
-        # Starts at 1.0: the first attack's windup is the fresh-attack delay
-        # Simulator.simulate puts on nextAttackTime at combat start, so the
-        # attack fires as soon as that floor passes.
-        self.attack_progress = 1.0
-        self.lastProgressTime = 0
         self.opponents = []
         self.dmgVector = []
         self.dmgDealt = 0 # no need to serialize
@@ -168,7 +152,8 @@ class Champion(FastDeepCopy):
         self.luckyAbility = False
         self.luckyCrit = False
 
-        self.attacksOnLastCast = -1  # Can't cast if we haven't attacked yet
+        # G18 (inherited from set18, open): a unit casts only after starting an attack since its last cast
+        self.attacksOnLastCast = -1
 
         # Items subscribed to the "onUpdate" phase. Filled in by the Simulator
         # once combat starts; None means "ask every item", which is what
@@ -275,36 +260,58 @@ class Champion(FastDeepCopy):
         # separate function good for bad luck + holobow
         getattr(self, stat).addStat(amount)
 
-    def canCast(self, time):
-        # 4 conditions:
-        # Current mana >= full mana
-        # champ can cast
-        # champ not manalocked
-        # champ not in auto animation
+    # ---------------------------------------------------------------- set18 compat views of the tick state
+    @property
+    def manalockTime(self):
+        return self.mana_locked_until / TPS
+
+    @manalockTime.setter
+    def manalockTime(self, value):
+        self.mana_locked_until = max(0, math.ceil(value * TPS - 1e-6))
+
+    @property
+    def nextAttackTime(self):
+        return self.busy_until / TPS
+
+    @nextAttackTime.setter
+    def nextAttackTime(self, value):
+        # set18 content holds attacks off (time + 9999) and releases them (time): the next attack starts fresh
+        self.busy_until = max(0, math.ceil(value * TPS - 1e-6))
+        self.attacking = False
+
+    @property
+    def attack_progress(self):
+        return 1.0
+
+    @attack_progress.setter
+    def attack_progress(self, value):
+        pass  # set18's continuous swing progress has no meaning on the tick engine
+
+    @property
+    def ranged(self):
+        if self._compat_timing:
+            return self.attackWindupRepeat > 0 or self.fillingAttackLead > 0
+        return self.attack_range > 1
+
+    # ---------------------------------------------------------------- casting and mana
+    def canCast(self, time=None):
+        """A full bar casts one tick after it filled (T4), never during a cast lock, and (G18, inherited) only after
+        an attack has started since the last cast."""
         return (
             self.curMana >= self.fullMana.stat
             and self.fullMana.stat > -1
-            and self.manalockTime <= time
-            and self.attackWindupLockout < time
-            and self.numAttacks > self.attacksOnLastCast
+            and self.tick >= self.busy_until
+            and self.full_since is not None
+            and self.tick > self.full_since
+            and self.attacks_started > self.attacksOnLastCast
         )
 
-    def canAttack(self, time):
-        return time >= self.nextAttackTime and self.attack_progress >= 1.0
-
-    def updateAttackProgress(self, time):
-        # nextAttackTime is still a hard floor (post-cast lockout, disabling
-        # opponents in the sim loop); progress only accrues once past it, so
-        # a lockout doesn't leave a backlog of "windup" for canAttack to
-        # cash in the instant it ends.
-        if time >= self.nextAttackTime:
-            dt = time - self.lastProgressTime
-            if dt > 0:
-                self.attack_progress += dt * self.aspd.stat
-        self.lastProgressTime = time
+    def canAttack(self, time=None):
+        return self.tick >= self.busy_until
 
     def addMana(self, amount, time=None) -> None:
-        if time is None or time > self.manalockTime:
+        """Mana from any source, times the mana multiplier; none during a cast lock or a mana lock (T5)."""
+        if self.tick >= self.busy_until and self.tick >= self.mana_locked_until:
             self.curMana += amount * self.manaGainMultiplier.stat
 
     def abilityScaling(self, level):
@@ -327,52 +334,40 @@ class Champion(FastDeepCopy):
     def attackTime(self):
         return 1 / self.aspd.stat
 
-    def fillingAttackStarted(self, time):
-        """True once a cancelling caster's next attack has started and its
-        mana would fill the bar (see fillingAttackLead)."""
-        if self.fillingAttackLead <= 0 or self.fullMana.stat <= -1:
-            return False
-        if self.manalockTime > time:
-            return False
-        gain = self.manaPerAttack.stat * self.manaGainMultiplier.stat
-        if self.curMana + gain < self.fullMana.stat:
-            return False
-        hit = max(time, self.nextAttackTime) + max(
-            0.0, 1.0 - self.attack_progress
-        ) / self.aspd.stat
-        return time >= hit - self.fillingAttackLead
+    def period_exact(self):
+        """Attack period now, in exact (fractional) ticks."""
+        return TPS / max(self.aspd.stat, 0.05)
 
-    def freshAttackDelay(self):
-        """Seconds from the start of a fresh attack (combat start, or the end
-        of a cast) to its attack event: one full windup, or for ranged
-        champions with start-of-attack mana, their Hold, attackWindupRepeat
-        before the hit (see the class attributes). The windup is capped at
-        one attack period so a very high attack speed can't make it longer
-        than a normal attack."""
-        windup = min(self.attackWindup, self.attackTime())
-        return max(0.0, windup - self.attackWindupRepeat)
+    def period_ticks(self):
+        return max(1, _round_half_up(self.period_exact()))
+
+    def schedule(self, delay_seconds, fn):
+        """Run fn() on the tick a client event `delay_seconds` from now lands on (T6). For spell effects that come
+        after the cast starts (e.g. a second hit at 0.833 s): fn runs before this tick's cast and attack checks."""
+        self.schedule_tick(self.tick + ticks_up(delay_seconds), fn)
+
+    def schedule_tick(self, tick, fn):
+        self._event_seq += 1
+        heapq.heappush(self.events, (tick, self._event_seq, fn))
+
+    def _run_events(self):
+        while self.events and self.events[0][0] <= self.tick:
+            _, _, fn = heapq.heappop(self.events)
+            fn()
 
     def performAttack(
         self,
         opponents,
         items,
         time,
-        multiplier=Stat(0, 1, 0),
+        multiplier=None,
         generateMana=True,
     ):
-        """Perform Attack: Activate 'before attack' and
-           'after attack' effects.
-
-        Args:
-            opponents (list[champion]): list of opps
-            items (list[Item]): list of active items
-            time (float): current time
-            multiplier (Stat, optional): dmg multiplier on attack
-            generateMana (bool, optional): whether to gen mana
-        """
+        """One attack's effects: 'preAttack' items, the damage, attack mana (when generateMana), 'postAttack' items.
+        The engine calls this when the attack lands, with generateMana only if the mana is due on the hit (T3)."""
         newAttack = Attack(
             opponents=opponents,
-            multiplier=multiplier,
+            multiplier=multiplier if multiplier is not None else Stat(0, 1, 0),
             canCrit=True,
             canOnHit=True,
             attackType="physical",
@@ -383,7 +378,7 @@ class Champion(FastDeepCopy):
 
         self.doAttack(newAttack, items, time)
 
-        if self.manalockTime <= time and generateMana == True:
+        if generateMana:
             self.addMana(self.manaPerAttack.stat)
 
         for item in items:
@@ -394,16 +389,111 @@ class Champion(FastDeepCopy):
         return 0
 
     def startAttack(self, opponents, items, time):
-        # increment attack and set next attack time
-        # needs to be a separate function b/c of vayne
+        """set18 compat: an extra attack that lands at once, outside the attack rhythm, with its mana."""
         self.numAttacks += 1
+        self.attacks_started += 1
         self.performAttack(opponents, items, time, Stat(0, 1, 0))
 
-        # carry any overshoot past 1.0 into the next swing instead of
-        # dropping it, so this doesn't itself become a source of drift
-        self.attack_progress = max(0.0, self.attack_progress - 1.0)
-        self.nextAttackTime = time
-        self.attackWindupLockout = time + self.attackTime() * self.attackWindupRatio
+    # ---------------------------------------------------------------- the attack rhythm (T2, T3)
+    def _mana_moment(self):
+        return self.timing.mana_moment(self.ranged)
+
+    def _begin_attack(self, items, time):
+        """An attack starts this tick: count it and pay start mana (T3). A ranged unit whose mana comes later pays
+        at the start an attack whose mana fills the bar (T3, Set 18: Karma, LeBlanc, Veigar, Cinderling,
+        Cassiopeia); returns True if this attack's mana is paid."""
+        self.attacks_started += 1
+        moment = self._mana_moment()
+        gain = self.manaPerAttack.stat * self.manaGainMultiplier.stat
+        if moment == 'start' or (self.ranged and self.curMana + gain >= self.fullMana.stat > -1):
+            self.addMana(self.manaPerAttack.stat)
+            return True
+        return False
+
+    def _start_fresh_attack(self, items, time):
+        """Combat start, the end of a cast lock, or an attack reset: a fresh attack starts now and releases one
+        windup later (G2, T5)."""
+        self.attacking = True
+        self.attack_start_tick = self.tick
+        self.release_tick = self.tick + self.timing.release_ticks(self.period_ticks())
+        self.release_exact = float(self.release_tick)
+        self._paid = self._begin_attack(items, time)
+
+    def _release(self, opponents, items, rhythm=True, paid=None):
+        """The attack releases (ranged) or hits (melee) this tick. With `rhythm`, the next attack is scheduled one
+        exact period after this release (T2). `paid`: whether this attack's mana is already paid (default: the
+        current attack's flag; an attack kept through a cast passes its own)."""
+        paid = self._paid if paid is None else paid
+        moment = self._mana_moment()
+        if moment == 'release' and not paid:
+            self.addMana(self.manaPerAttack.stat)
+            paid = True
+        if rhythm:
+            tick = self.tick
+            base = self.release_exact if tick == self.release_tick else float(tick)
+            self.release_exact = base + self.period_exact()
+            self.release_tick = max(_round_half_up(self.release_exact), tick + 1)
+            self.attack_start_tick = max(tick + 1, self.release_tick - self.timing.release_ticks(self.period_ticks()))
+            self._paid = False
+        flight = self.timing.flight_ticks(self.attack_range)
+
+        def land():
+            self.numAttacks += 1
+            self.performAttack(opponents, items, self.tick / TPS, Stat(0, 1, 0),
+                               generateMana=(moment == 'hit' and not paid))
+
+        if flight == 0:
+            land()
+        else:
+            self.schedule_tick(self.tick + flight, land)
+
+    def _attack_phase(self, opponents, items, time):
+        if self.tick < self.busy_until:
+            return
+        if not self.attacking:
+            self._start_fresh_attack(items, time)
+        elif self.tick == self.attack_start_tick:
+            self._paid = self._begin_attack(items, time)
+        if self.tick == self.release_tick:
+            self._release(opponents, items)
+
+    def _cast(self, opponents, items, time):
+        self.numCasts += 1
+        for item in items:
+            item.ability("preAbility", time, self)
+        self.performAbility(opponents, items, time)
+        if self._compat_timing:
+            self.timing.cast_lock = self.castTime
+            self.timing.mana_lock = self.manalockDuration if self.manalockDuration > 0 else None
+        cast_lock, mana_lock = self.timing.scaled_locks(self.base_aspd, self.aspd.stat)
+        tick = self.tick
+        self.busy_until = tick + max(1, ticks(cast_lock))
+        self.mana_locked_until = tick + ticks(mana_lock)
+        # overflow mana is kept (G10, inherited, open); startingMana is the bar after a cast (some champions)
+        self.curMana = self.curMana - self.fullMana.stat + self.startingMana
+        self.full_since = None
+        self.attacksOnLastCast = self.attacks_started
+        if self.attacking:
+            # T4: a ranged attack already under way still releases during the cast (unless the cast cancels it);
+            # any other attack in progress is lost. The rhythm restarts with a fresh attack after the cast lock.
+            under_way = self.attack_start_tick <= tick < self.release_tick
+            if under_way and self.ranged and not self.timing.cast_cancels_attack:
+                kept_paid = self._paid
+                self.schedule_tick(self.release_tick,
+                                   lambda: self._release(opponents, items, rhythm=False, paid=kept_paid))
+            self.attacking = False
+        for item in items:
+            item.ability("postAbility", time, self)
+
+    def prepare_timing(self):
+        """Called once at combat start: set18 content gets a Timing from its compat attributes."""
+        if self.timing is None:
+            self._compat_timing = True
+            self.timing = Timing(
+                launch=self.attackWindup, cast_lock=self.castTime,
+                mana_lock=self.manalockDuration if self.manalockDuration > 0 else None,
+                mana_at=('hit' if self.fillingAttackLead > 0 else ('start' if self.attackWindupRepeat > 0 else 'hit')),
+                source={'all': 'set18 compat attributes'})
 
     def updateStatuses(self, time):
         """Tick this champion's statuses and nothing else.
@@ -428,67 +518,30 @@ class Champion(FastDeepCopy):
         self.nextStatusUpdate = soonest
 
     def update(self, opponents, items, time):
+        """One tick (T1). Order: statuses, mana regen, onUpdate items, scheduled events (projectile hits, spell
+        effects), the cast check, the attack rhythm. A bar that fills during a tick casts on the next one (T4)."""
+        self.tick = _round_half_up(time * TPS)
         self.opponents = opponents
-        # Update each status
         if self.statuses and time >= self.nextStatusUpdate:
             self.updateStatuses(time)
 
-        # mana regeneration
-        if time >= self.nextMana:
-            self.nextMana += 0.25
-            # time provided = will check for manalock
-            self.addMana(self.manaRegen.stat / 4, time)
+        # mana regen in 0.25 s steps from t = 0 (G17, inherited), each paid on the first tick at or after its time
+        while self.tick >= math.ceil(self.next_regen * 0.25 * TPS - 1e-9):
+            self.next_regen += 1
+            self.addMana(self.manaRegen.stat / 4)
 
-        # Call any items which activate on each update. onUpdateItems is the
-        # subset of items that subscribe to this phase, precomputed once per
-        # combat by the Simulator; without it every item is asked on every
-        # frame just to answer "no".
         for item in self.onUpdateItems if self.onUpdateItems is not None else items:
             item.ability("onUpdate", time, self)
-        self.updateAttackProgress(time)
-        canCast = self.canCast(time)
-        if not canCast and opponents and self.fillingAttackStarted(time):
-            # The attack that fills the bar pays at its start (see
-            # fillingAttackLead); its damage lands now rather than at the
-            # hit, which is at most ~0.5s early. The cast follows next tick.
-            self.startAttack(opponents, items, time)
-            canCast = self.canCast(time)
-        elif self.canAttack(time) and not canCast:
-            # if they can cast it overrides the 1st auto
-            if opponents:
-                self.startAttack(opponents, items, time)
-                # startAttack can leave the champion able to cast
-                canCast = self.canCast(time)
-        if canCast:
-            self.numCasts += 1
-            for item in items:
-                item.ability("preAbility", time, self)
-            self.performAbility(opponents, items, time)
-            # set manalock
-            if time < -1:  # this line doesn't do what it should
-                # if they instant cast they shouldn't be manalocked
-                self.manalockTime = 0
-            else:
-                # manalock duration is used if set, otherwise defaults to castTime
-                self.manalockTime = time + (
-                    self.manalockDuration
-                    if self.manalockDuration > 0
-                    else self.castTime
-                )
-            self.curMana = self.curMana - self.fullMana.stat + self.startingMana
+        self._run_events()
 
-            self.attacksOnLastCast = self.numAttacks
-            # basically, can't attack before cast time up.
-            # this logic might be slightly incorrect
-            # castTime is the cast animation (cast start -> the next attack
-            # starts); a fresh attack follows.
-            self.nextAttackTime = max(
-                self.nextAttackTime,
-                time + self.castTime + self.freshAttackDelay(),
-            )
-            self.attack_progress = 1.0
-            for item in items:
-                item.ability("postAbility", time, self)
+        if self.full_since is None and self.curMana >= self.fullMana.stat > -1:
+            self.full_since = self.tick
+        if opponents and self.canCast(time):
+            self._cast(opponents, items, time)
+        if opponents:
+            self._attack_phase(opponents, items, time)
+        if self.full_since is None and self.curMana >= self.fullMana.stat > -1:
+            self.full_since = self.tick
 
     def baseAtkDamage(self, attack, multiplier):
         # just an extra method for abilities which attack for a % of your AD,

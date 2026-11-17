@@ -70,8 +70,15 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
                               set18champs / set18items / set18buffs / status
 ```
 
-- `simulator.Simulator.simulate` runs `prePreCombat -> preCombat -> postPreCombat`, then steps
-  `champion.update()` once per frame (30 fps). Opponents are dummies: they never attack or die.
+- `simulator.Simulator.simulate` runs `prePreCombat -> preCombat -> postPreCombat`, then calls
+  `champion.update()` once per 30 Hz tick. Opponents are dummies: they never attack or die.
+- **Timing core** (`timing.py`, `champion.py` `update`, rules T1-T9 in `docs/ASSUMPTIONS.md`, tests in
+  `test_timing.py`): everything is decided in whole ticks. A Set 19 champion sets `self.timing =
+  Timing.from_build(build.champion(key))` and overrides fields only with cited evidence (record it in
+  `Timing.source`). Delayed spell effects go through `self.schedule(seconds, fn)`, never a hand-made status.
+  Attack damage and on-attack item effects happen when the attack lands. The old set18 timing attributes
+  (`castTime`, `manalockDuration`, `attackWindup`, `nextAttackTime`, `manalockTime`) work only as compatibility
+  for the Set 18 content (C1).
 - Registries: a class is live only when listed (`champ_list`, `class_buffs`, `augments`, item lists).
   `worker.js` `PY_FILES` lists every module the browser loads; a new module must be added there too.
 - Items/buffs: behaviour in `performAbility(phase, time, champion, input_)` for the phases listed in `phases`.

@@ -67,7 +67,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
 | Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role | MagicMarksman | predicted | |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicMarksman | predicted | |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.2 s (6 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |

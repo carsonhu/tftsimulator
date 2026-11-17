@@ -31,6 +31,7 @@ const PY_FILES = [
   "simulator.py",
   "stats.py",
   "status.py",
+  "timing.py",
   "utils.py",
 ];
 
