@@ -1,0 +1,573 @@
+{
+ "rule": "In scope: every Set 19 shop unit whose game role is not a Tank role (the role name contains 'Tank'). Decided by the owner on 2026-11-17. Units may be removed later if they cannot be simulated realistically; each removal goes in \"removed\" with a date and reason.",
+ "decided_on_build": "rls-19.1.0.5973071.Set19.Shipping.pbe",
+ "in_scope": [
+  {
+   "key": "DA_Gnar19",
+   "name": "Gnar",
+   "cost": 1,
+   "role": "HybridSpecialist_Ammo"
+  },
+  {
+   "key": "DA_Katarina19",
+   "name": "Katarina",
+   "cost": 1,
+   "role": "MagicFighter"
+  },
+  {
+   "key": "DA_Kayn19",
+   "name": "Kayn",
+   "cost": 1,
+   "role": "AttackFighter"
+  },
+  {
+   "key": "DA_Neeko19",
+   "name": "Neeko",
+   "cost": 1,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Varus19",
+   "name": "Varus",
+   "cost": 1,
+   "role": "AttackCaster"
+  },
+  {
+   "key": "DA_Yunara19",
+   "name": "Yunara",
+   "cost": 1,
+   "role": "AttackMarksman"
+  },
+  {
+   "key": "DA_Ziggs19",
+   "name": "Ziggs",
+   "cost": 1,
+   "role": "MagicMarksman"
+  },
+  {
+   "key": "DA_Zoe19",
+   "name": "Zoe",
+   "cost": 1,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Ashe19",
+   "name": "Ashe",
+   "cost": 2,
+   "role": "AttackMarksman"
+  },
+  {
+   "key": "DA_Camille19",
+   "name": "Camille",
+   "cost": 2,
+   "role": "AttackFighter"
+  },
+  {
+   "key": "DA_Ezreal19",
+   "name": "Ezreal",
+   "cost": 2,
+   "role": "AttackCaster"
+  },
+  {
+   "key": "DA_Jax19",
+   "name": "Jax",
+   "cost": 2,
+   "role": "MagicFighter"
+  },
+  {
+   "key": "DA_Karthus19",
+   "name": "Karthus",
+   "cost": 2,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Lucian19",
+   "name": "Lucian",
+   "cost": 2,
+   "role": "AttackCaster"
+  },
+  {
+   "key": "DA_Lulu19",
+   "name": "Lulu",
+   "cost": 2,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Lux19",
+   "name": "Lux",
+   "cost": 2,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Qiyana19",
+   "name": "Qiyana",
+   "cost": 2,
+   "role": "AttackFighter"
+  },
+  {
+   "key": "DA_RenataGlasc19",
+   "name": "Renata Glasc",
+   "cost": 2,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Samira19",
+   "name": "Samira",
+   "cost": 2,
+   "role": "AttackCaster"
+  },
+  {
+   "key": "DA_SeraphineIndie19",
+   "name": "Seraphine",
+   "cost": 2,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Tristana19",
+   "name": "Tristana",
+   "cost": 2,
+   "role": "AttackCaster"
+  },
+  {
+   "key": "DA_Bard19",
+   "name": "Bard",
+   "cost": 3,
+   "role": "MagicMarksman"
+  },
+  {
+   "key": "DA_Briar19",
+   "name": "Briar",
+   "cost": 3,
+   "role": "AttackAssassin"
+  },
+  {
+   "key": "DA_Draven19",
+   "name": "Draven",
+   "cost": 3,
+   "role": "AttackCaster"
+  },
+  {
+   "key": "DA_Evelynn19",
+   "name": "Evelynn",
+   "cost": 3,
+   "role": "MagicFighter"
+  },
+  {
+   "key": "DA_Kaisa19",
+   "name": "Kai'Sa",
+   "cost": 3,
+   "role": "AttackMarksman"
+  },
+  {
+   "key": "DA_Malzahar19",
+   "name": "Malzahar",
+   "cost": 3,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Senna19",
+   "name": "Senna",
+   "cost": 3,
+   "role": "AttackCaster"
+  },
+  {
+   "key": "DA_Syndra19",
+   "name": "Syndra",
+   "cost": 3,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Viego19",
+   "name": "Viego",
+   "cost": 3,
+   "role": "AttackFighter"
+  },
+  {
+   "key": "DA_Ahri19",
+   "name": "Ahri",
+   "cost": 4,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Alune19",
+   "name": "Alune",
+   "cost": 4,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Aurora19",
+   "name": "Aurora",
+   "cost": 4,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Graves19",
+   "name": "Graves",
+   "cost": 4,
+   "role": "AttackFighter"
+  },
+  {
+   "key": "DA_Jhin19",
+   "name": "Jhin",
+   "cost": 4,
+   "role": "AttackSpecialist_Ammo"
+  },
+  {
+   "key": "DA_Jinx19",
+   "name": "Jinx",
+   "cost": 4,
+   "role": "AttackMarksman"
+  },
+  {
+   "key": "DA_Kayle19",
+   "name": "Kayle",
+   "cost": 4,
+   "role": "MagicMarksman"
+  },
+  {
+   "key": "DA_Locke19",
+   "name": "Locke",
+   "cost": 4,
+   "role": "MagicAssassin"
+  },
+  {
+   "key": "DA_Mel19",
+   "name": "Mel",
+   "cost": 4,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Vayne19",
+   "name": "Vayne",
+   "cost": 4,
+   "role": "AttackMarksman"
+  },
+  {
+   "key": "DA_Xayah19",
+   "name": "Xayah",
+   "cost": 4,
+   "role": "AttackCaster"
+  },
+  {
+   "key": "DA_Yasuo19",
+   "name": "Yasuo",
+   "cost": 4,
+   "role": "AttackFighter"
+  },
+  {
+   "key": "DA_Yone19",
+   "name": "Yone",
+   "cost": 4,
+   "role": "AttackFighter"
+  },
+  {
+   "key": "DA_Yuumi19",
+   "name": "Yuumi",
+   "cost": 4,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_AkaliKDA19",
+   "name": "Akali",
+   "cost": 5,
+   "role": "AttackAssassin"
+  },
+  {
+   "key": "DA_Akali_TrueDamage19",
+   "name": "Akali",
+   "cost": 5,
+   "role": "MagicFighter"
+  },
+  {
+   "key": "DA_Aphelios19",
+   "name": "Aphelios",
+   "cost": 5,
+   "role": "AttackMarksman"
+  },
+  {
+   "key": "DA_BaronNashor19",
+   "name": "Baron Nashor",
+   "cost": 5,
+   "role": "AttackFighter"
+  },
+  {
+   "key": "DA_Gwen19",
+   "name": "Gwen",
+   "cost": 5,
+   "role": "MagicFighter"
+  },
+  {
+   "key": "DA_Janna19",
+   "name": "Janna",
+   "cost": 5,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_LeeSin19",
+   "name": "Lee Sin",
+   "cost": 5,
+   "role": "AttackFighter"
+  },
+  {
+   "key": "DA_MissFortune19",
+   "name": "Miss Fortune",
+   "cost": 5,
+   "role": "AttackCaster"
+  },
+  {
+   "key": "DA_Mordekaiser19",
+   "name": "Mordekaiser",
+   "cost": 5,
+   "role": "MagicFighter"
+  },
+  {
+   "key": "DA_Nidalee19",
+   "name": "Nidalee",
+   "cost": 5,
+   "role": "MagicFighter"
+  },
+  {
+   "key": "DA_Nunu19",
+   "name": "Nunu & Willump",
+   "cost": 5,
+   "role": "MagicSpecialist"
+  },
+  {
+   "key": "DA_Pyke19",
+   "name": "Pyke",
+   "cost": 5,
+   "role": "AttackFighter"
+  },
+  {
+   "key": "DA_Rakan19",
+   "name": "Rakan",
+   "cost": 5,
+   "role": "MagicAssassin"
+  },
+  {
+   "key": "DA_Smeech19",
+   "name": "Smeech",
+   "cost": 5,
+   "role": "AttackSpecialist_Time"
+  },
+  {
+   "key": "DA_Sona19",
+   "name": "Sona",
+   "cost": 5,
+   "role": "MagicSpecialist"
+  },
+  {
+   "key": "DA_Taliyah19",
+   "name": "Taliyah",
+   "cost": 5,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_Teemo19",
+   "name": "Teemo",
+   "cost": 5,
+   "role": "MagicCaster"
+  },
+  {
+   "key": "DA_TwistedFate19",
+   "name": "Twisted Fate",
+   "cost": 5,
+   "role": "MagicMarksman"
+  },
+  {
+   "key": "DA_Vi19",
+   "name": "Vi",
+   "cost": 5,
+   "role": "AttackFighter"
+  },
+  {
+   "key": "DA_Vladimir19",
+   "name": "Vladimir",
+   "cost": 5,
+   "role": "MagicFighter"
+  },
+  {
+   "key": "DA_Zeri19",
+   "name": "Zeri",
+   "cost": 5,
+   "role": "AttackCaster"
+  }
+ ],
+ "excluded_tanks": [
+  {
+   "key": "DA_Elise19",
+   "name": "Elise",
+   "cost": 1,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Kennen19",
+   "name": "Kennen",
+   "cost": 1,
+   "role": "MagicTank_Manaless"
+  },
+  {
+   "key": "DA_Kobuko19",
+   "name": "Kobuko",
+   "cost": 1,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Lillia19",
+   "name": "Lillia",
+   "cost": 1,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Olaf19",
+   "name": "Olaf",
+   "cost": 1,
+   "role": "AttackTank_Manaless"
+  },
+  {
+   "key": "DA_Sett19",
+   "name": "Sett",
+   "cost": 1,
+   "role": "AttackTank"
+  },
+  {
+   "key": "DA_Taric19",
+   "name": "Taric",
+   "cost": 1,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Annie19",
+   "name": "Annie",
+   "cost": 2,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Gragas19",
+   "name": "Gragas",
+   "cost": 2,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Illaoi19",
+   "name": "Illaoi",
+   "cost": 2,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Nasus19",
+   "name": "Nasus",
+   "cost": 2,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Renekton19",
+   "name": "Renekton",
+   "cost": 2,
+   "role": "AttackTank"
+  },
+  {
+   "key": "DA_Amumu19",
+   "name": "Amumu",
+   "cost": 3,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Braum19",
+   "name": "Braum",
+   "cost": 3,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Ekko19",
+   "name": "Ekko",
+   "cost": 3,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Galio19",
+   "name": "Galio",
+   "cost": 3,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_KSante19",
+   "name": "K'Sante",
+   "cost": 3,
+   "role": "AttackTank"
+  },
+  {
+   "key": "DA_Swain19",
+   "name": "Swain",
+   "cost": 3,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Tibbers19",
+   "name": "Tibbers",
+   "cost": 3,
+   "role": "AttackTank"
+  },
+  {
+   "key": "DA_Alistar19",
+   "name": "Alistar",
+   "cost": 4,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Garen19",
+   "name": "Garen",
+   "cost": 4,
+   "role": "AttackTank"
+  },
+  {
+   "key": "DA_Leona19",
+   "name": "Leona",
+   "cost": 4,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Shyvana19",
+   "name": "Shyvana",
+   "cost": 4,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Thresh19",
+   "name": "Thresh",
+   "cost": 4,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Wukong19",
+   "name": "Wukong",
+   "cost": 4,
+   "role": "AttackTank"
+  },
+  {
+   "key": "DA_Yorick19",
+   "name": "Yorick",
+   "cost": 4,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Zac19",
+   "name": "Zac",
+   "cost": 4,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_DrMundo19",
+   "name": "Dr. Mundo",
+   "cost": 5,
+   "role": "MagicTank"
+  },
+  {
+   "key": "DA_Rell19",
+   "name": "Rell",
+   "cost": 5,
+   "role": "MagicTank"
+  }
+ ],
+ "removed": []
+}
