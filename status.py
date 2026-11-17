@@ -1,0 +1,980 @@
+import math
+
+from stats import FastDeepCopy
+
+
+class Status(FastDeepCopy):
+    """Holds champion status effects:
+    1. name
+    2. wearoff time
+    3. application effect
+    4. wearoff effect
+    """
+
+    # Earliest time update() could do anything. The frame loop polls every
+    # status on all ~900 frames of a combat, and most statuses (a 30s shred
+    # applied at combat start, say) are only waiting to expire, so there is
+    # nothing to look at until wearoff_time. -1 means "poll every frame",
+    # which is what any subclass with its own update() gets.
+    next_update = -1
+
+    def __init__(self, name):
+        self.wearoff_time = -1
+        self.name = name
+        self.active = False
+        self.opponent = None
+
+    def _reschedule(self):
+        """Recompute next_update after wearoff_time changes."""
+        if type(self).update is Status.update:
+            self.next_update = self.wearoff_time
+        else:
+            # Subclass does periodic work of its own; keep polling it.
+            self.next_update = -1
+
+    def application(self, champion, opponent, time, duration, params):
+        # opponent applies the status
+        self.opponent = opponent
+        self.active = True
+        self.wearoff_time = time + duration
+        self.applicationEffect(champion, time, duration, params)
+        self._reschedule()
+
+    def applicationEffect(self, champion, time, duration, params):
+        return 0
+
+    def reapplication(self, champion, opponent, time, duration, params):
+        self.opponent = opponent
+        self.active = True
+        if self.reapplicationEffect(champion, time, duration, params):
+            self.wearoff_time = time + duration
+        self._reschedule()
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return 0
+
+    def wearoff(self, champion, time):
+        self.active = False
+        self.wearoffEffect(champion, time)
+        self.opponent = None
+        if type(self).update is Status.update:
+            # Nothing left to do unless it gets reapplied.
+            self.next_update = float("inf")
+
+    def wearoffEffect(self, champion, time):
+        return 0
+
+    def update(self, champion, time):
+        if time > self.wearoff_time and self.active:
+            self.wearoff(champion, time)
+
+        # if status not in dict, put it in
+        # applyeeffect: if inactive, application
+        # else, reapplication
+
+
+
+def zero_scaling(x, y, z):
+    """Default zero scaling function for DoT effects."""
+    return 0
+
+
+class DoTEffect(Status):
+    # apply damage once per second. in-game it's at least every half-second
+    # but this is chill for clarity
+    def __init__(self, name):
+        super().__init__("DoT {}".format(name))
+        self.scaling = zero_scaling
+        self.next_proc = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        # params: (scaling function, interval)
+        self.scaling = params[0]
+        self.interval = params[1]
+        self.next_proc = math.floor(time) + self.interval
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return True
+
+    def wearoffEffect(self, champion, time):
+        self.next_proc = 999
+        return True
+
+    def update(self, champion, time):
+        if time > self.next_proc:
+            # do damage
+            self.opponent.multiTargetSpell(
+                self.opponent.opponents,
+                self.opponent.items,
+                time,
+                1,
+                self.scaling,
+                "magical",
+            )
+
+            self.next_proc += self.interval
+        super().update(champion, time)
+
+
+class DoTEffectNoItems(Status):
+    # bad code but this is for fairy tail
+    # no scaling, just raw damage
+    def __init__(self, name):
+        super().__init__("DoT {}".format(name))
+        self.damage = 0
+        self.next_proc = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.damage = params / duration
+        self.next_proc = math.floor(time) + 1
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return True
+
+    def wearoffEffect(self, champion, time):
+        self.next_proc = 999
+        return True
+
+    def update(self, champion, time):
+        if time > self.next_proc:
+            # do damage
+            self.opponent.doDamage(
+                self.opponent.opponents[0],
+                [],
+                0,
+                self.damage,
+                self.damage,
+                "magical",
+                time,
+            )
+
+            self.next_proc += 1
+        super().update(champion, time)
+
+
+class UltActivator(Status):
+    def __init__(self, name):
+        super().__init__("Ult Active {}".format(name))
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.ultActive = True
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.ultActive = False
+        return True
+
+
+class SilverBolts(Status):
+    def __init__(self, wearoff_time=999):
+        super().__init__("Silver Bolt", wearoff_time=wearoff_time)
+        self.stacks = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.stacks += 1
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        self.stacks += 1
+        if self.stacks == 3:
+            self.opponent.performAbility([champion], self.opponent.items, time)
+            self.stacks = 0
+        return True
+
+    def wearoffEffect(self, champion, time):
+        self.stacks = 0
+        return True
+
+
+class ADModifier(Status):
+    # increase AS by %
+    # NOTE: does not work with stacking
+    def __init__(self, name):
+        super().__init__("AD Modifier {}".format(name))
+        self.toAdd = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.toAdd = params
+        champion.bonus_ad.addStat(self.toAdd)
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.bonus_ad.addStat(-1 * self.toAdd)
+        return True
+
+
+class AsheUlt(Status):
+    # increase AS by %
+    # NOTE: does not work with stacking
+    def __init__(self, name):
+        super().__init__("Ashe Ult {}".format(name))
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.ultsActive += 1
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.ultsActive -= 1
+        return True
+
+
+class ASMultModifier(Status):
+    # increase AS by %
+    # NOTE: does not work with stacking
+    def __init__(self, wearoff_time):
+        super().__init__("AS Multiplicative Modifier", wearoff_time=wearoff_time)
+        self.addition = 1
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.aspd.mult += params
+        self.addition = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.aspd.mult -= self.addition
+        return True
+
+
+class ManaRegenModifier(Status):
+    # increase Mana Regen
+    # NOTE: does not work with stacking
+    def __init__(self, name):
+        super().__init__(f"Mana Regen Modifier {name}")
+        self.addition = 1
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.manaRegen.addStat(params)
+        self.addition = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.manaRegen.addStat(self.addition * -1)
+        return True
+
+
+class DmgMultiplierModifier(Status):
+    # increase AS by %
+    # NOTE: does not work with stacking
+    def __init__(self, name):
+        super().__init__("AS Multiplicative Modifier {}".format(name))
+        self.addition = 1
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.dmgMultiplier.addStat(params)
+        self.addition = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.dmgMultiplier.addStat(self.addition * -1)
+        return True
+
+
+class KogASModifier(Status):
+    # increase AS by %
+    # NOTE: does not work with stacking
+    def __init__(self, wearoff_time):
+        super().__init__("AS Modifier", wearoff_time=wearoff_time)
+        self.addition = 1
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.aspd.add += params
+        champion.ultActive = True
+        self.addition = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.ultActive = False
+        champion.aspd.add -= self.addition
+        return True
+
+
+class KaisaBuff(Status):
+    # increase AS by %
+    # idea is each buff has new name
+    def __init__(self, count, wearoff_time):
+        super().__init__("Kaisa Buff {}".format(count), wearoff_time=wearoff_time)
+        self.addition = 1
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.aspd.add += params
+        self.addition = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.aspd.add -= self.addition
+        return True
+
+
+class DecayingASModifier(Status):
+    # increase AS by %
+    # NOTE: does not work with stacking
+    def __init__(self, name):
+        super().__init__("Decaying AS Modifier {}".format(name))
+        self.addition = 1
+        self.duration = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.aspd.add += params
+        self.addition = params
+        self.amount_to_decrease = self.addition / (duration / (1 / 30))
+        self.duration = duration
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+
+    def wearoffEffect(self, champion, time):
+        # champion.aspd.add  -= self.addition
+        return True
+
+    def update(self, champion, time):
+        # NOTE: thsi will get fucked up with frame time
+        if time <= self.wearoff_time and self.active:
+            champion.aspd.add -= self.amount_to_decrease
+            self.addition -= self.amount_to_decrease
+        if time > self.wearoff_time and self.addition > 0:
+            champion.aspd.add -= self.addition
+            self.addition = 0
+        super().update(champion, time)
+
+
+class CritModifier(Status):
+    # increase crit by %
+    def __init__(self, name):
+        super().__init__("Crit Modifier {}".format(name))
+        self.addition = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.crit.addStat(params)
+        self.addition = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.aspd.addStat(-1 * self.addition)
+        return True
+
+
+class DmgAmpModifier(Status):
+    # increase crit by %
+    def __init__(self, name):
+        super().__init__("Dmg Amp Modifier {}".format(name))
+        self.addition = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.dmgMultiplier.addStat(params)
+        self.addition = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.dmgMultiplier.addStat(-1 * self.addition)
+        return True
+
+
+class ASModifier(Status):
+    # increase AS by %
+    # NOTE: does not work with stacking
+    def __init__(self, name):
+        super().__init__("AS Modifier {}".format(name))
+        self.addition = 1
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.aspd.add += params
+        self.addition = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.aspd.add -= self.addition
+        return True
+
+
+class ArmorReduction(Status):
+    # reduce armor by N%
+    def __init__(self, name):
+        super().__init__("Armor Reduction {}".format(name))
+        self.reduction = 1
+
+    def applicationEffect(self, champion, time, duration, params):
+        # if it's not a bigger shred, do nothing
+        champion.armor.mult = min(champion.armor.mult, params)
+        self.reduction = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        if self.reduction >= params:
+            champion.armor.mult = min(champion.armor.mult, self.reduction)
+            return True
+        else:
+            # if it's weaker, doesnt work
+            return False
+
+    def wearoffEffect(self, champion, time):
+        # iterate through champ statuses
+        champion.armor.mult = 1
+        for status_name, status in list(champion.statuses.items()):
+            if "Armor Reduction" in status_name and status.active:
+                champion.armor.mult = min(champion.armor.mult, status.reduction)
+        return True
+
+
+class MRReduction(Status):
+    # reduce MR by N%
+    def __init__(self, name):
+        super().__init__("MR Reduction {}".format(name))
+        self.reduction = 1
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.mr.mult = min(champion.mr.mult, params)
+        self.reduction = params
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        if self.reduction >= params:
+            champion.mr.mult = min(champion.mr.mult, self.reduction)
+            return True
+        else:
+            # if it's weaker, doesnt work
+            return False
+
+    def wearoffEffect(self, champion, time):
+        champion.mr.mult = 1
+        for status_name, status in list(champion.statuses.items()):
+            if (
+                "MR Reduction" in status_name
+                and status.active
+                and status_name != self.name
+            ):
+                champion.mr.mult = min(champion.mr.mult, status.reduction)
+        return True
+
+
+class CorrosionStatus(Status):
+    def __init__(self):
+        super().__init__("Corrosion")
+        self.amount = 4
+        self.interval = 2
+        self.next_proc = 2
+        self.total_reduction = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.next_proc = time + self.interval
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return True
+
+    def wearoffEffect(self, champion, time):
+        # champion.armor.addStat(self.total_reduction)
+        # champion.mr.addStat(self.total_reduction)
+        return True
+
+    def _reschedule(self):
+        # Ticks on a fixed interval and deliberately has no wearoff, so the
+        # next tick is the only time it needs looking at. Corrosion sits on
+        # every opponent for whole fights, so polling it every frame was one of
+        # the most expensive things in the simulator.
+        self.next_update = self.next_proc
+
+    def update(self, champion, time):
+        if time >= self.next_proc:
+            champion.armor.addStat(-self.amount)
+            champion.mr.addStat(-self.amount)
+            self.total_reduction += self.amount
+            self.next_proc += self.interval
+        self.next_update = self.next_proc
+        super().update(champion, time)
+
+
+class AccelerationGateStatus(Status):
+    def __init__(self):
+        super().__init__("AccelerationGateStatus")
+        self.scaling = zero_scaling
+        self.next_proc = 0
+        self.ticks_remaining = 0
+        self.mana_per_tick = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.mana_per_tick = (0.35 * champion.fullMana.stat) / 4
+        self.next_proc = time + 0.5
+        self.ticks_remaining = 4
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        self.ticks_remaining = 4
+        self.mana_per_tick = (0.35 * champion.fullMana.stat) / 4
+        self.next_proc = time + 0.5
+        return True
+
+    def update(self, champion, time):
+        if self.active and time >= self.next_proc and self.ticks_remaining > 0:
+            champion.addMana(self.mana_per_tick)
+            self.next_proc += 0.5
+            self.ticks_remaining -= 1
+        
+        super().update(champion, time)
+
+
+class AkaliNovaStrikeStatus(Status):
+    # N.O.V.A. Strike: after the power surge, Akali slices all enemies with a
+    # bleed dealing physical damage each second for the rest of combat.
+    def __init__(self, name="N.O.V.A. Strike"):
+        super().__init__(name)
+        self.scaling = zero_scaling
+        self.num_targets = 0
+        self.interval = 1.0
+        self.next_proc = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.scaling, self.num_targets = params
+        self.next_proc = time + self.interval
+        return True
+
+    def update(self, champion, time):
+        if self.active and time >= self.next_proc:
+            if champion.opponents:
+                champion.multiTargetSpell(
+                    champion.opponents,
+                    champion.items,
+                    time,
+                    self.num_targets,
+                    self.scaling,
+                    "physical",
+                )
+            self.next_proc += self.interval
+        super().update(champion, time)
+
+
+class TheGrooveStatus(Status):
+    def __init__(self):
+        super().__init__("The Groove")
+        self.as_bonus = 0
+        self.ad_ap_per_tick = 0
+        self.next_proc = 0
+        self.total_ad_ap_added = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.as_bonus = params.get("as_bonus", 0)
+        self.ad_ap_per_tick = params.get("ad_ap_tick", 0)
+        
+        champion.aspd.add += self.as_bonus
+        self.next_proc = time + 1.0
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return True
+
+    def wearoffEffect(self, champion, time):
+        champion.aspd.add -= self.as_bonus
+        return True
+
+    def update(self, champion, time):
+        if self.active and time >= self.next_proc:
+            if self.ad_ap_per_tick > 0:
+                champion.bonus_ad.addStat(self.ad_ap_per_tick)
+                champion.ap.addStat(self.ad_ap_per_tick)
+                self.total_ad_ap_added += self.ad_ap_per_tick
+            self.next_proc += 1.0
+        super().update(champion, time)
+
+
+class ExecutionerBleedStatus(Status):
+    # Executioner: every instance of damage the source deals bleeds the
+    # target for a % of that hit, split evenly as true damage over
+    # `duration`. Each hit is its own independent bleed and they all stack,
+    # so at steady state the bleeds add exactly the listed % on top of the
+    # source's DPS. One status instance holds every live bleed instead of
+    # spawning a uniquely named status per hit: Yunara/Zyra land several
+    # hits a second, which would leave hundreds of dead entries in the
+    # target's status dict being polled every frame.
+    def __init__(self):
+        super().__init__("Executioner Bleed")
+        self.interval = 1.0
+        # [next_proc, ticks_left, damage_per_tick] per live bleed
+        self.bleeds = []
+
+    def _addBleed(self, time, duration, params):
+        # params: total bleed damage, split into per-interval ticks
+        ticks = max(1, int(round(duration / self.interval)))
+        self.bleeds.append([time + self.interval, ticks, params / ticks])
+
+    def applicationEffect(self, champion, time, duration, params):
+        self.bleeds = []
+        self._addBleed(time, duration, params)
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        self._addBleed(time, duration, params)
+        return True
+
+    def update(self, champion, time):
+        if not self.active:
+            return
+        total = 0
+        for bleed in self.bleeds:
+            while bleed[1] > 0 and time >= bleed[0]:
+                total += bleed[2]
+                bleed[0] += self.interval
+                bleed[1] -= 1
+        self.bleeds = [b for b in self.bleeds if b[1] > 0]
+        if total > 0 and self.opponent is not None:
+            self.opponent.doDamage(
+                champion, [], 0, total, total, "true", time,
+            )
+        # Lifetime is the tick list, not wearoff_time: the last tick lands
+        # exactly at wearoff_time and float drift must not swallow it.
+        if not self.bleeds:
+            self.wearoff(champion, time)
+
+
+class CassiopeiaPoisonStatus(Status):
+    # Noxious Blast: total magic damage split into per-second ticks over
+    # `duration`. AP DoTs are NOT snapshotted in game: every tick goes out
+    # through the caster's multiTargetSpell, which re-reads her live AP (so
+    # AP gained mid-poison grows the remaining ticks) and makes each tick a
+    # real damage instance -- it crits with Jeweled Gauntlet, takes damage
+    # amps, and feeds on-spell-damage item effects. Hence params is the
+    # caster's scaling function, not a damage number locked in at cast.
+    #
+    # Poisons stack and each one needs its own live scaling function, so
+    # this must never merge into an existing instance -- the caller
+    # (set18champs.Cassiopeia) gives every cast's application a unique status
+    # name so each one lives as its own dict entry instead of reapplying.
+    def __init__(self, name):
+        super().__init__(name)
+        self.scaling = zero_scaling
+        self.duration = 1.0
+        self.interval = 1.0
+        self.next_proc = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        # params: the caster's total-damage scaling function, whose value is
+        # split over `duration` and re-evaluated at every tick
+        self.scaling = params
+        self.duration = duration
+        self.next_proc = time + self.interval
+        return True
+
+    def tickScaling(self, level, AD, AP):
+        # The listed damage is a total over `duration`, so each tick is one
+        # interval's share of it, off whatever AP the caster has right now.
+        return self.scaling(level, AD, AP) / self.duration * self.interval
+
+    def update(self, champion, time):
+        if self.active and time >= self.next_proc:
+            caster = self.opponent
+            if caster is not None:
+                caster.multiTargetSpell(
+                    [champion], caster.items, time, 1, self.tickScaling, "magical"
+                )
+            self.next_proc += self.interval
+        super().update(champion, time)
+
+
+class GrompBubbleStatus(Status):
+    # Belchy Bubble's AP-version splash: the listed 145/220/345 is a total
+    # dealt over 3s, split into per-second ticks. Like CassiopeiaPoisonStatus
+    # (AP DoTs are not snapshotted in game) each tick goes out through the
+    # caster's multiTargetSpell, re-reading his live AP and amps, so params
+    # is the splash scaling function rather than a number locked in at cast.
+    #
+    # Unlike Cassiopeia's poison this does NOT stack: one status name per
+    # target, so a recast inside the window refreshes the splash instead of
+    # layering a second copy.
+    def __init__(self, name="Gromp Bubble"):
+        super().__init__(name)
+        self.scaling = zero_scaling
+        self.duration = 1.0
+        self.interval = 1.0
+        self.next_proc = 0
+
+    def _start(self, time, duration, params):
+        # params: the splash's total-damage scaling function, whose value is
+        # split over `duration` and re-evaluated at every tick
+        self.scaling = params
+        self.duration = duration
+        self.next_proc = time + self.interval
+        return True
+
+    def applicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def tickScaling(self, level, AD, AP):
+        # One interval's share of the splash total, off the caster's live AP.
+        return self.scaling(level, AD, AP) / self.duration * self.interval
+
+    def update(self, champion, time):
+        if self.active and time >= self.next_proc:
+            caster = self.opponent
+            if caster is not None:
+                caster.multiTargetSpell(
+                    [champion], caster.items, time, 1, self.tickScaling, "magical"
+                )
+            self.next_proc += self.interval
+        super().update(champion, time)
+
+
+class KarmaTetherStatus(Status):
+    # Karmic Bond: a tether on one target dealing its listed total in even
+    # ticks over `duration`, then a burst on the target and the enemies
+    # around it. Both halves go out through the caster's multiTargetSpell
+    # (like CassiopeiaPoisonStatus's ticks) because each tick is its own
+    # damage instance in game -- so each one crits on its own with
+    # Jeweled Gauntlet and feeds on-spell-damage item effects.
+    #
+    # The burst lives here rather than in performAbility so it lands at the
+    # END of the tether, 1.5s after the cast, which is also why it re-reads
+    # the caster's current opponents instead of the list captured at cast.
+    def __init__(self, name):
+        super().__init__(name)
+        self.scaling = zero_scaling
+        self.burst_scaling = zero_scaling
+        self.interval = 0.5
+        self.next_proc = 0
+        self.ticks_total = 1
+        self.ticks_remaining = 0
+        self.burst_targets = 0
+        self.burst_pending = False
+
+    def _start(self, time, duration, params):
+        # params: (tether scaling, tick interval, tick count, burst scaling,
+        #          burst targets)
+        (
+            self.scaling,
+            self.interval,
+            self.ticks_total,
+            self.burst_scaling,
+            self.burst_targets,
+        ) = params
+        self.ticks_remaining = self.ticks_total
+        self.next_proc = time + self.interval
+        self.burst_pending = True
+        return True
+
+    def applicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def tickScaling(self, level, AD, AP):
+        # The tether's listed damage is a total, so each tick is an even
+        # share of it. Evaluated per tick (not locked at cast) since it goes
+        # through multiTargetSpell, which reads the caster's live AD/AP.
+        return self.scaling(level, AD, AP) / self.ticks_total
+
+    def update(self, champion, time):
+        caster = self.opponent
+        if self.active and caster is not None:
+            while self.ticks_remaining > 0 and time >= self.next_proc:
+                caster.multiTargetSpell(
+                    [champion], caster.items, time, 1, self.tickScaling, "magical"
+                )
+                self.ticks_remaining -= 1
+                self.next_proc += self.interval
+            # Same frame as the final tick: the tether's last damage and the
+            # burst go off together at the end of the channel.
+            if self.burst_pending and self.ticks_remaining == 0:
+                self.burst_pending = False
+                if caster.opponents:
+                    caster.multiTargetSpell(
+                        caster.opponents,
+                        caster.items,
+                        time,
+                        self.burst_targets,
+                        self.burst_scaling,
+                        "magical",
+                    )
+        super().update(champion, time)
+
+
+class ZyraPlantStatus(Status):
+    # Rampant Growth: a summoned plant, self-applied to the caster
+    # (DoTEffect-style -- "champion" and "opponent" are both the caster),
+    # ticking a magic-damage multiTargetSpell at the caster's current first
+    # target every `interval` seconds for a fixed attack COUNT rather than a
+    # fixed duration, since Summoner adds extra attacks, not extra time.
+    def __init__(self, name):
+        super().__init__(name)
+        self.scaling = zero_scaling
+        self.interval = 0.8
+        self.next_proc = 0
+        self.attacks_remaining = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        # params: (scaling function, interval, num_attacks)
+        self.scaling, self.interval, self.attacks_remaining = params
+        self.next_proc = time + self.interval
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return True
+
+    def update(self, champion, time):
+        if self.active and self.attacks_remaining > 0 and time >= self.next_proc:
+            if self.opponent is not None and self.opponent.opponents:
+                self.opponent.multiTargetSpell(
+                    self.opponent.opponents,
+                    self.opponent.items,
+                    time,
+                    1,
+                    self.scaling,
+                    "magical",
+                )
+            self.attacks_remaining -= 1
+            self.next_proc += self.interval
+        super().update(champion, time)
+
+
+
+class ApheliosSeverumStatus(Status):
+    # Moonlight's Onslaught's swipes: a fixed COUNT of Severum hits spread
+    # evenly across the 2s onslaught, not a listed total split over a
+    # duration. Each swipe is its own damage instance in game, so like
+    # CassiopeiaPoisonStatus every tick goes out through the caster's
+    # multiTargetSpell -- it reads his live AD, takes amps, and feeds
+    # on-spell-damage item effects rather than being locked in at cast.
+    #
+    # The count is decided at cast time (set18champs.Aphelios.swipeCount) and
+    # passed in rather than recomputed here, because it floors off his Attack
+    # Speed at the START of the cast: attack speed gained during the onslaught
+    # buys no extra swipes.
+    #
+    # This does not stack -- one status name, so a recast refreshes it. The
+    # 3.5s cast is longer than the 2s window anyway, so the two can never
+    # actually overlap unless something starts shortening casts.
+    def __init__(self, name="Aphelios Severum"):
+        super().__init__(name)
+        self.scaling = zero_scaling
+        self.interval = 0.25
+        self.next_proc = 0
+        self.swipes_remaining = 0
+
+    def _start(self, time, duration, params):
+        # params: (per-swipe scaling, swipe count). The swipes are evenly
+        # spaced across the window, so the interval falls out of the count
+        # rather than being a constant.
+        self.scaling, swipes = params
+        self.swipes_remaining = swipes
+        self.interval = duration / swipes if swipes else duration
+        self.next_proc = time + self.interval
+        return True
+
+    def applicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        return self._start(time, duration, params)
+
+    def update(self, champion, time):
+        caster = self.opponent
+        if self.active and caster is not None:
+            # Ticking before super().update() is what makes the last swipe
+            # land: it comes due at exactly the wearoff time, and on a frame
+            # that is past both, this pays it out before the status expires.
+            while self.swipes_remaining > 0 and time >= self.next_proc:
+                caster.multiTargetSpell(
+                    [champion], caster.items, time, 1, self.scaling, "physical"
+                )
+                self.swipes_remaining -= 1
+                self.next_proc += self.interval
+        super().update(champion, time)
+
+
+class BramblebackFrenzyStatus(Status):
+    # Crimson Fury's active: bonus Attack Damage and Armor ignore for 8s,
+    # both on Brambleback himself. params is (AD %, Armor ignore), with the
+    # ignore already resolved against his AP at cast time.
+    #
+    # One status name, so a recast inside the window refreshes the timer
+    # rather than stacking a second copy. A refresh re-reads params, so AP
+    # gained since the last cast lands in the new ignore value.
+    #
+    # The ignore is restored rather than subtracted on wearoff: armorPierce
+    # combines multiplicatively (see stats.ArmorPierce), and a 100% ignore
+    # can't be backed out of that product.
+    def __init__(self, name="Brambleback Frenzy"):
+        super().__init__(name)
+        self.ad = 0
+        self.pierce_before = 0
+
+    def _apply(self, champion, params):
+        self.ad, pierce = params
+        champion.bonus_ad.addStat(self.ad)
+        self.pierce_before = champion.armorPierce.add
+        champion.armorPierce.addStat(pierce)
+
+    def _remove(self, champion):
+        champion.bonus_ad.addStat(-self.ad)
+        champion.armorPierce.add = self.pierce_before
+
+    def applicationEffect(self, champion, time, duration, params):
+        self._apply(champion, params)
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        self._remove(champion)
+        self._apply(champion, params)
+        return True
+
+    def wearoffEffect(self, champion, time):
+        self._remove(champion)
+        return True

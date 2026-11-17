@@ -1,0 +1,687 @@
+import random
+
+import set18roles
+import utils
+from role import Role
+from stats import AD, AP, ArmorPierce, Aspd, Attack, FastDeepCopy, Resist, Stat
+
+import status
+
+
+class Champion(FastDeepCopy):
+    canFourStar = False
+    # Seconds from the end of the cast lockout (castTime) to the first
+    # post-cast hit. After a cast the unit starts a fresh attack from zero,
+    # which takes the full windup (18.5 replays: 0.27-0.40s melee, 0.5-1.1s
+    # ranged; a fixed time that does not shrink with attack speed). Each
+    # champion sets its own; 0 means unmeasured.
+    attackWindup = 0
+    # Ranged champions whose attack mana comes at the attack start (every
+    # ranged unit except the cast-cancelling casters: Karma, LeBlanc, Veigar,
+    # Cinderling, Cassiopeia). The replays log that start as a Hold event,
+    # this long before the release on a repeat attack. A fresh attack's Hold
+    # comes the same amount before its hit, so the first post-cast Hold lands
+    # castTime + attackWindup - attackWindupRepeat after the cast (18.5
+    # replays: Ahri 2.20s predicted and measured, Sivir 1.30 vs 1.34, Yunara
+    # 1.07 vs 1.07), and the next ones follow every attack period. For these
+    # champions the simulator's attack event (mana and damage) is that Hold,
+    # because the mana is what times the next cast. Counting the full windup
+    # instead made every cast cycle 0.3-0.5s too long. 0 = mana on the hit
+    # (melee, cancelling casters) or unmeasured.
+    attackWindupRepeat = 0
+    # Cast-cancelling casters (Karma, LeBlanc, Veigar, Cinderling,
+    # Cassiopeia) get attack mana on the hit, except from an attack whose
+    # mana fills the bar: that one pays at its start, they cast right
+    # there, and the attack still lands during the cast (18.5 replays:
+    # Karma's next hit comes 0.57s after such a cast). Waiting for the hit
+    # instead held Blue Buff Karma's casts ~0.5s late, and let Shojin's
+    # 12-mana hits overfill and bank the extra. This is a repeat attack's
+    # start -> hit time (Hold -> release); 0 = not a cancelling caster.
+    fillingAttackLead = 0
+
+    def __init__(
+        self,
+        name,
+        hp,
+        atk,
+        curMana,
+        fullMana,
+        aspd,
+        armor,
+        mr,
+        level,
+        role=Role.ATTACK_TANK,
+    ):
+        self.name = name
+        levels = [1, 1.5, 1.5**2, 1.5**3, 1.5**4]
+        hp_levels = [1, 1.8, 1.8**2, 1.8**3, 1.8**4]
+        self.hp = Stat(hp * hp_levels[level - 1], 1, 0)
+        self.bonus_ad = AP(0, 1, 0)
+        self.atk = AD(atk * levels[level - 1])
+        self.curMana = curMana
+        self.fullMana = Stat(fullMana, 1, 0)
+        self.startingMana = 0
+        self.aspd = Aspd(aspd, 1, 0)
+        self.ap = AP(0, 1, 0)
+        self.armor = Resist(armor, 1, 0)
+        self.mr = Resist(mr, 1, 0)
+        self.manaPerAttack = Stat(0, 1, 0)
+        self.manaRegen = Stat(0, 1, 0)
+        self.manaGainMultiplier = Stat(1, 1, 0)
+        self.level = level
+        self.dmgMultiplier = Stat(1, 1, 0)
+        # 2nd damage multiplier, multiplied against dmgMultiplier rather than
+        # summed into it -- for amps that stack multiplicatively with the
+        # item/augment amp pool (Ravager). Sources here are still additive with
+        # each other, so a third independent multiplier needs its own Stat.
+        self.extraDmgMultiplier = Stat(1, 1, 0)
+        self.crit = Stat(0.25, 1, 0)
+        self.critDmg = Stat(1.4, 1, 0)
+        self.omnivamp = Stat(0, 1, 0)
+
+        if not isinstance(role, Role):
+            self.role = Role.ATTACK_TANK
+        self.role = role
+
+        self.nextMana = -0.001  # you get an instant tick
+
+        self.armorPierce = ArmorPierce(0, 1, 0)
+        self.mrPierce = ArmorPierce(0, 1, 0)
+
+        self.canCrit = True
+        self.canSpellCrit = False
+        self.manalockTime = -1  # time until unmanalocked
+        self.manalockDuration = 0  # how long manalock lasts
+        self.castTime = 0
+        self.attackWindupLockout = (
+            -1
+        )  # attack windup: can only cast after attack windup is finished
+        # 0 = the cast starts on the next tick after the attack that fills the
+        # bar. 18.5 replays (59 TFTheory games): melee casts land 1 tick after
+        # the filling hit, and ranged casts replace the start of the filling
+        # attack, whose projectile still fires during the cast. The old 0.3 of
+        # the attack period held every cast back by ~0.3-0.4s.
+        self.attackWindupRatio = 0
+        self.items = [set18roles.ChampRole()]
+
+        self.statuses = {}  # current statuses
+        # Earliest next_update across self.statuses; lets the frame loop skip
+        # the whole status pass while everything is just waiting.
+        self.nextStatusUpdate = -1
+        self.nextAttackTime = 0
+        # Fraction of the current attack windup completed, accumulated
+        # continuously at the current attack speed (see canAttack/update),
+        # so an AS change mid-swing speeds up or slows down the swing
+        # already in progress instead of only affecting the next one.
+        # Starts at 1.0: the first attack's windup is the fresh-attack delay
+        # Simulator.simulate puts on nextAttackTime at combat start, so the
+        # attack fires as soon as that floor passes.
+        self.attack_progress = 1.0
+        self.lastProgressTime = 0
+        self.opponents = []
+        self.dmgVector = []
+        self.dmgDealt = 0 # no need to serialize
+        self.alive = True
+        self.lastDamagedOpponent = None
+
+        # notes for user
+        self.notes = ""
+
+        # Takedowns
+        self.takedowns = 0
+        
+        # Arbiter
+        self.cause = ""
+        self.effect = ""
+        
+        # Meep
+        self.meep = 0
+
+        # Blackthorn: the sacrificed ally on the hex. Role/Star Level/Cost
+        # decide which stat package the trait hands over and how big it is;
+        # set by class_utilities.blackthorn_selector. Cost 0 is "No Tier";
+        # role "None" is an empty hex, i.e. no sacrifice and no effect.
+        self.blackthorn_role = "None"
+        self.blackthorn_star = 1
+        self.blackthorn_cost = 1
+
+        # Augments
+        self.seraphim = False
+        self.retribution = False
+        self.embiggen = False
+
+        self.tactician_level = 4
+        self.first_takedown = 5  # time of first takedown
+        self.stage = 2  # 2, 3, 4, 5, 6
+
+        self.num_targets = 0
+        self.num_extra_targets = 0
+        self.item_count = 0  # number of craftables
+        # Trait-count-scaling buffs read this. The Champion Selector page sets
+        # it from a widget, but other pages don't, so it needs a default or
+        # those buffs raise AttributeError.
+        self.num_traits = 6
+
+        self.critCounter = 0
+        self.numAttacks = 0
+        self.numCasts = 0
+        self.luckyAbility = False
+        self.luckyCrit = False
+
+        self.attacksOnLastCast = -1  # Can't cast if we haven't attacked yet
+
+        # Items subscribed to the "onUpdate" phase. Filled in by the Simulator
+        # once combat starts; None means "ask every item", which is what
+        # callers outside the simulator loop get.
+        self.onUpdateItems = None
+
+    def hashFunction(self):
+        # Hash to cache champion data
+        items_tuple = tuple(item.hashFunction() for item in self.items)
+        stat_tuple = (
+            self.name,
+            self.hp.stat,
+            self.atk.stat,
+            self.aspd.stat,
+            self.ap.stat,
+            self.armor.stat,
+            self.curMana,
+            self.fullMana.stat,
+            self.mr.stat,
+            self.bonus_ad.stat,
+            self.manaPerAttack.stat,
+            self.manaRegen.stat,
+            self.manaGainMultiplier.stat,
+            self.level,
+            self.dmgMultiplier.stat,
+            self.crit.stat,
+            self.critDmg.stat,
+            self.omnivamp.stat,
+            self.canCrit,
+            self.canSpellCrit,
+            self.castTime,
+            self.tactician_level,
+            self.first_takedown,
+            self.takedowns,
+            self.seraphim,
+            self.retribution,
+            self.embiggen,
+            self.stage,
+            self.num_targets,
+            self.num_extra_targets,
+            self.item_count,
+            self.luckyAbility,
+            self.cause,
+            self.effect,
+            self.meep,
+            self.blackthorn_role,
+            self.blackthorn_star,
+            self.blackthorn_cost,
+        )
+        # return stat_tuple
+        return items_tuple + stat_tuple
+
+    def __hash__(self):
+        # used for caching
+        return hash(self.hashFunction())
+
+    def applyStatus(self, status, champion, time, duration, params=0):
+        """Apply status to self.
+
+        Args:
+            status (Status): Status to apply
+            champion (Champion): Opponent who applied the status
+            time (int): time of application
+            duration (int): How long to apply for
+            params (??): any extra params
+        """
+        if status.name not in self.statuses:
+            self.statuses[status.name] = status
+            self.statuses[status.name].application(
+                self, champion, time, duration, params
+            )
+        else:
+            if not self.statuses[status.name].active:
+                self.statuses[status.name].application(
+                    self, champion, time, duration, params
+                )
+            else:
+                self.statuses[status.name].reapplication(
+                    self, champion, time, duration, params
+                )
+        # Schedule changed; make the next frame look at the statuses again.
+        self.nextStatusUpdate = -1
+
+    def addPrecision(self):
+        if self.canSpellCrit:
+            self.critDmg.addStat(0.1)
+        self.canSpellCrit = True
+
+    # get basic stats from items
+    def addStats(self, item) -> None:
+        self.hp.addStat(item.hp)
+        self.bonus_ad.addStat(item.ad)  # now we have multipicative AD only
+        self.ap.addStat(item.ap)
+        self.aspd.addStat(item.aspd)
+        # self.curMana = min(self.curMana + item.mana, self.fullMana.stat)
+        self.manaRegen.addStat(item.manaRegen)
+        self.armor.addStat(item.armor)
+        self.mr.addStat(item.mr)
+        self.crit.addStat(item.crit / 100)
+        self.dmgMultiplier.addStat(item.dmgMultiplier)
+        self.omnivamp.addStat(item.omnivamp)
+
+    def addStat(self, stat, amount):
+        # separate function good for bad luck + holobow
+        getattr(self, stat).addStat(amount)
+
+    def canCast(self, time):
+        # 4 conditions:
+        # Current mana >= full mana
+        # champ can cast
+        # champ not manalocked
+        # champ not in auto animation
+        return (
+            self.curMana >= self.fullMana.stat
+            and self.fullMana.stat > -1
+            and self.manalockTime <= time
+            and self.attackWindupLockout < time
+            and self.numAttacks > self.attacksOnLastCast
+        )
+
+    def canAttack(self, time):
+        return time >= self.nextAttackTime and self.attack_progress >= 1.0
+
+    def updateAttackProgress(self, time):
+        # nextAttackTime is still a hard floor (post-cast lockout, disabling
+        # opponents in the sim loop); progress only accrues once past it, so
+        # a lockout doesn't leave a backlog of "windup" for canAttack to
+        # cash in the instant it ends.
+        if time >= self.nextAttackTime:
+            dt = time - self.lastProgressTime
+            if dt > 0:
+                self.attack_progress += dt * self.aspd.stat
+        self.lastProgressTime = time
+
+    def addMana(self, amount, time=None) -> None:
+        if time is None or time > self.manalockTime:
+            self.curMana += amount * self.manaGainMultiplier.stat
+
+    def abilityScaling(self, level):
+        # Abstract method
+        return 0
+
+    def __str__(self):
+        return ",".join(
+            (
+                str(p)
+                for p in (
+                    self.hp.stat,
+                    self.atk.stat,
+                    self.aspd.stat,
+                    self.ap.stat,
+                )
+            )
+        )
+
+    def attackTime(self):
+        return 1 / self.aspd.stat
+
+    def fillingAttackStarted(self, time):
+        """True once a cancelling caster's next attack has started and its
+        mana would fill the bar (see fillingAttackLead)."""
+        if self.fillingAttackLead <= 0 or self.fullMana.stat <= -1:
+            return False
+        if self.manalockTime > time:
+            return False
+        gain = self.manaPerAttack.stat * self.manaGainMultiplier.stat
+        if self.curMana + gain < self.fullMana.stat:
+            return False
+        hit = max(time, self.nextAttackTime) + max(
+            0.0, 1.0 - self.attack_progress
+        ) / self.aspd.stat
+        return time >= hit - self.fillingAttackLead
+
+    def freshAttackDelay(self):
+        """Seconds from the start of a fresh attack (combat start, or the end
+        of a cast) to its attack event: one full windup, or for ranged
+        champions with start-of-attack mana, their Hold, attackWindupRepeat
+        before the hit (see the class attributes). The windup is capped at
+        one attack period so a very high attack speed can't make it longer
+        than a normal attack."""
+        windup = min(self.attackWindup, self.attackTime())
+        return max(0.0, windup - self.attackWindupRepeat)
+
+    def performAttack(
+        self,
+        opponents,
+        items,
+        time,
+        multiplier=Stat(0, 1, 0),
+        generateMana=True,
+    ):
+        """Perform Attack: Activate 'before attack' and
+           'after attack' effects.
+
+        Args:
+            opponents (list[champion]): list of opps
+            items (list[Item]): list of active items
+            time (float): current time
+            multiplier (Stat, optional): dmg multiplier on attack
+            generateMana (bool, optional): whether to gen mana
+        """
+        newAttack = Attack(
+            opponents=opponents,
+            multiplier=multiplier,
+            canCrit=True,
+            canOnHit=True,
+            attackType="physical",
+            numTargets=1,
+        )
+        for item in items:
+            item.ability("preAttack", time, self, newAttack)
+
+        self.doAttack(newAttack, items, time)
+
+        if self.manalockTime <= time and generateMana == True:
+            self.addMana(self.manaPerAttack.stat)
+
+        for item in items:
+            item.ability("postAttack", time, self)
+
+    def performAbility(self, opponents, items, time):
+        # abstract method
+        return 0
+
+    def startAttack(self, opponents, items, time):
+        # increment attack and set next attack time
+        # needs to be a separate function b/c of vayne
+        self.numAttacks += 1
+        self.performAttack(opponents, items, time, Stat(0, 1, 0))
+
+        # carry any overshoot past 1.0 into the next swing instead of
+        # dropping it, so this doesn't itself become a source of drift
+        self.attack_progress = max(0.0, self.attack_progress - 1.0)
+        self.nextAttackTime = time
+        self.attackWindupLockout = time + self.attackTime() * self.attackWindupRatio
+
+    def updateStatuses(self, time):
+        """Tick this champion's statuses and nothing else.
+
+        The opponents in a simulation are inert damage sponges: the simulator
+        pushes their next attack past the end of combat, they hold no items, and
+        nothing reads their mana or attack counters. Shred/corrosion/DoT
+        statuses on them still have to tick, so this is the only part of
+        update() they need.
+        """
+        # List copy to avoid RuntimeError: dictionary changed size during iteration
+        for statusa in list(self.statuses.values()):
+            if time >= statusa.next_update:
+                statusa.update(self, time)
+
+        # Recompute from the live dict: a status that just ticked has moved its
+        # own schedule on, and one may have added another status.
+        soonest = float("inf")
+        for statusa in self.statuses.values():
+            if statusa.next_update < soonest:
+                soonest = statusa.next_update
+        self.nextStatusUpdate = soonest
+
+    def update(self, opponents, items, time):
+        self.opponents = opponents
+        # Update each status
+        if self.statuses and time >= self.nextStatusUpdate:
+            self.updateStatuses(time)
+
+        # mana regeneration
+        if time >= self.nextMana:
+            self.nextMana += 0.25
+            # time provided = will check for manalock
+            self.addMana(self.manaRegen.stat / 4, time)
+
+        # Call any items which activate on each update. onUpdateItems is the
+        # subset of items that subscribe to this phase, precomputed once per
+        # combat by the Simulator; without it every item is asked on every
+        # frame just to answer "no".
+        for item in self.onUpdateItems if self.onUpdateItems is not None else items:
+            item.ability("onUpdate", time, self)
+        self.updateAttackProgress(time)
+        canCast = self.canCast(time)
+        if not canCast and opponents and self.fillingAttackStarted(time):
+            # The attack that fills the bar pays at its start (see
+            # fillingAttackLead); its damage lands now rather than at the
+            # hit, which is at most ~0.5s early. The cast follows next tick.
+            self.startAttack(opponents, items, time)
+            canCast = self.canCast(time)
+        elif self.canAttack(time) and not canCast:
+            # if they can cast it overrides the 1st auto
+            if opponents:
+                self.startAttack(opponents, items, time)
+                # startAttack can leave the champion able to cast
+                canCast = self.canCast(time)
+        if canCast:
+            self.numCasts += 1
+            for item in items:
+                item.ability("preAbility", time, self)
+            self.performAbility(opponents, items, time)
+            # set manalock
+            if time < -1:  # this line doesn't do what it should
+                # if they instant cast they shouldn't be manalocked
+                self.manalockTime = 0
+            else:
+                # manalock duration is used if set, otherwise defaults to castTime
+                self.manalockTime = time + (
+                    self.manalockDuration
+                    if self.manalockDuration > 0
+                    else self.castTime
+                )
+            self.curMana = self.curMana - self.fullMana.stat + self.startingMana
+
+            self.attacksOnLastCast = self.numAttacks
+            # basically, can't attack before cast time up.
+            # this logic might be slightly incorrect
+            # castTime is the cast animation (cast start -> the next attack
+            # starts); a fresh attack follows.
+            self.nextAttackTime = max(
+                self.nextAttackTime,
+                time + self.castTime + self.freshAttackDelay(),
+            )
+            self.attack_progress = 1.0
+            for item in items:
+                item.ability("postAbility", time, self)
+
+    def baseAtkDamage(self, attack, multiplier):
+        # just an extra method for abilities which attack for a % of your AD,
+        # like Runaans
+        # Probably does result in some niche buggy interactions
+
+        return (attack + multiplier.add) * multiplier.mult
+
+    def doAttack(self, attack, items, time):
+        # Activating onhits
+        # onAttack is currently unused
+        if attack.canOnHit:
+            for item in items:
+                item.ability("onAttack", time, self, attack.opponents)
+
+        baseDmg = self.baseAtkDamage(
+            attack.scaling(self.level, self.atk.stat, self.bonus_ad.stat, self.ap.stat),
+            attack.multiplier,
+        )
+        baseCritDmg = baseDmg
+        if attack.canCrit:
+            baseCritDmg *= self.critDamage()
+        baseDmg *= self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        baseCritDmg *= self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        crit_chance = self.crit.stat if attack.canCrit else 0 # only increment crit if we can actually crit
+        for target in range(attack.numTargets):
+            self.doDamage(
+                attack.opponents[target],
+                items,
+                crit_chance,
+                baseCritDmg,
+                baseDmg,
+                attack.attackType,
+                time,
+            )
+
+    def critDamage(self):
+        # Crit chance < 1: critdmg.stat
+        # Crit chance > 1: add half the overfill crit chance to dmg
+        return self.critDmg.stat + max(0, 0 + (self.crit.stat - 1) / 2)
+
+    def doDamage(
+        self,
+        opponent,
+        items,
+        critChance,
+        damageIfCrit,
+        damage,
+        dtype,
+        time,
+        is_spell=False,
+        source_item=None,
+        ability_armor_pierce=0,
+        ability_mr_pierce=0,
+    ):
+        """Actually doing damage: consider
+            average of damage if crit and damage
+
+        Args:
+            opponent (Champion): opp to do dmg to
+            items (List[item]): List of active items/buffs
+            critChance (float)
+            damageIfCrit (float)
+            damage (float): dmg if not crit
+            dtype (str): "physical", "magical", "true"
+            time (int)
+            is_spell (bool, optional): is it spell damage?
+        """
+        #
+        # if not crit
+        critChance = min(1, critChance)
+        if getattr(self, "luckyCrit", False):
+            critChance = utils.lucky_chance(critChance)
+        self.critCounter += critChance
+        if self.critCounter > 1:
+            for item in items:
+                if item != source_item:
+                    # pass whether it's spell for holobow
+                    item.ability("onCrit", time, self, is_spell)
+            self.critCounter -= 1
+
+        preDmg = damage
+        preCritDmg = damageIfCrit
+
+        avgDmg = preDmg * (1 - critChance) + preCritDmg * critChance
+        # if anything needs to modify the damage dealt
+        for item in items:
+            avgDmg = item.ability("onDealDamage", time, self, avgDmg)
+        # if only spell dmg needs to be modified (Arcana Xerath)
+        if is_spell:
+            for item in items:
+                avgDmg = item.ability("onDealSpellDamage", time, self, avgDmg)
+
+        avgDmg = self.damage(avgDmg, dtype, opponent, ability_armor_pierce, ability_mr_pierce)
+        self.dmgDealt += avgDmg[0]
+        # PostOnDealDamage's input_ carries the damage amount but not who it
+        # hit; on-hit effects that need the specific target (e.g. Executioner
+        # applying a bleed) read this instead of threading a new param
+        # through every item.ability() call.
+        self.lastDamagedOpponent = opponent
+        for item in items:
+            # if you need to track how much dmg was actually dealt
+            item.ability("PostOnDealDamage", time, self, avgDmg)
+
+        if is_spell:
+            for item in items:
+                item.ability("PostOnDealSpellDamage", time, self, avgDmg)
+
+        if avgDmg:
+            # record (Time, Damage Dealt, current AS, current Mana, full Mana)
+            self.dmgVector.append(
+                (time, avgDmg, self.aspd.stat, self.curMana, self.fullMana.stat)
+            )
+
+
+    def multiTargetSpell(
+        self,
+        opponents,
+        items,
+        time,
+        targets,
+        scaling,
+        type="magical",
+        numAttacks=0,
+        ability_armor_pierce=0,
+        ability_mr_pierce=0,
+    ):
+        """Cast a damage-dealing spell
+
+        Args:
+            opponents (List[Champion]): List of opponents
+            items (List[item]): active items & buffs
+            time (float): current float
+            targets (int): # targets
+            scaling (func): damage func(level, AD, AP)
+            type (str, optional): physical, magical, true
+            numAttacks (int, optional): # of attacks to apply for guinsoo/runaans
+        """
+        baseDmg = scaling(self.level, self.bonus_ad.stat, self.ap.stat)
+        baseCritDmg = baseDmg
+        self.numAttacks += numAttacks
+        newAttack = Attack(opponents, Stat(0, 1, 0), "physical", 1, regularAuto=False)
+        for attacks in range(numAttacks):
+            # activate onhits, currently unused
+            for item in items:
+                item.ability("preAttack", time, self, newAttack)
+        if self.canSpellCrit:
+            baseCritDmg *= self.critDamage()
+
+        for opponent in opponents[0:targets]:
+            multipliedDmg = (
+                baseDmg * self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+            )
+            multipliedCritDmg = (
+                baseCritDmg * self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+            )
+            critChance = self.crit.stat if self.canSpellCrit else 0
+            self.doDamage(
+                opponent,
+                items,
+                critChance,
+                multipliedCritDmg,
+                multipliedDmg,
+                type,
+                time,
+                is_spell=True,
+                ability_armor_pierce=ability_armor_pierce,
+                ability_mr_pierce=ability_mr_pierce,
+            )
+
+        for attacks in range(numAttacks):
+            for item in items:
+                item.ability("postAttack", time, self)
+
+    def damage(self, dmg, dtype, defender, ability_armor_pierce=0, ability_mr_pierce=0):
+        """deal dmg, dmg is premitigated
+
+        Args:
+            dmg (FLOAT): for basic attacks, it's just atk. sometimes
+            dtype (STRING): physical/magical/true
+            defender (Champion): recipient
+        """
+        # Pierce past 100% ignores no more than 100% does, and shred can't take
+        # a resist below 0 -- so neither end can turn into bonus damage.
+        if dtype == "physical":
+            total_pierce = self.armorPierce.stat + ability_armor_pierce - self.armorPierce.stat * ability_armor_pierce
+            defense = max(0, defender.armor.stat) * (1 - min(total_pierce, 1))
+        elif dtype == "magical":
+            total_pierce = self.mrPierce.stat + ability_mr_pierce - self.mrPierce.stat * ability_mr_pierce
+            defense = max(0, defender.mr.stat) * (1 - min(total_pierce, 1))
+        elif dtype == "true":
+            defense = 0
+
+        # also add in 'damageTaken' modifier
+        dModifier = 100 / (100 + defense)
+        return (dmg * dModifier, dtype)

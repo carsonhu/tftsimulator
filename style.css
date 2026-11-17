@@ -1,0 +1,1035 @@
+/* style.css — dark theme matching the stlite build's look
+   (#0e1117 ground, #fafafa text, #ff4b4b accent). */
+
+* {
+  box-sizing: border-box;
+}
+
+/* Several containers below set display:flex/grid, which would beat the UA
+   stylesheet's [hidden] { display:none } on specificity and quietly un-hide
+   them (the Blackthorn panel did exactly that). */
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #0e1117;
+  color: #fafafa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+}
+
+/* ---------------- boot overlay ---------------- */
+
+#boot-status {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  padding: 24px;
+  background: #0e1117;
+  z-index: 10;
+}
+
+#boot-status[hidden] {
+  display: none;
+}
+
+#boot-status .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #31333f;
+  border-top-color: #ff4b4b;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+#boot-status .detail {
+  color: #a3a8b8;
+  font-size: 0.9em;
+  max-width: 32em;
+}
+
+#boot-status .error {
+  color: #ff4b4b;
+  white-space: pre-wrap;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8em;
+  text-align: left;
+  max-width: 48em;
+  max-height: 40vh;
+  overflow: auto;
+  background: #1a1c23;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------- layout ---------------- */
+
+#layout {
+  display: flex;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+#sidebar {
+  width: 340px;
+  flex: 0 0 340px;
+  padding: 16px;
+  background: #262730;
+  /* Pinned to the viewport and scrolling internally, so the controls stay
+     reachable however far down the results the page is scrolled. */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Slim scrollbar so the pinned sidebar doesn't lose width to it. */
+#sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: #4a4d5a transparent;
+}
+
+#sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+  background: #4a4d5a;
+  border-radius: 4px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#content {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 20px 28px 40px;
+}
+
+/* Hidden on desktop; the drawer machinery only exists on narrow screens. */
+#sidebarToggle,
+#sidebarBackdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  /* Streamlit-style drawer: the content gets the full width and the sidebar
+     slides in from the left over it, rather than stacking as a page-long
+     block of controls the results sit underneath. */
+  #sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    height: 100dvh; /* keeps the bottom reachable under mobile browser bars */
+    width: min(85vw, 340px);
+    z-index: 30;
+    transform: translateX(-105%); /* 105: keep the shadow off-screen too */
+    transition: transform 0.2s ease;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.5);
+  }
+  body.sidebar-open #sidebar {
+    transform: translateX(0);
+  }
+
+  #sidebarToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 40; /* above the drawer, so it stays tappable to close it */
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font-size: 1.2em;
+    color: #fafafa;
+    background: #262730;
+    border: 1px solid #4a4d5a;
+    border-radius: 8px;
+  }
+  body.sidebar-open #sidebarBackdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  /* Clear the fixed toggle button so it doesn't sit on the header. */
+  #content {
+    padding: 60px 14px 40px;
+  }
+}
+
+/* ---------------- sidebar controls ---------------- */
+
+#sidebar h2 {
+  font-size: 1.05em;
+  margin: 0 0 8px;
+}
+
+#sidebar section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#sidebar label,
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85em;
+  color: #c7cad6;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.row .grow {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+select,
+input[type="number"] {
+  width: 100%;
+  padding: 6px 8px;
+  background: #0e1117;
+  color: #fafafa;
+  border: 1px solid #31333f;
+  border-radius: 6px;
+  font: inherit;
+}
+
+select:focus,
+input:focus {
+  outline: 1px solid #ff4b4b;
+}
+
+/* ---------------- searchable select (see makeSearchable) ---------------- */
+
+.combo {
+  position: relative;
+  width: 100%;
+}
+
+/* The real <select> stays in the DOM so sel.value and sel.onchange keep
+   working; it is only the widget that is replaced. */
+.combo select {
+  display: none;
+}
+
+.combo-input {
+  width: 100%;
+  padding: 6px 8px;
+  background: #0e1117;
+  color: #fafafa;
+  border: 1px solid #31333f;
+  border-radius: 6px;
+  font: inherit;
+  cursor: pointer;
+  /* Long item names get an ellipsis rather than widening the sidebar. */
+  text-overflow: ellipsis;
+}
+
+.combo-list {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  /* Above the controls below it, and above the table's sticky header. */
+  z-index: 40;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #14161c;
+  border: 1px solid #3d4152;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+.combo-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  color: #fafafa;
+}
+
+/* One highlight, driven by the keyboard and by hover alike, so arrowing and
+   pointing cannot disagree about which row is about to be picked. */
+.combo-option.active {
+  background: #ff4b4b;
+  color: #fff;
+}
+
+.combo-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  flex: none;
+}
+
+/* Holds the column open for entries with no art, so the names still line up. */
+.combo-icon-blank {
+  visibility: hidden;
+}
+
+/* Dropped upward when the scrolling sidebar has no room below (see place). */
+.combo-list.above {
+  top: auto;
+  bottom: calc(100% + 2px);
+}
+
+.combo-empty {
+  padding: 6px 8px;
+  color: #9aa0ae;
+  font-style: italic;
+}
+
+input[type="range"] {
+  accent-color: #ff4b4b;
+  width: 100%;
+}
+
+.slider-value {
+  color: #ff4b4b;
+  font-weight: 600;
+}
+
+button {
+  padding: 6px 14px;
+  background: #0e1117;
+  color: #fafafa;
+  border: 1px solid #31333f;
+  border-radius: 6px;
+  font: inherit;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+button:hover {
+  border-color: #ff4b4b;
+  color: #ff4b4b;
+}
+
+details {
+  background: #1a1c23;
+  border: 1px solid #31333f;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+details summary {
+  cursor: pointer;
+  font-size: 0.9em;
+  color: #c7cad6;
+}
+
+details[open] summary {
+  margin-bottom: 8px;
+}
+
+details > label {
+  margin-bottom: 8px;
+}
+
+.buff-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+/* No buff in the bar takes a parameter: drop the third column entirely so
+   Name and Level use the full sidebar width. */
+#buffRows.no-param .buff-row {
+  grid-template-columns: 2fr 1fr;
+}
+
+#buffRows.no-param .buff-row > label:nth-child(3) {
+  display: none;
+}
+
+.col-label {
+  font-size: 0.82em;
+  color: #9aa0b0;
+}
+
+.team-traits {
+  display: grid;
+  /* One fixed cell width for every trait, packed left: a trait with a level
+     picker must not claim more room than a trait with a tick box. */
+  grid-template-columns: repeat(auto-fill, 190px);
+  justify-content: start;
+  /* dense: a single may drop back into a cell a two-wide trait left empty
+     at the end of its row, so no column is ever half-used. */
+  grid-auto-flow: row dense;
+  /* Fills the column's remaining height, with the traits themselves parked
+     at the top rather than spread down it. */
+  flex: 1 1 auto;
+  align-content: start;
+  gap: 6px 18px;
+  background: #1a1c23;
+  border: 1px solid #31333f;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+/* Every trait is one line: the label, then its control. Left as a column,
+   the level picker stacked its caption above a full-width select and towered
+   over the tick boxes beside it. */
+/* This panel is in <main>, not the sidebar, so it misses the `#sidebar label`
+   rule that makes a label a flex box -- without display here, every line below
+   was inline text and the picker sat hard against its own caption. */
+/* Badge, name, then the control immediately after it -- a control belongs to
+   the trait it names, so it sits against the name rather than out at the
+   cell's edge where the next trait starts. The trailing 1fr holds nothing and
+   exists only to soak up the cell's spare width; without it the auto tracks
+   would stretch and push the control away again. */
+.team-trait {
+  display: grid;
+  grid-template-columns: 22px auto auto 1fr;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+/* One trait asks which variant is on as well as how big it is (Greenfather's
+   Hex), so it needs one more column. It spans two cells rather than squeezing
+   two pickers and a name into one -- at 190px the name would have nowhere to
+   go, and Greenfather is far and away the widest thing this panel shows. */
+.team-trait.with-option {
+  grid-template-columns: 22px auto auto auto auto 1fr;
+  grid-column: span 2;
+  /* Laid out before every single-cell trait. Placed in catalog order, a
+     two-wide cell lands wherever the cursor happens to be, and the singles
+     under it then line up with only one of its halves -- Solar in columns 3-4
+     with Invoker alone under column 4. Packed first, the wide cells always
+     start at column 1 in pairs and the singles fill whole cells after them,
+     so every badge sits on a column edge. */
+  order: -1;
+}
+
+/* Sized in em so it tracks the text it sits beside rather than being pinned
+   to a bitmap's dimensions -- the whole reason these are drawn. */
+.stat-slot {
+  display: inline-flex;
+  align-items: center;
+}
+
+.stat-icon {
+  width: 1.15em;
+  height: 1.15em;
+  fill: currentColor;
+  display: block;
+}
+
+.team-trait select {
+  /* The generic sidebar rule stretches selects to 100%; these are sized by
+     their content instead. */
+  width: auto;
+  min-width: 3.4em;
+  padding: 1px 2px;
+  font-size: 0.9em;
+}
+
+.team-trait input[type="checkbox"] {
+  accent-color: #ff4b4b;
+  justify-self: start;
+  margin: 0;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.section-head h2 {
+  margin: 0;
+}
+
+.hint {
+  margin: 0 0 4px;
+  font-size: 0.8em;
+  color: #9aa0b0;
+}
+
+select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.buff-row input[hidden] {
+  display: none;
+}
+
+/* ---------------- pills (radio groups) ---------------- */
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.pill {
+  border-radius: 999px;
+  padding: 5px 14px;
+  align-self: auto;
+}
+
+.pill.active {
+  background: #ff4b4b;
+  border-color: #ff4b4b;
+  color: #fff;
+}
+
+.pill.active:hover {
+  color: #fff;
+}
+
+/* Wisp slice, with Blossom on: those Wisps are the upgraded ones. Blossom
+   pink rather than the page's red, so it reads as a different kind of mark
+   than "selected" -- and a ring outside the border, so it survives .active
+   painting the border itself red. */
+.pill-blossom {
+  border-color: #ff8ad8;
+  box-shadow: 0 0 0 2px rgba(255, 138, 216, 0.55);
+}
+
+.pill-blossom:not(.active) {
+  color: #ff8ad8;
+}
+
+/* Hover normally repaints the border red, which would erase the mark. */
+.pill-blossom:hover {
+  border-color: #ff8ad8;
+  color: #ff8ad8;
+}
+
+.pill-blossom.active:hover {
+  color: #fff;
+}
+
+/* ---------------- content ---------------- */
+
+h1 {
+  font-size: 1.7em;
+  margin: 0 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
+}
+
+/* Enemy stats, edited in place in the heading. The id-scoped selector is
+   deliberate: the generic input[type="number"] rule above would otherwise
+   win on specificity and give these the full-width sidebar treatment. */
+#header input.inline-num {
+  font: inherit;
+  color: #ff4b4b;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed #4a4d5a;
+  border-radius: 0;
+  padding: 0 2px;
+  text-align: right;
+  width: 5ch;
+}
+
+#header input.inline-num:hover {
+  border-bottom-color: #ff4b4b;
+}
+
+#header input.inline-num:focus {
+  outline: none;
+  border-bottom: 1px solid #ff4b4b;
+  background: #1a1c23;
+}
+
+/* Spinners would crowd the text and shift it as the value grows. */
+#header input.inline-num::-webkit-outer-spin-button,
+#header input.inline-num::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+#header input.inline-num {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+h3 {
+  margin: 18px 0 8px;
+}
+
+.disclaimer {
+  color: #a3a8b8;
+  font-size: 0.9em;
+  max-width: 60em;
+}
+
+.stats-row {
+  display: flex;
+  /* stretch, not flex-start: the Team Traits column is meant to run the full
+     height of the left column (stats + Display DPS + slice pills), so it
+     covers the top-right corner down to the table. */
+  align-items: stretch;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.stats-block h3,
+.team-block h3 {
+  margin: 14px 0 6px;
+}
+
+.stats-block {
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.team-block {
+  /* Takes whatever is left horizontally, and its inner box takes whatever is
+     left vertically. */
+  flex: 1 1 260px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+}
+
+.stats-panel {
+  display: grid;
+  /* Two roomy columns, each filled top to bottom by app.js. */
+  grid-template-columns: repeat(2, minmax(290px, 1fr));
+  gap: 2px 32px;
+  background: #1a1c23;
+  border: 1px solid #31333f;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.84em;
+  line-height: 1.6;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.stats-col {
+  min-width: 0;
+}
+
+/* Each stat line, with its additive input pushed to the column's right edge
+   so the inputs form a single aligned run. */
+.stat-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 1.9em;
+}
+
+.stat-bonus {
+  color: #7a7f8f;
+  flex: 0 0 auto;
+}
+
+.stats-panel input[type="number"] {
+  width: 4.5ch;
+  padding: 1px 4px;
+  margin-left: 2px;
+  font: inherit;
+  color: #fafafa;
+  background: #0e1117;
+  border: 1px solid #31333f;
+  border-radius: 4px;
+  text-align: right;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.stats-panel input[type="number"]::-webkit-outer-spin-button,
+.stats-panel input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.stats-panel input[type="number"]:hover {
+  border-color: #4a4d5a;
+}
+
+.stats-panel input[type="number"]:focus {
+  outline: none;
+  border-color: #ff4b4b;
+}
+
+.c-blue {
+  color: #4da3ff;
+  font-weight: 600;
+}
+
+.c-green {
+  color: #21c354;
+}
+
+.c-red {
+  color: #ff4b4b;
+}
+
+.notes {
+  color: #c7cad6;
+  font-size: 0.9em;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 14px 0 4px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 4px;
+  cursor: pointer;
+}
+
+.option-row .checkbox-row {
+  margin: 0;
+}
+
+/* Legend for the table's sequential fill. */
+.scale-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8em;
+  color: #9aa0b0;
+}
+
+.scale-legend .ramp {
+  width: 90px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid #31333f;
+  /* The same surface->step-500 ramp the cells paint with. */
+  background: linear-gradient(
+    90deg,
+    rgba(37, 106, 191, 0) 0%,
+    rgba(37, 106, 191, 1) 100%
+  );
+}
+
+.scale-legend .scale-note {
+  color: #7a7f8f;
+}
+
+.checkbox-row input {
+  accent-color: #ff4b4b;
+}
+
+.run-status {
+  color: #ffd166;
+  margin: 6px 0;
+  font-size: 0.9em;
+}
+
+/* ---------------- tables ---------------- */
+
+.table-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 380px;
+  border: 1px solid #31333f;
+  border-radius: 8px;
+  margin: 10px 0;
+  width: 100%;
+}
+
+table {
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+/* Sized to its content, not to the page. Stretching to 100% put ~300px of
+   pure slack into seven columns that had nothing to put there, which pushed
+   "DPS at 5" and "DPS at 25" a third of a metre apart on a wide monitor --
+   the two numbers a reader most wants to compare. Shrink-to-fit closes that
+   gap without dropping a single character. The larger type stays: the numbers
+   are the reason this page exists. Scoped to the results table -- the index
+   log lives in a narrow column beside the chart. */
+#resultsTable {
+  width: auto;
+  font-size: 1.05em;
+}
+
+/* The border hugs the table rather than framing the empty space beside it.
+   max-width keeps the scroll behaviour on a narrow window, where the table is
+   wider than the column and .table-wrap's overflow-x takes over. */
+.results-wrap {
+  width: fit-content;
+  max-width: 100%;
+}
+
+#logTable {
+  width: 100%;
+  font-size: 0.86em;
+}
+
+#logTable td,
+#logTable th {
+  padding: 3px 8px;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  background: #262730;
+}
+
+td,
+th {
+  padding: 4px 14px;
+  border-bottom: 1px solid #22242e;
+  text-align: right;
+}
+
+thead td,
+thead th {
+  font-weight: 600;
+  color: #c7cad6;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Tighter gutters than the 14px default, horizontal only -- the 4px above and
+   below is what sets the row height, and that stays put. Each column is a
+   right-aligned number against a shaded cell, so the fill already separates
+   them and the extra gutter was only buying width. */
+#resultsTable td,
+#resultsTable th {
+  padding-left: 9px;
+  padding-right: 9px;
+}
+
+/* Results table: label column on the left, the To Plot checkbox column on
+   the far right. */
+#resultsTable td:first-child,
+#resultsTable thead :first-child {
+  text-align: left;
+}
+
+#resultsTable td:last-child,
+#resultsTable thead :last-child {
+  text-align: center;
+}
+
+/* Item and augment art beside the name, like the stats sites. Inline rather
+   than a flex cell so the table's own column sizing still applies. */
+#resultsTable .row-icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  margin-right: 8px;
+  border-radius: 3px;
+}
+
+/* A trait is a hexagon coloured by its tier with a white glyph inside, the
+   way the game draws it. The glyph ships as one white-on-nothing PNG per
+   trait and is painted by a mask, so a tier change is a colour change rather
+   than another file. */
+.trait-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 24px;
+  flex: none;
+  vertical-align: middle;
+  margin-right: 8px;
+  background: #4a5061; /* no tier: still a badge, just an unranked one */
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.trait-glyph {
+  width: 15px;
+  height: 15px;
+  background: #14161c;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* Bronze is dark enough that a dark glyph disappears into it. */
+.trait-badge[data-tier="bronze"] .trait-glyph,
+.trait-badge:not([data-tier]) .trait-glyph {
+  background: #f4f1ee;
+}
+
+/* Sortable headers. */
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+th.sortable:hover {
+  color: #fafafa;
+  background: #31333f;
+}
+
+th.sorted {
+  color: #ff4b4b;
+}
+
+.sort-arrow {
+  font-size: 0.85em;
+}
+
+#logTable td:nth-child(3) {
+  text-align: left;
+}
+
+tbody tr:hover {
+  background: #1a1c23;
+}
+
+/* A shaded cell paints over the row's hover background, so the hover cue is
+   drawn on the cells themselves as rules above and below. */
+tbody tr:hover td {
+  box-shadow:
+    inset 0 1px 0 #6b7183,
+    inset 0 -1px 0 #6b7183;
+}
+
+/* Rows are the plot control now. */
+#resultsTable tbody tr {
+  cursor: pointer;
+}
+
+#resultsTable tbody tr:focus-visible {
+  outline: 2px solid #ff4b4b;
+  outline-offset: -2px;
+}
+
+/* A plotted row wears its series colour as a bar beside the name, never as
+   the text colour -- the label stays in ink and the mark carries identity.
+   --series is set per row in app.js from the same value the line uses. */
+#resultsTable tbody tr.plotted td:first-child {
+  box-shadow: inset 4px 0 0 var(--series);
+  font-weight: 600;
+}
+
+#resultsTable tbody tr.plotted:hover td:first-child {
+  box-shadow:
+    inset 4px 0 0 var(--series),
+    inset 0 1px 0 #6b7183,
+    inset 0 -1px 0 #6b7183;
+}
+
+td input[type="checkbox"] {
+  accent-color: #ff4b4b;
+}
+
+/* ---------------- plot area ---------------- */
+
+#plotHint {
+  color: #a3a8b8;
+  background: #1a1c23;
+  border: 1px solid #31333f;
+  border-radius: 8px;
+  padding: 10px 14px;
+  max-width: 30em;
+}
+
+#plotColumns {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+#chart {
+  flex: 3 1 0;
+  min-width: 0;
+  height: 480px;
+}
+
+#logColumn {
+  flex: 1 1 0;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.85em;
+  color: #c7cad6;
+}
+
+.log-wrap {
+  max-height: 300px;
+}
+
+@media (max-width: 1100px) {
+  #plotColumns {
+    flex-direction: column;
+  }
+  #chart {
+    width: 100%;
+    flex: none;
+  }
+  #logColumn {
+    width: 100%;
+  }
+}
+
+.caption {
+  color: #7a7f8f;
+  font-size: 0.8em;
+  margin-top: 24px;
+}
+
+.caption a {
+  color: #9aa0b0;
+}
+
+.caption a:hover {
+  color: #ff4b4b;
+}

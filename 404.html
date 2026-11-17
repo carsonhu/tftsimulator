@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+    <script>
+      // GitHub Pages serves this file for any path that isn't a real file,
+      // which is every in-app route: only index.html and stlite.html exist.
+      //
+      // The root is now the static build, which is the Champion Selector, so
+      // a bookmark of /ChampionSelector simply lands on "/". The pages that
+      // still live only in the Streamlit build keep working by routing to
+      // stlite.html?page=<name>, which app.py reads via st.query_params and
+      // turns into an st.switch_page() call -- Streamlit's frontend writes
+      // that path into the address bar on navigation but (confirmed by
+      // testing) never reads it back on boot, so the query param is what
+      // carries the destination.
+      var STLITE_ONLY = ["ManaGeneration", "TankCalculator"];
+
+      var loc = window.location;
+      // Everything after the leading "/". The site is served from the domain
+      // root (tftsimulator.app), so there is no base path to strip; it was 1
+      // segment back when this served from github.io/tftsimulator/.
+      var route = loc.pathname.split("/").slice(1).join("/");
+      var extra = loc.search ? "&" + loc.search.slice(1) : "";
+
+      if (STLITE_ONLY.indexOf(route) !== -1) {
+        loc.replace(
+          "/stlite.html?page=" + encodeURIComponent(route) + extra + loc.hash
+        );
+      } else {
+        // Joining zero segments still needs the leading "/" -- appending a
+        // trailing "/" to an empty join produces "//", which
+        // location.replace() reads as protocol-relative (host-relative, not
+        // path-relative) and silently fails to navigate.
+        loc.replace("/" + (loc.search || "") + loc.hash);
+      }
+    </script>
+  </head>
+  <body>Redirecting&hellip;</body>
+</html>
