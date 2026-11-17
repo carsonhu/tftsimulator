@@ -19,7 +19,8 @@ from champion import Champion
 from item import Item
 from timing import Timing
 
-# set18 defaults kept where the build has no value (E12: base crit lives in native code, not in data)
+# Base crit is in no shared asset (native defaults). The owner confirmed on 2026-11-17 that Set 19 keeps
+# 25% chance / 140% damage (E12).
 BASE_CRIT_CHANCE = 0.25
 BASE_CRIT_DAMAGE = 1.4
 
@@ -144,8 +145,8 @@ class BuildChampion(Champion):
             'attack_range': 'AttackRange' if 'AttackRange' in s else 'default 1 (no AttackRange: melee)',
             'role': f'role {c.role} effects', 'attack_speed_cap': 'GE_AttackSpeedMax' if cap else 'default 5',
             'excess_crit_ratio': 'CT_ExtraCritChanceToCritDamage' if ex is not None else 'default 0.5',
-            'crit_chance': 'CritChance' if 'CritChance' in s else f'default {BASE_CRIT_CHANCE} (E12 open)',
-            'crit_damage': 'CritDamage' if 'CritDamage' in s else f'default {BASE_CRIT_DAMAGE} (E12 open)',
+            'crit_chance': 'CritChance' if 'CritChance' in s else f'{BASE_CRIT_CHANCE} (owner, 2026-11-17: unchanged in Set 19)',
+            'crit_damage': 'CritDamage' if 'CritDamage' in s else f'{BASE_CRIT_DAMAGE} (owner, 2026-11-17: unchanged in Set 19)',
             'timing': self.timing.source,
         }
 

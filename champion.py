@@ -618,7 +618,7 @@ class Champion(FastDeepCopy):
         if getattr(self, "luckyCrit", False):
             critChance = utils.lucky_chance(critChance)
         self.critCounter += critChance
-        if self.critCounter > 1:
+        if self.critCounter >= 1:
             for item in items:
                 if item != source_item:
                     # pass whether it's spell for holobow
@@ -685,7 +685,10 @@ class Champion(FastDeepCopy):
         baseDmg = scaling(self.level, self.bonus_ad.stat, self.ap.stat)
         baseCritDmg = baseDmg
         self.numAttacks += numAttacks
-        newAttack = Attack(opponents, Stat(0, 1, 0), "physical", 1, regularAuto=False)
+        newAttack = Attack(
+            opponents=opponents, multiplier=Stat(0, 1, 0), attackType="physical", numTargets=1,
+            regularAuto=False,
+        )
         for attacks in range(numAttacks):
             # activate onhits, currently unused
             for item in items:
