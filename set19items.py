@@ -610,14 +610,14 @@ def apply_burn(champion, target, level, duration):
 
 def tick_burns(champion):
     """Deal the burns due this tick, once per tick however many burn items the holder has: true damage of
-    BurnWound(level) x the target's max HP, amplified like the holder's other damage (I7)."""
+    BurnWound(level) x the target's max HP, not boosted by anything (owner, 2026-11-17; I7)."""
     if getattr(champion, "burn_tick", None) == champion.tick:
         return
     champion.burn_tick = champion.tick
     period = ticks_up(champion.build.data["globals"]["burn"]["period"])
     for b in (getattr(champion, "burns", None) or {}).values():
         while b["next"] <= champion.tick and b["next"] <= b["end"]:
-            dmg = debuff_value(champion, "BurnWound", b["level"]) * b["target"].hp.stat * champion.dmgMultiplier.stat
+            dmg = debuff_value(champion, "BurnWound", b["level"]) * b["target"].hp.stat
             # items=[]: a burn tick is not an attack or a spell, so no on-hit effect answers it
             champion.doDamage(b["target"], [], 0, dmg, dmg, "true", champion.tick / TPS)
             b["next"] += period
