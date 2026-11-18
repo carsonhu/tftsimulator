@@ -27,7 +27,7 @@ Guinsoo's would show a wrong number.
 | Blue Buff | `DA_BlueBuff` | AbilityPower, AttackDamage, ManaPerSecond | `GA_BlueBuff` | confirmed (VOD) | [worksheet](../items/BlueBuff.md): +10 mana at combat start, 6 regen; VOD 2026-11-17. |
 | Bramble Vest | `DA_BrambleVest` | Armor, HealthMax | `GA_BrambleVest` | not started | |
 | Crownguard | `DA_Crownguard` | AbilityPower, Armor, HealthMax, IncomingHealMultiplier, IncomingShieldMultiplier | `GA_Crownguard` | not started | |
-| Deathblade | `DA_Deathblade` | AttackDamage | none | not started | "15% additional AD from all sources": three more AttackDamage modifiers with operations `Multiplicitive` (×) and MultiplyAdditive; meaning to check before use. No script. |
+| Deathblade | `DA_Deathblade` | AttackDamage | none | **confirmed** (VOD3) | 2026-11-17: 55% AD, every bonus AD ×1.15 (Channel1 MultiplyAdditive with base-cancelling AddFinals; ×1.30 with two), ledger I5. VOD3 panel: 63%, 103% with IE, 189% with IE + 2. No script. |
 | Dragon's Claw | `DA_DragonsClaw` | HealthMax, MagicResist | none | not started | `GE_DragonsClaw_HPRegen` (period 2 s); defensive. |
 | Edge of Night | `DA_EdgeOfNight` | AbilityPower, Armor, AttackDamage, AttackSpeed | `GA_EdgeOfNight` | not started | |
 | Evenshroud | `DA_Evenshroud` | HealthMax, MagicResist | none | not started | `GE_Evenshroud_ApplyGA` grants an ability though the item has none listed. |
@@ -45,7 +45,7 @@ Guinsoo's would show a wrong number.
 | Nashor's Tooth | `DA_NashorsTooth` | AbilityPower, AttackSpeed, CritChance, HealthMax, ManaPerAttack | `GA_NashorsTooth` | not started | |
 | Protector's Vow | `DA_ProtectorsVow` | Armor, MagicResist, ManaPerSecond | `GA_ProtectorsVow` | not started | |
 | Quicksilver | `DA_Quicksilver` | AttackSpeed, CritChance, MagicResist | `GA_Quicksilver` | not started | |
-| Rabadon's Deathcap | `DA_RabadonsDeathcap` | AbilityPower | none | not started | "15% additional AP from all sources": as Deathblade, on AbilityPower. No script. |
+| Rabadon's Deathcap | `DA_RabadonsDeathcap` | AbilityPower | none | implemented (stats) | 2026-11-17: 55% AP, every bonus AP ×1.15: the same effect structure as Deathblade (I5), which VOD3 confirms; not seen itself. No script. |
 | Red Buff | `DA_RedBuff` | AttackSpeed, OutgoingDamageMultiplier | `GA_RedBuff` | not started | |
 | Spear of Shojin | `DA_SpearOfShojin` | AbilityPower, AttackDamage, ManaPerAttack, ManaPerSecond | none | implemented (stats) | 2026-11-17: stats; 5 mana per attack paid with the role mana (I3, predicted). No script. |
 | Spirit Visage | `DA_SpiritVisage` | HealthMax, IncomingDamageMultiplier, ManaPerSecond | `GA_SpiritVisage` | not started | |

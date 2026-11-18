@@ -70,7 +70,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q3 | First attack at combat start: when does it land? | G3 | first attack's mana 8 ticks after combat start; engine 7 (G19 windup from a fresh attack at tick 0); the +1 is T10 (open) | E5, E6 |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.425 s (12.75 ticks) | **refuted for the unscaled launch**: release ~7-8 ticks, not 13. His attack modules lack `bUseRateScalingThreshold` (only Varus and Yorick among shop units), so the animation plays at the attack period: 0.425 x period / 2.5 (G19) | E6 |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | **shortened with AS** (G19): consistent at AS 0.77 (combat start), 0.87 and 1.11 (after casts), each within 1-1.5 ticks | E6, E7 |
-| Q6 | Projectile travel time (ranged only) | speed 2000 | spell missiles 1800 (arc 400), attack 2000; travel not measured |  |
+| Q6 | Projectile travel time (ranged only) | speed 2000 | spell missiles 1800 (arc 400), attack 2000; travel not measured. Owner (2026-11-17): travel depends on the target's distance, 4 hexes for most ranged fights; a VOD can estimate the landing (G4) |  |
 | Q7 | Cast time: cast start to the next attack starting | 1.0333 s (31 ticks) | **consistent** with cast lock 31 + G19 windup (+1 tick, T10): after-cast +7 at 38 and 37.5 ticks (predicted 37, 36); the first VOD's +37 frames fits 31 + 5 (+1) | E4, E7 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
 | Q9 | Mana lock: from cast start, when can mana be gained again? | 1 s (30 ticks) | **confirmed**: overflow shown +31 ticks after casts (first VOD +31 frames at 30 fps; second VOD +62/63 frames at 60 fps) | E3, E7 |
@@ -116,6 +116,7 @@ Source for all rows below: `Outplayed/…PBE_11-17-2026_15-16-17-933.mp4` (owner
   `EncoreHailMain` at 0.6286 s (spawn times in the build, P7); `Hail` missiles are visual. Arrival of HailMain
   (0x111b -> 0x960) applies `GE_Varus19_PrimaryDamage` (PhysicalDamageCalc1 = DamageAP x AP + DamageAD x AD) to the
   target and `GE_Varus19_SecondaryDamage` (Calc2 = AOEDamagePercent x Calc1) to enemies within AOEHexRange 1;
-  EncoreHailMain (0x121f -> 0x2e4) the same x RecastEffectiveness. Physical, RollIfCanSpellCrit. Assumed: AD in
-  the calc is the AttackDamage multiplier (1.0 base, like AP); adjacent enemies = num_targets - 1 (set18
+  EncoreHailMain (0x121f -> 0x2e4) the same x RecastEffectiveness. Physical, RollIfCanSpellCrit. AD in the calc
+  is the AttackDamage attribute (1.0 + bonus AD, like AP), not his 35 attack damage: owner, 2026-11-17 ("the AD in
+  his damage formula is only bonus AD": items' AD scales it, his base attack damage doesn't); adjacent enemies = num_targets - 1 (set18
   convention, default 2); straight-line missile flight (G4). The slow is not modelled (dummies never attack).

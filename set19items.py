@@ -6,8 +6,8 @@ from buildstore import BuildDataError, load_build
 from item import Item
 from timing import ticks_up
 
-offensive_craftables = ["ArchangelsStaff", "BlueBuff", "GuinsoosRageblade", "InfinityEdge", "JeweledGauntlet",
-                        "SpearOfShojin"]
+offensive_craftables = ["ArchangelsStaff", "BlueBuff", "Deathblade", "GuinsoosRageblade", "InfinityEdge",
+                        "JeweledGauntlet", "RabadonsDeathcap", "SpearOfShojin"]
 artifacts = []
 radiants = []
 emblems = []
@@ -28,6 +28,20 @@ def _hp_multiplier(c, v):
     c.hp.mult += v - 1  # MultiplyAdditive: (1 + sum of (v - 1)) on max health
 
 
+def _bonus_multiplier(stat):
+    """MultiplyAdditive on AD or AP in the item channel (I5): Channel1 = ((1 + bonuses) x (1 + sum of (v - 1))) +
+    AddFinal, where the effect's AddFinal terms cancel the x on the base 1 (checked in item_stats), so the effect
+    multiplies every bonus on the channel: the engine's addMultiplier (AD = base x (1 + addMultiplier x bonus))."""
+    def apply(c, v):
+        getattr(c, stat).addMultiplier += v - 1
+    return apply
+
+
+# the channel the stats layer models: items, traits and roles add to Channel1; Channel0 is the unit's base and
+# Channel2 applies after them (Last Whisper's armor x, Void Staff, healing cuts) (I5)
+ITEM_CHANNEL = 1
+
+
 # (attribute, operation) -> where a plain stat modifier lands in the engine (I1). Engine units: AD, AP and AS are
 # percent points; crit chance, omnivamp and damage amp are fractions; HP, armor, MR and mana are flat.
 STAT_MAP = {
@@ -44,7 +58,10 @@ STAT_MAP = {
     ("Omnivamp", "+"): lambda c, v: c.omnivamp.addStat(v),
     ("OutgoingDamageMultiplier", "+"): lambda c, v: c.dmgMultiplier.addStat(v),
     ("IncomingManaMultiplier", "+"): lambda c, v: c.manaGainMultiplier.addStat(v),
+    ("AttackDamage", "MultiplyAdditive"): _bonus_multiplier("bonus_ad"),
+    ("AbilityPower", "MultiplyAdditive"): _bonus_multiplier("ap"),
 }
+BONUS_MULTIPLIERS = {"AttackDamage", "AbilityPower"}  # their MultiplyAdditive comes with base-cancelling AddFinals
 # attributes that change nothing against training dummies (they never attack, heal or shield) (I1)
 NO_EFFECT_ON_DUMMIES = {"IncomingDamageMultiplier", "IncomingHealMultiplier", "IncomingShieldMultiplier",
                         "MaxTeamSizeBonus"}
@@ -64,15 +81,30 @@ def item_stats(entry, effects):
             raise BuildDataError(f"item {entry.key} has no effect {name!r} in build {entry.build.version}")
         if e["duration"] != "Infinite":
             raise BuildDataError(f"item {entry.key}: effect {name} is {e['duration']}, not a permanent stat")
+        finals = {}  # attribute -> sum of its AddFinal terms (consumed by a bonus multiplier below)
+        for m in e["modifiers"]:
+            if m["op"] == "AddFinal" and m["attribute"] in BONUS_MULTIPLIERS and len(set(m["values"])) == 1:
+                finals[m["attribute"]] = finals.get(m["attribute"], 0) + m["values"][0]
+        final_attrs = set(finals)
         for m in e["modifiers"]:
             key = (m["attribute"], m["op"])
-            if m["attribute"] in NO_EFFECT_ON_DUMMIES:
+            if m["attribute"] in NO_EFFECT_ON_DUMMIES or (m["op"] == "AddFinal" and m["attribute"] in final_attrs):
                 continue
             if m.get("scale") is not None or len(set(m["values"])) != 1:
                 raise BuildDataError(f"item {entry.key}: {m['attribute']} {m['op']} {m['text']} is not a plain value")
+            if m.get("channel", ITEM_CHANNEL) != ITEM_CHANNEL:
+                raise BuildDataError(f"item {entry.key}: {m['attribute']} {m['op']} is on channel {m['channel']}, "
+                                     f"not the item channel {ITEM_CHANNEL} (I5)")
+            if key[1] == "MultiplyAdditive" and key[0] in BONUS_MULTIPLIERS:
+                # the base 1 is multiplied too: the effect's AddFinals must take back exactly 1 x (v - 1)
+                if abs(finals.pop(key[0], 0) - (1 - m["values"][0])) > 1e-9:
+                    raise BuildDataError(f"item {entry.key}: {key[0]} x{m['values'][0]} without AddFinal terms that "
+                                         f"cancel it on the base (I5)")
             if key not in STAT_MAP:
                 raise BuildDataError(f"item {entry.key}: no stat mapping for {key} (ledger I1)")
             mods.append((m["attribute"], m["op"], m["values"][0], m.get("row")))
+        if finals:
+            raise BuildDataError(f"item {entry.key}: AddFinal on {sorted(finals)} with no multiplier to cancel (I5)")
         for t in e.get("granted_tags") or []:
             if t not in TAG_MAP:
                 raise BuildDataError(f"item {entry.key}: effect {name} grants {t}, which the engine doesn't model")
@@ -166,6 +198,21 @@ class StackingItem(BuildItem):
 
 def _name(key):
     return load_build().item(key).name  # the newest build's display name
+
+
+class Deathblade(BuildItem):
+    """55% AD; every bonus AD x1.15 (GE_Deathblade on Channel1: MultiplyAdditive ADMultiplier with AddFinal -1.15 + 1,
+    I5). Two Deathblades: x1.30. No script."""
+    KEY = "DA_Deathblade"
+    STATS = ("GE_Deathblade",)
+    display_name = _name(KEY)
+
+
+class RabadonsDeathcap(BuildItem):
+    """55% AP; every bonus AP x1.15 (as Deathblade, GE_RabadonsDeathcap_Stats, I5). No script."""
+    KEY = "DA_RabadonsDeathcap"
+    STATS = ("GE_RabadonsDeathcap_Stats",)
+    display_name = _name(KEY)
 
 
 class InfinityEdge(BuildItem):
