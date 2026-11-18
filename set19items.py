@@ -14,6 +14,7 @@ offensive_craftables = ["AdaptiveHelm", "ArchangelsStaff", "Bloodthirster", "Blu
                         "NashorsTooth", "Quicksilver", "RabadonsDeathcap", "RedBuff", "SpearOfShojin", "SteraksGage",
                         "StrikersFlail", "TitansResolve", "VoidStaff"]
 artifacts = []
+# Radiant versions: the same script with their own effects and rows (each class below the base items)
 radiants = []
 emblems = []
 animas = []
@@ -166,6 +167,15 @@ class BuildItem(Item):
             raise BuildDataError(f"item {self.KEY}: {effect} has no single plain mana term in build {entry.build.version}")
         return terms[0]["values"][0]
 
+    def ga_param(self, champion, ga, param):
+        """A parameter the item gives its script: an effect name, or a curve row's name (`RowName`). A Radiant runs
+        the same script with its own effects (GE_..._Radiant), so reading them here serves both."""
+        ref = next((r for r in self.build_entry(champion).d.get("ability_refs") or [] if r["ga"] == ga), None)
+        if ref is None or param not in (ref.get("params") or {}):
+            raise BuildDataError(f"item {self.KEY}: no {ga} parameter {param!r}")
+        v = ref["params"][param]
+        return v["RowName"] if isinstance(v, dict) and "RowName" in v else v
+
     def row(self, champion, name):
         """The item's curve row (single point) from the champion's build."""
         pts = self.build_entry(champion).row(name)
@@ -255,7 +265,7 @@ class GuinsoosRageblade(StackingItem):
     display_name = _name(KEY)
 
     def per_stack(self, champion):
-        stack, _ = self.script_modifier(champion, "GE_GuinsoosRageblade_ItemStack", "Stack", "+")
+        stack, _ = self.script_modifier(champion, self.ga_param(champion, "GA_GuinsoosRageblade", "ItemStackGE"), "Stack", "+")
         coef, scale = self.script_modifier(champion, "GE_GuinsoosRageblade_StackingAS", "AttackSpeed", "MultiplyAdditive")
         if scale != "Stack":
             raise BuildDataError(f"{self.KEY}: StackingAS no longer scales with Stack ({scale})")
@@ -274,13 +284,13 @@ class Quicksilver(StackingItem):
     display_name = _name(KEY)
 
     def period_seconds(self, champion):
-        ref = next(r for r in self.build_entry(champion).d["ability_refs"] if r["ga"] == "GA_Quicksilver")
-        return self.row(champion, ref["params"]["FrequencyCurveTable"]["RowName"])
+        return self.row(champion, self.ga_param(champion, "GA_Quicksilver", "FrequencyCurveTable"))
 
     def per_stack(self, champion):
         if self.next_k > self.MAX_ACTIONS:
             return
-        v, scale = self.script_modifier(champion, "GE_Quicksilver_StacksToAttackSpeed", "AttackSpeed",
+        v, scale = self.script_modifier(champion, self.ga_param(champion, "GA_Quicksilver", "QuicksilverStackingEffect"),
+                                        "AttackSpeed",
                                         "MultiplyAdditive")
         if scale is not None:
             raise BuildDataError(f"{self.KEY}: StacksToAttackSpeed is no longer a plain number ({scale})")
@@ -308,7 +318,8 @@ class TitansResolve(BuildItem):
         elif phase == "onLaunch" and self.stacks < self.row(champion, "MaxStacks"):
             self.stacks += 1
             for attr, stat in (("AttackDamage", champion.bonus_ad), ("AbilityPower", champion.ap)):
-                coef, scale = self.script_modifier(champion, "GE_TitansResolve_StackingStats", attr, "+")
+                coef, scale = self.script_modifier(
+                    champion, self.ga_param(champion, "GA_TitansResolve", "StackingStatsGE"), attr, "+")
                 if scale != "Stack":
                     raise BuildDataError(f"{self.KEY}: StackingStats {attr} no longer scales with Stack ({scale})")
                 stat.addStat(coef * 100)  # one stack
@@ -326,11 +337,11 @@ class ArchangelsStaff(StackingItem):
     display_name = _name(KEY)
 
     def period_seconds(self, champion):
-        ref = next(r for r in self.build_entry(champion).d["ability_refs"] if r["ga"] == "GA_ArchangelsStaff_RampingStats")
-        return self.row(champion, ref["params"]["FrequencyCurveRow"]["RowName"])
+        return self.row(champion, self.ga_param(champion, "GA_ArchangelsStaff_RampingStats", "FrequencyCurveRow"))
 
     def per_stack(self, champion):
-        stack, _ = self.script_modifier(champion, "GE_ArchangelsStaff_RampingStats", "Stack", "+")
+        stack, _ = self.script_modifier(
+            champion, self.ga_param(champion, "GA_ArchangelsStaff_RampingStats", "RampingStatGE"), "Stack", "+")
         coef, scale = self.script_modifier(champion, "GE_ArchangelsStaff_StackToAP", "AbilityPower", "+")
         if scale != "Stack":
             raise BuildDataError(f"{self.KEY}: StackToAP no longer scales with Stack ({scale})")
@@ -351,7 +362,7 @@ class BlueBuff(BuildItem):
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
-            champion.addMana(self.script_mana(champion, "GE_BlueBuff_StartingMana"))
+            champion.addMana(self.script_mana(champion, self.ga_param(champion, "GA_BlueBuff", "CombatStartManaGain")))
         return input_
 
 
@@ -400,7 +411,8 @@ class HandOfJustice(BuildItem):
     def applyStats(self, champion):
         super().applyStats(champion)
         for attr, stat in (("AttackDamage", champion.bonus_ad), ("AbilityPower", champion.ap)):
-            v, scale = self.script_modifier(champion, "GE_HandOfJustice_HighHealthEffect", attr, "+")
+            v, scale = self.script_modifier(
+                champion, self.ga_param(champion, "GA_HandOfJustice", "AboveThresholdGE"), attr, "+")
             if scale is not None:
                 raise BuildDataError(f"{self.KEY}: HighHealthEffect {attr} is not a plain number ({scale})")
             stat.addStat(v * 100)
@@ -419,7 +431,7 @@ class AdaptiveHelm(BuildItem):
         if champion.role.archetype in ("Tank", "Fighter"):
             return
         for attr, stat in (("AttackDamage", champion.bonus_ad), ("AbilityPower", champion.ap)):
-            v, scale = self.script_modifier(champion, "GE_AdaptiveHelm_OtherRoles", attr, "+")
+            v, scale = self.script_modifier(champion, self.ga_param(champion, "GA_AdaptiveHelm", "OtherRolesGE"), attr, "+")
             if scale is not None:
                 raise BuildDataError(f"{self.KEY}: OtherRoles {attr} is not a plain number ({scale})")
             stat.addStat(v * 100)
@@ -438,7 +450,8 @@ class GiantSlayer(BuildItem):
     def applyStats(self, champion):
         super().applyStats(champion)
         if self.VS_TANK:
-            v, scale = self.script_modifier(champion, "GE_GiantSlayer_ConditionalAmp", "OutgoingDamageMultiplier", "+")
+            v, scale = self.script_modifier(champion, self.ga_param(champion, "GA_GiantSlayer", "OutgoingDamageMultHolder"),
+                                            "OutgoingDamageMultiplier", "+")
             if scale is not None:
                 raise BuildDataError(f"{self.KEY}: ConditionalAmp is not a plain number ({scale})")
             champion.dmgMultiplier.addStat(v)
@@ -471,7 +484,7 @@ class KrakensFury(BuildItem):
             self.stacks = 0
         elif phase == "onLaunch" and self.stacks < self.row(champion, "MaxStacks"):
             self.stacks += 1
-            stack2, _ = self.script_modifier(champion, "GE_KrakensFury_ItemStack", "Stack2", "+")
+            stack2, _ = self.script_modifier(champion, self.ga_param(champion, "GA_KrakensFury", "ItemStackGE"), "Stack2", "+")
             coef, scale = self.script_modifier(champion, "GE_KrakensFury_StackingAD", "AttackDamage", "+")
             if scale != "Stack2":
                 raise BuildDataError(f"{self.KEY}: StackingAD no longer scales with Stack2 ({scale})")
@@ -496,7 +509,7 @@ class NashorsTooth(BuildItem):
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "onCrit" and not input_:  # input_: is it spell damage
-            champion.addMana(self.script_mana(champion, "GE_NashorsTooth_Mana"))
+            champion.addMana(self.script_mana(champion, self.ga_param(champion, "GA_NashorsTooth", "UpgradeHandler")))
         return input_
 
 
@@ -518,7 +531,8 @@ class StrikersFlail(BuildItem):
         if phase == "preCombat":
             self.slot = 0
         elif phase == "onCrit":
-            amp, scale = self.script_modifier(champion, "GE_StrikersFlail_Buff", "OutgoingDamageMultiplier", "+")
+            amp, scale = self.script_modifier(champion, self.ga_param(champion, "GA_StrikersFlail", "BuffGE"),
+                                              "OutgoingDamageMultiplier", "+")
             if scale is not None:
                 raise BuildDataError(f"{self.KEY}: the buff is not a plain number ({scale})")
             champion.applyStatus(status.DmgAmpModifier(f"StrikersFlail {id(self)} {self.slot}"), self, time,
@@ -549,8 +563,7 @@ class DebuffItem(BuildItem):
         super().__init__(phases=phases)
 
     def param_row(self, champion, param):
-        ref = next(r for r in self.build_entry(champion).d["ability_refs"] if r["ga"] == self.GA)
-        return self.row(champion, ref["params"][param]["RowName"])
+        return self.row(champion, self.ga_param(champion, self.GA, param))
 
     def performAbility(self, phase, time, champion, input_=0):
         target = getattr(champion, "lastDamagedOpponent", None)
@@ -658,3 +671,42 @@ class RedBuff(BurnItem):
     GA = "GA_RedBuff"
     LEVEL_PARAM, DURATION_PARAM = "BurnCurveRow", "DurationCurveRow"
     display_name = _name(KEY)
+
+
+# ---------------------------------------------------------------- Radiants (I9)
+def _radiant(base, key, stats, suffix=""):
+    """The Radiant version of `base`: the same class and script, with the Radiant's key, stats effect, rows and
+    script effects (read through its GA parameters, BuildItem.ga_param)."""
+    name = load_build().item(key).name + suffix
+    cls = type(base.__name__ + "Radiant", (base,), {"KEY": key, "STATS": (stats,), "display_name": name,
+                                                  "__doc__": f"{name}: {base.__name__} with {key}'s numbers."})
+    globals()[cls.__name__] = cls
+    radiants.append(cls.__name__)
+    return cls
+
+
+_radiant(AdaptiveHelm, "DA_AdaptiveHelm_Radiant", "GE_AdaptiveHelm_Stats_Radiant")
+_radiant(ArchangelsStaff, "DA_ArchangelsStaffRadiant", "GE_ArchangelsStaffRadiant_Stats")
+_radiant(Bloodthirster, "DA_BloodthirsterRadiant", "GE_BloodthirsterRadiant_Stats")
+_radiant(BlueBuff, "DA_BlueBuffRadiant", "GE_BlueBuff_Radiant_Stats")
+_radiant(Deathblade, "DA_DeathbladeRadiant", "GE_DeathbladeRadiant")
+_radiant(EdgeOfNight, "DA_EdgeOfNightRadiant", "GE_EdgeOfNightRadiant_Stats")
+_radiant(GiantSlayer, "DA_GiantSlayer_Radiant", "GE_GiantSlayer_Radiant_Stats", " (vs Tank)")
+_radiant(GiantSlayerNoTank, "DA_GiantSlayer_Radiant", "GE_GiantSlayer_Radiant_Stats", " (vs non-Tank)")
+_radiant(GuinsoosRageblade, "DA_GuinsoosRagebladeRadiant", "GE_GuinsoosRagebladeRadiant_Base")
+_radiant(HandOfJustice, "DA_HandOfJusticeRadiant", "GE_HandOfJusticeRadiant_Stats")
+_radiant(HextechGunblade, "DA_HextechGunbladeRadiant", "GE_HextechGunbladeRadiant_Stats")
+_radiant(InfinityEdge, "DA_InfinityEdgeRadiant", "GE_InfinityEdgeRadiant")
+_radiant(JeweledGauntlet, "DA_JeweledGauntletRadiant", "GE_JeweledGauntletRadiant")
+_radiant(KrakensFury, "DA_KrakensFury_Radiant", "GE_KrakensFury_Stats_Radiant")
+_radiant(LastWhisper, "DA_LastWhisperRadiant", "GE_LastWhisperRadiant_Stats")
+_radiant(Morellonomicon, "DA_MorellonomiconRadiant", "GE_MorellonomiconRadiant")
+_radiant(NashorsTooth, "DA_NashorsToothRadiant", "GE_NashorsToothRadiant_Stats")
+_radiant(Quicksilver, "DA_QuicksilverRadiant", "GE_QuicksilverRadiant_Stats")
+_radiant(RabadonsDeathcap, "DA_RabadonsDeathcap_Radiant", "GE_RabadonsDeathcap_Radiant_Stats")
+_radiant(RedBuff, "DA_RedBuffRadiant", "GE_RedBuffRadiant")
+_radiant(SpearOfShojin, "DA_SpearOfShojinRadiant", "GE_SpearOfShojinRadiant")
+_radiant(SteraksGage, "DA_SteraksGageRadiant", "GE_SteraksGageRadiant_Stats")
+_radiant(StrikersFlail, "DA_StrikersFlailRadiant", "GE_StrikersFlailRadiant_Stats")
+_radiant(TitansResolve, "DA_TitansResolve_Radiant", "GE_TitansResolve_Radiant_Stats")
+_radiant(VoidStaff, "DA_VoidStaffRadiant", "GE_VoidStaffRadiant_Stats")

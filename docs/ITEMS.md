@@ -61,4 +61,10 @@ Guinsoo's would show a wrong number.
 | Void Staff | `DA_VoidStaff` | AbilityPower, AttackSpeed, ManaPerSecond | `GA_VoidStaff` | implemented (script read) | 2026-11-17: MR x0.7 on the damaged unit after each hit, 5 s (I7). Predicted. |
 | Warmog's Armor | `DA_WarmogsArmor` | HealthMax | none | out of scope (tank item) | Not in the DPS item table (owner, 2026-11-17; I8). Stats only (HP), no damage effect: added when an HP-scaling champion needs it. |
 
-Artifacts, radiants, emblems and the rest are added when needed.
+## Radiants
+
+Every offensive craftable has its Radiant in the Radiant table (`set19items.radiants`, ledger I9): the same class and
+script, with the Radiant's key (the base item's `upgrade`), stats effect, rows and script effects. Status follows the
+base item's; nothing is VOD-checked yet.
+
+Artifacts, emblems and the rest are added when needed.
