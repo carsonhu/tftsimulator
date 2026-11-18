@@ -7,8 +7,6 @@ from timing import TPS, projectile_ticks, ticks_up
 
 class_buffs = []  # traits
 augments = []
-stat_buffs = []
-wisps = []
 no_buff = ["NoBuff"]
 
 
@@ -370,7 +368,7 @@ class Hitmaker(BuildTrait):
     """
     KEY = "DA_Hitmaker19"
     display_name = "Hitmaker"
-    team_trait = False  # the flag is about this champion (set18's Riftbeast "Is Alpha" pattern), not membership
+    team_trait = False  # the flag is about this champion, not membership
 
     @staticmethod
     def extraParameters():

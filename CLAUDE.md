@@ -50,6 +50,7 @@ python tools/import_build.py         # copy new snapshots from tftDatamine/build
 python tools/worksheets.py           # refresh the AUTO block of each worksheet from the newest build;
                                      # also warns if a build disagrees with roster.json
 python tools/worksheets.py --build <version>
+python tools/table_dump.py out.json  # every table for every champion; --diff a.json b.json before/after a refactor
 ```
 
 Snapshots are made on the datamining side: `F:/tft_projects/tftDatamine/tools/snapshot_build.py`, run every 3 hours

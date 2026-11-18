@@ -35,9 +35,10 @@ restructure, keep a durable copy (commit them, or a backup), because they are wh
 nothing.
 
 Each step below ends with: all tests pass unchanged (except tests that test the removed mechanism itself), both
-browser checks pass (`tools/browser_check/`), and the Craftable / Radiant / Artifact tables for every champion give
-the same numbers as before, to the decimal. A small script that dumps every table for every champion and diffs two
-runs makes that last check cheap; write it first.
+browser checks pass (`tools/browser_check/`), and the tables for every champion give the same numbers as before, to
+the decimal. `tools/table_dump.py` makes that last check cheap: run it before and after a step, then `--diff` the
+two dumps (every slice for every champion at 1 and 2 stars, with each row's DPS, ratios and damage vector, and the
+stats panel; about 2.5 minutes).
 
 ## The changes, in order
 
@@ -54,6 +55,15 @@ The Blackthorn panel is still in [index.html](../index.html) (always hidden). In
 Heartsteel the Flags path).
 
 **Done when:** a grep for those names finds nothing; the page looks the same.
+
+**Done (2026-11-17).** Removed: the Blackthorn panel (HTML, JS, catalog key), the Wisp slice and the Blossom pill
+marking, the Greenfather stat icons (`STAT_ICONS`, `statIcon`, `optionIcons`/`option_stats`, `trace_glyph.py`),
+`sweep_params` in the Trait sweep, the empty `wisps`, `stat_buffs` and `animas` registries, the "lucky" crit
+(`luckyCrit`, `luckyAbility`, `utils.py`) and the unused `onDealSpellDamage` / `PostOnDealSpellDamage` phases;
+comments that described set18 traits or the Streamlit pages now describe Set 19 cases. Kept, because a Set 19 class
+uses them: `_team_level_matters` (Heartsteel's Team Traits row), the Options path (Illbeats, Ionic Spark), the
+champion-specific flag row (Hitmaker's Big Shot). Tests 139 pass, both browser checks pass, and `table_dump.py
+--diff` finds no change except the removed Wisp slice (which only ever held the NoItem row).
 
 ### 2. Split the big modules; register classes with a decorator (small, low risk)
 
@@ -164,8 +174,8 @@ sliders become layout settings.
 
 | Step | Status |
 |---|---|
-| 0. Durable copy of the tests; table-diff script | not started |
-| 1. Delete set18 leftovers | not started |
+| 0. Durable copy of the tests; table-diff script | table-diff script done (`tools/table_dump.py`); test copy awaits the owner |
+| 1. Delete set18 leftovers | done (2026-11-17) |
 | 2. Split modules, decorator registration | not started |
 | 3. Game-shaped attributes | not started |
 | 4. Timed effects and damage events | not started |

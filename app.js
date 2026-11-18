@@ -2,10 +2,7 @@
 //
 // UI logic for the static frontend. All simulation happens in worker.js
 // (Pyodide); this file only builds controls from the catalog, assembles the
-// config object sim_entry.py documents, and renders what comes back. Where
-// behavior mirrors the Streamlit page (slice options, table columns, chart
-// construction), it mirrors pages/ChampionSelector.py and
-// class_utilities.plot_df on purpose -- v2 is a re-skin, not a redesign.
+// config object sim_entry.py documents, and renders what comes back.
 
 "use strict";
 
@@ -64,9 +61,8 @@ function showBootError(text) {
 
 const DPS_TIMES = [5, 10, 15, 20, 25];
 
-// Bonus stats, keyed as sim_entry expects them. Ranges are the ones the
-// Streamlit sidebar used. Each is rendered beside the stat it feeds in the
-// Base stats panel.
+// Bonus stats, keyed as sim_entry expects them. Each is rendered beside the
+// stat it feeds in the Base stats panel.
 const BONUS_FIELDS = {
   ad: { label: "Bonus AD", min: 0, max: 2000 },
   ap: { label: "Bonus AP", min: 0, max: 2000 },
@@ -87,11 +83,9 @@ const state = {
     num_targets: null,
     num_extra_targets: null,
     takedowns: 0,
-    num_traits: 6,
     bonus: { ad: 0, ap: 0, as: 0, dmgamp: 0, crit: 0, critdmg: 0, manaregen: 0, mpa: 0 },
     stage: "4-1",
     tactician_level: 4,
-    blackthorn: null,
     items: ["NoItem", "NoItem", "NoItem"],
     buffs: [], // [cls, level, params]
     enemy: { hp: 1800, armor: 100, mr: 100 },
@@ -100,8 +94,8 @@ const state = {
   },
   // Team traits the champion is NOT a member of: cls -> {level, params}.
   // Kept out of cfg.buffs so the buff bar stays the buff bar; merged in by
-  // cfgForSlice. params is 0 for the "Is X" traits, which is what the flag
-  // means, and the chosen index for one that asks (Greenfather's Hex). Being
+  // cfgForSlice. params is 0 for an "Is X" flag, which is what the flag
+  // means, and the ticked bits for a Flags trait (Heartsteel). Being
   // real entries in cfg.buffs from there on means the Trait slice sweeps
   // their other breakpoints too, same as any hand-picked buff.
   teamBuffs: new Map(),
@@ -109,8 +103,8 @@ const state = {
   displayDps: false,
   colorScale: true,
   // Class name -> icon URL, from the per-group index.json files. A row draws
-  // art only if its class is in here, so the wisp rows -- which have none --
-  // cost no failed requests.
+  // art only if its class is in here, so rows without art cost no failed
+  // requests.
   icons: new Map(),
   // icons/traits/tiers.json: {tiers: {cls: {level: tier}}, colours: {...}}.
   traitTiers: null,
@@ -118,8 +112,7 @@ const state = {
   // delivered, which is already ratio-at-25s descending.
   sort: { key: null, dir: "desc" },
   // Payload for the slice on screen, and per-slice plot selections. Any
-  // config change (not a slice change) clears selections, like a Streamlit
-  // rerun resetting the checkbox column.
+  // config change (not a slice change) clears selections.
   current: null,
   selections: new Map(), // slice -> Set(idx)
   cache: new Map(), // config-json -> payload
@@ -196,92 +189,6 @@ async function loadIcons() {
   // boot), so anything that draws an icon has to be told to draw again.
   if (state.catalog) renderTeamTraits();
   if (state.current) renderResults();
-}
-
-// The stat each Greenfather hex grants, drawn rather than downloaded.
-//
-// Riot writes these into tooltip text as tokens -- %i:scaleAS%, %i:scaleDA%,
-// %i:scaleManaRegen% -- but ships no image behind them: the in-match client
-// renders them from its own compiled UI, and nothing under game/assets,
-// game/assets/ux/tftmobile or the rcp-fe-lol-tft plugin carries them. The
-// Set 18 "Booster" icons are the nearest real art and cover four of the five
-// hexes, but there is no damage-amp booster, so a mixed set would have had
-// one hex wearing another stat's icon.
-//
-// So: three shapes in the spirit of the originals, sized by the text they sit
-// beside rather than by a bitmap, and tinted by the stat rather than by art
-// direction -- gold for speed, red for damage, blue for mana.
-const STAT_ICONS = {
-  // Three blades rising from a notched base -- one outline rather than three
-  // shapes, so the valleys between them are cut rather than overlapped. The
-  // outer pair are shorter and lean out; equal blades fanned from one point
-  // read as a crown.
-  scaleDA: {
-    label: "Damage Amp",
-    colour: "#e8734a",
-    // Traced from the reference, not redrawn -- three attempts by eye all
-    // came out far too narrow. Regenerate with:
-    //   python trace_glyph.py da.avif --tolerance 1.2
-    paths: [
-      { d: "M11.81 0.09 L22.12 20.34 L16.31 16.21 L14.81 16.21 L14.44 16.59 L12.38 23.71 L11.44 23.71 L9.75 17.71 L9.00 16.21 L7.12 16.40 L1.88 20.34 L11.81 0.28 Z" }, // centre chevron
-      { d: "M15.00 0.09 L23.62 5.71 L21.19 5.71 L21.00 6.09 L23.81 15.47 L22.69 15.65 L15.00 0.28 Z" }, // right blade
-      { d: "M8.62 0.09 L1.12 15.65 L0.00 15.47 L2.81 5.90 L0.19 5.71 L8.44 0.28 Z" }, // left blade
-    ],
-  },
-  // Riot's own Attack Speed motif, from the Set 18 Speed Booster: a
-  // chisel-tipped sword on the diagonal, its hilt crossing into an X, with
-  // three speed lines trailing off the back of the swing.
-  scaleAS: {
-    label: "Attack Speed",
-    colour: "#f0c04a",
-    // Riot's own art rather than a redrawing. Regenerate with:
-    //   python trace_glyph.py tft18_speedbooster.png --lift --top 4
-    //     --tolerance 0.5
-    // (--lift pulls the cream glyph off the gold plate; --top 4 drops the
-    // plate's own rim highlights, which lift the same way the glyph does.)
-    paths: [
-      { d: "M18.55 0.18 L23.64 0.18 L23.64 5.27 L10.18 17.27 L10.18 15.09 L9.82 14.73 L9.82 14.00 L9.45 13.63 L6.55 13.63 L18.18 0.54 Z" }, // blade
-      { d: "M1.45 12.54 L1.82 12.54 L11.27 22.00 L10.55 22.73 L10.18 22.00 L9.09 22.00 L8.73 22.73 L6.18 20.18 L5.82 20.18 L2.55 23.45 L1.82 23.45 L0.00 21.63 L1.82 19.82 L1.82 19.45 L2.18 19.45 L3.27 18.36 L3.64 17.63 L2.91 17.27 L2.18 16.54 L2.18 16.18 L1.45 15.82 L0.00 14.36 L0.00 14.00 L1.09 12.91 Z" }, // hilt
-      { d: "M0.00 0.18 L14.91 0.18 L12.36 2.73 L0.00 2.73 L0.00 0.54 Z" }, // speed line
-      { d: "M0.00 4.54 L10.91 4.54 L8.36 7.09 L0.00 7.09 L0.00 4.91 Z" }, // speed line
-    ],
-  },
-  // A droplet with the regen plus set above and behind it, which is what
-  // separates Mana Regen from plain Mana.
-  scaleManaRegen: {
-    label: "Mana Regen",
-    colour: "#4aa8e8",
-    paths: [
-      { d: "M5.4 1.2 h2.6 v3.2 h3.2 v2.6 h-3.2 v3.2 h-2.6 v-3.2 h-3.2 v-2.6 h3.2 Z" },
-      {
-        d:
-          "M15.0 6.6 C15.0 6.6 8.7 14.1 8.7 17.4 " +
-          "a6.3 6.3 0 0 0 12.6 0 C21.3 14.1 15.0 6.6 15.0 6.6 Z",
-      },
-    ],
-  },
-};
-
-function statIcon(key) {
-  const stat = STAT_ICONS[key];
-  if (!stat) return null;
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("class", "stat-icon");
-  svg.setAttribute("aria-hidden", "true");
-  svg.style.color = stat.colour;
-  for (const part of stat.paths) {
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", part.d);
-    // The two outer blades are the centre one pivoted about a point below the
-    // glyph, which is what fans them rather than sliding them sideways.
-    if (part.rotate) path.setAttribute("transform", `rotate(${part.rotate} 12 20)`);
-    svg.appendChild(path);
-  }
-  const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-  title.textContent = stat.label;
-  svg.appendChild(title);
-  return svg;
 }
 
 // A trait's glyph in a hexagon coloured by the tier that breakpoint sits at,
@@ -401,28 +308,6 @@ function buildStaticControls() {
     resizeBuffRows(v);
     onConfigChanged();
   });
-
-  // Blackthorn panel.
-  if (cat.blackthorn) {
-    const roleSel = $("btRole");
-    for (const r of cat.blackthorn.roles) roleSel.add(new Option(r, r));
-    const costSel = $("btCost");
-    for (const c of cat.blackthorn.costs) costSel.add(new Option(c.label, c.value));
-    roleSel.onchange = () => {
-      syncBlackthornCfg();
-      onConfigChanged();
-    };
-    costSel.onchange = () => {
-      // Which star levels exist depends on the cost, same as the page.
-      refreshBlackthornStars();
-      syncBlackthornCfg();
-      onConfigChanged();
-    };
-    $("btStar").onchange = () => {
-      syncBlackthornCfg();
-      onConfigChanged();
-    };
-  }
 
   for (const [id, key] of [
     ["enemyHp", "hp"],
@@ -843,7 +728,7 @@ function addEmblemTrait(itemCls) {
   if (!meta) return;
   const onLevel = meta.levels.find((l) => l > 0);
   if (onLevel === undefined) return;
-  // "Is Lunar" style membership flags: the emblem is the membership.
+  // A 0/1 "Is X" flag: the emblem is the membership.
   const isFlag =
     meta.extra && !meta.extra.Options && meta.extra.Min === 0 && meta.extra.Max === 1;
 
@@ -890,7 +775,7 @@ function renderBuffRows() {
     const levelSel = document.createElement("select");
     const paramInput = document.createElement("input");
     paramInput.type = "number";
-    // A parameter whose values are names, not a count (Greenfather's Hex).
+    // A parameter whose values are names, not a count (Illbeats' mix).
     // The stored value is still the index, so nothing downstream changes --
     // only what the row shows for it.
     const paramSelect = document.createElement("select");
@@ -902,7 +787,7 @@ function renderBuffRows() {
     flagBox.className = "param-flags";
     let flagBits = 0;
 
-    // Column headers per row, like buff_bar's widget labels: the third one
+    // Column headers per row: the third one
     // is the buff's own parameter title (Stacks, Casts, ...) and follows the
     // selected buff.
     const column = (text, ...controls) => {
@@ -1049,7 +934,6 @@ function renderBuffRows() {
     container.appendChild(row);
   });
   updateBuffParamLayout();
-  updateBlackthornPanel();
 }
 
 function updateBuffParamLayout() {
@@ -1105,7 +989,7 @@ function renderTeamTraits() {
     label.className = trait.scales ? "team-trait" : "team-trait flat";
     if (trait.options || trait.flags) label.classList.add("with-option");
     label.title = trait.options
-      ? trait.name + " on the board, at Ivern's star level"
+      ? trait.name + " on the board"
       : trait.flags
         ? "Team-wide " + trait.name + ": the bonuses of the ticked units"
         : "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)";
@@ -1131,9 +1015,9 @@ function renderTeamTraits() {
     };
 
     if (trait.scales) {
-      // The aura itself steps per breakpoint (Lunar), or the trait has no
-      // team-wide half to compare and its level is simply a real question
-      // (Greenfather's star level). Either way it gets a picker.
+      // The team-wide half itself steps per breakpoint, or the trait asks a
+      // named choice and its level is simply a real question too. Either way
+      // it gets a picker.
       const sel = document.createElement("select");
       for (const level of trait.levels) {
         sel.add(new Option(level === 0 ? "—" : String(level), String(level)));
@@ -1155,28 +1039,7 @@ function renderTeamTraits() {
         optionSel.value = String(params);
         optionSel.title = trait.paramTitle;
         label.appendChild(optionSel);
-
-        // A native <select> cannot put art inside its options, so the stat
-        // sits beside it and follows the choice -- which is the useful half
-        // anyway: what you want to see is what the hex you picked grants.
-        // Only for a trait whose options each stand for a stat: Solar's are a
-        // count, and a count has no icon to draw.
-        let drawStat = null;
-        if (trait.optionIcons) {
-          const slot = document.createElement("span");
-          slot.className = "stat-slot";
-          drawStat = () => {
-            slot.innerHTML = "";
-            const icon = statIcon(trait.optionIcons[Number(optionSel.value)]);
-            if (icon) slot.appendChild(icon);
-          };
-          drawStat();
-          label.appendChild(slot);
-        }
-        optionSel.onchange = () => {
-          if (drawStat) drawStat();
-          store(Number(sel.value), Number(optionSel.value));
-        };
+        optionSel.onchange = () => store(Number(sel.value), Number(optionSel.value));
       }
       sel.onchange = () =>
         store(
@@ -1227,99 +1090,22 @@ function renderTeamTraits() {
 }
 
 // ---------------------------------------------------------------------------
-// Blackthorn panel
-// ---------------------------------------------------------------------------
-
-function blackthornSelected() {
-  return state.cfg.buffs.some(([cls]) => cls === "Blackthorn");
-}
-
-function updateBlackthornPanel() {
-  const panel = $("blackthornPanel");
-  if (!state.catalog.blackthorn || !blackthornSelected()) {
-    panel.hidden = true;
-    state.cfg.blackthorn = null;
-    return;
-  }
-  if (panel.hidden) {
-    panel.hidden = false;
-    $("btRole").value = state.catalog.blackthorn.roles[0];
-    $("btCost").value = state.catalog.blackthorn.costs[0].value;
-    refreshBlackthornStars();
-  }
-  syncBlackthornCfg();
-}
-
-function refreshBlackthornStars() {
-  const stars = state.catalog.blackthorn.starsByCost[String($("btCost").value)];
-  const starSel = $("btStar");
-  const previous = starSel.value;
-  starSel.innerHTML = "";
-  for (const s of stars) starSel.add(new Option(s.label, s.value));
-  if ([...starSel.options].some((o) => o.value === previous)) starSel.value = previous;
-}
-
-function syncBlackthornCfg() {
-  if (!blackthornSelected()) return;
-  state.cfg.blackthorn = {
-    role: $("btRole").value,
-    star: Number($("btStar").value),
-    cost: Number($("btCost").value),
-  };
-}
-
-// ---------------------------------------------------------------------------
 // Slice options & the run loop
 // ---------------------------------------------------------------------------
 
 function sliceOptions() {
-  // Mirrors the page: with a full item bar only the non-item slices remain,
-  // and Blackthorn appears once the trait is in the buff bar.
-  let options;
+  // With a full item bar only the non-item slices remain.
   const itemCount = state.cfg.items.filter((i) => i !== "NoItem").length;
-  if (itemCount >= 3) {
-    options = ["Trait", "Augment/Buff", "Wisp"];
-  } else {
-    options = state.catalog.slices.slice();
-  }
-  if (blackthornSelected()) options.push("Blackthorn");
-  return options;
+  if (itemCount >= 3) return ["Trait", "Augment/Buff"];
+  return state.catalog.slices.slice();
 }
 
 function onConfigChanged() {
-  updateBlackthornPanel();
   // Re-rendered here rather than from renderBuffRows so that picking a trait
   // in the buff bar immediately disables its team-trait row.
   renderTeamTraits();
   state.selections.clear();
   refresh();
-}
-
-// The Blossom level on this champion, from wherever it is set: the buff bar
-// if it is a member, the Team Traits panel if the board runs Blossom without
-// it. 0 when neither.
-function blossomLevel() {
-  const row = state.cfg.buffs.find(([cls]) => cls === "Blossom");
-  if (row) return row[1];
-  const team = state.teamBuffs.get("Blossom");
-  return team ? team.level : 0;
-}
-
-// Several Wisps hand out bigger numbers to a holder whose Blossom is at 3+
-// (_is_blossom_upgraded in set18buffs), so with Blossom on, the Wisp slice is
-// showing a different set of values than it would otherwise -- and nothing on
-// the slice itself says which. The border says it before the click. 3 is both
-// Blossom's first breakpoint and the upgrade threshold; the threshold is what
-// is being drawn, so that is what it tests.
-function markBlossomSlice(container) {
-  const level = blossomLevel();
-  const upgraded = level >= 3;
-  for (const pill of container.children) {
-    if (pill.textContent !== "Wisp") continue;
-    pill.classList.toggle("pill-blossom", upgraded);
-    if (upgraded) pill.title = "Blossom " + level + ": these Wisps are upgraded";
-    else pill.removeAttribute("title");
-  }
 }
 
 async function refresh() {
@@ -1330,7 +1116,6 @@ async function refresh() {
     state.slice = v;
     refresh();
   });
-  markBlossomSlice($("sliceRadio"));
 
   renderHeader();
   updateStatsPanel(gen);
@@ -1539,49 +1324,42 @@ function seriesColor(slot) {
 function renderResults() {
   const payload = state.current;
   if (!payload) return;
-  const isBlackthorn = payload.slice === "Blackthorn";
   const selection = currentSelection();
 
-  // Same column logic as the page's display_dps checkbox.
+  // "Display DPS" swaps the DPS columns for the ratio columns.
   const dpsCols = state.displayDps
     ? DPS_TIMES.map((t) => ({ label: "Extra DPS (" + t + "s)", get: (row) => row.ratio[String(t)] }))
     : DPS_TIMES.map((t) => ({ label: "DPS at " + t, get: (row) => row.dps[String(t)] })).concat([
         { label: "Extra DPS (25s)", get: (row) => row.ratio["25"] },
       ]);
 
-  // The label columns differ per slice, but sorting shouldn't care: every
-  // column is described the same way, so the header handler is written once.
-  const labelCols = isBlackthorn
-    ? ["Role", "Star Level", "Cost"].map((name) => ({
-        label: name,
-        text: true,
-        get: (row) => (row.blackthorn || {})[name] ?? "",
-      }))
-    : [
-        {
-          label: "Extra",
-          text: true,
-          get: (row) => row.extra,
-          render: (cell, row) => {
-            const src = state.icons.get(row.extraCls);
-            const isTrait = state.traitTiers?.tiers?.[row.extraCls];
-            if (isTrait) {
-              const badge = traitBadge(row.extraCls, row.extraLevel);
-              if (badge) cell.appendChild(badge);
-            } else if (src) {
-              const icon = document.createElement("img");
-              icon.className = "row-icon";
-              icon.src = src;
-              // Decorative: the name sits right beside it, so a screen reader
-              // announcing the file too would only repeat.
-              icon.alt = "";
-              icon.loading = "lazy";
-              cell.appendChild(icon);
-            }
-            cell.appendChild(document.createTextNode(row.extra));
-          },
-        },
-      ];
+  // Every column is described the same way, so the header handler is
+  // written once.
+  const labelCols = [
+    {
+      label: "Extra",
+      text: true,
+      get: (row) => row.extra,
+      render: (cell, row) => {
+        const src = state.icons.get(row.extraCls);
+        const isTrait = state.traitTiers?.tiers?.[row.extraCls];
+        if (isTrait) {
+          const badge = traitBadge(row.extraCls, row.extraLevel);
+          if (badge) cell.appendChild(badge);
+        } else if (src) {
+          const icon = document.createElement("img");
+          icon.className = "row-icon";
+          icon.src = src;
+          // Decorative: the name sits right beside it, so a screen reader
+          // announcing the file too would only repeat.
+          icon.alt = "";
+          icon.loading = "lazy";
+          cell.appendChild(icon);
+        }
+        cell.appendChild(document.createTextNode(row.extra));
+      },
+    },
+  ];
   const columns = labelCols.concat(dpsCols.map((col) => ({ ...col, shade: true })));
 
   // Column-wise magnitude scale. Each DPS interval is normalised against its
@@ -1715,7 +1493,7 @@ function formatNumber(v) {
 }
 
 // ---------------------------------------------------------------------------
-// Rendering: chart, index log, pie (mirror of class_utilities.plot_df)
+// Rendering: chart, index log, pie
 // ---------------------------------------------------------------------------
 
 const COLORS = [

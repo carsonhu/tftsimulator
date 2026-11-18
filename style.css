@@ -7,7 +7,7 @@
 
 /* Several containers below set display:flex/grid, which would beat the UA
    stylesheet's [hidden] { display:none } on specificity and quietly un-hide
-   them (the Blackthorn panel did exactly that). */
+   them. */
 [hidden] {
   display: none !important;
 }
@@ -427,34 +427,19 @@ details > label {
   cursor: pointer;
 }
 
-/* One trait asks which variant is on as well as how big it is (Greenfather's
-   Hex), so it needs one more column. It spans two cells rather than squeezing
-   two pickers and a name into one -- at 190px the name would have nowhere to
-   go, and Greenfather is far and away the widest thing this panel shows. */
+/* A trait that asks a named choice (Illbeats' mix) or tick boxes (Heartsteel)
+   as well as how big it is needs one more column. It spans two cells rather
+   than squeezing two controls and a name into one -- at 190px the name would
+   have nowhere to go. */
 .team-trait.with-option {
   grid-template-columns: 22px auto auto auto auto 1fr;
   grid-column: span 2;
   /* Laid out before every single-cell trait. Placed in catalog order, a
      two-wide cell lands wherever the cursor happens to be, and the singles
-     under it then line up with only one of its halves -- Solar in columns 3-4
-     with Invoker alone under column 4. Packed first, the wide cells always
+     under it then line up with only one of its halves. Packed first, the wide cells always
      start at column 1 in pairs and the singles fill whole cells after them,
      so every badge sits on a column edge. */
   order: -1;
-}
-
-/* Sized in em so it tracks the text it sits beside rather than being pinned
-   to a bitmap's dimensions -- the whole reason these are drawn. */
-.stat-slot {
-  display: inline-flex;
-  align-items: center;
-}
-
-.stat-icon {
-  width: 1.15em;
-  height: 1.15em;
-  fill: currentColor;
-  display: block;
 }
 
 .team-trait select {
@@ -549,29 +534,6 @@ select:disabled {
 }
 
 .pill.active:hover {
-  color: #fff;
-}
-
-/* Wisp slice, with Blossom on: those Wisps are the upgraded ones. Blossom
-   pink rather than the page's red, so it reads as a different kind of mark
-   than "selected" -- and a ring outside the border, so it survives .active
-   painting the border itself red. */
-.pill-blossom {
-  border-color: #ff8ad8;
-  box-shadow: 0 0 0 2px rgba(255, 138, 216, 0.55);
-}
-
-.pill-blossom:not(.active) {
-  color: #ff8ad8;
-}
-
-/* Hover normally repaints the border red, which would erase the mark. */
-.pill-blossom:hover {
-  border-color: #ff8ad8;
-  color: #ff8ad8;
-}
-
-.pill-blossom.active:hover {
   color: #fff;
 }
 

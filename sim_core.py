@@ -11,14 +11,8 @@ class ChampLabel:
     """The two fields a result row's champion is ever asked for.
 
     Each row used to carry its whole post-combat Champion -- item graph,
-    statuses and all -- but every consumer (createSelectorDPSTable,
-    createUnitDPSTable, class_utilities.plot_df) reads only .name and .level.
-    Since st.cache_data pickles what it stores, keeping the full objects cost
-    ~1.2MB and ~100ms of (un)pickling per cached sweep to serve two scalars.
-
-    Note this is the *result* row, not the cache key: the key is the pickled
-    input champion built in doExperimentOneExtra, which still carries every
-    item, buff and bonus stat. Trimming here can't weaken it.
+    statuses and all -- but the only consumer (sim_entry._table_entries)
+    reads only .name and .level.
 
     The cost of the trim is diagnostic -- per-row final stacks, statuses and
     numCasts are gone. Per-instant AS and mana survive in Results, whose
@@ -44,8 +38,7 @@ def do_experiment_one_extra(
     frame_rate: int = 30,
 ) -> List[Dict[str, Any]]:
     """One simulation per extra item, then per extra buff, each on a fresh copy of the configured champion
-    against 8 copies of the opponent. A buff replaces any copy of the same trait the champion already carries.
-    (set18's Emblem, N.O.V.A., Blackthorn and Arbiter sweeps were Set 18 traits and are gone, E16.)"""
+    against 8 copies of the opponent. A buff replaces any copy of the same trait the champion already carries."""
     simulator = Simulator()
     sim_list: List[Dict[str, Any]] = []
 

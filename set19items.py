@@ -17,7 +17,6 @@ artifacts = []
 # Radiant versions: the same script with their own effects and rows (each class below the base items)
 radiants = []
 emblems = []
-animas = []
 no_item = ["NoItem"]
 
 

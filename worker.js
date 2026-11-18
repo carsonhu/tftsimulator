@@ -32,7 +32,6 @@ const PY_FILES = [
   "stats.py",
   "status.py",
   "timing.py",
-  "utils.py",
 ];
 
 async function boot() {
@@ -52,7 +51,7 @@ async function boot() {
       // served straight from cache with no request at all -- a local edit
       // never appears no matter how many times the server restarts, and in
       // production a returning visitor inside the 10-minute max-age can pair
-      // a fresh worker.js with a stale set18champs.py, which is worse than
+      // a fresh worker.js with a stale set19champs.py, which is worse than
       // stale: it is two halves of different builds.
       PY_FILES.map(async (path) => {
         const resp = await fetch(path, { cache: "no-cache" });

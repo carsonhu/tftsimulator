@@ -3,8 +3,7 @@
 # JSON boundary between the static frontend (index.html + app.js) and the Set 19 simulator.
 # The v2 page runs this file under Pyodide with *no* installed packages, so
 # nothing here (or in anything it imports) may touch streamlit, numpy or
-# pandas -- that restriction is the whole reason v2 boots in a couple of
-# seconds instead of sitting through stlite's "Installing packages." phase.
+# pandas, so the page boots in a couple of seconds.
 #
 # Three entry points, each taking/returning JSON strings so the JS side never
 # holds a live PyProxy:
@@ -13,8 +12,7 @@
 #   run_json(config)          -> table rows + plot timelines for one slice
 #
 # The config schema is documented on _build_champion. The DPS arithmetic keeps
-# set18's Streamlit rules (int() truncation above 10, keep-first duplicates) so
-# numbers stay comparable with the old site.
+# the old site's rules (int() truncation above 10, keep-first duplicates).
 
 import datetime
 import json
@@ -42,12 +40,10 @@ _PROBE_STATS = (
 def _team_level_matters(cls):
     """Does this trait's team-wide half change with its level?
 
-    For most traits it does not: Rapidfire's aura is a flat 10% Attack Speed
-    and Spellweaver's a flat 10 AP at every breakpoint -- only the members'
-    own bonus scales, and a non-member never gets that. Lunar is the
-    exception, where the shared aura itself steps 7/10/14/18. The UI shows a
-    plain on/off checkbox for the flat ones and a level picker only where the
-    level actually changes the answer.
+    For most traits it does not: only the members' own bonus scales, and a
+    non-member never gets that. The UI shows a plain on/off checkbox for the
+    flat ones and a level picker only where the level actually changes the
+    answer.
 
     Decided by running the trait at each level with the membership flag off
     and comparing what came out, rather than by a hardcoded list, so a trait
@@ -92,7 +88,6 @@ _ITEM_SLICES = {
     "Artifact": lambda: set19items.artifacts,
     "Radiant": lambda: set19items.radiants,
     "Emblem": lambda: set19items.emblems,
-    "Anima": lambda: set19items.animas,
 }
 
 
@@ -128,23 +123,19 @@ def get_catalog():
     # Tier order, alphabetical within each tier -- NOT one global sort. The
     # sidebar combo's search filter preserves this order, so typing "spear" or
     # "shojin" surfaces the craftable Spear of Shojin ahead of the Radiant
-    # one instead of alphabetically burying it. pages/ChampionSelector.py
-    # orders its sidebar the same way.
+    # one instead of alphabetically burying it.
     all_items = (
         set19items.no_item
         + sorted(set19items.offensive_craftables)
         + sorted(set19items.artifacts)
         + sorted(set19items.radiants)
         + sorted(set19items.emblems)
-        + sorted(set19items.animas)
     )
 
     all_buffs = sorted(
         set19buffs.class_buffs
         + set19buffs.augments
         + set19buffs.no_buff
-        + set19buffs.stat_buffs
-        + set19buffs.wisps
     )
     buffs = []
     for disp, cls_name in buff_display_map(all_buffs).items():
@@ -165,22 +156,21 @@ def get_catalog():
         )
 
     # Team traits: a trait your board runs that this champion is not part of.
-    # Two shapes qualify, and both are discovered from the classes rather than
-    # listed by name, so a trait added later turns up here on its own.
+    # Three shapes qualify, all discovered from the classes rather than listed
+    # by name, so a trait added later turns up here on its own.
     #
     #   * an "Is X" 0/1 membership flag. Passing 0 is what "my team has this
-    #     trait but this champion isn't one of them" means -- the aura half
-    #     applies, the member-only half doesn't.
-    #   * a named choice (Greenfather's Hex). There is no membership to
-    #     disclaim: whoever stands on Ivern's hex gets what the hex gives,
-    #     Ivern or not. The parameter is a real question rather than a flag to
-    #     zero, so the panel has to ask it.
+    #     trait but this champion isn't one of them" means -- the team-wide
+    #     half applies, the member-only half doesn't.
+    #   * a named choice (Illbeats' mix): a real question rather than a flag
+    #     to zero, so the panel has to ask it.
+    #   * tick boxes (Heartsteel's fielded members), below.
     team_buffs = []
     for cls_name in set19buffs.class_buffs:
         cls = getattr(set19buffs, cls_name)
         # team_trait = False opts a trait out even though its parameter shape
-        # would qualify: Riftbeast's "Is Alpha" is which champion holds the
-        # Alpha Mark, a champion-specific question, not team membership.
+        # would qualify: Hitmaker's "Is Big Shot" is a champion-specific
+        # question, not team membership.
         if not getattr(cls, "team_trait", True):
             continue
         try:
@@ -215,9 +205,6 @@ def get_catalog():
                 "options": list(options) if options else None,
                 # A list -> the panel shows these tick boxes and passes the bits.
                 "flags": list(flags[: extra.get("TeamFlags", len(flags))]) if flags else None,
-                # Per-option stat icons, when the trait has art to show for
-                # each choice (Greenfather's hexes). None -> just the picker.
-                "optionIcons": list(getattr(cls, "option_stats", []) or []) or None,
                 "paramDefault": extra.get("Default", 0),
                 # False -> the UI shows a checkbox and uses onLevel; True ->
                 # it shows a level picker.
@@ -238,9 +225,7 @@ def get_catalog():
             "Emblem",
             "Trait",
             "Augment/Buff",
-            "Wisp",
         ],
-        "blackthorn": None,  # set18 trait; app.js hides its panel when this is None
         # Client builds the numbers can come from (builds/index.json, newest first); the page sends the chosen
         # version as cfg["build"] and the worker loads that file into Pyodide before the run (B9).
         "builds": [_build_option(b) for b in list_builds()],
@@ -263,7 +248,7 @@ def get_catalog():
 # ---------------------------------------------------------------------------
 
 def _build_champion(cfg):
-    """Mirror of the ChampionSelector sidebar, in its order.
+    """The champion a config describes, with the sidebar's settings applied in its order.
 
     cfg = {
       "champ": "Ahri", "level": 1,
@@ -273,7 +258,7 @@ def _build_champion(cfg):
       "stage": "4-1", "tactician_level": 4,
       "build": "<version>"|null,                   # client build (default: newest)
       "items": ["NoItem","NoItem","NoItem"],       # class names
-      "buffs": [["Blossom", 2, 0], ...],           # (class, level, params)
+      "buffs": [["Encore", 2, 0], ...],            # (class, level, params)
       "enemy": {"hp","armor","mr"},
       "frame_rate": 30, "t": 30, "slice": "Craftable",
     }
@@ -347,16 +332,16 @@ def _build_enemy(cfg):
 
 
 # ---------------------------------------------------------------------------
-# DPS math (pure-python mirror of set18_streamlit_main.getDPS)
+# DPS math
 # ---------------------------------------------------------------------------
 
 def _cumulative_points(results):
     """(times, cumulative damage), duplicates collapsed to first occurrence.
 
-    getDPSFunction cumsums in event order and then keeps np.unique's *first*
-    index per duplicate timestamp; results arrive chronological so no sort is
-    needed here, but the keep-first rule must match or interpolated values
-    drift on frames with several damage instances.
+    Cumulative damage in event order, keeping the *first* value per duplicate
+    timestamp (the old site's rule); results arrive chronological so no sort is
+    needed, but the keep-first rule matters on frames with several damage
+    instances.
     """
     xs, ys = [], []
     cum = 0.0
@@ -385,8 +370,7 @@ def _interp(xs, ys, t):
 
 def _dps_at(xs, ys, t):
     res = _interp(xs, ys, t) / t
-    # Same presentation rule as getDPS's caller: big numbers lose the
-    # fraction. The truncated value also feeds the ratio columns, so this is
+    # Big numbers lose the fraction. The truncated value also feeds the ratio columns, so this is
     # arithmetic, not just formatting.
     if res > 10:
         res = int(res)
@@ -403,13 +387,13 @@ def _champion_specific_flag(cls):
     The Team Traits panel discovers the mirror image of this: 0/1 params that
     ask whether the board runs a trait this champion is not a member of. A
     trait setting team_trait = False has opted out of that panel precisely
-    because its flag is not about membership -- Riftbeast's is which champion
-    carries the Alpha Mark, which is a fact about the unit in front of you.
+    because its flag is not about membership -- Hitmaker's is whether this
+    unit is the Big Shot, a fact about the unit in front of you.
 
     That opt-out left those toggles with nowhere at all to be explored: not in
     Team Traits, and not in the level sweep, which holds params fixed. So the
-    Trait slice picks them up, and "is this the Alpha?" becomes a row you can
-    compare against instead of a checkbox you have to flip and re-run.
+    Trait slice picks them up, and "is this the Big Shot?" becomes a row you
+    can compare against instead of a checkbox you have to flip and re-run.
     """
     if getattr(cls, "team_trait", True):
         return False
@@ -423,40 +407,16 @@ def _champion_specific_flag(cls):
 
 
 def trait_sweep_buffs(buff_specs):
-    """The buff rows the Trait slice runs, for a bar of (name, level, params).
-
-    Imported by pages/ChampionSelector.py rather than mirrored there. The rest
-    of this file deliberately re-implements the pages so the two can be
-    compared, but that only works while the thing being compared is simple.
-    This one stopped being simple the moment it grew a second axis, and two
-    copies of a two-axis rule is how the frontends end up disagreeing about
-    which rows even exist -- which is a difference test_sim_entry's
-    number-for-number comparison would report as a missing row rather than as
-    the drift it is.
-    """
+    """The buff rows the Trait slice runs, for a bar of (name, level, params)."""
     extra = []
     for name, level, params in buff_specs:
         cls = getattr(set19buffs, name)
-        # A trait whose parameter is the real dial rather than a flag sweeps
-        # that instead: Solar has one breakpoint, so its levels are just on and
-        # off, and what the tab is being asked is what each 3-star is worth.
-        if getattr(cls, "sweep_params", False):
-            for lvl in cls.levels:
-                for opt in range(len(cls.extraParameters()["Options"])):
-                    # With the trait off the parameter changes nothing, so it
-                    # contributes one row, not one per option -- and neither
-                    # branch re-runs the combination already configured, which
-                    # is the baseline every row is read against.
-                    if (lvl, opt) == (level, params) or (lvl == 0 and opt != params):
-                        continue
-                    extra.append(cls(lvl, opt))
-            continue
         # Every *other* level of the buff, at the flag it is already on.
         for lvl in cls.levels:
             if lvl != level:
                 extra.append(cls(lvl, params))
-        # And for a champion-specific flag like Riftbeast's Alpha Mark, the
-        # same levels with the flag flipped, so what the Mark is worth is a
+        # And for a champion-specific flag like Hitmaker's Big Shot, the
+        # same levels with the flag flipped, so what the flag is worth is a
         # row you can read off against the others rather than something you
         # have to toggle and re-run to see.
         if _champion_specific_flag(cls):
@@ -490,15 +450,11 @@ def _slice_inputs(slice_name, cfg):
         classes = sorted(set19buffs.augments)
         return no_item, [getattr(set19buffs, c)() for c in classes]
 
-    if slice_name == "Wisp":
-        classes = sorted(set19buffs.wisps)
-        return no_item, [getattr(set19buffs, c)() for c in classes]
-
     return no_item, []
 
 
 def _table_entries(sim_list):
-    """Mirror of createSelectorDPSTable, minus pandas."""
+    """One row per trial: DPS at each time and the ratio against the NoItem row."""
     entries = []
     dps_dict = {}
     for idx, sim in enumerate(sim_list):

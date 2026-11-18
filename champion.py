@@ -1,8 +1,6 @@
 import heapq
 import math
-import random
 
-import utils
 from stats import AD, AP, ArmorPierce, Aspd, Attack, FastDeepCopy, Resist, Stat
 from timing import TPS, Timing, ticks, ticks_up
 
@@ -117,8 +115,6 @@ class Champion(FastDeepCopy):
         self.critCounter = 0
         self.numAttacks = 0
         self.numCasts = 0
-        self.luckyAbility = False
-        self.luckyCrit = False
 
         # G18 (inherited from set18, open): a unit casts only after starting an attack since its last cast
         self.attacksOnLastCast = -1
@@ -159,7 +155,6 @@ class Champion(FastDeepCopy):
             self.num_targets,
             self.num_extra_targets,
             self.item_count,
-            self.luckyAbility,
         )
         # return stat_tuple
         return items_tuple + stat_tuple
@@ -215,7 +210,6 @@ class Champion(FastDeepCopy):
         self.omnivamp.addStat(item.omnivamp)
 
     def addStat(self, stat, amount):
-        # separate function good for bad luck + holobow
         getattr(self, stat).addStat(amount)
 
     @property
@@ -525,7 +519,6 @@ class Champion(FastDeepCopy):
 
     def doAttack(self, attack, items, time):
         # Activating onhits
-        # onAttack is currently unused
         if attack.canOnHit:
             for item in items:
                 item.ability("onAttack", time, self, attack.opponents)
@@ -586,13 +579,10 @@ class Champion(FastDeepCopy):
         #
         # if not crit
         critChance = min(1, critChance)
-        if getattr(self, "luckyCrit", False):
-            critChance = utils.lucky_chance(critChance)
         self.critCounter += critChance
         if self.critCounter >= 1:
             for item in items:
                 if item != source_item:
-                    # pass whether it's spell for holobow
                     item.ability("onCrit", time, self, is_spell)
             self.critCounter -= 1
 
@@ -603,10 +593,6 @@ class Champion(FastDeepCopy):
         # if anything needs to modify the damage dealt
         for item in items:
             avgDmg = item.ability("onDealDamage", time, self, avgDmg)
-        # if only spell dmg needs to be modified (Arcana Xerath)
-        if is_spell:
-            for item in items:
-                avgDmg = item.ability("onDealSpellDamage", time, self, avgDmg)
 
         avgDmg = self.damage(avgDmg, dtype, opponent, ability_armor_pierce, ability_mr_pierce)
         self.dmgDealt += avgDmg[0]
@@ -618,10 +604,6 @@ class Champion(FastDeepCopy):
         for item in items:
             # if you need to track how much dmg was actually dealt
             item.ability("PostOnDealDamage", time, self, avgDmg)
-
-        if is_spell:
-            for item in items:
-                item.ability("PostOnDealSpellDamage", time, self, avgDmg)
 
         if avgDmg:
             # record (Time, Damage Dealt, current AS, current Mana, full Mana)
