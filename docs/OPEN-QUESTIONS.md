@@ -68,5 +68,4 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Draven's vortex: the decoded damage effect has no tick-rate factor, yet each 0.5 s hit is half the per-second value (owner's ruling). Where does the game halve it? | implemented as the owner ruled; the decode is incomplete somewhere (calc component or attribute) | champions/Draven.md D1 |
 | Crit-conditioned attack animations (Senna's crit attack winds up 0.636 s vs 0.531 s; Varus, Jinx, ... have CritAttack / SequentialAttack groups) | not modelled: the single launch time is used. Needed before Senna. | B13, P13 |
 | Trickshot ricochets' on-hit effects (at RichochetDamage^k) | not modelled; no listed item has an on-hit effect yet | B12 |
-| K/DA FIRESTARTER (15): 16% max-HP magic damage over 8 s | not counted: the trait deals it, not the unit. Should it count toward a K/DA member's damage? | B14 |
 | Illbeats (Draven's second trait) | not implemented | - |
