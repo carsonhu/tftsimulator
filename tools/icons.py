@@ -1,4 +1,5 @@
-"""The icons the page shows beside items, augments and traits, from the game client's own art.
+"""The icons the page shows beside items, augments, traits and champions (square portraits), from the game
+client's own art.
 
     python tools/icons.py            # from set19/: writes icons/<group>/<Class>.png + index.json, traits/tiers.json
 
@@ -61,12 +62,14 @@ def tint(im, tier):
 def classes():
     """{group: {Class: class object}} for every class the page can show."""
     import set19buffs
+    import set19champs
     import set19items
     from registry import REGISTRIES
     items = {n: getattr(set19items, n) for k in ('craftable', 'radiant', 'artifact', 'emblem') for n in REGISTRIES[k]}
     augments = {n: getattr(set19buffs, n) for n in REGISTRIES['augment']}
     traits = {n: getattr(set19buffs, n) for n in REGISTRIES['trait']}
-    return {'items': items, 'augments': augments, 'traits': traits}
+    champions = {n: getattr(set19champs, n) for n in set19champs.champ_list}
+    return {'items': items, 'augments': augments, 'traits': traits, 'champions': champions}
 
 
 def trait_tiers(cls, entry):
@@ -88,7 +91,7 @@ def trait_tiers(cls, entry):
 
 def main():
     data = json.load(open(DATA, encoding='utf-8'))
-    by_key = {g: {e['key']: e for e in data[g]} for g in ('items', 'augments', 'traits')}
+    by_key = {g: {e['key']: e for e in data[g]} for g in ('items', 'augments', 'traits', 'champions')}
     for group, found in classes().items():
         out_dir = os.path.join(OUT, group)
         os.makedirs(out_dir, exist_ok=True)

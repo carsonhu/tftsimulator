@@ -129,3 +129,13 @@ def test_dps_columns_average_over_fight_end_times():
     assert sim_entry._dps_window(hits, 20, 30) == pytest.approx(expected)  # below 10: not truncated
     cat = json.loads(sim_entry.catalog_json())
     assert [w['key'] for w in cat['dpsWindows']] == ['10-20', '20-30'] and cat['headline'] == '20-30'
+
+
+def test_champion_menu_by_cost_then_name():
+    # owner, 2026-11-18: the menu groups champions by shop cost, then name; a hero augment unit takes its base
+    # unit's cost (Olaf, 1); the page still opens on the first by name
+    cat = json.loads(sim_entry.catalog_json())
+    order = [(c['cost'], c['label'].lower()) for c in cat['champions']]
+    assert order == sorted(order) and all(c['cost'] > 0 for c in cat['champions'])
+    assert next(c['cost'] for c in cat['champions'] if c['name'] == 'OlafHeroAugment') == 1
+    assert cat['defaultChampion'] == sorted(c['name'] for c in cat['champions'])[0]

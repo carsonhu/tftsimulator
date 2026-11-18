@@ -104,8 +104,17 @@ _ITEM_SLICES = {
 # Catalog
 # ---------------------------------------------------------------------------
 
+def _cost(cls, build):
+    """The champion's shop cost in the build; a hero augment unit (cost 0) takes its base unit's (BASE_KEY)."""
+    cost = build.champion(cls.KEY).d.get("cost") or 0
+    if not cost and getattr(cls, "BASE_KEY", None):
+        cost = build.champion(cls.BASE_KEY).d.get("cost") or 0
+    return cost
+
+
 def get_catalog():
     champions = []
+    build = load_build()
     for name in sorted(set19champs.champ_list):
         cls = getattr(set19champs, name)
         levels = [1, 2, 3]
@@ -113,7 +122,10 @@ def get_catalog():
             levels.append(4)
         # label: what the page shows (a hero augment unit is "Olaf (Axe Crescendo)"); name: the class
         champions.append({"name": name, "label": getattr(cls, "display_name", name), "levels": levels,
-                          "area": bool(getattr(cls, "AREA", False))})
+                          "area": bool(getattr(cls, "AREA", False)), "cost": _cost(cls, build)})
+    # the menu's order (owner, 2026-11-18): by cost, then name; the page opens on the first by name, as before
+    default_champion = champions[0]["name"] if champions else None
+    champions.sort(key=lambda c: (c["cost"], c["label"].lower()))
 
     def item_group(class_names):
         # item_display_map returns {display: cls} in the order given, and that
@@ -226,6 +238,7 @@ def get_catalog():
 
     return {
         "champions": champions,
+        "defaultChampion": default_champion,
         "sidebarItems": item_group(all_items),
         "buffs": buffs,
         "teamBuffs": team_buffs,

@@ -154,7 +154,7 @@ async function init() {
   state.cfg.build = state.catalog.builds.length ? state.catalog.builds[0].version : null;
 
   buildStaticControls();
-  await selectChampion(state.catalog.champions[0].name, { keepLevel: false });
+  await selectChampion(state.catalog.defaultChampion || state.catalog.champions[0].name, { keepLevel: false });
 
   $("boot-status").hidden = true;
   $("layout").hidden = false;
@@ -162,7 +162,7 @@ async function init() {
 
 // icons.py writes one directory per group. Class names are unique across the
 // modules they come from, so a flat class -> URL map is enough.
-const ICON_GROUPS = ["items", "augments", "traits"];
+const ICON_GROUPS = ["items", "augments", "traits", "champions"];
 
 async function loadIcons() {
   await Promise.all(
@@ -239,8 +239,18 @@ function buildStaticControls() {
     if (event.key === "Escape") setSidebar(false);
   });
 
+  // Grouped by cost, then name (the catalog's order); a header per cost.
   const champSel = $("champ");
-  for (const c of cat.champions) champSel.add(new Option(c.label || c.name, c.name));
+  let group = null;
+  for (const c of cat.champions) {
+    if (!group || group.dataset.cost !== String(c.cost)) {
+      group = document.createElement("optgroup");
+      group.label = c.cost + " cost";
+      group.dataset.cost = String(c.cost);
+      champSel.appendChild(group);
+    }
+    group.appendChild(new Option(c.label || c.name, c.name));
+  }
   champSel.onchange = () => selectChampion(champSel.value, { keepLevel: false });
   makeSearchable(champSel);
 
@@ -435,6 +445,7 @@ function makeSearchable(select) {
 
   let active = -1;   // index into `matches`
   let matches = [];
+  let optionRows = [];  // the rendered row of each match (group headers are extra rows in the list)
 
   const label = () => select.options[select.selectedIndex]?.text ?? "";
   const sync = () => {
@@ -476,8 +487,20 @@ function makeSearchable(select) {
     active = needle
       ? 0
       : Math.max(0, matches.findIndex((option) => option.value === select.value));
+    // A select with <optgroup>s (the champion menu) gets a header row per group; headers aren't options.
+    let lastGroup = null;
+    const rows = [];
     matches.forEach((option, index) => {
+      const groupEl = option.parentElement.tagName === "OPTGROUP" ? option.parentElement : null;
+      if (groupEl && groupEl !== lastGroup) {
+        const header = document.createElement("div");
+        header.className = "combo-group";
+        header.textContent = groupEl.label;
+        list.appendChild(header);
+      }
+      lastGroup = groupEl;
       const row = document.createElement("div");
+      rows.push(row);
       row.className = "combo-option";
       row.setAttribute("role", "option");
       // The art the results table already uses for this row. Names alone are
@@ -504,14 +527,15 @@ function makeSearchable(select) {
       row.onmouseenter = () => setActive(index);
       list.appendChild(row);
     });
+    optionRows = rows;
     paint();
   }
 
   function paint() {
-    [...list.children].forEach((row, index) => {
+    optionRows.forEach((row, index) => {
       row.classList.toggle("active", index === active);
     });
-    const row = list.children[active];
+    const row = optionRows[active];
     if (row) row.scrollIntoView({ block: "nearest" });
   }
 
@@ -626,6 +650,7 @@ async function selectChampion(name, { keepLevel, keepConfig = false }) {
   const cat = state.catalog;
   const meta = cat.champions.find((c) => c.name === name);
   state.cfg.champ = name;
+  if ($("champ").value !== name) $("champ").value = name;  // the menu shows what runs (boot picks a default)
   $("targetsRow").hidden = !meta.area;
 
   const levelSel = $("level");

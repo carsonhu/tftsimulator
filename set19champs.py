@@ -748,6 +748,7 @@ class Karthus(BuildChampion):
 
 
 class OlafHeroAugment(BuildChampion):
+    BASE_KEY = 'DA_Olaf19'  # the unit the augment overrides: its shop cost places him in the champion menu
     """Olaf with the hero augment Axe Crescendo (DA_Olaf19_HeroAugment): the augment's unit
     DA_Olaf19_HeroAugment_Override, a separate champion (owner, 2026-11-18; champions/Olaf_HeroAugment.md, D1).
     Scripts: GA_Olaf19_HeroAugment, GA_Olaf19_EmpoweredAttack_HeroAugment (build ga_scripts.zip).

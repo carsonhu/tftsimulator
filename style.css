@@ -313,6 +313,17 @@ input:focus {
   bottom: calc(100% + 2px);
 }
 
+/* A group's header in a grouped list (the champion menu's costs): not an option. */
+.combo-group {
+  padding: 6px 8px 3px;
+  color: #9aa0ae;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: default;
+}
+
 .combo-empty {
   padding: 6px 8px;
   color: #9aa0ae;
