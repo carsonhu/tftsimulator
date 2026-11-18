@@ -97,6 +97,15 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Cast to the next attack | cast lock 76 ticks (the build), then a fresh attack | a Malzahar cast with a target that stays in range (VOD3's was followed by a walk) | champions/Malzahar.md E3 |
 | Beam and burst damage | 9 beam ticks of 380/570/960 x AP / 9 on the target; 4 bursts of 40/60/110 x AP within 1 hex, each after a 30% shred | damage numbers of a cast on targets of known MR | champions/Malzahar.md D1 |
 
+### 7e. Samira again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Cast to the next attack | cast lock 41 ticks (the build), then a fresh 9-tick windup: 50 ticks after the filling attack; VOD3 showed 54.5 (n = 1) | more Samira casts with the mana text | champions/Samira.md E3 |
+| Does every barrage count as an attack launch? | yes, once per cast (the DoOnce resets each cast) | a Samira with Titan's Resolve: stacks per cast | champions/Samira.md D1 |
+| Bullet damage | 10 x (4/6/9 x AP + 35/53/80 x AD), crit only with Precision | damage numbers of a barrage on a target of known armor | champions/Samira.md D1 |
+| Classical's growing amp | +1% per 6 s an enemy is Captivated, in 0.25 s steps from the Captivate | a Classical (2)+ carrier's damage-amp panel over a fight | B28 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

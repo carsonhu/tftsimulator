@@ -57,8 +57,8 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Samira`, D1); panel, mana and rhythm checked against VOD3
+- Keep in the simulator: **yes**
 
 ## Questions
 
@@ -67,29 +67,47 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackCaster | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed with her items (1★) | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackCaster | confirmed: 7 per attack, 2/s | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.2669 s (8.01 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 2800 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 1.3667 s (41 ticks) | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | 1.3667 s (41 ticks) | **open**: VOD3's attack after the cast paid 54.5 ticks after the filling attack, the engine 50 (she did not move) | E3 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.3333 s (40 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.3333 s (40 ticks) | consistent: overflow shown 41.5 ticks after the filling attack | E3 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | predicted: one GE_SimulateLaunchAttack per cast, at the first bullet (a DoOnce; assumed to reset each cast) | D1 |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted (script read: D1); no bullet damage number read yet | D1 |
+| Q14 | Passives and other mechanics that need modelling | see ability text | Captivate on crits (D1); Renegade (B27), Classical (B28), Trickshot bullets implemented | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+Source for all rows below: VOD3 (`…PBE_11-17-2026_17-13-37-283.mp4`, 60 fps), the owner's PBE recording, build
+`rls-19.1.0.5973071`; Samira 1★, round 1-4 (second fight), panel open f19253-19772.
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 5:23 (f19380) | 60 | inspection panel | 700/700, 0/60, 2/s; AD 85 (+103%), AS 0.83, crit 95%, armor/MR 30; Striker's Flail, Infinity Edge, Deathblade; Renegade (2) active, Classical, Trickshot, True Damage inactive | engine with those: HP 700, AD 85.47, AS 0.825, crit 0.95 | Q1 |
+| E2 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 f19253-19772 (`tools/vod_text_changes.py`, mana) | 60 | mana text | 27, 28, 29, 36, 37, 38, 45, 46, 47, 48, 55, 56, 57, cast, 4, 5, 12, 13, 14, 21, 22, 23, 30, 31: regen 0.5 a step, attacks +7 at f19296, 19370, 19442, 19515 (cast), 19624, 19698, 19770 | attacks 37, 36 ticks apart (engine 36/37) | Q2 |
+| E3 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 f19515-19630 (mana text; board every 8 frames) | 60 | the cast | overflow 4 shown +83 frames (41.5 ticks) after the filling attack; next attack's mana +109 frames (54.5 ticks); she stood still, the barrage flew at a target that stayed | mana lock as built (40 + T4); the attack after the cast 4.5 ticks later than the engine's 50 (n = 1) | Q7, Q9 |
 
 ## Decisions and notes
+
+- 2026-11-18, D1 (implemented, `set19champs.Samira`):
+  - **Spell (GA_Samira19_Spell):** mana lock; CD_Samira19_CastAnim at her target; at BeginFire (0.1962 s)
+    RepeatAction(TimeToShoot 0.374933 / NumBullets, NumBullets 10), the first at once, alternating CD_Samira19_Mis1 /
+    Mis2 (1500). Each arrival: PhysicalDamageCalc1 (DamageAP x AP + DamageAD x AD), physical spell damage, crits
+    only with Precision (Renegade or Infinity Edge give it), then the Trickshot bounce (CD_Samira19_MisBounce, 1500,
+    x RichochetDamage^k). Unlock (1.3105 s) ends the cast (build: 40 / 41 ticks).
+  - **Simulated attack:** GE_SimulateLaunchAttack on the first bullet's OnFired, behind a DoOnce. Assumed to reset
+    every cast (one launch per cast for on-attack items); if the ability instance persisted it would fire on her first
+    cast only.
+  - **Captivate (GA_Samira19_CaptivateCritTracker):** any crit of hers Captivates the enemy for 3 s, if Classical is
+    active. The engine's crits are averaged, so a Captivate comes with each CRIT event (I6).
 

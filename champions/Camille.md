@@ -90,3 +90,5 @@ VOD was played on (check the patch shown in game or the date against builds/inde
 
 ## Decisions and notes
 
+- 2026-11-18 (owner): Camille's movement is not modelled for now; she is assumed to stand next to her target.
+

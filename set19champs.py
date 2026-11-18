@@ -8,7 +8,8 @@ import set19buffs
 from build_champion import BuildChampion
 from champion import Champion
 from items.debuffs import apply_shred
-from events import IS_ATTACK, ON_HIT, ON_SPELL, ONHIT_AFTER, ONHIT_PRE, UNIT, CombatEvent, damage_tags
+from traits.classical import captivate
+from events import CRIT, IS_ATTACK, ON_HIT, ON_SPELL, ONHIT_AFTER, ONHIT_PRE, UNIT, CombatEvent, damage_tags
 from timing import TPS, Timing, projectile_ticks, ticks_up
 
 
@@ -651,7 +652,66 @@ class Malzahar(BuildChampion):
             self.schedule_tick(self.tick + ticks_up(self.begin + j * self.tick_rate), beam_tick)
 
 
-champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar']
+class Samira(BuildChampion):
+    """Bullets N' Roses (champions/Samira.md, D1). Scripts: GA_Samira19_Spell, GA_Samira19_TrickshotHandler,
+    GA_Samira19_CaptivateCritTracker (build ga_scripts.zip).
+
+    The cast applies the mana lock and plays CD_Samira19_CastAnim at her target. At 'BeginFire' (0.1962 s) a
+    RepeatAction fires NumBullets (10) bullets TimeToShoot (0.374933 s, the script's default) / NumBullets apart, the
+    first at once, alternating CD_Samira19_Mis1 / Mis2 ('Bullet', 1500 units/s) at her target. The first bullet fired
+    applies GE_SimulateLaunchAttack (a DoOnce: on-attack items hear one launch per cast, G11). Each arrival applies
+    GE_Samira19_BulletDamage = PhysicalDamageCalc1 (DamageAP x AP + DamageAD x AD), physical spell damage that crits
+    only with Precision, and sends the Trickshot bounce: GA_Samira19_TrickshotHandler flies CD_Samira19_MisBounce
+    (1500) to the nearest enemy not yet hit for the same damage x RichochetDamage^k (B12). 'Unlock' (1.3105 s) ends
+    the cast (the build's 40 / 41 ticks).
+    Passive (GA_Samira19_CaptivateCritTracker): any damage of hers that crits (Damage.Result.WasCrit) Captivates the
+    enemy for CaptivateDuration (3 s) when the board has Classical; the engine averages crits, so a Captivate comes
+    with each CRIT event (I6). Captivated enemies feed Classical's damage amp (traits/classical.py).
+    """
+    KEY = 'DA_Samira19'
+    CAST = 'CD_Samira19_CastAnim'
+    BULLETS = ('CD_Samira19_Mis1', 'CD_Samira19_Mis2')
+    BOUNCE = 'CD_Samira19_MisBounce'
+    TIME_TO_SHOOT = 0.374933  # GA_Samira19_Spell default TimeToShoot (script literal, not a curve row)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.begin_fire = self.chrono_event(self.CAST, 'BeginFire')
+        self.num_bullets = int(self.row('NumBullets'))
+        self.bullet_gap = self.TIME_TO_SHOOT / self.num_bullets
+        self.captivate_duration = self.row('CaptivateDuration')
+        self.notes = ('A barrage counts as one attack launch for on-attack items. Her crits Captivate (3 s) when '
+                      'Classical is active, which grows the Classical damage amp.')
+
+    def bullet_damage(self, level, AD, AP):
+        return self.row('DamageAP', star=level) * AP + self.row('DamageAD', star=level) * AD
+
+    def emit(self, moment, event, items):
+        super().emit(moment, event, items)
+        if moment == CRIT and event.target is not None:
+            captivate(self, event.target, self.captivate_duration)
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        for k in range(self.num_bullets):
+            def fire(k=k):
+                if k == 0:
+                    self.simulateLaunch(self.items)  # GE_SimulateLaunchAttack on the first OnFired (DoOnce)
+                flight = self.chrono_projectile_ticks(self.BULLETS[k % 2], 'Bullet', self.target_hexes(target))
+                self.schedule_tick(self.tick + flight, lambda: self._bullet_lands(target, [target], 0))
+            self.schedule_tick(self.tick + ticks_up(self.begin_fire + k * self.bullet_gap), fire)
+
+    def _bullet_lands(self, target, hit, k):
+        eff = self.trait_value('DA_Trickshot19', 'RichochetDamage') ** k if k else 1
+        self.multiTargetSpell([target], self.items, self.tick / TPS, 1,
+                              lambda level, AD, AP: self.bullet_damage(level, AD, AP) * eff, 'physical')
+        if self.trait_tier('DA_Trickshot19') > 0 and k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
+            nxt, hexes = self.ricochet(target, hit)
+            step = self.chrono_projectile_ticks(self.BOUNCE, 'Bounce', hexes)
+            self.schedule_tick(self.tick + step, lambda: self._bullet_lands(nxt, hit + [nxt], k + 1))
+
+
+champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira']
 
 
 class TrainingDummy(Champion):
