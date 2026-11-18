@@ -68,6 +68,8 @@ class Timing:
     mana_lock    cast start -> mana can be gained again (G6); None = cast_lock
     lock_scales_with_as  the spell's script reads attack speed: both locks scale by base AS / current AS (G7, a
                  generic rule; a champion whose script uses its own curve overrides scaled_locks)
+    lock_speed_clamp  (low, high) bounds on the cast's play rate current AS / base AS, when the script clamps it
+                 (Ziggs: FClamp(AttackSpeed / base, 1, 2)); None = unbounded
     cast_cancels_attack  a ranged attack under way when the cast starts never releases (T4); from the build's spell
                  (`CancelAbilitiesWithTag` has `Combat.Attacking`); default when the build doesn't say: it still releases
     variants     sequential attack animations (B13, Kai'Sa): [{'selector', 'min_as', 'launch', 'length'}] in the chrono's
@@ -81,7 +83,7 @@ class Timing:
 
     def __init__(self, launch=0.0, attack_len=0.0, proj_speed=0.0, distance=None, mana_at=None, cast_lock=0.0,
                  mana_lock=None, lock_scales_with_as=False, cast_cancels_attack=False, release_scales_with_period=False,
-                 variants=None, animations=0, cast_keeps_rhythm=False, source=None):
+                 variants=None, animations=0, cast_keeps_rhythm=False, lock_speed_clamp=None, source=None):
         self.launch = launch
         self.attack_len = attack_len
         self.release_scales_with_period = release_scales_with_period
@@ -95,6 +97,7 @@ class Timing:
         self.variants = list(variants or [])
         self.animations = animations
         self.cast_keeps_rhythm = cast_keeps_rhythm
+        self.lock_speed_clamp = lock_speed_clamp
         self.source = dict(source or {})
 
     @classmethod
@@ -176,10 +179,19 @@ class Timing:
         """'start', 'release' or 'hit' (T3 default: ranged at the release, melee on the hit)."""
         return self.mana_at or ('release' if ranged else 'hit')
 
+    def cast_rate(self, base_as, current_as):
+        """The cast's play rate: current AS / base AS when the spell reads attack speed (G7), within
+        lock_speed_clamp; 1 otherwise."""
+        if not (self.lock_scales_with_as and current_as > 0 and base_as > 0):
+            return 1.0
+        rate = current_as / base_as
+        if self.lock_speed_clamp:
+            lo, hi = self.lock_speed_clamp
+            rate = min(max(rate, lo), hi)
+        return rate
+
     def scaled_locks(self, base_as, current_as):
         """(cast lock, mana lock) in seconds at the current attack speed."""
         mana_lock = self.cast_lock if self.mana_lock is None else self.mana_lock
-        if self.lock_scales_with_as and current_as > 0 and base_as > 0:
-            f = base_as / current_as
-            return self.cast_lock * f, mana_lock * f
-        return self.cast_lock, mana_lock
+        rate = self.cast_rate(base_as, current_as)
+        return self.cast_lock / rate, mana_lock / rate

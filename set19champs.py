@@ -276,7 +276,63 @@ class Yunara(BuildChampion):
         self.stacks += self.row('NumOrbsToAdd')
 
 
-champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara']
+class Ziggs(BuildChampion):
+    """GlitterBOM3S (champions/Ziggs.md, D1). Scripts: GA_Ziggs19_Spell, GA_Ziggs19_LaunchProjectileAttack (build
+    ga_scripts.zip).
+
+    Passive: every attack applies GE_Ziggs19_AutoAttack, whose second damage application is MagicDamageCalc3
+    (AADamageAP x AP) magic spell damage (AppliesOnSpell, crits only with Precision), on the same hit as the physical
+    attack.
+    Spell: CD_Ziggs19_CastAnim plays at rate FClamp(AttackSpeed / base AttackSpeed, 1, 2) (0x4c1-0x689), so the cast
+    lock, mana lock and the 'MainBomb' spawn (0.3183 s, 1900 units/s) all shorten by that rate. The bomb's arrival
+    (OnArrived -> 0xa3e) applies GE_Ziggs19_PrimaryDamage (MagicDamageCalc1 = InitialDamage x AP) to the target and
+    GE_Ziggs19_SecondaryDamage (MagicDamageCalc2 = SecondaryDamageAP x AP) to the other enemies within 1 hex of it
+    (0x5d). Both magic spell damage, crit only with Precision. The bomb's first OnFired applies GE_SimulateLaunchAttack
+    (Combat.Event.LaunchAttack.SimulateTriggersOnly): not modelled, see notes.
+    """
+    KEY = 'DA_Ziggs19'
+    CAST = 'CD_Ziggs19_CastAnim'
+    BOMB = 'MainBomb'
+    CAST_RATE_CLAMP = (1, 2)  # GA_Ziggs19_Spell 0x635: FClamp(AttackSpeed / base, 1, 2)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.timing.lock_speed_clamp = self.CAST_RATE_CLAMP
+        self.timing.source['lock_speed_clamp'] = 'GA_Ziggs19_Spell 0x635 FClamp(AS / base AS, 1, 2)'
+        # set18 convention (as Varus): num_targets counts the target; the splash hits num_targets - 1 adjacent enemies
+        self.num_targets = 2
+        self.bomb_spawn = self.chrono_projectile_spawn(self.CAST, self.BOMB)
+        self.notes = ('Hyperpop (Hype levels between rounds) not modelled. The bomb\'s simulated attack (on-attack '
+                      'triggers only) is not modelled: no listed item reacts to it and its role mana would fall '
+                      'inside the mana lock. Adjacent enemies hit = targets - 1. The bomb flies his attack range.')
+
+    def bomb_damage(self, level, AD, AP):
+        return self.row('InitialDamage', star=level) * AP
+
+    def splash_damage(self, level, AD, AP):
+        return self.row('SecondaryDamageAP', star=level) * AP
+
+    def passive_damage(self, level, AD, AP):
+        return self.row('AADamageAP', star=level) * AP
+
+    def performAttack(self, opponents, items, time, multiplier=None, generateMana=True):
+        super().performAttack(opponents, items, time, multiplier, generateMana)
+        self.multiTargetSpell(opponents[:1], items, time, 1, self.passive_damage, 'magical')
+
+    def performAbility(self, opponents, items, time):
+        rate = self.timing.cast_rate(self.base_aspd, self.aspd.stat)
+        flight = self.chrono_projectile_ticks(self.CAST, self.BOMB, self.attack_range)
+
+        def land():
+            now = self.tick / TPS
+            self.multiTargetSpell(opponents[:1], items, now, 1, self.bomb_damage, 'magical')
+            if self.num_targets > 1:
+                self.multiTargetSpell(opponents[1:], items, now, self.num_targets - 1, self.splash_damage, 'magical')
+
+        self.schedule_tick(self.tick + ticks_up(self.bomb_spawn / rate) + flight, land)
+
+
+champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs']
 
 
 class TrainingDummy(Champion):
