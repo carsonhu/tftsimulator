@@ -53,23 +53,23 @@ def test_paddle_ball():
 
 
 def test_beach_pop():
-    # the level is the trait level (no breakpoints in the build); empowered members +20/35/35% AS and +5/8/8 mana
-    # every 3 s; level 3 also +40 mana every 10 s
-    for level, bonus in ((1, 0.2), (2, 0.35)):
+    # breakpoints 3/5/7 (the tooltip, VOD5 2:14; the build's are placeholders); empowered members +20/35/35% AS and
+    # +5/8/8 mana every 3 s; at 7 also +40 mana every 10 s
+    for level, bonus in ((3, 0.2), (4, 0.2), (5, 0.35), (7, 0.35)):
         z = LoggedZoe(1)
         fight(z, buffs=[set19buffs.BeachPop(level)], seconds=1)
         assert z.aspd.stat == pytest.approx(0.7 * (1 + bonus))
     z = LoggedZoe(1)
-    fight(z, buffs=[set19buffs.BeachPop(2)], seconds=7)
+    fight(z, buffs=[set19buffs.BeachPop(5)], seconds=7)
     assert [t for t, a, before, after in z.mana_log if a == 8] == [90, 180]
     z = LoggedZoe(1)
-    fight(z, buffs=[set19buffs.BeachPop(3)], seconds=11)
+    fight(z, buffs=[set19buffs.BeachPop(7)], seconds=11)
     assert [t for t, a, before, after in z.mana_log if a == 40] == [300]
     # not next to an instrument: nothing
     z = LoggedZoe(1)
-    fight(z, buffs=[set19buffs.BeachPop(2, 1)], seconds=4)
+    fight(z, buffs=[set19buffs.BeachPop(5, 1)], seconds=4)
     assert z.aspd.stat == pytest.approx(0.7) and not [t for t, a, b, af in z.mana_log if a == 8]
     # a non-member gets nothing from it here (the Health regen changes no damage)
     a = Ashe(1, build=load_build(V))
-    fight(a, buffs=[set19buffs.BeachPop(1)], seconds=1)
+    fight(a, buffs=[set19buffs.BeachPop(3)], seconds=1)
     assert a.aspd.stat == pytest.approx(0.75 * 1.2)  # Ashe is a Beach Pop member

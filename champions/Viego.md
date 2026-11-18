@@ -106,6 +106,7 @@ Buff's +10). Ticks count from combat start.
     a fixed-time projectile, taken as 0.25 s: G21) and deals GE_Viego19_SwordDamage; then one GE_SimulateLaunchAttack.
     Unlock (1.832 s) ends the cast (build: 55 / 56 ticks).
   - **Damage:** PhysicalDamageCalc1 in DA_Viego19's CalcComponent = DamagePerSwordAD x AbilityPower + DamagePerSwordAP x
-    AbilityPower: both terms capture AP (the row name says AD; the tooltip shows AP twice). Followed as data, flagged
-    for the owner (docs/OPEN-QUESTIONS.md). Physical, on-spell, crit only with Precision.
+    AbilityPower: both terms capture AP (the row name says AD; the tooltip shows AP twice). **Owner, 2026-11-18: the AD
+    row scales with AD**, so each sword deals DamagePerSwordAD x AD + DamagePerSwordAP x AP. Physical, on-spell, crit
+    only with Precision.
 

@@ -11,9 +11,10 @@ class BeachPop(BuildTrait):
     every 3 seconds." CT_OceanSong19 by trait level 1-3: AttackSpeed (20/35/35%), ManaRegen (5/8/8), RegenEveryXSeconds
     (3), OceanBreezeAfterXSeconds (10), OceanBreezeMana (0/0/40).
 
-    The build's tier list is a placeholder (threshold 0), so the units each level needs are not in the data: the
-    page's level here IS the trait level (1-3; the game's panel shows the first at 3 units). Whether the simulated
-    unit stands next to an instrument is the parameter (default: yes).
+    The build's tier list is a placeholder (threshold 0), so the units each tier needs are not in the data; they are
+    the game's tooltip (VOD5 2:14, owner): (3) 1 Instrument; 20% AS, 5 mana, (5) 2 Instruments; 35% AS, 8 mana,
+    (7) AND every 10 seconds an ocean breeze (BREAKPOINTS). The page's level is units on the board, as for every
+    trait. Whether the simulated unit stands next to an instrument is the parameter (default: yes).
     Empowered members: AttackSpeed MultiplyAdditive + AttackSpeed (the instrument's effect, as the text says) and
     GA_Oceansong19_HealthRegenHandler: WaitDelay(RegenEveryXSeconds), then TickRegen: ManaRegen mana (and a heal,
     nothing against dummies), repeating: +5/8/8 mana at 3, 6, 9, ... s. Level 3 (GA_Oceansong19_7Piece_ManaAndHeal):
@@ -23,7 +24,8 @@ class BeachPop(BuildTrait):
     KEY = "DA_OceanSong19"
     display_name = "Beach Pop"
     team_trait = False
-    levels = [0, 1, 2, 3]
+    BREAKPOINTS = [3, 5, 7]  # the tooltip (VOD5 2:14); the build's tier list is a placeholder
+    levels = [0, 3, 5, 7]
     PLACES = ["Next to an instrument", "Not empowered"]
     REPEATS = 99
 
@@ -38,7 +40,7 @@ class BeachPop(BuildTrait):
         tiers = getattr(champion, "trait_tiers", None)
         if tiers is None:
             tiers = champion.trait_tiers = {}
-        tiers[self.KEY] = int(self.level)  # the level is the trait level (no breakpoints in the build)
+        tiers[self.KEY] = sum(int(self.level) >= b for b in self.BREAKPOINTS)  # the tooltip's breakpoints
         if self.level and self._empowered_member(champion):
             champion.aspd.modify("MultiplyAdditive", 1 + champion.trait_value(self.KEY, "AttackSpeed"))
 

@@ -71,7 +71,7 @@ def test_vod5_cast_rhythm():
 
 
 def test_swords_and_simulated_launch():
-    # 10 swords of (36 + 3) x AP at 1 star (both coefficients scale AP in the client data), 32 + 8 ticks after the
+    # 10 swords of 36 x AD + 3 x AP at 1 star (the AD row scales AD: owner, 2026-11-18), 32 + 8 ticks after the
     # cast; one simulated attack launch per cast, at FireSwords
     v, counter = LoggedViego(1), LaunchCounter()
     rows = fight(v, items=[counter])
@@ -82,7 +82,11 @@ def test_swords_and_simulated_launch():
     v2 = LoggedViego(2)
     v2.ap.modify("+", 0.5)
     rows = fight(v2, seconds=8)
-    assert [d for t, d in rows if t == v2.casts[0] + 40] == [pytest.approx((54 + 5) * 1.5)] * 10
+    assert [d for t, d in rows if t == v2.casts[0] + 40] == [pytest.approx(54 + 5 * 1.5)] * 10
+    v3 = LoggedViego(2)
+    v3.bonus_ad.modify("+", 0.5)
+    rows = fight(v3, seconds=8)
+    assert [d for t, d in rows if t == v3.casts[0] + 40] == [pytest.approx(54 * 1.5 + 5)] * 10
 
 
 def test_slayer_and_choreographer():

@@ -87,7 +87,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | predicted: 0 (no GE_SimulateLaunchAttack) | D1 |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted (script read: D1); the DOT spread over its 15 s is assumed (the GE applies the full MagicDamageCalc3 each period) | D1 |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted (script read: D1); the DOT spread over its 15 s: owner 2026-11-18 (the tooltip is right) | D1 |
 | Q14 | Passives and other mechanics that need modelling | see ability text | her Captivates feed Classical (B28); Choreographer (B30) implemented | D1 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 
@@ -113,7 +113,7 @@ Source for all rows below: VOD2 (`…PBE_11-17-2026_16-35-16-966.mp4`, 60 fps), 
     Unlock (0.6578 s) ends the cast and the mana lock. A missile's hit: 1 Toxin and a Captivate. The build's 3.67 s
     spell timeline is the 3 s WaitDelay fallback for a chain that never lands.
   - **Toxin (GE_RenataGlasc19_ToxinDamage):** its own 15 s instance per application, a tick every 0.25 s; the GE
-    applies MagicDamageCalc3 (160/240/580 x AP) each period, which would be 60x the tooltip: assumed the DOT system
-    spreads it (160 x AP over the 60 ticks), the first tick on application (open). Magic, DOT, on-spell, crit only
+    applies MagicDamageCalc3 (160/240/580 x AP) each period, which would be 60x the tooltip; the tooltip is right (owner,
+    2026-11-18): 160 x AP spread over the 60 ticks. The first tick on application (open). Magic, DOT, on-spell, crit only
     with Precision.
 

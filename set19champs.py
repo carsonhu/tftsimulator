@@ -938,8 +938,9 @@ class Viego(BuildChampion):
     CD_Viego19_SwordCollapse_Mis from its place to the target; the 'ViegoSwordCollapse' projectile is a
     TFTFixedTimeMovement with no time of its own, assumed to arrive at the module's end, the chrono's length 0.25 s
     (G21); on arrival GE_Viego19_SwordDamage = PhysicalDamageCalc1, physical, AppliesOnSpell, crit only with Precision.
-    The CalcComponent builds PhysicalDamageCalc1 from DamagePerSwordAD x **AbilityPower** + DamagePerSwordAP x
-    AbilityPower (both terms capture AbilityPower, as the tooltip shows; followed as data, D1). After starting the
+    The CalcComponent builds PhysicalDamageCalc1 from DamagePerSwordAD x AbilityPower + DamagePerSwordAP x AbilityPower
+    (both terms capture AbilityPower), but the owner ruled the AD row scales with AD (2026-11-18, D1):
+    DamagePerSwordAD x AD + DamagePerSwordAP x AP. After starting the
     swords (0xede) one GE_SimulateLaunchAttack. 'Unlock' (1.832 s) removes the mana lock and finishes the cast (the
     build: 55 / 56 ticks).
     """
@@ -953,11 +954,12 @@ class Viego(BuildChampion):
         self.collapse = self.chrono(self.COLLAPSE)['length']  # G21: a fixed-time projectile takes its module's time
         self.num_swords = int(self.row('NumBaseSwords'))
         self.notes = ('10 swords hit the target 1.31 s into the cast (the takedown swords are not modelled: dummies '
-                      'never die). Each scales with AP only, as the client data has it.')
+                      'never die). Each deals DamagePerSwordAD x AD + DamagePerSwordAP x AP (owner, 2026-11-18).')
 
     def sword_damage(self, level, AD, AP):
-        # PhysicalDamageCalc1: both coefficients multiply AbilityPower in the CalcComponent (D1)
-        return (self.row('DamagePerSwordAD', star=level) + self.row('DamagePerSwordAP', star=level)) * AP
+        # PhysicalDamageCalc1: the AD row x AD, the AP row x AP (owner, 2026-11-18; the client's CalcComponent
+        # captures AbilityPower for both, D1)
+        return self.row('DamagePerSwordAD', star=level) * AD + self.row('DamagePerSwordAP', star=level) * AP
 
     def performAbility(self, opponents, items, time):
         target = opponents[0]
@@ -1141,8 +1143,8 @@ class RenataGlasc(BuildChampion):
     timeline is the 3 s WaitDelay fallback for a chain that never lands.) Each missile: SecondaryTargetStacks (1)
     Toxin and a Captivate. GE_RenataGlasc19_ToxinDamage: HasDuration ToxinDuration (15 s), Period TickRate (0.25 s),
     no stacking (each application its own), MagicDamageCalc3 (ToxinDamageAP x AP), magic, DOT, on-spell, crit only
-    with Precision. Assumed (D1): the DOT damage is spread over the duration (the tooltip's "over 15 seconds": 160 x
-    AP / 60 a tick) and ticks on application (bExecutePeriodicEffectOnApplication not set: Unreal's default true).
+    with Precision. The DOT damage is spread over the duration (the tooltip's "over 15 seconds": 160 x AP / 60 a
+    tick; owner, 2026-11-18: the tooltip is right) and ticks on application (bExecutePeriodicEffectOnApplication not set: Unreal's default true).
     Her Captivates feed Classical (B28): she is the simulated Classical unit.
     """
     KEY = 'DA_RenataGlasc19'
