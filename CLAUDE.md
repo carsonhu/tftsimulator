@@ -139,5 +139,5 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   VOD + timestamp, or ledger entry).
 - The user wants the simplest control that works. When a mechanic is out of scope, say so in the worksheet and in
   `self.notes`, instead of half-modelling it.
-- Push `set19` (`git push origin set19`) after each restructure step lands (owner, 2026-11-17); otherwise when asked.
+- Push `set19` (`git push origin set19`) after each restructure step and each champion lands (owner, 2026-11-17 / 18).
   The Pages workflow publishes on a push to `main` only, which is set18's live site: never push to `main` from here.
