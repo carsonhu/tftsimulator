@@ -8,8 +8,10 @@ Read `docs/ASSUMPTIONS.md` before changing any game rule, and the champion's wor
 
 ## Where you are
 
-- This directory is its own git repo (branch `main`, **no remote yet**). The folders above belong to another,
-  messy repo. Commit here, never there.
+- This directory is its own git repo. Work happens on branch `set19`, which tracks `origin/set19` on
+  github.com/carsonhu/tftsimulator (set18's repo, beside its `set16`-`set18` branches). Local `main` is never
+  pushed: `origin/main` is set18's live site, and this repo shares no history with it. The folders above belong
+  to another, messy repo. Commit here, never there.
 - set18 is a separate, live repo (tftsimulator.app). Don't edit it from here and don't import from it, but **use it
   as the reference for how things are done**, ordering above all: before writing a mechanic, read the set18
   equivalent and follow its phase unless evidence says otherwise; list every deviation in the ledger (O1-O5).
@@ -114,4 +116,5 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   VOD + timestamp, or ledger entry).
 - The user wants the simplest control that works. When a mechanic is out of scope, say so in the worksheet and in
   `self.notes`, instead of half-modelling it.
-- Don't push: there is no remote, and set18's GitHub Pages workflow (copied here) would publish if one were added.
+- Push only when asked, and only `set19` (`git push origin set19`). The Pages workflow publishes on a push to `main`
+  only, which is set18's live site: never push to `main` from here.
