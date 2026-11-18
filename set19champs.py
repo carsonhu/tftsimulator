@@ -228,7 +228,55 @@ class Kaisa(BuildChampion):
         self.aspd.addStat(self.row('ASOnCast') * 100)
 
 
-champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa']
+class Yunara(BuildChampion):
+    """Cultivation of Teen Spirit (champions/Yunara.md, D1). Scripts: GA_Yunara19_Spell, GA_Yunara19_Passive (build
+    ga_scripts.zip).
+
+    Spell: GE_Yunara19_EmpoweredAttack adds NumOrbsToAdd to her Stack attribute for the rest of combat (stacking per
+    cast); it finishes on activation and cancels nothing (T12).
+    Passive: on each attack launch (Combat.Event.LaunchAttack, 0x3587) with Stack >= 1 it plays CD_Yunara19_OrbMis at
+    her attack target, fitted to a fixed duration of 0.5 / AttackSpeed (DeterminePlayrate), with MissileSelector tags
+    1..min(Stack, MaxVisualOrbs 11) (AddTagsToDetermineMissiles): orb i spawns at the chrono's i-th projectile time,
+    scaled to that duration, and flies at 1850 units/s. Each arrival applies GE_Yunara19_AbilityDamage =
+    GetDamagePerVISUALOrb = Calc1 x (1 + (Stack - 11 if > 0) / 11), Calc1 = ADDamage x AD + APDamage x AP: in total
+    Stack x Calc1 per attack. Physical spell damage, crits only with Precision.
+    """
+    KEY = 'DA_Yunara19'
+    ORBS = 'CD_Yunara19_OrbMis'
+    MAX_VISUAL_ORBS = 11  # GA_Yunara19_Passive default (script literal)
+    PLAYRATE = 0.5  # DeterminePlayrate: the orb chrono lasts 0.5 / AttackSpeed s (script literal)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.stacks = 0
+        ch = self.chrono(self.ORBS)
+        self.orb_times = sorted(t for p in ch.get('projectiles') or [] if p['name'] == 'Yunara19_OrbMis'
+                                for t in p.get('spawn_at') or [])
+        self.orb_chrono_len = ch['length']
+        self.notes = "Orbs fly to her target at her attack range (4 hexes); the i-th orb takes the chrono's i-th spawn time."
+
+    def orb_damage(self, level, AD, AP):
+        return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
+
+    def onLaunch(self, opponents, items):
+        stacks = int(self.stacks)
+        if stacks < 1:
+            return
+        visual = min(stacks, self.MAX_VISUAL_ORBS)
+        per_orb = 1 + max(0, stacks - self.MAX_VISUAL_ORBS) / self.MAX_VISUAL_ORBS
+        duration = self.PLAYRATE / self.aspd.stat
+        flight = self.chrono_projectile_ticks(self.ORBS, 'Yunara19_OrbMis', self.attack_range)
+        for t in self.orb_times[:visual]:
+            spawn = t / self.orb_chrono_len * duration
+            self.schedule_tick(self.tick + ticks_up(spawn) + flight, lambda: self.multiTargetSpell(
+                opponents[:1], self.items, self.tick / TPS, 1,
+                lambda level, AD, AP: self.orb_damage(level, AD, AP) * per_orb, 'physical'))
+
+    def performAbility(self, opponents, items, time):
+        self.stacks += self.row('NumOrbsToAdd')
+
+
+champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara']
 
 
 class TrainingDummy(Champion):

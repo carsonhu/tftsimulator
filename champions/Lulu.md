@@ -34,7 +34,7 @@ Formulas (as stored; AD and AP are multipliers):
 - `AttackSpeedCalc1` = 0.45/0.55/0.65 × AP + 0.35
 - `HealthCalc1` = 175/260/395 × AP
 - `MagicDamageCalc1` = 400/600/900 × AP
-- `GenericCalc1` = 5 + 1 × 1
+- `GenericCalc1` = 5 + 1 + 1
 - `MagicDamageCalc2` = 20/30/45 × AP
 - `MagicDamageCalc3` = 20/30/45 × AP
 

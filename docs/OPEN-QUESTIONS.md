@@ -45,7 +45,14 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Missile damage | 36/54/85 × AD + 6/9/15 × AP each; physical; 3 every 3 attacks | damage numbers on a target of known armor | champions/Kaisa.md Q13 |
 | First attack at combat start | Attack1LowAS: 0.3255 s → tick 10 | first +10 after combat start (needs a Blue Buff elsewhere) | B13, Kai'Sa Q3 |
 
-### 4. Spell projectiles and damage numbers
+### 4. Yunara again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Orb damage and timing | each orb Calc1 (13/20/30 x AD + 3/5/7 x AP), the i-th orb spawning at the orb chrono's i-th time scaled to 0.5 / AS, flying 1850 units/s | damage numbers after her 2nd and 3rd casts | champions/Yunara.md D1 |
+| First attack at combat start | a stationary ranged unit releases one windup in (8 ticks); VOD2 she walked first (21.5 ticks) | a fight where she starts in range | G3, Yunara Q3 |
+
+### 5. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
@@ -53,7 +60,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Draven's record flight | 14 ticks at 4 hexes; VOD1 showed 16 (5 hexes would give 16) | a Draven cast at a target at a known distance | P12, Draven E4 |
 | Trickshot ricochet distance between dummies | the next dummy is 1 hex away (timing only; damage unchanged) | a ricochet's travel between two adjacent enemies | B12 |
 
-### 5. Items
+### 6. Items
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
@@ -68,4 +75,4 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Draven's vortex: the decoded damage effect has no tick-rate factor, yet each 0.5 s hit is half the per-second value (owner's ruling). Where does the game halve it? | implemented as the owner ruled; the decode is incomplete somewhere (calc component or attribute) | champions/Draven.md D1 |
 | Crit-conditioned attack animations (Senna's crit attack winds up 0.636 s vs 0.531 s; Varus, Jinx, ... have CritAttack / SequentialAttack groups) | not modelled: the single launch time is used. Needed before Senna. | B13, P13 |
 | Trickshot ricochets' on-hit effects (at RichochetDamage^k) | not modelled; no listed item has an on-hit effect yet | B12 |
-| Illbeats (Draven's second trait) | not implemented | - |
+| Illbeats (Draven's second trait), Ionic Spark (Yunara's) | not implemented | - |
