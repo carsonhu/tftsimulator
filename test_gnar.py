@@ -1,5 +1,5 @@
 """Gnar end to end (champions/Gnar.md): numbers from build rls-19.1.0.5973071; Ammo, attack speed and launch rhythm
-against the owner's 60 fps PBE VOD3 (17-13-37-283, f15620-16359: Gnar 2-star, AS 0.77 at combat start)."""
+against the owner's 60 fps PBE VOD3 (17-13-37-283, f15620-16359: Gnar 2-star with Infinity Edge + Striker's Flail)."""
 import pytest
 
 import set19buffs
@@ -43,8 +43,9 @@ def test_vod3_rhythm_and_attack_speed():
     # VOD3 Ammo text 1/3, 2/3, 3/3 (the rock), ... at f15728, 15805, 15892, 15958, 16030, 16108, 16171, (16269: a
     # walk), 16341: gaps 38.5, 43.5, 33, 36, 39, 31.5 ticks; AS 0.77 -> 0.83 -> 0.90 -> 0.96 at each 3/3
     g = LoggedGnar(2)
-    g.aspd.modify("MultiplyAdditive", 1.1)  # VOD3's 0.77 at combat start
-    fight(g)
+    fight(g, items=[set19items.InfinityEdge(), set19items.StrikersFlail()])
+    assert g.hp.stat == 1050 and g.crit.stat == pytest.approx(0.8)  # VOD3 panel: 1050 HP, 80% crit
+    assert g.as_after[0] == 0.77  # 0.7 x 1.1 (Striker's Flail)
     gaps = [b - a for a, b in zip(g.releases, g.releases[1:])][:6]
     assert all(abs(e - v) <= 1.5 for e, v in zip(gaps, [38.5, 43.5, 33, 36, 39, 31.5]))
     assert [round(a, 2) for a in g.as_after[2:9:3]] == [0.83, 0.9, 0.96]

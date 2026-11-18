@@ -554,10 +554,10 @@ class Gnar(BuildChampion):
         t.source['variants'] = f'{self.ATTACK} SequentialAttack x2 + SpecialAttack (GA_Gnar19_Passive Ammo, every 3rd)'
         self.rock_speed = self.chrono_projectile_speed(self.ROCK, 'SpellProjectile')
         self.notes = ('Every 3rd attack is the rock (its own, slower windup); each rock gives +9% x AP attack speed '
-                      'for the rest of combat. Mana items would add Ammo in game; not modelled.')
+                      'for the rest of combat. Items that give mana add no Ammo.')
 
     def canCast(self, time=None):
-        return False  # no spell: the bar is Ammo, spent by the passive
+        return False  # no spell: the bar is Ammo, spent by the passive; mana from items adds no Ammo (owner, 2026-11-18)
 
     def rock_damage(self, level, AD, AP):
         return self.row('ADDamage', star=level) * AD

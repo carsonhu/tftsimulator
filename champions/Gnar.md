@@ -60,7 +60,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | consistent (2★: 900 HP in planning, Ammo 0/3, armor/MR 25; combat AS 0.77 and HP 1050 from his board) | E1 |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed (2★: 900 HP, 60 AD, 0.7 AS, armor/MR 25, Ammo 0/3; with his items exactly the panel) | E1 |
 | Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | HybridSpecialist_Ammo | confirmed: no mana; the bar is Ammo, +1 per launch, reset after the rock | E2, D1 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.2678 s (8.03 ticks) | predicted | |
@@ -86,7 +86,7 @@ Source for all rows below: VOD3 (`…PBE_11-17-2026_17-13-37-283.mp4`, 60 fps), 
 
 | # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
 |---|---|---|---|---|---|---|---|---|
-| E1 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 4:10-4:27 | 60 | inspection panel | planning 900/900, 0/3; in combat 1050 HP, AD 81 (+35%), AS 0.77, crit 80%, armor/MR 25, two items (a gold blade and a blue item; HP +150 suggests Thief's Gloves' random items) | 2★ base stats as built; the items are not identified with certainty | Q1 |
+| E1 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 4:10-4:27 | 60 | inspection panel | planning 900/900, 0/3; in combat 1050 HP, AD 81 (+35%), AS 0.77, crit 80%, damage amp 10% (then 15, 25, 30%), armor/MR 25; Infinity Edge + Striker's Flail (owner) | 2★ as built with the items: HP 900 + 150, AS 0.7 x 1.1, crit 25 + 35 + 20, AD +35%, amp 10% + Flail's crit stacks | Q1 |
 | E2 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 f15620-16359 (`tools/vod_text_changes.py`, mana and as) | 60 | Ammo text and AS | Ammo 1, 2, 3, 0 at f15728, 15805, 15892, 15912; 15958, 16030, 16108, 16128; 16171, 16269, 16341, 16359. AS 0.77 -> 0.83 (f15892) -> 0.90 (f16108) -> 0.96 (f16341) | launch gaps 38.5, 43.5, 33, 36, 39, 31.5 ticks; engine (`test_gnar.py`) 39, 43, 32, 36, 39, 30. AS +0.063 (0.7 x 0.09 at AP 0%) at each rock. Ammo reset 10, 10, 9 ticks after the rock (0.3 / AS: 10.8, 10.0, 9.4). One gap of 49 ticks (engine 34): a walk or retarget | Q2, Q5, Q14 |
 
 ## Decisions and notes
@@ -104,6 +104,6 @@ Source for all rows below: VOD3 (`…PBE_11-17-2026_17-13-37-283.mp4`, 60 fps), 
     ricochet does not fire on the rock.
   - **Rhythm:** the B13 rule for units with several attack animations (starts a period apart, each releasing its own
     windup later) reproduces VOD3 within 1.5 ticks.
-  - **Not modelled:** items that give mana (Shojin, Blue Buff...) would add Ammo in game; the engine ignores them for
-    him (he never casts).
+  - **Mana from items** (Shojin, Blue Buff...) adds no Ammo: Ammo is not meant to be filled by mana (owner,
+    2026-11-18); he never casts.
 

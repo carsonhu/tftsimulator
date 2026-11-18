@@ -89,7 +89,6 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
 | Rock damage | 120/180/270 x AD physical, crits only with Precision, on-hit effects apply | damage numbers of his 3rd attacks on a target of known armor | champions/Gnar.md D1 |
-| Does mana from items fill Ammo? | ignored (he never casts) | a Gnar with Spear of Shojin or Blue Buff: the Ammo text | champions/Gnar.md D1 |
 
 ### 8. Spell projectiles and damage numbers
 
