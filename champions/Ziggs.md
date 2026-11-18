@@ -81,7 +81,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | the bomb applies GE_SimulateLaunchAttack once (on-attack triggers only, D1); not modelled: no listed item reacts, and its role mana would fall inside the mana lock | script |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | cancels Combat.Attacking (T4); the rhythm restarts with a fresh attack after the lock | E2 |
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | **confirmed**: attack 9 physical + 36 magic on the same hit, bomb 163 on the target + 72 on an adjacent minion (all four fit 10, 40, 180, 80 against minion armor = MR = 10, shown rounded down) | E3 |
-| Q14 | Passives and other mechanics that need modelling | see ability text | passive implemented (D1); Hyperpop (Hype levels between rounds) and Arcanist not implemented | D1 |
+| Q14 | Passives and other mechanics that need modelling | see ability text | passive implemented (D1); Arcanist implemented (B16); Hyperpop (Hype levels between rounds) not implemented | D1 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-17 | D1 |
 
 ## Evidence log
