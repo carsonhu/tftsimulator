@@ -57,6 +57,7 @@ class Champion(FastDeepCopy):
         self.crit = LegacyFlat(0.25)
         self.critDmg = LegacyFlat(1.4)
         self.omnivamp = LegacyFlat(0)
+        self.bonus_range = Attribute(0)  # hexes of item range (AttackRange): flights don't use it (owner, I10)
         # crit chance over 100% becomes crit damage at this ratio (set18 0.5; Set 19 data: CT_ExtraCritChanceToCritDamage)
         self.excess_crit_ratio = 0.5
 
@@ -197,18 +198,28 @@ class Champion(FastDeepCopy):
         self.canSpellCrit = True
 
     # get basic stats from items
-    def addStats(self, item) -> None:
-        self.hp.addStat(item.hp)
-        self.bonus_ad.addStat(item.ad)  # now we have multipicative AD only
-        self.ap.addStat(item.ap)
-        self.aspd.addStat(item.aspd)
-        # self.curMana = min(self.curMana + item.mana, self.fullMana.stat)
-        self.manaRegen.addStat(item.manaRegen)
-        self.armor.addStat(item.armor)
-        self.mr.addStat(item.mr)
-        self.crit.addStat(item.crit / 100)
-        self.dmgMultiplier.addStat(item.dmgMultiplier)
-        self.omnivamp.addStat(item.omnivamp)
+    # The game's attribute names -> this unit's Attribute (stats.Attribute, in game units), for effects read from the
+    # build: champion.attribute("AttackSpeed").modify("MultiplyAdditive", 1.1).
+    ATTRIBUTES = {
+        "AbilityPower": "ap",
+        "AttackDamage": "bonus_ad",  # the multiplier on the unit's own AD (atk), 1.0 = no bonus
+        "AttackSpeed": "aspd",
+        "AttackRange": "bonus_range",  # item range: flights keep the unit's own range (owner, I10)
+        "Armor": "armor",
+        "CritChance": "crit",
+        "CritDamage": "critDmg",
+        "HealthMax": "hp",
+        "IncomingManaMultiplier": "manaGainMultiplier",
+        "MagicResist": "mr",
+        "ManaMax": "fullMana",
+        "ManaPerAttack": "manaPerAttack",
+        "ManaPerSecond": "manaRegen",
+        "Omnivamp": "omnivamp",
+        "OutgoingDamageMultiplier": "dmgMultiplier",
+    }
+
+    def attribute(self, name):
+        return getattr(self, self.ATTRIBUTES[name])
 
     def addStat(self, stat, amount):
         getattr(self, stat).addStat(amount)

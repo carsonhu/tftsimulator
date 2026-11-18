@@ -1,5 +1,3 @@
-import math
-
 from stats import FastDeepCopy
 
 
@@ -73,324 +71,70 @@ class Status(FastDeepCopy):
         # else, reapplication
 
 
-
-def zero_scaling(x, y, z):
-    """Default zero scaling function for DoT effects."""
-    return 0
-
-
-class DoTEffect(Status):
-    # apply damage once per second. in-game it's at least every half-second
-    # but this is chill for clarity
-    def __init__(self, name):
-        super().__init__("DoT {}".format(name))
-        self.scaling = zero_scaling
-        self.next_proc = 0
-
-    def applicationEffect(self, champion, time, duration, params):
-        # params: (scaling function, interval)
-        self.scaling = params[0]
-        self.interval = params[1]
-        self.next_proc = math.floor(time) + self.interval
-        return True
-
-    def reapplicationEffect(self, champion, time, duration, params):
-        return True
-
-    def wearoffEffect(self, champion, time):
-        self.next_proc = 999
-        return True
-
-    def update(self, champion, time):
-        if time > self.next_proc:
-            # do damage
-            self.opponent.multiTargetSpell(
-                self.opponent.opponents,
-                self.opponent.items,
-                time,
-                1,
-                self.scaling,
-                "magical",
-            )
-
-            self.next_proc += self.interval
-        super().update(champion, time)
-
-
-class DoTEffectNoItems(Status):
-    # bad code but this is for fairy tail
-    # no scaling, just raw damage
-    def __init__(self, name):
-        super().__init__("DoT {}".format(name))
-        self.damage = 0
-        self.next_proc = 0
-
-    def applicationEffect(self, champion, time, duration, params):
-        self.damage = params / duration
-        self.next_proc = math.floor(time) + 1
-        return True
-
-    def reapplicationEffect(self, champion, time, duration, params):
-        return True
-
-    def wearoffEffect(self, champion, time):
-        self.next_proc = 999
-        return True
-
-    def update(self, champion, time):
-        if time > self.next_proc:
-            # do damage
-            self.opponent.doDamage(
-                self.opponent.opponents[0],
-                [],
-                0,
-                self.damage,
-                self.damage,
-                "magical",
-                time,
-            )
-
-            self.next_proc += 1
-        super().update(champion, time)
-
-
-class UltActivator(Status):
-    def __init__(self, name):
-        super().__init__("Ult Active {}".format(name))
-
-    def applicationEffect(self, champion, time, duration, params):
-        champion.ultActive = True
-        return True
-
-    def reapplicationEffect(self, champion, time, duration, params):
-        return True
-
-    def wearoffEffect(self, champion, time):
-        champion.ultActive = False
-        return True
-
-
-class ADModifier(Status):
-    # increase AS by %
-    # NOTE: does not work with stacking
-    def __init__(self, name):
-        super().__init__("AD Modifier {}".format(name))
-        self.toAdd = 0
-
-    def applicationEffect(self, champion, time, duration, params):
-        self.toAdd = params
-        champion.bonus_ad.addStat(self.toAdd)
-        return True
-
-    def reapplicationEffect(self, champion, time, duration, params):
-        # champion.aspd.add += params
-        # self.addition = params
-        return True
-
-    def wearoffEffect(self, champion, time):
-        champion.bonus_ad.addStat(-1 * self.toAdd)
-        return True
-
-
-class ManaRegenModifier(Status):
-    # increase Mana Regen
-    # NOTE: does not work with stacking
-    def __init__(self, name):
-        super().__init__(f"Mana Regen Modifier {name}")
-        self.addition = 1
-
-    def applicationEffect(self, champion, time, duration, params):
-        champion.manaRegen.addStat(params)
-        self.addition = params
-        return True
-
-    def reapplicationEffect(self, champion, time, duration, params):
-        # champion.aspd.add += params
-        # self.addition = params
-        return True
-
-    def wearoffEffect(self, champion, time):
-        champion.manaRegen.addStat(self.addition * -1)
-        return True
-
-
-class DmgMultiplierModifier(Status):
-    # increase AS by %
-    # NOTE: does not work with stacking
-    def __init__(self, name):
-        super().__init__("AS Multiplicative Modifier {}".format(name))
-        self.addition = 1
-
-    def applicationEffect(self, champion, time, duration, params):
-        champion.dmgMultiplier.addStat(params)
-        self.addition = params
-        return True
-
-    def reapplicationEffect(self, champion, time, duration, params):
-        # champion.aspd.add += params
-        # self.addition = params
-        return True
-
-    def wearoffEffect(self, champion, time):
-        champion.dmgMultiplier.addStat(self.addition * -1)
-        return True
-
-
-class DecayingASModifier(Status):
-    # increase AS by %
-    # NOTE: does not work with stacking
-    def __init__(self, name):
-        super().__init__("Decaying AS Modifier {}".format(name))
-        self.addition = 1
-        self.duration = 0
-
-    def applicationEffect(self, champion, time, duration, params):
-        champion.aspd.add += params
-        self.addition = params
-        self.amount_to_decrease = self.addition / (duration / (1 / 30))
-        self.duration = duration
-        return True
-
-    def reapplicationEffect(self, champion, time, duration, params):
-        # champion.aspd.add += params
-        # self.addition = params
-        return True
-
-    def wearoffEffect(self, champion, time):
-        # champion.aspd.add  -= self.addition
-        return True
-
-    def update(self, champion, time):
-        # NOTE: thsi will get fucked up with frame time
-        if time <= self.wearoff_time and self.active:
-            champion.aspd.add -= self.amount_to_decrease
-            self.addition -= self.amount_to_decrease
-        if time > self.wearoff_time and self.addition > 0:
-            champion.aspd.add -= self.addition
-            self.addition = 0
-        super().update(champion, time)
-
-
-class CritModifier(Status):
-    # increase crit by %
-    def __init__(self, name):
-        super().__init__("Crit Modifier {}".format(name))
-        self.addition = 0
-
-    def applicationEffect(self, champion, time, duration, params):
-        champion.crit.addStat(params)
-        self.addition = params
-        return True
-
-    def reapplicationEffect(self, champion, time, duration, params):
-        # champion.aspd.add += params
-        # self.addition = params
-        return True
-
-    def wearoffEffect(self, champion, time):
-        champion.aspd.addStat(-1 * self.addition)
-        return True
-
-
 class DmgAmpModifier(Status):
-    # increase crit by %
+    """Damage amp for the status's duration (Striker's Flail's buff): its own keyed modifier, removed at wearoff."""
+
     def __init__(self, name):
         super().__init__("Dmg Amp Modifier {}".format(name))
-        self.addition = 0
 
     def applicationEffect(self, champion, time, duration, params):
-        champion.dmgMultiplier.addStat(params)
-        self.addition = params
+        champion.dmgMultiplier.modify("+", params, key=self.name)
         return True
 
     def reapplicationEffect(self, champion, time, duration, params):
-        # champion.aspd.add += params
-        # self.addition = params
         return True
 
     def wearoffEffect(self, champion, time):
-        champion.dmgMultiplier.addStat(-1 * self.addition)
+        champion.dmgMultiplier.remove(self.name)
         return True
 
 
-class ASModifier(Status):
-    # increase AS by %
-    # NOTE: does not work with stacking
+def _reduction(attr, key):
+    """The Channel2 multiplier a reduction status keeps on `attr` (1 = none)."""
+    return next((m[2] for m in attr.mods if m[3] == key), 1)
+
+
+class _Reduction(Status):
+    """Armor or MR x reduction for the duration; only the strongest active one counts (I7): all of a kind share one
+    keyed Channel2 MultiplyCompound on the target."""
+    KIND = None  # the status-name prefix, also the modifier's key
+    ATTR = None  # the target's attribute field
+
     def __init__(self, name):
-        super().__init__("AS Modifier {}".format(name))
-        self.addition = 1
-
-    def applicationEffect(self, champion, time, duration, params):
-        champion.aspd.add += params
-        self.addition = params
-        return True
-
-    def reapplicationEffect(self, champion, time, duration, params):
-        # champion.aspd.add += params
-        # self.addition = params
-        return True
-
-    def wearoffEffect(self, champion, time):
-        champion.aspd.add -= self.addition
-        return True
-
-
-class ArmorReduction(Status):
-    # reduce armor by N%
-    def __init__(self, name):
-        super().__init__("Armor Reduction {}".format(name))
+        super().__init__("{} {}".format(self.KIND, name))
         self.reduction = 1
 
+    def _set(self, champion, value):
+        attr = getattr(champion, self.ATTR)
+        if value == 1:
+            attr.remove(self.KIND)
+        else:
+            attr.modify("MultiplyCompound", value, channel=2, key=self.KIND)
+
     def applicationEffect(self, champion, time, duration, params):
-        # if it's not a bigger shred, do nothing
-        champion.armor.mult = min(champion.armor.mult, params)
+        # if it's not a bigger reduction, it changes nothing
+        self._set(champion, min(_reduction(getattr(champion, self.ATTR), self.KIND), params))
         self.reduction = params
         return True
 
     def reapplicationEffect(self, champion, time, duration, params):
         if self.reduction >= params:
-            champion.armor.mult = min(champion.armor.mult, self.reduction)
+            self._set(champion, min(_reduction(getattr(champion, self.ATTR), self.KIND), self.reduction))
             return True
-        else:
-            # if it's weaker, doesnt work
-            return False
+        return False  # a weaker one doesn't renew it
 
     def wearoffEffect(self, champion, time):
-        # iterate through champ statuses
-        champion.armor.mult = 1
+        strongest = 1
         for status_name, status in list(champion.statuses.items()):
-            if "Armor Reduction" in status_name and status.active:
-                champion.armor.mult = min(champion.armor.mult, status.reduction)
+            if self.KIND in status_name and status.active and status_name != self.name:
+                strongest = min(strongest, status.reduction)
+        self._set(champion, strongest)
         return True
 
 
-class MRReduction(Status):
-    # reduce MR by N%
-    def __init__(self, name):
-        super().__init__("MR Reduction {}".format(name))
-        self.reduction = 1
+class ArmorReduction(_Reduction):
+    KIND, ATTR = "Armor Reduction", "armor"
 
-    def applicationEffect(self, champion, time, duration, params):
-        champion.mr.mult = min(champion.mr.mult, params)
-        self.reduction = params
-        return True
 
-    def reapplicationEffect(self, champion, time, duration, params):
-        if self.reduction >= params:
-            champion.mr.mult = min(champion.mr.mult, self.reduction)
-            return True
-        else:
-            # if it's weaker, doesnt work
-            return False
-
-    def wearoffEffect(self, champion, time):
-        champion.mr.mult = 1
-        for status_name, status in list(champion.statuses.items()):
-            if (
-                "MR Reduction" in status_name
-                and status.active
-                and status_name != self.name
-            ):
-                champion.mr.mult = min(champion.mr.mult, status.reduction)
-        return True
-
+class MRReduction(_Reduction):
+    KIND, ATTR = "MR Reduction", "mr"

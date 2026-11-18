@@ -230,13 +230,13 @@ class Flickerblades(BuildItem):
         if phase == "preCombat":
             self.count = 0
         elif phase == "onLaunch":
-            champion.aspd.addStat((self.row(champion, "StackingAttackSpeed") - 1) * 100)
+            champion.aspd.modify("MultiplyAdditive", self.row(champion, "StackingAttackSpeed"))
             self.count += 1
             every = self.row(champion, self.ga_param(champion, "GA_Artifact_NavoriFlickerblade", "AttacksPerADAPBuff_CT"))
             if self.count >= every:
                 self.count = 0
-                champion.bonus_ad.addStat(self.row(champion, "StackingAttackDamage") * 100)
-                champion.ap.addStat(self.row(champion, "StackingAbilityPower") * 100)
+                champion.bonus_ad.modify("+", self.row(champion, "StackingAttackDamage"))
+                champion.ap.modify("+", self.row(champion, "StackingAbilityPower"))
         return input_
 
 
@@ -256,15 +256,15 @@ class Dawncore(BuildItem):
     def applyStats(self, champion):
         super().applyStats(champion)
         floor = self.row(champion, "MinimumMana")
-        champion.fullMana.addStat(-min(self.row(champion, "FlatMaxManaReduction"),
-                                       max(0, champion.fullMana.stat - floor)))
+        champion.fullMana.modify("+", -min(self.row(champion, "FlatMaxManaReduction"),
+                                          max(0, champion.fullMana.stat - floor)))
 
     def performAbility(self, phase, time, champion, input_=0):
         floor = self.row(champion, "MinimumMana")
         cut = min(self.row(champion, "ReductionOnSpellcastPercent") / 100 * champion.fullMana.stat,
                   champion.fullMana.stat - floor)
         if cut > 0:
-            champion.fullMana.addStat(-cut)
+            champion.fullMana.modify("+", -cut)
         return input_
 
 
@@ -310,8 +310,8 @@ class Hullcrusher(BuildItem):
 
     def applyStats(self, champion):
         super().applyStats(champion)
-        champion.bonus_ad.addStat(self.row(champion, "ADBonus") * 100)
-        champion.ap.addStat(self.row(champion, "APBonus") * 100)
+        champion.bonus_ad.modify("+", self.row(champion, "ADBonus"))
+        champion.ap.modify("+", self.row(champion, "APBonus"))
 
 
 @register("artifact")
@@ -331,8 +331,8 @@ class TalismanOfAscension(BuildItem):
         amp, regen = self.row(champion, "DamageAmpBuff"), self.row(champion, "ManaGen")
 
         def buff():
-            champion.dmgMultiplier.addStat(amp)
-            champion.manaRegen.addStat(regen)
+            champion.dmgMultiplier.modify("+", amp)
+            champion.manaRegen.modify("+", regen)
         champion.schedule_tick(champion.tick + ticks_up(self.row(champion, "DelayBeforeBuff")), buff)
         return input_
 
@@ -349,7 +349,8 @@ class GamblersBlade(BuildItem):
 
     def applyStats(self, champion):
         super().applyStats(champion)
-        champion.aspd.addStat(self.row(champion, "ScalingAttackSpeed") * self.row(champion, "MaxCoinScaling") * 100)
+        champion.aspd.modify("MultiplyAdditive",
+                             1 + self.row(champion, "ScalingAttackSpeed") * self.row(champion, "MaxCoinScaling"))
 
 
 @register("artifact")
@@ -365,5 +366,5 @@ class CappaJuice(BuildItem):
     def applyStats(self, champion):
         super().applyStats(champion)
         hats = getattr(champion, "takedowns", 0)
-        champion.bonus_ad.addStat(self.row(champion, "ADPerStack") * hats * 100)
-        champion.ap.addStat(self.row(champion, "APPerStack") * hats * 100)
+        champion.bonus_ad.modify("+", self.row(champion, "ADPerStack") * hats)
+        champion.ap.modify("+", self.row(champion, "APPerStack") * hats)

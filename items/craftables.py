@@ -67,7 +67,7 @@ class GuinsoosRageblade(StackingItem):
         coef, scale = self.script_modifier(champion, "GE_GuinsoosRageblade_StackingAS", "AttackSpeed", "MultiplyAdditive")
         if scale != "Stack":
             raise BuildDataError(f"{self.KEY}: StackingAS no longer scales with Stack ({scale})")
-        champion.aspd.addStat(coef * stack * 100)
+        self.stack_modifier(champion, "AttackSpeed", "MultiplyAdditive", 1 + coef * stack * self.next_k)
 
 
 @register("craftable")
@@ -93,7 +93,7 @@ class Quicksilver(StackingItem):
                                         "MultiplyAdditive")
         if scale is not None:
             raise BuildDataError(f"{self.KEY}: StacksToAttackSpeed is no longer a plain number ({scale})")
-        champion.aspd.addStat((v - 1) * 100)
+        champion.aspd.modify("MultiplyAdditive", v)
 
 
 @register("craftable")
@@ -117,12 +117,12 @@ class TitansResolve(BuildItem):
             self.stacks = 0
         elif phase == "onLaunch" and self.stacks < self.row(champion, "MaxStacks"):
             self.stacks += 1
-            for attr, stat in (("AttackDamage", champion.bonus_ad), ("AbilityPower", champion.ap)):
+            for attr in ("AttackDamage", "AbilityPower"):
                 coef, scale = self.script_modifier(
                     champion, self.ga_param(champion, "GA_TitansResolve", "StackingStatsGE"), attr, "+")
                 if scale != "Stack":
                     raise BuildDataError(f"{self.KEY}: StackingStats {attr} no longer scales with Stack ({scale})")
-                stat.addStat(coef * 100)  # one stack
+                self.stack_modifier(champion, attr, "+", coef * self.stacks)
         return input_
 
 
@@ -146,7 +146,7 @@ class ArchangelsStaff(StackingItem):
         coef, scale = self.script_modifier(champion, "GE_ArchangelsStaff_StackToAP", "AbilityPower", "+")
         if scale != "Stack":
             raise BuildDataError(f"{self.KEY}: StackToAP no longer scales with Stack ({scale})")
-        champion.ap.addStat(coef * stack * 100)
+        self.stack_modifier(champion, "AbilityPower", "+", coef * stack * self.next_k)
 
 
 @register("craftable")
@@ -217,12 +217,12 @@ class HandOfJustice(BuildItem):
 
     def applyStats(self, champion):
         super().applyStats(champion)
-        for attr, stat in (("AttackDamage", champion.bonus_ad), ("AbilityPower", champion.ap)):
+        for attr in ("AttackDamage", "AbilityPower"):
             v, scale = self.script_modifier(
                 champion, self.ga_param(champion, "GA_HandOfJustice", "AboveThresholdGE"), attr, "+")
             if scale is not None:
                 raise BuildDataError(f"{self.KEY}: HighHealthEffect {attr} is not a plain number ({scale})")
-            stat.addStat(v * 100)
+            champion.attribute(attr).modify("+", v)
 
 
 @register("craftable")
@@ -238,11 +238,11 @@ class AdaptiveHelm(BuildItem):
         super().applyStats(champion)
         if champion.role.archetype in ("Tank", "Fighter"):
             return
-        for attr, stat in (("AttackDamage", champion.bonus_ad), ("AbilityPower", champion.ap)):
+        for attr in ("AttackDamage", "AbilityPower"):
             v, scale = self.script_modifier(champion, self.ga_param(champion, "GA_AdaptiveHelm", "OtherRolesGE"), attr, "+")
             if scale is not None:
                 raise BuildDataError(f"{self.KEY}: OtherRoles {attr} is not a plain number ({scale})")
-            stat.addStat(v * 100)
+            champion.attribute(attr).modify("+", v)
 
 
 @register("craftable")
@@ -263,7 +263,7 @@ class GiantSlayer(BuildItem):
                                             "OutgoingDamageMultiplier", "+")
             if scale is not None:
                 raise BuildDataError(f"{self.KEY}: ConditionalAmp is not a plain number ({scale})")
-            champion.dmgMultiplier.addStat(v)
+            champion.dmgMultiplier.modify("+", v)
 
 
 @register("craftable")
@@ -299,9 +299,9 @@ class KrakensFury(BuildItem):
             coef, scale = self.script_modifier(champion, "GE_KrakensFury_StackingAD", "AttackDamage", "+")
             if scale != "Stack2":
                 raise BuildDataError(f"{self.KEY}: StackingAD no longer scales with Stack2 ({scale})")
-            champion.bonus_ad.addStat(coef * stack2 * 100)
+            self.stack_modifier(champion, "AttackDamage", "+", coef * stack2 * self.stacks)
             if self.stacks == self.row(champion, "MaxStacks"):
-                champion.aspd.addStat(self.row(champion, "Bonus_AS") * 100)
+                champion.aspd.modify("MultiplyAdditive", 1 + self.row(champion, "Bonus_AS"))
         return input_
 
 

@@ -171,21 +171,23 @@ def test_rabadons_multiplies_every_bonus_ap():
 def _deathblade_with(change):
     data = copy.deepcopy(load_build(V).data)
     change(data['items']['DA_Deathblade']['effects'][0]['modifiers'])
-    return Build(data).item('DA_Deathblade')
+    return equipped(set19items.Deathblade(), build=Build(data))
 
 
-def test_a_multiplier_whose_addfinals_dont_cancel_the_base_is_refused():
+def test_modifiers_apply_as_listed_without_a_cancelling_check():
+    # I5: the game's formula, not a rule about which AddFinals must come with a multiplier. Without the AddFinal +1,
+    # AD = (1 + 0.55) x 1.15 - 1.15
     def drop_one(ms):
         ms.remove(next(m for m in ms if m['op'] == 'AddFinal' and m['values'] == [1]))
-    with pytest.raises(BuildDataError, match='cancel'):
-        set19items.item_stats(_deathblade_with(drop_one), ['GE_Deathblade'])
+    assert _deathblade_with(drop_one).bonus_ad.stat == pytest.approx(1.55 * 1.15 - 1.15)
 
 
-def test_a_modifier_off_the_item_channel_is_refused():
+def test_each_modifier_lands_on_its_channel():
+    # I5: the +0.55 on Channel2 comes after Channel1's x1.15 (whose AddFinals cancel it on the base 1): AD = 1 + 0.55
     def channel2(ms):
-        ms[0]['channel'] = 2
-    with pytest.raises(BuildDataError, match='channel 2'):
-        set19items.item_stats(_deathblade_with(channel2), ['GE_Deathblade'])
+        next(m for m in ms if m['op'] == '+')['channel'] = 2
+    assert _deathblade_with(channel2).bonus_ad.stat == pytest.approx(1.55)
+    assert _deathblade_with(lambda ms: None).bonus_ad.stat == pytest.approx(1 + 0.55 * 1.15)
 
 
 @pytest.mark.parametrize('items,base_ad,pct,ad', [
@@ -348,12 +350,12 @@ def test_last_whisper_and_void_staff_after_the_hit():
     t = dummy()
     Simulator().simulate([set19items.LastWhisper()], [], d, [t], 6)
     s = t.statuses['Armor Reduction Sunder']
-    assert t.armor.mult == 0.7 and s.active
+    assert t.armor.total('MultiplyCompound', channel=2) == 0.7 and s.active  # the Channel2 x0.7 (I5, I7)
     assert s.wearoff_time == pytest.approx(d.dmgVector[-1][0] + 3)
     d = Draven(1, build=load_build(V))
     t = dummy()
     Simulator().simulate([set19items.VoidStaff()], [], d, [t], 6)
-    assert t.mr.mult == 0.7 and t.statuses['MR Reduction Shred'].active
+    assert t.mr.total('MultiplyCompound', channel=2) == 0.7 and t.statuses['MR Reduction Shred'].active
 
 
 def test_radiants_use_their_own_numbers():
@@ -397,7 +399,7 @@ def test_stats_only_artifacts_and_silvermere_lock():
     n = equipped(set19items.SilvermereDawn(), set19items.GuinsoosRageblade())
     assert n.aspd.stat == 0.5 and n.bonus_ad.stat == pytest.approx(2.5)  # Channel2 Override: 0.5 whatever else
     n = equipped(set19items.RapidFireCannon())
-    assert n.attack_range == equipped().attack_range and n.bonus_range == 1  # flights keep the unit's own range
+    assert n.attack_range == equipped().attack_range and n.bonus_range.stat == 1  # flights keep the unit's own range
     assert n.dmgMultiplier.stat == pytest.approx(1.05)
     n = equipped(set19items.GamblersBlade())
     assert n.aspd.add == pytest.approx(55 + 30)  # 30 gold (owner)
