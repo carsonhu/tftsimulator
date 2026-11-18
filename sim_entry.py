@@ -343,40 +343,30 @@ def _build_enemy(cfg):
 # ---------------------------------------------------------------------------
 
 def _cumulative_points(results):
-    """(times, cumulative damage), duplicates collapsed to first occurrence.
-
-    Cumulative damage in event order, keeping the *first* value per duplicate
-    timestamp (the old site's rule); results arrive chronological so no sort is
-    needed, but the keep-first rule matters on frames with several damage
-    instances.
-    """
+    """(times, cumulative damage): one point per tick, holding every hit up to and including it (results arrive in
+    time order). The old site kept the first hit of a tick and drew lines between ticks, which moved same-tick hits
+    (on-hit magic, Statikk's bolts, splashes) to the next hit (owner, 2026-11-18: fixed)."""
     xs, ys = [], []
     cum = 0.0
     for inst in results:
         cum += inst[1][0]
         t = float(inst[0])
-        if xs and xs[-1] == t:
+        if xs and abs(xs[-1] - t) < 1e-9:
+            ys[-1] = cum
             continue
         xs.append(t)
         ys.append(cum)
     return xs, ys
 
 
-def _interp(xs, ys, t):
-    if not xs:
-        return 0.0
-    if t <= xs[0]:
-        return ys[0]
-    if t >= xs[-1]:
-        return ys[-1]
-    i = bisect_right(xs, t)
-    x0, x1 = xs[i - 1], xs[i]
-    y0, y1 = ys[i - 1], ys[i]
-    return y0 + (y1 - y0) * (t - x0) / (x1 - x0)
+def _damage_by(xs, ys, t):
+    """Damage dealt up to and including time t (a step: nothing of a later hit)."""
+    i = bisect_right(xs, t + 1e-9)
+    return ys[i - 1] if i else 0.0
 
 
 def _dps_at(xs, ys, t):
-    res = _interp(xs, ys, t) / t
+    res = _damage_by(xs, ys, t) / t
     # Big numbers lose the fraction. The truncated value also feeds the ratio columns, so this is
     # arithmetic, not just formatting.
     if res > 10:
