@@ -102,5 +102,6 @@ VOD was played on (check the patch shown in game or the date against builds/inde
   - **Spell (GA_Kaisa19_Spell):** +ASOnCast as MultiplyAdditive (+15% of base) for 60 s, stacking; it finishes on
     activation (T12).
   - **Attacks:** 4 sequential animations, LowAS or fast at 1.75 AS (B13).
-  - **Assumed:** secondary targets at her attack range (5 hexes) for missile flight; identical dummies make the split
-    irrelevant to the total.
+  - **Assumed:** each missile flies its own target's distance on the dummy layout (`layout.py`; owner, 2026-11-17):
+    5 hexes to her target, 6 to the default layout's dummy next to it; identical dummies make the split irrelevant
+    to the total.

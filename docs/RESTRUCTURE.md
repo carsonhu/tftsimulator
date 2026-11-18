@@ -202,8 +202,8 @@ ricochet (Trickshot, Draven, Kai'Sa) and Titanic Hydra read it; `num_targets`, `
 `bounce_hexes` and `Timing.distance` are gone. The page's two target sliders became 'Enemies next to the target'
 and 'Enemies 2 hexes from the target', shown for every champion. Tables identical (only the notes' wording
 changed). One rule changed on the owner's word: Titanic Hydra hits every enemy next to the target (set18 fixed it
-at 2, the average case; the default layout still gives 2). Not done: Kai'Sa's missiles to secondary targets still
-fly her target's distance, though the layout knows theirs (a rule change, left for the owner).
+at 2, the average case; the default layout still gives 2). Afterwards, also on the owner's word: Kai'Sa's missiles
+to secondary targets fly their own distance (6 hexes on the default layout, 4 ticks later than her target's).
 
 ## What not to do
 

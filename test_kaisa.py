@@ -72,19 +72,23 @@ def test_casts_stack_attack_speed_and_keep_the_rhythm():
 
 
 def test_missiles_every_third_launch():
-    # 3 missiles of 36 x AD + 6 x AP every 3 launches, landing 17 ticks later (1900 units/s over 5 hexes)
+    # 3 missiles of 36 x AD + 6 x AP every 3 launches, at 1900 units/s: the target's two land 17 ticks later (5
+    # hexes), the one to the dummy next to the target 21 (6 hexes on the default layout; owner, 2026-11-17)
     k = LoggedKaisa(1)
     rows = fight(k, seconds=6)
     missiles = [(t, d) for t, d in rows if d == 42]
     third = k.releases[2]
-    assert missiles[:3] == [(third + 17, 42)] * 3
+    assert missiles[:3] == [(third + 17, 42)] * 2 + [(third + 21, 42)]
 
 
 def test_missiles_ricochet_with_trickshot():
     k = LoggedKaisa(1)
     rows = fight(k, buffs=[set19buffs.Trickshot(2)], seconds=6)
     third = k.releases[2]
-    assert rows.count((third + 17 + 4, round(42 * 0.22, 2))) == 3  # each missile bounces once at 22%
+    # each missile bounces once at 22%, 1 hex (4 ticks) on: the target's two onto its neighbour, the neighbour's on
+    # down the line
+    bounce = round(42 * 0.22, 2)
+    assert rows.count((third + 17 + 4, bounce)) == 2 and rows.count((third + 21 + 4, bounce)) == 1
 
 
 def test_kda_mana_and_decaying_attack_speed():

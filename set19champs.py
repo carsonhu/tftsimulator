@@ -195,8 +195,8 @@ class Kaisa(BuildChampion):
         self.missiles_fired = 0
         self.launch_count = 0
         self.notes = ("Missiles alternate between the target and nearby enemies (identical dummies, same total); "
-                      "secondary targets are taken at her attack range. Ricochets go to the nearest dummy not yet "
-                      "hit (the layout).")
+                      "each missile flies its own target's distance on the dummy layout. Ricochets go to the nearest "
+                      "dummy not yet hit.")
 
     def missile_damage(self, level, AD, AP):
         return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
@@ -205,8 +205,6 @@ class Kaisa(BuildChampion):
         self.launch_count += 1
         if self.launch_count % self.every:
             return
-        # every missile flies the distance to her target (secondaries assumed at the same distance)
-        flight = self.chrono_projectile_ticks(self.MISSILE, 'SpellMis', self.target_hexes())
         near = self.nearby(opponents[0], int(self.row('HexSearchRangeAroundCurrentTarget')))
         secondaries = near[:int(self.row('MaxSecondaryTargets'))] or opponents[:1]
         on_target = 1 / self.row('PercentMissilesOnCurrentTarget')
@@ -216,6 +214,8 @@ class Kaisa(BuildChampion):
             else:
                 target = opponents[0]
             self.missiles_fired += 1
+            # each missile flies its own target's distance on the layout (owner, 2026-11-17)
+            flight = self.chrono_projectile_ticks(self.MISSILE, 'SpellMis', self.target_hexes(target))
             self.schedule_tick(self.tick + flight, lambda target=target: self._missile_lands(target, [target], 0))
 
     def _missile_lands(self, target, hit, k):
