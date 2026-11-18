@@ -149,6 +149,13 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Dash length | MinDashDistance (1 hex, 4 ticks at 2000 units/s): the nearest of the equally safe hexes on the dummy layout | VOD1's casts lasted ~4 ticks longer (lock 37-39 after the fill, engine 33) | champions/Lucian.md E2 |
 | Jazz's default count | 5 active traits | (owner) the default you want | B31 |
 
+### 7l. Renata Glasc again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Toxin tick size | 160/240/580 x AP spread over 60 ticks (the GE applies the full calc each 0.25 s period, which would be 60x the tooltip) | damage numbers of a Toxin tick on a target of known MR | champions/RenataGlasc.md D1 |
+| Toxin's first tick | on application (Unreal's default) | the frame of the first Toxin number after the chain lands | champions/RenataGlasc.md D1 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

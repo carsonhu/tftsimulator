@@ -64,8 +64,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.RenataGlasc`, D1); panel and the cast's locks checked
+  against VOD2
+- Keep in the simulator: **yes**
 
 ## Questions
 
@@ -74,29 +75,45 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed with her items (1★) | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster | confirmed: 7 per attack, 2/s (+6 Blue Buff) | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.3307 s (9.92 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 1800 | predicted | |
 | Q7 | Cast time: cast start to the next attack starting | 3.7 s (111 ticks) | predicted | |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 3.6667 s (110 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 3.6667 s (110 ticks) | **refuted** (the build's 3.67 s is the 3 s fallback): the chain's hit + SpellEnd's Unlock, 41 ticks at 4 hexes; VOD2's overflow at 42 and 41.5 after the filling regen step (engine 42) | E2, D1 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | predicted: 0 (no GE_SimulateLaunchAttack) | D1 |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted (script read: D1); the DOT spread over its 15 s is assumed (the GE applies the full MagicDamageCalc3 each period) | D1 |
+| Q14 | Passives and other mechanics that need modelling | see ability text | her Captivates feed Classical (B28); Choreographer (B30) implemented | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+Source for all rows below: VOD2 (`…PBE_11-17-2026_16-35-16-966.mp4`, 60 fps), the owner's PBE recording, build
+`rls-19.1.0.5973071`; Renata Glasc 1★, round 1-9, combat start f22888 (Blue Buff's +10).
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-18 | rls-19.1.0.5973071 | VOD2 6:21 (f22880), ability tooltip | 60 | inspection panel | 550/550, 0/45, 8/s; AD 35, AP 25%, AS 0.83, crit 25%, range 4; Guinsoo's Rageblade, Blue Buff; Classical and Choreographer 1/2 (inactive). Tooltip: Toxin 200 = 160 x 1.25 AP over 15 s | as built | Q1 |
+| E2 | 2026-11-18 | rls-19.1.0.5973071 | VOD2 f22888-23387 (`tools/vod_text_changes.py`, mana) | 60 | mana text | 10 at combat start; +2 regen steps from 2 ticks in (G17's phase), +7 attacks; two casts filled by regen (f23043, f23298); the overflow 1 shown 84 and 83 frames later (42, 41.5 ticks); the next attack's mana 53.5 ticks after the fill | engine (Guinsoo's, Blue Buff): lock 41 from the cast = 42 after the fill; the next attack 53 after it | Q2, Q9 |
 
 ## Decisions and notes
+
+- 2026-11-18, D1 (implemented, `set19champs.RenataGlasc`):
+  - **Spell (GA_RenataGlasc19_Spell):** mana lock; at LaunchChains (0.1974 s) the chain (1800 units/s) to her target
+    and a missile (spline, 1800) to each of 2 other enemies, the unpoisoned first. The chain's hit: 2 Toxin
+    applications and a Captivate (6 s if the enemy's star level <= hers, else 3 s); CD_RenataGlasc19_SpellEnd, whose
+    Unlock (0.6578 s) ends the cast and the mana lock. A missile's hit: 1 Toxin and a Captivate. The build's 3.67 s
+    spell timeline is the 3 s WaitDelay fallback for a chain that never lands.
+  - **Toxin (GE_RenataGlasc19_ToxinDamage):** its own 15 s instance per application, a tick every 0.25 s; the GE
+    applies MagicDamageCalc3 (160/240/580 x AP) each period, which would be 60x the tooltip: assumed the DOT system
+    spreads it (160 x AP over the 60 ticks), the first tick on application (open). Magic, DOT, on-spell, crit only
+    with Precision.
 

@@ -1129,8 +1129,69 @@ class Lucian(BuildChampion):
                     lambda level, AD, AP: self.shot_damage(level, AD, AP) * eff, 'physical'))
 
 
+class RenataGlasc(BuildChampion):
+    """Hostile Measures (champions/RenataGlasc.md, D1). Script: GA_RenataGlasc19_Spell (build ga_scripts.zip).
+
+    The cast plays CD_RenataGlasc19_Spell at her target and applies the mana lock (0xe96). At 'LaunchChains' (0.1974
+    s) CD_RenataGlasc19_Projectile's 'Chain' (1800 units/s) flies to her target and CD_RenataGlasc19_Projectile2's
+    'Missile' (spline, 1800) to NumSecondaryTargets (2) other enemies, the unpoisoned first. The chain's hit: the
+    target gets PrimaryTargetStacks (2) applications of GE_RenataGlasc19_ToxinDamage and a Captivate
+    (GE_Virtuosos19_Captivate: CaptivateDurationLong 6 s if its star level <= hers, else Short 3 s); CD_RenataGlasc19_
+    SpellEnd plays and its 'Unlock' (0.6578 s) removes the mana lock and finishes the cast. (The build's 3.67 s
+    timeline is the 3 s WaitDelay fallback for a chain that never lands.) Each missile: SecondaryTargetStacks (1)
+    Toxin and a Captivate. GE_RenataGlasc19_ToxinDamage: HasDuration ToxinDuration (15 s), Period TickRate (0.25 s),
+    no stacking (each application its own), MagicDamageCalc3 (ToxinDamageAP x AP), magic, DOT, on-spell, crit only
+    with Precision. Assumed (D1): the DOT damage is spread over the duration (the tooltip's "over 15 seconds": 160 x
+    AP / 60 a tick) and ticks on application (bExecutePeriodicEffectOnApplication not set: Unreal's default true).
+    Her Captivates feed Classical (B28): she is the simulated Classical unit.
+    """
+    KEY = 'DA_RenataGlasc19'
+    CAST, END = 'CD_RenataGlasc19_Spell', 'CD_RenataGlasc19_SpellEnd'
+    CHAIN, MISSILE = 'CD_RenataGlasc19_Projectile', 'CD_RenataGlasc19_Projectile2'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.launch = self.chrono_event(self.CAST, 'LaunchChains')
+        self.end_unlock = self.chrono_event(self.END, 'Unlock')
+        self.period = self.row('TickRate')
+        self.toxin_ticks = round(self.row('ToxinDuration') / self.period)
+        self.toxin_until = {}  # id(dummy) -> the tick its last Toxin ends (unpoisoned first)
+        self.notes = ('Toxin: 2 stacks on the target and 1 on each of 2 nearby enemies, each 160 x AP over 15 s; every '
+                      'application Captivates (Classical).')
+
+    def toxin_tick(self, level, AD, AP):
+        # assumed: the DOT's total is spread over its ticks (D1)
+        return self.row('ToxinDamageAP', star=level) * AP / self.toxin_ticks
+
+    def _toxin(self, target, stacks):
+        long = target.level <= self.level
+        captivate(self, target, self.row('CaptivateDurationLong' if long else 'CaptivateDurationShort'))
+        start = self.tick
+        end = start + round(self.row('ToxinDuration') * TPS)
+        self.toxin_until[id(target)] = max(self.toxin_until.get(id(target), 0), end)
+        for k in range(self.toxin_ticks):
+            self.schedule_tick(start + round(k * self.period * TPS), lambda: self.multiTargetSpell(
+                [target], self.items, self.tick / TPS, 1,
+                lambda level, AD, AP: self.toxin_tick(level, AD, AP) * stacks, 'magical'))
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        launch = self.tick + ticks_up(self.launch)
+        hit = launch + self.chrono_projectile_ticks(self.CHAIN, 'Chain', self.target_hexes(target))
+        unlock = hit - self.tick + ticks_up(self.end_unlock)
+        self.timing.mana_lock = unlock / TPS
+        self.timing.cast_lock = (unlock + 1) / TPS
+        self.schedule_tick(hit, lambda: self._toxin(target, int(self.row('PrimaryTargetStacks'))))
+        n = int(self.row('NumSecondaryTargets'))
+        others = self.nearby(target, 99)
+        others.sort(key=lambda d: self.toxin_until.get(id(d), 0) > self.tick)  # unpoisoned first, then nearest
+        for d in others[:n]:
+            land = launch + self.chrono_projectile_ticks(self.MISSILE, 'Missile', self.target_hexes(d))
+            self.schedule_tick(land, lambda d=d: self._toxin(d, int(self.row('SecondaryTargetStacks'))))
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
-              'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian']
+              'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc']
 
 
 class TrainingDummy(Champion):
