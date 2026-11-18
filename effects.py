@@ -4,11 +4,12 @@ An ActiveEffect is a GAS active effect: it holds its modifiers on the unit's att
 name, so they come off exactly), may act every period, and follows a stacking rule. Units keep them in
 `unit.effects` (name -> effect); `apply_effect` and `expire_effects` are the only ways in and out.
 
-The stacking rule every current effect has (StackLimitCount 1 in the build: GE_ArmorSunder, GE_MRShred, GE_Burn):
-one instance per name on a unit; applying it again while it lasts renews it, keeping the later end and the higher
-level, and a periodic effect keeps its period's phase (StackPeriodResetPolicy NeverReset). Effects that stack as
-separate instances (Striker's Flail's buff: TFTStackGameplayEffectInstancesEffectComponent) use one name per
-instance.
+The stacking rule every current effect has: one instance per name on a unit; applying it again while it lasts
+renews it, keeping the later end and the higher level, and a periodic effect keeps its period's phase
+(StackPeriodResetPolicy NeverReset, GE_Burn). One sunder, shred or burn per target is ledger I7's rule: their
+records carry StackLimitCount 1 but no StackingType, and a limit without a stacking type does nothing (VOD2:
+Quicksilver's StackLimitCount 9 doesn't cap it, docs/ITEMS.md). Effects that stack as separate instances (Striker's
+Flail's buff: TFTStackGameplayEffectInstancesEffectComponent, AggregateBySource) use one name per instance.
 """
 import math
 
