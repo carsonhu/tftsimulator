@@ -67,7 +67,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q9 | Mana lock | none (no GE_ManaLock): the cast lock, 1 tick | predicted |  |
 | Q12 | Does the cast cancel or reset an attack in progress? | no Combat.Attacking cancel | **no**: rhythm unbroken through the cast (T12) | E2 |
 | Q13 | Ability damage: formula, targets, hit count | see above | implemented from the script (D1): Stack orbs per attack after the first cast, Calc1 each; damage not yet checked | script |
-| Q14 | Passives and other mechanics | see ability text | Swiftstriker (B15); Ionic Spark not implemented | B15 |
+| Q14 | Passives and other mechanics | see ability text | Swiftstriker (B15); Ionic Spark letters and gift (B22) | B15, B22 |
 | Q15 | Can this unit be simulated realistically? |  | **yes**, implemented 2026-11-17 | D1 |
 | Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
 | Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackMarksman | predicted | |

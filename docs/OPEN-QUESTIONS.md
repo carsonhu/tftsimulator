@@ -89,6 +89,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
 | Hitmaker's AD (a trait, checked the same way) | every member +12% AD, a Big Shot +20/35% more (32/47% in all) | panel AD % of a Big Shot and of another Hitmaker at Hitmaker (2) | B18 |
+| Ionic Spark letters and gifts (a trait) | +7% AS per letter at 4, 8, 12 s; the 1st gift (25% AD/AP) at 0 s; no flight time | the panel AS / AD of an Ionic Spark member over the first ~13 s at Ionic Spark (5) | B22 |
 | Heartsteel's team bonuses (a trait, read the same way) | each fielded member gives every ally Kayn +7% AD, Alune +7% AP, Aphelios +6% AS, Ezreal +10% crit; at (7) members get 2.5x (Ezreal's crit by the tooltip: the files give members only +10% more) | panel stats of a non-member and of a member with Kayn/Alune/Aphelios fielded, and at Heartsteel (7) | B21 |
 | Illbeats (4) (a trait, read the same way) | the mix's values x1.5 (StatMult at level 3) | the mixer readouts at Illbeats (4) | B20 |
 | Rabadon's Deathcap | every bonus AP × 1.15 (same structure as Deathblade, which VOD3 confirmed); panel 63% alone, 104% with Jeweled Gauntlet | panel AP % with a Rabadon's | I5, docs/ITEMS.md |
@@ -105,4 +106,5 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|
 | Draven's vortex: the decoded damage effect has no tick-rate factor, yet each 0.5 s hit is half the per-second value (owner's ruling). Where does the game halve it? | implemented as the owner ruled; the decode is incomplete somewhere (calc component or attribute) | champions/Draven.md D1 |
 | Trickshot ricochets' on-hit effects (at RichochetDamage^k) | not modelled; no listed item has an on-hit effect yet | B12 |
-| Ionic Spark (Yunara's), Hyperpop (Ziggs's), True Damage's B-Side and Prismatic tiers, Heartsteel's Prismatic car and the other members' Bias upgrades (Kayn, Alune, Aphelios: not implemented champions) | not implemented | - |
+| True Damage's Prismatic tier, Heartsteel's Prismatic car, Ionic Spark's (10) fan waves, the other Heartsteel members' Bias upgrades (Kayn, Alune, Aphelios: not implemented champions) | not implemented | - |
+| True Damage's B-Side | out of scope: it gives no combat power (owner, 2026-11-17) | B19 |

@@ -302,8 +302,9 @@ class Ziggs(BuildChampion):
         # set18 convention (as Varus): num_targets counts the target; the splash hits num_targets - 1 adjacent enemies
         self.num_targets = 2
         self.bomb_spawn = self.chrono_projectile_spawn(self.CAST, self.BOMB)
-        self.notes = ('Hyperpop (Hype levels between rounds) not modelled. The bomb\'s simulated attack triggers '
-                      'on-attack items (Titan\'s Resolve); its role mana would fall inside the mana lock. Adjacent enemies hit = targets - 1. The bomb flies his attack range.')
+        self.notes = ('The bomb\'s simulated attack triggers on-attack items (Titan\'s Resolve); its role mana '
+                      'would fall inside the mana lock. Adjacent enemies hit = targets - 1. The bomb flies his '
+                      'attack range.')
 
     def bomb_damage(self, level, AD, AP):
         return self.row('InitialDamage', star=level) * AP
