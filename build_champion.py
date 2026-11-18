@@ -14,6 +14,7 @@ Base stats, HP and AD per star, mana, attack speed (and its cap), range, role ma
 never typed into champion code. `self.sources` records where each value came from; a value the build lacks is
 either a loud BuildDataError or a documented default listed in `self.sources`.
 """
+import set19buffs
 from buildstore import BuildDataError, load_build
 from champion import Champion
 from item import Item
@@ -137,6 +138,11 @@ class BuildChampion(Champion):
         self.crit.base = s.get('CritChance', BASE_CRIT_CHANCE)
         self.critDmg.base = s.get('CritDamage', BASE_CRIT_DAMAGE)
         self.timing = Timing.from_build(c, spell=self.SPELL)
+        # traits (B11): tiers are set at combat start by the board's trait buffs (set19buffs.BuildTrait); the page
+        # preselects the champion's own traits that the simulator implements
+        self.trait_tiers = {}
+        self.default_traits = [name for name in set19buffs.class_buffs
+                               if getattr(set19buffs, name).KEY in (c.d.get('trait_keys') or [])]
         self.sources = {
             'build': b.version,
             'hp': f'HealthMax {s["HealthMax"]} x star multiplier', 'ad': 'AutoAttackDamage row',
@@ -177,6 +183,10 @@ class BuildChampion(Champion):
                                  f'in build {self.build.version} ({sorted(speeds, key=str)})')
         return speeds.pop()
 
-    def trait_value(self, trait_key, row, trait_level):
-        """A trait's curve row at a trait level (0 = inactive), from the selected build (exact curve point)."""
-        return self.build.trait(trait_key).row(row, col=trait_level)
+    def trait_tier(self, trait_key):
+        """The tier this champion's board reaches in a trait (0 = inactive), set at combat start (B11)."""
+        return self.trait_tiers.get(trait_key, 0)
+
+    def trait_value(self, trait_key, row, tier=None):
+        """A trait's curve row at a tier (default: the board's tier), from the selected build (exact curve point)."""
+        return self.build.trait(trait_key).row(row, col=self.trait_tier(trait_key) if tier is None else tier)

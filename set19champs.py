@@ -15,7 +15,8 @@ class Neeko(BuildChampion):
     The cast timeline CD_Neeko19_CastAnimWithClone fires Throw1-Throw6; each throw plays a projectile chrono
     (script 0x18e3 switch). Throws 1, 2 and 4 spawn 'Popper' missiles at full effectiveness; throws 3, 5 and 6 spawn
     'Encore' missiles whose effectiveness is CT_Encore19 RecastEffectiveness at the Encore trait level (0 when Encore
-    is inactive: those missiles then deal nothing). Each missile applies GE_Neeko19_Damage on arrival:
+    is inactive: those missiles then deal nothing). The Encore tier comes from the Encore trait buff
+    (set19buffs.Encore). Each missile applies GE_Neeko19_Damage on arrival:
     MagicDamageCalc1 (DamageAP x AP) x effectiveness, magic, spell damage, crits only if the spell can crit.
     """
     KEY = 'DA_Neeko19'
@@ -31,7 +32,6 @@ class Neeko(BuildChampion):
 
     def __init__(self, level, build=None):
         super().__init__(level, build)
-        self.encore_level = 0  # scenario input: Encore trait level (0 inactive, 1 = (2), 2 = (4)) until traits exist
         # read every number now, so a build that lacks one fails at construction, not mid-fight
         self.throws = [(self.chrono_event(self.CAST, ev), self.chrono_projectile_speed(ch, name), encore)
                        for ev, ch, name, encore in self.THROWS]
@@ -41,7 +41,7 @@ class Neeko(BuildChampion):
     def missile_effectiveness(self, encore):
         if not encore:
             return 1
-        return self.trait_value('DA_Encore19', 'RecastEffectiveness', self.encore_level)
+        return self.trait_value('DA_Encore19', 'RecastEffectiveness')  # at the board's Encore tier (B11)
 
     def abilityScaling(self, level, AD, AP):
         return self.row('DamageAP', star=level) * AP

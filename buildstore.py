@@ -99,6 +99,15 @@ class Role(_Entry):
 
 
 class Table(_Entry):
+    @property
+    def thresholds(self):
+        """A trait's tier thresholds in units, ascending (Encore: [2, 4]); [] for items and augments."""
+        return sorted(t['threshold'] for t in self.d.get('tiers') or [])
+
+    def tier_of(self, units):
+        """The trait tier `units` trait units reach: 0 inactive, 1 the first threshold, ..."""
+        return sum(1 for t in self.thresholds if units >= t)
+
     def row(self, name, col=None):
         """[[time, value], ...] curve points, or the value at one time (exact point only)."""
         rows = self.d.get('rows') or {}

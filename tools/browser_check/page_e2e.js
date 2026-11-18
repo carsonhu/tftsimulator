@@ -30,7 +30,36 @@ const puppeteer = require("puppeteer-core");
       rows: [...document.querySelectorAll("#resultsTable tr")].slice(0, 3).map((r) => r.textContent.replace(/\s+/g, " ").trim()),
     };
   });
-  console.log("after", Math.round((Date.now() - t0) / 1000), "s:", JSON.stringify(await read(), null, 1));
+  const first = await read();
+  console.log("after", Math.round((Date.now() - t0) / 1000), "s:", JSON.stringify(first, null, 1));
+
+  // The champion's own traits are preselected in the buff bar (off); turning one up must change the results.
+  const buffRows = () => page.evaluate(() => [...document.querySelectorAll(".buff-row")].map((r) => {
+    const [buff, level] = r.querySelectorAll("select");
+    return { buff: buff.value, level: level.value, levels: [...level.options].map((o) => o.value) };
+  }));
+  const bar = await buffRows();
+  console.log("buff bar:", JSON.stringify(bar));
+  const idx = bar.findIndex((b) => b.buff === "Encore");
+  if (idx < 0) {
+    console.log("FAIL Encore not preselected");
+  } else {
+    const last = bar[idx].levels[bar[idx].levels.length - 1];
+    await page.evaluate((i, v) => {
+      const sel = document.querySelectorAll(".buff-row")[i].querySelectorAll("select")[1];
+      sel.value = v;
+      sel.dispatchEvent(new Event("change"));
+    }, idx, last);
+    try {
+      await page.waitForFunction((before) => {
+        const r = document.querySelectorAll("#resultsTable tr")[1];
+        return r && r.textContent.replace(/\s+/g, " ").trim() !== before;
+      }, { timeout: 60000 }, first.rows[1]);
+      console.log("Encore " + last + ":", JSON.stringify((await read()).rows));
+    } catch (e) {
+      console.log("FAIL results did not change after setting Encore " + last);
+    }
+  }
   console.log("console errors:", errors.length ? errors : "none");
   await browser.close();
 })();

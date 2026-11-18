@@ -34,7 +34,8 @@ attack speed and cap, range, role mana and timing all come from the selected bui
 numbers are read by curve-row name (`self.row('APDamage')`), never typed in. A missing value raises
 `BuildDataError` naming the build; don't catch it to default to 0. Spell effects are timed from the build's chronos
 (`self.chrono_event(...)`, `self.chrono_projectile_speed(...)`, B10) and scheduled with `self.schedule_tick`; trait
-values a spell reads come from `self.trait_value(...)` (B11). `set19champs.Neeko` is the worked example: its
+values a spell reads come from `self.trait_value(...)` at the tier the board's trait buff set (B11; traits are
+`set19buffs.BuildTrait` subclasses with a `KEY`, levels = units on the board). `set19champs.Neeko` is the worked example: its
 docstring and worksheet decision D1 cite the script for each structural fact.
 
 ## Commands

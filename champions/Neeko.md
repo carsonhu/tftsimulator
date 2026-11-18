@@ -116,7 +116,7 @@ to within 0.3 mana at 9 checked frames).
   `GE_Neeko19_Damage` = MagicDamageCalc1 × SetByCaller `Set19.Trait.Encore.Effectiveness` (MultiplyAdditive), magic.
   Throws fire at ticks 7, 11, 14, 18, 21, 24 after the cast; each lands 13 ticks later at range 4 (G4).
   Assumptions made here: one damage per throw (each projectile chrono holds two identical 'Popper' modules; the text
-  says "3 confetti streams that each deal"); arc travel time (G4); Encore level as a scenario input (B11).
+  says "3 confetti streams that each deal"); arc travel time (G4); the Encore tier from the Encore trait buff (B11).
   Checked in tests against the VOD: attack mana every 43 ticks from tick 13 (E4, E5), the next attack's mana 38
   ticks after a cast (E3: 39 frames).
 - Known gap vs the VOD: the engine's first cast is at tick 174 from combat start; the VOD's at ~177-178 frames.
