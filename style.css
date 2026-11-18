@@ -1344,6 +1344,8 @@ td input[type="checkbox"] {
 }
 
 .viz-mods {
+  max-height: 64px;
+  overflow-y: auto;
   margin: 3px 0 4px;
   padding: 2px 6px;
   border-left: 2px solid #4a4d5a;
@@ -1425,4 +1427,10 @@ td input[type="checkbox"] {
 
 .viz-time {
   white-space: nowrap;
+}
+
+.viz-mods div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

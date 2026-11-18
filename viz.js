@@ -36,7 +36,7 @@ const FightViewer = (() => {
     dealt: [], // per tick: damage dealt up to and including it, [total, per unit...]
     perTick: null, // tick -> {physical, magical, true}
     portrait: null,
-    selectedStat: "as",
+    selectedStat: null, // the stat whose modifiers the card lists (click a stat; again to close)
     shownTick: -1,
     view: null, // world -> screen transform
   };
@@ -71,7 +71,7 @@ const FightViewer = (() => {
     el.vizCard.addEventListener("click", (event) => {
       const row = event.target.closest("[data-stat]");
       if (row) {
-        v.selectedStat = row.dataset.stat;
+        v.selectedStat = v.selectedStat === row.dataset.stat ? null : row.dataset.stat;
         v.shownTick = -1;
         draw();
       }
@@ -625,7 +625,10 @@ const FightViewer = (() => {
     if (s.armorPen) rows.push(["", "Armor pen", pct(s.armorPen), ""]);
     if (s.mrPen) rows.push(["", "MR pen", pct(s.mrPen), ""]);
     if (s.omnivamp) rows.push(["", "Omnivamp", pct(s.omnivamp), ""]);
-    const mods = (s.mods || {})[v.selectedStat] || [];
+    // one line per modifier: its key without the effect's instance number, or the item and trait stats (unkeyed)
+    const modLines = (key) => ((s.mods || {})[key] || []).map(([op, value, k]) =>
+      `${k ? String(k).replace(/ \d+$/, "") : "item / trait stats"}: ${op} ${num(value, 3)}`);
+    const mods = v.selectedStat ? modLines(v.selectedStat) : [];
     const selectedName = (rows.find((r) => r[0] === v.selectedStat) || [, ""])[1];
     const items = tr.items.filter((n) => n !== tr.extra);
     const manaFrac = s.maxMana > 0 ? Math.min(s.mana / s.maxMana, 1) : 0;
@@ -640,11 +643,11 @@ const FightViewer = (() => {
         <span>${num(s.mana, 1)} / ${num(s.maxMana, 0)} mana</span></div>
       <div class="viz-grid">${rows.map(([key, name, value, extra]) => `
         <div ${key ? `data-stat="${key}"` : ""} class="viz-cell ${key && key === v.selectedStat ? "selected" : ""}"
-          ${extra ? `title="${esc(extra)}"` : ""}><span>${name}</span><b>${value}</b></div>`).join("")}
+          title="${esc([extra, ...(key ? modLines(key) : [])].filter(Boolean).join("\n") || "no modifiers")}"
+          ><span>${name}</span><b>${value}</b></div>`).join("")}
       </div>
-      <div class="viz-mods"><div class="viz-dim">${esc(selectedName)} modifiers${mods.length ? "" : ": none"}</div>
-        ${mods.map(([op, value, key]) => `<div>${esc(key || "unkeyed (item or trait stats)")}: <span>${esc(op)} ${num(value, 3)}</span></div>`).join("")}
-      </div>
+      ${v.selectedStat ? `<div class="viz-mods"><div class="viz-dim">${esc(selectedName)}${mods.length ? "" : ": no modifiers"}</div>
+        ${mods.map((line) => `<div title="${esc(line)}">${esc(line)}</div>`).join("")}</div>` : ""}
       <div class="viz-grid viz-totals">
         <div class="viz-cell"><span>Attacks</span><b>${s.attacks ?? 0}</b></div>
         <div class="viz-cell"><span>Casts</span><b>${s.casts ?? 0}</b></div>
