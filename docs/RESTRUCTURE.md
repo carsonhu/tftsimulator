@@ -128,7 +128,7 @@ the tables are unchanged.
 key) modifiers and evaluates the game's formula; every champion stat is one, in game units. Items apply build
 modifiers with their own op and channel; Stack-scaled item effects and K/DA's decaying AS are one keyed modifier
 re-sized as they change. Also removed: the unused set18 statuses, `Champion.addStats` and the per-item stat fields.
-Kept on purpose, so no number moves: Rapid Firecannon's amp stays additive (owner question in
+Kept on purpose, so no number moves: Rapid Firecannon's amp stays additive (owner default; open in
 docs/OPEN-QUESTIONS.md), the role's ManaMax "at least" still clamps the base, the armor/MR floor at 0 is an
 explicit bound, and the old `Stat` class remains only for `Attack.multiplier` and the pierce stats (step 4). Tests
 that read the old units (AS and AD bonuses in percent points, `armor.mult`, `as_cap`) now read the same numbers

@@ -22,8 +22,9 @@ class NoItem(Item):
 # attributes that change nothing against training dummies (they never attack, heal or shield) (I1)
 NO_EFFECT_ON_DUMMIES = {"IncomingDamageMultiplier", "IncomingHealMultiplier", "IncomingShieldMultiplier",
                         "MaxTeamSizeBonus"}
-# OutgoingDamageMultiplier MultiplyAdditive (Rapid Firecannon's x1.05) joins the damage-amp pool additively, as
-# before step 3 (I1); the game's formula would multiply the pool instead. Kept until the owner decides
+# OutgoingDamageMultiplier MultiplyAdditive (Rapid Firecannon's x1.05, the only amp in the build not written as +)
+# joins the damage-amp pool additively: damage amp is additive by default (owner, 2026-11-17; I1). The stock
+# formula would multiply the pool instead; open until a clip shows otherwise
 # (docs/OPEN-QUESTIONS.md), so the restructure changes no number.
 ADDITIVE_AMP = ("OutgoingDamageMultiplier", "MultiplyAdditive")
 # tags an item's effect grants that the engine models (I2)
