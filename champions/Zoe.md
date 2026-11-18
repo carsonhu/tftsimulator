@@ -47,8 +47,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Zoe`, D1) from the client data; no cast seen on a VOD
+  yet (VOD5's fights ended before her 90 mana filled)
+- Keep in the simulator: **yes**
 
 ## Questions
 
@@ -69,9 +70,9 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted (script read: D1) | D1 |
+| Q14 | Passives and other mechanics that need modelling | see ability text | the overkill ricochet: not modelled (dummies never die); Beach Pop (B32), Arcanist implemented | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 
 ## Evidence log
 
@@ -80,6 +81,14 @@ VOD was played on (check the patch shown in game or the date against builds/inde
 
 | Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
 |---|---|---|---|---|---|---|---|
+| 2026-11-18 | rls-19.1.0.5973071 | VOD5 (`…PBE_11-18-2026_0-57-11-500.mp4`) f7933-12478, three fights | 60 | mana text | 15 start, +7 per attack, 2/s; the longest fight ended at 86/90: no cast | no cast to check | Q7, Q9 |
 
 ## Decisions and notes
+
+- 2026-11-18, D1 (implemented, `set19champs.Zoe`):
+  - **Spell (GA_Zoe19_Spell):** mana lock; at LaunchProjectile (0.2884 s) the ball flies 300 units behind her
+    (ProjectDistanceThroughTarget(-300)); at RedirectProjectile (1.3167 s) CD_Zoe19_RedirectProjectile's Ball (spawn
+    0.0291 s, 2500 units/s) flies to the farthest enemy and hits the first enemy on its way, on the dummy line her target:
+    300 units + her range. 450/675/1000 x AP magic, on-spell, crit only with Precision. Unlock (1.8147 s) ends the cast.
+    The overkill ricochet (GE_Zoe19_OverkillDamage) needs a kill: not modelled.
 

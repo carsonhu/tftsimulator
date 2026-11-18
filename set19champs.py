@@ -11,7 +11,7 @@ from champion import Champion
 from items.debuffs import apply_shred
 from traits.classical import captivate
 from events import CRIT, IS_ATTACK, ON_HIT, ON_SPELL, ONHIT_AFTER, ONHIT_PRE, UNIT, CombatEvent, damage_tags
-from timing import TPS, Timing, projectile_ticks, ticks_up
+from timing import HEX_UNITS, TPS, Timing, projectile_ticks, ticks_up
 
 
 class Neeko(BuildChampion):
@@ -1190,8 +1190,44 @@ class RenataGlasc(BuildChampion):
             self.schedule_tick(land, lambda d=d: self._toxin(d, int(self.row('SecondaryTargetStacks'))))
 
 
+class Zoe(BuildChampion):
+    """Paddle Ball (champions/Zoe.md, D1). Script: GA_Zoe19_Spell (build ga_scripts.zip).
+
+    The cast plays CD_Zoe19_CastAnim and applies the mana lock. At 'LaunchProjectile' (0.2884 s) the ball flies
+    backwards to a point BehindDistance (300 units, ProjectDistanceThroughTarget(-300), script literal) behind her
+    (CD_Zoe19_InitialProjectile, visual); at 'RedirectProjectile' (1.3167 s) CD_Zoe19_RedirectProjectile's 'Ball'
+    (spawn 0.0291 s, 2500 units/s) flies from there to the farthest enemy (TR_Add_FurthestEnemyWithoutTags) and the
+    first enemy it overlaps takes GE_Zoe19_SpellDamage (MagicDamageCalc1 = SpellDamageAP x AP, magic, on-spell, crit
+    only with Precision). On the dummy line the first enemy on that path is her target: 300 units + her attack range.
+    If it dies the ball goes on with the overkill (GE_Zoe19_OverkillDamage): dummies never die, not modelled. 'Unlock'
+    (1.8147 s) ends the cast (the build: 55 / 56 ticks).
+    """
+    KEY = 'DA_Zoe19'
+    CAST = 'CD_Zoe19_CastAnim'
+    REDIRECT = 'CD_Zoe19_RedirectProjectile'
+    BEHIND = 300  # GA_Zoe19_Spell 0x13dd ProjectDistanceThroughTarget(..., -300) (script literal, units)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.redirect_at = self.chrono_event(self.CAST, 'RedirectProjectile')
+        self.ball_spawn = self.chrono_projectile_spawn(self.REDIRECT, 'Ball')
+        self.notes = ('The ball is fired backwards, then redirected through her to her target (the first enemy on its '
+                      'path on the dummy line). The overkill ricochet is not modelled: dummies never die.')
+
+    def ball_damage(self, level, AD, AP):
+        return self.row('SpellDamageAP', star=level) * AP
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        hexes = self.target_hexes(target) + self.BEHIND / HEX_UNITS
+        land = (self.tick + ticks_up(self.redirect_at + self.ball_spawn)
+                + self.chrono_projectile_ticks(self.REDIRECT, 'Ball', hexes))
+        self.schedule_tick(land, lambda: self.multiTargetSpell([target], self.items, self.tick / TPS, 1,
+                                                               self.ball_damage, 'magical'))
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
-              'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc']
+              'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe']
 
 
 class TrainingDummy(Champion):

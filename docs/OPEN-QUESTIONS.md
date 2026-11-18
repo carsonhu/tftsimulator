@@ -156,6 +156,14 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Toxin tick size | 160/240/580 x AP spread over 60 ticks (the GE applies the full calc each 0.25 s period, which would be 60x the tooltip) | damage numbers of a Toxin tick on a target of known MR | champions/RenataGlasc.md D1 |
 | Toxin's first tick | on application (Unreal's default) | the frame of the first Toxin number after the chain lands | champions/RenataGlasc.md D1 |
 
+### 7m. Zoe and Beach Pop
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Zoe's cast (locks, the ball's flight) | the build: 55 / 56 ticks; the ball 41 + 14 ticks after the cast | any Zoe cast with the mana text (VOD5's fights ended at 86/90) | champions/Zoe.md D1 |
+| Beach Pop's breakpoints | the page picks the trait level 1-3 | (owner) the unit counts per level (the panel showed the first at 3) | B32 |
+| Beach Pop's mana timer | +5/8/8 at 3, 6, 9 ... s from combat start | an empowered Beach Pop unit's mana text | B32 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

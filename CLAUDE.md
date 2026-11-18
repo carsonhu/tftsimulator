@@ -102,9 +102,9 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   radiant, artifact, emblem, trait, augment), which fills `set19items.offensive_craftables` / `radiants` /
   `artifacts` / `emblems` and `set19buffs.class_buffs` / `augments`; champions are live when listed in
   `set19champs.champ_list` (Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal, Lux, Gnar, Malzahar, Samira,
-  Karthus, Ashe, Viego, Kayle, Lucian, RenataGlasc, OlafHeroAugment (hero augment units are separate champions: `roster.json` `hero_augments`);
+  Karthus, Ashe, Viego, Kayle, Lucian, RenataGlasc, Zoe, OlafHeroAugment (hero augment units are separate champions: `roster.json` `hero_augments`);
   traits: Encore, Trickshot, K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats, Heartsteel, Hyperpop, Ionic
-  Spark, Prodigy, Pentakill, Composer, Renegade, Classical, Slayer, Choreographer, Jazz). A debuff a spell applies uses the shared helpers in `items/debuffs.py`
+  Spark, Prodigy, Pentakill, Composer, Renegade, Classical, Slayer, Choreographer, Jazz, Beach Pop). A debuff a spell applies uses the shared helpers in `items/debuffs.py`
   (`apply_shred`, `apply_burn`). A new trait is
   a module in `traits/` plus its import line in `set19buffs.py`. `worker.js` `PY_FILES` lists every module the
   browser loads; a new module must be added there too (`test_sim_entry.py` checks the `items/` and `traits/` ones). Builds reach the browser through

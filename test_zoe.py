@@ -1,0 +1,75 @@
+"""Zoe and Beach Pop (champions/Zoe.md): numbers from build rls-19.1.0.5973071 (no cast seen on a VOD yet: VOD5's
+fights ended before her 90 mana filled)."""
+import pytest
+
+import set19buffs
+from buildstore import load_build
+from set19champs import Ashe, Zoe
+from simulator import Simulator
+from test_timing import dummy
+
+V = 'rls-19.1.0.5973071.Set19.Shipping.pbe'
+
+
+class LoggedZoe(Zoe):
+    def __init__(self, level=1):
+        super().__init__(level, build=load_build(V))
+        self.mana_log, self.casts = [], []
+
+    def addMana(self, amount, time=None):
+        before = self.curMana
+        super().addMana(amount, time)
+        self.mana_log.append((self.tick, amount, before, self.curMana))
+
+    def performAbility(self, opponents, items, time):
+        self.casts.append(self.tick)
+        super().performAbility(opponents, items, time)
+
+
+def fight(c, items=(), buffs=(), seconds=10, n=8):
+    ds = [dummy() for _ in range(n)]
+    for d in ds:
+        d.armor.base = d.mr.base = 0
+    Simulator().simulate(list(items), list(buffs), c, ds, seconds)
+    return [(round(t * 30), round(d[0], 4)) for t, d, *_ in c.dmgVector]
+
+
+def test_build_numbers():
+    z = LoggedZoe(1)
+    assert (z.curMana, z.fullMana.stat, z.aspd.stat, z.attack_range) == (15, 90, 0.7, 4)
+    assert (z.redirect_at, z.ball_spawn) == (1.3167, 0.0291)
+    assert (round(z.timing.mana_lock * 30), round(z.timing.cast_lock * 30)) == (55, 56)
+    assert sorted(z.default_traits) == ['Arcanist', 'BeachPop']
+
+
+def test_paddle_ball():
+    # the ball: 450 x AP to the target, from 300 units behind her at 2500 units/s after RedirectProjectile (1.3167 s +
+    # spawn 0.0291 s = 41 ticks): 300 + 4 x 215 units = 14 ticks
+    z = LoggedZoe(1)
+    z.curMana = 90
+    rows = fight(z, seconds=4)
+    cast = z.casts[0]
+    assert [(t - cast, d) for t, d in rows if d == 450] == [(41 + 14, 450)]
+
+
+def test_beach_pop():
+    # the level is the trait level (no breakpoints in the build); empowered members +20/35/35% AS and +5/8/8 mana
+    # every 3 s; level 3 also +40 mana every 10 s
+    for level, bonus in ((1, 0.2), (2, 0.35)):
+        z = LoggedZoe(1)
+        fight(z, buffs=[set19buffs.BeachPop(level)], seconds=1)
+        assert z.aspd.stat == pytest.approx(0.7 * (1 + bonus))
+    z = LoggedZoe(1)
+    fight(z, buffs=[set19buffs.BeachPop(2)], seconds=7)
+    assert [t for t, a, before, after in z.mana_log if a == 8] == [90, 180]
+    z = LoggedZoe(1)
+    fight(z, buffs=[set19buffs.BeachPop(3)], seconds=11)
+    assert [t for t, a, before, after in z.mana_log if a == 40] == [300]
+    # not next to an instrument: nothing
+    z = LoggedZoe(1)
+    fight(z, buffs=[set19buffs.BeachPop(2, 1)], seconds=4)
+    assert z.aspd.stat == pytest.approx(0.7) and not [t for t, a, b, af in z.mana_log if a == 8]
+    # a non-member gets nothing from it here (the Health regen changes no damage)
+    a = Ashe(1, build=load_build(V))
+    fight(a, buffs=[set19buffs.BeachPop(1)], seconds=1)
+    assert a.aspd.stat == pytest.approx(0.75 * 1.2)  # Ashe is a Beach Pop member

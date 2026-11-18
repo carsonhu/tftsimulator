@@ -56,7 +56,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 ## Status
 
 - Worksheet status: **implemented** (2026-11-18, `set19champs.Ashe`, D1); panel, mana and the first cast's rhythm checked
-  against VOD5. Beach Pop is not implemented yet (it comes with Zoe).
+  against VOD5. Beach Pop implemented with Zoe (B32).
 - Keep in the simulator: **yes**
 
 ## Questions
