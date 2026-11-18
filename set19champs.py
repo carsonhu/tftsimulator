@@ -6,6 +6,7 @@ how the damage is built) is the champion's script, cited by file and offset.
 """
 import set19buffs
 from build_champion import BuildChampion
+from buildstore import BuildDataError
 from champion import Champion
 from items.debuffs import apply_shred
 from traits.classical import captivate
@@ -826,8 +827,110 @@ class OlafHeroAugment(BuildChampion):
                       'physical', now, tags=damage_tags('physical', UNIT))
 
 
+class Ashe(BuildChampion):
+    """Feelin' Shot Shot Shot (champions/Ashe.md, D1). Scripts: GA_Ashe19_Spell, GA_Ashe19_EmpoweredAttack (build
+    ga_scripts.zip).
+
+    The cast (GA_Ashe19_Spell) plays CD_Ashe19_CastAnim for a fixed duration, CT_Ashe19_ASToCastSpeed ASToCastTime at
+    her AttackSpeed when it starts (0x3e3: 0.3333 s up to 1 AS, linear to 0.15 s at 5 AS); the cast finishes when it
+    stops (a cast lock of that + 1 tick, the build's rule). It applies the mana lock (0x610) and GE_Ashe19_Empowered
+    (0x65b: tag ChronoTags.Dynamic.CustomAttack.1 and AttackSpeed MultiplyAdditive AttackSpeedCalc1 = SpellASBase +
+    SpellASAP x AP: +50% at AP 1, VOD5 E2: 0.93 -> 1.30). Each Combat.Event.LaunchAttack.Custom.1 counts (0xfd); at
+    NumFlurryAttacks (6), one tick later (DelayUntilNextTick, 0x1ae -> 0xf), the empower and the mana lock are
+    removed: her mana is locked until the tick after the 6th flurry, whose own mana is lost.
+    With the tag, CD_Ashe19_Attack_new plays the 'EmpoweredAttack' group: CustomLaunchAttack1 at 0 s (the flurry
+    leaves when the attack starts; the engine releases 1 tick after a start), otherwise the SequentialAttack group
+    (LaunchAttack at 0.2971 s of 2.1333 s, rate-scaled). A flurry (GA_Ashe19_EmpoweredAttack: the custom launch fires
+    no attack projectile) is CD_Ashe19_EmpoweredMis at her target: 'OnHitArrow' at 0 s and two 'NoOnHitArrow' at
+    0.075 and 0.15 s (ArrowsPerFlurry 3), 2100 units/s. Each arrival applies PhysicalDamageCalc1 (ArrowDamageAD x AD,
+    AD the multiplier), physical, AppliesOnHit and AppliesOnSpell (the first also IsAttack), crit only with
+    Precision, with on-hit effects at OnHitEffectivenessPerFlurryArrow (0.6, I11).
+    """
+    KEY = 'DA_Ashe19'
+    ATTACK = 'CD_Ashe19_Attack_new'
+    FLURRY = 'CD_Ashe19_EmpoweredMis'
+    CAST_TIME = ('CT_Ashe19_ASToCastSpeed', 'ASToCastTime')
+    EMPOWERED = 3  # the selector this class gives the empowered animation
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        t, length = self.timing, self.chrono(self.ATTACK)['length']
+        normal = [{'selector': s, 'min_as': None, 'launch': self.chrono_event(self.ATTACK, 'LaunchAttack'),
+                   'length': length} for s in (1, 2)]
+        # the empowered module's own length (1.8333 s) is not in the build; with a launch at 0 s it changes nothing
+        empowered = {'selector': self.EMPOWERED, 'min_as': None,
+                     'launch': self.chrono_event(self.ATTACK, 'CustomLaunchAttack1'), 'length': length}
+        t.variants, t.animations = normal + [empowered], 2
+        t.source['variants'] = f'{self.ATTACK}: SequentialAttack x2, EmpoweredAttack (CustomAttack.1)'
+        # every module of her attack chrono has PlayRateScalingThreshold 1.0 (client asset; not yet in the build):
+        # the animation plays at the attack period, shorter as well as longer, as G19 (VOD5 E2: first attack 5.5 ticks
+        # after combat start at AS 0.86, G2 would give 9; G20 open)
+        t.release_scales_with_period = True
+        t.source['release_scales_with_period'] = f'{self.ATTACK} PlayRateScalingThreshold 1.0 (G20, VOD5 E2)'
+        t.mana_lock = 10 ** 6  # lifted the tick after the last flurry (onLaunch)
+        t.source['mana_lock'] = 'GA_Ashe19_Spell: removed the tick after the last flurry launch (0x1ae, 0xf)'
+        t.source['cast_lock'] = f'{self.CAST_TIME[0]} {self.CAST_TIME[1]} at her AS at the cast (GA_Ashe19_Spell 0x3e3)'
+        # her script reads AttackSpeed only through that curve: the lock is not divided by the AS ratio as well
+        t.lock_scales_with_as = False
+        t.source['lock_scales_with_as'] = 'GA_Ashe19_Spell reads AS only for ASToCastTime (0x3e3)'
+        self.arrows = [('OnHitArrow', self.chrono_projectile_spawn(self.FLURRY, 'OnHitArrow'))] + [
+            ('NoOnHitArrow', s) for s in sorted(p for q in self.chrono(self.FLURRY)['projectiles']
+                                                if q['name'] == 'NoOnHitArrow' for p in q['spawn_at'])]
+        if len(self.arrows) != self.row('ArrowsPerFlurry'):
+            raise BuildDataError(f'{self.KEY}: {self.FLURRY} spawns {len(self.arrows)} arrows, ArrowsPerFlurry is '
+                                 f'{self.row("ArrowsPerFlurry")}')
+        self.empowered_left = 0
+        self._planned = 1
+        self._this_empowered = False
+        self.notes = ('Her next 6 attacks after a cast have +30% + 20% x AP attack speed and are flurries of 3 arrows; '
+                      'her mana is locked until the 6th flurry.')
+
+    def arrow_damage(self, level, AD, AP):
+        return self.row('ArrowDamageAD', star=level) * AD
+
+    def _next_animation(self):
+        self._planned = self.EMPOWERED if self.empowered_left > 0 else self.launches % 2 + 1
+        return self._planned, self.aspd.stat
+
+    def performAbility(self, opponents, items, time):
+        cast_end = self.table_value(*self.CAST_TIME, self.aspd.stat)  # read before the empower (0x3e3 < 0x65b)
+        self.timing.cast_lock = (ticks_up(cast_end) + 1) / TPS
+        self.aspd.modify('MultiplyAdditive', 1 + self.row('SpellASBase') + self.row('SpellASAP') * self.ap.stat,
+                         key='ashe_empowered')
+        self.empowered_left = int(self.row('NumFlurryAttacks'))
+
+    def onLaunch(self, opponents, items):
+        self._this_empowered = self._planned == self.EMPOWERED
+        if self._this_empowered:
+            self.empowered_left -= 1
+            if self.empowered_left == 0:
+                self.mana_locked_until = self.tick + 1
+                self.schedule_tick(self.tick + 1, lambda: self.aspd.remove('ashe_empowered'))
+
+    def fire_attack(self, opponents, items, moment, paid):
+        if not self._this_empowered:
+            return super().fire_attack(opponents, items, moment, paid)
+        target = opponents[0]
+        hexes = self.target_hexes(target)
+        for i, (name, spawn) in enumerate(self.arrows):
+            at = self.tick + ticks_up(spawn) + self.chrono_projectile_ticks(self.FLURRY, name, hexes)
+            self.schedule_tick(at, lambda first=(i == 0): self._arrow_lands(target, first))
+
+    def _arrow_lands(self, target, first):
+        items, now = self.items, self.tick / TPS
+        dmg = self.arrow_damage(self.level, self.bonus_ad.stat, self.ap.stat)
+        crit_dmg = dmg * self.critDamage() if self.canSpellCrit else dmg
+        amp = self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        eff = self.row('OnHitEffectivenessPerFlurryArrow')
+        tags = damage_tags('physical', UNIT, ON_HIT, ON_SPELL, *((IS_ATTACK,) if first else ()))
+        self.emit(ONHIT_PRE, CombatEvent(self, target, dtype='physical', tags=tags, time=now, effectiveness=eff), items)
+        self.doDamage(target, items, self.crit.stat if self.canSpellCrit else 0, crit_dmg * amp, dmg * amp,
+                      'physical', now, tags=tags)
+        self.emit(ONHIT_AFTER, CombatEvent(self, target, tags=tags, time=now, effectiveness=eff), items)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
-              'OlafHeroAugment']
+              'OlafHeroAugment', 'Ashe']
 
 
 class TrainingDummy(Champion):

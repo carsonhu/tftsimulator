@@ -121,7 +121,8 @@ class LichBane(BuildItem):
             self.launched = True
         elif phase == ONHIT_AFTER and self.armed and (not champion.ranged or self.launched):
             self.armed = False
-            item_damage(champion, input_.target, stage_value(self, champion, "ProcDamage"), "magical")
+            item_damage(champion, input_.target, stage_value(self, champion, "ProcDamage") * input_.effectiveness,
+                        "magical")  # I11
         return input_
 
 
@@ -138,7 +139,8 @@ class WitsEnd(BuildItem):
     LISTENS = {ONHIT_AFTER: frozenset()}
 
     def performAbility(self, phase, time, champion, input_=0):
-        item_damage(champion, input_.target, stage_value(self, champion, "OnHitDamage"), "magical")
+        item_damage(champion, input_.target, stage_value(self, champion, "OnHitDamage") * input_.effectiveness,
+                    "magical")  # I11
         return input_
 
 
@@ -193,7 +195,7 @@ class TitanicHydra(BuildItem):
         amount = (champion.hp.stat * self.row(champion, "PercentHealthBonusDamage")
                   + champion.atk.stat * champion.bonus_ad.stat * self.row(champion, "PercentADBonusDamage"))
         for target in [input_.target] + champion.nearby(input_.target, self.HEX_RANGE):
-            item_damage(champion, target, amount, "physical")
+            item_damage(champion, target, amount * input_.effectiveness, "physical")  # I11
         return input_
 
 
@@ -210,7 +212,8 @@ class HellfireHatchet(BuildItem):
     LISTENS = {ONHIT_AFTER: frozenset()}
 
     def performAbility(self, phase, time, champion, input_=0):
-        item_damage(champion, input_.target, champion.hp.stat * self.row(champion, "PercentHPDamage"), "physical")
+        item_damage(champion, input_.target,
+                    champion.hp.stat * self.row(champion, "PercentHPDamage") * input_.effectiveness, "physical")  # I11
         return input_
 
 

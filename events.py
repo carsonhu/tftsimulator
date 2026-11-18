@@ -33,16 +33,18 @@ TYPES = {"physical": "Damage.Type.Physical", "magical": "Damage.Type.Magic", "tr
 
 class CombatEvent(object):
     """One event: who caused it, at whom, how much (after resistances; None before the damage is known), its damage
-    type, its tags and the time (seconds)."""
-    __slots__ = ("source", "target", "amount", "dtype", "tags", "time")
+    type, its tags, the time (seconds) and, for an on-hit damage, its on-hit effectiveness
+    (Damage.SetByCaller.OnHitEffectivenessMultiplier: 1 for an attack; Ashe's flurry arrows 0.6; I11)."""
+    __slots__ = ("source", "target", "amount", "dtype", "tags", "time", "effectiveness")
 
-    def __init__(self, source, target=None, amount=None, dtype=None, tags=frozenset(), time=0.0):
+    def __init__(self, source, target=None, amount=None, dtype=None, tags=frozenset(), time=0.0, effectiveness=1.0):
         self.source = source
         self.target = target
         self.amount = amount
         self.dtype = dtype
         self.tags = tags
         self.time = time
+        self.effectiveness = effectiveness
 
 
 def damage_tags(dtype, *tags):

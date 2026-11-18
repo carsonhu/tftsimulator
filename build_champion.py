@@ -175,6 +175,15 @@ class BuildChampion(Champion):
         return self.data.row(name, star=star or self.level)
 
     # ------------------------------------------------------------ spell timelines from the build
+    def table_value(self, table, name, x):
+        """Row `name` of another curve table in the champion's folder at `x` (EvaluateCurveTableRow): step or
+        linear between keys, flat outside them (a Constant pre/post extrapolation; any other raises)."""
+        c = self.data.table_curve(table, name)
+        if (c.get('pre') or 'Constant') != 'Constant' or (c.get('post') or 'Constant') != 'Constant':
+            raise BuildDataError(f'{self.KEY}: {table}.{name} extrapolates ({c.get("pre")}, {c.get("post")}); '
+                                 f'only Constant is read')
+        return curve_at(c['points'], x, c.get('interp') or 'Constant')
+
     def chrono(self, name):
         """One timeline (chrono) in the champion's folder: {'length', 'events': [[name, t], ...], 'projectiles'}."""
         ch = (self.data.d.get('chronos') or {}).get(name)

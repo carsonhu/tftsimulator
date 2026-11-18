@@ -28,7 +28,27 @@ def plain(html):
             .replace('&#x27;', "'").strip())
 
 
-def champion(c):
+def folder_tables(c, curves):
+    """The other curve tables in the champion's folder (Ashe's CT_Ashe19_ASToCastSpeed, read by her script, not
+    by the tooltip): {table: {row: {'interp', 'pre', 'post', 'points': [[time, value], ...]}}}, from the snapshot's
+    curvetables.json (whose keys are pak paths: TFT/Plugins/GameFeatures/Set_19/Content/Champions/Ashe/CT_X.uasset)."""
+    pkg = c['package']  # /Set_19/Champions/Ashe/DA_Ashe19
+    if '/Champions/' not in pkg:
+        return {}
+    plugin, rest = pkg.lstrip('/').split('/', 1)
+    name = rest.split('Champions/', 1)[1].split('/', 1)[0]
+    prefix = f'TFT/Plugins/GameFeatures/{plugin}/Content/Champions/{name}/'
+    own = (c['ability'].get('curve_table') or '').rsplit('/', 1)[-1]
+    out = {}
+    for path, rows in curves.items():
+        stem = path.rsplit('/', 1)[-1].removesuffix('.uasset')
+        if path.startswith(prefix) and stem.startswith('CT_') and stem != own:
+            out[stem] = {r: {'interp': v.get('interp'), 'pre': v.get('pre'), 'post': v.get('post'),
+                             'points': v.get('keys') or []} for r, v in rows.items()}
+    return out
+
+
+def champion(c, curves):
     t = c.get('timing') or {}
     return {
         'key': c['key'], 'name': c['name'], 'cost': c['cost'], 'role': c['role'], 'in_shop': c['in_shop'],
@@ -49,6 +69,7 @@ def champion(c):
         'effects': c.get('effects') or [],
         'unlock': c.get('unlock'),
         'chronos': c.get('chronos') or {},
+        'tables': folder_tables(c, curves),
         'package': c['package'],
     }
 
@@ -60,12 +81,13 @@ def simple(x, keep):
 def convert(src_dir):
     d = json.load(open(os.path.join(src_dir, 'data.json'), encoding='utf-8'))
     m = json.load(open(os.path.join(src_dir, 'manifest.json'), encoding='utf-8'))
+    curves = json.load(open(os.path.join(src_dir, 'curvetables.json'), encoding='utf-8'))
     return {
         'schema': SCHEMA,
         'meta': {k: m.get(k) for k in ('version', 'install', 'set', 'snapshot_at', 'pak_mtime', 'usmap',
                                        'usmap_is_this_build', 'tools', 'counts', 'read_problems',
                                        'cosmetic_read_problems')},
-        'champions': {c['key']: champion(c) for c in d['champions']},
+        'champions': {c['key']: champion(c, curves) for c in d['champions']},
         'roles': {r['key'].removeprefix('DA_Role_'): r for r in d.get('roles', [])},
         'traits': {t['key']: simple(t, ('key', 'name', 'kind', 'rows', 'calcs', 'curve_table', 'tables'))
                    | {'tiers': [{'threshold': x['threshold'], 'text': plain(x['html']), 'unlock': x.get('unlock')}

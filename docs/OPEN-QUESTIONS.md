@@ -118,6 +118,14 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Axe damage | 150/225/360 x AD + 15/20/30 x AP physical, no on-hit | damage numbers of an axe on a target of known armor | champions/Olaf_HeroAugment.md D1 |
 | Do on-launch items hear the empowered throws? | yes (Combat.Event.LaunchAttack.Custom.1 is a LaunchAttack) | Olaf (Axe Crescendo) with Titan's Resolve: stacks per throw | champions/Olaf_HeroAugment.md D1 |
 
+### 7h. Ashe again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| The second empowered phase | 6 flurries at the attack period (AS 1.53-1.60: ~19 ticks apart), lock lifted 109 ticks after the filling attack | VOD5 showed 122.5 (the first phase matched to 1.5 ticks); a clip of a longer Ashe fight on a target that stays alive | champions/Ashe.md E2 |
+| Arrow damage | 3 x 33/50/75 x AD per flurry, on-hit at 0.6 | damage numbers of a flurry on a target of known armor | champions/Ashe.md D1, I11 |
+| Play-rate threshold for the other 15 units (G20) | G2 (no shortening) for every unit but Ashe | a Draven, Malzahar or Ziggs attack at AS above ~1.1 | G20 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

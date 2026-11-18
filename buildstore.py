@@ -44,6 +44,16 @@ class Champion(_Entry):
         vals = tuple(rows[name])
         return vals if star is None else vals[star - 1]
 
+    def table_curve(self, table, name):
+        """Row `name` of another curve table in the champion's folder (Ashe's CT_Ashe19_ASToCastSpeed):
+        {'interp', 'pre', 'post', 'points': [[time, value], ...]}, from the build's `tables`."""
+        rows = (self.d.get('tables') or {}).get(table)
+        if rows is None:
+            raise self._missing(f'curve table {table!r}')
+        if name not in rows:
+            raise self._missing(f'row {name!r} of {table}')
+        return rows[name]
+
     def stat(self, name):
         if name not in self.d['stats']:
             raise self._missing(f'stat {name!r}')
