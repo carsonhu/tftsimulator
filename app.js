@@ -368,15 +368,6 @@ function buildStaticControls() {
     onConfigChanged();
   });
 
-  $("takedowns").onchange = () => {
-    state.cfg.takedowns = clampInput($("takedowns"));
-    onConfigChanged();
-  };
-  $("numTraits").onchange = () => {
-    state.cfg.num_traits = clampInput($("numTraits"));
-    onConfigChanged();
-  };
-
   // Item selectors.
   const itemRows = $("itemRows");
   for (let n = 0; n < cat.defaults.numItems; n++) {

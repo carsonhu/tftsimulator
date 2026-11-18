@@ -68,20 +68,6 @@
           </label>
         </section>
 
-        <details>
-          <summary>Extra options</summary>
-          <label
-            >Total takedowns
-            <input type="number" id="takedowns" min="0" max="100" value="0" />
-          </label>
-          <label
-            >Number of active traits
-            <input type="number" id="numTraits" min="0" max="12" value="6" />
-          </label>
-          <!-- The bonus-stat inputs live in the Base stats panel now, each
-               one beside the stat it feeds. -->
-        </details>
-
         <section>
           <label
             >Game build
@@ -178,9 +164,11 @@
           /><span>MR</span>
         </h1>
         <p class="disclaimer">
-          Cast times and attack windups are measured from patch 18.5 replays
-          where available. Units cast right after the attack that fills their
-          mana.
+          Every number comes from the selected game build. Attack and cast
+          timing is read from the build's animations and checked against PBE
+          footage where noted. Units cast right after the attack that fills
+          their mana. Training dummies never attack back, so effects that need
+          the holder to lose health never trigger.
         </p>
 
         <!-- Team Traits sits beside Base stats and matches its height: the
