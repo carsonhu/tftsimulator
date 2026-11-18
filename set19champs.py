@@ -1098,10 +1098,9 @@ class Lucian(BuildChampion):
 
     def __init__(self, level, build=None):
         super().__init__(level, build)
-        t = self.timing
-        t.mana_lock = None  # set per cast: dash + the cast chrono's Unlock
         self.dash_hexes = self.row('MinDashDistance')
         self.dash = projectile_ticks(self.DASH_SPEED, self.dash_hexes)
+        self.set_locks(self.CAST)  # the build has no cast lockout for him: the plain cast's, shown on the panel
         self.notes = ('A cast: a 1-hex dash, then 2 shots (with Encore active, 2 more at the Encore recast strength); '
                       'each shot counts as an attack for on-attack items.')
 
@@ -1111,12 +1110,17 @@ class Lucian(BuildChampion):
     def encore(self):
         return self.trait_tier('DA_Encore19') > 0 and 'DA_Encore19' in (self.data.d.get('trait_keys') or [])
 
-    def performAbility(self, opponents, items, time):
-        target = opponents[0]
-        chrono = self.ENCORE_CAST if self.encore() else self.CAST
+    def set_locks(self, chrono):
+        """The cast's locks: the dash, then the cast chrono's Unlock (mana lock); the next attack the tick after."""
         unlock = self.dash + ticks_up(self.chrono_event(chrono, 'Unlock'))
         self.timing.mana_lock = unlock / TPS
         self.timing.cast_lock = (unlock + 1) / TPS
+        self.timing.source['cast_lock'] = self.timing.source['mana_lock'] =             f'{self.DASH} ({self.dash} ticks) + {chrono} Unlock'
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        chrono = self.ENCORE_CAST if self.encore() else self.CAST
+        self.set_locks(chrono)
         mult = self.trait_value('DA_Encore19', 'RecastEffectiveness') if self.encore() else 1
         fire = self.tick + self.dash
         hexes = self.target_hexes(target)
