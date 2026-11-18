@@ -82,7 +82,7 @@ class SilvermereDawn(BuildItem):
 
 
 def item_damage(champion, target, amount, dtype):
-    """Damage an item deals on its own (I10): not boosted by damage amp (owner, 2026-11-17, as burn), can't crit, and
+    """Damage an item deals on its own (I10): not boosted by damage amp (owner, 2026-11-17), can't crit, and
     tagged Damage.Source.Item, so no effect that waits for the unit's damage hears it."""
     if amount > 0 and target is not None:
         champion.doDamage(target, champion.items, 0, amount, amount, dtype, champion.tick / TPS,

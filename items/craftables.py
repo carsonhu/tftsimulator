@@ -5,7 +5,7 @@ from registry import register
 from items.base import BuildItem, StackingItem, item_name
 from effects import ActiveEffect, apply_effect, last_tick
 from events import CRIT, IS_ATTACK, LAUNCH
-from items.debuffs import BurnItem, DebuffItem, apply_shred, debuff_value
+from items.debuffs import DebuffItem, apply_shred, debuff_value
 
 
 @register("craftable")
@@ -395,24 +395,24 @@ class VoidStaff(DebuffItem):
         apply_shred(champion, target, level, duration)
 
 
+# Burn is not simulated (owner, 2026-11-18, as in set18: too unrealistic to simulate). Red Buff and
+# Morellonomicon are their stats only, and say so in their names (I7).
+NO_BURN = " (no burn)"
+
+
 @register("craftable")
-class Morellonomicon(BurnItem):
-    """Stats GE_Morellonomicon (150 HP, 20% AP, 1 mana regen). Script GA_Morellonomicon: after each damage the holder
-    deals (Damage.Source.Unit) with AppliesOnHit.IsAttack or AppliesOnSpell (0x53), ApplyBurnAndWoundToTarget: GE_Burn
-    at level BurnPercent (1) and GE_Wound for BurnAndWoundDuration (10 s)."""
+class Morellonomicon(BuildItem):
+    """Stats GE_Morellonomicon (150 HP, 20% AP, 1 mana regen). Its script GA_Morellonomicon burns and wounds the
+    holder's targets (GE_Burn, GE_Wound): not simulated (NO_BURN)."""
     KEY = "DA_Morellonomicon"
     STATS = ("GE_Morellonomicon",)
-    GA = "GA_Morellonomicon"
-    LEVEL_PARAM, DURATION_PARAM = "BurnPercentRow", "BurnAndWoundDurationRow"
-    display_name = item_name(KEY)
+    display_name = item_name(KEY) + NO_BURN
 
 
 @register("craftable")
-class RedBuff(BurnItem):
-    """Stats GE_RedBuff (3% damage amp, 45% AS). Script GA_RedBuff: after each damage the holder deals as a unit with
-    IsAttack (0xa) or AppliesOnSpell (0x64e), GE_Burn at level Burn (1) and GE_Wound for Duration (5 s)."""
+class RedBuff(BuildItem):
+    """Stats GE_RedBuff (3% damage amp, 45% AS). Its script GA_RedBuff burns and wounds the holder's targets
+    (GE_Burn, GE_Wound): not simulated (NO_BURN)."""
     KEY = "DA_RedBuff"
     STATS = ("GE_RedBuff",)
-    GA = "GA_RedBuff"
-    LEVEL_PARAM, DURATION_PARAM = "BurnCurveRow", "DurationCurveRow"
-    display_name = item_name(KEY)
+    display_name = item_name(KEY) + NO_BURN

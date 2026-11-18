@@ -1,8 +1,7 @@
-"""Debuffs an item puts on the damaged target (ledger I7): sunder and shred (DebuffItem) and burn (BurnItem)."""
+"""Debuffs an item puts on the damaged target (ledger I7): sunder and shred (DebuffItem). Burn is not simulated."""
 from buildstore import BuildDataError, load_build
 from effects import ActiveEffect, apply_effect, last_tick
-from events import BURN, DAMAGE_POST, ITEM, UNIT, damage_tags
-from timing import TPS, ticks_up
+from events import DAMAGE_POST, UNIT
 from items.base import BuildItem
 
 
@@ -69,45 +68,3 @@ def apply_sunder(champion, target, level, duration):
     op, channel = shared_rule(champion, "GE_ArmorSunder", "Armor")
     sunder = ActiveEffect("Sunder", [("armor", op, debuff_value(champion, "ShredSunderChill", level), channel)])
     apply_effect(target, sunder, champion.tick, last_tick(champion.tick, duration))
-
-
-def apply_burn(champion, target, level, duration):
-    """GE_Burn on `target` from `champion` (I7), as an effects.ActiveEffect with the build's rules (globals.burn):
-    one burn per target (StackLimitCount 1); a new application renews the duration but not the period
-    (NeverReset); the first tick is one period after application (bExecutePeriodicEffectOnApplication false). It
-    covers ticks up to the applied tick + ticks_up(duration)."""
-    g = champion.build.data["globals"]["burn"]
-    burn = ActiveEffect("Burn", level=level, period=ticks_up(g["period"]), period_on_application=bool(g["on_application"]))
-    apply_effect(target, burn, champion.tick, last_tick(champion.tick, duration))
-    champion.__dict__.setdefault("burning", {})[id(target)] = target
-
-
-def tick_burns(champion):
-    """Deal the burns due this tick, once per tick however many burn items the holder has: true damage of
-    BurnWound(level) x the target's max HP, not boosted by anything (owner, 2026-11-17; I7)."""
-    if getattr(champion, "burn_tick", None) == champion.tick:
-        return
-    champion.burn_tick = champion.tick
-    for target in (getattr(champion, "burning", None) or {}).values():
-        burn = target.effects.get("Burn")
-        for _ in range(burn.due(champion.tick) if burn is not None else 0):
-            dmg = debuff_value(champion, "BurnWound", burn.level) * target.hp.stat
-            # an item's debuff, not the unit's damage: nothing that waits for Damage.Source.Unit hears it
-            champion.doDamage(target, champion.items, 0, dmg, dmg, "true", champion.tick / TPS,
-                              tags=damage_tags("true", ITEM, BURN))
-
-
-class BurnItem(DebuffItem):
-    """An item that burns (and wounds: nothing against dummies) the targets of the holder's attacks and spells."""
-    def __init__(self):
-        super().__init__(phases=("preCombat", "onUpdate"))
-
-    def performAbility(self, phase, time, champion, input_=0):
-        if phase == "preCombat":
-            champion.burning = {}
-        elif phase == "onUpdate":
-            tick_burns(champion)
-        return super().performAbility(phase, time, champion, input_)
-
-    def debuff(self, champion, target, time, level, duration):
-        apply_burn(champion, target, level, duration)

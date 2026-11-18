@@ -1,7 +1,7 @@
 """Radiant items (ledger I9): each runs its base craftable's script with its own effects and rows."""
 from buildstore import load_build
 from registry import register
-from items.craftables import AdaptiveHelm, ArchangelsStaff, Bloodthirster, BlueBuff, Deathblade, EdgeOfNight, GiantSlayer, GiantSlayerNoTank, GuinsoosRageblade, HandOfJustice, HextechGunblade, InfinityEdge, JeweledGauntlet, KrakensFury, LastWhisper, Morellonomicon, NashorsTooth, Quicksilver, RabadonsDeathcap, RedBuff, SpearOfShojin, SteraksGage, StrikersFlail, TitansResolve, VoidStaff
+from items.craftables import AdaptiveHelm, ArchangelsStaff, Bloodthirster, BlueBuff, Deathblade, EdgeOfNight, GiantSlayer, GiantSlayerNoTank, GuinsoosRageblade, HandOfJustice, HextechGunblade, InfinityEdge, JeweledGauntlet, KrakensFury, LastWhisper, Morellonomicon, NashorsTooth, Quicksilver, NO_BURN, RabadonsDeathcap, RedBuff, SpearOfShojin, SteraksGage, StrikersFlail, TitansResolve, VoidStaff
 
 
 # ---------------------------------------------------------------- Radiants (I9)
@@ -31,11 +31,11 @@ _radiant(InfinityEdge, "DA_InfinityEdgeRadiant", "GE_InfinityEdgeRadiant")
 _radiant(JeweledGauntlet, "DA_JeweledGauntletRadiant", "GE_JeweledGauntletRadiant")
 _radiant(KrakensFury, "DA_KrakensFury_Radiant", "GE_KrakensFury_Stats_Radiant")
 _radiant(LastWhisper, "DA_LastWhisperRadiant", "GE_LastWhisperRadiant_Stats")
-_radiant(Morellonomicon, "DA_MorellonomiconRadiant", "GE_MorellonomiconRadiant")
+_radiant(Morellonomicon, "DA_MorellonomiconRadiant", "GE_MorellonomiconRadiant", NO_BURN)
 _radiant(NashorsTooth, "DA_NashorsToothRadiant", "GE_NashorsToothRadiant_Stats")
 _radiant(Quicksilver, "DA_QuicksilverRadiant", "GE_QuicksilverRadiant_Stats")
 _radiant(RabadonsDeathcap, "DA_RabadonsDeathcap_Radiant", "GE_RabadonsDeathcap_Radiant_Stats")
-_radiant(RedBuff, "DA_RedBuffRadiant", "GE_RedBuffRadiant")
+_radiant(RedBuff, "DA_RedBuffRadiant", "GE_RedBuffRadiant", NO_BURN)
 _radiant(SpearOfShojin, "DA_SpearOfShojinRadiant", "GE_SpearOfShojinRadiant")
 _radiant(SteraksGage, "DA_SteraksGageRadiant", "GE_SteraksGageRadiant_Stats")
 _radiant(StrikersFlail, "DA_StrikersFlailRadiant", "GE_StrikersFlailRadiant_Stats")

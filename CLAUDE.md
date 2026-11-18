@@ -90,7 +90,7 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
 
 - Where code lives: augments in `augments/` (`base.py`: BuildAugment; `combat.py`: the offensive combat augments and
   the Sunder30 / Shred30 entries; ledger A1-A8), items in `items/` (`base.py`: NoItem, the stats layer, BuildItem, StackingItem, item_name;
-  `debuffs.py`: sunder, shred, burn; `craftables.py`, `radiants.py`, `artifacts.py`,
+  `debuffs.py`: sunder, shred (burn is not simulated: owner); `craftables.py`, `radiants.py`, `artifacts.py`,
   `emblems.py`: Spatula items and plain-stat emblems), traits in `traits/` (one module
   per trait, `base.py`: Buff, NoBuff, BuildTrait). `set19items` and `set19buffs` gather them, so every class is still
   `set19items.<Class>` / `set19buffs.<Class>`; the import order in `set19buffs` is the order traits are offered and
@@ -110,7 +110,7 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   Karthus, Ashe, Viego, Kayle, Lucian, RenataGlasc, Zoe, OlafHeroAugment (hero augment units are separate champions: `roster.json` `hero_augments`);
   traits: Encore, Trickshot, K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats, Heartsteel, Hyperpop, Ionic
   Spark, Prodigy, Pentakill, Composer, Renegade, Classical, Slayer, Choreographer, Jazz, Beach Pop). A debuff a spell applies uses the shared helpers in `items/debuffs.py`
-  (`apply_shred`, `apply_burn`). A new trait is
+  (`apply_shred`, `apply_sunder`). A new trait is
   a module in `traits/` plus its import line in `set19buffs.py`. `worker.js` `PY_FILES` lists every module the
   browser loads; a new module must be added there too (`test_sim_entry.py` checks the `items/` and `traits/` ones). Builds reach the browser through
   the worker (B9): the newest at boot, others when the page's "Game build" picker names one. After changing the

@@ -332,27 +332,16 @@ def test_strikers_flail_four_instances_of_five_percent():
     assert n.dmgMultiplier.stat == pytest.approx(base + 0.15)
 
 
-def burn_rows(item, seconds=15):
+@pytest.mark.parametrize("cls", ["RedBuff", "Morellonomicon", "RedBuffRadiant", "MorellonomiconRadiant"])
+def test_no_burn(cls):
+    # burn is not simulated (owner, 2026-11-18, as set18): the item is its stats, and its name says so
     from set19champs import Draven
+    item = getattr(set19items, cls)()
+    assert item.name.endswith(" (no burn)")
     d = Draven(1, build=load_build(V))
     t = dummy()
-    t.hp.base = 1800
-    Simulator().simulate([item], [], d, [t], seconds)
-    rows = [(round(x * 30), round(dmg[0], 6)) for x, dmg, *_ in d.dmgVector]
-    return d, t, rows
-
-
-def test_burn_one_percent_max_hp_per_second():
-    # GE_Burn: period 1 s, first tick a period after application, true damage BurnWound(1) = 0.01 x max HP, not
-    # boosted by anything (owner: Red Buff's own 3% amp leaves it at 18); one burn per target, renewed by every hit
-    d, t, rows = burn_rows(set19items.RedBuff())
-    burn = round(0.01 * 1800, 6)
-    ticks = [x for x, v in rows if v == burn]
-    first_hit = next(x for x, v in rows if v != burn)
-    assert ticks[0] == first_hit + 30 and all(b - a == 30 for a, b in zip(ticks, ticks[1:]))
-    assert ticks[-1] == first_hit + 30 * len(ticks) and ticks[-1] + 30 > 15 * 30  # burns to the end of the fight
-    d, t, rows = burn_rows(set19items.Morellonomicon())
-    assert any(v == round(0.01 * 1800, 6) for x, v in rows)
+    Simulator().simulate([item], [], d, [t], 6)
+    assert "Burn" not in t.effects and all(x[1][1] != "true" for x in d.dmgVector)
 
 
 def test_last_whisper_and_void_staff_after_the_hit():

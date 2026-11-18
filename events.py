@@ -9,7 +9,7 @@ Moments, each fired where the engine always fired it:
     LAUNCH         an attack releases, or a spell simulates one (Combat.Event.LaunchAttack; G11)
     ONHIT_PRE      before an attack's damage (PreApply): Titanic Hydra, Trickshot
     CRIT           the averaged crit counter passes 1 (I6), before that damage
-    DAMAGE_POST    after each damage instance (PostApply): sunder, shred, burn, True Damage's bonus
+    DAMAGE_POST    after each damage instance (PostApply): sunder, shred, True Damage's bonus
     ONHIT_AFTER    after an attack's damage and its mana: Wit's End, Lich Bane, Hellfire Hatchet
 """
 
@@ -26,7 +26,6 @@ TRAIT = "Damage.Source.Trait"  # engine label: True Damage's bonus, which nothin
 IS_ATTACK = "AppliesOnHit.IsAttack"
 ON_HIT = "OnHitDamage"  # the attack's own hit (not a Trickshot ricochet, which applies no on-hit effects)
 ON_SPELL = "AppliesOnSpell"
-BURN = "Debuff.Burn"
 SIMULATED = "Combat.Event.LaunchAttack.SimulateTriggersOnly"
 TYPES = {"physical": "Damage.Type.Physical", "magical": "Damage.Type.Magic", "true": "Damage.Type.True"}
 
