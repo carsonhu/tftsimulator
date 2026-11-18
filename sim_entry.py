@@ -460,16 +460,29 @@ def _slice_inputs(slice_name, cfg):
     return no_item, []
 
 
+def _row_label(extra):
+    """The row's name: an item's or augment's own; a trait's with its level ("Trickshot 3"), and with its 0/1 flag
+    when the Trait slice runs it both ways (Hitmaker's Big Shot: "Hitmaker 2 (Is Big Shot: no)")."""
+    cls = type(extra)
+    levels = [lvl for lvl in getattr(cls, "levels", []) if lvl]
+    if not isinstance(extra, set19buffs.Buff) or len(levels) < 2:
+        return extra.name
+    label = f"{extra.name} {extra.level}"
+    if _champion_specific_flag(cls):
+        label += f" ({cls.extraParameters().get('Title', 'Flag')}: {'yes' if extra.params else 'no'})"
+    return label
+
+
 def _table_entries(sim_list):
-    """One row per trial: DPS at each time and the ratio against the NoItem row."""
+    """One row per trial: DPS at each time and the ratio against the NoItem row (each row's own numbers: rows can
+    share a name, e.g. a trait at several levels)."""
     entries = []
-    dps_dict = {}
     for idx, sim in enumerate(sim_list):
         entry = {
             "idx": idx,
             "name": sim["Champ"].name,
             "level": sim["Champ"].level,
-            "extra": sim["Extra"].name,
+            "extra": _row_label(sim["Extra"]),
             "extraCls": type(sim["Extra"]).__name__,
             # Which breakpoint a trait row is, so the page can colour its icon
             # by tier. Items are not levelled and report None.
@@ -478,20 +491,18 @@ def _table_entries(sim_list):
         xs, ys = _cumulative_points(sim["Results"])
         entry["dps"] = {str(t): _dps_at(xs, ys, t) for t in DPS_TIMES}
         entries.append(entry)
-        key = (entry["name"], entry["level"], entry["extra"])
-        dps_dict[key] = {t: entry["dps"][str(t)] for t in DPS_TIMES}
 
     for entry in entries:
-        base = dps_dict.get((entry["name"], entry["level"], "NoItem"))
-        own = dps_dict[(entry["name"], entry["level"], entry["extra"])]
+        base = next((e["dps"] for e in entries if (e["name"], e["level"], e["extra"])
+                     == (entry["name"], entry["level"], "NoItem")), None)
+        own = entry["dps"]
         entry["ratio"] = {}
         for t in DPS_TIMES:
+            t = str(t)
             if base is not None:
-                entry["ratio"][str(t)] = round(
-                    own[t] / base[t] if base[t] != 0 else 0, 2
-                )
+                entry["ratio"][t] = round(own[t] / base[t] if base[t] != 0 else 0, 2)
             else:
-                entry["ratio"][str(t)] = 0
+                entry["ratio"][t] = 0
 
     entries.sort(key=lambda e: e["ratio"]["25"], reverse=True)
     return entries

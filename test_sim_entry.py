@@ -105,3 +105,16 @@ def test_the_number_of_targets_reaches_an_area_champion_only():
     assert dps('Varus', 'Craftable', 'NoItem', {'targets': 5}) > dps('Varus', 'Craftable', 'NoItem', None) \
         == dps('Varus', 'Craftable', 'NoItem', {'targets': 3}) > dps('Varus', 'Craftable', 'NoItem', {'targets': 1})
     assert dps('Draven', 'Artifact', 'Titanic Hydra', {'targets': 7}) == dps('Draven', 'Artifact', 'Titanic Hydra', None)
+
+
+def test_trait_rows_name_their_level_and_use_their_own_numbers():
+    # owner, 2026-11-18: "Trickshot 2", "Trickshot 3", ...; each row's ratio is its own DPS over NoItem's (rows used to
+    # share one by name, so every level of a trait showed the last one's)
+    out = json.loads(sim_entry.run_json(json.dumps(cfg(champ='Gnar', level=1, slice='Trait', t=30,
+                                                       buffs=[['Pentakill', 0, 0], ['Trickshot', 0, 0]]))))
+    rows = {r['extra']: r for r in out['rows']}
+    assert {'Pentakill 3', 'Pentakill 5', 'Pentakill 7', 'Trickshot 2', 'Trickshot 3', 'Trickshot 4', 'NoItem'} == set(rows)
+    base = rows['NoItem']['dps']['25']
+    for r in rows.values():
+        assert r['ratio']['25'] == round(r['dps']['25'] / base, 2)
+    assert len({rows[f'Pentakill {n}']['ratio']['25'] for n in (3, 5, 7)}) == 3
