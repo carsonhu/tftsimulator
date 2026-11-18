@@ -187,7 +187,7 @@ class TitanicHydra(BuildItem):
     it, whatever the page's number of targets (owner, 2026-11-18)."""
     KEY = "DA_Artifact_TitanicHydra"
     STATS = ("GE_Artifact_TitanicHydra_Stats",)
-    display_name = item_name(KEY)
+    display_name = item_name(KEY) + " (1 adjacent)"  # owner, 2026-11-18: one enemy next to the target assumed
 
     LISTENS = {ONHIT_PRE: frozenset()}
 

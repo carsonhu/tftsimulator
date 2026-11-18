@@ -104,7 +104,7 @@ def test_the_number_of_targets_reaches_an_area_champion_only():
 
     assert dps('Varus', 'Craftable', 'NoItem', {'targets': 5}) > dps('Varus', 'Craftable', 'NoItem', None) \
         == dps('Varus', 'Craftable', 'NoItem', {'targets': 3}) > dps('Varus', 'Craftable', 'NoItem', {'targets': 1})
-    assert dps('Draven', 'Artifact', 'Titanic Hydra', {'targets': 7}) == dps('Draven', 'Artifact', 'Titanic Hydra', None)
+    assert dps('Draven', 'Artifact', 'Titanic Hydra (1 adjacent)', {'targets': 7}) == dps('Draven', 'Artifact', 'Titanic Hydra (1 adjacent)', None)
 
 
 def test_trait_rows_name_their_level_and_use_their_own_numbers():
