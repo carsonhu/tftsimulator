@@ -123,6 +123,19 @@ time (items, then traits, then champions), diffing the tables after each.
 **Done when:** `STAT_MAP`, `BONUS_MULTIPLIERS`, `FINAL_OVERRIDES`, `Aspd.override` and `AD.addMultiplier` are gone;
 the tables are unchanged.
 
+**Done (2026-11-17)**, in four commits, each diffed: `Attribute` with an adapter (9c367df), items (2c25a2d), traits
+(b978f31), champions and the page's inputs, adapter removed (48fd09c). `stats.Attribute` holds (channel, op, value,
+key) modifiers and evaluates the game's formula; every champion stat is one, in game units. Items apply build
+modifiers with their own op and channel; Stack-scaled item effects and K/DA's decaying AS are one keyed modifier
+re-sized as they change. Also removed: the unused set18 statuses, `Champion.addStats` and the per-item stat fields.
+Kept on purpose, so no number moves: Rapid Firecannon's amp stays additive (owner question in
+docs/OPEN-QUESTIONS.md), the role's ManaMax "at least" still clamps the base, the armor/MR floor at 0 is an
+explicit bound, and the old `Stat` class remains only for `Attack.multiplier` and the pierce stats (step 4). Tests
+that read the old units (AS and AD bonuses in percent points, `armor.mult`, `as_cap`) now read the same numbers
+from the attribute, and the two tests of the removed refusals check the formula instead. Tables: identical with
+`--rel 1e-9`; summing bonuses as fractions instead of percent points moves raw damage numbers by at most 8.9e-16
+relative, never a shown one. A run with every page bonus box set matched step 2's code the same way.
+
 ### 4. Timed effects and damage events modelled on the game's
 
 **Effects now:** burn, sunder, shred, Striker's Flail, Titan's stacks, Ionic Spark letters and Swiftstriker stacks
@@ -186,6 +199,6 @@ sliders become layout settings.
 | 0. Durable copy of the tests; table-diff script | done: `tools/table_dump.py`; tests committed on branch `set19` |
 | 1. Delete set18 leftovers | done (2026-11-17) |
 | 2. Split modules, decorator registration | done (2026-11-17) |
-| 3. Game-shaped attributes | not started |
+| 3. Game-shaped attributes | done (2026-11-17) |
 | 4. Timed effects and damage events | not started |
 | 5. Dummy layout | not started |

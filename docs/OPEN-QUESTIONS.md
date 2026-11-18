@@ -111,4 +111,5 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Trickshot ricochets' on-hit effects (at RichochetDamage^k) | not modelled; no listed item has an on-hit effect yet | B12 |
 | True Damage's Prismatic tier, Heartsteel's Prismatic car, Ionic Spark's (10) fan waves, the other Heartsteel members' Bias upgrades (Kayn, Alune, Aphelios: not implemented champions) | not implemented | - |
 | True Damage's B-Side | out of scope: it gives no combat power (owner, 2026-11-17) | B19 |
+| Rapid Firecannon's damage amp | x1.05 joins the other amps additively (1 + others + 0.05), as before restructure step 3; the game's formula (MultiplyAdditive on OutgoingDamageMultiplier) would multiply them: (1 + others) x 1.05. Only differs when another amp is active | owner decision (or a damage number with Rapid Firecannon plus another amp) | I1 |
 | Blighting Jewel | not in the table: its flat -3 MR per magic hit stacks for the whole combat on dummies that never die, which overstates it (owner, 2026-11-17). Needs a decision on how to model flat MR shred (a cap, a target that changes, an average) | docs/ITEMS.md |

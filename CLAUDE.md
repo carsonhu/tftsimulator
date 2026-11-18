@@ -116,7 +116,11 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   `postAttack`, `onCrit`, `preAbility`, `postAbility`,
   `onDealDamage`, ...). A trait's parameter (`extraParameters`) is a number, a named choice (`Options`) or tick
   boxes (`Flags`: bit i is Flags[i]; `TeamFlags` limits the Team Traits panel to the leading ones; Heartsteel).
-  Units differ per stat (item `crit=20` is 20%; `omnivamp=0.15` is a fraction; `ad`, `ap`, `aspd` are percent points).
+  Stats are `stats.Attribute`s in game units, changed only with modifiers: `champion.aspd.modify("MultiplyAdditive",
+  1.1)`, `champion.ap.modify("+", 0.2)`, keyed when the effect is later removed or re-sized. AD and AP are
+  multipliers from 1.0, AS is attacks per second, crit / crit damage / omnivamp / amp are fractions; ops and
+  channels are the build's (`+` AddBase, MultiplyAdditive, MultiplyCompound, AddFinal, `=` Override, bounds), and
+  `champion.attribute("AttackSpeed")` finds one by the game's name (ledger I1, I5).
 - Tests (committed on `set19`): `python -m pytest -q` with set18's venv (`../set18/.venv/Scripts/python`) until this
   repo has its own.
 
