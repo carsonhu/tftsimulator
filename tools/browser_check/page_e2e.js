@@ -36,13 +36,18 @@ const puppeteer = require("puppeteer-core");
   // The champion's own traits are preselected in the buff bar (off); turning one up must change the results.
   const buffRows = () => page.evaluate(() => [...document.querySelectorAll(".buff-row")].map((r) => {
     const [buff, level] = r.querySelectorAll("select");
-    return { buff: buff.value, level: level.value, levels: [...level.options].map((o) => o.value) };
+    const param = r.querySelector("input[type=number]");
+    return { buff: buff.value, level: level.value, levels: [...level.options].map((o) => o.value),
+             param: r.querySelectorAll("label")[2].style.visibility === "hidden" ? null : param.value,
+             paramTitle: r.querySelectorAll(".col-label")[2].textContent };
   }));
   const bar = await buffRows();
   console.log("buff bar:", JSON.stringify(bar));
-  const idx = bar.findIndex((b) => b.buff === "Encore");
+  // the default champion's own implemented trait (Draven: Trickshot)
+  const idx = bar.findIndex((b) => b.buff !== "NoBuff");
+  const trait = idx < 0 ? null : bar[idx].buff;
   if (idx < 0) {
-    console.log("FAIL Encore not preselected");
+    console.log("FAIL no trait of the champion preselected");
   } else {
     const last = bar[idx].levels[bar[idx].levels.length - 1];
     await page.evaluate((i, v) => {
@@ -55,10 +60,25 @@ const puppeteer = require("puppeteer-core");
         const r = document.querySelectorAll("#resultsTable tr")[1];
         return r && r.textContent.replace(/\s+/g, " ").trim() !== before;
       }, { timeout: 60000 }, first.rows[1]);
-      console.log("Encore " + last + ":", JSON.stringify((await read()).rows));
+      console.log(trait + " " + last + ":", JSON.stringify((await read()).rows));
     } catch (e) {
-      console.log("FAIL results did not change after setting Encore " + last);
+      console.log("FAIL results did not change after setting " + trait + " " + last);
     }
+  }
+  // Senna: her traits Hitmaker (with its "Is Big Shot" flag, default 1) preselected
+  await page.evaluate(() => {
+    const sel = document.querySelector("#champ");
+    sel.value = "Senna";
+    sel.dispatchEvent(new Event("change"));
+  });
+  try {
+    await page.waitForFunction(() => [...document.querySelectorAll(".buff-row select")].some((s) => s.value === "Hitmaker"),
+                               { timeout: 30000 });
+    const hm = (await buffRows()).find((b) => b.buff === "Hitmaker");
+    console.log("Senna Hitmaker row:", JSON.stringify(hm));
+    if (hm.paramTitle !== "Is Big Shot" || hm.param !== "1") console.log("FAIL Hitmaker's Is Big Shot flag");
+  } catch (e) {
+    console.log("FAIL Hitmaker not preselected for Senna");
   }
   console.log("console errors:", errors.length ? errors : "none");
   await browser.close();

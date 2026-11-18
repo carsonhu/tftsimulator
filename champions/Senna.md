@@ -82,7 +82,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | the blast applies GE_SimulateLaunchAttack at cast start, under the mana lock (G11): not modelled | script |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | cancels Combat.Attacking (T4) | script |
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | implemented from the script (D1): blast Calc1 + mark, detonation 1.5 x Calc1 + 8% damage amp; damage not yet checked | script |
-| Q14 | Passives and other mechanics that need modelling | see ability text | mark/detonate alternation and the stacking amp (D1); True Damage, Hitmaker not implemented | D1 |
+| Q14 | Passives and other mechanics that need modelling | see ability text | mark/detonate alternation and the stacking amp (D1); Hitmaker implemented (B18); True Damage not implemented | D1 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-17 | D1 |
 
 ## Evidence log
