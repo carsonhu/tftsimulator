@@ -1216,7 +1216,7 @@ async function updateStatsPanel(gen) {
     // carrying an input isn't stranded below the one that doesn't.
     "Mana Regen: " + b(r2(s.manaRegen.stat)) + " = " + s.manaRegen.base + " + " + g(r2(s.manaRegen.add) + " Mana"),
     "Mana: " + b(r2(s.curMana)) + " / " + b(r2(s.fullMana)),
-    "Cast Time: " + b(s.castTime + " seconds"),
+    "Cast Time: " + b(r3(s.castTime) + " seconds"),
   ];
   const rightText = [
     "AS: " + b(r3(s.aspd.stat)) + " = " + s.aspd.base + " * (1 + " + g(r4(s.aspd.add) + " AS") + ")",
