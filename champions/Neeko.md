@@ -122,3 +122,7 @@ to within 0.3 mana at 9 checked frames).
 - Known gap vs the VOD: the engine's first cast is at tick 174 from combat start; the VOD's at ~177-178 frames.
   Attacks and the cast lock match, so the difference is the regen grid's phase (G17: the engine pays regen from
   tick 0, the VOD's grid started ~4.5 frames after the banner). Left open until more units show the phase.
+- 2026-11-17: without Encore the engine skips the three Encore missiles. The game still fires them (the script plays
+  the Encore projectile chronos on every cast) and applies `GE_Neeko19_Damage` at effectiveness 0, i.e. three 0-damage
+  hits. Same damage either way; it would matter only for an effect that counts spell hits regardless of size. If one
+  is implemented, deal the 0 hits instead of skipping them (and see E20).
