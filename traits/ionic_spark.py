@@ -42,14 +42,14 @@ class IonicSpark(BuildTrait):
         if tier == 0 or self.KEY not in (champion.data.d.get("trait_keys") or []):
             return input_
         period = champion.trait_value(self.KEY, "LetterFrequency")
-        letter = champion.trait_value(self.KEY, "LetterASGain") * 100
+        letter = 1 + champion.trait_value(self.KEY, "LetterASGain")  # one MultiplyAdditive instance per letter
         for k in range(1, self.ACTIONS):
-            champion.schedule_tick(champion.tick + ticks_up(k * period), lambda: champion.aspd.addStat(letter))
+            champion.schedule_tick(champion.tick + ticks_up(k * period), lambda: champion.aspd.modify("MultiplyAdditive", letter))
         if tier >= 2 and self.GIFTS[self.params] != "None":
             attack = champion.role.key.startswith("Attack")
             stat = champion.bonus_ad if attack else champion.ap
-            gift = champion.trait_value(self.KEY, "PersonalGiftAD" if attack else "PersonalGiftAP") * 100
-            champion.schedule_tick(champion.tick + ticks_up(self.params * period), lambda: stat.addStat(gift))
+            gift = champion.trait_value(self.KEY, "PersonalGiftAD" if attack else "PersonalGiftAP")
+            champion.schedule_tick(champion.tick + ticks_up(self.params * period), lambda: stat.modify("+", gift))
         return input_
 
 

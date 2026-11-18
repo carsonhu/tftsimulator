@@ -42,27 +42,28 @@ class KDA(BuildTrait):
         if not self._member(champion):
             return
         m = self._boost(champion)
-        champion.fullMana.mult *= 1 - self.row(champion, "ManaReduction") * m
+        # x (1 - reduction) on max mana after every Channel1 change (Dawncore's too), as before step 3
+        champion.fullMana.modify("MultiplyCompound", 1 - self.row(champion, "ManaReduction") * m, channel=2)
 
     def performAbility(self, phase, time, champion, input_=0):
         if not self._member(champion) or champion.trait_tier(self.KEY) < 3:
             return input_
         m = self._boost(champion)
-        bonus = self.row(champion, "DecayingAS") * m * 100  # attack speed points
+        bonus = self.row(champion, "DecayingAS") * m  # the AS bonus at the trigger, decaying to 0
         duration = self.row(champion, "ASDuration")
         steps = int(round(duration / self.DECAY_PERIOD))
         triggers = [0.0]
         if self.row(champion, "TriggerOnCombatStart") != 1:
             triggers = []
         triggers.append(self.row(champion, "MidCombatTrigger"))
-        for t0 in triggers:
+        for n, t0 in enumerate(triggers):
+            key = f"KDA decaying AS {id(self)} {n}"  # one effect per trigger, its size stepped down
             for j in range(steps + 1):
                 # the bonus held from step j to step j + 1; at the end of the duration it is gone
-                before = bonus * (1 - (j - 1) / steps) if j else 0.0
-                after = bonus * (1 - j / steps) if j < steps else 0.0
-                delta = after - before
+                held = bonus * (1 - j / steps) if j < steps else 0.0
                 champion.schedule_tick(champion.tick + ticks_up(t0 + j * self.DECAY_PERIOD),
-                                       lambda d=delta: champion.aspd.addStat(d))
+                                       lambda v=held, k=key: champion.aspd.modify("MultiplyAdditive", 1 + v, key=k)
+                                       if v else champion.aspd.remove(k))
         return input_
 
 

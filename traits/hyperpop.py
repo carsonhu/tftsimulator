@@ -27,7 +27,7 @@ class Hyperpop(BuildTrait):
         if champion.trait_value(self.KEY, "PercentIncreasePerLevel") != 0:
             raise BuildDataError(f"{self.KEY}: PercentIncreasePerLevel is not 0 in build {champion.build.version}: "
                                  f"Hype now scales the stats (needs a Hype-level parameter)")
-        champion.aspd.addStat(champion.trait_value(self.KEY, "BaseAttackSpeed") * 100)
+        champion.aspd.modify("MultiplyAdditive", 1 + champion.trait_value(self.KEY, "BaseAttackSpeed"))
 
 
 Hyperpop.levels = [0] + Hyperpop.breakpoints()

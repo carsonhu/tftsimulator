@@ -22,7 +22,7 @@ class Arcanist(BuildTrait):
         if champion.trait_tier(self.KEY) == 0:
             return
         member = self.KEY in (champion.data.d.get("trait_keys") or [])
-        champion.ap.addStat(champion.trait_value(self.KEY, "ArcanistAP" if member else "NonArcanistAP") * 100)
+        champion.ap.modify("+", champion.trait_value(self.KEY, "ArcanistAP" if member else "NonArcanistAP"))
 
 
 Arcanist.levels = [0] + Arcanist.breakpoints()

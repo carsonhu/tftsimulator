@@ -24,12 +24,12 @@ class Heartsteel(BuildTrait):
     """
     KEY = "DA_Heartsteel19"
     display_name = "Heartsteel"
-    # tick box -> (champion, curve row, where it lands); AD, AP and AS are percent points, crit a fraction (I1)
+    # tick box -> (champion, curve row, attribute, op); the row is the bonus: + v, or MultiplyAdditive (1 + v)
     MEMBERS = [
-        ("Kayn", "DA_Kayn19", "KaynAD", lambda c, v: c.bonus_ad.addStat(v * 100)),
-        ("Alune", "DA_Alune19", "AluneAP", lambda c, v: c.ap.addStat(v * 100)),
-        ("Aphelios", "DA_Aphelios19", "ApheliosAS", lambda c, v: c.aspd.addStat(v * 100)),
-        ("Ezreal", "DA_Ezreal19", "EzrealCritChance", lambda c, v: c.crit.addStat(v)),
+        ("Kayn", "DA_Kayn19", "KaynAD", "AttackDamage", "+"),
+        ("Alune", "DA_Alune19", "AluneAP", "AbilityPower", "+"),
+        ("Aphelios", "DA_Aphelios19", "ApheliosAS", "AttackSpeed", "MultiplyAdditive"),
+        ("Ezreal", "DA_Ezreal19", "EzrealCritChance", "CritChance", "+"),
     ]
     BIAS = len(MEMBERS)  # the bit after the members
 
@@ -51,10 +51,11 @@ class Heartsteel(BuildTrait):
             return
         member = self.KEY in (champion.data.d.get("trait_keys") or [])
         stan = champion.trait_value(self.KEY, "StanPercentIncrease") if member else 0
-        for bit, (name, key, row, add) in enumerate(self.MEMBERS):
+        for bit, (name, key, row, attr, op) in enumerate(self.MEMBERS):
             if not (self.params >> bit) & 1 and getattr(champion, "KEY", None) != key:
                 continue
-            add(champion, champion.trait_value(self.KEY, row) * (1 + stan))
+            v = champion.trait_value(self.KEY, row) * (1 + stan)
+            champion.attribute(attr).modify(op, 1 + v if op == "MultiplyAdditive" else v)
         champion.heartsteel_bias = member and tier >= 2 and bool((self.params >> self.BIAS) & 1)
 
 

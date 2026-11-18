@@ -24,15 +24,15 @@ class Swiftstriker(BuildTrait):
     def applyStats(self, champion):
         super().applyStats(champion)
         if champion.trait_tier(self.KEY) > 0:
-            champion.aspd.addStat(champion.trait_value(self.KEY, "TeamAS") * 100)
+            champion.aspd.modify("MultiplyAdditive", 1 + champion.trait_value(self.KEY, "TeamAS"))
 
     def performAbility(self, phase, time, champion, input_=0):
         if self.KEY not in (champion.data.d.get("trait_keys") or []) or champion.trait_tier(self.KEY) == 0:
             return input_
         period = champion.trait_value(self.KEY, "Period")
-        bonus = champion.trait_value(self.KEY, "SwiftieAS") * 100
+        bonus = 1 + champion.trait_value(self.KEY, "SwiftieAS")  # one MultiplyAdditive instance per stack
         for k in range(1, int(champion.trait_value(self.KEY, "Stacks")) + 1):
-            champion.schedule_tick(champion.tick + ticks_up(k * period), lambda: champion.aspd.addStat(bonus))
+            champion.schedule_tick(champion.tick + ticks_up(k * period), lambda: champion.aspd.modify("MultiplyAdditive", bonus))
         return input_
 
 

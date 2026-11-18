@@ -27,9 +27,9 @@ class Hitmaker(BuildTrait):
         super().applyStats(champion)
         if champion.trait_tier(self.KEY) == 0 or self.KEY not in (champion.data.d.get("trait_keys") or []):
             return
-        champion.bonus_ad.addStat(champion.trait_value(self.KEY, "BaseAD") * 100)
+        champion.bonus_ad.modify("+", champion.trait_value(self.KEY, "BaseAD"))
         if self.params:
-            champion.bonus_ad.addStat(champion.trait_value(self.KEY, "BonusAD") * 100)
+            champion.bonus_ad.modify("+", champion.trait_value(self.KEY, "BonusAD"))
 
 
 Hitmaker.levels = [0] + Hitmaker.breakpoints()

@@ -55,8 +55,8 @@ class Illbeats(BuildTrait):
         member = self.KEY in (champion.data.d.get("trait_keys") or [])
         share = 1 if member else champion.trait_value(self.KEY, "SelflessStatMult")
         ad, ap = self.ticks(champion)
-        champion.bonus_ad.addStat(self.channel_value(champion, "PercentAD", ad) * share * 100)
-        champion.ap.addStat(self.channel_value(champion, "PercentAP", ap) * share * 100)
+        champion.bonus_ad.modify("+", self.channel_value(champion, "PercentAD", ad) * share)
+        champion.ap.modify("+", self.channel_value(champion, "PercentAP", ap) * share)
 
 
 Illbeats.levels = [0] + Illbeats.breakpoints()
