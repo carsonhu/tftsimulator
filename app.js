@@ -368,6 +368,12 @@ function buildStaticControls() {
     onConfigChanged();
   });
 
+  // Takedowns this game: Cappa Juice's Hats.
+  $("takedowns").onchange = () => {
+    state.cfg.takedowns = clampInput($("takedowns"));
+    onConfigChanged();
+  };
+
   // Item selectors.
   const itemRows = $("itemRows");
   for (let n = 0; n < cat.defaults.numItems; n++) {

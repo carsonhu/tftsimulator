@@ -67,4 +67,34 @@ Every offensive craftable has its Radiant in the Radiant table (`set19items.radi
 script, with the Radiant's key (the base item's `upgrade`), stats effect, rows and script effects. Status follows the
 base item's; nothing is VOD-checked yet.
 
-Artifacts, emblems and the rest are added when needed.
+## Artifacts
+
+The Artifact table (`set19items.artifacts`, ledger I10). Nothing is VOD-checked yet.
+
+| Item | Status | Notes |
+|---|---|---|
+| Infinity Force | implemented (stats) | No script. |
+| Silvermere Dawn | implemented (stats) | AS locked at 0.5 (Channel2 Override, I10); the stun does nothing to dummies. |
+| Rapid Firecannon | implemented (stats) | +1 range (longer flights), damage amp x1.05; +range per kill never happens. |
+| Fishbones | implemented (stats) | +2 range; random targets change nothing among identical dummies. |
+| Gold Collector | implemented (stats) | The execute needs a target below 12% health: dummies never lose health (G9). |
+| Luden's Tempest | implemented (stats) | Overkill damage needs a kill (G9). |
+| Horizon Focus | implemented (stats) | Needs a stun: no implemented champion stuns. |
+| Seeker's Armguard | implemented (stats) | Takedown stats need kills (G9). |
+| Gambler's Blade | implemented (stats) | +30% AS from 30 gold in the bank (owner, I10). |
+| Cappa Juice | implemented (stats) | +1% AD/AP per Hat = the page's Total takedowns (owner, I10). |
+| Hullcrusher | implemented (script read) | 400 HP, 10% AD/AP: no adjacent ally assumed (owner, I10). |
+| Statikk Shiv | implemented (script read) | Every 3rd release: 6 x (15 + 35% bonus AP) magic split over min(enemies, 6) bolts; not boosted (I10). |
+| Lich Bane | implemented (script read) | First hit after each cast: ProcDamage by stage, magic; not boosted (I10). |
+| Wit's End | implemented (script read) | Every hit: OnHitDamage by stage, magic; not boosted; the heal does nothing here (I10). |
+| Titanic Hydra | implemented (script read) | Every hit: 2% max HP + 4% AD physical to the target and one more dummy; not boosted (I10). |
+| Hellfire Hatchet | implemented (script read) | Every hit: 3% max HP physical; AS per missing health is 0 here (I10). |
+| Flickerblades | implemented (script read) | +4% AS per release, +2% AD/AP every 3rd (I10). |
+| Dawncore | implemented (script read) | Max mana -10, then -5% per cast (min 15), after each cast's cost (I10). |
+| Manazane | implemented (script read) | After the first cast, 110 mana in 2.2 steps every 0.1 s, paused while mana is locked (I10). |
+| Talisman of Ascension | implemented (script read) | At 22 s: +120% damage amp, +12 mana regen (I10). |
+| Blighting Jewel | not listed | Flat MR shred needs a modelling decision (owner); see docs/OPEN-QUESTIONS.md. |
+| Death's Defiance, Mittens, Mogul's Mail, The Indomitable, Lightshield Crest, Zhonya's Paradox, Void Gauntlet, Aegis of Dawn, Aegis of Dusk, Forbidden Idol | out of scope | Defensive or support: no damage of their own against dummies. |
+| Eternal Pact | out of scope | Depends on an ally's behaviour (owner). |
+
+Emblems and the rest are added when needed.

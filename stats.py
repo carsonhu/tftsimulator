@@ -113,9 +113,12 @@ class Aspd(Stat):
     def __init__(self, base, multModifier, addModifier):
         super().__init__(base, multModifier, addModifier)
         self.as_cap = 5
+        self.override = None  # an AttackSpeed Override modifier (Silvermere Dawn: locked at 0.5)
 
     @property
     def stat(self):
+        if self.override is not None:
+            return self.override
         return min(self.mult * self.base * (1 + self.add / 100), self.as_cap)
 
 

@@ -98,6 +98,9 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Last Whisper / Void Staff | x0.7 armor / MR from the hit after the first, for 3 s / 5 s after the latest hit | a holder's damage numbers on one target: 1st hit vs 2nd | I7 |
 | Kraken's Fury stacks | +3.5% AD per attack release (simulated attacks count), 15 max, then +15% AS | panel AD % of a holder over its first attacks (and a cast) | docs/ITEMS.md |
 | Striker's Flail stacking | separate 5 s instances of +5% damage amp, 4 at most | the damage-amp line of a crit carrier's panel | I6 |
+| Titanic Hydra's splash | the target and one more dummy (1 hex apart) | a Hydra holder's hit on a target with two neighbours | I10 |
+| Lich Bane on a ranged holder | procs on the first hit after the release that follows the cast | a ranged Lich Bane holder's damage numbers after a cast | I10 |
+| Dawncore's per-cast cut | 5% of max mana after each cast's cost (the next cast is cheaper) | the max mana a Dawncore holder shows after each cast | I10 |
 | Spear of Shojin's mana | its 5 mana per attack is paid with the role's attack mana, at the same moment | a Shojin holder's mana steps (+12 for a caster) | I3 |
 
 ## No clip needed
@@ -108,3 +111,4 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Trickshot ricochets' on-hit effects (at RichochetDamage^k) | not modelled; no listed item has an on-hit effect yet | B12 |
 | True Damage's Prismatic tier, Heartsteel's Prismatic car, Ionic Spark's (10) fan waves, the other Heartsteel members' Bias upgrades (Kayn, Alune, Aphelios: not implemented champions) | not implemented | - |
 | True Damage's B-Side | out of scope: it gives no combat power (owner, 2026-11-17) | B19 |
+| Blighting Jewel | not in the table: its flat -3 MR per magic hit stacks for the whole combat on dummies that never die, which overstates it (owner, 2026-11-17). Needs a decision on how to model flat MR shred (a cap, a target that changes, an average) | docs/ITEMS.md |
