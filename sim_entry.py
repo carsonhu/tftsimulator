@@ -24,6 +24,7 @@ import set19champs
 import set19items
 import sim_core
 from buildstore import list_builds, load_build
+from layout import Layout
 from helpers import buff_display_map, buff_display_names, item_display_map
 from simulator import Simulator
 
@@ -238,6 +239,7 @@ def get_catalog():
             "duration": 30,
             "numItems": 3,
             "numBuffs": {"min": 1, "max": 10, "default": 2},
+            "layout": {"adjacent": Layout().adjacent, "two_hex": Layout().two_hex},
         },
         "dpsTimes": DPS_TIMES,
     }
@@ -252,7 +254,7 @@ def _build_champion(cfg):
 
     cfg = {
       "champ": "Ahri", "level": 1,
-      "num_targets": int|null, "num_extra_targets": int|null,
+      "layout": {"adjacent": 1, "two_hex": 1},     # enemies next to the target / 2 hexes from it (layout.py)
       "takedowns": 0,
       "bonus": {"ad","ap","as","manaregen","mpa","dmgamp","crit","critdmg"},
       "stage": "4-1", "tactician_level": 4,
@@ -264,13 +266,6 @@ def _build_champion(cfg):
     }
     """
     champ = _champion_class(cfg)(int(cfg["level"]), build=_build(cfg))
-
-    # The sliders only exist for champs whose defaults are non-zero, so a
-    # stored value is only applied where the page would have shown a slider.
-    if champ.num_targets > 0 and cfg.get("num_targets") is not None:
-        champ.num_targets = int(cfg["num_targets"])
-    if champ.num_extra_targets > 0 and cfg.get("num_extra_targets") is not None:
-        champ.num_extra_targets = int(cfg["num_extra_targets"])
 
     champ.takedowns = int(cfg.get("takedowns", 0))
 
@@ -322,6 +317,13 @@ def _champion_class(cfg):
     if cfg["champ"] not in set19champs.champ_list:
         raise KeyError(f'{cfg["champ"]} is not a Set 19 champion in set19champs.champ_list')
     return getattr(set19champs, cfg["champ"])
+
+
+def _layout(cfg):
+    """Where the dummies stand: the page's 'Enemies next to the target' and 'Enemies 2 hexes away' (layout.py)."""
+    lay = cfg.get("layout") or {}
+    default = Layout()
+    return Layout(int(lay.get("adjacent", default.adjacent)), int(lay.get("two_hex", default.two_hex)))
 
 
 def _build_enemy(cfg):
@@ -524,7 +526,8 @@ def run_slice(cfg):
     frame_rate = int(cfg.get("frame_rate", 30))
 
     items, buffs = _slice_inputs(slice_name, cfg)
-    sim_list = sim_core.do_experiment_one_extra(champ, enemy, items, buffs, duration, frame_rate)
+    sim_list = sim_core.do_experiment_one_extra(champ, enemy, items, buffs, duration, frame_rate,
+                                                layout=_layout(cfg))
     rows = _table_entries(sim_list)
 
     timelines = {
@@ -553,16 +556,14 @@ def _panel(attr, kind="flat"):
 
 
 def get_champ_info(cfg):
-    # UI hints come from a fresh instance so slider defaults are the champ's
-    # own values, not whatever the config already overrode them to.
+    # UI hints come from a fresh instance so the default traits are the champ's
+    # own, not whatever the config already holds.
     fresh = _champion_class(cfg)(int(cfg["level"]), build=_build(cfg))
     info = {
         "defaultTraits": {
             "classNames": list(fresh.default_traits),
             "displayNames": buff_display_names(fresh.default_traits),
         },
-        "numTargets": fresh.num_targets,
-        "numExtraTargets": fresh.num_extra_targets,
     }
 
     # The stat panel shows the configured champion *after* item/buff static

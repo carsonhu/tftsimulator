@@ -87,7 +87,7 @@ The Artifact table (`set19items.artifacts`, ledger I10). Nothing is VOD-checked 
 | Statikk Shiv | implemented (script read) | Every 3rd release: 6 x (15 + 35% bonus AP) magic split over min(enemies, 6) bolts; not boosted (I10). |
 | Lich Bane | implemented (script read) | First hit after each cast: ProcDamage by stage, magic; not boosted (I10). |
 | Wit's End | implemented (script read) | Every hit: OnHitDamage by stage, magic; not boosted; the heal does nothing here (I10). |
-| Titanic Hydra | implemented (script read) | Every hit: 2% max HP + 4% AD physical to the target and one more dummy; not boosted (I10). |
+| Titanic Hydra | implemented (script read) | Every hit: 2% max HP + 4% AD physical to the target and every enemy next to it (the dummy layout); not boosted (I10). |
 | Hellfire Hatchet | implemented (script read) | Every hit: 3% max HP physical; AS per missing health is 0 here (I10). |
 | Flickerblades | implemented (script read) | +4% AS per release, +2% AD/AP every 3rd (I10). |
 | Dawncore | implemented (script read) | Max mana -10, then -5% per cast (min 15), after each cast's cost (I10). |

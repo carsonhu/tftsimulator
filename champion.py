@@ -1,6 +1,7 @@
 import heapq
 import math
 
+import layout
 from effects import expire_effects
 from events import (CRIT, DAMAGE_POST, IS_ATTACK, LAUNCH, ON_HIT, ON_SPELL, ONHIT_AFTER, ONHIT_PRE, SIMULATED,
                     UNIT, CombatEvent, damage_tags)
@@ -101,6 +102,7 @@ class Champion(FastDeepCopy):
 
         self.effects = {}  # timed effects on this unit: name -> effects.ActiveEffect
         self.opponents = []
+        self.hex = None  # (q, r) on the dummy layout, set when the fight starts (layout.py)
         self.dmgVector = []
         self.dmgDealt = 0 # no need to serialize
         self.alive = True
@@ -113,8 +115,6 @@ class Champion(FastDeepCopy):
         self.tactician_level = 4
         self.first_takedown = 5  # time of first takedown
         self.stage = 2  # 2, 3, 4, 5, 6
-        self.num_targets = 0
-        self.num_extra_targets = 0
         self.item_count = 0  # number of craftables
 
         self.critCounter = 0
@@ -157,8 +157,6 @@ class Champion(FastDeepCopy):
             self.first_takedown,
             self.takedowns,
             self.stage,
-            self.num_targets,
-            self.num_extra_targets,
             self.item_count,
         )
         # return stat_tuple
@@ -200,6 +198,19 @@ class Champion(FastDeepCopy):
     @property
     def ranged(self):
         return self.attack_range > 1
+
+    # ---------------------------------------------------------------- the dummy layout (layout.py)
+    def target_hexes(self, target=None):
+        """Hexes from this unit to `target` (its attack target by default): projectile flights (G4)."""
+        return layout.distance(self, self.opponents[0] if target is None else target)
+
+    def nearby(self, target, hexes):
+        """The enemies within `hexes` of `target`, not counting it, nearest first."""
+        return layout.around(target, hexes, self.opponents)
+
+    def ricochet(self, previous, hit):
+        """(next target, hexes) for a ricochet from `previous` that has already hit `hit` (B12)."""
+        return layout.ricochet(previous, hit, self.opponents)
 
     # ---------------------------------------------------------------- casting and mana
     def canCast(self, time=None):
@@ -386,7 +397,7 @@ class Champion(FastDeepCopy):
             self.attack_start_tick = max(tick + 1, self.release_tick - self.timing.release_ticks(
                 self.period_ticks(), crit=self._animation_crit()))
             self._paid = False
-        flight = self.timing.flight_ticks(self.attack_range)
+        flight = self.timing.flight_ticks(self.target_hexes())
 
         def land():
             self.numAttacks += 1

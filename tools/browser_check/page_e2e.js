@@ -118,6 +118,28 @@ const puppeteer = require("puppeteer-core");
   } catch (e) {
     console.log("FAIL Heartsteel row for Ezreal: " + e.message);
   }
+  // The dummy layout (layout.py): two sliders for every champion, default 1 and 1; more enemies next to the
+  // target means more of Ezreal's splash
+  try {
+    const layout = () => page.evaluate(() => ["layoutAdjacent", "layoutTwoHex"].map(
+      (id) => document.querySelector("#" + id).value + "/" + document.querySelector("#" + id + "Value").textContent));
+    const shown = await layout();
+    console.log("layout sliders:", JSON.stringify(shown));
+    if (shown.join() !== "1/1,1/1") console.log("FAIL layout sliders' defaults");
+    const before = (await read()).rows[1];
+    await page.evaluate(() => {
+      const s = document.querySelector("#layoutAdjacent");
+      s.value = "3";
+      s.dispatchEvent(new Event("change"));
+    });
+    await page.waitForFunction((b) => {
+      const r = document.querySelectorAll("#resultsTable tr")[1];
+      return r && r.textContent.replace(/\s+/g, " ").trim() !== b;
+    }, { timeout: 60000 }, before);
+    console.log("3 enemies next to the target:", JSON.stringify(await layout()), JSON.stringify((await read()).rows));
+  } catch (e) {
+    console.log("FAIL layout slider did not change the results: " + e.message);
+  }
   console.log("console errors:", errors.length ? errors : "none");
   await browser.close();
 })();

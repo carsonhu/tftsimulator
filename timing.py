@@ -60,7 +60,6 @@ class Timing:
                  when the period is shorter than attack_len (G19: attack modules without bUseRateScalingThreshold,
                  Varus). Default False: G2.
     proj_speed   attack projectile speed (units/s); 0 = the attack lands at the release (melee) (G4)
-    distance     hexes to the target for projectile flight; None = the champion's attack range
     mana_at      when an attack pays its mana: 'start', 'release' or 'hit'. Default (T3): ranged at the release
                  (Set 19 VOD: Neeko, Draven, Varus; Set 18 replays' "Hold" event, which is the release), melee on
                  the hit
@@ -85,7 +84,7 @@ class Timing:
     source       {field: where the value came from}, e.g. 'build rls-19.1.0.5973071' or a VOD with its timestamp
     """
 
-    def __init__(self, launch=0.0, attack_len=0.0, proj_speed=0.0, distance=None, mana_at=None, cast_lock=0.0,
+    def __init__(self, launch=0.0, attack_len=0.0, proj_speed=0.0, mana_at=None, cast_lock=0.0,
                  mana_lock=None, lock_scales_with_as=False, cast_cancels_attack=False, release_scales_with_period=False,
                  variants=None, animations=0, cast_keeps_rhythm=False, lock_speed_clamp=None, crit_animation=None,
                  source=None):
@@ -93,7 +92,6 @@ class Timing:
         self.attack_len = attack_len
         self.release_scales_with_period = release_scales_with_period
         self.proj_speed = proj_speed
-        self.distance = distance
         self.mana_at = mana_at
         self.cast_lock = cast_lock
         self.mana_lock = mana_lock
@@ -191,9 +189,9 @@ class Timing:
         """Attack start -> release/hit, in whole ticks (at least 1), for an attack period of `period_ticks`."""
         return max(1, ticks_up(self.windup_seconds(period_ticks, selector, aspd, crit)))
 
-    def flight_ticks(self, attack_range):
-        """Release -> hit for a projectile (G4); 0 for melee."""
-        hexes = self.distance if self.distance is not None else max(1, attack_range or 1)
+    def flight_ticks(self, hexes):
+        """Release -> hit for a projectile flying `hexes` (the dummy layout's distance to the target, G4); 0 for
+        melee."""
         return projectile_ticks(self.proj_speed, hexes)
 
     def mana_moment(self, ranged):

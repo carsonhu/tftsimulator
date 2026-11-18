@@ -5,6 +5,7 @@ import pytest
 import set19buffs
 import set19items
 from buildstore import load_build
+from layout import Layout
 from set19champs import Varus
 from simulator import Simulator
 from test_timing import dummy
@@ -28,11 +29,11 @@ class LoggedVarus(Varus):
         super().performAbility(opponents, items, time)
 
 
-def fight(v, items=(), buffs=(), seconds=14, armor=0, n=2):
+def fight(v, items=(), buffs=(), seconds=14, armor=0, n=2, layout=None):
     ds = [dummy() for _ in range(n)]
     for d in ds:
         d.armor.base = armor
-    Simulator().simulate(list(items), list(buffs), v, ds, seconds)
+    Simulator().simulate(list(items), list(buffs), v, ds, seconds, layout=layout)
     return [(round(t * 30), round(d[0], 2)) for t, d, *_ in v.dmgVector]
 
 
@@ -40,7 +41,7 @@ def test_build_numbers_and_timing_rules():
     v = LoggedVarus(1)
     assert (v.curMana, v.fullMana.stat, v.aspd.stat, v.attack_range) == (30, 70, 0.7, 4)
     assert v.missiles == [(0.4278, 1800, False), (0.6286, 1800, True)]
-    assert v.num_targets == 2  # set18 convention: the target + 1 adjacent by default
+    assert v.aoe == 1  # AOEHexRange: the splash hits the enemies next to the target (1 on the default layout)
     assert v.timing.release_scales_with_period  # G19: his attack modules lack bUseRateScalingThreshold
     assert v.timing.cast_cancels_attack and (v.timing.cast_lock, v.timing.mana_lock) == (1.0333, 1)
 
@@ -61,7 +62,7 @@ def test_vod_fight_with_blue_buff_and_guinsoos():
 
 def test_spell_damage_and_timing():
     # Calc1 = 30 x AP + 230 x AD at 1★ (AD, AP multipliers 1.0): 260 to the target, 130 (AOEDamagePercent 0.5) to
-    # one adjacent enemy (num_targets 2), physical, at cast + 13 (Fire 0.4278 s) + 15 (4 hexes at 1800, G4)
+    # one adjacent enemy (the default layout), physical, at cast + 13 (Fire 0.4278 s) + 15 (4 hexes at 1800, G4)
     v = LoggedVarus(1)
     rows = fight(v, seconds=8)
     c = v.casts[0]
@@ -83,8 +84,7 @@ def test_encore_missile_and_targets():
     spell = [(t - c, d) for t, d in rows if t > c and d != 38.5]  # 38.5 = an attack: 35 AD x 1.1 average crit
     assert spell[:4] == [(28, 260), (28, 130), (34, 65), (34, 32.5)]
     v = LoggedVarus(1)
-    v.num_targets = 1
-    rows = fight(v, seconds=8)
+    rows = fight(v, seconds=8, layout=Layout(adjacent=0))
     assert [d for t, d in rows if d > 100] == [260]
 
 

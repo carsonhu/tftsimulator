@@ -22,6 +22,7 @@ const PY_FILES = [
   "champion.py",
   "effects.py",
   "events.py",
+  "layout.py",
   "helpers/__init__.py",
   "helpers/display_name.py",
   "item.py",

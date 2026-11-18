@@ -80,8 +80,7 @@ const state = {
   cfg: {
     champ: null,
     level: 1,
-    num_targets: null,
-    num_extra_targets: null,
+    layout: { adjacent: 1, two_hex: 1 }, // where the dummies stand (layout.py); boot reads the defaults
     takedowns: 0,
     bonus: { ad: 0, ap: 0, as: 0, dmgamp: 0, crit: 0, critdmg: 0, manaregen: 0, mpa: 0 },
     stage: "4-1",
@@ -303,6 +302,20 @@ function buildStaticControls() {
     for (const sel of itemRows.querySelectorAll("select")) sel.value = "NoItem";
     onConfigChanged();
   };
+
+  // Where the training dummies stand (layout.py): the same for every champion.
+  state.cfg.layout = Object.assign({}, cat.defaults.layout);
+  for (const [id, key] of [
+    ["layoutAdjacent", "adjacent"],
+    ["layoutTwoHex", "two_hex"],
+  ]) {
+    $(id).value = state.cfg.layout[key];
+    $(id + "Value").textContent = state.cfg.layout[key];
+    bindSlider(id, id + "Value", (v) => {
+      state.cfg.layout[key] = v;
+      onConfigChanged();
+    });
+  }
 
   bindSlider("numBuffs", "numBuffsValue", (v) => {
     resizeBuffRows(v);
@@ -624,44 +637,12 @@ async function selectChampion(name, { keepLevel, keepConfig = false }) {
     levelSel.value = state.cfg.level;
   }
 
-  // null means "whatever the champion's own default is", so these have to be
-  // cleared before the probe below or it would describe the overrides instead
-  // of the unit. A level change is no reason to lose a hand-set target count,
-  // though, so hold them across the probe and put them back after it.
-  const heldTargets = keepConfig
-    ? [state.cfg.num_targets, state.cfg.num_extra_targets]
-    : [null, null];
-  state.cfg.num_targets = null;
-  state.cfg.num_extra_targets = null;
-
-  // Minimal config: the defaults (traits, target counts) must describe the
-  // champion itself, not whatever items/buffs are still configured.
+  // Minimal config: the default traits must describe the champion itself,
+  // not whatever items/buffs are still configured.
   const probe = cfgForSlice(state.slice);
   probe.items = ["NoItem", "NoItem", "NoItem"];
   probe.buffs = [];
   const info = await rpc("champInfo", JSON.stringify(probe));
-
-  // setupTargetSlider reports back what it could actually show, so an
-  // override that no longer fits the slider's range cannot leave the config
-  // claiming a number the UI never displayed.
-  state.cfg.num_targets = setupTargetSlider(
-    "numTargets",
-    info.numTargets,
-    heldTargets[0],
-    (v) => {
-      state.cfg.num_targets = v;
-      onConfigChanged();
-    }
-  );
-  state.cfg.num_extra_targets = setupTargetSlider(
-    "numExtraTargets",
-    info.numExtraTargets,
-    heldTargets[1],
-    (v) => {
-      state.cfg.num_extra_targets = v;
-      onConfigChanged();
-    }
-  );
 
   // Buff bar: default traits at their first listed level, min two rows.
   // Skipped when only the star level moved -- see the level handler.
@@ -685,36 +666,6 @@ function defaultBuffTuple(cls) {
   const meta = state.buffMeta.get(cls);
   const params = meta.extra ? meta.extra.Default : 0;
   return [cls, meta.levels[0], params];
-}
-
-// `held` is a count the user already picked and that is being carried across
-// a level change; null means show the champion's own default. Returns the
-// override the config should now hold -- null when there isn't one, so the
-// champion's default keeps being whatever champInfo says it is.
-function setupTargetSlider(id, defaultValue, held, onChange) {
-  const row = $(id + "Row");
-  const slider = $(id);
-  const label = $(id + "Value");
-  if (!defaultValue || defaultValue <= 0) {
-    row.hidden = true;
-    return null;
-  }
-  row.hidden = false;
-  slider.min = 1;
-  slider.max = Math.max(3, defaultValue + 1);
-  // The range only depends on the champion, so a held value chosen from this
-  // same slider still fits it; the clamp is for the case where it somehow
-  // does not, and the return keeps the config honest about the result.
-  const shown =
-    held == null ? defaultValue : Math.min(Math.max(held, 1), slider.max);
-  slider.value = shown;
-  label.textContent = shown;
-  slider.oninput = () => (label.textContent = slider.value);
-  slider.onchange = () => {
-    label.textContent = slider.value;
-    onChange(Number(slider.value));
-  };
-  return held == null ? null : shown;
 }
 
 // An emblem makes its holder a member of the trait, so picking one puts the

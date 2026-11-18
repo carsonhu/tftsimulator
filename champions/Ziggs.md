@@ -108,5 +108,5 @@ VOD was played on (check the patch shown in game or the date against builds/inde
   - **Simulated attack:** the bomb's first OnFired applies GE_SimulateLaunchAttack, which sends
     Combat.Event.LaunchAttack.SimulateTriggersOnly (GA_SimulateLaunchAttack). Not modelled: no listed item reacts
     to attacks, and role mana from it (if the native mana handler hears it) would fall inside the mana lock.
-  - **Assumed:** the bomb flies his attack range (4 hexes); adjacent enemies hit = targets - 1 (set18 convention, as
-    Varus). MiniBombs / FindMiniBombTargets in the script are never called.
+  - **Assumed:** the bomb flies his attack range (4 hexes); the splash hits the enemies next to the target on the
+    dummy layout (`layout.py`, default one). MiniBombs / FindMiniBombTargets in the script are never called.

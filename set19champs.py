@@ -48,7 +48,7 @@ class Neeko(BuildChampion):
         return self.row('DamageAP', star=level) * AP
 
     def performAbility(self, opponents, items, time):
-        hexes = self.attack_range  # the target stands at attack range (G4)
+        hexes = self.target_hexes()  # the layout's target, at attack range (G4)
         for t, speed, encore in self.throws:
             eff = self.missile_effectiveness(encore)
             if eff <= 0:
@@ -79,19 +79,18 @@ class Varus(BuildChampion):
 
     def __init__(self, level, build=None):
         super().__init__(level, build)
-        # set18 convention: num_targets counts the target; the splash hits num_targets - 1 adjacent enemies
-        self.num_targets = 2
+        self.aoe = int(self.row('AOEHexRange'))
         self.missiles = [(self.chrono_projectile_spawn(self.CAST, name), self.chrono_projectile_speed(self.CAST, name),
                           encore) for name, encore in self.MISSILES]
         self.splash = self.row('AOEDamagePercent')
-        self.notes = ('Slow (20% AS for 4 s) not modelled: dummies never attack. Adjacent enemies hit = '
-                      'targets - 1. Missiles take the straight-line travel time at the attack range (arc ignored, G4).')
+        self.notes = ('Slow (20% AS for 4 s) not modelled: dummies never attack. The splash hits the enemies '
+                      'next to the target (the layout). Missiles take the straight-line travel time at the attack range (arc ignored, G4).')
 
     def abilityScaling(self, level, AD, AP):
         return self.row('DamageAP', star=level) * AP + self.row('DamageAD', star=level) * AD
 
     def performAbility(self, opponents, items, time):
-        hexes = self.attack_range
+        hexes = self.target_hexes()
         for t, speed, encore in self.missiles:
             eff = 1 if not encore else self.trait_value('DA_Encore19', 'RecastEffectiveness')
             if eff <= 0:
@@ -101,10 +100,10 @@ class Varus(BuildChampion):
                 now = self.tick / TPS
                 self.multiTargetSpell(opponents[:1], items, now, 1,
                                       lambda level, AD, AP: self.abilityScaling(level, AD, AP) * eff, 'physical')
-                if self.num_targets > 1:
-                    self.multiTargetSpell(opponents[1:], items, now, self.num_targets - 1,
-                                          lambda level, AD, AP: self.abilityScaling(level, AD, AP) * eff * self.splash,
-                                          'physical')
+                splash = self.nearby(opponents[0], self.aoe)  # within AOEHexRange of the target
+                self.multiTargetSpell(splash, items, now, len(splash),
+                                      lambda level, AD, AP: self.abilityScaling(level, AD, AP) * eff * self.splash,
+                                      'physical')
 
             self.schedule_tick(self.tick + ticks_up(t) + projectile_ticks(speed, hexes), land)
 
@@ -137,7 +136,8 @@ class Draven(BuildChampion):
         self.throw_at = self.chrono_projectile_spawn(self.CAST, 'Blade')
         self.vortex_hits = int(self.row('Duration') / self.VORTEX_TICK)
         self.notes = ("The vortex's damage is booked on the record's target: it splits among the enemies inside, which "
-                      "adds up to the same total on identical dummies. Ricochets go to the next dummy, 1 hex away.")
+                      "adds up to the same total on identical dummies. Ricochets go to the nearest dummy not yet "
+                      "hit (the layout).")
 
     def record_damage(self, level, AD, AP):
         return self.row('BladeDamage', star=level) * AD
@@ -146,14 +146,14 @@ class Draven(BuildChampion):
         return self.row('BladeRiftPerSecondAD', star=level) * AD + self.row('BladeRiftPerSecondAP', star=level) * AP
 
     def performAbility(self, opponents, items, time):
-        flight = self.chrono_projectile_ticks(self.CAST, 'Blade', self.attack_range)
-        self.schedule_tick(self.tick + ticks_up(self.throw_at) + flight, lambda: self._record_lands(opponents, 0))
+        target = opponents[0]
+        flight = self.chrono_projectile_ticks(self.CAST, 'Blade', self.target_hexes(target))
+        self.schedule_tick(self.tick + ticks_up(self.throw_at) + flight, lambda: self._record_lands(target, [target], 0))
 
-    def _record_lands(self, opponents, k):
-        """The record (k = 0) or its k-th Trickshot ricochet arrives."""
+    def _record_lands(self, target, hit, k):
+        """The record (k = 0) or its k-th Trickshot ricochet arrives at `target`; `hit` = the enemies hit so far."""
         items = self.items
         eff = self.trait_value('DA_Trickshot19', 'RichochetDamage') ** k if k else 1
-        target = opponents[k % len(opponents)]
         self.multiTargetSpell([target], items, self.tick / TPS, 1,
                               lambda level, AD, AP: self.record_damage(level, AD, AP) * eff, 'physical')
         for j in range(self.vortex_hits):
@@ -163,8 +163,9 @@ class Draven(BuildChampion):
                                       'physical')
             self.schedule_tick(self.tick + ticks_up(j * self.VORTEX_TICK), vortex_hit)
         if k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
-            step = self.chrono_projectile_ticks(self.BOUNCE, 'Blade', set19buffs.bounce_hexes(opponents))
-            self.schedule_tick(self.tick + step, lambda: self._record_lands(opponents, k + 1))
+            nxt, hexes = self.ricochet(target, hit)
+            step = self.chrono_projectile_ticks(self.BOUNCE, 'Blade', hexes)
+            self.schedule_tick(self.tick + step, lambda: self._record_lands(nxt, hit + [nxt], k + 1))
 
 
 class Kaisa(BuildChampion):
@@ -194,7 +195,8 @@ class Kaisa(BuildChampion):
         self.missiles_fired = 0
         self.launch_count = 0
         self.notes = ("Missiles alternate between the target and nearby enemies (identical dummies, same total); "
-                      "secondary targets are taken at her attack range. Ricochets go to the next dummy, 1 hex away.")
+                      "secondary targets are taken at her attack range. Ricochets go to the nearest dummy not yet "
+                      "hit (the layout).")
 
     def missile_damage(self, level, AD, AP):
         return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
@@ -203,8 +205,10 @@ class Kaisa(BuildChampion):
         self.launch_count += 1
         if self.launch_count % self.every:
             return
-        flight = self.chrono_projectile_ticks(self.MISSILE, 'SpellMis', self.attack_range)
-        secondaries = opponents[1:1 + int(self.row('MaxSecondaryTargets'))] or opponents[:1]
+        # every missile flies the distance to her target (secondaries assumed at the same distance)
+        flight = self.chrono_projectile_ticks(self.MISSILE, 'SpellMis', self.target_hexes())
+        near = self.nearby(opponents[0], int(self.row('HexSearchRangeAroundCurrentTarget')))
+        secondaries = near[:int(self.row('MaxSecondaryTargets'))] or opponents[:1]
         on_target = 1 / self.row('PercentMissilesOnCurrentTarget')
         for _ in range(self.num_missiles):
             if self.missiles_fired % on_target > 0:
@@ -212,16 +216,16 @@ class Kaisa(BuildChampion):
             else:
                 target = opponents[0]
             self.missiles_fired += 1
-            self.schedule_tick(self.tick + flight, lambda target=target: self._missile_lands(opponents, target, 0))
+            self.schedule_tick(self.tick + flight, lambda target=target: self._missile_lands(target, [target], 0))
 
-    def _missile_lands(self, opponents, target, k):
+    def _missile_lands(self, target, hit, k):
         eff = self.trait_value('DA_Trickshot19', 'RichochetDamage') ** k if k else 1
         self.multiTargetSpell([target], self.items, self.tick / TPS, 1,
                               lambda level, AD, AP: self.missile_damage(level, AD, AP) * eff, 'physical')
         if k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
-            nxt = opponents[(opponents.index(target) + 1) % len(opponents)]
-            step = self.chrono_projectile_ticks(self.BOUNCE, 'SpellMis', set19buffs.bounce_hexes(opponents))
-            self.schedule_tick(self.tick + step, lambda: self._missile_lands(opponents, nxt, k + 1))
+            nxt, hexes = self.ricochet(target, hit)
+            step = self.chrono_projectile_ticks(self.BOUNCE, 'SpellMis', hexes)
+            self.schedule_tick(self.tick + step, lambda: self._missile_lands(nxt, hit + [nxt], k + 1))
 
     def performAbility(self, opponents, items, time):
         # MultiplyAdditive (1 + ASOnCast), for the rest of combat (ASDuration 60)
@@ -265,7 +269,7 @@ class Yunara(BuildChampion):
         visual = min(stacks, self.MAX_VISUAL_ORBS)
         per_orb = 1 + max(0, stacks - self.MAX_VISUAL_ORBS) / self.MAX_VISUAL_ORBS
         duration = self.PLAYRATE / self.aspd.stat
-        flight = self.chrono_projectile_ticks(self.ORBS, 'Yunara19_OrbMis', self.attack_range)
+        flight = self.chrono_projectile_ticks(self.ORBS, 'Yunara19_OrbMis', self.target_hexes())
         for t in self.orb_times[:visual]:
             spawn = t / self.orb_chrono_len * duration
             self.schedule_tick(self.tick + ticks_up(spawn) + flight, lambda: self.multiTargetSpell(
@@ -299,12 +303,10 @@ class Ziggs(BuildChampion):
         super().__init__(level, build)
         self.timing.lock_speed_clamp = self.CAST_RATE_CLAMP
         self.timing.source['lock_speed_clamp'] = 'GA_Ziggs19_Spell 0x635 FClamp(AS / base AS, 1, 2)'
-        # set18 convention (as Varus): num_targets counts the target; the splash hits num_targets - 1 adjacent enemies
-        self.num_targets = 2
         self.bomb_spawn = self.chrono_projectile_spawn(self.CAST, self.BOMB)
         self.notes = ('The bomb\'s simulated attack triggers on-attack items (Titan\'s Resolve); its role mana '
-                      'would fall inside the mana lock. Adjacent enemies hit = targets - 1. The bomb flies his '
-                      'attack range.')
+                      'would fall inside the mana lock. The splash hits the enemies next to the target (the '
+                      'layout). The bomb flies his attack range.')
 
     def bomb_damage(self, level, AD, AP):
         return self.row('InitialDamage', star=level) * AP
@@ -321,13 +323,13 @@ class Ziggs(BuildChampion):
 
     def performAbility(self, opponents, items, time):
         rate = self.timing.cast_rate(self.base_aspd, self.aspd.stat)
-        flight = self.chrono_projectile_ticks(self.CAST, self.BOMB, self.attack_range)
+        flight = self.chrono_projectile_ticks(self.CAST, self.BOMB, self.target_hexes())
 
         def land():
             now = self.tick / TPS
             self.multiTargetSpell(opponents[:1], items, now, 1, self.bomb_damage, 'magical')
-            if self.num_targets > 1:
-                self.multiTargetSpell(opponents[1:], items, now, self.num_targets - 1, self.splash_damage, 'magical')
+            splash = self.nearby(opponents[0], 1)  # the other enemies within 1 hex (0x5d)
+            self.multiTargetSpell(splash, items, now, len(splash), self.splash_damage, 'magical')
 
         spawn = self.tick + ticks_up(self.bomb_spawn / rate)
         self.schedule_tick(spawn, lambda: self.simulateLaunch(items))  # 0x9f5: the bomb's first OnFired (G11)
@@ -388,7 +390,7 @@ class Senna(BuildChampion):
                 self.multiTargetSpell(opponents[:1], items, self.tick / TPS, 1, self.blast_damage, 'physical')
                 self.marked = True
 
-            flight = self.chrono_projectile_ticks(self.BLAST, 'SennaMis', self.attack_range)
+            flight = self.chrono_projectile_ticks(self.BLAST, 'SennaMis', self.target_hexes())
             self.schedule_tick(self.tick + ticks_up(self.blast_spawn) + flight, land)
             self.simulateLaunch(items)  # 0x1bfe: the blast's GE_SimulateLaunchAttack, at once (G11)
         else:
@@ -417,8 +419,8 @@ class Ezreal(BuildChampion):
     Heartsteel (3)+, `heartsteel_bias`): DetermineDamageForSpell multiplies both the primary and the secondary damage
     by 1 + HeartsteelStan_PercentIncreasedAbilityDamage (0.25). Every cast first adds 1 to the combat-only spell Stack
     (GE_IncSpellStackBy1_CombatOnly, 0x10ed); Stack % 3 == 0 (casts 3, 6, ...) makes it a 2-hex cast (Is2HexCast,
-    0x11b5): TR_Add_EnemiesWithinHexRange with HexRange 2 instead of 1 picks the secondary targets. Those extra
-    enemies (within 2 hexes, not 1) are the extra-targets slider.
+    0x11b5): TR_Add_EnemiesWithinHexRange with HexRange 2 instead of 1 picks the secondary targets (the layout's
+    enemies 2 hexes from the target join the ones next to it).
     """
     KEY = 'DA_Ezreal19'
     MARK = 'CD_Ezreal19_CastAnim'
@@ -426,23 +428,21 @@ class Ezreal(BuildChampion):
 
     def __init__(self, level, build=None):
         super().__init__(level, build)
-        self.num_targets = 2  # set18 convention (as Varus): the splash hits num_targets - 1 adjacent enemies
         self.second_stage = self.chrono_event(self.MARK, 'Unlock')
         spawns = sorted(t for p in self.chrono(self.SHOT).get('projectiles') or [] if p['name'] == 'SpellMis'
                         for t in p.get('spawn_at') or [])
         if len(spawns) != 2:
             raise ValueError(f'Ezreal: expected the root and Encore SpellMis in {self.SHOT}, got {spawns}')
         self.shot_spawn, self.encore_spawn = spawns
-        self.num_extra_targets = 1  # Heartsteel Bias 2-hex casts: enemies 2 hexes from the target (not 1)
         self.spell_stack = 0  # the combat-only spell Stack
-        self.notes = ('Adjacent enemies hit = targets - 1. Extra targets: enemies 2 hexes from the target, hit '
-                      'only by every 3rd cast of a Heartsteel Bias. The detonating missile flies his attack range.')
+        self.notes = ('The splash hits the enemies next to the target (the layout); every 3rd cast of a Heartsteel '
+                      'Bias also those 2 hexes away. The detonating missile flies his attack range.')
 
     def detonation(self, level, AD, AP):
         return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
 
     def performAbility(self, opponents, items, time):
-        flight = self.chrono_projectile_ticks(self.SHOT, 'SpellMis', self.attack_range)
+        flight = self.chrono_projectile_ticks(self.SHOT, 'SpellMis', self.target_hexes())
         stage2 = self.tick + ticks_up(self.second_stage)
         shots = [(self.shot_spawn, 1)]
         if self.trait_tier('DA_Encore19') > 0:
@@ -451,7 +451,8 @@ class Ezreal(BuildChampion):
         self.spell_stack += 1  # GE_IncSpellStackBy1_CombatOnly (0x10ed)
         bias = getattr(self, 'heartsteel_bias', False)
         boost = 1 + self.row('HeartsteelStan_PercentIncreasedAbilityDamage') if bias else 1
-        splash_targets = self.num_targets - 1 + (self.num_extra_targets if bias and self.spell_stack % 3 == 0 else 0)
+        # TR_Add_EnemiesWithinHexRange around the target: HexRange 1, or 2 on a 2-hex cast (0x11b5)
+        splash_targets = self.nearby(opponents[0], 2 if bias and self.spell_stack % 3 == 0 else 1)
         # GE_SimulateLaunchAttack at stage 1 (0x168a) and again at stage 2 (0x1ce5 -> 0xf): VOD4, Titan's stacks
         self.simulateLaunch(items)
         self.schedule_tick(stage2, lambda: self.simulateLaunch(items))
@@ -460,8 +461,8 @@ class Ezreal(BuildChampion):
                 now = self.tick / TPS
                 self.multiTargetSpell(opponents[:1], items, now, 1,
                                       lambda level, AD, AP: self.detonation(level, AD, AP) * eff, 'physical')
-                if splash_targets > 0:
-                    self.multiTargetSpell(opponents[1:], items, now, splash_targets,
+                if splash_targets:
+                    self.multiTargetSpell(splash_targets, items, now, len(splash_targets),
                                           lambda level, AD, AP: self.detonation(level, AD, AP) * splash * eff,
                                           'physical')
 

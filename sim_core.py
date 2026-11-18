@@ -4,6 +4,7 @@ import copy
 from typing import Any, Dict, List
 
 from set19buffs import class_buffs
+from layout import Layout
 from simulator import Simulator
 
 
@@ -36,10 +37,13 @@ def do_experiment_one_extra(
     buff_list,
     duration: float,
     frame_rate: int = 30,
+    layout: Layout = None,
 ) -> List[Dict[str, Any]]:
     """One simulation per extra item, then per extra buff, each on a fresh copy of the configured champion
-    against 8 copies of the opponent. A buff replaces any copy of the same trait the champion already carries."""
+    against copies of the opponent placed by `layout` (layout.py; 8 by default). A buff replaces any copy of the
+    same trait the champion already carries."""
     simulator = Simulator()
+    layout = layout or Layout()
     sim_list: List[Dict[str, Any]] = []
 
     for item in item_list:
@@ -48,9 +52,10 @@ def do_experiment_one_extra(
             [copy.deepcopy(item)],
             [],
             champ,
-            [copy.deepcopy(opponent) for _ in range(8)],
+            [copy.deepcopy(opponent) for _ in range(layout.count)],
             duration,
             frameRate=frame_rate,
+            layout=layout,
         )
         sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": item, "Results": results})
 
@@ -75,9 +80,10 @@ def do_experiment_one_extra(
             [],
             [copy.deepcopy(buff)],
             champ,
-            [copy.deepcopy(opponent) for _ in range(8)],
+            [copy.deepcopy(opponent) for _ in range(layout.count)],
             duration,
             frameRate=frame_rate,
+            layout=layout,
         )
         sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": buff, "Results": results})
 

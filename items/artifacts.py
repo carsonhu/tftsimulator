@@ -180,20 +180,19 @@ class TitanicHydra(BuildItem):
     """Stats GE_Artifact_TitanicHydra_Stats (300 HP, 20% AS, 20% AD). Script GA_Artifact_TitanicHydra: before each
     on-hit damage is applied (PreApply, 0x59), GE_Artifact_TitanicHydra_BonusDamage: physical, holder max Health x
     PercentHealthBonusDamage (2%) + Attack Damage x PercentADBonusDamage (4%) to the enemies within 1 hex of the
-    target (TR_Add_EnemiesWithinHexRange, HexRange 1, taken to include the target). The dummies stand 1 hex apart
-    (B12): the target and one more."""
+    target (TR_Add_EnemiesWithinHexRange, HexRange 1, taken to include the target): the target and every enemy next
+    to it on the dummy layout (owner, 2026-11-17)."""
     KEY = "DA_Artifact_TitanicHydra"
     STATS = ("GE_Artifact_TitanicHydra_Stats",)
     display_name = item_name(KEY)
-    TARGETS = 2  # the target and the next dummy, 1 hex away (B12)
+    HEX_RANGE = 1  # TR_Add_EnemiesWithinHexRange HexRange
 
     LISTENS = {ONHIT_PRE: frozenset()}
 
     def performAbility(self, phase, time, champion, input_=0):
         amount = (champion.hp.stat * self.row(champion, "PercentHealthBonusDamage")
                   + champion.atk.stat * champion.bonus_ad.stat * self.row(champion, "PercentADBonusDamage"))
-        others = [o for o in champion.opponents if o is not input_.target]
-        for target in ([input_.target] + others)[:self.TARGETS]:
+        for target in [input_.target] + champion.nearby(input_.target, self.HEX_RANGE):
             item_damage(champion, target, amount, "physical")
         return input_
 

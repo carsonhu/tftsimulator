@@ -1,6 +1,7 @@
 import math
 
 from effects import expire_effects
+from layout import Layout
 from timing import TPS
 
 
@@ -18,14 +19,16 @@ class Simulator(object):
             for item in items:
                 item.ability(phase, 0, champion)
 
-    def simulate(self, items, buffs, champion, opponents, duration, frameRate=TPS):
+    def simulate(self, items, buffs, champion, opponents, duration, frameRate=TPS, layout=None):
         """Run `duration` seconds of combat in whole 30 Hz ticks (T1). `frameRate` is accepted for old callers and
         ignored: the game's rate is fixed (G1), and a finer step would split events the game puts on one tick.
+        `layout` places the dummies (layout.Layout; default: the target, one neighbour, one 2 hexes away).
         dmgVector rows: (time, damage, AS, mana, max mana)."""
         champion.item_count += len([item for item in items if item.name != "NoItem"])
         items = items + buffs + champion.items
         champion.items = items
         champion.opponents = opponents
+        (layout or Layout()).place(champion, opponents)
         self.itemStats(items, champion)
         champion.prepare_timing()
         # Combat opens with a fresh attack at tick 0, released one windup in (G3); movement is not modelled, so

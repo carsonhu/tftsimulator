@@ -87,3 +87,16 @@ def test_the_worker_loads_every_top_level_module():
         name = os.path.basename(path)
         if not name.startswith(('test_', 'verify_')) and name not in ('conftest.py', 'serve.py', '__init__.py'):
             assert name in listed, name
+
+
+def test_the_layout_settings_reach_the_run():
+    # the page's 'Enemies next to the target' (layout.py): Titanic Hydra hits each of them, so more neighbours,
+    # more damage; the catalog gives the page the default layout
+    cat = json.loads(sim_entry.catalog_json())
+    assert cat['defaults']['layout'] == {'adjacent': 1, 'two_hex': 1}
+
+    def hydra(layout):
+        out = json.loads(sim_entry.run_json(json.dumps(cfg(champ='Draven', level=1, slice='Artifact', layout=layout))))
+        return next(r['dps']['5'] for r in out['rows'] if r['extra'] == "Titanic Hydra")
+
+    assert hydra({'adjacent': 3, 'two_hex': 1}) > hydra(None) == hydra({'adjacent': 1, 'two_hex': 1})

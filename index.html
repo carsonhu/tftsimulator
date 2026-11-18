@@ -56,15 +56,15 @@
               <select id="level"></select>
             </label>
           </div>
-          <label id="numTargetsRow" hidden
-            >Number of targets
-            <input type="range" id="numTargets" min="1" max="3" step="1" />
-            <span class="slider-value" id="numTargetsValue"></span>
+          <label title="Training dummies on the hexes next to the target: splashes, Titanic Hydra, ricochets"
+            >Enemies next to the target
+            <input type="range" id="layoutAdjacent" min="0" max="6" step="1" />
+            <span class="slider-value" id="layoutAdjacentValue"></span>
           </label>
-          <label id="numExtraTargetsRow" hidden
-            >Number of extra targets
-            <input type="range" id="numExtraTargets" min="1" max="3" step="1" />
-            <span class="slider-value" id="numExtraTargetsValue"></span>
+          <label title="Training dummies 2 hexes from the target: 2-hex splashes, Kai'Sa's missiles, ricochets"
+            >Enemies 2 hexes from the target
+            <input type="range" id="layoutTwoHex" min="0" max="6" step="1" />
+            <span class="slider-value" id="layoutTwoHexValue"></span>
           </label>
         </section>
 

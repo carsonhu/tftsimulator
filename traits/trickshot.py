@@ -6,12 +6,6 @@ from events import ONHIT_PRE
 from traits.base import BuildTrait
 
 
-def bounce_hexes(opponents):
-    """Hexes a Trickshot ricochet travels between dummies (B12): the next one stands 1 hex away; with a single dummy
-    the ricochet returns to it (the bounce computer re-picks an already-hit enemy when none is left), 0 hexes."""
-    return 1 if len(opponents) > 1 else 0
-
-
 @register("trait")
 class Trickshot(BuildTrait):
     """Trickshot (DA_Trickshot19): "Trickshots' Attacks and Abilities ricochet. Each ricochet deals a percentage of
@@ -31,20 +25,24 @@ class Trickshot(BuildTrait):
     LISTENS = {ONHIT_PRE: frozenset()}  # the attack's own hit (ricochets apply no on-hit effects)
 
     def performAbility(self, phase, time, champion, input_=0):
-        opponents = champion.opponents
         if self.KEY not in (champion.data.d.get("trait_keys") or []) or champion.trait_tier(self.KEY) == 0:
             return input_
         n = int(champion.trait_value(self.KEY, "NumRichochets"))
         r = champion.trait_value(self.KEY, "RichochetDamage")
-        step = projectile_ticks(champion.timing.proj_speed, bounce_hexes(opponents))
+        # the dummies stand still, so the whole chain is known at the hit: each ricochet departs on the previous
+        # one's arrival, to the nearest dummy not yet hit (the layout, B12)
+        target, hit, at = input_.target, [input_.target], champion.tick
         for k in range(1, n + 1):
-            def ricochet(k=k):
-                target = opponents[k % len(opponents)]
+            target, hexes = champion.ricochet(target, hit)
+            hit.append(target)
+            at += projectile_ticks(champion.timing.proj_speed, hexes)
+
+            def ricochet(k=k, target=target):
                 attack = Attack(opponents=[target], scaling=lambda level, baseAD, AD, AP: baseAD * AD * r ** k,
                                 canCrit=True, canOnHit=False, attackType="physical", numTargets=1,
                                 regularAuto=False)
                 champion.doAttack(attack, champion.items, champion.tick / TPS)
-            champion.schedule_tick(champion.tick + k * step, ricochet)
+            champion.schedule_tick(at, ricochet)
         return input_
 
 

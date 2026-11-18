@@ -194,6 +194,17 @@ sliders become layout settings.
 
 **Done when:** the four rows above read from one place; the default layout gives the same tables.
 
+**Done (2026-11-17).** `layout.py`: the champion at (0, 0), its target at its attack range, `adjacent` dummies next
+to the target, `two_hex` 2 hexes away, the rest in a line beyond; the default (1, 1) is the old line. The simulator
+places the dummies at combat start; champions and items ask `target_hexes()`, `nearby(target, hexes)` and
+`ricochet(previous, hit)` (Champion). Flights, Varus / Ziggs / Ezreal splashes, Kai'Sa's secondary targets, every
+ricochet (Trickshot, Draven, Kai'Sa) and Titanic Hydra read it; `num_targets`, `num_extra_targets`,
+`bounce_hexes` and `Timing.distance` are gone. The page's two target sliders became 'Enemies next to the target'
+and 'Enemies 2 hexes from the target', shown for every champion. Tables identical (only the notes' wording
+changed). One rule changed on the owner's word: Titanic Hydra hits every enemy next to the target (set18 fixed it
+at 2, the average case; the default layout still gives 2). Not done: Kai'Sa's missiles to secondary targets still
+fly her target's distance, though the layout knows theirs (a rule change, left for the owner).
+
 ## What not to do
 
 - **No rewrite from scratch.** Each step must leave the simulator working and the tables unchanged.
@@ -212,4 +223,4 @@ sliders become layout settings.
 | 2. Split modules, decorator registration | done (2026-11-17) |
 | 3. Game-shaped attributes | done (2026-11-17) |
 | 4. Timed effects and damage events | done (2026-11-17) |
-| 5. Dummy layout | not started |
+| 5. Dummy layout | done (2026-11-17) |

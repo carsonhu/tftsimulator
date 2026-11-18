@@ -98,7 +98,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Last Whisper / Void Staff | x0.7 armor / MR from the hit after the first, for 3 s / 5 s after the latest hit | a holder's damage numbers on one target: 1st hit vs 2nd | I7 |
 | Kraken's Fury stacks | +3.5% AD per attack release (simulated attacks count), 15 max, then +15% AS | panel AD % of a holder over its first attacks (and a cast) | docs/ITEMS.md |
 | Striker's Flail stacking | separate 5 s instances of +5% damage amp, 4 at most | the damage-amp line of a crit carrier's panel | I6 |
-| Titanic Hydra's splash | the target and one more dummy (1 hex apart) | a Hydra holder's hit on a target with two neighbours | I10 |
+| Titanic Hydra's splash | the target and every enemy next to it (HexRange 1 taken to include the target; the page's layout, default one neighbour) | a Hydra holder's hit on a target with two neighbours | I10 |
 | Lich Bane on a ranged holder | procs on the first hit after the release that follows the cast | a ranged Lich Bane holder's damage numbers after a cast | I10 |
 | Dawncore's per-cast cut | 5% of max mana after each cast's cost (the next cast is cheaper) | the max mana a Dawncore holder shows after each cast | I10 |
 | Where a timed effect ends (low priority: note it if seen) | a 3 s sunder applied at tick a covers ticks a to a + 90 and is gone at a + 91 (whole ticks, every unit) | a hit that lands about 3 s after a Last Whisper holder's previous hit on the same target, sundered or not | T14 |

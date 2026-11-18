@@ -118,5 +118,5 @@ Source for all rows below: `Outplayed/…PBE_11-17-2026_15-16-17-933.mp4` (owner
   target and `GE_Varus19_SecondaryDamage` (Calc2 = AOEDamagePercent x Calc1) to enemies within AOEHexRange 1;
   EncoreHailMain (0x121f -> 0x2e4) the same x RecastEffectiveness. Physical, RollIfCanSpellCrit. AD in the calc
   is the AttackDamage attribute (1.0 + bonus AD, like AP), not his 35 attack damage: owner, 2026-11-17 ("the AD in
-  his damage formula is only bonus AD": items' AD scales it, his base attack damage doesn't); adjacent enemies = num_targets - 1 (set18
-  convention, default 2); straight-line missile flight (G4). The slow is not modelled (dummies never attack).
+  his damage formula is only bonus AD": items' AD scales it, his base attack damage doesn't); the splash hits the enemies within AOEHexRange (1) of
+  the target on the dummy layout (`layout.py`, default one); straight-line missile flight (G4). The slow is not modelled (dummies never attack).
