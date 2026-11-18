@@ -134,6 +134,14 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Sword travel | 0.25 s after FireSwords (fixed-time projectile, G21) | the frame of the swords' damage numbers | G21 |
 | Choreographer row | 'By range': melee in the front (shield, no amp) | (owner) is that the default you want? | B30 |
 
+### 7j. Kayle again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| The first attack after the finale | a fresh attack at the finale's Unlock: 12 ticks to its release | VOD5: 19.5 ticks after her mana showed again (n = 1; KeepFacing plays 1.1165 s at BigHit) | champions/Kayle.md E2 |
+| The buff's length | 4 s + 0.75 x 0.5 s / S | the frames of the AS change in and out (VOD5's panel moved 10 ticks after the Buff event) | champions/Kayle.md D1 |
+| Her attack projectile's speed in the build | 2250 typed from the client asset | (tool) the snapshot should read projectiles that a champion's own attack script names | champions/Kayle.md D1 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

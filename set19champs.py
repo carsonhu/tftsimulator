@@ -970,8 +970,112 @@ class Viego(BuildChampion):
         self.schedule_tick(fire + ticks_up(self.collapse), land)
 
 
+class Kayle(BuildChampion):
+    """Stairway to Hell (champions/Kayle.md, D1). Scripts: GA_Kayle19_Spell_new, GA_Kayle19_RangedAttack_new (build
+    ga_scripts.zip).
+
+    Passive (GA_Kayle19_RangedAttack_new): her attack is her own projectile, DA_Kayle19_AutoAttackProjectile
+    (TFTFixedSpeedMovement 2250 units/s, client asset: the snapshot doesn't read projectiles named in a champion's own
+    attack script); on arrival the attack damage and GE_Kayle19_PassiveDamage (MagicDamageCalc1 = APDamage x AP,
+    magic, on-spell, crit only with Precision).
+    Spell: CD_Kayle19_BeginCast plays at S = FClamp(AttackSpeed / (base AttackSpeed x (1 + BonusAttackSpeed)), 1, 2)
+    (ComputeASScalingForStart); the mana lock (0x2ad1). At its 'Buff' event (0.1324 s / S) GE_Kayle19_AttackSpeedBuff
+    (AttackSpeed MultiplyAdditive AttackSpeedCalc1 = BonusAttackSpeed + 1, VOD5: 0.94 -> 1.58) for Duration + 0.75 x
+    the chrono's duration (taken as its length / S: D1); at 'Unlock' (0.4929 s / S) the cast finishes (cast lock that
+    + 1 tick; the build's G7 ratio is not applied) and every Combat.Event.LaunchAttack (exact: simulated attacks don't
+    count) adds a sword. When the buff ends (WaitForGameplayEffectRemoved) she stops attacking and moving and plays
+    CD_Kayle19_LaunchAllSwords at FClamp(sqrt(AttackSpeed / (base x 1.8)), 1, 1.5) (ComputeASScalingForFinale, her AS
+    after the buff): at 'BigHit' (1.048 s) GE_Kayle19_AOEDamage (MagicDamageCalc2) on the enemies within AOEHexRange of
+    the target, then a looping 0.1 s timer drops one sword per attack (GE_Kayle19_SingleSwordDamage, MagicDamageCalc3,
+    on her target), the first 0.1 s after BigHit; at 'Unlock' (1.4532 s) FinishSpell lets her attack and removes the
+    mana lock. All spell damage magic, on-spell, crit only with Precision. The Ascension rows (999) do nothing.
+    """
+    KEY = 'DA_Kayle19'
+    BEGIN = 'CD_Kayle19_BeginCast'
+    FINALE = 'CD_Kayle19_LaunchAllSwords'
+    PROJECTILE_SPEED = 2250  # DA_Kayle19_AutoAttackProjectile TFTFixedSpeedMovement MoveSpeed (client asset, not in the build)
+    FINALE_CLAMP = 1.5  # ComputeASScalingForFinale FMin(Sqrt(...), 1.5) (script literal)
+    START_CLAMP = 2  # ComputeASScalingForStart FMin(..., 2) (script literal)
+    DURATION_SHARE = 0.75  # GA_Kayle19_Spell_new 0xd1: the chrono's duration x 0.75 (script literal)
+    DROP_EVERY = 0.1  # 0x100d: K2_SetTimerDelegate(0.1, looping) (script literal)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        t = self.timing
+        t.proj_speed = self.PROJECTILE_SPEED
+        t.source['proj_speed'] = 'DA_Kayle19_AutoAttackProjectile 2250 (client asset; not in the build)'
+        t.lock_scales_with_as = False
+        t.source['lock_scales_with_as'] = 'GA_Kayle19_Spell_new: its own AS clamps (ComputeASScaling*)'
+        t.mana_lock = 10 ** 6  # lifted at the finale's Unlock
+        t.source['mana_lock'] = 'GA_Kayle19_Spell_new: FinishSpell at CD_Kayle19_LaunchAllSwords Unlock'
+        self.buff_at = self.chrono_event(self.BEGIN, 'Buff')
+        self.begin_unlock = self.chrono_event(self.BEGIN, 'Unlock')
+        self.begin_len = self.chrono(self.BEGIN)['length']
+        self.big_hit = self.chrono_event(self.FINALE, 'BigHit')
+        self.finale_unlock = self.chrono_event(self.FINALE, 'Unlock')
+        self.aoe = int(self.row('AOEHexRange'))
+        self.counting = False
+        self.swords = 0
+        self.notes = ('For 4 s after a cast: +80% attack speed and a sword per attack; then she stops for the finale: '
+                      'a 2-hex blast and the swords on her target. Her mana is locked from the cast to the end of the finale.')
+
+    def passive_damage(self, level, AD, AP):
+        return self.row('APDamage', star=level) * AP
+
+    def aoe_damage(self, level, AD, AP):
+        return self.row('AOEDamageAP', star=level) * AP
+
+    def sword_damage(self, level, AD, AP):
+        return self.row('SwordAPDamage', star=level) * AP
+
+    def performAttack(self, opponents, items, time, multiplier=None, generateMana=True):
+        super().performAttack(opponents, items, time, multiplier, generateMana)
+        self.multiTargetSpell(opponents[:1], items, time, 1, self.passive_damage, 'magical')
+
+    def _speed(self, clamp, root):
+        r = self.aspd.stat / (self.base_aspd * (1 + self.row('BonusAttackSpeed')))
+        return min(max(r ** 0.5 if root else r, 1), clamp)
+
+    def onLaunch(self, opponents, items):
+        if self.counting:
+            self.swords += 1
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        s = self._speed(self.START_CLAMP, root=False)
+        self.timing.cast_lock = (ticks_up(self.begin_unlock / s) + 1) / TPS
+        start = self.tick + ticks_up(self.buff_at / s)
+        duration = self.row('Duration') + self.DURATION_SHARE * self.begin_len / s
+
+        def buff():
+            self.aspd.modify('MultiplyAdditive', 1 + self.row('BonusAttackSpeed'), key='kayle_buff')
+            self.swords, self.counting = 0, True
+            self.schedule_tick(self.tick + ticks_up(duration), finale)
+
+        def finale():
+            self.aspd.remove('kayle_buff')
+            self.counting = False
+            f = self._speed(self.FINALE_CLAMP, root=True)
+            now, swords = self.tick, self.swords
+            self.attacking = False  # GE_UnitStopAttackingMoving until the finale's Unlock
+            self.busy_until = now + ticks_up(self.finale_unlock / f)
+            hit = now + ticks_up(self.big_hit / f)
+            area = [target] + self.nearby(target, self.aoe)  # TR_Add_EnemiesWithinHexRange, the target included
+            self.schedule_tick(hit, lambda: self.multiTargetSpell(area, self.items, self.tick / TPS, len(area),
+                                                                  self.aoe_damage, 'magical'))
+            for k in range(1, swords + 1):
+                self.schedule_tick(hit + ticks_up(k * self.DROP_EVERY), lambda: self.multiTargetSpell(
+                    [target], self.items, self.tick / TPS, 1, self.sword_damage, 'magical'))
+            self.schedule_tick(self.busy_until, lift)
+
+        def lift():
+            self.mana_locked_until = self.tick
+
+        self.schedule_tick(start, buff)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
-              'OlafHeroAugment', 'Ashe', 'Viego']
+              'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle']
 
 
 class TrainingDummy(Champion):
