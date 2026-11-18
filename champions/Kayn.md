@@ -42,6 +42,8 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Kayn19_Attack` | ChronoDefs | 2.6 | LaunchAttack 0.3273, Unlock 1.04 |
+| `CD_Kayn19_Dash` | ChronoDefs | 1.1094 | Default 0, Loop 0.4624, FinishJump 0.4816 |
+| `CD_Kayn19_Heartsteel_BecomeShadowAssassin` | ChronoDefs | 89.9497 | Default 0, Loop 0.012 |
 | `CD_Kayn19_Spell` | ChronoDefs | 0.7304 | DealDamage 0.4591 |
 
 ### Scripts on the unit

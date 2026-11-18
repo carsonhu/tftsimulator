@@ -48,9 +48,10 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Vladimir19_3StarCast` | Chronos | 2.5959 | Clap 0.5076, Clap 0.6692, Drop 0.6692, Drop 2 |
+| `CD_Vladimir19_3StarCast` | Chronos | 3.6 | Default 0, Clap 0.5076, Clap 0.6692, Drop 0.6692, Drop 2, Laugh 2.5959 |
 | `CD_Vladimir19_Attack` | Chronos | 1.0012 | LaunchAttack 0.38, Unlock 0.7495 |
 | `CD_Vladimir19_CastNormal` | Chronos | 0.961 | Cast 0.1425, Unlock 0.9503 |
+| `CD_Vladimir19_CastNormal_Projectile` | Chronos | 2 | Default 0, Hit 0.5 |
 | `CD_Vladimir19_CastSpecial` | Chronos | 1.8148 | Unlock 1.8 |
 | `CD_Vladimir19_Chandelier` | Chronos | 5 | Teleport 0, Damage 1.7963, DestroyActor 4.2469 |
 

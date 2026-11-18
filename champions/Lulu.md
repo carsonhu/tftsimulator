@@ -54,6 +54,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | `CD_Lulu19_HyperpopHypemeter_Outro` | Chronos | 0.5108 | EndOutro 0.485 |
 | `CD_Lulu19_Whimsy` | Chronos | 1 | Unlock 0.987 |
 | `CD_Lulu19_WhimsySelf` | Chronos | 1 | SelfCast 0.3971, EncoreSelfCast 0.6855 |
+| `CD_Lulu19_WhimsyTar` | Chronos | 5.5 | Default 0, Loop 0.1004 |
 | `CD_Lulu19_WildGrowth` | Chronos | 1 | UpWeGo 0.3045, EncoreUpWeGo 0.5305 |
 
 ### Scripts on the unit

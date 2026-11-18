@@ -55,7 +55,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Aphelios19_AttackNew` | Chronos/Basic | 2.3 | LaunchAttack 0.3, LaunchAttack 0.3342, Unlock 0.6, Unlock 0.65 |
-| `CD_Aphelios19_CastSustained` | Chronos/Basic | 3.1974 | LaunchAttack 2.1 |
+| `CD_Aphelios19_CastSustained` | Chronos/Basic | 8.6333 | Default 0, LaunchAttack 2.1, LoopBegin 3.1974, LoopEnd 6.2 |
 | `CD_Aphelios19_CastAnim` | Chronos/Cast | 2.2009 | StartLasers 0.1453, FireBlasts 0.9834, Unlock 2.1371 |
 
 ### Scripts on the unit

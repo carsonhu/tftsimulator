@@ -55,12 +55,12 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Akali_TrueDamage19_3StarSpell` | Chronos/3Star | 1.4068 | Explosion 1.3865 |
+| `CD_Akali_TrueDamage19_3StarSpell` | Chronos/3Star | 1.5403 | Default 0, Explosion 1.3865, Return 1.4068 |
 | `CD_Akali_TrueDamage19_3StarSpellStrike` | Chronos/3Star | 0.75 | Teleport 0.0241, Dash 0.1788 |
 | `CD_Akali_TrueDamage19_3StarStrikeTar` | Chronos | 0.1988 | End 0.1138 |
 | `CD_Akali_TrueDamage19_Attack` | Chronos | 2.3 | LaunchAttack 0.3385, LaunchAttack 0.3685, Unlock 0.6664, Unlock 0.92 |
 | `CD_Akali_TrueDamage19_Spell` | Chronos | 0.4981 | StartShroud 0.1599 |
-| `CD_Akali_TrueDamage19_SpellShroudDetonate` | Chronos | 1.0006 | Explosion 0.4317, ReturnFacing 0.9104 |
+| `CD_Akali_TrueDamage19_SpellShroudDetonate` | Chronos | 1.3342 | Default 0, Explosion 0.4317, ReturnFacing 0.9104, Return 1.0006 |
 | `CD_Akali_TrueDamage19_SpellStrike` | Chronos | 0.9979 | Teleport 0.0418, Dash 0.1965, StrikeDamage 0.574 |
 
 ### Scripts on the unit

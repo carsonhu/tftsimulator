@@ -96,7 +96,7 @@ def test_the_number_of_targets_reaches_an_area_champion_only():
     cat = json.loads(sim_entry.catalog_json())
     assert cat['defaults']['layout'] == {'targets': 3, 'max': 7}
     area = {c['name'] for c in cat['champions'] if c['area']}
-    assert area == {'Varus', 'Ziggs', 'Ezreal', 'Malzahar', 'Kayle', 'Bard', 'RenataGlasc'}
+    assert area == {'Varus', 'Ziggs', 'Ezreal', 'Malzahar', 'Kayle', 'Bard', 'RenataGlasc', 'Briar'}
 
     def dps(champ, slice_, extra, layout):
         out = json.loads(sim_entry.run_json(json.dumps(cfg(champ=champ, level=1, slice=slice_, layout=layout))))

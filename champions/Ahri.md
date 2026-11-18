@@ -41,6 +41,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_19_Ahri_Attack` | Chronos/Default | 3.2 | LaunchAttack 0.3067, LaunchAttack 0.3874, Unlock 1.2, Unlock 1.28 |
+| `CD_Ahri19_DashMove` | Chronos/Default | 0.3002 | Arrived 0.3002 |
 | `CD_19_Ahri_CastAnim_Empowered` | Chronos/Spell/Empowered | 1.8155 | Fire 0.5157, Unlock 0.9443 |
 | `CD_19_Ahri_SpiritRushActivationPose` | Chronos/Spell/Empowered | 0.7667 | PowerUp 0.2009, Unlock 0.7512 |
 | `CD_19_Ahri_CastAnim_Basic` | Chronos/Spell/Standard | 1.1568 | StartMissiles 0.1398, Unlock 0.9981 |

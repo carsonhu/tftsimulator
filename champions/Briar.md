@@ -41,8 +41,8 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Briar19_Attack` | CD_Briar19_Attack | 2.6333 | LaunchAttack 0.3289, CustomLaunchAttack1 0.4853, CustomLaunchAttack1 0.5099, Unlock 0.64, Unlock 1.0533, Unlock 1.1067 |
-| `CD_Briar19_CastAnim_Long` | CD_Briar19_CastAnim_Long | 0.31 | SlideBack 0.1059, Unlock 0.2923 |
-| `CD_Briar19_CastAnim_Short` | CD_Briar19_CastAnim_Short | 0.31 | SlideBack 0.1059, Unlock 0.2923 |
+| `CD_Briar19_CastAnim_Long` | CD_Briar19_CastAnim_Long | 0.9585 | Default 0, Boom 0.31, Land 0.6731, SlideBack 0.7706, AtNewHex 0.9422, Unlock 0.9422 |
+| `CD_Briar19_CastAnim_Short` | CD_Briar19_CastAnim_Short | 0.8166 | Default 0, Boom 0.31, Land 0.5311, SlideBack 0.6286, AtNewHex 0.8003, Unlock 0.8003 |
 | `CD_Briar19_Windup` | CD_Briar19_Windup | 0.5013 | HealOverWindup 0, Kick 0.191 |
 
 ### Scripts on the unit
@@ -59,8 +59,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Briar`, D1); predicted from the script, the panel
+  checked on VOD5 (E1); no cast timed yet
+- Keep in the simulator: **yes** (owner, 2026-11-18)
 
 ## Questions
 
@@ -69,29 +70,41 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackAssassin | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed for HP, mana, range | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackAssassin: 10 per attack, on the hit (melee) | predicted | |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
-| Q4 | Attack windup at base AS (attack start to hit / release) | 0.3289 s (9.87 ticks) | predicted | |
-| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
-| Q6 | Projectile travel time (ranged only) | none | not applicable? | |
-| Q7 | Cast time: cast start to the next attack starting | 1.0333 s (31 ticks) | predicted | |
+| Q4 | Attack windup at base AS (attack start to hit / release) | 0.3289 s (10 ticks) | predicted | |
+| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 (bUseRateScalingThreshold set, no threshold: G20) | open; matters for the frenzy (AS x3: period 12.5 ticks, slash windup 15) | D1 |
+| Q6 | Projectile travel time (ranged only) | – | not applicable | |
+| Q7 | Cast time: cast start to the next attack starting | 31 ticks (Short dash): Kick 6 + Unlock 24 + 1; 36 with the Long dash (Unlock 29) | predicted | D1 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | – | predicted | |
-| Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
-| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | the tick after the 3rd slash | predicted | D1 |
+| Q10 | Does the mana lock scale with attack speed? | ends with the slashes, so it shortens with AS | predicted | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0; the 3 slashes are attacks (custom launches) with on-hit effects | predicted | D1 |
+| Q12 | Does the cast cancel or reset an attack in progress? | cancels | predicted | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | dash AOE 100/150/240 x AD on the targets; 3 slashes of 100/150/240 x AD on her target | predicted (script and effects read) | D1 |
+| Q14 | Passives and other mechanics that need modelling | the heal and the role's damage reduction: nothing against dummies; full health assumed | not applicable | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-18 | rls-19.1.0.5973071 | VOD5 (`…PBE_11-18-2026_0-57-11-500.mp4`) 8:20, owner's screenshot | 60 | inspection panel in combat (round 1-9) | 850/850, 0/30; AD 58, AP 15%, AS 2.92, crit 45%, armor 65, MR 85, range 1 hex, Front; 2 items; Ionic Spark, Slayer, Collab | HP, mana, range as built; AS 2.92 = 0.8 x 3.65 fits the frenzy's +200% with +65% from items and traits (not itemised) | Q1, Q13 |
 
 ## Decisions and notes
 
+- 2026-11-18, D1 (implemented, `set19champs.Briar`):
+  - **Cast (GA_Briar19_Spell):** mana lock; CD_Briar19_Windup at the snack target (the farthest enemy within 3
+    hexes; her target when none); 'Kick' (0.191 s) starts the dash, Short under 2.5 hexes, else Long. The dash
+    chronos run three phases whose starts fire 'Boom' and 'Land' (the build lacked these until the snapshot fix,
+    2026-11-18): Boom (0.31 s) +200% AS and the frenzy tag; Land (Short 0.5311 / Long 0.6731 s) the AOE; Unlock
+    (0.8003 / 0.9422 s) ends the cast.
+  - **Frenzy:** 3 custom attacks (CustomLaunchAttack1 at 0.4853, 0.4853, 0.5099 s of 2.6333, 2.6333, 2.7667 s),
+    each a slash (GE_Briar19_DamageSlash, on-hit) instead of the attack; the buff ends at the 3rd, the mana lock the
+    tick after.
+  - **Assumed (owner, 2026-11-18):** full health. The AOE hits the page's number of targets (G22: the target and
+    the enemies next to it), not the snack target's neighbours; the snack target only sets the dash's length.

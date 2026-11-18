@@ -49,6 +49,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 |---|---|---|---|
 | `CD_Kayle19_Attack` | Chrono | 2.1667 | LaunchAttack 0.3979, Unlock 0.8667 |
 | `CD_Kayle19_BeginCast` | Chrono | 0.5 | Buff 0.1324, Unlock 0.4929 |
+| `CD_Kayle19_Celebration` | Chrono | 4.5995 | Default 0, Loop 0.7328 |
 | `CD_Kayle19_LaunchAllSwords` | Chrono | 4.5077 | SwordsGoUp 0.3386, BigHit 1.048, Unlock 1.4532 |
 
 ### Scripts on the unit

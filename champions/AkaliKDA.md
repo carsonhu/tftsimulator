@@ -44,9 +44,12 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_AkaliKDA19_3StarSkateboardExplosion` | Chronos/3Star | 1.8494 | Damage 0.2566 |
+| `CD_AkaliKDA19_3StarSkateboard_Moving` | Chronos/3Star | 46.2873 | Arrive 46.2873 |
 | `CD_AkaliKDA19_Attack` | Chronos | 3 | LaunchAttack 0.2964, LaunchAttack 0.3064, LaunchAttack 0.3832, Unlock 0.4532, Unlock 1.1864, Unlock 1.2 |
+| `CD_AkaliKDA19_PaintedHex` | Chronos | 1.3788 | Default 0, Loop 0.7572 |
 | `CD_AkaliKDA19_CastAnim` | Chronos/NormalCast | 0.3666 | StartDash 0.3286 |
-| `CD_AkaliKDA19_MoveToCastLocation` | Chronos/NormalCast | 0.0188 | StartSkating 0.01 |
+| `CD_AkaliKDA19_MoveToCastLocation` | Chronos/NormalCast | 0.3495 | Default 0, Arrive 0.01, StartSkating 0.01, Loop 0.0188 |
+| `CD_AkaliKDA19_MoveToFinalHex` | Chronos/NormalCast | 1.1473 | Default 0, Arrive 0.1498, LoopAnim 0.1498 |
 | `CD_AkaliKDA19_EmpoweredCastAnimation` | Chronos/SpecialCast | 1.0167 | FireProjectiles 0.3685, Unlock 0.9956 |
 | `CD_AkaliKDA19_ExplosionOnHex` | Chronos/SpecialCast | 1.0012 | BlowUpAnotherHex 0.0449 |
 

@@ -35,6 +35,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 |---|---|---|---|
 | `CD_Lucian19_CastAnim` | Chronos | 0.9507 | Unlock 0.9298 |
 | `CD_Lucian19_CastAnim_Encore` | Chronos | 0.8263 | Unlock 0.8029 |
+| `CD_Lucian19_Dash` | Chronos | 1.3652 | Default 0, Arrive 0.0124, LoopAnim 0.0124 |
 | `CD_Lucian19__Attack` | Chronos | 1.5 | LaunchAttackVariant1 0.2283, LaunchAttackVariant2 0.2283, LaunchAttackVariant1 0.262, LaunchAttackVariant2 0.262, Unlock 0.6 |
 
 ### Scripts on the unit

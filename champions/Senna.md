@@ -42,6 +42,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | `CD_Senna19_Attack` | Chronos | 3.3 | LaunchAttack 0.531, LaunchAttack 0.6364, Unlock 1.2, Unlock 1.32 |
 | `CD_Senna19_CastAnim1` | Chronos | 1.2546 | Unlock 1.1984 |
 | `CD_Senna19_CastAnim2` | Chronos | 1.0002 | Damage 0.2851, Unlock 0.9864 |
+| `CD_Senna19_Celebration` | Chronos | 6.4419 | Default 0, Loop 1.9631 |
 | `CD_Senna19_FastYoink` | Chronos | 0.7728 | Lock 0, Unlock 0.5056 |
 
 ### Scripts on the unit

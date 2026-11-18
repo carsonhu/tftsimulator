@@ -41,7 +41,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Jax19_SlamOnTarget` | Chronos/Ability | 0.5759 | DealDamage 0.42, Unlock 0.5581 |
+| `CD_Jax19_SlamOnTarget` | Chronos/Ability | 0.5759 | Arrive 0.4124, DealDamage 0.42, Unlock 0.5581 |
 | `CD_Jax19_AttackNew` | Chronos/Basic | 2.1 | LaunchAttack 0.3239, Unlock 0.8532 |
 
 ### Scripts on the unit

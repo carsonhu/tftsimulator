@@ -50,10 +50,11 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Yone19_AttackNew` | Chrono | 2.5 | LaunchAttack 0.26, LaunchAttack 0.323, LaunchAttack 0.353, LaunchAttack 0.3542, Unlock 0.9864, Unlock 1 |
-| `CD_Yone19_CastAnim` | Chrono | 0.2966 | StartStrikes 0.0062 |
+| `CD_Yone19_CastAnim` | Chrono | 9.9446 | Default 0, Loop 0.2966, StartStrikes 0.4992 |
 | `CD_Yone19_CastAnim_Part2` | Chrono | 0.7915 | DealDamage 0.3453, Unlock 0.6589 |
+| `CD_Yone19_Celebration` | Chrono | 12.2141 | Default 0, Loop 3.0894 |
 | `CD_Yone19_SpellMissile` | Chrono | 0.3999 | Damage 0.0576, Damage 0.0793, Damage 0.0831, Damage 0.1619 |
-| `CD_Yone19_CastAnimAlt` | Chrono/old | 0.3478 | StartStrikes 0.0073 |
+| `CD_Yone19_CastAnimAlt` | Chrono/old | 9.9957 | Default 0, Loop 0.3478, StartStrikes 0.5504 |
 | `CD_Yone19_CastAnim_Part2_Alt` | Chrono/old | 1.0058 | DealDamage 0.7784, Unlock 0.9879 |
 
 ### Scripts on the unit

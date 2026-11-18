@@ -48,7 +48,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_RenataGlasc19_Attack` | CD_RenataGlasc19_Attack | 2.3333 | LaunchAttack 0.3307, Unlock 0.9333 |
-| `CD_RenataGlasc19_Spell` | CD_RenataGlasc19_Spell | 0.9328 | LaunchChains 0.1974 |
+| `CD_RenataGlasc19_Spell` | CD_RenataGlasc19_Spell | 1.2021 | Default 0, LaunchChains 0.1974, Waiting 0.9328 |
 | `CD_RenataGlasc19_SpellEnd` | CD_RenataGlasc19_SpellEnd | 0.6804 | Unlock 0.6578 |
 
 ### Scripts on the unit

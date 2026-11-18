@@ -55,7 +55,9 @@ class Layout:
     def place(self, champion, dummies):
         """Put the champion and `dummies` (the target first) on their hexes; any beyond the targets are out of play."""
         target = (max(1, champion.attack_range or 1), 0)
-        spots = [target] + ring(target, 1)[:self.targets - 1]
+        # a melee unit stands on one of the target's neighbouring hexes: skip it (a 7th target then stands 2 away)
+        free = [h for h in ring(target, 1) + ring(target, 2) if h != (0, 0)]
+        spots = [target] + free[:self.targets - 1]
         champion.hex = (0, 0)
         for i, dummy in enumerate(dummies):
             dummy.in_play = i < len(spots)

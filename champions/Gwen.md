@@ -46,9 +46,11 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
+| `CD_Gwen19_3Star_CopiesPopOut` | 3Star | 0.2998 | Arrived 0.2998 |
 | `CD_Gwen19_Attack` | Chronos | 3.0666 | LaunchAttack 0.3377, Unlock 1.2267 |
 | `CD_Gwen19_CastAnim_3Star` | Chronos | 2.4703 | BigSnipSpawn 0, SNIP 1.4838, RecastCheck 2.4513 |
 | `CD_Gwen19_CastAnim_new` | Chronos | 1.9539 | BigSnipSpawn 0, SNIP 1.4838, RecastCheck 1.9361 |
+| `CD_Gwen19_DashMove` | Chronos | 0.2714 | Arrived 0.2667 |
 | `CD_Gwen19_ScissorsAnimation` | Chronos | 2.6445 | BigSnipSpawn 0, SNIP 1.4846, ByeScissors 2.5279 |
 | `CD_Gwen19_Scissors_3Star_SmallVersion` | Chronos | 3.63 | BigSnipSpawn 0, SNIP 1.4846, ByeScissors 2.7085 |
 

@@ -53,6 +53,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | `CD_Qiyana19_Attack` | Chronos | 1.9667 | LaunchAttack 0.2992, LaunchAttack 0.3067, LaunchAttack 0.307, Unlock 0.5867, Unlock 0.7867, Unlock 0.84 |
 | `CD_Qiyana19_CastAnimMove` | Chronos | 1.5006 | MovementEnd 0.4004, Fire 0.7299, PrintGold 0.7784, ManaUnlock 1.2495, Unlock 1.4916 |
 | `CD_Qiyana19_CastAnimNoMove` | Chronos | 1.1016 | Fire 0.3498, PrintGold 0.3779, ManaUnlock 0.8491, Unlock 1.0912 |
+| `CD_Qiyana19_Celebration` | Chronos | 7 | Default 0, Loop 2.0324 |
 
 ### Scripts on the unit
 

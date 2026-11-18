@@ -63,6 +63,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
+| `CD_Sona19_3Star_IncreaseCopySize` | Champion/Chronos | 89.9866 | Default 0, Loop 0.9997 |
 | `CD_Sona19_PassivePulse` | Champion/Chronos | 8.0105 | DamagePulse 0.3002, Pulse 0.5063, HeartsteelPulse 0.6995 |
 | `CD_Sona19_Spell` | Champion/Chronos | 2.6983 | CalculateWaveSplit 1.2661, Unlock 2.5983 |
 | `CD_Sona19_ChangeFormIn` | Trait | 0.5992 | SwapForm 0.5254 |

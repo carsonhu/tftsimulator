@@ -45,12 +45,14 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Vi19_3Star5Cost_JaxSpawnCeremony` | Chronos/Base | 0.5743 | Targetable 0.1513, Unlock 0.5428 |
+| `CD_Vi19_3Star5Cost_JaxSpawnCeremony` | Chronos/Base | 0.5743 | Targetable 0.1513, Land 0.5016, Unlock 0.5428 |
+| `CD_Vi19_3Star5Cost_Jax_Size` | Chronos/Base | 89.9866 | Default 0, Loop 0.9997 |
 | `CD_Vi19_Attack` | Chronos/Base | 1.1333 | LaunchAttack 0.2724, LaunchAttack 0.2924, LaunchAttack 0.3526, Unlock 0.4533, Unlock 0.6533, Unlock 0.8267 |
 | `CD_Vi19_SpellIntro` | Chronos/SpellAnims | 0.6462 | ShieldSelfAndAlly 0.3051, SpawnFists 0.4522, StartSlamming 0.5664 |
 | `CD_Vi19_SpellOutro` | Chronos/SpellAnims | 0.5997 | EndSpell 0.396 |
 | `CD_Vi19_Spell_LeftGroundStrike` | Chronos/SpellAnims | 0.5468 | Slam 0.2824 |
 | `CD_Vi19_Spell_RightGroundStrike` | Chronos/SpellAnims | 0.5468 | Slam 0.2191 |
+| `CD_Vi19_ShieldNew` | Chronos/SpellVFX | 6.0928 | Default 0, Loop 0.2001 |
 
 ### Scripts on the unit
 

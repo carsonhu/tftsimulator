@@ -45,6 +45,8 @@ Every timeline in the champion folder that has events (the spell prediction abov
 |---|---|---|---|
 | `CD_Vayne19_Attack` | Chronos | 1.3 | LaunchAttack 0.2317, CustomLaunchAttack1 0.2323, LaunchAttack 0.3007, LaunchAttack 0.3039, CustomLaunchAttack1 0.3677, Unlock 0.52, Unlock 0.56, Unlock 0.6533, Unlock 0.6667, Unlock 1.2 |
 | `CD_Vayne19_CastAnim` | Chronos | 0.7003 | DemonON 0.0726, Unlock 0.6968 |
+| `CD_Vayne19_Celebration` | Chronos | 5.4324 | Default 0, Loop 3.4393 |
+| `CD_Vayne19_TumbleMove` | Chronos | 0.2265 | MovementComplete 0.2224 |
 | `CD_Vayne19_TumbleUnlock` | Chronos | 0.5118 | Unlock 0.5062 |
 
 ### Scripts on the unit

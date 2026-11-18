@@ -47,10 +47,10 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Yasuo19_Attack` | Chronos | 1.6 | LaunchAttack 0.26, LaunchAttack 0.2775, LaunchAttack 0.2823, Unlock 0.6533, Unlock 0.6664 |
-| `CD_Yasuo19_BaseSpell` | Chronos | 0.2204 | Damage 0.0648, Unlock 0.2156 |
+| `CD_Yasuo19_BaseSpell` | Chronos | 0.8709 | Default 0, Thrust 0.2204, Damage 0.4115, Unlock 0.8568 |
 | `CD_Yasuo19_BaseSpell_NoDash` | Chronos | 0.716 | Damage 0.194, Unlock 0.6409 |
-| `CD_Yasuo19_UltKnockup` | Chronos | 0.1273 | Damage1 0.0076, ReturnToHex 0.0444, Damage2 0.0498, Unlock 0.1256 |
-| `CD_Yasuo19_UltNoKnockup` | Chronos | 0.1273 | Damage1 0.0076, ReturnToHex 0.0444, Damage2 0.0498, Unlock 0.1256 |
+| `CD_Yasuo19_UltKnockup` | Chronos | 1.4355 | Default 0, Knockup 0.1273, Damage1 0.1888, Damage2 0.5278, Slam 1.1514, ReturnToHex 1.2504, Unlock 1.4317 |
+| `CD_Yasuo19_UltNoKnockup` | Chronos | 1.4355 | Default 0, Knockup 0.1273, Damage1 0.1888, Damage2 0.5278, Slam 1.1514, ReturnToHex 1.2504, Unlock 1.4317 |
 | `CD_Yasuo19_UltWhirlwind` | Chronos | 0.9999 | FireWind 0.3025 |
 
 ### Scripts on the unit

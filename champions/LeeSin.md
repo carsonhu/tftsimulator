@@ -54,7 +54,10 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
+| `CD_LeeSin19_MoveToLocation` | Chronos/3Star | 59.9705 | Arrive 59.9705 |
 | `CD_LeeSin19_Attack` | Chronos/Basic | 1.3 | LaunchAttack 0.33, Unlock 0.52, Unlock 0.64, Unlock 0.7067 |
+| `CD_LeeSin19_Celebration` | Chronos/Basic | 8.7747 | Default 0, Loop 1.7704 |
+| `CD_LeeSin19_Dash` | Chronos/Spell | 0.5512 | Arrived 0.5512 |
 | `CD_LeeSin19_Punch` | Chronos/Spell | 1.1461 | PunchDamage 0.382, ContinueChain 0.7159, Unlock 1.1297 |
 | `CD_LeeSin19_Slam` | Chronos/Spell | 1 | SlamDamage 0.2635, Next 0.6734 |
 | `CD_LeeSin19_Spin` | Chronos/Spell | 1.1 | Knockup 0.1612, SpinDamage 0.1612, SpinDamage 0.3532, SpinDamage 0.5389, Next 0.7794 |

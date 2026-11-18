@@ -46,10 +46,12 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
+| `CD_BaronNashor19_AccordianAttachment` | Accordian | 1.9967 | Default 0, Loop 0.7525 |
 | `CD_BaronNashor19_Accordian_Attack` | Accordian | 1.6667 | LaunchAttack 0.2671, Unlock 0.6667 |
-| `CD_BaronNashor19_Accordian_CombineCeremony` | Accordian | 5.8333 | LaunchAttack 0.2671, Unlock 0.6667, Jump 1.6492, RAA!!! 3.5893, Disappear 4.8563 |
+| `CD_BaronNashor19_Accordian_CombineCeremony` | Accordian | 5.8333 | Jump 1.6492, LaunchAttack 1.9163, Unlock 2.3159, RAA!!! 3.5893, Disappear 4.8563 |
 | `CD_BaronNashor19_Accordian_Death` | Accordian | 1.501 | Done 1.0036 |
 | `CD_BaronNashor19_Accordian_SpawnCeremony` | Accordian | 0.5017 | Unlock 0.4967 |
+| `CD_BaronNashor19_BanjoAttachment` | Banjo | 1.9954 | Default 0, Loop 0.7525 |
 | `CD_BaronNashor19_Banjo_Attack` | Banjo | 0.9333 | LaunchAttack 0.4, Unlock 0.75 |
 | `CD_BaronNashor19_Banjo_CombineCeremony` | Banjo | 5.8333 | Jump 1.0731, RAA!!! 3.5893, Disappear 4.8563 |
 | `CD_BaronNashor19_Banjo_Death` | Banjo | 1.5 | Done 1.0029 |
@@ -58,14 +60,17 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | `CD_BaronNashor19_CombineCeremony` | BaronNashor/Chronos/Basic | 5.8333 | RAA!!! 3.5893 |
 | `CD_BaronNashor19_SpellNew` | BaronNashor/Chronos/Spell | 1.9237 | Summon1 0.5019, Unlock 1.9092 |
 | `CD_BaronNashor19_Disappear` | CD_BaronNashor19_Disappear | 0.9894 | Disappear 0.7698 |
+| `CD_BaronNashor19_DrumAttachment` | Drum | 1.9954 | Default 0, Loop 0.7525 |
 | `CD_BaronNashor19_Drum_Attack` | Drum | 1 | LaunchAttack 0.26, LaunchAttack 0.27, Unlock 0.4, Unlock 0.452 |
 | `CD_BaronNashor19_Drum_CombineCeremony` | Drum | 5.8333 | Jump 1.2179, RAA!!! 3.5893, Disappear 4.8563 |
 | `CD_BaronNashor19_Drum_Death` | Drum | 0.8012 | Done 0.5357 |
 | `CD_BaronNashor19_Drum_SpawnCeremony` | Drum | 0.504 | Unlock 0.4967 |
+| `CD_BaronNashor19_RiftHeraldAttachment` | RiftHerald | 1.9954 | Default 0, Loop 0.7525 |
 | `CD_BaronNashor19_RiftHerald_Attack` | RiftHerald | 2.3333 | LaunchAttack 0.2372, Unlock 0.9332 |
 | `CD_BaronNashor19_RiftHerald_CombineCeremony` | RiftHerald | 5.8333 | Jump 0, RAA!!! 3.5893, Disappear 4.8563 |
 | `CD_BaronNashor19_RiftHerald_Death` | RiftHerald | 1.5 | Done 1.0029 |
 | `CD_BaronNashor19_RiftHerald_SpawnCeremony` | RiftHerald | 1.4556 | Unlock 1.4398 |
+| `CD_BaronNashor19_TrumpetAttachment` | Trumpet | 1.9973 | Default 0, Loop 0.7525 |
 | `CD_BaronNashor19_Trumpet_Attack` | Trumpet | 1 | LaunchAttack 0.27, Unlock 0.452 |
 | `CD_BaronNashor19_Trumpet_CombineCeremony` | Trumpet | 5.8333 | Jump 1.8309, RAA!!! 3.5893, Disappear 4.8563 |
 | `CD_BaronNashor19_Trumpet_Death` | Trumpet | 1.5038 | Done 1.0055 |

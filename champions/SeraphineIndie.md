@@ -53,7 +53,8 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Seraphine19_Attack` | Chrono | 1.6333 | LaunchAttack 0.2682, Unlock 0.6533 |
-| `CD_Seraphine19_CastAnim` | Chrono | 0.8986 | ThirdFire 0.2472, HighNote 0.269, SecondFire 0.2757, BeginFire 0.2997, Unlock 0.8808 |
+| `CD_Seraphine19_CastAnim` | Chrono | 2.7156 | Default 0, HighNote 0.269, BeginFire 0.2997, Pose1 0.8986, SecondFire 1.1739, Pose2 1.7956, ThirdFire 2.0487, Unlock 2.6974 |
+| `CD_Seraphine19_Celebration` | Chrono | 11.4 | Default 0, Loop 0.3297 |
 | `CD_Seraphine19_RisingStarCeremony` | Chrono | 5.3313 | Transform 0.5815, Loot 0.6219 |
 | `CD_Seraphine19_SuperstarCeremony` | Chrono | 5.0259 | Transform 0.1964, Loot 0.9112 |
 | `CD_Seraphine19_CatGrantLoot` | UniqueTraits | 4.186 | BeginSpawn 2.7984, Loot 2.9578 |

@@ -37,7 +37,9 @@ Every timeline in the champion folder that has events (the spell prediction abov
 |---|---|---|---|
 | `CD_Camille19_Attack` | Chronos | 2 | LaunchAttack 0.2702, LaunchAttack 0.3385, Unlock 0.8, Unlock 0.92 |
 | `CD_Camille19_Spell` | Chronos | 0.9004 | DealDamage 0.5251, Unlock 0.8959 |
-| `CD_Camille19_DashStart` | Chronos/Passive | 0.4978 | Fire 0.0922 |
+| `CD_Camille19_DashEnd` | Chronos/Passive | 0.2203 | Land 0.2191 |
+| `CD_Camille19_DashMiddle` | Chronos/Passive | 3.0076 | Arrive 3.0076 |
+| `CD_Camille19_DashStart` | Chronos/Passive | 3.8958 | Default 0, Fire 0.0922, LongAnimForFacing 0.4978 |
 
 ### Scripts on the unit
 

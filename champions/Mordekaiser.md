@@ -51,6 +51,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | `CD_Mordekaiser19_3StarSpell` | Chronos/3Star | 44.5788 | Slam 1.9929, Slam 3.8056, Slam 5.5077, Slam 7.1792, Unlock 8.9773 |
 | `CD_Mordekaiser19_Attack` | Chronos | 2.6 | LaunchAttack 0.6, CustomLaunchAttack1 0.8, Unlock 1.1732, Unlock 1.35 |
 | `CD_Mordekaiser19_Cast` | Chronos | 1.5801 | YeetBuildup 0, Empowered 1.4751 |
+| `CD_Mordekaiser19_Celebration` | Chronos | 5.2514 | Default 0, Loop 1.0031 |
 | `CD_Mordekaiser19_Claw` | Chronos | 1.6291 | Yeet 0.9858 |
 
 ### Scripts on the unit

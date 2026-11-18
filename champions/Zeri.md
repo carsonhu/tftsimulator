@@ -39,9 +39,11 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
+| `CD_Zeri19_3Star_HopToCenterIntoCelebrate` | Chronos | 3.3894 | Default 0, Windup 0.5583, Arrived 0.9289, Loop 1.7858 |
 | `CD_Zeri19_Attack` | Chronos | 1.0333 | LaunchAttack 0.0759, LaunchAttack 0.1996, Unlock 0.62,  0.64 |
-| `CD_Zeri19_CastAnim_3Star` | Chronos | 0.9991 | Start1 0.0016, Start2 0.1678, Start3 0.3341, Start4 0.5004, FaceTarget 0.6237, Start5 0.6667, Start6 0.8329 |
-| `CD_Zeri19_CastAnim_new` | Chronos | 0.9991 | Start6 0.0004, Start1 0.0019, Telegraph 0.185, Start2 0.2014, Start3 0.4009, Boom 0.4614, Start4 0.6004, Start5 0.7999, Unlock 0.9463 |
+| `CD_Zeri19_CastAnim_3Star` | Chronos | 3.016 | Default 0, FaceTarget 0.6237, Movement 0.9991, Start1 1, Start2 1.1, Start3 1.2, Start4 1.3, Start5 1.4, Start6 1.5, LastMoveDone 1.59, DoneMovement 1.5999 |
+| `CD_Zeri19_CastAnim_new` | Chronos | 3.016 | Default 0, Movement 0.9991, Start1 1, Start2 1.1, Start3 1.2, Start4 1.3, Start5 1.4, Movement2 1.4998, Start6 1.5, LastMoveDone 1.59, DoneMovement 1.9009, Telegraph 2.1073, Boom 2.4159, Unlock 2.9572 |
+| `CD_Zeri19_Celebration` | Chronos | 2.2579 | Default 0, loop 0.7013 |
 | `CD_Zeri19_CloneShoot` | Chronos | 0.7986 | Shoot 0 |
 
 ### Scripts on the unit

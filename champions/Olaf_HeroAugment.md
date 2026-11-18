@@ -35,7 +35,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Olaf19_Attack` | Chrono | 1 | LaunchAttackVariant1 0.32, LaunchAttackVariant2 0.32, LaunchAttack 0.4, CustomLaunchAttack1 0.5, Unlock 0.6 |
-| `CD_Olaf19_Empower_HeroAugment` | Chrono | 0.6603 | Empower 0 |
+| `CD_Olaf19_Empower_HeroAugment` | Chrono | 2.0821 | Default 0, Empower 0, LoopMarker 0.6603 |
 | `CD_Olaf19_Revive` | Chrono | 1.5012 | KillableAgain 0.5006, Unlock 1.4879 |
 
 ### Scripts on the unit

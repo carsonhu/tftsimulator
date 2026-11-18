@@ -61,7 +61,8 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | `CD_Smeech19_Attack` | Chronos | 1.7333 | LaunchAttack 0.1602, LaunchAttack 0.325, LaunchAttack 0.35, Unlock 0.5, Unlock 0.55, Unlock 0.6932 |
 | `CD_Smeech19_BeatSpawn_Mis` | Chronos | 9.9928 | LaunchProjectile 1 |
 | `CD_Smeech19_GainEmblem` | Chronos | 1.9996 | GainEmblem 1 |
-| `CD_Smeech19_SpecialCast` | Chronos | 2.1 | GainShield 0.2285, AoE 0.775, SpawnBeats 0.8072, Unlock 1.2442 |
+| `CD_Smeech19_Leap` | Chronos | 0.4335 | LeapEnd 0.4335 |
+| `CD_Smeech19_SpecialCast` | Chronos | 3.2 | Default 0, GainShield 0.2285, AoE 0.775, SpawnBeats 0.8072, LoopBegin 2.1, LoopEnd 3.1, Unlock 3.1592 |
 | `CD_Smeech19_SpecialEnemyTar` | Chronos | 10 | Instakill 9 |
 | `CD_Smeech19_Spell` | Chronos | 0.6356 | Strike 0.0937, Strike 0.2781, Unlock 0.4478, Unlock 0.6322 |
 | `CD_Smeech19_SpellJazzSpin` | Chronos | 1.639 | GainShield 0.2285, AoE 0.7235, SpawnBeats 0.7257, Unlock 1.0885 |

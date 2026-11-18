@@ -166,6 +166,14 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | When the wave reaches the target | it starts half a hex behind Bard (back row): 29 ticks after FireMeeps (0.4381 s) at 4 hexes, then 7 ticks per hex | the frame of the wave's damage numbers after the cast | champions/Bard.md Q16 |
 | The wave's two halves | 0.1 s apart, the first on application | two numbers per enemy, 3 frames apart | champions/Bard.md D1 |
 
+### 7p. Syndra and Briar (VOD5 has both)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Syndra's volleyball and bounce | the ball 40 + 11 ticks after the cast (4 hexes), the bounce 4 ticks later; 15 ticks bouncing in place | the frames of her two damage numbers (VOD5 11:35-12:30) | champions/Syndra.md Q16 |
+| Briar's frenzy windup | G2: 15 ticks per slash though the period is 12.5 at x3 AS (bUseRateScalingThreshold, no threshold) | the slashes' damage numbers after a cast (VOD5 8:20) | champions/Briar.md Q5, G20 |
+| Briar's mana after the frenzy | locked until the tick after the 3rd slash | her mana bar during and after the slashes | champions/Briar.md Q9 |
+
 ### 7n. Augments
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

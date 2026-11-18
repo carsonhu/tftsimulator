@@ -67,9 +67,10 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | `CD_Nidalee19_ShortPounce2` | Chronos | 0.4506 | Damage 0.4132, Arrived 0.4455 |
 | `CD_Nidalee19_ShortPounce3` | Chronos | 0.4701 | Damage 0.4311, Arrived 0.4648 |
 | `CD_Nidalee19_ShortPounce4` | Chronos | 0.4903 | Damage 0.4496, Arrived 0.4847 |
-| `CD_Nidalee19_SlideBack` | Chronos | 0.2042 | Unlock 0.2029 |
+| `CD_Nidalee19_SlideBack` | Chronos | 0.2042 | Arrived 0.2, Unlock 0.2029 |
 | `CD_Nidalee19_Spear` | Chronos | 1.4899 | Heal 0, Throw 0.7567, Unlock 1.4829 |
 | `CD_Nidalee19_CougarAttack` | Chronos/old | 1.3333 | LaunchAttack 0.3213, Unlock 0.5333 |
+| `CD_Nidalee19_CougarCelebration` | Chronos/old | 2.136 | Default 0, Loop 1.3027 |
 
 ### Scripts on the unit
 

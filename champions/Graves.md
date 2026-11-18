@@ -40,6 +40,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Graves19_Attack` | Chronos | 1.3 | CustomLaunchAttack1 0.12, LaunchAttack 0.12, CustomEventOnAttack1 0.52, Unlock 0.5864 |
+| `CD_Graves19_Dash` | Chronos | 3.2951 | Arrive 0.3964 |
 
 ### Scripts on the unit
 

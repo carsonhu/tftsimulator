@@ -45,7 +45,8 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | `CD_Pyke19_3StarDashAnim` | 3Star | 1.3987 | Spawn 0.3372 |
 | `CD_Pyke19_3StarTeleport` | 3Star | 0.2019 | Teleport 0.0189 |
 | `CD_Pyke19_AttackNew` | Chronos/Basic | 1.5667 | LaunchAttack 0.2646, Unlock 0.624 |
-| `CD_Pyke19_Execute` | Chronos/Passive | 1.0011 | ExecuteEnemy 0.4831, EndExecute 0.5889 |
+| `CD_Pyke19_MoveToFinalHex` | Chronos/Cast | 0.2871 | Default 0, Arrive 0.01, LoopAnim 0.01 |
+| `CD_Pyke19_Execute` | Chronos/Passive | 1.0011 | EndMovement 0.4267, ExecuteEnemy 0.4831, EndExecute 0.5889, EndMovement 0.6118 |
 
 ### Scripts on the unit
 

@@ -41,6 +41,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 |---|---|---|---|
 | `CD_Samira19_Attack` | CD_Samira19_Attack | 2.9 | LaunchAttack 0.2669, LaunchAttack 0.267, LaunchAttack 0.2693, Unlock 1.0533, Unlock 1.1067, Unlock 1.16 |
 | `CD_Samira19_CastAnim` | CD_Samira19_CastAnim | 1.3385 | BeginFire 0.1962, EndFire 0.5712, Unlock 1.3105 |
+| `CD_Samira19_Celebration` | CD_Samira19_Celebration | 10.7918 | Default 0, Loop 2.9287 |
 
 ### Scripts on the unit
 

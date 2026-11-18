@@ -4,6 +4,8 @@ Each champion is added after its worksheet (champions/<Name>.md) has the evidenc
 Numbers are read from the selected build by name; what the code itself states (which event spawns which projectile,
 how the damage is built) is the champion's script, cited by file and offset.
 """
+import math
+import layout
 import set19buffs
 from build_champion import BuildChampion
 from buildstore import BuildDataError
@@ -1199,6 +1201,210 @@ class Bard(BuildChampion):
             falloff = max(falloff * (1 - step), floor)
 
 
+class Syndra(BuildChampion):
+    """Serve's Up (champions/Syndra.md, D1). Script: GA_Syndra19_Spell (build ga_scripts.zip).
+
+    The cast commits (0x2bc8), plays CD_Syndra19_CastAnim at her attack target and applies the mana lock (0x290f).
+    The chrono runs three phases (Default 0.7749 s, Windup 1.0240 s, FinishAnimation 0.2011 s): its 'Volleyball'
+    (2400 units/s) spawns at 1.3085 s and 'Unlock' (1.99 s) removes the mana lock and finishes the cast. The ball's
+    hit applies GE_Syndra19_PrimaryDamage (MagicDamageCalc1 = PrimaryDamageAP x AP) to the target, then looks for an
+    enemy behind it (0xf): TR_Add_UnitsWithinExpandingCone from the hit, pointing away from Syndra, 1800 units long,
+    StartingBounceAngle (120 degrees) wide and SearchAngleIncreasePerCheck (30) wider each check until one is found,
+    the target excluded; sorted by distance, then farthest row first, then fewest items. The ball flies there
+    (CD_Syndra19_Bounce 'Bounce', 2000 units/s) and applies GE_Syndra19_SecondaryDamage (MagicDamageCalc2 =
+    SecondaryDamageAP x AP); with nobody behind, it bounces in place on the target (CD_Syndra19_BounceInPlace, a
+    fixed-time 'Bounce' with no time of its own: the chrono's length, 0.4999 s, G21) and hits it again. Both
+    magic, on-spell, crit only with Precision (client assets). The script reads ShredPercent and ShredDuration (0)
+    but applies nothing with them.
+    """
+    KEY = 'DA_Syndra19'
+    CAST, BOUNCE, IN_PLACE = 'CD_Syndra19_CastAnim', 'CD_Syndra19_Bounce', 'CD_Syndra19_BounceInPlace'
+    CONE_LENGTH = 1800  # GA_Syndra19_Spell literal (ConeLength)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.launch = self.chrono_projectile_spawn(self.CAST, 'Volleyball')
+        unlock = ticks_up(self.chrono_event(self.CAST, 'Unlock'))
+        self.timing.mana_lock = unlock / TPS
+        self.timing.cast_lock = (unlock + 1) / TPS
+        self.timing.source['cast_lock'] = self.timing.source['mana_lock'] = f'{self.CAST} Unlock (3 phases)'
+        self.in_place = self.chrono(self.IN_PLACE)['length']
+        self.notes = ('A cast: a volleyball at her target, then a bounce to an enemy behind it for less (to the target '
+                      'itself when nobody is behind).')
+
+    def primary_damage(self, level, AD, AP):
+        return self.row('PrimaryDamageAP', star=level) * AP
+
+    def secondary_damage(self, level, AD, AP):
+        return self.row('SecondaryDamageAP', star=level) * AP
+
+    def bounce_target(self, target):
+        """The enemy behind `target` the bounce goes to (TR_Add_UnitsWithinExpandingCone and the sorts), or None."""
+        sx, sy = layout.world(self.hex)
+        tx, ty = layout.world(target.hex)
+        n = math.hypot(tx - sx, ty - sy) or 1
+        ux, uy = (tx - sx) / n, (ty - sy) / n  # away from Syndra
+        others = []
+        for d in layout.in_play(self.opponents):
+            if d is target:
+                continue
+            x, y = layout.world(d.hex)
+            dx, dy = x - tx, y - ty
+            dist = math.hypot(dx, dy)
+            if dist <= self.CONE_LENGTH:
+                angle = math.degrees(math.acos(max(-1.0, min(1.0, (dx * ux + dy * uy) / (dist or 1)))))
+                others.append((d, dist, angle, dx * ux + dy * uy))
+        width = self.row('StartingBounceAngle')
+        while width <= 360 + 1e-9 or not others:
+            found = [o for o in others if o[2] <= width / 2 + 1e-6]
+            if found or width > 360:
+                break
+            width += self.row('SearchAngleIncreasePerCheck')
+        if not found:
+            return None
+        return max(found, key=lambda o: (round(o[3], 6), -o[1]))[0]
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        hit = self.tick + ticks_up(self.launch) + self.chrono_projectile_ticks(self.CAST, 'Volleyball',
+                                                                              self.target_hexes(target))
+
+        def lands():
+            now = self.tick / TPS
+            self.multiTargetSpell([target], self.items, now, 1, self.primary_damage, 'magical')
+            other = self.bounce_target(target)
+            if other is None:
+                at, victim = self.tick + ticks_up(self.in_place), target
+            else:
+                at = self.tick + self.chrono_projectile_ticks(self.BOUNCE, 'Bounce', layout.distance(target, other))
+                victim = other
+            self.schedule_tick(at, lambda: self.multiTargetSpell([victim], self.items, self.tick / TPS, 1,
+                                                                 self.secondary_damage, 'magical'))
+
+        self.schedule_tick(hit, lands)
+
+
+class Briar(BuildChampion):
+    """Snack Attack (champions/Briar.md, D1). Script: GA_Briar19_Spell (build ga_scripts.zip).
+
+    The cast commits (0x2f63), reads the snack range, AOE range and NumFrenzyAttacks, and picks the snack target: the
+    enemies within HexRangeSnack (3) hexes, farthest first (0x268b, 0x1edc); none: her attack target. It plays
+    CD_Briar19_Windup at it and applies the mana lock (0x1e5c). 'HealOverWindup' (0 s) heals her (GE_Briar19_Heal:
+    nothing against dummies); 'Kick' (0.191 s) starts the dash: CD_Briar19_CastAnim_Short when the snack target was
+    under 2.5 hexes (214.5 units) away, else _Long (0xab1). The dash chrono's phases fire 'Boom' (0.31 s): GE_Briar19_
+    EmpoweredBuff (AttackSpeed MultiplyAdditive 1 + FrenzyAS: +200%, and tag ChronoTags.Dynamic.CustomAttack.1);
+    'Land' (Short 0.5311 s, Long 0.6731 s): GE_Briar19_DamageAOE (PhysicalDamageCalc1 = DamageAOE_AD x AD, physical,
+    AOE, on-spell, crit only with Precision) on the enemies within HexRangeAOE (1) of the snack target, her attack
+    target if none (0x1576); 'Unlock' (0.8003 / 0.9422 s): FinishCasting (0x19fe). The mana lock stays on.
+    With the tag her attack chrono plays the Empowered sequence: CustomLaunchAttack1 at 0.4853 s of 2.6333 s, twice,
+    then at 0.5099 s of 2.7667 s, rate-scaled like her other attacks. Each Combat.Event.LaunchAttack.Custom.1 is a
+    slash instead of the attack (GA_LaunchMeleeAttack hears only LaunchAttack): GE_Briar19_DamageSlash on the
+    attack's target (PhysicalDamageCalc2 = DamageFrenzyAD x AD, physical, AppliesOnSpell and AppliesOnHit.IsAttack:
+    on-hit effects, crit only with Precision). At NumFrenzyAttacks (3) the buff comes off (0x231d) and, one tick
+    later, the mana lock (DelayUntilNextTick, 0xf): her slashes' mana is lost, as Ashe's and Olaf's.
+    Assumed: full health (Slayer, Briar's heal: owner, 2026-11-18). The dash's length (Short / Long) follows the
+    snack target, the farthest enemy within 3 hexes; the AOE hits the page's targets (owner, 2026-11-18: the number
+    of targets is the enemies an area hits, G22), the target and the enemies next to it, not the snack target's
+    neighbours.
+    """
+    KEY = 'DA_Briar19'
+    AREA = True  # its damage depends on the page's number of targets (layout.py)
+    ATTACK, WINDUP = 'CD_Briar19_Attack', 'CD_Briar19_Windup'
+    SHORT, LONG = 'CD_Briar19_CastAnim_Short', 'CD_Briar19_CastAnim_Long'
+    FRENZY = 3  # the selector of the first frenzy animation (3, 4, 5)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        t, ch = self.timing, self.chrono(self.ATTACK)
+        launch = self.chrono_event(self.ATTACK, 'LaunchAttack')
+        normal_len = next(v['length'] for v in self.data.timing.get('attack_variants') or []
+                          if v.get('group') == 'SequentialAttack')
+        normal = [{'selector': s, 'min_as': None, 'launch': launch, 'length': normal_len} for s in (1, 2)]
+        # the Empowered sequence: the two Attack1/2_Frenzy modules end at the chrono's length, Attack3_Frenzy at its
+        # anim_end; their CustomLaunchAttack1 events are the build's two times, in that order
+        customs = sorted(tm for n, tm in ch['events'] if n == 'CustomLaunchAttack1')
+        if len(customs) != 2:
+            raise BuildDataError(f'{self.KEY}: {self.ATTACK} has {len(customs)} CustomLaunchAttack1 times')
+        frenzy = [(customs[0], ch['length']), (customs[0], ch['length']), (customs[1], ch['anim_end'])]
+        t.variants = normal + [{'selector': self.FRENZY + i, 'min_as': None, 'launch': ln, 'length': lg}
+                               for i, (ln, lg) in enumerate(frenzy)]
+        t.animations = 2
+        t.source['variants'] = f'{self.ATTACK}: SequentialAttack x2, EmpoweredSequence (CustomAttack.1) x3'
+        t.mana_lock = 10 ** 6  # lifted the tick after the last slash (onLaunch)
+        t.source['mana_lock'] = 'GA_Briar19_Spell: removed the tick after the last slash (0x231d, 0xf)'
+        self.kick = ticks_up(self.chrono_event(self.WINDUP, 'Kick'))
+        self.dash = {c: {e: ticks_up(self.chrono_event(c, e)) for e in ('Boom', 'Land', 'Unlock')}
+                     for c in (self.SHORT, self.LONG)}
+        self._set_cast_lock(self.SHORT)
+        self.frenzy_left = 0
+        self.frenzy_done = 0
+        self._planned = 1
+        self._this_frenzy = False
+        self.notes = ('A cast: a dash at the farthest enemy within 3 hexes, hitting it and the enemies next to it; then '
+                      'her next 3 attacks have +200% attack speed and are slashes (her mana is locked until the 3rd). '
+                      'Full health assumed.')
+
+    def _set_cast_lock(self, dash):
+        self.timing.cast_lock = (self.kick + self.dash[dash]['Unlock'] + 1) / TPS
+        self.timing.source['cast_lock'] = f'{self.WINDUP} Kick + {dash} Unlock'
+
+    def aoe_damage(self, level, AD, AP):
+        return self.row('DamageAOE_AD', star=level) * AD
+
+    def slash_damage(self, level, AD, AP):
+        return self.row('DamageFrenzyAD', star=level) * AD
+
+    def snack_target(self, target):
+        near = [d for d in layout.in_play(self.opponents) if layout.distance(self, d) <= self.row('HexRangeSnack')]
+        return max(near, key=lambda d: layout.distance(self, d)) if near else target
+
+    def _next_animation(self):
+        self._planned = self.FRENZY + self.frenzy_done if self.frenzy_left > 0 else self.launches % 2 + 1
+        return self._planned, self.aspd.stat
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        snack = self.snack_target(target)
+        sx, sy = layout.world(self.hex)
+        x, y = layout.world(snack.hex)
+        dash = self.SHORT if math.hypot(x - sx, y - sy) / 214.5 < 2.5 else self.LONG  # 0xab1: literals
+        self._set_cast_lock(dash)
+        start, ev = self.tick + self.kick, self.dash[dash]
+
+        def boom():
+            self.aspd.modify('MultiplyAdditive', 1 + self.row('FrenzyAS'), key='briar_frenzy')
+            self.frenzy_left, self.frenzy_done = int(self.row('NumFrenzyAttacks')), 0
+
+        def land():
+            hit = [target] + self.nearby(target, self.row('HexRangeAOE'))  # the page's targets (G22, docstring)
+            self.multiTargetSpell(hit, self.items, self.tick / TPS, len(hit), self.aoe_damage, 'physical')
+
+        self.schedule_tick(start + ev['Boom'], boom)
+        self.schedule_tick(start + ev['Land'], land)
+
+    def onLaunch(self, opponents, items):
+        self._this_frenzy = self.frenzy_left > 0 and self._planned >= self.FRENZY
+        if self._this_frenzy:
+            self.frenzy_left -= 1
+            self.frenzy_done += 1
+            if self.frenzy_left == 0:
+                self.aspd.remove('briar_frenzy')
+                self.mana_locked_until = self.tick + 1
+
+    def fire_attack(self, opponents, items, moment, paid):
+        if not self._this_frenzy:
+            return super().fire_attack(opponents, items, moment, paid)
+        target, now = opponents[0], self.tick / TPS
+        dmg = self.slash_damage(self.level, self.bonus_ad.stat, self.ap.stat)
+        crit_dmg = dmg * self.critDamage() if self.canSpellCrit else dmg
+        amp = self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        tags = damage_tags('physical', UNIT, ON_HIT, IS_ATTACK, ON_SPELL)
+        self.emit(ONHIT_PRE, CombatEvent(self, target, dtype='physical', tags=tags, time=now), items)
+        self.doDamage(target, items, self.crit.stat if self.canSpellCrit else 0, crit_dmg * amp, dmg * amp,
+                      'physical', now, tags=tags)
+        self.emit(ONHIT_AFTER, CombatEvent(self, target, tags=tags, time=now), items)
+
+
 class RenataGlasc(BuildChampion):
     """Hostile Measures (champions/RenataGlasc.md, D1). Script: GA_RenataGlasc19_Spell (build ga_scripts.zip).
 
@@ -1298,7 +1504,8 @@ class Zoe(BuildChampion):
 
 
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
-              'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard']
+              'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
+              'Syndra', 'Briar']
 
 
 class TrainingDummy(Champion):

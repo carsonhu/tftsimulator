@@ -35,7 +35,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Aurora19_Attack` | CD_Aurora19_Attack | 2.6 | LaunchAttack 0.3348, LaunchAttack 0.3365, Unlock 1.04 |
-| `CD_Aurora19_CastAnim` | CD_Aurora19_CastAnim | 0.4985 | Retargetable1 0.0177, Mark 0.0612, Damage 0.1821, ResetChronoTarget 0.2784, Untargetable2 0.3686, Retargetable2 0.4027, Untargetable1 0.4358, Unlock 0.4853 |
+| `CD_Aurora19_CastAnim` | CD_Aurora19_CastAnim | 2.0739 | Default 0, Untargetable1 0.4358, FadeOut 0.4985, Retargetable1 0.5545, Mark 0.6919, Damage 1.0738, ResetChronoTarget 1.3784, Untargetable2 1.6633, BackHome 1.7619, Retargetable2 1.7711, Unlock 2.0323 |
 
 ### Scripts on the unit
 

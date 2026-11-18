@@ -44,7 +44,8 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Nunu19_BallGrow` | Chronos | 1.0001 | Unlock 0.6 |
-| `CD_Nunu19_CastingDiscoBall` | Chronos | 1.2 | LaunchProjectile 0.6 |
+| `CD_Nunu19_CastingDiscoBall` | Chronos | 14.2648 | Default 0, LaunchProjectile 0.6, DanceBegin 1.2, DanceLoopBegin 3.0309, DanceLoopEnd 8.0331 |
+| `CD_Nunu19_ThreeStarDiscoFloor` | Chronos | 4 | Default 0, LoopEnd 1.6 |
 | `CD_Nunu19_UniqueTrait_BoardDiscoFever` | UniqueTrait/Chronos | 2 | DiscoFever 0.2997 |
 
 ### Scripts on the unit

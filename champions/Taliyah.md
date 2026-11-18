@@ -49,10 +49,14 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
+| `CD_Taliyah19_3StarCelebrate` | Chronos | 9.9643 | Default 0, SurfLoop 0.5817, Arrived 3.0309, DanceLoop 4.1309 |
+| `CD_Taliyah19_3StarCeremony` | Chronos | 3 | Default 0, Land 2 |
 | `CD_Taliyah19_Attack` | Chronos | 1.6667 | LaunchAttackVariant1 0.2284, LaunchAttackVariant2 0.2284, Unlock 0.6667 |
-| `CD_Taliyah19_HopOff` | Chronos | 0.6007 | Unlock 0.5807 |
+| `CD_Taliyah19_BringWave` | Chronos | 3.9961 | Arrived 3.9961 |
+| `CD_Taliyah19_BringWave3Star` | Chronos | 3.9961 | Arrived 3.9961 |
+| `CD_Taliyah19_HopOff` | Chronos | 0.6007 | ArriveSafe 0.2358, Unlock 0.5807 |
 | `CD_Taliyah19_SmallCast` | Chronos | 1.9324 | Unlock 1.9113 |
-| `CD_Taliyah19_Windup` | Chronos | 1.3191 | BeginSurf 1.271 |
+| `CD_Taliyah19_Windup` | Chronos | 1.3499 | Default 0, Untargetable 1.3191, BeginSurf 1.3488 |
 
 ### Scripts on the unit
 

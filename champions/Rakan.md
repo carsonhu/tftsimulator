@@ -43,6 +43,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 |---|---|---|---|
 | `CD_Rakan19_Attack` | Chronos/Basic | 1.6013 | LaunchAttack 0.3888, LaunchAttack 0.3942, Unlock 1.0533, Unlock 1.068 |
 | `CD_Rakan19_CastAnim` | Chronos/Spell | 1.1589 | KnockUp 0.4206, SpawnFeathers 0.4414, RemoveIndicator 0.5857, Unlock 1.1345 |
+| `CD_Rakan19_Dash` | Chronos/Spell | 0.3489 | Default 0, LoopAnim 0.0995, Arrive 0.0996 |
 
 ### Scripts on the unit
 

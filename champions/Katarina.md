@@ -37,7 +37,8 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Katarina19_Attack` | CD_Katarina19_Attack | 1.4667 | LaunchAttack 0.2918, LaunchAttack 0.2985, Unlock 0.5867, Unlock 0.6 |
-| `CD_Katarina19_CastAnimCombined` | CD_Katarina19_CastAnimCombined | 0.2995 | Spin 0, Unlock 0.2039, Eviscerate 0.2098, CheckIfMove 0.2484, Eviscerate 0.2673, Unlock 0.286 |
+| `CD_Katarina19_CastAnimCombined` | CD_Katarina19_CastAnimCombined | 1.4499 | Default 0, Spin 0, CheckIfMove 0.2484, Movement 0.2995, Eviscerate 0.835, MovementEnd 0.8994, Unlock 1.2743, Eviscerate 1.285, Unlock 1.4251 |
+| `CD_Katarina19_Move` | CD_Katarina19_Move | 0.5996 | MovementEnd 0.5271 |
 
 ### Scripts on the unit
 

@@ -42,7 +42,9 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Teemo19_3Star5Cost_Swing` | Champion/Chrono/3Star5Cost | 1.6 | Launch 0.7047 |
+| `CD_Teemo19_3Star5Cost_GrabEnemyTactician` | Champion/Chrono/3Star5Cost | 2 | Default 0, Wait 1.6 |
+| `CD_Teemo19_3Star5Cost_LaunchEnemyTactician` | Champion/Chrono/3Star5Cost | 3.2 | Default 0, Boom 2 |
+| `CD_Teemo19_3Star5Cost_Swing` | Champion/Chrono/3Star5Cost | 3.6 | Default 0, Swing 1.6, Launch 2.4808 |
 | `CD_Teemo19_Attack` | Champion/Chrono/Basic | 1.5901 | LaunchAttack 0.3, Unlock 0.9 |
 | `CD_Teemo19_HyperpopHypemeter_Intro` | Champion/Chrono/Hyperpop | 1 | StartHype 0.95 |
 | `CD_Teemo19_HyperpopHypemeter_Outro` | Champion/Chrono/Hyperpop | 0.5485 | EndOutro 0.5207 |

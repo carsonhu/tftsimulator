@@ -35,7 +35,7 @@ Formulas (as stored; AD and AP are multipliers):
 
 ### Timing the client predicts (unverified for Set 19)
 
-- Attack chrono `CD_Jhin19_Attack_new`: launch 0.534 s (16.02 ticks); animation length 1.2519 s (37.56 ticks); release at base AS 0.534 s (16.02 ticks)
+- Attack chrono `CD_Jhin19_Attack_new`: launch 0.534 s (16.02 ticks); animation length 1.6506 s (49.52 ticks); release at base AS 0.534 s (16.02 ticks)
 - Attack projectile: DA_Jhin19_AutoAttackProjectile, speed 2600 units/s
 - No spell timeline decoded (no spell ability, or the script never reaches a cast end).
 

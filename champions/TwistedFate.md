@@ -56,7 +56,9 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_TwistedFate19_Attack` | Chronos | 1.0003 | LaunchAttackVariant1 0.2884, LaunchAttackVariant2 0.2884, CustomLaunchAttack1 0.33, Unlock 0.68, CustomLaunchAttack1 0.8108, CustomLaunchAttack1 0.9265 |
+| `CD_TwistedFate19_3Star5Cost_Spell` | Chronos | 6.4445 | Default 0, NewPhaseMarker 2.3026 |
+| `CD_TwistedFate19_3Star5Cost_Tar` | Chronos | 1.83 | Default 0, NewPhaseMarker 1.0373 |
+| `CD_TwistedFate19_Attack` | Chronos | 1.0003 | LaunchAttackVariant1 0.2884, LaunchAttackVariant2 0.2884, Unlock 0.68, CustomLaunchAttack1 0.8108, CustomLaunchAttack1 0.91, CustomLaunchAttack1 0.9265 |
 | `CD_TwistedFate19_CombatStart` | Chronos | 0.9999 | DrawCard1 0.4971, DrawCard2 0.6013, DrawCard3 0.7, DrawCard4 0.7967, DrawCard5 0.8985 |
 | `CD_TwistedFate19_Redraw` | Chronos | 0.3202 | DrawCard1 0, DrawCard2 0.0697, DrawCard3 0.1367, DrawCard4 0.2045, DrawCard5 0.2731 |
 
