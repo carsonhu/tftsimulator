@@ -26,7 +26,7 @@ class BeachPop(BuildTrait):
     team_trait = False
     BREAKPOINTS = [3, 5, 7]  # the tooltip (VOD5 2:14); the build's tier list is a placeholder
     levels = [0, 3, 5, 7]
-    PLACES = ["Next to an instrument", "Not empowered"]
+    PLACES = ["Yes", "No"]  # empowered: next to an instrument
     REPEATS = 99
 
     def __init__(self, level=0, params=0):
