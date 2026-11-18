@@ -48,12 +48,13 @@ def test_build_numbers_and_timing_rules():
 
 def test_vod_fight_with_blue_buff_and_guinsoos():
     # VOD (ticks from combat start): first attack mana at 8, casts at 56, 221.5, 378 -> gaps 165.5, 156.5.
-    # Engine: 7 and 54, 219, 376. The gaps match to half a tick; the constant ~2-tick offset is the open T10 (+1 on
-    # fresh attacks) and G17 (first regen step ~4 ticks after combat start in the VOD, tick 0 in the engine).
+    # Engine: 7 and 61, 226, 383. The gaps match to half a tick; the constant 5-tick offset is G17/T7: the VOD's first
+    # regen step came ~4 ticks after combat start, the engine's at 7.5 (owner, 2026-11-18: the simplest rule, steps
+    # at 0.25 s, 0.5 s, ...; with the t = 0 step it was 2 ticks early), plus the open T10 (+1 on fresh attacks).
     v = LoggedVarus(1)
     fight(v, items=[set19items.BlueBuff(), set19items.GuinsoosRageblade()])
     assert v.attack_mana[0] == 7
-    assert v.casts == [54, 219, 376]
+    assert v.casts == [61, 226, 383]
     vod = [56, 221.5, 378]
     gaps = [b - a for a, b in zip(v.casts, v.casts[1:])]
     vod_gaps = [b - a for a, b in zip(vod, vod[1:])]

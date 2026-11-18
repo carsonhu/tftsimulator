@@ -51,8 +51,8 @@ def test_vod3_mana_with_shojin_and_adaptive_helm():
     fight(c, items=[set19items.SpearOfShojin(), set19items.AdaptiveHelm()])
     steps = {round(after - before, 3) for t, a, before, after in c.mana_log if after > before}
     assert steps == {1.725, 13.8}
-    overflow = [round(next(before for t, a, before, after in c.mana_log if t > cast), 3) for cast in c.casts]
-    assert overflow[:3] == [1.4, 1.075, 0.75]
+    overflow = [round(next(before for t, a, before, after in c.mana_log if t > cast), 3) for cast in c.casts[:3]]
+    assert overflow == [1.4, 1.075, 0.75]
     # cast rhythm: VOD3 cast-filling attacks at f29116, 29319, 29512 = 0, 101.5, 198 ticks; engine 99 + 99
     assert [b - a for a, b in zip(c.casts, c.casts[1:])][:2] == [99, 99]
     # the attack after a cast pays its mana 59 ticks after the filling attack's (VOD3: 59.5, 56.5, 59)

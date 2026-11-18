@@ -71,8 +71,8 @@ class Champion(FastDeepCopy):
 
         self.role = None  # build_champion.BuildRole for Set 19 champions
 
-        # mana regen is paid in 0.25 s steps from t = 0 (G17: inherited from set18, open); index of the next step
-        self.next_regen = 0
+        # mana regen is paid in 0.25 s steps, the first at 0.25 s: none at t = 0 (G17, T7); index of the next step
+        self.next_regen = 1
 
         self.armorPierce = ArmorPierce(0, 1, 0)
         self.mrPierce = ArmorPierce(0, 1, 0)
@@ -477,7 +477,7 @@ class Champion(FastDeepCopy):
         if self.effects:
             expire_effects(self, self.tick)
 
-        # mana regen in 0.25 s steps from t = 0 (G17, inherited), each paid on the first tick at or after its time
+        # mana regen in 0.25 s steps from 0.25 s (G17, T7), each paid on the first tick at or after its time
         while self.tick >= math.ceil(self.next_regen * 0.25 * TPS - 1e-9):
             self.next_regen += 1
             self.addMana(self.manaRegen.stat / 4)
