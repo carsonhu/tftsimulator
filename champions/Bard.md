@@ -83,7 +83,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q14 | Passives and other mechanics that need modelling | the Horn of the Traveler | not applicable: not simulated (owner) | D1 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 | Q16 | Where the wave starts (the board's edge behind Bard) and so when it reaches the target | half a hex behind him: 29 ticks after FireMeeps at 4 hexes | open (a VOD of the wave's damage numbers) | D1 |
-| Q17 | Which enemies the wave meets | the target and the page's dummies next to it / 2 hexes from it within its 600 width; fillers beyond: none | open (owner) | D1 |
+| Q17 | Which enemies the wave meets | the page's number of targets (default 3), all next to the target and within its 600 width | decided (owner, 2026-11-18; G22) | D1 |
 
 ## Evidence log
 
@@ -109,6 +109,5 @@ VOD was played on (check the patch shown in game or the date against builds/inde
     bDoTotalDamageOverDuration) = MagicDamageCalc1 x SetByCaller Falloff, magic, AOE, on-spell, crit only with
     Precision; then Falloff = max(Falloff x 0.7, 0.2). Two halves 3 ticks apart, the first on application (as
     Renata's Toxin).
-  - **Assumed:** the wave starts half a hex behind Bard (back row) (Q16); it meets the target and the dummies the
-    page places next to it or 2 hexes from it within its width, nearest Bard first; the filler dummies beyond are
-    off the board (Q17). On the default layout: 3 enemies, 1 + 0.7 + 0.49 = 2.19 x one hit.
+  - **Assumed:** the wave starts half a hex behind Bard (back row) (Q16); it meets the page's number of targets (owner: default 3; G22), all next to the target, nearest Bard first (Q17): 1 + 0.7 +
+    0.49 = 2.19 x one hit.

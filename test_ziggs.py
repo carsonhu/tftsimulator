@@ -56,14 +56,15 @@ def test_vod2_rhythm_after_the_cast():
 
 def test_attack_and_bomb_damage():
     # VOD2 numbers on round 1-1 minions (armor = MR = 10, shown rounded down): attack 9 physical + 36 magic on the
-    # same hit (10 AD, 40 x AP); bomb 163 on the target and 72 on an adjacent minion (180 x AP, 80 x AP)
+    # same hit (10 AD, 40 x AP); bomb 163 on the target and 72 on an adjacent minion (180 x AP, 80 x AP); the page's
+    # 3 targets: 2 enemies next to the target
     z = LoggedZiggs(1)
     rows = fight(z)
     first_hit = z.releases[0] + z.timing.flight_ticks(z.attack_range)
     assert sorted(d for t, d in rows if t == first_hit) == [11, 40]  # 10 x expected crit 1.1; magic can't crit
     c = z.casts[0]
     land = c + ticks_up(0.3183) + projectile_ticks(1900, 4)
-    assert sorted(d for t, d in rows if t == land and d > 40) == [80, 180]
+    assert sorted(d for t, d in rows if t == land and d > 40) == [80, 80, 180]
     assert not any(d in (80, 180) for t, d in rows if t != land and t < land + 30)
 
 

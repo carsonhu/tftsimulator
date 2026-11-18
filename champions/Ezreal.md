@@ -107,7 +107,8 @@ VOD was played on (check the patch shown in game or the date against builds/inde
     DetermineDamageForSpell multiplies the primary and the secondary damage by 1 + HeartsteelStan_PercentIncreasedAbilityDamage
     (0.25). Each cast first adds 1 to the combat-only spell Stack (GE_IncSpellStackBy1_CombatOnly, 0x10ed); Stack % 3 == 0
     (casts 3, 6, ...) sets Is2HexCast, and TR_Add_EnemiesWithinHexRange then takes HexRange 2 instead of 1 for the
-    secondary targets: the layout's enemies 2 hexes from the target join the ones next to it (default 1 each). B21.
+    secondary targets. The page's targets all stand next to the target (G22, owner 2026-11-18), so the 2-hex cast meets
+    the same enemies as the others. B21.
   - **Not modelled:** the stage-1 simulated attack (mana lock, G11). The script's W/Q chrono speed variables are never read.
   - **Assumed:** the detonating missile flies his attack range (4 hexes); the splash hits the enemies next to the
     target on the dummy layout (`layout.py`).

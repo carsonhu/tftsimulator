@@ -80,7 +80,7 @@ def test_secondary_is_nearest_lux():
     fight(c, seconds=1)
     assert c.nearest(1, exclude=[c.opponents[0]]) == [c.opponents[1]]
     c = LoggedLux(1)
-    fight(c, seconds=1, layout=Layout(adjacent=3))
+    fight(c, seconds=1, layout=Layout(4))
     target = c.opponents[0]
     (other,) = c.nearest(1, exclude=[target])
     assert c.target_hexes(other) == 4

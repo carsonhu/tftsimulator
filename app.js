@@ -80,7 +80,7 @@ const state = {
   cfg: {
     champ: null,
     level: 1,
-    layout: { adjacent: 1, two_hex: 1 }, // where the dummies stand (layout.py); boot reads the defaults
+    layout: { targets: 3 }, // the number of targets (layout.py); boot reads the default
     takedowns: 0,
     bonus: { ad: 0, ap: 0, as: 0, dmgamp: 0, crit: 0, critdmg: 0, manaregen: 0, mpa: 0 },
     stage: "4-1",
@@ -303,19 +303,15 @@ function buildStaticControls() {
     onConfigChanged();
   };
 
-  // Where the training dummies stand (layout.py): the same for every champion.
-  state.cfg.layout = Object.assign({}, cat.defaults.layout);
-  for (const [id, key] of [
-    ["layoutAdjacent", "adjacent"],
-    ["layoutTwoHex", "two_hex"],
-  ]) {
-    $(id).value = state.cfg.layout[key];
-    $(id + "Value").textContent = state.cfg.layout[key];
-    bindSlider(id, id + "Value", (v) => {
-      state.cfg.layout[key] = v;
-      onConfigChanged();
-    });
-  }
+  // The number of targets (layout.py): shown only for a champion whose damage depends on it (catalog "area").
+  state.cfg.layout = { targets: cat.defaults.layout.targets };
+  $("layoutTargets").max = cat.defaults.layout.max;
+  $("layoutTargets").value = state.cfg.layout.targets;
+  $("layoutTargetsValue").textContent = state.cfg.layout.targets;
+  bindSlider("layoutTargets", "layoutTargetsValue", (v) => {
+    state.cfg.layout.targets = v;
+    onConfigChanged();
+  });
 
   bindSlider("numBuffs", "numBuffsValue", (v) => {
     resizeBuffRows(v);
@@ -626,6 +622,7 @@ async function selectChampion(name, { keepLevel, keepConfig = false }) {
   const cat = state.catalog;
   const meta = cat.champions.find((c) => c.name === name);
   state.cfg.champ = name;
+  $("targetsRow").hidden = !meta.area;
 
   const levelSel = $("level");
   levelSel.innerHTML = "";

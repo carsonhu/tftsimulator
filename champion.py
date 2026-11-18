@@ -217,6 +217,10 @@ class Champion(FastDeepCopy):
         over: [(dummy, world units along the line)], nearest first (layout.line_hits)."""
         return layout.line_hits(self, target, self.opponents, length, width, pool)[1]
 
+    def neighbour(self, target):
+        """One enemy next to `target` whatever the page's targets (Titanic Hydra; layout.neighbour)."""
+        return layout.neighbour(target, self.opponents)
+
     def ricochet(self, previous, hit):
         """(next target, hexes) for a ricochet from `previous` that has already hit `hit` (B12)."""
         return layout.ricochet(previous, hit, self.opponents)

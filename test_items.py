@@ -383,14 +383,14 @@ def test_radiants_use_their_own_numbers():
     assert len(set19items.radiants) == len(set19items.offensive_craftables)
 
 
-def artifact_fight(item, champ=None, seconds=12, n=8, stage=4, hp=1800, mr=100):
+def artifact_fight(item, champ=None, seconds=12, n=8, stage=4, hp=1800, mr=100, layout=None):
     from set19champs import Draven
     c = (champ or Draven)(1, build=load_build(V))
     c.stage = stage
     ds = [dummy() for _ in range(n)]
     for d in ds:
         d.hp.base, d.mr.base = hp, mr
-    Simulator().simulate([item], [], c, ds, seconds)
+    Simulator().simulate([item], [], c, ds, seconds, layout=layout)
     return c, ds
 
 
@@ -415,14 +415,14 @@ def test_stats_only_artifacts_and_silvermere_lock():
 
 
 def test_statikk_shiv_every_third_release():
-    # NumTargets x (15 + bonus AP x 0.35) split among min(enemies, 6) bolts; magic; not boosted by damage amp
-    s = set19items.StatikkShiv()
-    c, ds = artifact_fight(s, n=8, mr=0)
+    # 6 bolts of 15 + bonus AP x 0.35; magic; not boosted by damage amp. 6 enemies assumed whatever the page's
+    # targets (owner, 2026-11-18): with fewer, the bolts go round the dummies in play
+    from layout import Layout
     per = 15 + 0.25 * 100 * 0.35  # Shiv's own 25% AP
-    shots = [d for t, d, *_ in c.dmgVector if abs(d[0] - per) < 1e-6]
-    assert len(shots) == 6 * (c.launches // 3)
-    c, ds = artifact_fight(set19items.StatikkShiv(), n=2, mr=0)
-    assert sum(1 for t, d, *_ in c.dmgVector if abs(d[0] - per * 3) < 1e-6) == 2 * (c.launches // 3)
+    for targets in (1, 3, 7):
+        c, ds = artifact_fight(set19items.StatikkShiv(), n=max(2, targets), mr=0, layout=Layout(targets))
+        shots = [d for t, d, *_ in c.dmgVector if abs(d[0] - per) < 1e-6]
+        assert len(shots) == 6 * (c.launches // 3)
 
 
 def test_on_hit_artifacts():

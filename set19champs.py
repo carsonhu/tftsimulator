@@ -78,6 +78,7 @@ class Varus(BuildChampion):
     AD here is the AttackDamage attribute, a multiplier (1.0 base, items add to it), like AP.
     """
     KEY = 'DA_Varus19'
+    AREA = True  # its damage depends on the page's number of targets (layout.py)
     CAST = 'CD_Varus19_CastAnim'
     MISSILES = (('HailMain', False), ('EncoreHailMain', True))  # (projectile, Encore missile?)
 
@@ -299,6 +300,7 @@ class Ziggs(BuildChampion):
     (Combat.Event.LaunchAttack.SimulateTriggersOnly): on-attack items hear it (simulateLaunch, G11).
     """
     KEY = 'DA_Ziggs19'
+    AREA = True  # its damage depends on the page's number of targets (layout.py)
     CAST = 'CD_Ziggs19_CastAnim'
     BOMB = 'MainBomb'
     CAST_RATE_CLAMP = (1, 2)  # GA_Ziggs19_Spell 0x635: FClamp(AttackSpeed / base, 1, 2)
@@ -427,6 +429,7 @@ class Ezreal(BuildChampion):
     enemies 2 hexes from the target join the ones next to it).
     """
     KEY = 'DA_Ezreal19'
+    AREA = True  # its damage depends on the page's number of targets (layout.py)
     MARK = 'CD_Ezreal19_CastAnim'
     SHOT = 'CD_Ezreal19_CastAnim2'
 
@@ -615,6 +618,7 @@ class Malzahar(BuildChampion):
     Precision. 'Unlock' (2.4688 s) removes the mana lock and finishes the cast (the build's timeline: 75 / 76 ticks).
     """
     KEY = 'DA_Malzahar19'
+    AREA = True  # its damage depends on the page's number of targets (layout.py)
     CAST = 'CD_Malzahar19_CastAnim_new'
 
     def __init__(self, level, build=None):
@@ -994,6 +998,7 @@ class Kayle(BuildChampion):
     mana lock. All spell damage magic, on-spell, crit only with Precision. The Ascension rows (999) do nothing.
     """
     KEY = 'DA_Kayle19'
+    AREA = True  # its damage depends on the page's number of targets (layout.py)
     BEGIN = 'CD_Kayle19_BeginCast'
     FINALE = 'CD_Kayle19_LaunchAllSwords'
     PROJECTILE_SPEED = 2250  # DA_Kayle19_AutoAttackProjectile TFTFixedSpeedMovement MoveSpeed (client asset, not in the build)
@@ -1152,11 +1157,11 @@ class Bard(BuildChampion):
     over its 0.2 s duration at a 0.1 s period (bDoTotalDamageOverDuration), so two halves, the first on application.
     The cast chrono's 'Unlock' (0.8402 s) removes the mana lock and finishes the cast.
 
-    Assumed (D1): the wave starts half a hex behind him (he stands in his back row), and it meets the target and the
-    dummies the page places next to it or 2 hexes from it that lie in its width; the filler dummies beyond are off the
-    board.
+    Assumed (D1): the wave starts half a hex behind him (he stands in his back row); it meets the page's number of
+    targets (owner, 2026-11-18: 3 by default), all next to the target and so in its width.
     """
     KEY = 'DA_Bard19'
+    AREA = True  # its damage depends on the page's number of targets (layout.py)
     CAST, WAVE = 'CD_Bard19_CastAnimMeeps', 'CD_Bard19_MeepProjectile'
     LENGTH, WIDTH = 2000, 600  # GA_Bard19_Spell defaults 'Line Length', 'Line Width'
     BEHIND = 0.5  # hexes from the board's back edge to Bard (assumed, D1)
@@ -1183,9 +1188,8 @@ class Bard(BuildChampion):
     def performAbility(self, opponents, items, time):
         target = opponents[0]
         fire = self.tick + ticks_up(self.fire)
-        pool = [target] + self.nearby(target, 2)
         falloff, step, floor = 1.0, self.row('FalloffPerUnit'), self.row('MinimumDamagePercent')
-        for d, along in self.line(target, self.LENGTH, self.WIDTH, pool):
+        for d, along in self.line(target, self.LENGTH, self.WIDTH):
             hit = fire + ticks_up((self.BEHIND * HEX_UNITS + along) / self.wave_speed)
             for k in range(self.halves):
                 self.schedule_tick(hit + ticks_up(k * 0.1), lambda d=d, f=falloff: self.multiTargetSpell(
@@ -1211,6 +1215,7 @@ class RenataGlasc(BuildChampion):
     Her Captivates feed Classical (B28): she is the simulated Classical unit.
     """
     KEY = 'DA_RenataGlasc19'
+    AREA = True  # its damage depends on the page's number of targets (layout.py)
     CAST, END = 'CD_RenataGlasc19_Spell', 'CD_RenataGlasc19_SpellEnd'
     CHAIN, MISSILE = 'CD_RenataGlasc19_Projectile', 'CD_RenataGlasc19_Projectile2'
 

@@ -163,7 +163,6 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
-| Which enemies the wave meets | the target and the page's dummies next to it / 2 hexes from it within its 600 width (3 on the default layout); the filler dummies beyond: none | (owner) | champions/Bard.md Q17 |
 | When the wave reaches the target | it starts half a hex behind Bard (back row): 29 ticks after FireMeeps (0.4381 s) at 4 hexes, then 7 ticks per hex | the frame of the wave's damage numbers after the cast | champions/Bard.md Q16 |
 | The wave's two halves | 0.1 s apart, the first on application | two numbers per enemy, 3 frames apart | champions/Bard.md D1 |
 

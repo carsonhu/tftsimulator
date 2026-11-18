@@ -53,13 +53,13 @@ def test_vod4_releases_before_the_first_cast():
 
 
 def test_detonation_damage_and_splash():
-    # Calc1 = 190 x AD + 30 x AP = 220 on the target, 0.33 x 220 on one adjacent enemy, at stage 2 (0.6663 s -> 20
+    # Calc1 = 190 x AD + 30 x AP = 220 on the target, 0.33 x 220 on each of the 2 other targets, at stage 2 (0.6663 s -> 20
     # ticks) + the missile's spawn (0.1729 s -> 6) + its flight (2200 units/s over 4 hexes)
     e = LoggedEzreal(1)
     rows = fight(e)
     c = e.casts[0]
     land = c + 20 + 6 + projectile_ticks(2200, 4)
-    assert sorted(d for t, d in rows if t == land) == [round(0.33 * 220, 4), 220]
+    assert sorted(d for t, d in rows if t == land) == [round(0.33 * 220, 4)] * 2 + [220]
     assert not any(d == 220 for t, d in rows if t != land and t < land + 20)
 
 
@@ -69,7 +69,7 @@ def test_encore_adds_a_weaker_second_detonation():
     rows = fight(e, buffs=[set19buffs.Encore(2)])
     c = e.casts[0]
     second = c + 20 + ticks_up(0.319) + projectile_ticks(2200, 4)
-    assert sorted(d for t, d in rows if t == second) == [round(0.33 * 220 * 0.25, 4), 55]
+    assert sorted(d for t, d in rows if t == second) == [round(0.33 * 220 * 0.25, 4)] * 2 + [55]
 
 
 def stats_with(cls, trait):
@@ -110,8 +110,9 @@ def test_heartsteel_aphelios_attack_speed():
 
 def test_heartsteel_bias_upgrade():
     # GA_Ezreal19_Spell: a Bias at (3)+ deals x 1.25 (HeartsteelStan_PercentIncreasedAbilityDamage) on both hits;
-    # casts 3, 6, ... (spell Stack % 3 == 0) also hit the enemies within 2 hexes (the extra-targets slider, 1)
-    def detonations(trait, n=4):
+    # casts 3, 6, ... (spell Stack % 3 == 0) reach 2 hexes instead of 1: the page's targets all stand next to the
+    # target (layout.py), so they meet the same enemies
+    def detonations(trait, n=3):
         e = LoggedEzreal(1)
         rows = fight(e, buffs=[trait], seconds=30, n=n)
         land = [c + 20 + 6 + projectile_ticks(2200, 4) for c in e.casts]
@@ -120,7 +121,6 @@ def test_heartsteel_bias_upgrade():
     bias = 1 << set19buffs.Heartsteel.BIAS
     up = detonations(set19buffs.Heartsteel(3, bias))
     hit, splash = 220 * 1.25, round(0.33 * 220 * 1.25, 4)
-    assert up[0] == up[1] == up[3] == [splash, hit]
-    assert up[2] == [splash, splash, hit]
+    assert up[0] == up[1] == up[2] == up[3] == [splash, splash, hit]
     for trait in (set19buffs.Heartsteel(3, 0), set19buffs.Heartsteel(1, bias)):  # not a Bias / below (3)
-        assert detonations(trait)[2] == [round(0.33 * 220, 4), 220]
+        assert detonations(trait)[2] == [round(0.33 * 220, 4)] * 2 + [220]

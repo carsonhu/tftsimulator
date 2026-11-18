@@ -3,6 +3,7 @@ from registry import register
 from timing import TPS, ticks_up
 from events import ITEM, LAUNCH, ONHIT_AFTER, ONHIT_PRE, damage_tags
 from items.base import BuildItem, item_name
+from layout import in_play
 
 
 # ---------------------------------------------------------------- artifacts (I10)
@@ -150,7 +151,8 @@ class StatikkShiv(BuildItem):
     holder's attack releases (Combat.Event.LaunchAttack, simulated attacks count, 0x1616; never reset) and on every
     3rd (0x16f4) fires at once, at the release: NumTargets x (BaseDamage + bonus AP x APScalar) split among
     min(enemies, NumTargets) bolts (0x228-0x4eb), magic (GE_Artifact_StatikkShiv_Damage): the attack's target first,
-    then the others (all dummies are alike). 15 + 35% of bonus AP per bolt with 6+ enemies."""
+    then the others. Taken to hit 6 enemies whatever the page's number of targets (owner, 2026-11-18): NumTargets
+    bolts of 15 + 35% of bonus AP each, over the dummies in play in turn (all dummies are alike)."""
     KEY = "DA_Artifact_StatikkShiv"
     STATS = ("GE_Artifact_StatikkShiv_Artifact_Stats",)
     display_name = item_name(KEY)
@@ -169,11 +171,10 @@ class StatikkShiv(BuildItem):
             self.count += 1
             if self.count % self.EVERY == 0 and champion.opponents:
                 n = int(self.row(champion, "NumTargets"))
-                bolts = min(len(champion.opponents), n)
-                per = (self.row(champion, "BaseDamage")
-                       + (champion.ap.stat - 1) * 100 * self.row(champion, "APScalar")) * n / bolts
-                for target in champion.opponents[:bolts]:
-                    item_damage(champion, target, per, "magical")
+                enemies = in_play(champion.opponents)  # the page's targets, not the spare (layout.py)
+                per = self.row(champion, "BaseDamage") + (champion.ap.stat - 1) * 100 * self.row(champion, "APScalar")
+                for k in range(n):  # n enemies assumed (owner): one bolt each
+                    item_damage(champion, enemies[k % len(enemies)], per, "magical")
         return input_
 
 
@@ -182,19 +183,19 @@ class TitanicHydra(BuildItem):
     """Stats GE_Artifact_TitanicHydra_Stats (300 HP, 20% AS, 20% AD). Script GA_Artifact_TitanicHydra: before each
     on-hit damage is applied (PreApply, 0x59), GE_Artifact_TitanicHydra_BonusDamage: physical, holder max Health x
     PercentHealthBonusDamage (2%) + Attack Damage x PercentADBonusDamage (4%) to the enemies within 1 hex of the
-    target (TR_Add_EnemiesWithinHexRange, HexRange 1, taken to include the target): the target and every enemy next
-    to it on the dummy layout (owner, 2026-11-17)."""
+    target (TR_Add_EnemiesWithinHexRange, HexRange 1, taken to include the target): the target and one enemy next to
+    it, whatever the page's number of targets (owner, 2026-11-18)."""
     KEY = "DA_Artifact_TitanicHydra"
     STATS = ("GE_Artifact_TitanicHydra_Stats",)
     display_name = item_name(KEY)
-    HEX_RANGE = 1  # TR_Add_EnemiesWithinHexRange HexRange
 
     LISTENS = {ONHIT_PRE: frozenset()}
 
     def performAbility(self, phase, time, champion, input_=0):
         amount = (champion.hp.stat * self.row(champion, "PercentHealthBonusDamage")
                   + champion.atk.stat * champion.bonus_ad.stat * self.row(champion, "PercentADBonusDamage"))
-        for target in [input_.target] + champion.nearby(input_.target, self.HEX_RANGE):
+        # the target and one enemy next to it, whatever the page's targets (owner, 2026-11-18)
+        for target in (input_.target, champion.neighbour(input_.target)):
             item_damage(champion, target, amount * input_.effectiveness, "physical")  # I11
         return input_
 

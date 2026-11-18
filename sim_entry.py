@@ -24,7 +24,7 @@ import set19champs
 import set19items
 import sim_core
 from buildstore import list_builds, load_build
-from layout import Layout
+from layout import MAX_TARGETS, TARGETS, Layout
 from helpers import buff_display_map, buff_display_names, item_display_map
 from simulator import Simulator
 
@@ -104,7 +104,8 @@ def get_catalog():
         if getattr(cls, "canFourStar", False):
             levels.append(4)
         # label: what the page shows (a hero augment unit is "Olaf (Axe Crescendo)"); name: the class
-        champions.append({"name": name, "label": getattr(cls, "display_name", name), "levels": levels})
+        champions.append({"name": name, "label": getattr(cls, "display_name", name), "levels": levels,
+                          "area": bool(getattr(cls, "AREA", False))})
 
     def item_group(class_names):
         # item_display_map returns {display: cls} in the order given, and that
@@ -240,7 +241,7 @@ def get_catalog():
             "duration": 30,
             "numItems": 3,
             "numBuffs": {"min": 1, "max": 10, "default": 2},
-            "layout": {"adjacent": Layout().adjacent, "two_hex": Layout().two_hex},
+            "layout": {"targets": TARGETS, "max": MAX_TARGETS},
         },
         "dpsTimes": DPS_TIMES,
     }
@@ -255,7 +256,7 @@ def _build_champion(cfg):
 
     cfg = {
       "champ": "Ahri", "level": 1,
-      "layout": {"adjacent": 1, "two_hex": 1},     # enemies next to the target / 2 hexes from it (layout.py)
+      "layout": {"targets": 3},                    # the target and the enemies next to it (layout.py; AREA champions)
       "takedowns": 0,
       "bonus": {"ad","ap","as","manaregen","mpa","dmgamp","crit","critdmg"},
       "stage": "4-1", "tactician_level": 4,
@@ -321,10 +322,11 @@ def _champion_class(cfg):
 
 
 def _layout(cfg):
-    """Where the dummies stand: the page's 'Enemies next to the target' and 'Enemies 2 hexes away' (layout.py)."""
-    lay = cfg.get("layout") or {}
-    default = Layout()
-    return Layout(int(lay.get("adjacent", default.adjacent)), int(lay.get("two_hex", default.two_hex)))
+    """Where the dummies stand: the page's 'Number of targets' (layout.py), for a champion whose damage depends on it
+    (AREA); any other gets the default, as the page shows it no slider."""
+    if not getattr(_champion_class(cfg), "AREA", False):
+        return Layout()
+    return Layout(int((cfg.get("layout") or {}).get("targets", TARGETS)))
 
 
 def _build_enemy(cfg):

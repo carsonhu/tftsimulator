@@ -29,8 +29,8 @@ class LoggedMalzahar(Malzahar):
         super().performAbility(opponents, items, time)
 
 
-def fight(c, items=(), buffs=(), seconds=10, n=8, mr=0, layout=None):
-    ds = [dummy() for _ in range(n)]
+def fight(c, items=(), buffs=(), seconds=10, mr=0, layout=None):
+    ds = [dummy() for _ in range((layout or Layout()).count)]
     for d in ds:
         d.armor.base, d.mr.base = 0, mr
     Simulator().simulate(list(items), list(buffs), c, ds, seconds, layout=layout)
@@ -62,25 +62,25 @@ def test_vod3_mana_and_lock():
 
 
 def test_beam_and_bursts():
-    # 1-star at AP 1.0 on 0-MR dummies: 4 bursts of 40 on the target and its neighbour (cast + 11, 30, 49, 69 ticks),
+    # 1-star at AP 1.0 on 0-MR dummies: 4 bursts of 40 on the 3 targets (cast + 11, 30, 49, 69 ticks),
     # 9 beam ticks of 380 / 9 on the target from cast + 11, every 0.25 s
     m = LoggedMalzahar(1)
     ds, rows = fight(m, seconds=12)
     cast = m.casts[0]
     spell = [(t - cast, d) for t, d in rows if t >= cast and d != round(35 * 1.1, 4)]
     bursts = sorted(t for t, d in spell if d == 40)
-    assert bursts == [11, 11, 30, 30, 49, 49, 69, 69]
+    assert bursts == [11] * 3 + [30] * 3 + [49] * 3 + [69] * 3
     beam = [t for t, d in spell if d == pytest.approx(380 / 9)]
     assert beam == [11, 19, 26, 34, 41, 49, 56, 64, 71]
-    # the shred: 30% for 4 s on everyone a burst hits (MR x 0.7), the target and its neighbour only
+    # the shred: 30% for 4 s on everyone a burst hits (MR x 0.7): with 2 targets, the target and its neighbour
     m = LoggedMalzahar(1)
-    ds, rows = fight(m, seconds=7.5, mr=100)
-    assert [d.mr.stat for d in ds[:3]] == [70, 70, 100]
+    ds, rows = fight(m, seconds=7.5, mr=100, layout=Layout(2))
+    assert [d.mr.stat for d in ds] == [70, 70]
 
 
 def test_bursts_hit_every_neighbour():
     m = LoggedMalzahar(1)
-    ds, rows = fight(m, seconds=8, layout=Layout(adjacent=3))
+    ds, rows = fight(m, seconds=8, layout=Layout(4))
     cast = m.casts[0]
     assert [d for t, d in rows if t == cast + 30].count(40) == 4
 

@@ -89,14 +89,19 @@ def test_the_worker_loads_every_top_level_module():
             assert name in listed, name
 
 
-def test_the_layout_settings_reach_the_run():
-    # the page's 'Enemies next to the target' (layout.py): Titanic Hydra hits each of them, so more neighbours,
-    # more damage; the catalog gives the page the default layout
+def test_the_number_of_targets_reaches_an_area_champion_only():
+    # the page's 'Number of targets' (layout.py, owner 2026-11-18): the catalog gives the default and which champions
+    # show it (AREA); Varus's splash hits each target, so more targets, more damage. Draven's damage doesn't depend
+    # on it (no slider): any value runs the default, and Titanic Hydra always hits one enemy next to the target
     cat = json.loads(sim_entry.catalog_json())
-    assert cat['defaults']['layout'] == {'adjacent': 1, 'two_hex': 1}
+    assert cat['defaults']['layout'] == {'targets': 3, 'max': 7}
+    area = {c['name'] for c in cat['champions'] if c['area']}
+    assert area == {'Varus', 'Ziggs', 'Ezreal', 'Malzahar', 'Kayle', 'Bard', 'RenataGlasc'}
 
-    def hydra(layout):
-        out = json.loads(sim_entry.run_json(json.dumps(cfg(champ='Draven', level=1, slice='Artifact', layout=layout))))
-        return next(r['dps']['5'] for r in out['rows'] if r['extra'] == "Titanic Hydra")
+    def dps(champ, slice_, extra, layout):
+        out = json.loads(sim_entry.run_json(json.dumps(cfg(champ=champ, level=1, slice=slice_, layout=layout))))
+        return next(r['dps']['25'] for r in out['rows'] if r['extra'] == extra)
 
-    assert hydra({'adjacent': 3, 'two_hex': 1}) > hydra(None) == hydra({'adjacent': 1, 'two_hex': 1})
+    assert dps('Varus', 'Craftable', 'NoItem', {'targets': 5}) > dps('Varus', 'Craftable', 'NoItem', None) \
+        == dps('Varus', 'Craftable', 'NoItem', {'targets': 3}) > dps('Varus', 'Craftable', 'NoItem', {'targets': 1})
+    assert dps('Draven', 'Artifact', 'Titanic Hydra', {'targets': 7}) == dps('Draven', 'Artifact', 'Titanic Hydra', None)

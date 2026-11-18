@@ -85,7 +85,7 @@ def test_encore_missile_and_targets():
     spell = [(t - c, d) for t, d in rows if t > c and d != 38.5]  # 38.5 = an attack: 35 AD x 1.1 average crit
     assert spell[:4] == [(28, 260), (28, 130), (34, 65), (34, 32.5)]
     v = LoggedVarus(1)
-    rows = fight(v, seconds=8, layout=Layout(adjacent=0))
+    rows = fight(v, seconds=8, layout=Layout(1))
     assert [d for t, d in rows if d > 100] == [260]
 
 

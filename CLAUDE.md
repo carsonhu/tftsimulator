@@ -132,8 +132,8 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   multipliers from 1.0, AS is attacks per second, crit / crit damage / omnivamp / amp are fractions; ops and
   channels are the build's (`+` AddBase, MultiplyAdditive, MultiplyCompound, AddFinal, `=` Override, bounds), and
   `champion.attribute("AttackSpeed")` finds one by the game's name (ledger I1, I5).
-- Where the dummies stand is `layout.py` (the page's 'Enemies next to the target' / '2 hexes from the target';
-  default: one of each, then a line). Ask it, never index `opponents[1:]`: `self.target_hexes()` for a flight,
+- Where the dummies stand is `layout.py` (the page's 'Number of targets', default 3: the target and the others next
+  to it, G22; shown only for champions with `AREA = True`, whose damage depends on it). Ask it, never index `opponents[1:]`: `self.target_hexes()` for a flight,
   `self.nearby(target, hexes)` for a splash (the script's HexRange), `self.ricochet(previous, hit)` for a bounce, `self.line(target, length, width)` for a
   line (Bard's wave).
   `opponents[0]` is the target.

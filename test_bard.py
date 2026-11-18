@@ -14,7 +14,7 @@ V = 'rls-19.1.0.5973071.Set19.Shipping.pbe'
 
 def fight(layout=None, seconds=10):
     b = Bard(1, build=load_build(V))
-    ds = [dummy() for _ in range(8)]
+    ds = [dummy() for _ in range((layout or Layout()).count)]
     for d in ds:
         d.mr.base = 0  # the wave's magic damage as dealt
     Simulator().simulate([], [], b, ds, seconds, layout=layout)
@@ -31,25 +31,25 @@ def test_cast_locks_follow_the_wave_cast():
 def test_wave_falloff_and_timing():
     # 20 mana + 10 per attack (MagicMarksman): releases 6, 46, ..., 206 -> 80 -> cast at 207. FireMeeps 0.4381 s ->
     # 221. The wave starts half a hex behind Bard at 1000 units/s: the target (4 hexes) after (107.5 + 860) / 1000 s
-    # = 29 ticks (250), the dummy behind it 7 ticks later (257), the next at 263. Each hit 210 x AP x falloff (1, 0.7,
-    # 0.49) in two halves 3 ticks apart.
+    # = 29 ticks (250); the other 2 targets stand next to it (layout.py), the one beside it a little further along the
+    # line (254), the one behind it a hex further (257). Each hit 210 x AP x falloff (1, 0.7, 0.49) in two halves 3
+    # ticks apart.
     b, ds, spells = fight()
-    assert spells[:6] == [(250, 105.0), (253, 105.0), (257, 73.5), (260, 73.5), (263, 51.45), (266, 51.45)]
+    assert sorted(spells[:6]) == [(250, 105.0), (253, 105.0), (254, 73.5), (257, 51.45), (257, 73.5), (260, 51.45)]
 
 
-def test_wave_misses_dummies_off_its_line_and_the_fillers():
-    # default layout: the target, one behind it, one 2 hexes behind (all on the line); the fillers beyond are off the
-    # board (D1): 3 dummies hit, not 8
+def test_wave_meets_the_number_of_targets():
+    # 3 by default (owner, 2026-11-18): 6 halves from the first cast
     b, ds, spells = fight()
-    assert len({t for t, _ in spells[:6]}) == 6 and len([s for s in spells if s[0] < 300]) == 6
-    # no dummies next to / 2 hexes from the target: only the target
-    b, ds, spells = fight(Layout(adjacent=0, two_hex=0))
+    assert len([s for s in spells if s[0] < 300]) == 6
+    # one target: only the target (the spare dummy is out of play)
+    b, ds, spells = fight(Layout(1))
     assert spells == [(250, 105.0), (253, 105.0)]  # one cast in 10 s
 
 
 def test_falloff_floor():
-    # 1, 0.7, 0.49, 0.343, 0.2401, then 0.2 (MinimumDamagePercent) for the rest: 6 adjacent dummies all lie within
-    # the 600-wide line (centres at most 186 units off it)
-    b, ds, spells = fight(Layout(adjacent=6, two_hex=0), seconds=9)
+    # 1, 0.7, 0.49, 0.343, 0.2401, then 0.2 (MinimumDamagePercent) for the rest: 7 targets, the 6 next to the target
+    # all within the 600-wide line (centres at most 186 units off it)
+    b, ds, spells = fight(Layout(7), seconds=9)
     halves = sorted({v for _, v in spells}, reverse=True)
     assert halves[:3] == [105.0, 73.5, 51.45] and min(halves) == pytest.approx(105 * 0.2)

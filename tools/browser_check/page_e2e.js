@@ -118,27 +118,38 @@ const puppeteer = require("puppeteer-core");
   } catch (e) {
     console.log("FAIL Heartsteel row for Ezreal: " + e.message);
   }
-  // The dummy layout (layout.py): two sliders for every champion, default 1 and 1; more enemies next to the
-  // target means more of Ezreal's splash
+  // The number of targets (layout.py): shown for Ezreal (his splash), default 3; 5 targets means more splash.
+  // Hidden for a champion whose damage doesn't depend on it.
   try {
-    const layout = () => page.evaluate(() => ["layoutAdjacent", "layoutTwoHex"].map(
-      (id) => document.querySelector("#" + id).value + "/" + document.querySelector("#" + id + "Value").textContent));
+    const layout = () => page.evaluate(() => ({
+      hidden: document.querySelector("#targetsRow").hidden,
+      value: document.querySelector("#layoutTargets").value + "/" + document.querySelector("#layoutTargetsValue").textContent,
+    }));
     const shown = await layout();
-    console.log("layout sliders:", JSON.stringify(shown));
-    if (shown.join() !== "1/1,1/1") console.log("FAIL layout sliders' defaults");
+    console.log("targets slider:", JSON.stringify(shown));
+    if (shown.hidden || shown.value !== "3/3") console.log("FAIL targets slider for Ezreal (shown, default 3)");
     const before = (await read()).rows[1];
     await page.evaluate(() => {
-      const s = document.querySelector("#layoutAdjacent");
-      s.value = "3";
+      const s = document.querySelector("#layoutTargets");
+      s.value = "5";
       s.dispatchEvent(new Event("change"));
     });
     await page.waitForFunction((b) => {
       const r = document.querySelectorAll("#resultsTable tr")[1];
       return r && r.textContent.replace(/\s+/g, " ").trim() !== b;
     }, { timeout: 60000 }, before);
-    console.log("3 enemies next to the target:", JSON.stringify(await layout()), JSON.stringify((await read()).rows));
+    console.log("5 targets:", JSON.stringify(await layout()), JSON.stringify((await read()).rows));
+    await page.evaluate(() => {
+      const sel = document.querySelector("#champ");
+      sel.value = "Draven";
+      sel.dispatchEvent(new Event("change"));
+    });
+    await page.waitForFunction(() => document.querySelector("#targetsRow").hidden, { timeout: 30000 });
+    const draven = await layout();
+    console.log("Draven targets slider:", JSON.stringify(draven));
+    if (!draven.hidden) console.log("FAIL targets slider shown for Draven");
   } catch (e) {
-    console.log("FAIL layout slider did not change the results: " + e.message);
+    console.log("FAIL targets slider: " + e.message);
   }
   console.log("console errors:", errors.length ? errors : "none");
   await browser.close();

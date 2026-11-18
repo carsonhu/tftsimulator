@@ -2,10 +2,14 @@
 N hexes of a dummy, and where a ricochet goes.
 
 Hexes are axial coordinates (q, r). The champion stands at (0, 0) and its target at (R, 0), R = the champion's
-attack range (G4: the target is at attack range). The other dummies stand around the target: `adjacent` of them on
-the hexes next to it, `two_hex` on hexes 2 away, the rest in a line beyond (3, 4, ... hexes from the target). The
-default (one of each) is the line of dummies 1 hex apart the engine assumed before (B12): the target, a neighbour,
-one 2 hexes away. Each ring is filled starting behind the target (away from the champion), going round.
+attack range (G4: the target is at attack range). The page sets one number, the targets (owner, 2026-11-18): the
+target and `targets` - 1 enemies on the hexes next to it, filled starting behind the target (away from the champion)
+and going round, so each is next to the one before (ricochets fly 1 hex, B12). Every splash, line or nearby-enemies
+rule of 1 hex or more meets all of them. A champion whose damage does not depend on it gets no slider and the
+default (3).
+
+A fight with one target also holds a spare dummy far away, out of play: no area, line or ricochet sees it; only
+Titanic Hydra's assumed neighbour (owner: always one enemy next to the target) uses it (`neighbour`).
 
 `opponents[0]` stays the target: the dummies are placed, and kept, in that order (nearest the target first).
 """
@@ -14,7 +18,8 @@ import math
 
 DIRECTIONS = ((1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1))
 HEX_UNITS = 215.0  # world units between hex centres (timing.HEX_UNITS, G4)
-COUNT = 8  # dummies in a fight unless the layout needs more
+TARGETS = 3  # the page's default (owner, 2026-11-18)
+MAX_TARGETS = 7  # the target and its 6 neighbours
 
 
 def hex_distance(a, b):
@@ -35,30 +40,33 @@ def ring(center, radius):
 
 
 class Layout:
-    """The page's layout settings: enemies next to the target and enemies 2 hexes from it."""
+    """The page's layout setting: the number of targets (the target and the enemies next to it)."""
 
-    def __init__(self, adjacent=1, two_hex=1):
-        if not 0 <= adjacent <= 6 or not 0 <= two_hex <= 12:
-            raise ValueError(f'layout: {adjacent} adjacent (0-6), {two_hex} at 2 hexes (0-12)')
-        self.adjacent = adjacent
-        self.two_hex = two_hex
+    def __init__(self, targets=TARGETS):
+        if not 1 <= targets <= MAX_TARGETS:
+            raise ValueError(f'layout: {targets} targets (1-{MAX_TARGETS})')
+        self.targets = targets
 
     @property
     def count(self):
-        """Dummies a fight needs: 8, or more when the rings ask for more."""
-        return max(COUNT, 1 + self.adjacent + self.two_hex)
+        """Dummies a fight needs: the targets, and a spare when there is only one (`neighbour`)."""
+        return max(2, self.targets)
 
     def place(self, champion, dummies):
-        """Put the champion and `dummies` (the target first) on their hexes."""
+        """Put the champion and `dummies` (the target first) on their hexes; any beyond the targets are out of play."""
         target = (max(1, champion.attack_range or 1), 0)
-        spots = [target] + ring(target, 1)[:self.adjacent] + ring(target, 2)[:self.two_hex]
-        spots += [(target[0] + 3 + i, 0) for i in range(max(0, len(dummies) - len(spots)))]
+        spots = [target] + ring(target, 1)[:self.targets - 1]
         champion.hex = (0, 0)
-        for dummy, spot in zip(dummies, spots):
-            dummy.hex = spot
+        for i, dummy in enumerate(dummies):
+            dummy.in_play = i < len(spots)
+            dummy.hex = spots[i] if dummy.in_play else (target[0] + 10 + i, 0)
 
     def __repr__(self):
-        return f'Layout(adjacent={self.adjacent}, two_hex={self.two_hex})'
+        return f'Layout(targets={self.targets})'
+
+
+def in_play(dummies):
+    return [d for d in dummies if getattr(d, 'in_play', True)]
 
 
 def distance(a, b):
@@ -67,15 +75,22 @@ def distance(a, b):
 
 
 def around(target, hexes, dummies):
-    """The dummies within `hexes` of `target`, not counting it, nearest first (ties in placement order)."""
-    near = [d for d in dummies if d is not target and distance(d, target) <= hexes]
+    """The dummies in play within `hexes` of `target`, not counting it, nearest first (ties in placement order)."""
+    near = [d for d in in_play(dummies) if d is not target and distance(d, target) <= hexes]
     return sorted(near, key=lambda d: distance(d, target))
 
 
 def nearest(unit, n, dummies, exclude=()):
-    """The `n` dummies nearest `unit` (e.g. the champion), leaving out `exclude`; ties in placement order."""
-    near = [d for d in dummies if d is not unit and all(d is not x for x in exclude)]
+    """The `n` dummies in play nearest `unit` (e.g. the champion), leaving out `exclude`; ties in placement order."""
+    near = [d for d in in_play(dummies) if d is not unit and all(d is not x for x in exclude)]
     return sorted(near, key=lambda d: distance(d, unit))[:n]
+
+
+def neighbour(target, dummies):
+    """One enemy next to `target` whatever the page's targets (owner, 2026-11-18: Titanic Hydra): the nearest in play,
+    else the spare."""
+    near = around(target, 1, dummies)
+    return near[0] if near else next(d for d in dummies if d is not target)
 
 
 def world(h):
@@ -90,6 +105,7 @@ def line_hits(source, target, dummies, length, width, pool=None):
     straight at each dummy, ties to the one nearest the target's direction). Returns (direction, [(dummy, distance
     along the line from source)]) for the dummies of `pool` (default: all) within width / 2 of that line, in front
     of the source, nearest first."""
+    dummies = in_play(dummies)
     sx, sy = world(source.hex)
     pts = {id(d): world(d.hex) for d in dummies}
 
@@ -118,7 +134,7 @@ def line_hits(source, target, dummies, length, width, pool=None):
         ux, uy = math.cos(aim), math.sin(aim)
     else:
         ux, uy = best[2], best[3]
-    hits = [(d, along(d, ux, uy)[0]) for d in (dummies if pool is None else pool)
+    hits = [(d, along(d, ux, uy)[0]) for d in (dummies if pool is None else in_play(pool))
             if along(d, ux, uy)[0] >= -1e-9 and along(d, ux, uy)[1] <= width / 2 + 1e-9]
     return (ux, uy), sorted(hits, key=lambda h: h[1])
 
@@ -126,7 +142,8 @@ def line_hits(source, target, dummies, length, width, pool=None):
 def ricochet(previous, hit, dummies):
     """(next target, hexes flown) for a ricochet from `previous` (B12): the nearest dummy not yet in `hit`; when every
     dummy has been hit, the nearest other one; with a single dummy, back to it (0 hexes). Ties go to the next dummy
-    in placement order after `previous` (the line of dummies the engine assumed before)."""
+    in placement order after `previous`. Only dummies in play."""
+    dummies = in_play(dummies)
     n = len(dummies)
     start = dummies.index(previous)
 

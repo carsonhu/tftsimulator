@@ -56,15 +56,10 @@
               <select id="level"></select>
             </label>
           </div>
-          <label title="Training dummies on the hexes next to the target: splashes, Titanic Hydra, ricochets"
-            >Enemies next to the target
-            <input type="range" id="layoutAdjacent" min="0" max="6" step="1" />
-            <span class="slider-value" id="layoutAdjacentValue"></span>
-          </label>
-          <label title="Training dummies 2 hexes from the target: 2-hex splashes, Kai'Sa's missiles, ricochets"
-            >Enemies 2 hexes from the target
-            <input type="range" id="layoutTwoHex" min="0" max="6" step="1" />
-            <span class="slider-value" id="layoutTwoHexValue"></span>
+          <label id="targetsRow" title="Enemies the champion's area damage hits, the target included" hidden
+            >Number of targets
+            <input type="range" id="layoutTargets" min="1" max="7" step="1" />
+            <span class="slider-value" id="layoutTargetsValue"></span>
           </label>
         </section>
 

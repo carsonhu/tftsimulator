@@ -103,6 +103,7 @@ class RoleEffects(Item):
 
 class BuildChampion(Champion):
     KEY = None  # the champion's data asset, e.g. 'DA_Ahri19'
+    AREA = False  # True: its damage depends on the page's number of targets, which then shows its slider
     SPELL = None  # the spell timeline that times its casts (default: the build's first)
 
     def __init__(self, level, build=None):
