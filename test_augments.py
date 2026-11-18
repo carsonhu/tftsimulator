@@ -119,9 +119,6 @@ def test_attack_speed_and_mana():
     c = lucian()
     run(c, [set19buffs.ChaliceOfPower()])
     assert (c.ap.stat, c.manaRegen.stat) == (pytest.approx(1.25), 2 + 1)
-    c = lucian()
-    run(c, [set19buffs.URF()])
-    assert (c.aspd.stat, c.manaRegen.stat) == (pytest.approx(0.75 * 1.2), 2 + 3)
 
 
 def test_seraphims_staff():
@@ -164,3 +161,16 @@ def test_sunder_and_shred():
     c = lucian()
     ds = run(c, [set19buffs.Sunder30(), set19buffs.Shred30()])
     assert all(d.armor.stat == pytest.approx(70) and d.mr.stat == pytest.approx(70) for d in ds)
+
+
+@pytest.mark.parametrize("items, n", [
+    ((), 0), (("Spatula",), 1), (("FryingPan",), 1), (("TacticiansCrown",), 2), (("TacticiansCape",), 2),
+    (("JazzEmblem",), 1), (("Spatula", "TacticiansShield"), 3), (("InfinityEdge",), 0)])
+def test_urf_counts_spatula_items(items, n):
+    # GE_URF x MMC_NumSpatulaItemsOnHolder: 1 per Spatula, Frying Pan or emblem, 2 per Tactician's item
+    c = lucian()
+    held = [getattr(set19items, i)() for i in items]
+    run(c, [set19buffs.URF()], items=held)
+    emblem_as = 0.1 if "JazzEmblem" in items else 0
+    assert c.aspd.stat == pytest.approx(0.75 * (1 + emblem_as + 0.2 * n))
+    assert c.manaRegen.stat == 2 + 3 * n

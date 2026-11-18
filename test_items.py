@@ -480,3 +480,21 @@ def test_dawncore_manazane_talisman():
     assert m.given == pytest.approx(110) and m.next_tick is None
     c, ds = artifact_fight(set19items.TalismanOfAscension(), champ=Neeko, seconds=23)
     assert c.dmgMultiplier.stat == pytest.approx(2.2) and c.manaRegen.stat == equipped().manaRegen.stat + 12
+
+
+@pytest.mark.parametrize("cls", set19items.emblems)
+def test_every_listed_spatula_item_reads_from_the_build(cls):
+    equipped(getattr(set19items, cls)())  # raises if a stat can't be applied exactly
+
+
+def test_emblem_stats():
+    # GE_Jazz19_Emblem: 100 HP, AS 1 x AttackSpeedCalc1 (1 + EmblemAS 0.1); GE_DemonVision19_Emblem (Rock): +20% crit,
+    # +15% AS; GE_Pentakill19_Emblem: 15% AD and AP
+    base = equipped()
+    n = equipped(set19items.JazzEmblem())
+    assert n.aspd.stat == pytest.approx(base.aspd.stat * 1.1) and n.hp.stat == base.hp.stat + 100
+    n = equipped(set19items.RockEmblem())
+    assert n.crit.stat == pytest.approx(base.crit.stat + 0.2) and n.aspd.stat == pytest.approx(base.aspd.stat * 1.15)
+    n = equipped(set19items.PentakillEmblem())
+    assert (n.bonus_ad.stat, n.ap.stat) == (pytest.approx(1.15), pytest.approx(1.15))
+    assert set19items.JazzEmblem().trait == "Jazz" and set19items.RockEmblem().trait is None

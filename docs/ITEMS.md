@@ -53,9 +53,9 @@ Guinsoo's would show a wrong number.
 | Sterak's Gage | `DA_SteraksGage` | AttackDamage, HealthMax | `GA_SteraksGage` | implemented (stats) | 2026-11-17: the 40%-health shield never triggers against dummies (I8). |
 | Striker's Flail | `DA_StrikersFlail` | AttackSpeed, CritChance, HealthMax, OutgoingDamageMultiplier | `GA_StrikersFlail` | implemented (script read) | 2026-11-17: +5% damage amp per crit for 5 s, 4 instances (I6). Predicted. |
 | Sunfire Cape | `DA_SunfireCape` | Armor, HealthMax | `GA_SunfireCape` | out of scope (tank item) | Not in the DPS item table (owner, 2026-11-17; I8). |
-| Tactician's Cape | `DA_TacticiansCape` | MaxTeamSizeBonus | `GA_TacticiansCape` | out of scope | Team size only: nothing for one champion against dummies. |
-| Tacticians Crown | `DA_TacticiansCrown` | MaxTeamSizeBonus | `GA_TacticiansCrown` | out of scope | Team size only: nothing for one champion against dummies. |
-| Tacticians Shield | `DA_TacticiansShield` | MaxTeamSizeBonus | `GA_TacticiansShield` | out of scope | Team size only: nothing for one champion against dummies. |
+| Tactician's Cape | `DA_TacticiansCape` | MaxTeamSizeBonus | `GA_TacticiansCape` | implemented (stats) | Listed with the emblems (below): team size does nothing here, but U.R.F. counts it twice (A6). |
+| Tacticians Crown | `DA_TacticiansCrown` | MaxTeamSizeBonus | `GA_TacticiansCrown` | implemented (stats) | Listed with the emblems (below): team size does nothing here, but U.R.F. counts it twice (A6). |
+| Tacticians Shield | `DA_TacticiansShield` | MaxTeamSizeBonus | `GA_TacticiansShield` | implemented (stats) | Listed with the emblems (below): team size does nothing here, but U.R.F. counts it twice (A6). |
 | Thief's Gloves | `DA_ThiefsGloves` | CritChance, HealthMax | `GA_ThiefsGloves` | out of scope | Random items each round: pick the items themselves instead. |
 | Titan's Resolve | `DA_TitansResolve` | Armor, AttackSpeed | `GA_TitansResolve` | confirmed (VOD) | 2026-11-17: one stack (+2% AD and AP, GE_TitansResolve_StackingStats) per Combat.Event.LaunchAttack, up to 25; simulated attacks count (G11); damage taken also stacks (nothing against dummies). Engine event `LAUNCH` (attack release, `Champion.simulateLaunch`; events.py). VOD4 (19-0-51-650) Ezreal 1★ with IE and Guinsoo's, round 2-2 (`tools/vod_text_changes.py --field ap`): AP 12, 14, 16 on the release frames f75988, 76052, 76114; +4 at the cast f76174 (release + simulated attack) and +2 at f76216 (stage 2); 22-28 on releases; +4 at f76447, +2 at 76489 (2nd cast). |
 | Void Staff | `DA_VoidStaff` | AbilityPower, AttackSpeed, ManaPerSecond | `GA_VoidStaff` | implemented (script read) | 2026-11-17: MR x0.7 on the damaged unit after each hit, 5 s (I7). Predicted. |
@@ -97,4 +97,18 @@ The Artifact table (`set19items.artifacts`, ledger I10). Nothing is VOD-checked 
 | Death's Defiance, Mittens, Mogul's Mail, The Indomitable, Lightshield Crest, Zhonya's Paradox, Void Gauntlet, Aegis of Dawn, Aegis of Dusk, Forbidden Idol | out of scope | Defensive or support: no damage of their own against dummies. |
 | Eternal Pact | out of scope | Depends on an ally's behaviour (owner). |
 
-Emblems and the rest are added when needed.
+## Emblems and Spatula items
+
+The Emblem table (`set19items.emblems`, `items/emblems.py`): the Spatula items U.R.F. counts (A6) and the emblems whose
+effect is plain stats. An emblem applies its stats effect GE_<Trait>_Emblem; its AttackSpeed is 1 x AttackSpeedCalc1,
+checked to be 1 + EmblemAS. The trait it adds is the buff bar's level (picking the emblem offers the trait). Nothing
+is VOD-checked yet.
+
+| Item | Status | Notes |
+|---|---|---|
+| Spatula, Frying Pan | implemented (stats) | No stats; U.R.F. counts each once. |
+| Tactician's Crown, Cape, Shield | implemented (stats) | Team size only; U.R.F. counts each twice. |
+| K/DA, Ill Beats, Ionic Spark, Rock, Beach Pop, Pentakill, Jazz, True Damage, Classical, Hyperpop | implemented (stats) | Stats effect only. K/DA's GE_KDA19_StarLevelContribution is the trait's side. Rock's trait isn't simulated. |
+| Arcanist, Bodyguard, Choreographer, Frontman, Heartsteel, Hitmaker, Juggernaut, Manager, Prodigy, Renegade, Slayer, Swiftstriker | not listed | More than stats: execute, resist conversion, back-row AS, on-hit scripts, trait tags, amp per health, a max-mana row, granted abilities, empowered crits. Added when their mechanic is written. |
+
+The rest are added when needed.

@@ -5,6 +5,7 @@ Ledger: docs/ASSUMPTIONS.md A1-A8."""
 from augments.base import BuildAugment
 from events import DAMAGE_POST, ITEM, UNIT, damage_tags
 from items.debuffs import apply_shred, apply_sunder
+from items.emblems import spatula_count
 from registry import register
 from timing import TPS, ticks_up
 
@@ -357,13 +358,16 @@ class ChaliceOfPower(BuildAugment):
 
 @register("augment")
 class URF(BuildAugment):
-    """U.R.F. (DA_URF): Spatula and Frying Pan items gain AS (20%) and ManaRegen (3). The unit is taken to hold one (an
-    emblem; the augment gives a Spatula) (A6)."""
+    """U.R.F. (DA_URF): GE_URF gives AS (MultiplyAdditive 0.2) and ManaPerSecond (3), each x MMC_NumSpatulaItemsOnHolder:
+    1 per Spatula, Frying Pan or emblem the unit holds, 2 per Tactician's item (items.emblems.spatula_count; A6).
+    Nothing when it holds none."""
     KEY, display_name = "DA_URF", "U.R.F."
 
     def stats(self, champion):
-        champion.aspd.modify("MultiplyAdditive", 1 + self.value(champion, "AS"))
-        champion.manaRegen.modify("+", self.value(champion, "ManaRegen"))
+        n = spatula_count(champion)
+        if n:
+            champion.aspd.modify("MultiplyAdditive", 1 + n * self.value(champion, "AS"))
+            champion.manaRegen.modify("+", n * self.value(champion, "ManaRegen"))
 
 
 @register("augment")

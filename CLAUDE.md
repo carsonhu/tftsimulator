@@ -87,7 +87,8 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
 
 - Where code lives: augments in `augments/` (`base.py`: BuildAugment; `combat.py`: the offensive combat augments and
   the Sunder30 / Shred30 entries; ledger A1-A8), items in `items/` (`base.py`: NoItem, the stats layer, BuildItem, StackingItem, item_name;
-  `debuffs.py`: sunder, shred, burn; `craftables.py`, `radiants.py`, `artifacts.py`), traits in `traits/` (one module
+  `debuffs.py`: sunder, shred, burn; `craftables.py`, `radiants.py`, `artifacts.py`,
+  `emblems.py`: Spatula items and plain-stat emblems), traits in `traits/` (one module
   per trait, `base.py`: Buff, NoBuff, BuildTrait). `set19items` and `set19buffs` gather them, so every class is still
   `set19items.<Class>` / `set19buffs.<Class>`; the import order in `set19buffs` is the order traits are offered and
   run in. `items/` also holds the item worksheets (`items/<Name>.md`).

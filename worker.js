@@ -31,6 +31,7 @@ const PY_FILES = [
   "items/base.py",
   "items/craftables.py",
   "items/debuffs.py",
+  "items/emblems.py",
   "items/radiants.py",
   "registry.py",
   "set19buffs.py",
