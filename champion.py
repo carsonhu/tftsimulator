@@ -368,6 +368,14 @@ class Champion(FastDeepCopy):
     def onLaunch(self, opponents, items):
         """An attack releases (the LaunchAttack event). Champions whose passive counts launches override this."""
 
+    def simulateLaunch(self, items):
+        """GE_SimulateLaunchAttack (a cast's 'simulated attack'): GA_SimulateLaunchAttack sends
+        Combat.Event.LaunchAttack.SimulateTriggersOnly, which every non-exact Combat.Event.LaunchAttack listener hears
+        (G11; VOD4 Ezreal: Titan's Resolve stacks). Items react in their 'onLaunch' phase; the attack itself, its
+        mana and the champion's own launch count are not touched."""
+        for item in items:
+            item.ability("onLaunch", self.tick / TPS, self)
+
     def _release(self, opponents, items, rhythm=True, paid=None):
         """The attack releases (ranged) or hits (melee) this tick. With `rhythm`, the next attack is scheduled one
         exact period after this release (T2). `paid`: whether this attack's mana is already paid (default: the
@@ -381,6 +389,8 @@ class Champion(FastDeepCopy):
             paid = True
         self.launches += 1
         self.onLaunch(opponents, items)
+        for item in items:
+            item.ability("onLaunch", self.tick / TPS, self)  # Combat.Event.LaunchAttack listeners (Titan's Resolve)
         if rhythm and self.timing.variants:
             # B13: attack starts are one period apart and each releases its own animation's windup later, so the
             # releases of different animations are not a period apart (Kai'Sa, VOD3)

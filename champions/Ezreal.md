@@ -76,7 +76,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
 | Q9 | Mana lock: from cast start, when can mana be gained again? | 1.1667 s (35 ticks) | predicted | |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | stage 1 applies GE_SimulateLaunchAttack at cast start, under the mana lock (G11): not modelled | script |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | **confirmed**: two simulated attacks per cast, at the cast and at stage 2: two Titan's Resolve stacks (docs/ITEMS.md); role mana falls inside the mana lock | G11 |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | cancels Combat.Attacking (T4) | script |
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | **consistent**: the second cast's detonation dealt 327 (a crit vs a frontliner), so FirstCastHit resets each cast (D1); the exact value is not checkable (Titan's stacks, unknown armor) | E3 |
 | Q14 | Passives and other mechanics that need modelling | see ability text | two-stage cast and the Encore second missile (D1); Heartsteel upgrade not implemented | D1 |

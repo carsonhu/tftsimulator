@@ -97,7 +97,8 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   stats, `docs/ITEMS.md`); stats and tags are applied at combat start from the champion's build (ledger I1-I3), and
   anything the layer can't apply exactly raises. A scripted item is listed only once its script is implemented.
 - Items/buffs: behaviour in `performAbility(phase, time, champion, input_)` for the phases listed in `phases`
-  (`preCombat`, `onUpdate`, `preAttack`, `onAttack`, `postAttack`, `onCrit`, `preAbility`, `postAbility`,
+  (`preCombat`, `onUpdate`, `onLaunch` (attack release and simulated attacks, G11), `preAttack`, `onAttack`,
+  `postAttack`, `onCrit`, `preAbility`, `postAbility`,
   `onDealDamage`, ...). Units differ per stat (item `crit=20` is 20%; `omnivamp=0.15` is a fraction; `ad`, `ap`,
   `aspd` are percent points).
 - Tests (local, gitignored): `python -m pytest -q` with set18's venv (`../set18/.venv/Scripts/python`) until this

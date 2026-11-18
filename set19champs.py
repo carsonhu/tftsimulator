@@ -288,7 +288,7 @@ class Ziggs(BuildChampion):
     (OnArrived -> 0xa3e) applies GE_Ziggs19_PrimaryDamage (MagicDamageCalc1 = InitialDamage x AP) to the target and
     GE_Ziggs19_SecondaryDamage (MagicDamageCalc2 = SecondaryDamageAP x AP) to the other enemies within 1 hex of it
     (0x5d). Both magic spell damage, crit only with Precision. The bomb's first OnFired applies GE_SimulateLaunchAttack
-    (Combat.Event.LaunchAttack.SimulateTriggersOnly): not modelled, see notes.
+    (Combat.Event.LaunchAttack.SimulateTriggersOnly): on-attack items hear it (simulateLaunch, G11).
     """
     KEY = 'DA_Ziggs19'
     CAST = 'CD_Ziggs19_CastAnim'
@@ -302,9 +302,8 @@ class Ziggs(BuildChampion):
         # set18 convention (as Varus): num_targets counts the target; the splash hits num_targets - 1 adjacent enemies
         self.num_targets = 2
         self.bomb_spawn = self.chrono_projectile_spawn(self.CAST, self.BOMB)
-        self.notes = ('Hyperpop (Hype levels between rounds) not modelled. The bomb\'s simulated attack (on-attack '
-                      'triggers only) is not modelled: no listed item reacts to it and its role mana would fall '
-                      'inside the mana lock. Adjacent enemies hit = targets - 1. The bomb flies his attack range.')
+        self.notes = ('Hyperpop (Hype levels between rounds) not modelled. The bomb\'s simulated attack triggers '
+                      'on-attack items (Titan\'s Resolve); its role mana would fall inside the mana lock. Adjacent enemies hit = targets - 1. The bomb flies his attack range.')
 
     def bomb_damage(self, level, AD, AP):
         return self.row('InitialDamage', star=level) * AP
@@ -329,7 +328,9 @@ class Ziggs(BuildChampion):
             if self.num_targets > 1:
                 self.multiTargetSpell(opponents[1:], items, now, self.num_targets - 1, self.splash_damage, 'magical')
 
-        self.schedule_tick(self.tick + ticks_up(self.bomb_spawn / rate) + flight, land)
+        spawn = self.tick + ticks_up(self.bomb_spawn / rate)
+        self.schedule_tick(spawn, lambda: self.simulateLaunch(items))  # 0x9f5: the bomb's first OnFired (G11)
+        self.schedule_tick(spawn + flight, land)
 
 
 class Senna(BuildChampion):
@@ -338,7 +339,7 @@ class Senna(BuildChampion):
     The cast checks the attack target for her GE_Senna19_Marker (0xf25-0x11de):
     - unmarked: FireBlast (0x17ba) plays CD_Senna19_CastAnim1; its 'SennaMis' missile (0.7859 s, 4000 units/s)
       applies GE_Senna19_Marker and GE_Senna19_Damage (PhysicalDamageCalc1 = SpellAD x AD + SpellAP x AP) on arrival
-      (0x509). It also applies GE_SimulateLaunchAttack at once (0x1bfe), under the mana lock (G11: not modelled).
+      (0x509). It also applies GE_SimulateLaunchAttack at once (0x1bfe): on-attack items hear it (G11).
     - marked: CD_Senna19_CastAnim2; at its 'Damage' event (0.2851 s, 0x761 -> 0x36) the marker is removed and
       GE_Senna19_MarkerDamage (PhysicalDamageCalc2 = MarkerPercentOfSpellAD x Calc1) applied; the SoulRip projectile
       flying back to her gives GE_Senna19_Cast2Buff (OutgoingDamageMultiplier + BonusDA, infinite, no stack limit,
@@ -388,6 +389,7 @@ class Senna(BuildChampion):
 
             flight = self.chrono_projectile_ticks(self.BLAST, 'SennaMis', self.attack_range)
             self.schedule_tick(self.tick + ticks_up(self.blast_spawn) + flight, land)
+            self.simulateLaunch(items)  # 0x1bfe: the blast's GE_SimulateLaunchAttack, at once (G11)
         else:
             def detonate():
                 self.multiTargetSpell(opponents[:1], items, self.tick / TPS, 1, self.rip_damage_value, 'physical')
@@ -408,8 +410,9 @@ class Ezreal(BuildChampion):
     'SpellMis' (0.319 s): FirstCastHit, set by the first detonation of the cast, makes it deal x CT_Encore19
     RecastEffectiveness (DetermineDamageForSpell). CastAnim2's Unlock ends the spell (the build's 36-tick cast lock,
     35-tick mana lock). Physical spell damage, crits only with Precision.
-    Not modelled: the Heartsteel upgrade (+25% and a 2-hex radius every 3rd cast: Heartsteel is not implemented) and
-    the stage-1 GE_SimulateLaunchAttack (under the mana lock, G11).
+    Each stage applies GE_SimulateLaunchAttack (0x168a, 0x1ce5 -> 0xf): on-attack items hear both (G11; VOD4: two
+    Titan's Resolve stacks per cast). Not modelled: the Heartsteel upgrade (+25% and a 2-hex radius every 3rd cast:
+    Heartsteel is not implemented).
     """
     KEY = 'DA_Ezreal19'
     MARK = 'CD_Ezreal19_CastAnim'
@@ -424,7 +427,7 @@ class Ezreal(BuildChampion):
         if len(spawns) != 2:
             raise ValueError(f'Ezreal: expected the root and Encore SpellMis in {self.SHOT}, got {spawns}')
         self.shot_spawn, self.encore_spawn = spawns
-        self.notes = ('Heartsteel upgrade and Titan\'s-style item stacks not modelled. Adjacent enemies hit = '
+        self.notes = ('Heartsteel upgrade not modelled. Adjacent enemies hit = '
                       'targets - 1. The detonating missile flies his attack range.')
 
     def detonation(self, level, AD, AP):
@@ -437,6 +440,9 @@ class Ezreal(BuildChampion):
         if self.trait_tier('DA_Encore19') > 0:
             shots.append((self.encore_spawn, self.trait_value('DA_Encore19', 'RecastEffectiveness')))
         splash = self.row('AoEPercentDamage')
+        # GE_SimulateLaunchAttack at stage 1 (0x168a) and again at stage 2 (0x1ce5 -> 0xf): VOD4, Titan's stacks
+        self.simulateLaunch(items)
+        self.schedule_tick(stage2, lambda: self.simulateLaunch(items))
         for spawn, eff in shots:
             def land(eff=eff):
                 now = self.tick / TPS

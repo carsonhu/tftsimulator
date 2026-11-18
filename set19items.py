@@ -7,7 +7,7 @@ from item import Item
 from timing import ticks_up
 
 offensive_craftables = ["ArchangelsStaff", "BlueBuff", "Deathblade", "GuinsoosRageblade", "InfinityEdge",
-                        "JeweledGauntlet", "RabadonsDeathcap", "SpearOfShojin"]
+                        "JeweledGauntlet", "Quicksilver", "RabadonsDeathcap", "SpearOfShojin", "TitansResolve"]
 artifacts = []
 radiants = []
 emblems = []
@@ -255,6 +255,59 @@ class GuinsoosRageblade(StackingItem):
         if scale != "Stack":
             raise BuildDataError(f"{self.KEY}: StackingAS no longer scales with Stack ({scale})")
         champion.aspd.addStat(coef * stack * 100)
+
+
+class Quicksilver(StackingItem):
+    """Stats GE_Quicksilver_Stats (15% AS, 20% crit, 20 MR). Script GA_Quicksilver: WaitOnTimePassedInPhase(
+    StackFrequency, combat) then RepeatAction(StackFrequency, 99) (0x343), whose first action is immediate; each
+    action applies QuicksilverStackingEffect = GE_Quicksilver_StacksToAttackSpeed (AttackSpeed MultiplyAdditive 1.03).
+    So +3% AS at 1, 2, 3, ... s, up to 99 times; EffectDuration (18 s) is only the Unstoppable (nothing against
+    dummies). VOD4 Senna (docs/ITEMS.md): with Guinsoo's, one +0.075 AS step every 60 frames from 1 s."""
+    KEY = "DA_Quicksilver"
+    STATS = ("GE_Quicksilver_Stats",)
+    MAX_ACTIONS = 99  # RepeatAction's count (script literal, 0x343)
+    display_name = _name(KEY)
+
+    def period_seconds(self, champion):
+        ref = next(r for r in self.build_entry(champion).d["ability_refs"] if r["ga"] == "GA_Quicksilver")
+        return self.row(champion, ref["params"]["FrequencyCurveTable"]["RowName"])
+
+    def per_stack(self, champion):
+        if self.next_k > self.MAX_ACTIONS:
+            return
+        v, scale = self.script_modifier(champion, "GE_Quicksilver_StacksToAttackSpeed", "AttackSpeed",
+                                        "MultiplyAdditive")
+        if scale is not None:
+            raise BuildDataError(f"{self.KEY}: StacksToAttackSpeed is no longer a plain number ({scale})")
+        champion.aspd.addStat((v - 1) * 100)
+
+
+class TitansResolve(BuildItem):
+    """Stats GE_TitansResolve_Stats (10% AS, 20 armor). Script GA_TitansResolve: at activation it applies
+    StackingStatsGE = GE_TitansResolve_StackingStats (AttackDamage and AbilityPower + 0.02 x Stack); every
+    Combat.Event.LaunchAttack of the holder (WaitGameplayEvent, not exact: simulated attacks count, 0x63f) and every
+    attack or spell damage taken (nothing, against dummies) applies GE_TitansResolve_Stack (one stack) while Stack <
+    MaxStacks (25). Full stacks: 15% max HP and Unstoppable (nothing against dummies). VOD4 Ezreal
+    (docs/ITEMS.md): +2% AP on every release's frame and twice per cast (his two simulated attacks)."""
+    KEY = "DA_TitansResolve"
+    STATS = ("GE_TitansResolve_Stats",)
+    display_name = _name(KEY)
+
+    def __init__(self):
+        super().__init__(phases=["preCombat", "onLaunch"])
+        self.stacks = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            self.stacks = 0
+        elif phase == "onLaunch" and self.stacks < self.row(champion, "MaxStacks"):
+            self.stacks += 1
+            for attr, stat in (("AttackDamage", champion.bonus_ad), ("AbilityPower", champion.ap)):
+                coef, scale = self.script_modifier(champion, "GE_TitansResolve_StackingStats", attr, "+")
+                if scale != "Stack":
+                    raise BuildDataError(f"{self.KEY}: StackingStats {attr} no longer scales with Stack ({scale})")
+                stat.addStat(coef * 100)  # one stack
+        return input_
 
 
 class ArchangelsStaff(StackingItem):

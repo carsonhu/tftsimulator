@@ -79,7 +79,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
 | Q9 | Mana lock: from cast start, when can mana be gained again? | 1.2 s (36 ticks) | **consistent**: two lock lengths appear in the fight, ~74-77 and ~59-64 frames to the first mana after the cast (36 and 30 ticks = 72 and 60 frames, then up to one 0.25 s regen step) | E2 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | the blast applies GE_SimulateLaunchAttack at cast start, under the mana lock (G11): not modelled | script |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | the blast (not the detonation) applies one simulated attack at cast start: on-attack items hear it (G11); role mana falls inside the mana lock | G11 |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | cancels Combat.Attacking (T4) | script |
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | implemented from the script (D1): blast Calc1 + mark, detonation 1.5 x Calc1 + 8% damage amp; damage not yet checked | script |
 | Q14 | Passives and other mechanics that need modelling | see ability text | mark/detonate alternation and the stacking amp (D1); Hitmaker (B18) and True Damage A-Side (B19) implemented | D1 |

@@ -44,7 +44,7 @@ Guinsoo's would show a wrong number.
 | Morellonomicon | `DA_Morellonomicon` | AbilityPower, HealthMax, ManaPerSecond | `GA_Morellonomicon` | not started | |
 | Nashor's Tooth | `DA_NashorsTooth` | AbilityPower, AttackSpeed, CritChance, HealthMax, ManaPerAttack | `GA_NashorsTooth` | not started | |
 | Protector's Vow | `DA_ProtectorsVow` | Armor, MagicResist, ManaPerSecond | `GA_ProtectorsVow` | not started | |
-| Quicksilver | `DA_Quicksilver` | AttackSpeed, CritChance, MagicResist | `GA_Quicksilver` | not started | |
+| Quicksilver | `DA_Quicksilver` | AttackSpeed, CritChance, MagicResist | `GA_Quicksilver` | confirmed (VOD) | 2026-11-17: +3% base AS (GE_Quicksilver_StacksToAttackSpeed, x1.03) at 1, 2, 3, ... s (WaitOnTimePassedInPhase 1 s, then RepeatAction(1 s, 99) acting at once); the 18 s is only the Unstoppable. VOD4 (19-0-51-650) Senna 1★ with Guinsoo's, round 1-4, combat start f41837: AS 0.94, then 1.01, 1.09, 1.16, 1.24, 1.31, 1.39, 1.46, 1.54, 1.61 every 60 frames = 0.75 x (1.25 + 0.1k). |
 | Rabadon's Deathcap | `DA_RabadonsDeathcap` | AbilityPower | none | implemented (stats) | 2026-11-17: 55% AP, every bonus AP ×1.15: the same effect structure as Deathblade (I5), which VOD3 confirms; not seen itself. No script. |
 | Red Buff | `DA_RedBuff` | AttackSpeed, OutgoingDamageMultiplier | `GA_RedBuff` | not started | |
 | Spear of Shojin | `DA_SpearOfShojin` | AbilityPower, AttackDamage, ManaPerAttack, ManaPerSecond | none | implemented (stats) | 2026-11-17: stats; 5 mana per attack paid with the role mana (I3, predicted). No script. |
@@ -57,7 +57,7 @@ Guinsoo's would show a wrong number.
 | Tacticians Crown | `DA_TacticiansCrown` | MaxTeamSizeBonus | `GA_TacticiansCrown` | not started | |
 | Tacticians Shield | `DA_TacticiansShield` | MaxTeamSizeBonus | `GA_TacticiansShield` | not started | |
 | Thief's Gloves | `DA_ThiefsGloves` | CritChance, HealthMax | `GA_ThiefsGloves` | not started | |
-| Titan's Resolve | `DA_TitansResolve` | Armor, AttackSpeed | `GA_TitansResolve` | not started | |
+| Titan's Resolve | `DA_TitansResolve` | Armor, AttackSpeed | `GA_TitansResolve` | confirmed (VOD) | 2026-11-17: one stack (+2% AD and AP, GE_TitansResolve_StackingStats) per Combat.Event.LaunchAttack, up to 25; simulated attacks count (G11); damage taken also stacks (nothing against dummies). Engine phase `onLaunch` (attack release, `Champion.simulateLaunch`). VOD4 (19-0-51-650) Ezreal 1★ with IE and Guinsoo's, round 2-2 (`tools/vod_text_changes.py --field ap`): AP 12, 14, 16 on the release frames f75988, 76052, 76114; +4 at the cast f76174 (release + simulated attack) and +2 at f76216 (stage 2); 22-28 on releases; +4 at f76447, +2 at 76489 (2nd cast). |
 | Void Staff | `DA_VoidStaff` | AbilityPower, AttackSpeed, ManaPerSecond | `GA_VoidStaff` | not started | |
 | Warmog's Armor | `DA_WarmogsArmor` | HealthMax | none | stats only, not listed | Stats only (HP), no damage effect: added when an HP-scaling champion needs it. |
 

@@ -58,7 +58,6 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|---|
 | Does his cast speed up with attack speed, capped at 2x? | the cast chrono plays at FClamp(AS / base AS, 1, 2): cast lock 25 ticks at base AS, 12 at 2x | a Ziggs with attack-speed items or Swiftstriker stacks: cast to next release | G7, champions/Ziggs.md D1 |
 | First attack at combat start | a stationary ranged unit releases one windup in (18 ticks at base AS); VOD2's fight was minions walking in | a fight with a combat-start marker (Blue Buff) | G3, Ziggs Q3 |
-| The bomb's simulated attack (`GE_SimulateLaunchAttack`) | not modelled (no listed item reacts to attacks) | once an on-attack item is added: does a cast trigger it? | G11, champions/Ziggs.md D1 |
 
 ### 6. Senna again
 
@@ -75,6 +74,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Cast to the next attack | the bar fills at a release, the cast is the next tick, cast lock 36 ticks, then an 11-tick windup: 48 ticks from that release; VOD4 showed 46 and 44 | another Ezreal fight, ideally against a stationary target (no retargeting) | T4, T10, champions/Ezreal.md E2 |
 | Detonation damage | 190 x AD + 30 x AP on the target, 0.33x that within 1 hex | damage numbers without Titan's Resolve, on a target of known armor | champions/Ezreal.md D1 |
 | Encore's second missile | x RecastEffectiveness (25/50%) at 0.319 s into stage 2 | an Ezreal with Encore (2) | champions/Ezreal.md D1 |
+| Where does 5% of his AD come from? | VOD4 2-2: AD 40% at combat start with Infinity Edge (35%) and no stacks; Heartsteel (1), Illbeats (2) and Frontman (2) were active, none implemented | his panel with and without Heartsteel | champions/Ezreal.md E1 |
 
 ### 8. Spell projectiles and damage numbers
 
@@ -99,4 +99,4 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|
 | Draven's vortex: the decoded damage effect has no tick-rate factor, yet each 0.5 s hit is half the per-second value (owner's ruling). Where does the game halve it? | implemented as the owner ruled; the decode is incomplete somewhere (calc component or attribute) | champions/Draven.md D1 |
 | Trickshot ricochets' on-hit effects (at RichochetDamage^k) | not modelled; no listed item has an on-hit effect yet | B12 |
-| Illbeats (Draven's second trait), Ionic Spark (Yunara's), Hyperpop (Ziggs's), Heartsteel (Ezreal's: also his spell upgrade), True Damage's B-Side and Prismatic tiers; items Titan's Resolve and Quicksilver (both in VOD4) | not implemented | - |
+| Illbeats (Draven's second trait), Ionic Spark (Yunara's), Hyperpop (Ziggs's), Heartsteel (Ezreal's: also his spell upgrade), True Damage's B-Side and Prismatic tiers | not implemented | - |
