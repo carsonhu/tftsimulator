@@ -1,5 +1,6 @@
 import math
 
+from effects import expire_effects
 from timing import TPS
 
 
@@ -39,16 +40,16 @@ class Simulator(object):
         ]
 
         for opponent in opponents:
-            # dummies never act (update() is never called on them); only their statuses tick
+            # dummies never act (update() is never called on them); only their timed effects end
             opponent.opponents = champion
 
         n_ticks = math.ceil(duration * TPS - 1e-9)
         for tick in range(n_ticks):
             self.current_time = tick / TPS
+            for opponent in opponents:  # before the champion acts, like the champion's own (effects.py)
+                if opponent.effects:
+                    expire_effects(opponent, tick)
             champion.update(opponents, items, self.current_time)
-            for opponent in opponents:
-                if opponent.statuses and self.current_time >= opponent.nextStatusUpdate:
-                    opponent.updateStatuses(self.current_time)
         self.current_time = n_ticks / TPS
         return champion.dmgVector
 

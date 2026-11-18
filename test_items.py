@@ -316,7 +316,8 @@ def test_strikers_flail_four_instances_of_five_percent():
     for k in range(5):
         f.performAbility('onCrit', k * 0.5, n, False)
     assert n.dmgMultiplier.stat == pytest.approx(base + 0.20)  # capped at 4 instances
-    n.updateStatuses(5.6)  # 5 s after the 2nd crit (1 s): the 1st and 2nd have worn off; the 5th renewed the 1st
+    from effects import expire_effects
+    expire_effects(n, 168)  # 5.6 s, past the 2nd crit's 5 s (0.5 s): the 2nd has worn off; the 5th renewed the 1st
     assert n.dmgMultiplier.stat == pytest.approx(base + 0.15)
 
 
@@ -349,13 +350,13 @@ def test_last_whisper_and_void_staff_after_the_hit():
     d = Draven(1, build=load_build(V))
     t = dummy()
     Simulator().simulate([set19items.LastWhisper()], [], d, [t], 6)
-    s = t.statuses['Armor Reduction Sunder']
-    assert t.armor.total('MultiplyCompound', channel=2) == 0.7 and s.active  # the Channel2 x0.7 (I5, I7)
-    assert s.wearoff_time == pytest.approx(d.dmgVector[-1][0] + 3)
+    s = t.effects['Sunder']
+    assert s.modifiers == [('armor', 'MultiplyAdditive', 0.7, 2)]  # GE_ArmorSunder's op and channel (I5, I7)
+    assert abs(s.last_tick - (round(d.dmgVector[-1][0] * 30) + 90)) <= 1  # 3 s from the last hit
     d = Draven(1, build=load_build(V))
     t = dummy()
     Simulator().simulate([set19items.VoidStaff()], [], d, [t], 6)
-    assert t.mr.total('MultiplyCompound', channel=2) == 0.7 and t.statuses['MR Reduction Shred'].active
+    assert t.effects['Shred'].modifiers == [('mr', 'MultiplyAdditive', 0.7, 2)]
 
 
 def test_radiants_use_their_own_numbers():
@@ -378,7 +379,7 @@ def test_radiants_use_their_own_numbers():
     d = Draven(1, build=load_build(V))
     t = dummy()
     Simulator().simulate([set19items.LastWhisperRadiant()], [], d, [t], 4)
-    assert t.statuses['Armor Reduction Sunder'].wearoff_time == pytest.approx(d.dmgVector[-1][0] + 50)  # renewed by each hit
+    assert abs(t.effects['Sunder'].last_tick - (round(d.dmgVector[-1][0] * 30) + 1500)) <= 1  # renewed by each hit
     assert len(set19items.radiants) == len(set19items.offensive_craftables)
 
 

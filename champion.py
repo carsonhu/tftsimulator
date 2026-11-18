@@ -1,10 +1,10 @@
 import heapq
 import math
 
+from effects import expire_effects
 from stats import ArmorPierce, Attack, Attribute, FastDeepCopy, Stat
 from timing import TPS, Timing, ticks, ticks_up
 
-import status
 
 
 def _round_half_up(x):
@@ -97,10 +97,7 @@ class Champion(FastDeepCopy):
         self._event_seq = 0
         self.items = []  # role effects, items and buffs (BuildChampion adds its RoleEffects)
 
-        self.statuses = {}  # current statuses
-        # Earliest next_update across self.statuses; lets the frame loop skip
-        # the whole status pass while everything is just waiting.
-        self.nextStatusUpdate = -1
+        self.effects = {}  # timed effects on this unit: name -> effects.ActiveEffect
         self.opponents = []
         self.dmgVector = []
         self.dmgDealt = 0 # no need to serialize
@@ -169,33 +166,6 @@ class Champion(FastDeepCopy):
     def __hash__(self):
         # used for caching
         return hash(self.hashFunction())
-
-    def applyStatus(self, status, champion, time, duration, params=0):
-        """Apply status to self.
-
-        Args:
-            status (Status): Status to apply
-            champion (Champion): Opponent who applied the status
-            time (int): time of application
-            duration (int): How long to apply for
-            params (??): any extra params
-        """
-        if status.name not in self.statuses:
-            self.statuses[status.name] = status
-            self.statuses[status.name].application(
-                self, champion, time, duration, params
-            )
-        else:
-            if not self.statuses[status.name].active:
-                self.statuses[status.name].application(
-                    self, champion, time, duration, params
-                )
-            else:
-                self.statuses[status.name].reapplication(
-                    self, champion, time, duration, params
-                )
-        # Schedule changed; make the next frame look at the statuses again.
-        self.nextStatusUpdate = -1
 
     def addPrecision(self):
         if self.canSpellCrit:
@@ -476,35 +446,13 @@ class Champion(FastDeepCopy):
         if self.timing is None:
             raise ValueError(f'{self.name} has no timing (BuildChampion sets it from the build)')
 
-    def updateStatuses(self, time):
-        """Tick this champion's statuses and nothing else.
-
-        The opponents in a simulation are inert damage sponges: the simulator
-        pushes their next attack past the end of combat, they hold no items, and
-        nothing reads their mana or attack counters. Shred/corrosion/DoT
-        statuses on them still have to tick, so this is the only part of
-        update() they need.
-        """
-        # List copy to avoid RuntimeError: dictionary changed size during iteration
-        for statusa in list(self.statuses.values()):
-            if time >= statusa.next_update:
-                statusa.update(self, time)
-
-        # Recompute from the live dict: a status that just ticked has moved its
-        # own schedule on, and one may have added another status.
-        soonest = float("inf")
-        for statusa in self.statuses.values():
-            if statusa.next_update < soonest:
-                soonest = statusa.next_update
-        self.nextStatusUpdate = soonest
-
     def update(self, opponents, items, time):
-        """One tick (T1). Order: statuses, mana regen, onUpdate items, scheduled events (projectile hits, spell
+        """One tick (T1). Order: timed effects end, mana regen, onUpdate items, scheduled events (projectile hits, spell
         effects), the cast check, the attack rhythm. A bar that fills during a tick casts on the next one (T4)."""
         self.tick = _round_half_up(time * TPS)
         self.opponents = opponents
-        if self.statuses and time >= self.nextStatusUpdate:
-            self.updateStatuses(time)
+        if self.effects:
+            expire_effects(self, self.tick)
 
         # mana regen in 0.25 s steps from t = 0 (G17, inherited), each paid on the first tick at or after its time
         while self.tick >= math.ceil(self.next_regen * 0.25 * TPS - 1e-9):

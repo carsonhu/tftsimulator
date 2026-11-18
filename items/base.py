@@ -119,6 +119,15 @@ class BuildItem(Item):
             raise BuildDataError(f"item {self.KEY}: {effect} has no single {attribute} {op} modifier")
         return ms[0]["values"][0], ms[0].get("scale")
 
+    def script_rule(self, champion, effect, attribute):
+        """(op, channel) of the single `attribute` modifier in an effect the item's script applies (its value may
+        come from elsewhere, e.g. a debuff level)."""
+        ge = (self.build_entry(champion).d.get("script_effects") or {}).get(effect)
+        ms = [m for m in (ge or {}).get("modifiers") or [] if m["attribute"] == attribute]
+        if len(ms) != 1:
+            raise BuildDataError(f"item {self.KEY}: {effect} has no single {attribute} modifier")
+        return ms[0]["op"], ms[0].get("channel", 1)
+
     def script_mana(self, champion, effect):
         """The mana an effect the item's script applies gives (a plain number)."""
         entry = self.build_entry(champion)

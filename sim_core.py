@@ -11,10 +11,10 @@ class ChampLabel:
     """The two fields a result row's champion is ever asked for.
 
     Each row used to carry its whole post-combat Champion -- item graph,
-    statuses and all -- but the only consumer (sim_entry._table_entries)
+    effects and all -- but the only consumer (sim_entry._table_entries)
     reads only .name and .level.
 
-    The cost of the trim is diagnostic -- per-row final stacks, statuses and
+    The cost of the trim is diagnostic -- per-row final stacks, effects and
     numCasts are gone. Per-instant AS and mana survive in Results, whose
     entries are (time, damage, aspd, curMana, fullMana).
     """

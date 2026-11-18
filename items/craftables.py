@@ -1,9 +1,9 @@
 """The offensive craftables (the Craftable table; owner, 2026-11-17: no tank items). Status and evidence per item:
 docs/ITEMS.md."""
-import status
 from buildstore import BuildDataError
 from registry import register
 from items.base import BuildItem, StackingItem, item_name
+from effects import ActiveEffect, apply_effect, legacy_last_tick
 from items.debuffs import BurnItem, DebuffItem, debuff_value
 
 
@@ -348,8 +348,10 @@ class StrikersFlail(BuildItem):
                                               "OutgoingDamageMultiplier", "+")
             if scale is not None:
                 raise BuildDataError(f"{self.KEY}: the buff is not a plain number ({scale})")
-            champion.applyStatus(status.DmgAmpModifier(f"StrikersFlail {id(self)} {self.slot}"), self, time,
-                                 self.row(champion, "BuffDuration"), amp)
+            # one effect per instance slot (TFTStackGameplayEffectInstancesEffectComponent, AggregateBySource)
+            buff = ActiveEffect(f"StrikersFlail {id(self)} {self.slot}", [("dmgMultiplier", "+", amp, 1)])
+            apply_effect(champion, buff, champion.tick,
+                         legacy_last_tick(time, self.row(champion, "BuffDuration"), on_actor=True))
             self.slot = (self.slot + 1) % int(self.row(champion, "MaxStacks"))
         return input_
 
@@ -358,8 +360,8 @@ class StrikersFlail(BuildItem):
 class LastWhisper(DebuffItem):
     """Stats GE_LastWhisper_Stats (20% AS, 15% AD, 20% crit). Script GA_LastWhisper: after each damage the holder
     deals (0x4fe Damage.Source.Unit, 0x6f7 attacks) it applies GE_ArmorSunder at level SunderPercent (30) for
-    SunderDuration (3 s): Armor MultiplyAdditive ShredSunderChill(30) = x0.7. Sunders don't stack (the engine keeps
-    the strongest, status.ArmorReduction)."""
+    SunderDuration (3 s): Armor MultiplyAdditive ShredSunderChill(30) = x0.7 on Channel2. One sunder per target
+    (StackLimitCount 1), renewed by each hit (effects.py)."""
     KEY = "DA_LastWhisper"
     STATS = ("GE_LastWhisper_Stats",)
     GA = "GA_LastWhisper"
@@ -367,15 +369,16 @@ class LastWhisper(DebuffItem):
     display_name = item_name(KEY)
 
     def debuff(self, champion, target, time, level, duration):
-        target.applyStatus(status.ArmorReduction("Sunder"), champion, time, duration,
-                           debuff_value(champion, "ShredSunderChill", level))
+        op, channel = self.script_rule(champion, "GE_ArmorSunder", "Armor")
+        sunder = ActiveEffect("Sunder", [("armor", op, debuff_value(champion, "ShredSunderChill", level), channel)])
+        apply_effect(target, sunder, champion.tick, legacy_last_tick(time, duration, on_actor=False))
 
 
 @register("craftable")
 class VoidStaff(DebuffItem):
     """Stats GE_VoidStaff_Stats (35% AP, 15% AS, 1 mana regen). Script GA_VoidStaff: after each damage the holder
     deals (0x572 Damage.Source.Unit, 0x76b attacks) it applies GE_MRShred at level ShredPercent (30) for
-    ShredDuration (5 s): MagicResist MultiplyAdditive ShredSunderChill(30) = x0.7, not stacking."""
+    ShredDuration (5 s): MagicResist MultiplyAdditive ShredSunderChill(30) = x0.7 on Channel2, one per target."""
     KEY = "DA_VoidStaff"
     STATS = ("GE_VoidStaff_Stats",)
     GA = "GA_VoidStaff"
@@ -383,8 +386,9 @@ class VoidStaff(DebuffItem):
     display_name = item_name(KEY)
 
     def debuff(self, champion, target, time, level, duration):
-        target.applyStatus(status.MRReduction("Shred"), champion, time, duration,
-                           debuff_value(champion, "ShredSunderChill", level))
+        op, channel = self.script_rule(champion, "GE_MRShred", "MagicResist")
+        shred = ActiveEffect("Shred", [("mr", op, debuff_value(champion, "ShredSunderChill", level), channel)])
+        apply_effect(target, shred, champion.tick, legacy_last_tick(time, duration, on_actor=False))
 
 
 @register("craftable")

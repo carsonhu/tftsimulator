@@ -1,5 +1,6 @@
 """Debuffs an item puts on the damaged target (ledger I7): sunder and shred (DebuffItem) and burn (BurnItem)."""
 from buildstore import BuildDataError, load_build
+from effects import ActiveEffect, apply_effect
 from timing import TPS, ticks_up
 from items.base import BuildItem
 
@@ -40,17 +41,14 @@ class DebuffItem(BuildItem):
 
 
 def apply_burn(champion, target, level, duration):
-    """GE_Burn on `target` from `champion` (I7): one burn per target (StackLimitCount 1); a new application renews
-    the duration but not the period (NeverReset); the first tick is one period after application
-    (bExecutePeriodicEffectOnApplication false)."""
+    """GE_Burn on `target` from `champion` (I7), as an effects.ActiveEffect with the build's rules (globals.burn):
+    one burn per target (StackLimitCount 1); a new application renews the duration but not the period
+    (NeverReset); the first tick is one period after application (bExecutePeriodicEffectOnApplication false). It
+    covers ticks up to the applied tick + ticks_up(duration)."""
     g = champion.build.data["globals"]["burn"]
-    burns = champion.__dict__.setdefault("burns", {})
-    now, end = champion.tick, champion.tick + ticks_up(duration)
-    b = burns.get(id(target))
-    if b is None or b["end"] < now:
-        burns[id(target)] = {"target": target, "next": now + ticks_up(g["period"]), "end": end, "level": level}
-    else:
-        b["end"], b["level"] = max(b["end"], end), max(b["level"], level)
+    burn = ActiveEffect("Burn", level=level, period=ticks_up(g["period"]), period_on_application=bool(g["on_application"]))
+    apply_effect(target, burn, champion.tick, champion.tick + ticks_up(duration))
+    champion.__dict__.setdefault("burning", {})[id(target)] = target
 
 
 def tick_burns(champion):
@@ -59,13 +57,12 @@ def tick_burns(champion):
     if getattr(champion, "burn_tick", None) == champion.tick:
         return
     champion.burn_tick = champion.tick
-    period = ticks_up(champion.build.data["globals"]["burn"]["period"])
-    for b in (getattr(champion, "burns", None) or {}).values():
-        while b["next"] <= champion.tick and b["next"] <= b["end"]:
-            dmg = debuff_value(champion, "BurnWound", b["level"]) * b["target"].hp.stat
+    for target in (getattr(champion, "burning", None) or {}).values():
+        burn = target.effects.get("Burn")
+        for _ in range(burn.due(champion.tick) if burn is not None else 0):
+            dmg = debuff_value(champion, "BurnWound", burn.level) * target.hp.stat
             # items=[]: a burn tick is not an attack or a spell, so no on-hit effect answers it
-            champion.doDamage(b["target"], [], 0, dmg, dmg, "true", champion.tick / TPS)
-            b["next"] += period
+            champion.doDamage(target, [], 0, dmg, dmg, "true", champion.tick / TPS)
 
 
 class BurnItem(DebuffItem):
@@ -75,7 +72,7 @@ class BurnItem(DebuffItem):
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
-            champion.burns = {}
+            champion.burning = {}
         elif phase == "onUpdate":
             tick_burns(champion)
         return super().performAbility(phase, time, champion, input_)
