@@ -24,6 +24,7 @@ Read `docs/ASSUMPTIONS.md` before changing any game rule, and the champion's wor
 | What | Where |
 |---|---|
 | Assumptions and decisions, with status and evidence | `docs/ASSUMPTIONS.md` |
+| Every open question, grouped by the clip that would answer it (add a row with each new assumption; delete it when answered) | `docs/OPEN-QUESTIONS.md` |
 | How to measure timing from VODs | `docs/evidence-method.md` |
 | Which units are in scope (65 non-tanks) and removals with reasons | `roster.json` (hand-edited) |
 | One worksheet per in-scope champion: build data, questions, evidence log, decisions | `champions/<Name>.md` |
