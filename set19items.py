@@ -65,7 +65,8 @@ STAT_MAP = {
     ("OutgoingDamageMultiplier", "+"): lambda c, v: c.dmgMultiplier.addStat(v),
     ("IncomingManaMultiplier", "+"): lambda c, v: c.manaGainMultiplier.addStat(v),
     ("OutgoingDamageMultiplier", "MultiplyAdditive"): lambda c, v: c.dmgMultiplier.addStat(v - 1),
-    ("AttackRange", "+"): lambda c, v: setattr(c, "attack_range", c.attack_range + int(v)),
+    # item range is kept apart: flights stay the unit's own range (owner, 2026-11-17: Rapid Firecannon doesn't change them)
+    ("AttackRange", "+"): lambda c, v: setattr(c, "bonus_range", getattr(c, "bonus_range", 0) + int(v)),
     ("AttackSpeed", "="): lambda c, v: setattr(c.aspd, "override", v),  # Silvermere Dawn's lock (I10)
     ("AttackDamage", "MultiplyAdditive"): _bonus_multiplier("bonus_ad"),
     ("AbilityPower", "MultiplyAdditive"): _bonus_multiplier("ap"),
@@ -762,16 +763,17 @@ class SeekersArmguard(BuildItem):
 
 
 class Fishbones(BuildItem):
-    """Stats GE_Artifact_Fishbones_Stats (25% AD, 25% AS, +2 attack range). GE_Artifact_Fishbones_Targeting makes
-    attacks pick random enemies (Target.Overridden): every dummy is the same, so only the longer range (flight time)
-    shows. No script."""
+    """Stats GE_Artifact_Fishbones_Stats (25% AD, 25% AS, +2 attack range: no effect on flights, I10).
+    GE_Artifact_Fishbones_Targeting makes attacks pick random enemies (Target.Overridden): every dummy is the same.
+    No script."""
     KEY = "DA_Artifact_Fishbones"
     STATS = ("GE_Artifact_Fishbones_Stats",)
     display_name = _name(KEY)
 
 
 class RapidFireCannon(BuildItem):
-    """Stats GE_Artifact_RapidFireCannon_Stats (55% AS, +1 attack range, damage amp x1.05). Script
+    """Stats GE_Artifact_RapidFireCannon_Stats (55% AS, damage amp x1.05, +1 attack range: no effect on flights,
+    owner 2026-11-17, I10). Script
     GA_Artifact_RapidFireCannon: +1 range per kill; dummies never die (G9)."""
     KEY = "DA_Artifact_RapidFireCannon"
     STATS = ("GE_Artifact_RapidFireCannon_Stats",)

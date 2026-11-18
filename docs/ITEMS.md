@@ -75,8 +75,8 @@ The Artifact table (`set19items.artifacts`, ledger I10). Nothing is VOD-checked 
 |---|---|---|
 | Infinity Force | implemented (stats) | No script. |
 | Silvermere Dawn | implemented (stats) | AS locked at 0.5 (Channel2 Override, I10); the stun does nothing to dummies. |
-| Rapid Firecannon | implemented (stats) | +1 range (longer flights), damage amp x1.05; +range per kill never happens. |
-| Fishbones | implemented (stats) | +2 range; random targets change nothing among identical dummies. |
+| Rapid Firecannon | implemented (stats) | Damage amp x1.05; its +1 range doesn't change flights (owner); +range per kill never happens. |
+| Fishbones | implemented (stats) | Its +2 range doesn't change flights; random targets change nothing among identical dummies. |
 | Gold Collector | implemented (stats) | The execute needs a target below 12% health: dummies never lose health (G9). |
 | Luden's Tempest | implemented (stats) | Overkill damage needs a kill (G9). |
 | Horizon Focus | implemented (stats) | Needs a stun: no implemented champion stuns. |
