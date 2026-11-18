@@ -208,6 +208,10 @@ class Champion(FastDeepCopy):
         """The enemies within `hexes` of `target`, not counting it, nearest first."""
         return layout.around(target, hexes, self.opponents)
 
+    def nearest(self, n, exclude=()):
+        """The `n` enemies nearest this unit, leaving out `exclude` (TR_Add_N_NearestEnemies...)."""
+        return layout.nearest(self, n, self.opponents, exclude)
+
     def ricochet(self, previous, hit):
         """(next target, hexes) for a ricochet from `previous` that has already hit `hit` (B12)."""
         return layout.ricochet(previous, hit, self.opponents)

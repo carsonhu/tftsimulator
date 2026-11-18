@@ -469,7 +469,53 @@ class Ezreal(BuildChampion):
             self.schedule_tick(stage2 + ticks_up(spawn) + flight, land)
 
 
-champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal']
+class Lux(BuildChampion):
+    """Lux Lux Beam! (champions/Lux.md, D1). Script: GA_Lux19_Spell (build ga_scripts.zip).
+
+    The cast applies the mana lock (GE_ManaLock, 0x1876) and plays CD_Lux19_Spell_new at her target's hex. Its
+    'Prism' event (0.3137 s) tosses the prism (CD_Lux19_Prism, visual); at 'DamageAndBeam' (1.0416 s, 0x28b) she
+    takes her attack target and the NumSecondaryTargets enemies nearest her, the target left out
+    (TR_Add_N_NearestEnemiesWithoutTags from her own position, SortByRowDistance; when there is none, the target
+    again: 0x5b4), and at once applies GE_Lux19_PrimaryDamage (MagicDamageCalc1 = PrimaryDamageAP x AP) to the target
+    and GE_Lux19_SecondaryDamage (MagicDamageCalc2 = SecondaryDamageAP x AP) to each secondary; the beam chronos are
+    visual. Both are magic spell damage that crits only with Precision (RollIfCanSpellCrit). Her 'Unlock' event
+    (1.5625 s, 0xc75) removes the mana lock and finishes the cast; ManaRefundOnKill needs a kill (dummies never die).
+    The build's spell timeline has no lock for her, so the locks are read from the chrono as for Senna: mana lock =
+    the Unlock tick, cast lock one tick later.
+    """
+    KEY = 'DA_Lux19'
+    CAST = 'CD_Lux19_Spell_new'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.beam_at = self.chrono_event(self.CAST, 'DamageAndBeam')
+        unlock = ticks_up(self.chrono_event(self.CAST, 'Unlock')) / TPS
+        self.timing.cast_lock, self.timing.mana_lock = unlock + 1 / TPS, unlock
+        self.timing.source['cast_lock'] = self.timing.source['mana_lock'] = f'{self.CAST} Unlock (GA_Lux19_Spell 0xc75)'
+        self.num_secondaries = int(self.row('NumSecondaryTargets'))
+        self.notes = ('The secondary beam hits the enemy nearest Lux other than her target (the target again when '
+                      'there is none). Mana refund on kill not modelled: dummies never die.')
+
+    def primary_damage(self, level, AD, AP):
+        return self.row('PrimaryDamageAP', star=level) * AP
+
+    def secondary_damage(self, level, AD, AP):
+        return self.row('SecondaryDamageAP', star=level) * AP
+
+    def performAbility(self, opponents, items, time):
+        def beam():
+            target = opponents[0]
+            others = self.nearest(self.num_secondaries, exclude=[target]) or [target]
+            # GetRepeatingListFromTargetData: the list repeated to NumSecondaryTargets entries
+            secondaries = [others[i % len(others)] for i in range(self.num_secondaries)]
+            now = self.tick / TPS
+            self.multiTargetSpell([target], items, now, 1, self.primary_damage, 'magical')
+            self.multiTargetSpell(secondaries, items, now, len(secondaries), self.secondary_damage, 'magical')
+
+        self.schedule_tick(self.tick + ticks_up(self.beam_at), beam)
+
+
+champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux']
 
 
 class TrainingDummy(Champion):

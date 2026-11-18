@@ -69,6 +69,12 @@ def around(target, hexes, dummies):
     return sorted(near, key=lambda d: distance(d, target))
 
 
+def nearest(unit, n, dummies, exclude=()):
+    """The `n` dummies nearest `unit` (e.g. the champion), leaving out `exclude`; ties in placement order."""
+    near = [d for d in dummies if d is not unit and all(d is not x for x in exclude)]
+    return sorted(near, key=lambda d: distance(d, unit))[:n]
+
+
 def ricochet(previous, hit, dummies):
     """(next target, hexes flown) for a ricochet from `previous` (B12): the nearest dummy not yet in `hit`; when every
     dummy has been hit, the nearest other one; with a single dummy, back to it (0 hexes). Ties go to the next dummy

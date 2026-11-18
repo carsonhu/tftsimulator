@@ -76,6 +76,14 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Encore's second missile | x RecastEffectiveness (25/50%) at 0.319 s into stage 2 | an Ezreal with Encore (2) | champions/Ezreal.md D1 |
 | Heartsteel Bias upgrade | x1.25 on both hits; casts 3, 6, ... also hit the enemies 2 hexes from the target (0.33x) | an Ezreal chosen as Bias at Heartsteel (3)+: damage numbers of his 1st-3rd casts | B21, champions/Ezreal.md D1 |
 
+### 7b. Lux again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Beam damage and its moment | 330/500/800 x AP on the target and 170/255/425 x AP on the enemy nearest Lux, both 32 ticks after the cast starts (DamageAndBeam 1.0416 s) | damage numbers of a Lux cast on targets of known MR | champions/Lux.md D1 |
+| Which enemy the secondary beam hits | the enemy nearest Lux other than her target (not the one nearest the target) | a Lux cast with an enemy beside her and one beside her target | champions/Lux.md D1 |
+| Prodigy | members +2/3/6/7 + 1 mana regen, everyone else +1 | the regen shown in the panel with Prodigy (2)+ active | B24 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

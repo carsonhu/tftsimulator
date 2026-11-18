@@ -54,6 +54,7 @@ const PY_FILES = [
   "traits/swiftstriker.py",
   "traits/trickshot.py",
   "traits/true_damage.py",
+  "traits/prodigy.py",
 ];
 
 async function boot() {

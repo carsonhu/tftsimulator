@@ -106,7 +106,7 @@ def test_encore_missiles_at_the_boards_encore_tier(units, tier, share):
 
 def test_encore_is_offered_at_the_builds_breakpoints_and_preselected_for_members():
     assert set19buffs.Encore.levels == [0, 2, 4]  # CT_Encore19 tiers (2), (4)
-    assert LoggedNeeko(1).default_traits == ['Encore', 'KDA']  # Neeko is also K/DA
+    assert LoggedNeeko(1).default_traits == ['Encore', 'KDA', 'Prodigy']  # Neeko is also K/DA and Prodigy
     from build_champion import BuildChampion
     ahri = type('A', (BuildChampion,), {'KEY': 'DA_Ahri19'})(1, build=load_build(V))
     assert 'Encore' not in ahri.default_traits  # not an Encore unit (she is K/DA)
