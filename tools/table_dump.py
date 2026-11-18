@@ -55,8 +55,13 @@ def dump(build):
     return out
 
 
-def diff(a, b, path=""):
-    """Every difference between two dumps, as 'path: a != b' lines."""
+WORST = [0.0, ""]  # the largest relative float difference --diff accepted under --rel, and where
+
+
+def diff(a, b, path="", rel=0.0):
+    """Every difference between two dumps, as 'path: a != b' lines. With `rel`, floats within that relative
+    difference count as equal: reordered arithmetic moves the last bits of a raw damage number. Shown numbers can't
+    hide behind it: a truncated DPS is an int, and a ratio rounded to 2 places that flips is off by far more."""
     if isinstance(a, dict) and isinstance(b, dict):
         lines = []
         for k in sorted(set(a) | set(b), key=str):
@@ -65,15 +70,21 @@ def diff(a, b, path=""):
             elif k not in b:
                 lines.append(f"{path}/{k}: only in the first")
             else:
-                lines += diff(a[k], b[k], f"{path}/{k}")
+                lines += diff(a[k], b[k], f"{path}/{k}", rel)
         return lines
     if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
         lines = []
         for i, (x, y) in enumerate(zip(a, b)):
-            lines += diff(x, y, f"{path}[{i}]")
+            lines += diff(x, y, f"{path}[{i}]", rel)
             if len(lines) > 5:
                 break
         return lines
+    if rel and isinstance(a, float) and isinstance(b, float) and a != b:
+        r = abs(a - b) / max(abs(a), abs(b))
+        if r <= rel:
+            if r > WORST[0]:
+                WORST[:] = [r, path]
+            return []
     return [] if a == b else [f"{path}: {str(a)[:80]} != {str(b)[:80]}"]
 
 
@@ -82,11 +93,14 @@ def main():
     ap.add_argument("out", nargs="?")
     ap.add_argument("--build")
     ap.add_argument("--diff", nargs=2)
+    ap.add_argument("--rel", type=float, default=0.0, help="with --diff: relative float tolerance (e.g. 1e-9)")
     args = ap.parse_args()
     if args.diff:
         a, b = (json.load(open(p, encoding="utf-8")) for p in args.diff)
-        lines = diff(a, b)
+        lines = diff(a, b, rel=args.rel)
         print("\n".join(lines[:200]) if lines else "identical")
+        if WORST[0]:
+            print(f"largest float difference accepted: {WORST[0]:.2e} relative, at {WORST[1]}")
         sys.exit(1 if lines else 0)
     data = dump(args.build)
     with open(args.out, "w", encoding="utf-8") as f:

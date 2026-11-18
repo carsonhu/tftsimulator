@@ -535,6 +535,21 @@ def run_slice(cfg):
 # Champ info / stats panel
 # ---------------------------------------------------------------------------
 
+def _panel(attr, kind="flat"):
+    """How the Base stats panel writes an attribute (base, bonus, total), in the panel's units: AD and AP in points
+    of 100 with Deathblade / Rabadon's factor on the bonus (addMultiplier), attack speed's bonus in percent, the rest
+    as they are. Only Channel1 bonuses are shown; the total is the attribute's value."""
+    ma = attr.total("MultiplyAdditive")
+    view = {"stat": attr.stat, "mult": attr.total("MultiplyCompound", 2), "addMultiplier": 1}
+    if kind == "multiplier":
+        view.update(base=100, add=attr.total("+") * 100, addMultiplier=1 + ma)
+    elif kind == "aspd":
+        view.update(base=attr.base, add=ma * 100)
+    else:
+        view.update(base=attr.base, add=attr.total("+"))
+    return view
+
+
 def get_champ_info(cfg):
     # UI hints come from a fresh instance so slider defaults are the champ's
     # own values, not whatever the config already overrode them to.
@@ -554,28 +569,19 @@ def get_champ_info(cfg):
     champ = _build_champion(cfg)
     Simulator().itemStats(champ.items, champ)
 
-    def stat(s):
-        return {
-            "base": s.base,
-            "add": s.add,
-            "mult": s.mult,
-            "stat": s.stat,
-            "addMultiplier": getattr(s, "addMultiplier", 1),
-        }
-
     info["stats"] = {
-        "atk": stat(champ.atk),
-        "bonusAd": stat(champ.bonus_ad),
-        "ap": stat(champ.ap),
-        "dmgAmp": stat(champ.dmgMultiplier),
+        "atk": _panel(champ.atk),
+        "bonusAd": _panel(champ.bonus_ad, "multiplier"),
+        "ap": _panel(champ.ap, "multiplier"),
+        "dmgAmp": _panel(champ.dmgMultiplier),
         "curMana": champ.curMana,
         "fullMana": champ.fullMana.stat,
-        "manaRegen": stat(champ.manaRegen),
+        "manaRegen": _panel(champ.manaRegen),
         "castTime": champ.timing.cast_lock,  # cast start -> next attack (T5), from the build
-        "aspd": stat(champ.aspd),
-        "crit": stat(champ.crit),
-        "critDmg": stat(champ.critDmg),
-        "manaPerAttack": stat(champ.manaPerAttack),
+        "aspd": _panel(champ.aspd, "aspd"),
+        "crit": _panel(champ.crit),
+        "critDmg": _panel(champ.critDmg),
+        "manaPerAttack": _panel(champ.manaPerAttack),
         "role": champ.role.value if champ.role else None,
         "build": champ.build.version if getattr(champ, "build", None) else None,
         "canSpellCrit": bool(champ.canSpellCrit),

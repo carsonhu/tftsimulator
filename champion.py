@@ -1,7 +1,8 @@
 import heapq
 import math
 
-from stats import AD, AP, ArmorPierce, Aspd, Attack, FastDeepCopy, Resist, Stat
+from stats import (ArmorPierce, Attack, Attribute, FastDeepCopy, LegacyAspd, LegacyFlat, LegacyMultiplier,
+                   LegacyResist, Stat)
 from timing import TPS, Timing, ticks, ticks_up
 
 import status
@@ -33,29 +34,29 @@ class Champion(FastDeepCopy):
     ):
         self.name = name
         # HP and AD are this star level's values (Set 19: from the build, B1); no scaling here
-        self.hp = Stat(hp, 1, 0)
-        self.bonus_ad = AP(0, 1, 0)
-        self.atk = AD(atk)
+        self.hp = LegacyFlat(hp)
+        self.bonus_ad = LegacyMultiplier()
+        self.atk = Attribute(atk)
         self.curMana = curMana
-        self.fullMana = Stat(fullMana, 1, 0)
+        self.fullMana = LegacyFlat(fullMana)
         self.startingMana = 0
-        self.aspd = Aspd(aspd, 1, 0)
-        self.ap = AP(0, 1, 0)
-        self.armor = Resist(armor, 1, 0)
-        self.mr = Resist(mr, 1, 0)
-        self.manaPerAttack = Stat(0, 1, 0)
-        self.manaRegen = Stat(0, 1, 0)
-        self.manaGainMultiplier = Stat(1, 1, 0)
+        self.aspd = LegacyAspd(aspd)
+        self.ap = LegacyMultiplier()
+        self.armor = LegacyResist(armor)
+        self.mr = LegacyResist(mr)
+        self.manaPerAttack = LegacyFlat(0)
+        self.manaRegen = LegacyFlat(0)
+        self.manaGainMultiplier = LegacyFlat(1)
         self.level = level
-        self.dmgMultiplier = Stat(1, 1, 0)
+        self.dmgMultiplier = LegacyFlat(1)
         # 2nd damage multiplier, multiplied against dmgMultiplier rather than
         # summed into it -- for amps that stack multiplicatively with the
         # item/augment amp pool (Ravager). Sources here are still additive with
         # each other, so a third independent multiplier needs its own Stat.
-        self.extraDmgMultiplier = Stat(1, 1, 0)
-        self.crit = Stat(0.25, 1, 0)
-        self.critDmg = Stat(1.4, 1, 0)
-        self.omnivamp = Stat(0, 1, 0)
+        self.extraDmgMultiplier = LegacyFlat(1)
+        self.crit = LegacyFlat(0.25)
+        self.critDmg = LegacyFlat(1.4)
+        self.omnivamp = LegacyFlat(0)
         # crit chance over 100% becomes crit damage at this ratio (set18 0.5; Set 19 data: CT_ExtraCritChanceToCritDamage)
         self.excess_crit_ratio = 0.5
 
