@@ -314,6 +314,7 @@ def test_strikers_flail_four_instances_of_five_percent():
     f = set19items.StrikersFlail()
     base = n.dmgMultiplier.stat
     for k in range(5):
+        n.tick = 15 * k  # a crit every 0.5 s
         f.performAbility('onCrit', k * 0.5, n, False)
     assert n.dmgMultiplier.stat == pytest.approx(base + 0.20)  # capped at 4 instances
     from effects import expire_effects
@@ -352,7 +353,7 @@ def test_last_whisper_and_void_staff_after_the_hit():
     Simulator().simulate([set19items.LastWhisper()], [], d, [t], 6)
     s = t.effects['Sunder']
     assert s.modifiers == [('armor', 'MultiplyAdditive', 0.7, 2)]  # GE_ArmorSunder's op and channel (I5, I7)
-    assert abs(s.last_tick - (round(d.dmgVector[-1][0] * 30) + 90)) <= 1  # 3 s from the last hit
+    assert s.last_tick == round(d.dmgVector[-1][0] * 30) + 90  # 3 s from the last hit (T14)
     d = Draven(1, build=load_build(V))
     t = dummy()
     Simulator().simulate([set19items.VoidStaff()], [], d, [t], 6)
@@ -379,7 +380,7 @@ def test_radiants_use_their_own_numbers():
     d = Draven(1, build=load_build(V))
     t = dummy()
     Simulator().simulate([set19items.LastWhisperRadiant()], [], d, [t], 4)
-    assert abs(t.effects['Sunder'].last_tick - (round(d.dmgVector[-1][0] * 30) + 1500)) <= 1  # renewed by each hit
+    assert t.effects['Sunder'].last_tick == round(d.dmgVector[-1][0] * 30) + 1500  # renewed by each hit (T14)
     assert len(set19items.radiants) == len(set19items.offensive_craftables)
 
 

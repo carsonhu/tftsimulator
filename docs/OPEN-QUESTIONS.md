@@ -101,6 +101,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Titanic Hydra's splash | the target and one more dummy (1 hex apart) | a Hydra holder's hit on a target with two neighbours | I10 |
 | Lich Bane on a ranged holder | procs on the first hit after the release that follows the cast | a ranged Lich Bane holder's damage numbers after a cast | I10 |
 | Dawncore's per-cast cut | 5% of max mana after each cast's cost (the next cast is cheaper) | the max mana a Dawncore holder shows after each cast | I10 |
+| Where a timed effect ends (low priority: note it if seen) | a 3 s sunder applied at tick a covers ticks a to a + 90 and is gone at a + 91 (whole ticks, every unit) | a hit that lands about 3 s after a Last Whisper holder's previous hit on the same target, sundered or not | T14 |
 | Spear of Shojin's mana | its 5 mana per attack is paid with the role's attack mana, at the same moment | a Shojin holder's mana steps (+12 for a caster) | I3 |
 
 ## No clip needed

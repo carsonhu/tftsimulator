@@ -200,5 +200,5 @@ sliders become layout settings.
 | 1. Delete set18 leftovers | done (2026-11-17) |
 | 2. Split modules, decorator registration | done (2026-11-17) |
 | 3. Game-shaped attributes | done (2026-11-17) |
-| 4. Timed effects and damage events | not started |
+| 4. Timed effects and damage events | timed effects done (2026-11-17: `effects.ActiveEffect`, whole-tick ends, T14); damage events not started |
 | 5. Dummy layout | not started |

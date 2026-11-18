@@ -11,10 +11,8 @@ records carry StackLimitCount 1 but no StackingType, and a limit without a stack
 Quicksilver's StackLimitCount 9 doesn't cap it, docs/ITEMS.md). Effects that stack as separate instances (Striker's
 Flail's buff: TFTStackGameplayEffectInstancesEffectComponent, AggregateBySource) use one name per instance.
 """
-import math
-
 from stats import FastDeepCopy
-from timing import TPS
+from timing import ticks_up
 
 
 class ActiveEffect(FastDeepCopy):
@@ -72,14 +70,7 @@ def expire_effects(unit, tick):
             del unit.effects[name]
 
 
-def legacy_last_tick(applied_time, duration, on_actor):
-    """The last tick a sunder, shred or Striker's Flail buff covered before step 4, kept for one commit so the tables
-    stay identical: the old status ended on the first tick k with k / TPS > applied_time + duration, compared in float
-    seconds, at the start of that tick on the acting champion (last tick k - 1) and after the champion acted on a
-    dummy (last tick k). That is the applied tick + 30 x duration (+1 on a dummy), but a tick less for about 3% of
-    application ticks, from float rounding alone."""
-    end = applied_time + duration
-    k = max(0, math.floor(end * TPS) - 2)
-    while not k / TPS > end:
-        k += 1
-    return k - 1 if on_actor else k
+def last_tick(tick, seconds):
+    """The last tick an effect applied at `tick` for `seconds` covers: tick + ticks_up(seconds) (G1). It is removed
+    before the tick after, on the champion and on a dummy alike."""
+    return tick + ticks_up(seconds)

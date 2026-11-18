@@ -3,7 +3,7 @@ docs/ITEMS.md."""
 from buildstore import BuildDataError
 from registry import register
 from items.base import BuildItem, StackingItem, item_name
-from effects import ActiveEffect, apply_effect, legacy_last_tick
+from effects import ActiveEffect, apply_effect, last_tick
 from items.debuffs import BurnItem, DebuffItem, debuff_value
 
 
@@ -351,7 +351,7 @@ class StrikersFlail(BuildItem):
             # one effect per instance slot (TFTStackGameplayEffectInstancesEffectComponent, AggregateBySource)
             buff = ActiveEffect(f"StrikersFlail {id(self)} {self.slot}", [("dmgMultiplier", "+", amp, 1)])
             apply_effect(champion, buff, champion.tick,
-                         legacy_last_tick(time, self.row(champion, "BuffDuration"), on_actor=True))
+                         last_tick(champion.tick, self.row(champion, "BuffDuration")))
             self.slot = (self.slot + 1) % int(self.row(champion, "MaxStacks"))
         return input_
 
@@ -371,7 +371,7 @@ class LastWhisper(DebuffItem):
     def debuff(self, champion, target, time, level, duration):
         op, channel = self.script_rule(champion, "GE_ArmorSunder", "Armor")
         sunder = ActiveEffect("Sunder", [("armor", op, debuff_value(champion, "ShredSunderChill", level), channel)])
-        apply_effect(target, sunder, champion.tick, legacy_last_tick(time, duration, on_actor=False))
+        apply_effect(target, sunder, champion.tick, last_tick(champion.tick, duration))
 
 
 @register("craftable")
@@ -388,7 +388,7 @@ class VoidStaff(DebuffItem):
     def debuff(self, champion, target, time, level, duration):
         op, channel = self.script_rule(champion, "GE_MRShred", "MagicResist")
         shred = ActiveEffect("Shred", [("mr", op, debuff_value(champion, "ShredSunderChill", level), channel)])
-        apply_effect(target, shred, champion.tick, legacy_last_tick(time, duration, on_actor=False))
+        apply_effect(target, shred, champion.tick, last_tick(champion.tick, duration))
 
 
 @register("craftable")

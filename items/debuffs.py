@@ -1,6 +1,6 @@
 """Debuffs an item puts on the damaged target (ledger I7): sunder and shred (DebuffItem) and burn (BurnItem)."""
 from buildstore import BuildDataError, load_build
-from effects import ActiveEffect, apply_effect
+from effects import ActiveEffect, apply_effect, last_tick
 from timing import TPS, ticks_up
 from items.base import BuildItem
 
@@ -47,7 +47,7 @@ def apply_burn(champion, target, level, duration):
     covers ticks up to the applied tick + ticks_up(duration)."""
     g = champion.build.data["globals"]["burn"]
     burn = ActiveEffect("Burn", level=level, period=ticks_up(g["period"]), period_on_application=bool(g["on_application"]))
-    apply_effect(target, burn, champion.tick, champion.tick + ticks_up(duration))
+    apply_effect(target, burn, champion.tick, last_tick(champion.tick, duration))
     champion.__dict__.setdefault("burning", {})[id(target)] = target
 
 
