@@ -711,7 +711,38 @@ class Samira(BuildChampion):
             self.schedule_tick(self.tick + step, lambda: self._bullet_lands(nxt, hit + [nxt], k + 1))
 
 
-champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira']
+class Karthus(BuildChampion):
+    """Requiem (champions/Karthus.md, D1). Script: GA_Karthus19_Spell (build ga_scripts.zip).
+
+    The cast applies the mana lock (0x534) and plays CD_Karthus19_CastAnim at his attack target (CastOnTarget). At its
+    'Damage' event (1.1269 s, 0x116) GE_Karthus19_Damage = MagicDamageCalc1 (APDamage x AP) x
+    Max(PercentDamageOfPreviousCast ^ TimesCast, MinimumDamagePercent) (SetByCaller Multiplier), magic spell damage
+    that crits only with Precision. At 'Unlock' (1.337 s, 0x361) he recasts on a new target if the hit one died;
+    otherwise EndSpell removes the mana lock and finishes the cast. Dummies never die: one hit per cast, at x1. The
+    build's spell timeline has no lock for him, so the locks are read from the chrono as for Lux: mana lock = the
+    Unlock tick (41), cast lock one more (42).
+    """
+    KEY = 'DA_Karthus19'
+    CAST = 'CD_Karthus19_CastAnim'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.damage_at = self.chrono_event(self.CAST, 'Damage')
+        unlock = ticks_up(self.chrono_event(self.CAST, 'Unlock')) / TPS
+        self.timing.cast_lock, self.timing.mana_lock = unlock + 1 / TPS, unlock
+        self.timing.source['cast_lock'] = self.timing.source['mana_lock'] = f'{self.CAST} Unlock (GA_Karthus19_Spell 0x361)'
+        self.notes = 'The recast on a kill (70% of the previous hit) is not modelled: dummies never die.'
+
+    def requiem(self, level, AD, AP):
+        return self.row('APDamage', star=level) * AP
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        self.schedule_tick(self.tick + ticks_up(self.damage_at), lambda: self.multiTargetSpell(
+            [target], items, self.tick / TPS, 1, self.requiem, 'magical'))
+
+
+champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus']
 
 
 class TrainingDummy(Champion):

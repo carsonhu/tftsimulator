@@ -106,6 +106,12 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Bullet damage | 10 x (4/6/9 x AP + 35/53/80 x AD), crit only with Precision | damage numbers of a barrage on a target of known armor | champions/Samira.md D1 |
 | Classical's growing amp | +1% per 6 s an enemy is Captivated, in 0.25 s steps from the Captivate | a Classical (2)+ carrier's damage-amp panel over a fight | B28 |
 
+### 7f. Karthus again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Requiem damage | 440/660/930 x AP magic, 34 ticks after the cast starts | damage numbers of a cast on a target of known MR | champions/Karthus.md D1 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

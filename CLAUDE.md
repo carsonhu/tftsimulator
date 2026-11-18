@@ -101,7 +101,8 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
 - Registries: an item or buff is live only when decorated `@register(kind)` (`registry.py`; kinds craftable,
   radiant, artifact, emblem, trait, augment), which fills `set19items.offensive_craftables` / `radiants` /
   `artifacts` / `emblems` and `set19buffs.class_buffs` / `augments`; champions are live when listed in
-  `set19champs.champ_list` (Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal, Lux, Gnar, Malzahar, Samira;
+  `set19champs.champ_list` (Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal, Lux, Gnar, Malzahar, Samira,
+  Karthus;
   traits: Encore, Trickshot, K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats, Heartsteel, Hyperpop, Ionic
   Spark, Prodigy, Pentakill, Composer, Renegade, Classical). A debuff a spell applies uses the shared helpers in `items/debuffs.py`
   (`apply_shred`, `apply_burn`). A new trait is
