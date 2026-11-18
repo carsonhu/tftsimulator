@@ -66,10 +66,49 @@ async function boot() {
   for (const [path, text] of sources) {
     pyodide.FS.writeFile("/app/" + path, text);
   }
+  // Client builds (ledger B9): buildstore.py reads builds/index.json and
+  // builds/<file> next to itself, so they go to /app/builds. The index and the
+  // newest build (the default) load now; any other build the first time a
+  // request names it (ensureBuild). A build file never changes once written
+  // (snapshots are immutable), so each is fetched at most once per page.
+  pyodide.FS.mkdirTree("/app/builds");
+  buildIndex = await fetchText("builds/index.json");
+  pyodide.FS.writeFile("/app/builds/index.json", buildIndex);
+  buildFiles = new Map(
+    JSON.parse(buildIndex).builds.map((b) => [b.version, b.file])
+  );
+  const newest = JSON.parse(buildIndex).builds[0];
+  if (newest) await loadBuild(pyodide, newest.version);
+
   pyodide.runPython('import sys; sys.path.insert(0, "/app")');
   const entry = pyodide.pyimport("sim_entry");
   postMessage({ type: "ready", bootMs: Math.round(performance.now() - t0) });
-  return entry;
+  return { pyodide, entry };
+}
+
+let buildIndex = null;
+let buildFiles = new Map(); // version -> file name in builds/
+const loadedBuilds = new Set();
+
+async function fetchText(path) {
+  const resp = await fetch(path, { cache: "no-cache" });
+  if (!resp.ok) throw new Error("fetch " + path + ": HTTP " + resp.status);
+  return resp.text();
+}
+
+async function loadBuild(pyodide, version) {
+  if (loadedBuilds.has(version)) return;
+  const file = buildFiles.get(version);
+  if (!file) throw new Error("build " + version + " is not in builds/index.json");
+  pyodide.FS.writeFile("/app/builds/" + file, await fetchText("builds/" + file));
+  loadedBuilds.add(version);
+}
+
+// A champInfo/run config may name a build (cfg.build); load it before Python
+// asks for it. No build named = the newest, already loaded at boot.
+async function ensureBuild(pyodide, configJson) {
+  const version = JSON.parse(configJson).build;
+  if (version) await loadBuild(pyodide, version);
 }
 
 const entryPromise = boot();
@@ -83,13 +122,15 @@ entryPromise.catch((err) => {
 onmessage = async (event) => {
   const { id, cmd, arg } = event.data;
   try {
-    const entry = await entryPromise;
+    const { pyodide, entry } = await entryPromise;
     let result;
     if (cmd === "catalog") {
       result = entry.catalog_json();
     } else if (cmd === "champInfo") {
+      await ensureBuild(pyodide, arg);
       result = entry.champ_info_json(arg);
     } else if (cmd === "run") {
+      await ensureBuild(pyodide, arg);
       result = entry.run_json(arg);
     } else {
       throw new Error("unknown cmd: " + cmd);

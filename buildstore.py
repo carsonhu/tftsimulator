@@ -153,10 +153,13 @@ _cache = {}
 
 def load_build(version=None):
     """A build by version string (default: newest). Cached per process."""
+    builds = list_builds()
     if version is None:
-        version = list_builds()[0]['version']
+        version = builds[0]['version']
     if version not in _cache:
-        path = os.path.join(BUILDS, f'{version}.json')
+        # the index names each build's file (the browser worker fetches the same name, B9)
+        file = next((b.get('file') for b in builds if b['version'] == version), None) or f'{version}.json'
+        path = os.path.join(BUILDS, file)
         if not os.path.exists(path):
             raise BuildDataError(f'build {version} is not imported (python tools/import_build.py)')
         _cache[version] = Build(json.load(open(path, encoding='utf-8')))

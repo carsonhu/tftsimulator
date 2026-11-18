@@ -84,8 +84,10 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   effects happen when the attack lands.
 - Registries: a class is live only when listed (`set19champs.champ_list`, `set19buffs.class_buffs` /
   `augments` / ..., `set19items` lists); champions so far: Neeko; the others are empty. `worker.js` `PY_FILES`
-  lists every module the browser loads; a new module must be added there too. The browser can't load `builds/`
-  yet (B9).
+  lists every module the browser loads; a new module must be added there too. Builds reach the browser through
+  the worker (B9): the newest at boot, others when the page's "Game build" picker names one. After changing the
+  worker, the page or build loading, run `tools/browser_check/` (`npm install` there once; `node worker_e2e.js`,
+  and `node page_e2e.js` with `python serve.py 8619` running).
 - Items/buffs: behaviour in `performAbility(phase, time, champion, input_)` for the phases listed in `phases`
   (`preCombat`, `onUpdate`, `preAttack`, `onAttack`, `postAttack`, `onCrit`, `preAbility`, `postAbility`,
   `onDealDamage`, ...). Units differ per stat (item `crit=20` is 20%; `omnivamp=0.15` is a fraction; `ad`, `ap`,

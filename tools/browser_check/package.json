@@ -1,0 +1,9 @@
+{
+  "name": "set19-browser-check",
+  "private": true,
+  "description": "Checks the page's Python worker under real Pyodide (worker_e2e.js) and the page in headless Edge (page_e2e.js). See the header of each script.",
+  "dependencies": {
+    "pyodide": "0.27.6",
+    "puppeteer-core": "23.11.1"
+  }
+}

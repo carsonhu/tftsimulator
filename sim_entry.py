@@ -16,13 +16,16 @@
 # set18's Streamlit rules (int() truncation above 10, keep-first duplicates) so
 # numbers stay comparable with the old site.
 
+import datetime
 import json
+import re
 from bisect import bisect_right
 
 import set19buffs
 import set19champs
 import set19items
 import sim_core
+from buildstore import list_builds, load_build
 from helpers import buff_display_map, buff_display_names, item_display_map
 from simulator import Simulator
 
@@ -232,6 +235,9 @@ def get_catalog():
             "Wisp",
         ],
         "blackthorn": None,  # set18 trait; app.js hides its panel when this is None
+        # Client builds the numbers can come from (builds/index.json, newest first); the page sends the chosen
+        # version as cfg["build"] and the worker loads that file into Pyodide before the run (B9).
+        "builds": [_build_option(b) for b in list_builds()],
         "defaults": {
             "enemy": {"hp": 1800, "armor": 100, "mr": 100},
             "stages": ["2-1", "3-1", "4-1", "5-1", "6-1"],
@@ -304,8 +310,19 @@ def _build_champion(cfg):
 
 
 def _build(cfg):
-    from buildstore import load_build
-    return load_build(cfg.get("build"))
+    return load_build(cfg.get("build") or None)
+
+
+def _build_option(b):
+    """A builds/index.json entry -> {version, label} for the build picker, e.g. 'PBE 19.1 #5973071 (Nov 17 13:28)'."""
+    v = b["version"]
+    m = re.match(r"rls-(\d+\.\d+)\.\d+\.(\d+)", v)
+    name = f"{m.group(1)} #{m.group(2)}" if m else v
+    when = ""
+    if b.get("pak_mtime"):
+        d = datetime.datetime.fromisoformat(b["pak_mtime"])
+        when = f" ({d.strftime('%b')} {d.day} {d.strftime('%H:%M')})"
+    return {"version": v, "label": f"{b.get('install') or ''} {name}{when}".strip()}
 
 
 def _champion_class(cfg):

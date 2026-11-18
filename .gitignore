@@ -180,3 +180,7 @@ pyrightconfig.json
 icons/*_sheet.png
 test_*.py 
 verify_*.py 
+
+# tools/browser_check dependencies (npm install there)
+node_modules/
+package-lock.json

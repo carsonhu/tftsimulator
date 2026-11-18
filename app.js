@@ -154,6 +154,8 @@ async function init() {
   loadIcons();
   state.catalog = await rpc("catalog");
   state.buffMeta = new Map(state.catalog.buffs.map((b) => [b.cls, b]));
+  // Named explicitly (not left to "newest") so the run cache keys on it.
+  state.cfg.build = state.catalog.builds.length ? state.catalog.builds[0].version : null;
 
   buildStaticControls();
   await selectChampion(state.catalog.champions[0].name, { keepLevel: false });
@@ -339,6 +341,17 @@ function buildStaticControls() {
     // target count you picked the wrong ones. Re-seeding here used to throw
     // them away -- setting the level last, after configuring the bar, reset
     // every trait to its first level and every slider to its default.
+    selectChampion(state.cfg.champ, { keepLevel: true, keepConfig: true });
+  };
+
+  // Client build the numbers come from (newest first). Every champion number
+  // depends on it, so a change re-reads the champion like a level change.
+  const buildSel = $("build");
+  for (const b of cat.builds) buildSel.add(new Option(b.label, b.version));
+  buildSel.title = buildSel.value;
+  buildSel.onchange = () => {
+    state.cfg.build = buildSel.value;
+    buildSel.title = buildSel.value;
     selectChampion(state.cfg.champ, { keepLevel: true, keepConfig: true });
   };
 
