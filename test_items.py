@@ -295,7 +295,7 @@ def test_krakens_fury_stacks_per_launch_then_attack_speed():
         Simulator().simulate([k], [], d, [dummy()], seconds)
         assert k.stacks == min(15, d.launches)
         assert d.bonus_ad.stat == pytest.approx(1.10 + 0.035 * k.stacks)
-        assert d.aspd.add == pytest.approx(10 + (15 if k.stacks == 15 else 0))  # +15% AS at the 15th stack
+        assert d.aspd.total('MultiplyAdditive') * 100 == pytest.approx(10 + (15 if k.stacks == 15 else 0))  # +15% AS at the 15th stack
 
 
 def test_nashors_tooth_mana_on_attack_crits_only():
@@ -395,14 +395,14 @@ def artifact_fight(item, champ=None, seconds=12, n=8, stage=4, hp=1800, mr=100):
 
 def test_stats_only_artifacts_and_silvermere_lock():
     n = equipped(set19items.InfinityForce())
-    assert (n.bonus_ad.stat, n.ap.stat, n.aspd.add) == (pytest.approx(1.3), pytest.approx(1.3), pytest.approx(30))
+    assert (n.bonus_ad.stat, n.ap.stat, n.aspd.total('MultiplyAdditive') * 100) == (pytest.approx(1.3), pytest.approx(1.3), pytest.approx(30))
     n = equipped(set19items.SilvermereDawn(), set19items.GuinsoosRageblade())
     assert n.aspd.stat == 0.5 and n.bonus_ad.stat == pytest.approx(2.5)  # Channel2 Override: 0.5 whatever else
     n = equipped(set19items.RapidFireCannon())
     assert n.attack_range == equipped().attack_range and n.bonus_range.stat == 1  # flights keep the unit's own range
     assert n.dmgMultiplier.stat == pytest.approx(1.05)
     n = equipped(set19items.GamblersBlade())
-    assert n.aspd.add == pytest.approx(55 + 30)  # 30 gold (owner)
+    assert n.aspd.total('MultiplyAdditive') * 100 == pytest.approx(55 + 30)  # 30 gold (owner)
     n = Neeko(1, build=load_build(V))
     n.takedowns = 12
     Simulator().itemStats([set19items.CappaJuice()] + n.items, n)
@@ -410,7 +410,7 @@ def test_stats_only_artifacts_and_silvermere_lock():
     n = equipped(set19items.Hullcrusher())
     assert (n.bonus_ad.stat, n.ap.stat) == (pytest.approx(1.1), pytest.approx(1.1))
     n = equipped(set19items.HellfireHatchet())  # its AS per missing Health is skipped (0 at full Health)
-    assert n.aspd.add == 0
+    assert n.aspd.total('MultiplyAdditive') * 100 == 0
 
 
 def test_statikk_shiv_every_third_release():
@@ -450,7 +450,7 @@ def test_lich_bane_once_per_cast():
 def test_flickerblades_and_blighting_jewel():
     f = set19items.Flickerblades()
     c, ds = artifact_fight(f, seconds=6)
-    assert c.aspd.add == pytest.approx(20 + 4 * c.launches)
+    assert c.aspd.total('MultiplyAdditive') * 100 == pytest.approx(20 + 4 * c.launches)
     assert c.bonus_ad.stat == pytest.approx(1 + 0.02 * (c.launches // 3))
 
 

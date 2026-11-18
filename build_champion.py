@@ -85,9 +85,9 @@ class RoleEffects(Item):
         for m in self.mods:
             a, op = m['attribute'], m['op']
             if a == 'ManaPerAttack' and op == '+':
-                champion.manaPerAttack.addStat(self._single(m))
+                champion.manaPerAttack.modify(op, self._single(m))
             elif a == 'ManaPerSecond' and op == '+':
-                champion.manaRegen.addStat(self._single(m))
+                champion.manaRegen.modify(op, self._single(m))
             elif a == 'ManaMax' and op == 'at least':
                 floor = self._single(m)
                 if champion.fullMana.base > -1 and champion.fullMana.base < floor:
@@ -95,8 +95,8 @@ class RoleEffects(Item):
             elif a == 'AttackSpeed' and m.get('lookup'):
                 lk = m['lookup']
                 v = curve_at(lk['points'], champion.stage, lk.get('interp') or 'Constant')
-                # MultiplyAdditive: the value's excess over 1 is a percent bonus (1.05 -> +5% attack speed)
-                champion.aspd.addStat((v - 1) * 100)
+                # MultiplyAdditive: the value's excess over 1 is the bonus (1.05 -> +5% attack speed)
+                champion.aspd.modify("MultiplyAdditive", v)
             else:
                 self.ignored.append(f'{a} {op} {m["text"]}')
 
@@ -130,7 +130,7 @@ class BuildChampion(Champion):
         g = b.data.get('globals') or {}
         cap = (g.get('attack_speed_cap') or {}).get('value')
         if cap:
-            self.aspd.as_cap = cap
+            self.aspd.modify("at most", cap, channel=2, key="cap")  # GE_AttackSpeedMax (B4)
         ex = curve_at(((g.get('excess_crit_to_crit_damage') or {}).get('points')), 1)
         if ex is not None:
             self.excess_crit_ratio = ex
@@ -168,7 +168,7 @@ class BuildChampion(Champion):
 
         self.spell_crit_sources += 1
         self.canSpellCrit = True
-        self.critDmg.addStat(bonus(self.spell_crit_sources) - bonus(self.spell_crit_sources - 1))
+        self.critDmg.modify("+", bonus(self.spell_crit_sources) - bonus(self.spell_crit_sources - 1))
 
     def row(self, name, star=None):
         """This champion's curve row at its star level (or `star`), from the selected build."""

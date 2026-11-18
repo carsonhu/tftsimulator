@@ -224,8 +224,8 @@ class Kaisa(BuildChampion):
             self.schedule_tick(self.tick + step, lambda: self._missile_lands(opponents, nxt, k + 1))
 
     def performAbility(self, opponents, items, time):
-        # MultiplyAdditive (1 + ASOnCast): +ASOnCast x 100 attack speed points, for the rest of combat (ASDuration 60)
-        self.aspd.addStat(self.row('ASOnCast') * 100)
+        # MultiplyAdditive (1 + ASOnCast), for the rest of combat (ASDuration 60)
+        self.aspd.modify("MultiplyAdditive", 1 + self.row('ASOnCast'))
 
 
 class Yunara(BuildChampion):
@@ -395,7 +395,7 @@ class Senna(BuildChampion):
             def detonate():
                 self.multiTargetSpell(opponents[:1], items, self.tick / TPS, 1, self.rip_damage_value, 'physical')
                 self.marked = False
-                self.dmgMultiplier.addStat(self.row('BonusDA'))
+                self.dmgMultiplier.modify("+", self.row('BonusDA'))
 
             self.schedule_tick(self.tick + ticks_up(self.rip_damage), detonate)
 

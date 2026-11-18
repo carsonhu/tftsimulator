@@ -85,10 +85,10 @@ def test_ionic_spark_letters_and_gift():
         log, orig = [], y.update
 
         def upd(opp, items, time):
-            before = (y.aspd.add, y.bonus_ad.add)
+            before = (y.aspd.total('MultiplyAdditive') * 100, y.bonus_ad.total('+') * 100)
             orig(opp, items, time)
-            if (y.aspd.add, y.bonus_ad.add) != before:
-                log.append((y.tick, round(y.aspd.add, 6), round(y.bonus_ad.add, 6)))
+            if (y.aspd.total('MultiplyAdditive') * 100, y.bonus_ad.total('+') * 100) != before:
+                log.append((y.tick, round(y.aspd.total('MultiplyAdditive') * 100, 6), round(y.bonus_ad.total('+') * 100, 6)))
         y.update = upd
         Simulator().simulate([], [set19buffs.IonicSpark(level, gift)], y, [dummy()], seconds)
         return log

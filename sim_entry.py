@@ -274,15 +274,17 @@ def _build_champion(cfg):
 
     champ.takedowns = int(cfg.get("takedowns", 0))
 
+    # The page's + boxes, in its units: AD, AP, AS, damage amp, crit and crit damage in percent, mana as numbers.
+    # Each becomes a Channel1 modifier in game units (AS: MultiplyAdditive, the rest added).
     bonus = cfg.get("bonus", {})
-    champ.bonus_ad.addStat(float(bonus.get("ad", 0)))
-    champ.ap.addStat(float(bonus.get("ap", 0)))
-    champ.aspd.addStat(float(bonus.get("as", 0)))
-    champ.manaRegen.addStat(float(bonus.get("manaregen", 0)))
-    champ.manaPerAttack.addStat(float(bonus.get("mpa", 0)))
-    champ.dmgMultiplier.addStat(float(bonus.get("dmgamp", 0)) / 100)
-    champ.crit.addStat(float(bonus.get("crit", 0)) / 100)
-    champ.critDmg.addStat(float(bonus.get("critdmg", 0)) / 100)
+    for attr, key, per in (("bonus_ad", "ad", 100), ("ap", "ap", 100), ("manaRegen", "manaregen", 1),
+                           ("manaPerAttack", "mpa", 1), ("dmgMultiplier", "dmgamp", 100), ("crit", "crit", 100),
+                           ("critDmg", "critdmg", 100)):
+        v = float(bonus.get(key, 0))
+        if v:
+            getattr(champ, attr).modify("+", v / per)
+    if float(bonus.get("as", 0)):
+        champ.aspd.modify("MultiplyAdditive", 1 + float(bonus["as"]) / 100)
 
     stage = cfg.get("stage", "4-1")
     champ.stage = int(str(stage).split("-")[0])

@@ -124,7 +124,7 @@ def test_hyperpop_attack_speed_for_members():
     for level, pct in ((0, 0), (2, 10), (3, 15), (4, 25), (5, 40)):
         z = Ziggs(1, build=load_build(V))
         Simulator().itemStats([set19buffs.Hyperpop(level)] + z.items, z)
-        assert z.aspd.add == pytest.approx(pct)
+        assert z.aspd.total('MultiplyAdditive') * 100 == pytest.approx(pct)
     d = Draven(1, build=load_build(V))
     Simulator().itemStats([set19buffs.Hyperpop(5)] + d.items, d)
-    assert d.aspd.add == 0
+    assert d.aspd.total('MultiplyAdditive') * 100 == 0

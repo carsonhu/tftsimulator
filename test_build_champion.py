@@ -33,7 +33,8 @@ def test_base_stats_mana_range_and_cap():
     a = make('DA_Ahri19')
     assert (a.aspd.stat, a.armor.stat, a.mr.stat) == (0.8, 40, 40)
     assert (a.curMana, a.fullMana.stat) == (0, 30)
-    assert a.attack_range == 4 and a.aspd.as_cap == 5  # B4: GE_AttackSpeedMax
+    a.aspd.modify('MultiplyAdditive', 100)
+    assert a.attack_range == 4 and a.aspd.stat == 5  # B4: GE_AttackSpeedMax caps it
     assert a.role.key == 'MagicCaster' and a.role.archetype == 'Caster'
     assert a.timing.launch == 0.3067 and a.timing.cast_lock == 1
 

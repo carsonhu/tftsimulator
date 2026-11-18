@@ -120,7 +120,7 @@ def test_locks_scale_with_attack_speed_when_the_script_reads_it():
     # G7: base AS 1.0, current 2.0 (item) -> cast lock 1.0 s becomes 0.5 s (15 ticks)
     # one cast only: starts full, no mana afterwards
     p = Probe(Timing(launch=0.3, cast_lock=1.0, lock_scales_with_as=True), aspd=1.0, mana=(30, 30), per_attack=0)
-    p.aspd.add = 100  # +100% AS
+    p.aspd.modify('MultiplyAdditive', 2)  # +100% AS
     run(p, seconds=2)
     assert len(p.cast_ticks) == 1
     assert p.busy_until - p.cast_ticks[0] == 15

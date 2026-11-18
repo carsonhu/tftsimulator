@@ -1,8 +1,7 @@
 import heapq
 import math
 
-from stats import (ArmorPierce, Attack, Attribute, FastDeepCopy, LegacyAspd, LegacyFlat, LegacyMultiplier,
-                   LegacyResist, Stat)
+from stats import ArmorPierce, Attack, Attribute, FastDeepCopy, Stat
 from timing import TPS, Timing, ticks, ticks_up
 
 import status
@@ -34,29 +33,35 @@ class Champion(FastDeepCopy):
     ):
         self.name = name
         # HP and AD are this star level's values (Set 19: from the build, B1); no scaling here
-        self.hp = LegacyFlat(hp)
-        self.bonus_ad = LegacyMultiplier()
-        self.atk = Attribute(atk)
+        # Every stat is a stats.Attribute in game units (ledger I5): AD and AP are multipliers (1.0 = no bonus) on the
+        # unit's own AD (atk) and on ability damage; attack speed is attacks per second; crit, crit damage, omnivamp
+        # and damage amp are fractions; the rest are flat.
+        self.hp = Attribute(hp)
+        self.bonus_ad = Attribute(1.0)  # the game's AttackDamage
+        self.atk = Attribute(atk)  # this star's base AD
         self.curMana = curMana
-        self.fullMana = LegacyFlat(fullMana)
+        self.fullMana = Attribute(fullMana)
         self.startingMana = 0
-        self.aspd = LegacyAspd(aspd)
-        self.ap = LegacyMultiplier()
-        self.armor = LegacyResist(armor)
-        self.mr = LegacyResist(mr)
-        self.manaPerAttack = LegacyFlat(0)
-        self.manaRegen = LegacyFlat(0)
-        self.manaGainMultiplier = LegacyFlat(1)
+        self.aspd = Attribute(aspd)
+        self.aspd.modify("at most", 5, channel=2, key="cap")  # set18's cap; Set 19 reads it from the build (B4)
+        self.ap = Attribute(1.0)
+        self.armor = Attribute(armor)
+        self.mr = Attribute(mr)
+        for resist in (self.armor, self.mr):
+            resist.modify("at least", 0, channel=2, key="floor")  # never below 0 (engine rule, kept from set18)
+        self.manaPerAttack = Attribute(0)
+        self.manaRegen = Attribute(0)
+        self.manaGainMultiplier = Attribute(1)
         self.level = level
-        self.dmgMultiplier = LegacyFlat(1)
+        self.dmgMultiplier = Attribute(1)
         # 2nd damage multiplier, multiplied against dmgMultiplier rather than
         # summed into it -- for amps that stack multiplicatively with the
         # item/augment amp pool (Ravager). Sources here are still additive with
         # each other, so a third independent multiplier needs its own Stat.
-        self.extraDmgMultiplier = LegacyFlat(1)
-        self.crit = LegacyFlat(0.25)
-        self.critDmg = LegacyFlat(1.4)
-        self.omnivamp = LegacyFlat(0)
+        self.extraDmgMultiplier = Attribute(1)
+        self.crit = Attribute(0.25)
+        self.critDmg = Attribute(1.4)
+        self.omnivamp = Attribute(0)
         self.bonus_range = Attribute(0)  # hexes of item range (AttackRange): flights don't use it (owner, I10)
         # crit chance over 100% becomes crit damage at this ratio (set18 0.5; Set 19 data: CT_ExtraCritChanceToCritDamage)
         self.excess_crit_ratio = 0.5
@@ -194,7 +199,7 @@ class Champion(FastDeepCopy):
 
     def addPrecision(self):
         if self.canSpellCrit:
-            self.critDmg.addStat(0.1)
+            self.critDmg.modify("+", 0.1)
         self.canSpellCrit = True
 
     # get basic stats from items
@@ -220,9 +225,6 @@ class Champion(FastDeepCopy):
 
     def attribute(self, name):
         return getattr(self, self.ATTRIBUTES[name])
-
-    def addStat(self, stat, amount):
-        getattr(self, stat).addStat(amount)
 
     @property
     def ranged(self):
