@@ -121,6 +121,16 @@ class Table(_Entry):
                 return v
         raise self._missing(f'point {col} of row {name!r}')
 
+    def table_row(self, table, name):
+        """[[time, value], ...] of row `name` in another curve table of the trait's folder (Illbeats'
+        CT_Illbeats19_PercentAtEachTick), from the snapshot's `tables`."""
+        rows = (self.d.get('tables') or {}).get(table)
+        if rows is None:
+            raise self._missing(f'curve table {table!r}')
+        if name not in rows:
+            raise self._missing(f'row {name!r} of {table}')
+        return rows[name]
+
 
 class Build:
     def __init__(self, data):

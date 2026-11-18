@@ -67,7 +67,7 @@ def convert(src_dir):
                                        'cosmetic_read_problems')},
         'champions': {c['key']: champion(c) for c in d['champions']},
         'roles': {r['key'].removeprefix('DA_Role_'): r for r in d.get('roles', [])},
-        'traits': {t['key']: simple(t, ('key', 'name', 'kind', 'rows', 'calcs', 'curve_table'))
+        'traits': {t['key']: simple(t, ('key', 'name', 'kind', 'rows', 'calcs', 'curve_table', 'tables'))
                    | {'tiers': [{'threshold': x['threshold'], 'text': plain(x['html']), 'unlock': x.get('unlock')}
                                 for x in t['tiers']]} for t in d['traits']},
         'items': {i['key']: simple(i, ('key', 'name', 'kind', 'tags', 'rows', 'calcs', 'recipes', 'upgrade', 'source',
