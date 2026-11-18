@@ -12,26 +12,15 @@ class Choreographer(BuildTrait):
     Allies starting in the back rows get GA_Choreographer_Backline: GE_Choreographer_BacklineDamageAmp, SetByCaller
     Set19.Trait.Choreographer.DamageAmp = DamageAmp x ChoreographerPercentMult for a Choreographer (0x74-0x149),
     taken as the unit's damage amp for the combat. Front-row allies get GA_Choreographer_Frontline's shield instead,
-    which changes no damage against dummies. Where the simulated unit starts is the parameter: 'By range' (the
-    default) puts a unit with attack range 1 in the front rows and any other in the back; or pick either row. The
-    (5) dash (DashPercentHealthTriger) and the Dance Party augment are not modelled.
+    which changes no damage against dummies. The simulated unit is taken to start in the back 2 rows, whatever its
+    range (owner, 2026-11-18). The (5) dash (DashPercentHealthTriger) and the Dance Party augment are not modelled.
     """
     KEY = "DA_Choreographer19"
     display_name = "Choreographer"
-    ROWS = ["By range", "Front 2 rows", "Back rows"]
-
-    @staticmethod
-    def extraParameters():
-        return {"Title": "Starts in", "Min": 0, "Max": len(Choreographer.ROWS) - 1, "Default": 0,
-                "Options": Choreographer.ROWS}
-
-    def back_row(self, champion):
-        row = self.ROWS[int(self.params or 0)]
-        return champion.attack_range > 1 if row == "By range" else row == "Back rows"
 
     def applyStats(self, champion):
         super().applyStats(champion)
-        if champion.trait_tier(self.KEY) == 0 or not self.back_row(champion):
+        if champion.trait_tier(self.KEY) == 0:
             return
         amp = champion.trait_value(self.KEY, "DamageAmp")
         if self.KEY in (champion.data.d.get("trait_keys") or []):

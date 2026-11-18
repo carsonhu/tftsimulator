@@ -95,11 +95,11 @@ def test_slayer_and_choreographer():
     v = LoggedViego(1)
     fight(v, buffs=[set19buffs.Slayer(2)], seconds=1)
     assert v.aspd.stat == pytest.approx(0.8 * (1.05 + 0.2))
-    # Choreographer (2): back-row allies +6% damage amp, Choreographers double; 'By range' puts melee in the front
-    for params, amp in ((0, 0), (1, 0), (2, 0.12)):
-        v = LoggedViego(1)
-        fight(v, buffs=[set19buffs.Choreographer(2, params)], seconds=1)
-        assert v.dmgMultiplier.stat == pytest.approx(1 + amp)
-    a = Ashe(1, build=load_build(V))  # not a Choreographer, range 5: back row by range, single amp
+    # Choreographer (2): back-row allies +6% damage amp, Choreographers double; every unit starts in the back 2 rows
+    # (owner), melee Viego included
+    v = LoggedViego(1)
+    fight(v, buffs=[set19buffs.Choreographer(2)], seconds=1)
+    assert v.dmgMultiplier.stat == pytest.approx(1.12)
+    a = Ashe(1, build=load_build(V))  # not a Choreographer: single amp
     fight(a, buffs=[set19buffs.Choreographer(2)], seconds=1)
     assert a.dmgMultiplier.stat == pytest.approx(1.06)
