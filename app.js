@@ -59,7 +59,9 @@ function showBootError(text) {
 // State
 // ---------------------------------------------------------------------------
 
-const DPS_TIMES = [5, 10, 15, 20, 25];
+// The DPS columns (sim_entry.DPS_WINDOWS): average DPS over fights ending in each window; the catalog lists them.
+let DPS_WINDOWS = [];
+let HEADLINE = null;
 
 // Bonus stats, keyed as sim_entry expects them. Each is rendered beside the
 // stat it feeds in the Base stats panel.
@@ -108,7 +110,7 @@ const state = {
   // icons/traits/tiers.json: {tiers: {cls: {level: tier}}, colours: {...}}.
   traitTiers: null,
   // Which header the table is sorted by. key null = the order sim_entry
-  // delivered, which is already ratio-at-25s descending.
+  // delivered, which is already the headline window's ratio, descending.
   sort: { key: null, dir: "desc" },
   // Payload for the slice on screen, and per-slice plot selections. Any
   // config change (not a slice change) clears selections.
@@ -145,6 +147,8 @@ async function init() {
   // index just means no icons, never a page that fails to start.
   loadIcons();
   state.catalog = await rpc("catalog");
+  DPS_WINDOWS = state.catalog.dpsWindows;
+  HEADLINE = state.catalog.headline;
   state.buffMeta = new Map(state.catalog.buffs.map((b) => [b.cls, b]));
   // Named explicitly (not left to "newest") so the run cache keys on it.
   state.cfg.build = state.catalog.builds.length ? state.catalog.builds[0].version : null;
@@ -1274,11 +1278,13 @@ function renderResults() {
   if (!payload) return;
   const selection = currentSelection();
 
-  // "Display DPS" swaps the DPS columns for the ratio columns.
+  // "Display DPS" swaps the DPS columns for the ratio columns. Each column is the average over fights ending in
+  // its window (sim_entry.DPS_WINDOWS).
+  const headline = DPS_WINDOWS.find((w) => w.key === HEADLINE) || DPS_WINDOWS[DPS_WINDOWS.length - 1];
   const dpsCols = state.displayDps
-    ? DPS_TIMES.map((t) => ({ label: "Extra DPS (" + t + "s)", get: (row) => row.ratio[String(t)] }))
-    : DPS_TIMES.map((t) => ({ label: "DPS at " + t, get: (row) => row.dps[String(t)] })).concat([
-        { label: "Extra DPS (25s)", get: (row) => row.ratio["25"] },
+    ? DPS_WINDOWS.map((w) => ({ label: "Extra DPS (" + w.label + ")", get: (row) => row.ratio[w.key] }))
+    : DPS_WINDOWS.map((w) => ({ label: "DPS " + w.label, get: (row) => row.dps[w.key] })).concat([
+        { label: "Extra DPS (" + headline.label + ")", get: (row) => row.ratio[headline.key] },
       ]);
 
   // Every column is described the same way, so the header handler is
@@ -1329,7 +1335,7 @@ function renderResults() {
   });
 
   // Sorting is a view concern: the payload is left alone so that clearing the
-  // sort returns to the order sim_entry delivered (ratio at 25s, descending).
+  // sort returns to the order sim_entry delivered (the headline window's ratio, descending).
   let rows = payload.rows;
   const sortCol = columns.find((col) => col.label === state.sort.key);
   if (sortCol) {

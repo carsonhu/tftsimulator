@@ -16,8 +16,8 @@
 
 import datetime
 import json
+import math
 import re
-from bisect import bisect_right
 
 import set19buffs
 import set19champs
@@ -28,7 +28,15 @@ from layout import MAX_TARGETS, TARGETS, Layout
 from helpers import buff_display_map, buff_display_names, item_display_map
 from simulator import Simulator
 
-DPS_TIMES = [5, 10, 15, 20, 25]
+# The table's DPS columns (owner, 2026-11-18): the average DPS over fights ending anywhere in each window (s), not at
+# one instant, so a cast landing just after a column's time no longer swings it. Most fights end between 20 and 30 s;
+# 10-20 s shows ramp-up. The last window is the headline: rows are sorted by it and the Extra DPS ratio is read there.
+DPS_WINDOWS = [(10, 20), (20, 30)]
+HEADLINE = "20-30"
+
+
+def _window_key(window):
+    return f"{window[0]}-{window[1]}"
 
 # Stats a trait's team-wide half could plausibly move. Compared alongside the
 # damage vector when deciding whether a team trait's level matters.
@@ -243,7 +251,8 @@ def get_catalog():
             "numBuffs": {"min": 1, "max": 10, "default": 2},
             "layout": {"targets": TARGETS, "max": MAX_TARGETS},
         },
-        "dpsTimes": DPS_TIMES,
+        "dpsWindows": [{"key": _window_key(w), "label": f"{w[0]}–{w[1]} s"} for w in DPS_WINDOWS],
+        "headline": HEADLINE,
     }
 
 
@@ -342,31 +351,16 @@ def _build_enemy(cfg):
 # DPS math
 # ---------------------------------------------------------------------------
 
-def _cumulative_points(results):
-    """(times, cumulative damage): one point per tick, holding every hit up to and including it (results arrive in
-    time order). The old site kept the first hit of a tick and drew lines between ticks, which moved same-tick hits
-    (on-hit magic, Statikk's bolts, splashes) to the next hit (owner, 2026-11-18: fixed)."""
-    xs, ys = [], []
-    cum = 0.0
+def _dps_window(results, a, b):
+    """The average of (damage dealt by T) / T over fight end times T spread evenly over [a, b] (a > 0): every hit
+    counts, a hit at t weighing ln(b / max(t, a)) / (b - a): fully before the window, about the share of the window
+    after it inside, nothing after b. Exact: damage dealt by T is a step in T."""
+    total = 0.0
     for inst in results:
-        cum += inst[1][0]
         t = float(inst[0])
-        if xs and abs(xs[-1] - t) < 1e-9:
-            ys[-1] = cum
-            continue
-        xs.append(t)
-        ys.append(cum)
-    return xs, ys
-
-
-def _damage_by(xs, ys, t):
-    """Damage dealt up to and including time t (a step: nothing of a later hit)."""
-    i = bisect_right(xs, t + 1e-9)
-    return ys[i - 1] if i else 0.0
-
-
-def _dps_at(xs, ys, t):
-    res = _damage_by(xs, ys, t) / t
+        if t <= b + 1e-9:
+            total += inst[1][0] * math.log(b / max(t, a))
+    res = total / (b - a)
     # Big numbers lose the fraction. The truncated value also feeds the ratio columns, so this is
     # arithmetic, not just formatting.
     if res > 10:
@@ -464,8 +458,8 @@ def _row_label(extra):
 
 
 def _table_entries(sim_list):
-    """One row per trial: DPS at each time and the ratio against the NoItem row (each row's own numbers: rows can
-    share a name, e.g. a trait at several levels)."""
+    """One row per trial: DPS over each window (DPS_WINDOWS) and the ratio against the NoItem row (each row's own
+    numbers: rows can share a name, e.g. a trait at several levels)."""
     entries = []
     for idx, sim in enumerate(sim_list):
         entry = {
@@ -478,8 +472,7 @@ def _table_entries(sim_list):
             # by tier. Items are not levelled and report None.
             "extraLevel": getattr(sim["Extra"], "level", None),
         }
-        xs, ys = _cumulative_points(sim["Results"])
-        entry["dps"] = {str(t): _dps_at(xs, ys, t) for t in DPS_TIMES}
+        entry["dps"] = {_window_key(w): _dps_window(sim["Results"], *w) for w in DPS_WINDOWS}
         entries.append(entry)
 
     for entry in entries:
@@ -487,14 +480,13 @@ def _table_entries(sim_list):
                      == (entry["name"], entry["level"], "NoItem")), None)
         own = entry["dps"]
         entry["ratio"] = {}
-        for t in DPS_TIMES:
-            t = str(t)
+        for t in entry["dps"]:
             if base is not None:
                 entry["ratio"][t] = round(own[t] / base[t] if base[t] != 0 else 0, 2)
             else:
                 entry["ratio"][t] = 0
 
-    entries.sort(key=lambda e: e["ratio"]["25"], reverse=True)
+    entries.sort(key=lambda e: e["ratio"][HEADLINE], reverse=True)
     return entries
 
 
@@ -526,7 +518,7 @@ def run_slice(cfg):
     champ = _build_champion(cfg)
     enemy = _build_enemy(cfg)
     slice_name = cfg.get("slice", "Craftable")
-    duration = float(cfg.get("t", 30))
+    duration = max(float(cfg.get("t", 30)), DPS_WINDOWS[-1][1])  # the fight runs at least to the last window's end
     frame_rate = int(cfg.get("frame_rate", 30))
 
     items, buffs = _slice_inputs(slice_name, cfg)

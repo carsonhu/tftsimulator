@@ -96,6 +96,9 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   `set19items.<Class>` / `set19buffs.<Class>`; the import order in `set19buffs` is the order traits are offered and
   run in. `items/` also holds the item worksheets (`items/<Name>.md`).
 
+- The table's DPS columns (`sim_entry.DPS_WINDOWS`, owner 2026-11-18): the average DPS over fights ending anywhere
+  in 10-20 s and 20-30 s, every hit counted (`_dps_window`); rows sort by the 20-30 s ratio (Extra DPS). Not DPS at
+  one instant: a cast just after it would swing the number.
 - `simulator.Simulator.simulate` runs `prePreCombat -> preCombat -> postPreCombat`, then calls
   `champion.update()` once per 30 Hz tick. Opponents are `set19champs.TrainingDummy`: they never attack or die.
 - **Timing core** (`timing.py`, `champion.py` `update`, rules T1-T9 in `docs/ASSUMPTIONS.md`, tests in

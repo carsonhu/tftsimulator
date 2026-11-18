@@ -41,7 +41,7 @@ def test_catalog_info_and_run(registered):
     import set19items
     listed = {getattr(set19items, c).display_name for c in set19items.offensive_craftables}
     assert {r['extra'] for r in out['rows']} == listed | {'NoItem'}
-    assert out['rows'][0]['dps']['5'] > 0
+    assert out['rows'][0]['dps']['10-20'] > 0
 
 
 def test_unknown_champion_is_refused():
@@ -100,7 +100,7 @@ def test_the_number_of_targets_reaches_an_area_champion_only():
 
     def dps(champ, slice_, extra, layout):
         out = json.loads(sim_entry.run_json(json.dumps(cfg(champ=champ, level=1, slice=slice_, layout=layout))))
-        return next(r['dps']['25'] for r in out['rows'] if r['extra'] == extra)
+        return next(r['dps']['20-30'] for r in out['rows'] if r['extra'] == extra)
 
     assert dps('Varus', 'Craftable', 'NoItem', {'targets': 5}) > dps('Varus', 'Craftable', 'NoItem', None) \
         == dps('Varus', 'Craftable', 'NoItem', {'targets': 3}) > dps('Varus', 'Craftable', 'NoItem', {'targets': 1})
@@ -114,7 +114,18 @@ def test_trait_rows_name_their_level_and_use_their_own_numbers():
                                                        buffs=[['Pentakill', 0, 0], ['Trickshot', 0, 0]]))))
     rows = {r['extra']: r for r in out['rows']}
     assert {'Pentakill 3', 'Pentakill 5', 'Pentakill 7', 'Trickshot 2', 'Trickshot 3', 'Trickshot 4', 'NoItem'} == set(rows)
-    base = rows['NoItem']['dps']['25']
+    base = rows['NoItem']['dps']['20-30']
     for r in rows.values():
-        assert r['ratio']['25'] == round(r['dps']['25'] / base, 2)
-    assert len({rows[f'Pentakill {n}']['ratio']['25'] for n in (3, 5, 7)}) == 3
+        assert r['ratio']['20-30'] == round(r['dps']['20-30'] / base, 2)
+    assert len({rows[f'Pentakill {n}']['ratio']['20-30'] for n in (3, 5, 7)}) == 3
+
+
+def test_dps_columns_average_over_fight_end_times():
+    # owner, 2026-11-18: each column is the average of (damage dealt by T) / T for T spread over the window; a hit at t
+    # counts ln(b / max(t, a)) / (b - a): fully before the window, partly inside, not at all after it
+    hits = [(5.0, (100, 'magical')), (25.0, (300, 'magical')), (31.0, (1000, 'magical'))]
+    import math
+    expected = (100 * math.log(30 / 20) + 300 * math.log(30 / 25)) / 10
+    assert sim_entry._dps_window(hits, 20, 30) == pytest.approx(expected)  # below 10: not truncated
+    cat = json.loads(sim_entry.catalog_json())
+    assert [w['key'] for w in cat['dpsWindows']] == ['10-20', '20-30'] and cat['headline'] == '20-30'
