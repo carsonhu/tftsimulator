@@ -276,11 +276,11 @@ const FightViewer = (() => {
     const pts = qs.map(world);
     const xmin = Math.min(...pts.map((p) => p[0])) - HEX * 1.1;
     const xmax = Math.max(...pts.map((p) => p[0])) + HEX * 1.1;
-    const ymin = Math.min(-ROW, ...pts.map((p) => p[1])) - ROW * 0.85;
-    const ymax = Math.max(ROW, ...pts.map((p) => p[1])) + ROW * 0.85;
+    const ymin = Math.min(...pts.map((p) => p[1])) - ROW * 0.95;
+    const ymax = Math.max(...pts.map((p) => p[1])) + ROW * 0.7;
     const width = el.vizStage.clientWidth;
     const scale = width / (xmax - xmin);
-    const height = Math.min(Math.max((ymax - ymin) * scale, 170), 340);
+    const height = Math.min(Math.max((ymax - ymin) * scale, 150), 230);
     const [ctx, W, H] = setupCanvas(el.vizCanvas, height);
     const s = Math.min(W / (xmax - xmin), H / (ymax - ymin));
     const ox = (W - (xmax - xmin) * s) / 2 - xmin * s;
@@ -554,7 +554,7 @@ const FightViewer = (() => {
 
   function drawStrip() {
     const tr = v.trace;
-    const [ctx, W, H] = setupCanvas(el.vizStrip, 54);
+    const [ctx, W, H] = setupCanvas(el.vizStrip, 42);
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = "#12151d";
     ctx.fillRect(0, 0, W, H);
@@ -615,12 +615,12 @@ const FightViewer = (() => {
     const rows = [
       ["ad", "AD", num(s.ad, 1), s.adMult !== 1 ? `×${num(s.adMult)}` : ""],
       ["ap", "AP", Math.round(s.ap * 100), ""],
-      ["as", "Attack speed", num(s.as, 3), ""],
+      ["as", "Atk speed", num(s.as, 3), ""],
       ["crit", "Crit", pct(s.crit), ""],
-      ["critDmg", "Crit damage", pct(s.critDmg), ""],
-      ["amp", "Damage amp", pct(s.amp - 1), ""],
-      ["regen", "Mana regen", num(s.regen, 1) + "/s", ""],
-      ["mpa", "Mana / attack", num(s.mpa, 1), s.manaMult !== 1 ? `×${num(s.manaMult)}` : ""],
+      ["critDmg", "Crit dmg", pct(s.critDmg), ""],
+      ["amp", "Amp", pct(s.amp - 1), ""],
+      ["regen", "Regen", num(s.regen, 1) + "/s", ""],
+      ["mpa", "Mana/atk", num(s.mpa, 1), s.manaMult !== 1 ? `×${num(s.manaMult)}` : ""],
     ];
     if (s.armorPen) rows.push(["", "Armor pen", pct(s.armorPen), ""]);
     if (s.mrPen) rows.push(["", "MR pen", pct(s.mrPen), ""]);
@@ -633,25 +633,24 @@ const FightViewer = (() => {
     el.vizCard.innerHTML = `
       <div class="viz-card-head">
         <strong>${esc(tr.champion.label)}</strong> <span class="viz-stars">${"★".repeat(tr.champion.level)}</span>
-        <div class="viz-sub">Row: ${esc(tr.extra)}</div>
-        ${items.length ? `<div class="viz-sub">Also: ${items.map(esc).join(", ")}</div>` : ""}
+        <div class="viz-sub">${esc(tr.extra)}${items.length ? " · " + items.map(esc).join(", ") : ""}</div>
       </div>
       <div class="viz-status ${s.casting ? "is-casting" : ""}">${esc(status)}${lock ? `<br><span>${esc(lock)}</span>` : ""}</div>
       <div class="viz-mana"><div class="viz-mana-fill ${s.lockedUntil != null ? "locked" : ""}" style="width:${(manaFrac * 100).toFixed(1)}%"></div>
         <span>${num(s.mana, 1)} / ${num(s.maxMana, 0)} mana</span></div>
-      <table class="viz-stats">${rows.map(([key, name, value, extra]) => `
-        <tr ${key ? `data-stat="${key}"` : ""} class="${key === v.selectedStat ? "selected" : ""}">
-          <td>${name}</td><td>${value}${extra ? ` <span class="viz-dim">${extra}</span>` : ""}</td></tr>`).join("")}
-      </table>
+      <div class="viz-grid">${rows.map(([key, name, value, extra]) => `
+        <div ${key ? `data-stat="${key}"` : ""} class="viz-cell ${key && key === v.selectedStat ? "selected" : ""}"
+          ${extra ? `title="${esc(extra)}"` : ""}><span>${name}</span><b>${value}</b></div>`).join("")}
+      </div>
       <div class="viz-mods"><div class="viz-dim">${esc(selectedName)} modifiers${mods.length ? "" : ": none"}</div>
         ${mods.map(([op, value, key]) => `<div>${esc(key || "unkeyed (item or trait stats)")}: <span>${esc(op)} ${num(value, 3)}</span></div>`).join("")}
       </div>
-      <table class="viz-stats viz-totals">
-        <tr><td>Attacks landed</td><td>${s.attacks ?? 0}</td></tr>
-        <tr><td>Casts</td><td>${s.casts ?? 0}</td></tr>
-        <tr><td>Damage dealt</td><td>${Math.round(dealt).toLocaleString()}</td></tr>
-        <tr><td>DPS so far</td><td>${secs > 0 ? (dealt / secs).toFixed(1) : "–"}</td></tr>
-      </table>
+      <div class="viz-grid viz-totals">
+        <div class="viz-cell"><span>Attacks</span><b>${s.attacks ?? 0}</b></div>
+        <div class="viz-cell"><span>Casts</span><b>${s.casts ?? 0}</b></div>
+        <div class="viz-cell"><span>Damage</span><b>${Math.round(dealt).toLocaleString()}</b></div>
+        <div class="viz-cell"><span>DPS so far</span><b>${secs > 0 ? (dealt / secs).toFixed(1) : "–"}</b></div>
+      </div>
       ${s.effects && s.effects.length ? `<div class="viz-effects">Effects on the champion: ${s.effects.map(esc).join(", ")}</div>` : ""}
       <div class="viz-dummies">${tr.units.slice(1).filter((u) => u.inPlay).map((u) => {
         const i = tr.units.indexOf(u);
