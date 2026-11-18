@@ -61,3 +61,16 @@ def test_a_run_uses_the_build_it_names(registered):
     assert out['stats']['build'] == 'rls-19.1.0.5973071.Set19.Shipping.pbe'
     with pytest.raises(KeyError, match='no-such-build'):
         sim_entry.champ_info_json(json.dumps(cfg(build='no-such-build')))
+
+
+def test_the_worker_loads_every_module():
+    """The browser loads only the modules worker.js lists (PY_FILES): a module missing there fails only on the page."""
+    import glob
+    import os
+    import re
+    here = os.path.dirname(os.path.abspath(__file__))
+    listed = set(re.findall(r'"([\w/]+\.py)"', open(os.path.join(here, 'worker.js'), encoding='utf-8').read()))
+    for pkg in ('items', 'traits', 'helpers'):
+        for path in glob.glob(os.path.join(here, pkg, '*.py')):
+            assert f'{pkg}/{os.path.basename(path)}' in listed
+    assert 'registry.py' in listed

@@ -23,6 +23,13 @@ const PY_FILES = [
   "helpers/__init__.py",
   "helpers/display_name.py",
   "item.py",
+  "items/__init__.py",
+  "items/artifacts.py",
+  "items/base.py",
+  "items/craftables.py",
+  "items/debuffs.py",
+  "items/radiants.py",
+  "registry.py",
   "set19buffs.py",
   "set19champs.py",
   "set19items.py",
@@ -32,6 +39,19 @@ const PY_FILES = [
   "stats.py",
   "status.py",
   "timing.py",
+  "traits/__init__.py",
+  "traits/arcanist.py",
+  "traits/base.py",
+  "traits/encore.py",
+  "traits/heartsteel.py",
+  "traits/hitmaker.py",
+  "traits/hyperpop.py",
+  "traits/illbeats.py",
+  "traits/ionic_spark.py",
+  "traits/kda.py",
+  "traits/swiftstriker.py",
+  "traits/trickshot.py",
+  "traits/true_damage.py",
 ];
 
 async function boot() {
@@ -61,8 +81,9 @@ async function boot() {
     ),
   ]);
 
-  pyodide.FS.mkdirTree("/app/helpers");
   for (const [path, text] of sources) {
+    // /app itself, and the package folder of a module like items/base.py.
+    pyodide.FS.mkdirTree("/app/" + path.slice(0, path.lastIndexOf("/") + 1));
     pyodide.FS.writeFile("/app/" + path, text);
   }
   // Client builds (ledger B9): buildstore.py reads builds/index.json and

@@ -83,6 +83,16 @@ new module (the browser loads only what is listed).
 
 **Done when:** the tables are unchanged; adding an item means writing one class in one file.
 
+**Done (2026-11-17).** `items/` (`base.py`, `debuffs.py`, `craftables.py`, `radiants.py`, `artifacts.py`), `traits/`
+(`base.py` and one module per trait) and `registry.py` (`@register(kind)`). Two changes from the plan: the stats
+layer is `items/base.py`, not `items/stats.py`, so it can't be mistaken for the top-level `stats.py`; and
+`set19items.py` / `set19buffs.py` stay as the modules that gather the packages, so every caller and test still names
+classes as `set19items.<Class>` / `set19buffs.<Class>`. The import order in `set19buffs.py` keeps the old trait order,
+which is also the order traits run in. Code moved verbatim; the only renames are private helpers (`_name` is now
+`item_name`). The worker now creates each module's folder, and a test checks that it lists every module. Tests
+(140) pass, both browser checks pass, the registries equal the old lists exactly, and `table_dump.py --diff` finds
+the tables identical.
+
 ### 3. Attributes shaped like the game's (the big one)
 
 **Now:** the game has one rule for every attribute: per evaluation channel, `((base + AddBase) × (1 + Σ
@@ -175,7 +185,7 @@ sliders become layout settings.
 |---|---|
 | 0. Durable copy of the tests; table-diff script | done: `tools/table_dump.py`; tests committed on branch `set19` |
 | 1. Delete set18 leftovers | done (2026-11-17) |
-| 2. Split modules, decorator registration | not started |
+| 2. Split modules, decorator registration | done (2026-11-17) |
 | 3. Game-shaped attributes | not started |
 | 4. Timed effects and damage events | not started |
 | 5. Dummy layout | not started |

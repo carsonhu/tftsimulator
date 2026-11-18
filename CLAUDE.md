@@ -82,8 +82,14 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
                                                                  |
                               sim_core.do_experiment_one_extra -> simulator.Simulator
                                                                  |
-                              set19champs / set19items / set19buffs / status
+                              set19champs / set19items (items/) / set19buffs (traits/) / status
 ```
+
+- Where code lives: items in `items/` (`base.py`: NoItem, the stats layer, BuildItem, StackingItem, item_name;
+  `debuffs.py`: sunder, shred, burn; `craftables.py`, `radiants.py`, `artifacts.py`), traits in `traits/` (one module
+  per trait, `base.py`: Buff, NoBuff, BuildTrait). `set19items` and `set19buffs` gather them, so every class is still
+  `set19items.<Class>` / `set19buffs.<Class>`; the import order in `set19buffs` is the order traits are offered and
+  run in. `items/` also holds the item worksheets (`items/<Name>.md`).
 
 - `simulator.Simulator.simulate` runs `prePreCombat -> preCombat -> postPreCombat`, then calls
   `champion.update()` once per 30 Hz tick. Opponents are `set19champs.TrainingDummy`: they never attack or die.
@@ -92,15 +98,19 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   Timing.from_build(...)`; override a field only with cited evidence and record it in `Timing.source`. Delayed
   spell effects go through `self.schedule(seconds, fn)`, never a hand-made status. Attack damage and on-attack item
   effects happen when the attack lands.
-- Registries: a class is live only when listed (`set19champs.champ_list`, `set19buffs.class_buffs` /
-  `augments` / ..., `set19items` lists); see each list for what is live (champions: Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal; traits: Encore, Trickshot, K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats, Heartsteel, Hyperpop, Ionic Spark). `worker.js` `PY_FILES`
-  lists every module the browser loads; a new module must be added there too. Builds reach the browser through
+- Registries: an item or buff is live only when decorated `@register(kind)` (`registry.py`; kinds craftable,
+  radiant, artifact, emblem, trait, augment), which fills `set19items.offensive_craftables` / `radiants` /
+  `artifacts` / `emblems` and `set19buffs.class_buffs` / `augments`; champions are live when listed in
+  `set19champs.champ_list` (Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal; traits: Encore, Trickshot,
+  K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats, Heartsteel, Hyperpop, Ionic Spark). A new trait is
+  a module in `traits/` plus its import line in `set19buffs.py`. `worker.js` `PY_FILES` lists every module the
+  browser loads; a new module must be added there too (`test_sim_entry.py` checks the `items/` and `traits/` ones). Builds reach the browser through
   the worker (B9): the newest at boot, others when the page's "Game build" picker names one. After changing the
   worker, the page or build loading, run `tools/browser_check/` (`npm install` there once; `node worker_e2e.js`,
   and `node page_e2e.js` with `python serve.py 8619` running).
 - Items: `set19items.BuildItem` subclasses with `KEY` and `STATS` (the effects reviewed as the item's unconditional
   stats, `docs/ITEMS.md`); stats and tags are applied at combat start from the champion's build (ledger I1-I3), and
-  anything the layer can't apply exactly raises. A scripted item is listed only once its script is implemented.
+  anything the layer can't apply exactly raises. A scripted item is registered only once its script is implemented.
 - Items/buffs: behaviour in `performAbility(phase, time, champion, input_)` for the phases listed in `phases`
   (`preCombat`, `onUpdate`, `onLaunch` (attack release and simulated attacks, G11), `preAttack`, `onAttack`,
   `postAttack`, `onCrit`, `preAbility`, `postAbility`,
