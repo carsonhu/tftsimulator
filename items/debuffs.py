@@ -1,6 +1,7 @@
 """Debuffs an item puts on the damaged target (ledger I7): sunder and shred (DebuffItem) and burn (BurnItem)."""
 from buildstore import BuildDataError, load_build
 from effects import ActiveEffect, apply_effect, last_tick
+from events import BURN, DAMAGE_POST, ITEM, UNIT, damage_tags
 from timing import TPS, ticks_up
 from items.base import BuildItem
 
@@ -22,17 +23,17 @@ class DebuffItem(BuildItem):
     LEVEL_PARAM / DURATION_PARAM name the GA parameters whose curve rows give the level and duration."""
     GA = None
     LEVEL_PARAM = DURATION_PARAM = None
+    LISTENS = {DAMAGE_POST: frozenset((UNIT,))}  # WaitForDealDamage(Damage.Source.Unit), PostApply
 
-    def __init__(self, phases=("PostOnDealDamage",)):
+    def __init__(self, phases=()):
         super().__init__(phases=phases)
 
     def param_row(self, champion, param):
         return self.row(champion, self.ga_param(champion, self.GA, param))
 
     def performAbility(self, phase, time, champion, input_=0):
-        target = getattr(champion, "lastDamagedOpponent", None)
-        if phase == "PostOnDealDamage" and target is not None and input_ and input_[0]:
-            self.debuff(champion, target, time, self.param_row(champion, self.LEVEL_PARAM),
+        if phase == DAMAGE_POST and input_.amount:
+            self.debuff(champion, input_.target, time, self.param_row(champion, self.LEVEL_PARAM),
                         self.param_row(champion, self.DURATION_PARAM))
         return input_
 
@@ -61,14 +62,15 @@ def tick_burns(champion):
         burn = target.effects.get("Burn")
         for _ in range(burn.due(champion.tick) if burn is not None else 0):
             dmg = debuff_value(champion, "BurnWound", burn.level) * target.hp.stat
-            # items=[]: a burn tick is not an attack or a spell, so no on-hit effect answers it
-            champion.doDamage(target, [], 0, dmg, dmg, "true", champion.tick / TPS)
+            # an item's debuff, not the unit's damage: nothing that waits for Damage.Source.Unit hears it
+            champion.doDamage(target, champion.items, 0, dmg, dmg, "true", champion.tick / TPS,
+                              tags=damage_tags("true", ITEM, BURN))
 
 
 class BurnItem(DebuffItem):
     """An item that burns (and wounds: nothing against dummies) the targets of the holder's attacks and spells."""
     def __init__(self):
-        super().__init__(phases=("preCombat", "PostOnDealDamage", "onUpdate"))
+        super().__init__(phases=("preCombat", "onUpdate"))
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":

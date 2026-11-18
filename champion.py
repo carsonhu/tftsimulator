@@ -2,6 +2,8 @@ import heapq
 import math
 
 from effects import expire_effects
+from events import (CRIT, DAMAGE_POST, IS_ATTACK, LAUNCH, ON_HIT, ON_SPELL, ONHIT_AFTER, ONHIT_PRE, SIMULATED,
+                    UNIT, CombatEvent, damage_tags)
 from stats import ArmorPierce, Attack, Attribute, FastDeepCopy, Stat
 from timing import TPS, Timing, ticks, ticks_up
 
@@ -102,7 +104,6 @@ class Champion(FastDeepCopy):
         self.dmgVector = []
         self.dmgDealt = 0 # no need to serialize
         self.alive = True
-        self.lastDamagedOpponent = None
 
         # notes for user
         self.notes = ""
@@ -270,7 +271,7 @@ class Champion(FastDeepCopy):
         multiplier=None,
         generateMana=True,
     ):
-        """One attack's effects: 'preAttack' items, the damage, attack mana (when generateMana), 'postAttack' items.
+        """One attack's effects: the damage, attack mana (when generateMana), then the ONHIT_AFTER event (events.py).
         The engine calls this when the attack lands, with generateMana only if the mana is due on the hit (T3)."""
         newAttack = Attack(
             opponents=opponents,
@@ -280,16 +281,14 @@ class Champion(FastDeepCopy):
             attackType="physical",
             numTargets=1,
         )
-        for item in items:
-            item.ability("preAttack", time, self, newAttack)
-
         self.doAttack(newAttack, items, time)
 
         if generateMana:
             self.addMana(self.manaPerAttack.stat)
 
-        for item in items:
-            item.ability("postAttack", time, self)
+        if opponents:
+            self.emit(ONHIT_AFTER, CombatEvent(self, opponents[0], tags=damage_tags("physical", UNIT, IS_ATTACK, ON_HIT),
+                                               time=time), items)
 
     def performAbility(self, opponents, items, time):
         # abstract method
@@ -343,16 +342,21 @@ class Champion(FastDeepCopy):
         self.release_tick = max(_round_half_up(self.release_exact), tick + 1)
         self.attack_start_tick = max(tick + 1, min(_round_half_up(self.start_exact), self.release_tick - 1))
 
+    def emit(self, moment, event, items):
+        """Tell every item and buff in `items` that hears `moment` with the event's tags (events.py), in list order."""
+        for item in items:
+            if item.LISTENS and item.hears(moment, event):
+                item.on_event(moment, event, self)
+
     def onLaunch(self, opponents, items):
         """An attack releases (the LaunchAttack event). Champions whose passive counts launches override this."""
 
     def simulateLaunch(self, items):
         """GE_SimulateLaunchAttack (a cast's 'simulated attack'): GA_SimulateLaunchAttack sends
         Combat.Event.LaunchAttack.SimulateTriggersOnly, which every non-exact Combat.Event.LaunchAttack listener hears
-        (G11; VOD4 Ezreal: Titan's Resolve stacks). Items react in their 'onLaunch' phase; the attack itself, its
-        mana and the champion's own launch count are not touched."""
-        for item in items:
-            item.ability("onLaunch", self.tick / TPS, self)
+        (G11; VOD4 Ezreal: Titan's Resolve stacks). Items hear it as LAUNCH, tagged SimulateTriggersOnly; the attack
+        itself, its mana and the champion's own launch count are not touched."""
+        self.emit(LAUNCH, CombatEvent(self, tags=frozenset((SIMULATED,)), time=self.tick / TPS), items)
 
     def _release(self, opponents, items, rhythm=True, paid=None):
         """The attack releases (ranged) or hits (melee) this tick. With `rhythm`, the next attack is scheduled one
@@ -367,8 +371,7 @@ class Champion(FastDeepCopy):
             paid = True
         self.launches += 1
         self.onLaunch(opponents, items)
-        for item in items:
-            item.ability("onLaunch", self.tick / TPS, self)  # Combat.Event.LaunchAttack listeners (Titan's Resolve)
+        self.emit(LAUNCH, CombatEvent(self, time=self.tick / TPS), items)  # Combat.Event.LaunchAttack (Titan's Resolve)
         if rhythm and self.timing.variants:
             # B13: attack starts are one period apart and each releases its own animation's windup later, so the
             # releases of different animations are not a period apart (Kai'Sa, VOD3)
@@ -480,10 +483,11 @@ class Champion(FastDeepCopy):
         return (attack + multiplier.add) * multiplier.mult
 
     def doAttack(self, attack, items, time):
-        # Activating onhits
+        """An attack's damage to its targets, after the ONHIT_PRE event if it applies on-hit effects."""
+        tags = damage_tags(attack.attackType, UNIT, IS_ATTACK, *((ON_HIT,) if attack.canOnHit else ()))
         if attack.canOnHit:
-            for item in items:
-                item.ability("onAttack", time, self, attack.opponents)
+            self.emit(ONHIT_PRE, CombatEvent(self, attack.opponents[0], dtype=attack.attackType, tags=tags, time=time),
+                      items)
 
         baseDmg = self.baseAtkDamage(
             attack.scaling(self.level, self.atk.stat, self.bonus_ad.stat, self.ap.stat),
@@ -504,6 +508,7 @@ class Champion(FastDeepCopy):
                 baseDmg,
                 attack.attackType,
                 time,
+                tags=tags,
             )
 
     def critDamage(self):
@@ -520,8 +525,7 @@ class Champion(FastDeepCopy):
         damage,
         dtype,
         time,
-        is_spell=False,
-        source_item=None,
+        tags=frozenset(),
         ability_armor_pierce=0,
         ability_mr_pierce=0,
     ):
@@ -536,36 +540,24 @@ class Champion(FastDeepCopy):
             damage (float): dmg if not crit
             dtype (str): "physical", "magical", "true"
             time (int)
-            is_spell (bool, optional): is it spell damage?
+            tags (frozenset): the damage's tags (events.py); listeners filter on them
         """
         #
         # if not crit
         critChance = min(1, critChance)
         self.critCounter += critChance
         if self.critCounter >= 1:
-            for item in items:
-                if item != source_item:
-                    item.ability("onCrit", time, self, is_spell)
+            self.emit(CRIT, CombatEvent(self, opponent, dtype=dtype, tags=tags, time=time), items)
             self.critCounter -= 1
 
         preDmg = damage
         preCritDmg = damageIfCrit
 
         avgDmg = preDmg * (1 - critChance) + preCritDmg * critChance
-        # if anything needs to modify the damage dealt
-        for item in items:
-            avgDmg = item.ability("onDealDamage", time, self, avgDmg)
 
         avgDmg = self.damage(avgDmg, dtype, opponent, ability_armor_pierce, ability_mr_pierce)
         self.dmgDealt += avgDmg[0]
-        # PostOnDealDamage's input_ carries the damage amount but not who it
-        # hit; on-hit effects that need the specific target (e.g. Executioner
-        # applying a bleed) read this instead of threading a new param
-        # through every item.ability() call.
-        self.lastDamagedOpponent = opponent
-        for item in items:
-            # if you need to track how much dmg was actually dealt
-            item.ability("PostOnDealDamage", time, self, avgDmg)
+        self.emit(DAMAGE_POST, CombatEvent(self, opponent, avgDmg[0], dtype, tags, time), items)
 
         if avgDmg:
             # record (Time, Damage Dealt, current AS, current Mana, full Mana)
@@ -582,7 +574,6 @@ class Champion(FastDeepCopy):
         targets,
         scaling,
         type="magical",
-        numAttacks=0,
         ability_armor_pierce=0,
         ability_mr_pierce=0,
     ):
@@ -595,19 +586,10 @@ class Champion(FastDeepCopy):
             targets (int): # targets
             scaling (func): damage func(level, AD, AP)
             type (str, optional): physical, magical, true
-            numAttacks (int, optional): # of attacks to apply for guinsoo/runaans
         """
         baseDmg = scaling(self.level, self.bonus_ad.stat, self.ap.stat)
         baseCritDmg = baseDmg
-        self.numAttacks += numAttacks
-        newAttack = Attack(
-            opponents=opponents, multiplier=Stat(0, 1, 0), attackType="physical", numTargets=1,
-            regularAuto=False,
-        )
-        for attacks in range(numAttacks):
-            # activate onhits, currently unused
-            for item in items:
-                item.ability("preAttack", time, self, newAttack)
+        tags = damage_tags(type, UNIT, ON_SPELL)
         if self.canSpellCrit:
             baseCritDmg *= self.critDamage()
 
@@ -627,14 +609,10 @@ class Champion(FastDeepCopy):
                 multipliedDmg,
                 type,
                 time,
-                is_spell=True,
+                tags=tags,
                 ability_armor_pierce=ability_armor_pierce,
                 ability_mr_pierce=ability_mr_pierce,
             )
-
-        for attacks in range(numAttacks):
-            for item in items:
-                item.ability("postAttack", time, self)
 
     def damage(self, dmg, dtype, defender, ability_armor_pierce=0, ability_mr_pierce=0):
         """deal dmg, dmg is premitigated

@@ -21,6 +21,7 @@ const PY_FILES = [
   "buildstore.py",
   "champion.py",
   "effects.py",
+  "events.py",
   "helpers/__init__.py",
   "helpers/display_name.py",
   "item.py",

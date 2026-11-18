@@ -1,21 +1,23 @@
-"""Engine review bugs E8 and E9 (docs/ASSUMPTIONS.md)."""
+"""Engine review bugs E8 and E9 (docs/ASSUMPTIONS.md), on the combat events (events.py)."""
 from champion import Champion
+from events import CRIT, DAMAGE_POST, IS_ATTACK, ON_HIT, ON_SPELL, ONHIT_PRE, UNIT
 from item import Item
-import stats
-from stats import Stat
+from stats import Attack
 from test_timing import dummy
 
 
 class Spy(Item):
+    LISTENS = {CRIT: frozenset(), DAMAGE_POST: frozenset(), ONHIT_PRE: frozenset()}
+
     def __init__(self):
-        super().__init__(name='Spy', phases=['preAttack', 'onCrit'])
-        self.attacks, self.crits = [], 0
+        super().__init__(name='Spy')
+        self.crits, self.seen = 0, []
 
     def performAbility(self, phase, time, champion, input_=0):
-        if phase == 'preAttack':
-            self.attacks.append(input_)
-        else:
+        if phase == CRIT:
             self.crits += 1
+        else:
+            self.seen.append((phase, input_.target, input_.dtype, input_.tags))
 
 
 def unit():
@@ -24,14 +26,17 @@ def unit():
     return c
 
 
-def test_spell_attacks_carry_their_fields_in_the_right_places():
-    # E8: multiTargetSpell's simulated attacks were built positionally: scaling=Stat, canCrit="physical", canOnHit=1
-    c, spy = unit(), Spy()
-    c.multiTargetSpell([dummy()], [spy], 0, 1, lambda lvl, ad, ap: 100, numAttacks=1)
-    a = spy.attacks[0]
-    assert a.scaling is stats.default_scaling and a.canCrit is True and a.canOnHit is True
-    assert a.attackType == 'physical' and a.numTargets == 1 and isinstance(a.multiplier, Stat)
-    assert a.regularAuto is False
+def test_spell_and_attack_damage_carry_their_tags():
+    # E8 was multiTargetSpell's simulated attacks built with fields in the wrong places; that path is gone, and what
+    # tells a listener what hit is now the event: spell damage is the unit's spell, an attack's the unit's on-hit
+    c, spy, d = unit(), Spy(), dummy()
+    c.multiTargetSpell([d], [spy], 0, 1, lambda lvl, ad, ap: 100)
+    (moment, target, dtype, tags), = spy.seen
+    assert (moment, target, dtype) == (DAMAGE_POST, d, 'magical') and {UNIT, ON_SPELL} <= tags and IS_ATTACK not in tags
+    spy.seen.clear()
+    c.doAttack(Attack(opponents=[d]), [spy], 0)
+    assert [s[0] for s in spy.seen] == [ONHIT_PRE, DAMAGE_POST]
+    assert all(s[1] is d and {UNIT, IS_ATTACK, ON_HIT} <= s[3] for s in spy.seen)
 
 
 def test_crit_effects_fire_from_the_first_crit():

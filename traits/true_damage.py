@@ -1,5 +1,6 @@
 """The TrueDamage trait."""
 from registry import register
+from events import DAMAGE_POST, TRAIT, UNIT, damage_tags
 from traits.base import BuildTrait
 
 
@@ -19,8 +20,7 @@ class TrueDamage(BuildTrait):
     display_name = "True Damage"
     levels = [0, 3, 5]  # A-Side units on the board
 
-    def __init__(self, level=0, params=0):
-        super().__init__(level, params, phases=["PostOnDealDamage"])
+    LISTENS = {DAMAGE_POST: frozenset((UNIT,))}  # the unit's own damage, after it lands
 
     def applyStats(self, champion):
         if getattr(champion, "trait_tiers", None) is None:
@@ -30,9 +30,9 @@ class TrueDamage(BuildTrait):
 
     def performAbility(self, phase, time, champion, input_=0):
         if (champion.trait_tier(self.KEY) == 0 or self.KEY not in (champion.data.d.get("trait_keys") or [])
-                or not input_ or not input_[0]):
+                or not input_.amount):
             return input_
-        bonus = champion.trait_value(self.KEY, "SideB_BonusTDPercent") * input_[0]
-        # items=[]: nothing reacts to the bonus itself (and it doesn't trigger itself)
-        champion.doDamage(champion.lastDamagedOpponent, [], 0, bonus, bonus, "true", time)
+        bonus = champion.trait_value(self.KEY, "SideB_BonusTDPercent") * input_.amount
+        # tagged as the trait's, not the unit's: nothing reacts to the bonus itself (and it doesn't trigger itself)
+        champion.doDamage(input_.target, champion.items, 0, bonus, bonus, "true", time, tags=damage_tags("true", TRAIT))
         return input_

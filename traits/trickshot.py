@@ -2,6 +2,7 @@
 from registry import register
 from stats import Attack
 from timing import TPS, projectile_ticks
+from events import ONHIT_PRE
 from traits.base import BuildTrait
 
 
@@ -27,11 +28,10 @@ class Trickshot(BuildTrait):
     KEY = "DA_Trickshot19"
     display_name = "Trickshot"
 
-    def __init__(self, level=0, params=0):
-        super().__init__(level, params, phases=["onAttack"])
+    LISTENS = {ONHIT_PRE: frozenset()}  # the attack's own hit (ricochets apply no on-hit effects)
 
     def performAbility(self, phase, time, champion, input_=0):
-        opponents = input_
+        opponents = champion.opponents
         if self.KEY not in (champion.data.d.get("trait_keys") or []) or champion.trait_tier(self.KEY) == 0:
             return input_
         n = int(champion.trait_value(self.KEY, "NumRichochets"))

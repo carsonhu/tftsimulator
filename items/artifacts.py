@@ -1,6 +1,7 @@
 """Artifacts (ledger I10). Damage an artifact deals on its own is not boosted, can't crit and triggers no item."""
 from registry import register
 from timing import TPS, ticks_up
+from events import ITEM, LAUNCH, ONHIT_AFTER, ONHIT_PRE, damage_tags
 from items.base import BuildItem, item_name
 
 
@@ -82,9 +83,10 @@ class SilvermereDawn(BuildItem):
 
 def item_damage(champion, target, amount, dtype):
     """Damage an item deals on its own (I10): not boosted by damage amp (owner, 2026-11-17, as burn), can't crit, and
-    answered by no item (items=[]): the holder's other items don't react to it."""
+    tagged Damage.Source.Item, so no effect that waits for the unit's damage hears it."""
     if amount > 0 and target is not None:
-        champion.doDamage(target, [], 0, amount, amount, dtype, champion.tick / TPS)
+        champion.doDamage(target, champion.items, 0, amount, amount, dtype, champion.tick / TPS,
+                          tags=damage_tags(dtype, ITEM))
 
 
 def stage_value(item, champion, row):
@@ -103,8 +105,10 @@ class LichBane(BuildItem):
     STATS = ("GE_Artifact_LichBane_Stats",)
     display_name = item_name(KEY)
 
+    LISTENS = {LAUNCH: frozenset(), ONHIT_AFTER: frozenset()}
+
     def __init__(self):
-        super().__init__(phases=["preCombat", "preAbility", "onLaunch", "postAttack"])
+        super().__init__(phases=["preCombat", "preAbility"])
         self.armed = self.launched = False
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -113,11 +117,11 @@ class LichBane(BuildItem):
         elif phase == "preAbility":
             if not self.armed:
                 self.armed, self.launched = True, False
-        elif phase == "onLaunch" and self.armed:
+        elif phase == LAUNCH and self.armed:
             self.launched = True
-        elif phase == "postAttack" and self.armed and (not champion.ranged or self.launched):
+        elif phase == ONHIT_AFTER and self.armed and (not champion.ranged or self.launched):
             self.armed = False
-            item_damage(champion, champion.lastDamagedOpponent, stage_value(self, champion, "ProcDamage"), "magical")
+            item_damage(champion, input_.target, stage_value(self, champion, "ProcDamage"), "magical")
         return input_
 
 
@@ -131,11 +135,10 @@ class WitsEnd(BuildItem):
     STATS = ("GE_Artifact_WitsEnd_Stats",)
     display_name = item_name(KEY)
 
-    def __init__(self):
-        super().__init__(phases=["postAttack"])
+    LISTENS = {ONHIT_AFTER: frozenset()}
 
     def performAbility(self, phase, time, champion, input_=0):
-        item_damage(champion, champion.lastDamagedOpponent, stage_value(self, champion, "OnHitDamage"), "magical")
+        item_damage(champion, input_.target, stage_value(self, champion, "OnHitDamage"), "magical")
         return input_
 
 
@@ -151,14 +154,16 @@ class StatikkShiv(BuildItem):
     display_name = item_name(KEY)
     EVERY = 3  # script literal (0x16f4)
 
+    LISTENS = {LAUNCH: frozenset()}
+
     def __init__(self):
-        super().__init__(phases=["preCombat", "onLaunch"])
+        super().__init__(phases=["preCombat"])
         self.count = 0
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             self.count = 0
-        elif phase == "onLaunch":
+        elif phase == LAUNCH:
             self.count += 1
             if self.count % self.EVERY == 0 and champion.opponents:
                 n = int(self.row(champion, "NumTargets"))
@@ -182,13 +187,13 @@ class TitanicHydra(BuildItem):
     display_name = item_name(KEY)
     TARGETS = 2  # the target and the next dummy, 1 hex away (B12)
 
-    def __init__(self):
-        super().__init__(phases=["onAttack"])
+    LISTENS = {ONHIT_PRE: frozenset()}
 
     def performAbility(self, phase, time, champion, input_=0):
         amount = (champion.hp.stat * self.row(champion, "PercentHealthBonusDamage")
                   + champion.atk.stat * champion.bonus_ad.stat * self.row(champion, "PercentADBonusDamage"))
-        for target in (input_ or champion.opponents)[:self.TARGETS]:
+        others = [o for o in champion.opponents if o is not input_.target]
+        for target in ([input_.target] + others)[:self.TARGETS]:
             item_damage(champion, target, amount, "physical")
         return input_
 
@@ -203,12 +208,10 @@ class HellfireHatchet(BuildItem):
     SKIP = (("AttackSpeed", "MultiplyAdditive", "custom"),)
     display_name = item_name(KEY)
 
-    def __init__(self):
-        super().__init__(phases=["postAttack"])
+    LISTENS = {ONHIT_AFTER: frozenset()}
 
     def performAbility(self, phase, time, champion, input_=0):
-        item_damage(champion, champion.lastDamagedOpponent,
-                    champion.hp.stat * self.row(champion, "PercentHPDamage"), "physical")
+        item_damage(champion, input_.target, champion.hp.stat * self.row(champion, "PercentHPDamage"), "physical")
         return input_
 
 
@@ -222,14 +225,16 @@ class Flickerblades(BuildItem):
     STATS = ("GE_Artifact_NavoriFlickerblade_Stats",)
     display_name = item_name(KEY)
 
+    LISTENS = {LAUNCH: frozenset()}
+
     def __init__(self):
-        super().__init__(phases=["preCombat", "onLaunch"])
+        super().__init__(phases=["preCombat"])
         self.count = 0
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             self.count = 0
-        elif phase == "onLaunch":
+        elif phase == LAUNCH:
             champion.aspd.modify("MultiplyAdditive", self.row(champion, "StackingAttackSpeed"))
             self.count += 1
             every = self.row(champion, self.ga_param(champion, "GA_Artifact_NavoriFlickerblade", "AttacksPerADAPBuff_CT"))

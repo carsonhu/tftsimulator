@@ -15,6 +15,9 @@ class Buff(Item):
     def performAbility(self, phase, time, champion, input_=0):
         raise NotImplementedError("Please Implement this method")
 
+    def hears(self, moment, event):
+        return self.level != 0 and super().hears(moment, event)  # an inactive trait hears nothing
+
     def ability(self, phase, time, champion, input_=0):
         if self.level == 0:
             return input_

@@ -111,10 +111,13 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
 - Items: `set19items.BuildItem` subclasses with `KEY` and `STATS` (the effects reviewed as the item's unconditional
   stats, `docs/ITEMS.md`); stats and tags are applied at combat start from the champion's build (ledger I1-I3), and
   anything the layer can't apply exactly raises. A scripted item is registered only once its script is implemented.
-- Items/buffs: behaviour in `performAbility(phase, time, champion, input_)` for the phases listed in `phases`
-  (`preCombat`, `onUpdate`, `onLaunch` (attack release and simulated attacks, G11), `preAttack`, `onAttack`,
-  `postAttack`, `onCrit`, `preAbility`, `postAbility`,
-  `onDealDamage`, ...). A trait's parameter (`extraParameters`) is a number, a named choice (`Options`) or tick
+- Items/buffs: lifecycle behaviour in `performAbility(phase, time, champion, input_)` for the phases listed in
+  `phases` (`prePreCombat`, `preCombat`, `postPreCombat`, `onUpdate`, `preAbility`, `postAbility`). Combat events
+  (`events.py`: `LAUNCH` (attack release and simulated attacks, G11), `ONHIT_PRE`, `CRIT`, `DAMAGE_POST`,
+  `ONHIT_AFTER`) are heard by declaring `LISTENS = {moment: tags}`, the tags the script waits for (e.g.
+  `{DAMAGE_POST: {UNIT}}` for WaitForDealDamage(Damage.Source.Unit)); the handler gets a `CombatEvent` (source,
+  target, amount, type, tags) as `input_`. Damage an item or debuff deals itself is tagged `Damage.Source.Item`.
+  Timed effects on a unit are `effects.ActiveEffect`s (`apply_effect`, whole-tick ends, T14). A trait's parameter (`extraParameters`) is a number, a named choice (`Options`) or tick
   boxes (`Flags`: bit i is Flags[i]; `TeamFlags` limits the Team Traits panel to the leading ones; Heartsteel).
   Stats are `stats.Attribute`s in game units, changed only with modifiers: `champion.aspd.modify("MultiplyAdditive",
   1.1)`, `champion.ap.modify("+", 0.2)`, keyed when the effect is later removed or re-sized. AD and AP are

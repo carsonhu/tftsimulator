@@ -4,6 +4,7 @@ from buildstore import BuildDataError
 from registry import register
 from items.base import BuildItem, StackingItem, item_name
 from effects import ActiveEffect, apply_effect, last_tick
+from events import CRIT, IS_ATTACK, LAUNCH
 from items.debuffs import BurnItem, DebuffItem, debuff_value
 
 
@@ -108,14 +109,16 @@ class TitansResolve(BuildItem):
     STATS = ("GE_TitansResolve_Stats",)
     display_name = item_name(KEY)
 
+    LISTENS = {LAUNCH: frozenset()}  # Combat.Event.LaunchAttack, not exact: simulated attacks count
+
     def __init__(self):
-        super().__init__(phases=["preCombat", "onLaunch"])
+        super().__init__(phases=["preCombat"])
         self.stacks = 0
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             self.stacks = 0
-        elif phase == "onLaunch" and self.stacks < self.row(champion, "MaxStacks"):
+        elif phase == LAUNCH and self.stacks < self.row(champion, "MaxStacks"):
             self.stacks += 1
             for attr in ("AttackDamage", "AbilityPower"):
                 coef, scale = self.script_modifier(
@@ -286,14 +289,16 @@ class KrakensFury(BuildItem):
     STATS = ("GE_KrakensFury_Stats",)
     display_name = item_name(KEY)
 
+    LISTENS = {LAUNCH: frozenset()}
+
     def __init__(self):
-        super().__init__(phases=["preCombat", "onLaunch"])
+        super().__init__(phases=["preCombat"])
         self.stacks = 0
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             self.stacks = 0
-        elif phase == "onLaunch" and self.stacks < self.row(champion, "MaxStacks"):
+        elif phase == LAUNCH and self.stacks < self.row(champion, "MaxStacks"):
             self.stacks += 1
             stack2, _ = self.script_modifier(champion, self.ga_param(champion, "GA_KrakensFury", "ItemStackGE"), "Stack2", "+")
             coef, scale = self.script_modifier(champion, "GE_KrakensFury_StackingAD", "AttackDamage", "+")
@@ -310,17 +315,16 @@ class NashorsTooth(BuildItem):
     """Stats GE_NashorsTooth_Stats (10% AS, 15% AP, 150 HP, 20% crit, ManaPerAttack 2: paid with the role's attack
     mana, I3). Script GA_NashorsTooth: every damage the holder deals with Damage.Result.WasCrit and
     Damage.Specifiers.AppliesOnHit.IsAttack (a critical attack) applies UpgradeHandler = GE_NashorsTooth_Mana
-    (+ManaPerAttack_BonusOnCrit 2, BankIfOverflow) when it lands. The engine averages crits: its onCrit phase fires
-    each time the accumulated crit chance passes 1 (I6)."""
+    (+ManaPerAttack_BonusOnCrit 2, BankIfOverflow) when it lands. The engine averages crits: CRIT fires each time
+    the accumulated crit chance passes 1 (I6)."""
     KEY = "DA_NashorsTooth"
     STATS = ("GE_NashorsTooth_Stats",)
     display_name = item_name(KEY)
 
-    def __init__(self):
-        super().__init__(phases=["onCrit"])
+    LISTENS = {CRIT: frozenset((IS_ATTACK,))}  # WasCrit + Damage.Specifiers.AppliesOnHit.IsAttack
 
     def performAbility(self, phase, time, champion, input_=0):
-        if phase == "onCrit" and not input_:  # input_: is it spell damage
+        if phase == CRIT:
             champion.addMana(self.script_mana(champion, self.ga_param(champion, "GA_NashorsTooth", "UpgradeHandler")))
         return input_
 
@@ -331,19 +335,21 @@ class StrikersFlail(BuildItem):
     the holder deals with Damage.Result.WasCrit (attacks and spells) applies BuffGE = GE_StrikersFlail_Buff
     (OutgoingDamageMultiplier + DABuff 5%, BuffDuration 5 s) after it (PostApply). The buff's
     TFTStackGameplayEffectInstancesEffectComponent keeps separate instances up to MaxStacks (4); the simulator renews
-    the oldest when a 5th lands (set18's rule; I6). The engine averages crits (onCrit, I6)."""
+    the oldest when a 5th lands (set18's rule; I6). The engine averages crits (CRIT, I6)."""
     KEY = "DA_StrikersFlail"
     STATS = ("GE_StrikersFlail_Stats",)
     display_name = item_name(KEY)
 
+    LISTENS = {CRIT: frozenset()}  # WasCrit, attacks and spells
+
     def __init__(self):
-        super().__init__(phases=["preCombat", "onCrit"])
+        super().__init__(phases=["preCombat"])
         self.slot = 0
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             self.slot = 0
-        elif phase == "onCrit":
+        elif phase == CRIT:
             amp, scale = self.script_modifier(champion, self.ga_param(champion, "GA_StrikersFlail", "BuffGE"),
                                               "OutgoingDamageMultiplier", "+")
             if scale is not None:

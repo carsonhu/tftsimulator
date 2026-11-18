@@ -163,6 +163,17 @@ its script.
 **Keep:** crits stay averaged (expected damage per hit), with on-crit triggers firing each time the accumulated
 crit chance passes 1 (ledger I6). Move that counter into the event system so every on-crit listener shares it.
 
+**Done (2026-11-17).** Timed effects: `effects.ActiveEffect` (2c153c1), then whole-tick ends (22ed0f9, the one
+step that moved numbers, owner-approved, T14); the snapshot's effect records gained `stacking` and `components`.
+Damage events: `events.CombatEvent` with the game's tags and five moments (`LAUNCH`, `ONHIT_PRE`, `CRIT`,
+`DAMAGE_POST`, `ONHIT_AFTER`), each fired exactly where its old phase fired, so the tables are identical (not a bit
+different). Items and traits declare `LISTENS`; the damage phase strings (`onLaunch`, `onAttack`, `postAttack`,
+`onCrit`, `PostOnDealDamage`), the unused `preAttack` / `onDealDamage` and `numAttacks`, the `items=[]` convention
+and `lastDamagedOpponent` are gone. Lifecycle phases (`preCombat`, `onUpdate`, `preAbility`, ...) stay as phases:
+they are not damage. The crit counter stays in `doDamage` and fires `CRIT` for every listener alike (I6). Not done:
+merging `ONHIT_AFTER` into `DAMAGE_POST` (Wit's End and the like are PostApply listeners in their scripts) would
+move them before the attack's mana and among the debuff listeners; it is left until a clip shows the order matters.
+
 **Done when:** `status.py` is gone or holds only `ActiveEffect`; the phase strings are gone; the tables are
 unchanged.
 
@@ -200,5 +211,5 @@ sliders become layout settings.
 | 1. Delete set18 leftovers | done (2026-11-17) |
 | 2. Split modules, decorator registration | done (2026-11-17) |
 | 3. Game-shaped attributes | done (2026-11-17) |
-| 4. Timed effects and damage events | timed effects done (2026-11-17: `effects.ActiveEffect`, whole-tick ends, T14); damage events not started |
+| 4. Timed effects and damage events | done (2026-11-17) |
 | 5. Dummy layout | not started |

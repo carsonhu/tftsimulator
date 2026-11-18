@@ -2,6 +2,9 @@ from stats import FastDeepCopy
 
 
 class Item(FastDeepCopy):
+    # combat events this item reacts to: moment -> the tags an event must carry (events.py)
+    LISTENS = {}
+
     def __init__(self, name, phases=None):
         self.name = name
         self.phases = phases
@@ -15,6 +18,14 @@ class Item(FastDeepCopy):
 
     def performAbility(self, phases, time, champion, input_=0):
         raise NotImplementedError("Please Implement this method for {}".format(self.name))       
+
+    def hears(self, moment, event):
+        wants = self.LISTENS.get(moment)
+        return wants is not None and wants <= event.tags
+
+    def on_event(self, moment, event, champion):
+        """A combat event this item listens to; by default handled in performAbility(moment, time, champion, event)."""
+        self.performAbility(moment, event.time, champion, event)
 
     def ability(self, phase, time, champion, input_=0):
         if self.phases and phase in self.phases:

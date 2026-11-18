@@ -5,12 +5,22 @@ import pytest
 
 import set19items
 from buildstore import Build, BuildDataError, load_build
+from events import CRIT, IS_ATTACK, ON_HIT, ON_SPELL, UNIT, CombatEvent, damage_tags
 from set19champs import Neeko
 from simulator import Simulator
 from test_timing import dummy
 
 V = 'rls-19.1.0.5973071.Set19.Shipping.pbe'
 
+
+
+def attack_crit(c):
+    """The CRIT event of an attack (events.py)."""
+    return CombatEvent(c, tags=damage_tags('physical', UNIT, IS_ATTACK, ON_HIT))
+
+
+def spell_crit(c):
+    return CombatEvent(c, tags=damage_tags('magical', UNIT, ON_SPELL))
 
 def equipped(*items, build=None):
     n = Neeko(1, build=build or load_build(V))
@@ -302,9 +312,9 @@ def test_nashors_tooth_mana_on_attack_crits_only():
     n = equipped(set19items.NashorsTooth())
     nt = next(i for i in [set19items.NashorsTooth()])
     before = n.curMana
-    nt.performAbility('onCrit', 0, n, False)
+    n.emit(CRIT, attack_crit(n), [nt])
     assert n.curMana == pytest.approx(before + 2)
-    nt.performAbility('onCrit', 0, n, True)  # a spell crit gives nothing
+    n.emit(CRIT, spell_crit(n), [nt])  # a spell crit gives nothing (the listener wants IsAttack)
     assert n.curMana == pytest.approx(before + 2)
     assert n.manaPerAttack.stat == equipped().manaPerAttack.stat + 2  # ManaPerAttack 2 with the role's mana (I3)
 
@@ -315,7 +325,7 @@ def test_strikers_flail_four_instances_of_five_percent():
     base = n.dmgMultiplier.stat
     for k in range(5):
         n.tick = 15 * k  # a crit every 0.5 s
-        f.performAbility('onCrit', k * 0.5, n, False)
+        n.emit(CRIT, attack_crit(n), [f])
     assert n.dmgMultiplier.stat == pytest.approx(base + 0.20)  # capped at 4 instances
     from effects import expire_effects
     expire_effects(n, 168)  # 5.6 s, past the 2nd crit's 5 s (0.5 s): the 2nd has worn off; the 5th renewed the 1st
@@ -374,7 +384,7 @@ def test_radiants_use_their_own_numbers():
     k = set19items.NashorsToothRadiant()
     n = equipped(k)
     before = n.curMana
-    k.performAbility('onCrit', 0, n, False)
+    n.emit(CRIT, attack_crit(n), [k])
     assert n.curMana == pytest.approx(before + 2)  # GE_NashorsToothRadiant_Mana
     from set19champs import Draven
     d = Draven(1, build=load_build(V))

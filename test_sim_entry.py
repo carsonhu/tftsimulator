@@ -74,3 +74,16 @@ def test_the_worker_loads_every_module():
         for path in glob.glob(os.path.join(here, pkg, '*.py')):
             assert f'{pkg}/{os.path.basename(path)}' in listed
     assert 'registry.py' in listed
+
+def test_the_worker_loads_every_top_level_module():
+    """Every engine module at the top level is in worker.js's PY_FILES (tests, the local server and pytest's setup
+    are not loaded)."""
+    import glob
+    import os
+    import re
+    here = os.path.dirname(os.path.abspath(__file__))
+    listed = set(re.findall(r'"([\w/]+\.py)"', open(os.path.join(here, 'worker.js'), encoding='utf-8').read()))
+    for path in glob.glob(os.path.join(here, '*.py')):
+        name = os.path.basename(path)
+        if not name.startswith(('test_', 'verify_')) and name not in ('conftest.py', 'serve.py', '__init__.py'):
+            assert name in listed, name
