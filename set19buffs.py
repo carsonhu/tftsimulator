@@ -19,6 +19,8 @@ from traits.pentakill import *  # noqa: F401,F403
 from traits.composer import *  # noqa: F401,F403
 from traits.renegade import *  # noqa: F401,F403
 from traits.classical import *  # noqa: F401,F403
+from traits.slayer import *  # noqa: F401,F403
+from traits.choreographer import *  # noqa: F401,F403
 from registry import REGISTRIES
 
 class_buffs = REGISTRIES["trait"]  # traits

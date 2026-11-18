@@ -56,8 +56,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Viego`, D1); panel and the cast's rhythm checked against
+  VOD5; Slayer's attack speed against VOD5's second fight
+- Keep in the simulator: **yes**
 
 ## Questions
 
@@ -66,29 +67,45 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackFighter | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed with his items (1★, 2★) | E1, E3 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackFighter | confirmed: 10 per attack, no role regen (Blue Buff's 6/s) | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.3 s (9 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | none | not applicable? | |
-| Q7 | Cast time: cast start to the next attack starting | 1.8667 s (56 ticks) | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | 1.8667 s (56 ticks) | confirmed: the next attack's mana 65 ticks after the cast (56 + 9-tick windup), engine 65 | E2 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.8333 s (55 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.8333 s (55 ticks) | consistent: mana shown again 55 ticks after the cast | E2 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | predicted: one GE_SimulateLaunchAttack per cast, at FireSwords | D1 |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted (script read, D1): both coefficients scale **AP** in the client data; no damage number read yet | D1 |
+| Q14 | Passives and other mechanics that need modelling | see ability text | takedown swords: not modelled (dummies never die); Pentakill (B25), Slayer (B29), Choreographer (B30) implemented | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+Source for all rows below: VOD5 (`…PBE_11-18-2026_0-57-11-500.mp4`, session folder 0-33-59-673, 60 fps), the owner's
+PBE recording in the score mode, build `rls-19.1.0.5973071`. First fight: Viego 1★, round 1-7, combat start f24670 (Blue
+Buff's +10). Ticks count from combat start.
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-18 | rls-19.1.0.5973071 | VOD5 6:51 (f24660) | 60 | inspection panel | 850/850, 0/40, 6/s; AD 69, AP 15%, AS 0.96, crit 45%, armor 70, MR 90; Quicksilver, Blue Buff; Bodyguard (2) from the board; Pentakill, Choreographer, Slayer 1 each (inactive) | 0.8 x (1.05 Fighter stage 1 + 0.15), 60 x 1.15 AD: as built | Q1 |
+| E2 | 2026-11-18 | rls-19.1.0.5973071 | VOD5 f24670-25021 (`tools/vod_text_changes.py`, mana) | 60 | mana text | 10 (combat start), regen +1.5 at 3, 11, 18, 26, 33, 41, 48 (the first step 3 ticks in: G17), +10 at 20 and 52 (fills: cast); 2 at 108; +10 at 118, 147.5, ~175.5 (fills) | engine (Quicksilver, Blue Buff): the next attack 65 ticks after the cast (clip 65), then 29, 28 (clip 29.5, 28); mana lock 55 as built. His first attack came 11 ticks after the engine's (a walk) | Q2, Q7, Q9 |
+| E3 | 2026-11-18 | rls-19.1.0.5973071 | VOD5 9:16 (f33360) | 60 | inspection panel, round 2-1 | 2★, no items, 504/1530 HP; AD 104, AS 1.11, omnivamp 13%; Pentakill (3), Slayer (2), Bodyguard (2) active | Slayer: 0.8 x (1.05 + 0.2 x (1 + 1026/1530)) = 1.107 AS, 8% x 1.67 = 13% omnivamp: the missing-Health scaling as the trait text says (B29) | Q14 |
 
 ## Decisions and notes
+
+- 2026-11-18, D1 (implemented, `set19champs.Viego`):
+  - **Spell (GA_Viego19_Spell):** mana lock; 10 swords (+ takedown swords: GenericCalc2, 0 against dummies) spawn
+    around his target over 0.75 s; at FireSwords (1.0579 s) each flies into the target (CD_Viego19_SwordCollapse_Mis,
+    a fixed-time projectile, taken as 0.25 s: G21) and deals GE_Viego19_SwordDamage; then one GE_SimulateLaunchAttack.
+    Unlock (1.832 s) ends the cast (build: 55 / 56 ticks).
+  - **Damage:** PhysicalDamageCalc1 in DA_Viego19's CalcComponent = DamagePerSwordAD x AbilityPower + DamagePerSwordAP x
+    AbilityPower: both terms capture AP (the row name says AD; the tooltip shows AP twice). Followed as data, flagged
+    for the owner (docs/OPEN-QUESTIONS.md). Physical, on-spell, crit only with Precision.
 

@@ -126,6 +126,14 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Arrow damage | 3 x 33/50/75 x AD per flurry, on-hit at 0.6 | damage numbers of a flurry on a target of known armor | champions/Ashe.md D1, I11 |
 | Play-rate threshold for the other 15 units (G20) | G2 (no shortening) for every unit but Ashe | a Draven, Malzahar or Ziggs attack at AS above ~1.1 | G20 |
 
+### 7i. Viego again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Sword damage scales AP only? | (36 + 3) x AP per sword at 1 star (the client's CalcComponent captures AbilityPower for both terms) | damage numbers of a cast by a Viego with AD items (e.g. Deathblade) and no AP | champions/Viego.md D1 |
+| Sword travel | 0.25 s after FireSwords (fixed-time projectile, G21) | the frame of the swords' damage numbers | G21 |
+| Choreographer row | 'By range': melee in the front (shield, no amp) | (owner) is that the default you want? | B30 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

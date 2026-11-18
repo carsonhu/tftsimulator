@@ -929,8 +929,49 @@ class Ashe(BuildChampion):
         self.emit(ONHIT_AFTER, CombatEvent(self, target, tags=tags, time=now, effectiveness=eff), items)
 
 
+class Viego(BuildChampion):
+    """Singled Out (champions/Viego.md, D1). Script: GA_Viego19_Spell (build ga_scripts.zip).
+
+    The cast commits, applies the mana lock (0xf8c) and reads the swords: NumBaseSwords (10) + GenericCalc2 (bonus
+    swords from takedowns, GA_Viego19_SwordStacking: dummies never die, 0). It plays CD_Viego19_SpellCast and spawns the
+    swords around his target over 0.75 s (visual). At 'FireSwords' (1.0579 s, 0x19e3 -> 0x1917) every sword plays
+    CD_Viego19_SwordCollapse_Mis from its place to the target; the 'ViegoSwordCollapse' projectile is a
+    TFTFixedTimeMovement with no time of its own, assumed to arrive at the module's end, the chrono's length 0.25 s
+    (G21); on arrival GE_Viego19_SwordDamage = PhysicalDamageCalc1, physical, AppliesOnSpell, crit only with Precision.
+    The CalcComponent builds PhysicalDamageCalc1 from DamagePerSwordAD x **AbilityPower** + DamagePerSwordAP x
+    AbilityPower (both terms capture AbilityPower, as the tooltip shows; followed as data, D1). After starting the
+    swords (0xede) one GE_SimulateLaunchAttack. 'Unlock' (1.832 s) removes the mana lock and finishes the cast (the
+    build: 55 / 56 ticks).
+    """
+    KEY = 'DA_Viego19'
+    CAST = 'CD_Viego19_SpellCast'
+    COLLAPSE = 'CD_Viego19_SwordCollapse_Mis'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.fire_at = self.chrono_event(self.CAST, 'FireSwords')
+        self.collapse = self.chrono(self.COLLAPSE)['length']  # G21: a fixed-time projectile takes its module's time
+        self.num_swords = int(self.row('NumBaseSwords'))
+        self.notes = ('10 swords hit the target 1.31 s into the cast (the takedown swords are not modelled: dummies '
+                      'never die). Each scales with AP only, as the client data has it.')
+
+    def sword_damage(self, level, AD, AP):
+        # PhysicalDamageCalc1: both coefficients multiply AbilityPower in the CalcComponent (D1)
+        return (self.row('DamagePerSwordAD', star=level) + self.row('DamagePerSwordAP', star=level)) * AP
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        fire = self.tick + ticks_up(self.fire_at)
+        self.schedule_tick(fire, lambda: self.simulateLaunch(self.items))  # 0xede, after the swords start (G11)
+
+        def land():
+            for _ in range(self.num_swords):
+                self.multiTargetSpell([target], self.items, self.tick / TPS, 1, self.sword_damage, 'physical')
+        self.schedule_tick(fire + ticks_up(self.collapse), land)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
-              'OlafHeroAugment', 'Ashe']
+              'OlafHeroAugment', 'Ashe', 'Viego']
 
 
 class TrainingDummy(Champion):
