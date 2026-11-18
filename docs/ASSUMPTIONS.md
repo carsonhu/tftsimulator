@@ -103,6 +103,22 @@ number below is read from the selected build. `champion.sources` lists where eac
 | B10 | Spell effects are timed from the build's chronos: `chrono_event(chrono, event)` for when an effect fires (`ticks_up` from the cast tick), `chrono_projectile_speed(chrono, name)` for its missile (G4). Which event triggers which effect is the champion's script, cited in the class docstring; values are read at construction so a build lacking one fails before the fight. | from data + script | `build_champion.py`; first used by Neeko |
 | B11 | Traits are buffs read from the build (`set19buffs.BuildTrait`, first: `Encore`). The buff's level is the number of trait units on the board, offered at the newest build's breakpoints (Encore 0 / 2 / 4); at combat start it sets `champion.trait_tiers[KEY]` = how many of the **selected** build's thresholds that count reaches. A member's spell reads the trait's rows at that tier (`trait_value(key, row)`). A champion's own implemented traits are preselected in the page's buff bar, off (`default_traits`, from the build's trait list). Tier n = the trait's n-th curve key, as the tier text shows (Encore: 1 → 25% at (2), 2 → 50% at (4)). | from data; tier ↔ curve key predicted | `CT_Encore19`; tests `test_neeko.py` |
 
+## Phase order (2026-11-17)
+
+set18 is the reference for how and when things happen (owner, 2026-11-17: ordering problems are the expected
+failure). Before writing a mechanic, read its set18 equivalent (`../set18/set18items.py`, `set18buffs.py`,
+`set18champs.py`) and use the same phase unless evidence says otherwise; every deviation is listed here with its
+reason. Order within a phase is list order: items, then buffs (traits, augments), then the champion's own
+(`Simulator.simulate`: `items + buffs + champion.items`).
+
+| ID | Phase | What runs there | Status / deviation from set18 |
+|---|---|---|---|
+| O1 | static pass (`Simulator.itemStats`: `addStats` + `Item.applyStats`, before any phase) | every fixed stat: items' build stats and tags (I1, I2), trait tiers (B11), the role's effects (B5) | as set18 for item stats (its constructor fields). **Deviation:** set18 applied roles in `preCombat`, last in the list; here they are static, so every phase sees role mana and Fighter AS whatever the order. Additive effects are unchanged by the move; an effect that *overrides* a role value in `preCombat` now wins where in set18 the role came after it. |
+| O2 | `prePreCombat` | flags that other effects read in `preCombat` (set18: Retribution, Embiggen) | as set18. Kept free of stats (they were briefly here; moved to O1 2026-11-17, test `test_items.py::test_phase_order_...`). |
+| O3 | `preCombat` | grants and combat-start effects (e.g. Blue Buff's mana) | as set18 |
+| O4 | `postPreCombat` | effects that need every AD/AP grant landed (set18: conversions, Blossom wisps) | as set18 |
+| O5 | each tick (`Champion.update`) | statuses → mana regen → `onUpdate` items → scheduled events → cast check → attack | as set18's order; timed item effects use `onUpdate` like set18, but on tick thresholds from the script (I4) instead of set18's `time > t`, which fires a tick late. |
+
 ## Items (2026-11-17)
 
 `set19items.BuildItem`: an item names its data asset (`KEY`) and the effects that are its unconditional stats

@@ -62,13 +62,13 @@ class BuildRole:
 
 
 class RoleEffects(Item):
-    """The role's stat effects from the build, applied at combat start (E13, B5):
+    """The role's stat effects from the build, applied in the static-stats pass before any combat phase (E13, B5):
     ManaPerAttack, ManaPerSecond, the ManaMax floor, and attack speed through the role's lookup curve at
     champion.stage (the Fighter's FighterAttackSpeed curve). Other modifiers (movement speed, threat) don't affect
     damage against dummies and are listed in `ignored`."""
 
     def __init__(self, role_entry):
-        super().__init__(name='Role', phases=['preCombat'])
+        super().__init__(name='Role', phases=None)
         self.role_key = role_entry.key
         self.mods = [m for e in role_entry.d.get('effects') or [] if e for m in e.get('modifiers') or []]
         self.ignored = []
@@ -80,7 +80,7 @@ class RoleEffects(Item):
             raise BuildDataError(f'role modifier {m["attribute"]} is not a single value: {m["text"]}')
         return vals[0]
 
-    def performAbility(self, phase, time, champion, input_=0):
+    def applyStats(self, champion):
         self.ignored = []
         for m in self.mods:
             a, op = m['attribute'], m['op']
@@ -99,7 +99,6 @@ class RoleEffects(Item):
                 champion.aspd.addStat((v - 1) * 100)
             else:
                 self.ignored.append(f'{a} {op} {m["text"]}')
-        return 0
 
 
 class BuildChampion(Champion):

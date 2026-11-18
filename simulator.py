@@ -9,8 +9,11 @@ class Simulator(object):
         self.frameTime = 1 / TPS
 
     def itemStats(self, items, champion):
+        # static stats first (fixed fields, then the build's: Item.applyStats), then the phases in order:
+        # prePreCombat is for flags other effects read in preCombat
         for item in items:
             champion.addStats(item)
+            item.applyStats(champion)
         for phase in ("prePreCombat", "preCombat", "postPreCombat"):
             for item in items:
                 item.ability(phase, 0, champion)

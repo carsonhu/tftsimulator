@@ -58,28 +58,30 @@ class BuildTrait(Buff):
     """A Set 19 trait whose numbers come from the selected build.
 
     `level` is how many units with the trait the board fields (0 = inactive), offered at the build's breakpoints.
-    At combat start the trait records the tier those units reach under the champion's own build (B11) in
-    `champion.trait_tiers[KEY]`; a member's spell reads its trait's values at that tier
-    (`BuildChampion.trait_value`). A trait whose effect is entirely inside its members' spells (Encore) does nothing
-    else here.
+    In the static-stats pass (Item.applyStats, before any combat phase) the trait records the tier those units reach
+    under the champion's own build (B11) in `champion.trait_tiers[KEY]`, so every phase can read it; a member's spell
+    reads its trait's values at that tier (`BuildChampion.trait_value`). A trait whose effect is entirely inside its
+    members' spells (Encore) does nothing else.
     """
     KEY = None
     levels = [0]
 
-    def __init__(self, level=0, params=0):
-        super().__init__(self.display_name, level, params, phases=["preCombat"])
+    def __init__(self, level=0, params=0, phases=None):
+        super().__init__(self.display_name, level, params, phases=phases)
 
     @classmethod
     def breakpoints(cls, build=None):
         return (build or load_build()).trait(cls.KEY).thresholds
 
-    def performAbility(self, phase, time, champion, input_=0):
+    def applyStats(self, champion):
         build = getattr(champion, "build", None) or load_build()
         tiers = getattr(champion, "trait_tiers", None)
         if tiers is None:
             tiers = champion.trait_tiers = {}
         tiers[self.KEY] = build.trait(self.KEY).tier_of(self.level)
-        return 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        return input_
 
 
 class Encore(BuildTrait):

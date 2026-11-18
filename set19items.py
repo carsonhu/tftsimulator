@@ -83,26 +83,22 @@ class BuildItem(Item):
 
     STATS names the item's effects that are its unconditional stats, as reviewed in docs/ITEMS.md (an item's other
     effects, such as a conditional buff or one that grants an ability, are its mechanic and are written in the
-    class). At combat start ('prePreCombat') the item reads them from the champion's own build and applies them.
+    class). They are read from the champion's own build and applied in the static-stats pass (Item.applyStats),
+    before any combat phase, so prePreCombat stays free for flags that items read later.
     """
     KEY = None
     STATS = ()
 
     def __init__(self, phases=()):
-        super().__init__(self.display_name, phases=["prePreCombat", *phases])
-
-    def ability(self, phase, time, champion, input_=0):
-        if phase == "prePreCombat":
-            self.apply_stats(champion)
-        return super().ability(phase, time, champion, input_)
+        super().__init__(self.display_name, phases=list(phases) or None)
 
     def performAbility(self, phase, time, champion, input_=0):
-        return input_  # stats only; subclasses with mechanics override this for their other phases
+        return input_  # stats only; subclasses with mechanics override this for their phases
 
     def build_entry(self, champion):
         return (getattr(champion, "build", None) or load_build()).item(self.KEY)
 
-    def apply_stats(self, champion):
+    def applyStats(self, champion):
         mods, tags = item_stats(self.build_entry(champion), self.STATS)
         for attr, op, value, _ in mods:
             STAT_MAP[(attr, op)](champion, value)

@@ -10,7 +10,9 @@ Read `docs/ASSUMPTIONS.md` before changing any game rule, and the champion's wor
 
 - This directory is its own git repo (branch `main`, **no remote yet**). The folders above belong to another,
   messy repo. Commit here, never there.
-- set18 is a separate, live repo (tftsimulator.app). Don't edit it from here and don't import from it.
+- set18 is a separate, live repo (tftsimulator.app). Don't edit it from here and don't import from it, but **use it
+  as the reference for how things are done**, ordering above all: before writing a mechanic, read the set18
+  equivalent and follow its phase unless evidence says otherwise; list every deviation in the ledger (O1-O5).
 - The parent `tft_calculator/` holds old set-5 `champion.py`, `status.py`, `buffs.py`; anything run with a cwd
   outside `set19/` must put `set19/` first on `sys.path`. `conftest.py` / `pytest.ini` handle this for pytest.
 - Files carried over from set18 are CRLF; new files are LF. Keep each file's existing endings (Edit preserves
