@@ -16,7 +16,7 @@
 > 4 of a Kind: Item Component
 > 5 of a Kind: Mystery Box!
 > 
-> Active: The next 5 attacks gain 1 Attack Speed and are replaced with cards that deal 100/150/2000 × AP magic damage to the target and 30/45/1000 × AP magic damage to 2 nearby enemies.
+> Active: The next 5 attacks gain 100% Attack Speed and are replaced with cards that deal 100/150/2000 × AP magic damage to the target and 30/45/1000 × AP magic damage to 2 nearby enemies.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|

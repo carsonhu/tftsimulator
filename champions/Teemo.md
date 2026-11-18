@@ -12,7 +12,7 @@
 
 > Passive: Attacks apply Viral, dealing 110/165/1337 × AP magic damage over 15 seconds. Infected enemies become zombies on death, seeking out unaffected enemies and exploding, dealing 70/105/800 × AP damage to adjacent enemies and applying Viral.
 > 
-> Active: Launch a mushroom that applies Viral to enemies in a 3 hex radius and deals 530/800/13337 × AP magic damage, reduced by 0.2 per hex away from the center.
+> Active: Launch a mushroom that applies Viral to enemies in a 3 hex radius and deals 530/800/13337 × AP magic damage, reduced by 20% per hex away from the center.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|

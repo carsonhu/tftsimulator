@@ -3,16 +3,16 @@
 <!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
 ## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
 
-- **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive ⟨computed in game: TFTStageMagnitude⟩ → FighterAttackSpeed curve; MovementSpeed + 200; ManaMax at least 10)
+- **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: K/DA, Renegade
 - **HP** 850 / 1530 / 2754 · **AD** 30 / 45 / 67.5 · **AS** 0.8 · **Range** 1 · **Armor** 50 · **MR** 50 · **Mana** 0 / 40
 - **Unlock**: 3 unique K/DA or Renegade Champions.
 
 ### Ability: Villainous
 
-> Passive: At combat start, teleport behind the current target, then become enshrouded for 15 seconds. While enshrouded, become untargetable to attacks and gain 0.5 Durability if at least 3 other allies are alive.
+> Passive: At combat start, teleport behind the current target, then become enshrouded for 15 seconds. While enshrouded, become untargetable to attacks and gain 50% Durability if at least 3 other allies are alive.
 > 
-> Active: Deal 280/420/700 × AP magic damage to the current target and 120/180/300 × AP magic damage to other enemies in a semi-circle. Ignore 0.4 of enemy Magic Resist.
+> Active: Deal 280/420/700 × AP magic damage to the current target and 120/180/300 × AP magic damage to other enemies in a semi-circle. Ignore 40% of enemy Magic Resist.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|

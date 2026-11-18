@@ -3,7 +3,7 @@
 <!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
 ## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
 
-- **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive ⟨computed in game: TFTStageMagnitude⟩ → FighterAttackSpeed curve; MovementSpeed + 200; ManaMax at least 10)
+- **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Heartsteel, Slayer
 - **HP** 1150 / 2070 / 3726 · **AD** 55 / 82 / 123 · **AS** 0.85 · **Range** 1 · **Armor** 70 · **MR** 70 · **Mana** 0 / 50
 
@@ -13,7 +13,7 @@
 > 
 > Active: Rapidly strike the target and up to 2 nearby enemies 10/10/30 times, each dealing 35/55/400 × AD physical damage. After the assault, unleash a massive slash that deals 175/265/1500 × AD physical damage to target.
 > 
-> Heartsteel Upgrade: Casts strike 2 more times and ignore 0.250.25 of Armor.
+> Heartsteel Upgrade: Casts strike 2 more times and ignore 25%25% of Armor.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|

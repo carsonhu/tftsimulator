@@ -12,7 +12,7 @@
 
 > Passive: Gain a Chakram every 4 attacks, up to 15. Attacks deal 7/10/200 × AD bonus physical damage for every Chakram equipped. After collecting 15, gain 30%/30%/500% Attack Damage and infinite range.
 > 
-> Active: Fire bolts at the 3 nearest enemies that deal 280/420/3000 × AD + 60/90/300 × AP physical damage, then split into 16 bolts that deal 0.15/0.15/1 × PhysicalDamageCalc1 physical damage to enemies they pass through. Gain 0.75 Attack Speed for 4 seconds.
+> Active: Fire bolts at the 3 nearest enemies that deal 280/420/3000 × AD + 60/90/300 × AP physical damage, then split into 16 bolts that deal 0.15/0.15/1 × PhysicalDamageCalc1 physical damage to enemies they pass through. Gain 75% Attack Speed for 4 seconds.
 > 
 > Heartsteel Upgrade: Start combat with 5 Chakrams equipped.
 

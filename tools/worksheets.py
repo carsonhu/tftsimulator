@@ -47,8 +47,11 @@ def is_tank(role):
 
 
 def sheet_name(key):
-    """DA_Ahri19 -> Ahri, DA_Akali_TrueDamage19 -> Akali_TrueDamage, DA_19_Foo -> Foo."""
+    """DA_Ahri19 -> Ahri, DA_Akali_TrueDamage19 -> Akali_TrueDamage, DA_19_Foo -> Foo,
+    DA_Olaf19_HeroAugment_Override -> Olaf_HeroAugment."""
     n = key.removeprefix('DA_')
+    if 'HeroAugment' in n:
+        return n.split('19', 1)[0] + '_HeroAugment'
     n = re.sub(r'^19_', '', n)
     return re.sub(r'19$', '', n)
 
@@ -298,7 +301,7 @@ def main():
     os.makedirs(SHEETS, exist_ok=True)
     made = updated = 0
     removed = {u['key'] for u in roster['removed']}
-    for u in roster['in_scope']:
+    for u in roster['in_scope'] + roster.get('hero_augments', []):
         if u['key'] in removed or not b.has_champion(u['key']):
             continue
         c = b.champion(u['key'])
@@ -316,7 +319,8 @@ def main():
                 open(path, 'w', encoding='utf-8', newline='\n').write(new)
                 updated += 1
         else:
-            head = f'# {c.name} ({c.d["cost"]}-cost {c.d["role"]}) · `{c.key}`\n\n'
+            head = (f'# {c.name} with the hero augment {u["augment"]} ({c.d["role"]}) · `{c.key}`\n\n' if u.get('augment')
+                    else f'# {c.name} ({c.d["cost"]}-cost {c.d["role"]}) · `{c.key}`\n\n')
             open(path, 'w', encoding='utf-8', newline='\n').write(head + block + '\n' + fill_human(c))
             made += 1
     print(f'build {b.version}: {made} worksheets created, {updated} updated')

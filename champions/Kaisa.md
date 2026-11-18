@@ -9,9 +9,9 @@
 
 ### Ability: Make it Rain
 
-> Passive: Every 3 attacks, fire 3 missiles that deal ⟨⟩AP physical damage. 
+> Passive: Every 3 attacks, fire 3 missiles that deal 36/54/85 × AD + 6/9/15 × AP physical damage. 
 > 
-> Active: Gain 0.15 Attack Speed for the rest of combat.
+> Active: Gain 15% Attack Speed for the rest of combat.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|

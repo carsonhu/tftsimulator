@@ -103,7 +103,8 @@ def get_catalog():
         levels = [1, 2, 3]
         if getattr(cls, "canFourStar", False):
             levels.append(4)
-        champions.append({"name": name, "levels": levels})
+        # label: what the page shows (a hero augment unit is "Olaf (Axe Crescendo)"); name: the class
+        champions.append({"name": name, "label": getattr(cls, "display_name", name), "levels": levels})
 
     def item_group(class_names):
         # item_display_map returns {display: cls} in the order given, and that

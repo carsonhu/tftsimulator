@@ -236,7 +236,7 @@ function buildStaticControls() {
   });
 
   const champSel = $("champ");
-  for (const c of cat.champions) champSel.add(new Option(c.name, c.name));
+  for (const c of cat.champions) champSel.add(new Option(c.label || c.name, c.name));
   champSel.onchange = () => selectChampion(champSel.value, { keepLevel: false });
   makeSearchable(champSel);
 

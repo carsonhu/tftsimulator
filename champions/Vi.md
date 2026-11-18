@@ -3,7 +3,7 @@
 <!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
 ## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
 
-- **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive ⟨computed in game: TFTStageMagnitude⟩ → FighterAttackSpeed curve; MovementSpeed + 200; ManaMax at least 10)
+- **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: EDM, Juggernaut
 - **HP** 1200 / 2160 / 3888 · **AD** 80 / 120 / 180 · **AS** 0.9 · **Range** 1 · **Armor** 65 · **MR** 65 · **Mana** 0 / 50
 
@@ -11,7 +11,7 @@
 
 > Summon 2 giant hologram fists. Gain 300/400/500 × AP Shield for 2 seconds and grant 125/165/215 × AP Shield to 2/2/10 nearby allies. Slam the target 5/5/40 times, each dealing 130/200/1000 × AD physical damage to them and 35/55/400 × AD damage to all other enemies within 2 hexes.
 > 
-> EDM Upgrade: Slam one more time and heal 0.15 of damage dealt by this ability.
+> EDM Upgrade: Slam one more time and heal 15% of damage dealt by this ability.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|

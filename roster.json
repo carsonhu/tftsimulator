@@ -569,5 +569,17 @@
    "role": "MagicTank"
   }
  ],
- "removed": []
+ "removed": [],
+ "hero_augments_rule": "Hero augment units (the augment's DA_<Name>19_HeroAugment[_]Override unit) are separate champions in the simulator (owner, 2026-11-18). Every Set 19 hero augment turns a tank into a non-tank, so the base unit stays excluded. Listed here when added.",
+ "hero_augments": [
+  {
+   "key": "DA_Olaf19_HeroAugment_Override",
+   "name": "Olaf",
+   "augment": "Axe Crescendo",
+   "augment_key": "DA_Olaf19_HeroAugment",
+   "cost": 1,
+   "role": "AttackMarksman",
+   "added": "2026-11-18"
+  }
+ ]
 }

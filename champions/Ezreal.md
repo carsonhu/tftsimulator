@@ -11,7 +11,7 @@
 
 > Fire a missile that marks the target, then fire a second blast that detonates it. The explosion deals 190/285/430 × AD + 30/45/70 × AP physical damage to the target and 0.33 × PhysicalDamageCalc1 physical damage to enemies within 1 hex.
 > 
-> Heartsteel Upgrade: Detonation deals 0.25 more damage. Every 3rd cast hits enemies in a 2 hex radius instead.
+> Heartsteel Upgrade: Detonation deals 25% more damage. Every 3rd cast hits enemies in a 2 hex radius instead.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|

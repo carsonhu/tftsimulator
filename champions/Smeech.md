@@ -16,7 +16,7 @@
 > 
 > After unleashing 15 Beats, gain an emblem of a trait you don't have active and increase the number of Beats required.
 > 
-> (Unleashed Beats: ⟨⟩/⟨⟩)
+> (Unleashed Beats: ⟨live⟩/15)
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|

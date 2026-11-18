@@ -9,7 +9,7 @@
 
 ### Ability: Lasers After Midnight
 
-> Quickly dash around the arena, aiming 6 lasers at the current target. Lasers fire in rapid succession, each dealing 30/45/500 × AP + 135/205/1000 × AD physical damage to enemies hit and ignoring 0.4 of their Armor.
+> Quickly dash around the arena, aiming 6 lasers at the current target. Lasers fire in rapid succession, each dealing 30/45/500 × AP + 135/205/1000 × AD physical damage to enemies hit and ignoring 40% of their Armor.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|

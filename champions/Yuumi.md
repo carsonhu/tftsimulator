@@ -11,7 +11,7 @@
 
 > Throw a spinning disc that deals 175/265/1400 × AP magic damage and stacks on the target's head, reducing their Magic Resist by 1 every second. 
 > 
-> When they have 4 + 1 discs, the stack topples over, dealing 0.4 of the stacked discs' total damage to the target and another 0.4 split among 4 nearby enemies.
+> When they have 4 + 1 discs, the stack topples over, dealing 40% of the stacked discs' total damage to the target and another 40% split among 4 nearby enemies.
 > 
 > If an enemy dies with a disc, it passes to another enemy.
 

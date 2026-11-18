@@ -111,6 +111,13 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|---|
 | Requiem damage | 440/660/930 x AP magic, 34 ticks after the cast starts | damage numbers of a cast on a target of known MR | champions/Karthus.md D1 |
 
+### 7g. Olaf (Axe Crescendo) again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Axe damage | 150/225/360 x AD + 15/20/30 x AP physical, no on-hit | damage numbers of an axe on a target of known armor | champions/Olaf_HeroAugment.md D1 |
+| Do on-launch items hear the empowered throws? | yes (Combat.Event.LaunchAttack.Custom.1 is a LaunchAttack) | Olaf (Axe Crescendo) with Titan's Resolve: stacks per throw | champions/Olaf_HeroAugment.md D1 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

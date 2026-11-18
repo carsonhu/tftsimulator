@@ -3,18 +3,18 @@
 <!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
 ## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
 
-- **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive ⟨computed in game: TFTStageMagnitude⟩ → FighterAttackSpeed curve; MovementSpeed + 200; ManaMax at least 10)
+- **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Classical, Arcanist
 - **HP** 1150 / 2070 / 3726 · **AD** 40 / 60 / 90 · **AS** 0.75 · **Range** 2 · **Armor** 60 · **MR** 60 · **Mana** 0 / 40
 - **Unlock**: Only 1 Champion in the two front rows of the battlefield.
 
 ### Ability: The Opera Phantom
 
-> Passive: Gain 0.3/0.3/1 Omnivamp. Debuffed enemies are Captivated.
+> Passive: Gain 30%/30%/100% Omnivamp. Debuffed enemies are Captivated.
 > 
 > Active: Deal 100/150/999 × AP magic damage to the 3 nearest enemies and Captivate them for 3 seconds. 
 > 
-> Every 5/5/1th cast, drop a chandelier on the board. It deals 380/600/9999 × AP magic damage to all enemies, reduced by 0.1 per hex they are away from the epicenter.
+> Every 5/5/1th cast, drop a chandelier on the board. It deals 380/600/9999 × AP magic damage to all enemies, reduced by 10% per hex they are away from the epicenter.
 > 
 > Debuffs: Burn, Wound, Shred, Sunder, Mana Reave, Weaken, Slow, Vunerable
 

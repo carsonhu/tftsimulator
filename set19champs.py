@@ -742,7 +742,92 @@ class Karthus(BuildChampion):
             [target], items, self.tick / TPS, 1, self.requiem, 'magical'))
 
 
-champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus']
+class OlafHeroAugment(BuildChampion):
+    """Olaf with the hero augment Axe Crescendo (DA_Olaf19_HeroAugment): the augment's unit
+    DA_Olaf19_HeroAugment_Override, a separate champion (owner, 2026-11-18; champions/Olaf_HeroAugment.md, D1).
+    Scripts: GA_Olaf19_HeroAugment, GA_Olaf19_EmpoweredAttack_HeroAugment (build ga_scripts.zip).
+
+    The cast (GA_Olaf19_HeroAugment): NumAttacks = the NumAttacks row + his Stack attribute (0x3b6); the mana lock
+    (0x4d3); CD_Olaf19_Empower_HeroAugment, whose 'Empower' event (0 s) applies GE_Olaf19_Empowered_HeroAugment
+    (tag ChronoTags.Dynamic.CustomAttack.1, infinite) and finishes the cast (build: cast lock 1 tick). The cast
+    cancels an attack in progress. Each Combat.Event.LaunchAttack.Custom.1 counts (0x1a8); at NumAttacks it applies
+    GE_Olaf19_CastStacker_HeroAugment (Stack + ExtraAttacksPerCast, infinite) and ends the empower (0x7d5): the
+    Empowered effect is removed and, one tick later (DelayUntilNextTick, 0xf), the mana lock. So the mana lock lasts
+    until the tick after the last empowered launch, and the last empowered attack's own mana is lost.
+    His attack chrono CD_Olaf19_Attack, for a unit with Augment.HeroAugment.HasHeroOverride: with the CustomAttack.1
+    tag the 'Empowered' group plays (CustomLaunchAttack1 at 0.5 s in a 1.1667 s animation, rate-scaled), otherwise
+    the 'Unempowered' SequentialAttack group (LaunchAttackVariant1/2 at 0.32 s in 1.0 s, rate-scaled). The custom
+    launch is not one GA_LaunchProjectileAttack fires on, so the empowered attack throws only the axe
+    (GA_Olaf19_EmpoweredAttack_HeroAugment: CD_Olaf19_Spell_HeroAugment's 'BigAxe', 1700 units/s, at his attack
+    target). On arrival GE_Olaf19_SpellDamage_HeroAugment = PhysicalDamageCalc1 (ADDamage x AD + APDamage x AP, AD
+    and AP the multipliers), physical, Damage.Source.Unit with no other tags (no on-hit), crits only with Precision.
+    The base Olaf's heal passive is not on this unit.
+    """
+    KEY = 'DA_Olaf19_HeroAugment_Override'
+    ATTACK = 'CD_Olaf19_Attack'
+    AXE = 'CD_Olaf19_Spell_HeroAugment'
+    EMPOWERED = 3  # the selector this class gives the empowered animation
+    display_name = 'Olaf (Axe Crescendo)'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.name = self.display_name
+        t, ch = self.timing, self.chrono(self.ATTACK)
+        # CD_Olaf19_Attack's modules: the unempowered ones end at the chrono's length (1.0 s), the empowered one at its
+        # anim_end (1.1667 s)
+        normal = [{'selector': s, 'min_as': None, 'launch': self.chrono_event(self.ATTACK, f'LaunchAttackVariant{s}'),
+                   'length': ch['length']} for s in (1, 2)]
+        empowered = {'selector': self.EMPOWERED, 'min_as': None,
+                     'launch': self.chrono_event(self.ATTACK, 'CustomLaunchAttack1'), 'length': ch['anim_end']}
+        t.variants, t.animations = normal + [empowered], 2
+        t.launch, t.attack_len = normal[0]['launch'], normal[0]['length']
+        t.source['variants'] = f'{self.ATTACK} HeroAugment groups: Unempowered x2, Empowered (CustomAttack.1)'
+        # the mana lock ends the tick after the last empowered launch (onLaunch sets it); until then it holds
+        t.mana_lock = 10 ** 6
+        t.source['mana_lock'] = 'GA_Olaf19_HeroAugment: removed the tick after the last empowered launch (0x7d5, 0xf)'
+        self.empowered_left = 0  # empowered attacks still to throw this cast
+        self.axe_stacks = 0  # his Stack attribute: + ExtraAttacksPerCast after each cast's throws
+        self._planned = 1  # the animation of the attack starting next
+        self._this_empowered = False
+        self.notes = ('Each cast empowers his next 2 attacks (+1 per earlier cast) into thrown axes; his mana is locked '
+                      'until the last axe is thrown.')
+
+    def axe_damage(self, level, AD, AP):
+        return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
+
+    def _next_animation(self):
+        self._planned = self.EMPOWERED if self.empowered_left > 0 else self.launches % 2 + 1
+        return self._planned, self.aspd.stat
+
+    def performAbility(self, opponents, items, time):
+        self.empowered_left = int(self.row('NumAttacks') + self.axe_stacks)
+
+    def onLaunch(self, opponents, items):
+        self._this_empowered = self._planned == self.EMPOWERED
+        if self._this_empowered:
+            self.empowered_left -= 1
+            if self.empowered_left == 0:
+                self.axe_stacks += self.row('ExtraAttacksPerCast')
+                self.mana_locked_until = self.tick + 1
+
+    def fire_attack(self, opponents, items, moment, paid):
+        if not self._this_empowered:
+            return super().fire_attack(opponents, items, moment, paid)
+        target = opponents[0]
+        flight = self.chrono_projectile_ticks(self.AXE, 'BigAxe', self.target_hexes(target))
+        self.schedule_tick(self.tick + flight, lambda: self._axe_lands(target))
+
+    def _axe_lands(self, target):
+        items, now = self.items, self.tick / TPS
+        dmg = self.axe_damage(self.level, self.bonus_ad.stat, self.ap.stat)
+        crit_dmg = dmg * self.critDamage() if self.canSpellCrit else dmg
+        amp = self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        self.doDamage(target, items, self.crit.stat if self.canSpellCrit else 0, crit_dmg * amp, dmg * amp,
+                      'physical', now, tags=damage_tags('physical', UNIT))
+
+
+champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
+              'OlafHeroAugment']
 
 
 class TrainingDummy(Champion):

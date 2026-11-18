@@ -9,7 +9,7 @@
 
 ### Ability: Pursue Sin (The Soul Nail Song)
 
-> Passive: Attacks deal 45/68/500 × AP bonus magic damage. All damage Locke deals to enemies is increased by 0.1 for each mark he has applied to them.
+> Passive: Attacks deal 45/68/500 × AP bonus magic damage. All damage Locke deals to enemies is increased by 10% for each mark he has applied to them.
 > 
 > Active: Hurl 3 Soul Nails at the furthest enemy within 4 hexes, each dealing 15/22/400 × AP magic damage and marking all enemies hit. Then, teleport to the enemy and deal 150/225/2000 × AP magic damage.
 

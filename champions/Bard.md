@@ -11,7 +11,7 @@
 
 > Passive: Gain the Horn of the Traveler. While equipped, casts generate XP and attacks grant bonus Mana.
 > 
-> Active: Summon a wave of meeps that deal 210/315/505 × AP magic damage to enemies hit, reduced by 0.3 for each one it passes through.
+> Active: Summon a wave of meeps that deal 210/315/505 × AP magic damage to enemies hit, reduced by 30% for each one it passes through.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
