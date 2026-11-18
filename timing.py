@@ -40,6 +40,9 @@ class Timing:
     launch       attack start -> release (ranged) or hit (melee) at an unstretched animation (G2)
     attack_len   the attack animation's length; the release stretches by period / attack_len when the attack period
                  is longer (G2). 0 = never stretch.
+    release_scales_with_period  the attack animation always plays at the attack period, so the release also shrinks
+                 when the period is shorter than attack_len (G19: attack modules without bUseRateScalingThreshold,
+                 Varus). Default False: G2.
     proj_speed   attack projectile speed (units/s); 0 = the attack lands at the release (melee) (G4)
     distance     hexes to the target for projectile flight; None = the champion's attack range
     mana_at      when an attack pays its mana: 'start', 'release' or 'hit'. Default (T3): ranged at the release
@@ -55,9 +58,11 @@ class Timing:
     """
 
     def __init__(self, launch=0.0, attack_len=0.0, proj_speed=0.0, distance=None, mana_at=None, cast_lock=0.0,
-                 mana_lock=None, lock_scales_with_as=False, cast_cancels_attack=False, source=None):
+                 mana_lock=None, lock_scales_with_as=False, cast_cancels_attack=False, release_scales_with_period=False,
+                 source=None):
         self.launch = launch
         self.attack_len = attack_len
+        self.release_scales_with_period = release_scales_with_period
         self.proj_speed = proj_speed
         self.distance = distance
         self.mana_at = mana_at
@@ -82,6 +87,9 @@ class Timing:
             if t.get(key) is not None:
                 kw[field] = t[key]
                 src[field] = where
+        if t.get('attack_rate_scaling_threshold') == [False]:  # G19: every attack module lacks the flag
+            kw['release_scales_with_period'] = True
+            src['release_scales_with_period'] = f'{where} (attack modules without bUseRateScalingThreshold, G19)'
         spells = t.get('spells') or []
         sp = next((s for s in spells if s['ga'] == spell), None) if spell else (spells[0] if spells else None)
         if spell and sp is None:
@@ -99,16 +107,20 @@ class Timing:
                 # T4: the spell's CancelAbilitiesWithTag has Combat.Attacking
                 kw['cast_cancels_attack'] = bool(sp['cancels_attack'])
                 src['cast_cancels_attack'] = f'{where} {sp["ga"]}'
-        for f in ('launch', 'attack_len', 'proj_speed', 'cast_lock', 'mana_lock', 'cast_cancels_attack'):
+        for f in ('launch', 'attack_len', 'proj_speed', 'cast_lock', 'mana_lock', 'cast_cancels_attack',
+                  'release_scales_with_period'):
             src.setdefault(f, 'default')
         return cls(source=src, **kw)
 
     def release_ticks(self, period_ticks):
         """Attack start -> release/hit, in ticks, for an attack period of `period_ticks` (G2): the attack animation
-        stretches to the period when the period is longer, never shrinks. At least 1 tick."""
+        stretches to the period when the period is longer, never shrinks; with release_scales_with_period it also
+        shrinks (G19). At least 1 tick."""
         stretch = 1.0
         if self.attack_len > 0:
-            stretch = max(1.0, (period_ticks / TPS) / self.attack_len)
+            stretch = (period_ticks / TPS) / self.attack_len
+            if not self.release_scales_with_period:
+                stretch = max(1.0, stretch)  # G2: stretch, never shrink
         return max(1, ticks_up(self.launch * stretch))
 
     def flight_ticks(self, attack_range):

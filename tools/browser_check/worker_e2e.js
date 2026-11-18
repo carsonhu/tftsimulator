@@ -79,7 +79,7 @@ function check(name, ok, detail) {
   check("catalog lists both builds, newest first", c.builds.map((b) => b.version).join() ===
         [newest.version, FAKE.version].join(), JSON.stringify(c.builds));
   console.log("  labels:", c.builds.map((b) => b.label));
-  check("champions", c.champions.map((x) => x.name).join() === "Neeko", JSON.stringify(c.champions));
+  check("champions include Neeko", c.champions.some((x) => x.name === "Neeko"), JSON.stringify(c.champions));
   check("boot fetched the index and only the newest build",
         fetched.includes("builds/" + newest.file) && !fetched.includes("builds/fake.json"), fetched.join());
 

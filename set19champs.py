@@ -60,7 +60,55 @@ class Neeko(BuildChampion):
             self.schedule_tick(self.tick + ticks_up(t) + projectile_ticks(speed, hexes), land)
 
 
-champ_list = ['Neeko']
+class Varus(BuildChampion):
+    """One Thousand Arrows (champions/Varus.md). Script: GA_Varus19_Spell (build ga_scripts.zip).
+
+    The cast chrono CD_Varus19_CastAnim spawns a 'HailMain' missile at its Fire point (0.4278 s) and, in its Encore
+    group (plays only for an Encore unit), an 'EncoreHailMain' missile at its Encore point (0.6286 s); the other
+    'Hail' missiles are visual. HailMain's arrival (OnArrived -> 0x111b -> 0x960) applies GE_Varus19_PrimaryDamage
+    to the target and GE_Varus19_SecondaryDamage to enemies within AOEHexRange of it, at effectiveness 1;
+    EncoreHailMain's (-> 0x121f -> 0x2e4) does the same at CT_Encore19 RecastEffectiveness (Encore tier, B11). Both
+    are physical spell damage that crits only with Precision (RollIfCanSpellCrit): Primary = PhysicalDamageCalc1 =
+    DamageAP x AP + DamageAD x AD; Secondary = PhysicalDamageCalc2 = AOEDamagePercent x Calc1.
+    AD here is the AttackDamage attribute, a multiplier (1.0 base, items add to it), like AP.
+    """
+    KEY = 'DA_Varus19'
+    CAST = 'CD_Varus19_CastAnim'
+    MISSILES = (('HailMain', False), ('EncoreHailMain', True))  # (projectile, Encore missile?)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        # set18 convention: num_targets counts the target; the splash hits num_targets - 1 adjacent enemies
+        self.num_targets = 2
+        self.missiles = [(self.chrono_projectile_spawn(self.CAST, name), self.chrono_projectile_speed(self.CAST, name),
+                          encore) for name, encore in self.MISSILES]
+        self.splash = self.row('AOEDamagePercent')
+        self.notes = ('Slow (20% AS for 4 s) not modelled: dummies never attack. Adjacent enemies hit = '
+                      'targets - 1. Missiles take the straight-line travel time at the attack range (arc ignored, G4).')
+
+    def abilityScaling(self, level, AD, AP):
+        return self.row('DamageAP', star=level) * AP + self.row('DamageAD', star=level) * AD
+
+    def performAbility(self, opponents, items, time):
+        hexes = self.attack_range
+        for t, speed, encore in self.missiles:
+            eff = 1 if not encore else self.trait_value('DA_Encore19', 'RecastEffectiveness')
+            if eff <= 0:
+                continue  # without Encore the Encore missile is not spawned (its chrono group needs the tag)
+
+            def land(eff=eff):
+                now = self.tick / TPS
+                self.multiTargetSpell(opponents[:1], items, now, 1,
+                                      lambda level, AD, AP: self.abilityScaling(level, AD, AP) * eff, 'physical')
+                if self.num_targets > 1:
+                    self.multiTargetSpell(opponents[1:], items, now, self.num_targets - 1,
+                                          lambda level, AD, AP: self.abilityScaling(level, AD, AP) * eff * self.splash,
+                                          'physical')
+
+            self.schedule_tick(self.tick + ticks_up(t) + projectile_ticks(speed, hexes), land)
+
+
+champ_list = ['Neeko', 'Varus']
 
 
 class TrainingDummy(Champion):

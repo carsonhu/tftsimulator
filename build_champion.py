@@ -197,6 +197,16 @@ class BuildChampion(Champion):
                                  f'in build {self.build.version} ({sorted(speeds, key=str)})')
         return speeds.pop()
 
+    def chrono_projectile_spawn(self, chrono, projectile):
+        """Seconds from the chrono's start to the spawn of the projectile named `projectile` (its module's PlayPoint;
+        one spawn time only)."""
+        spawns = {t for p in self.chrono(chrono).get('projectiles') or [] if p['name'] == projectile
+                  for t in p.get('spawn_at') or []}
+        if len(spawns) != 1:
+            raise BuildDataError(f'{self.KEY}: chrono {chrono} has no single spawn time for {projectile!r} '
+                                 f'in build {self.build.version} ({sorted(spawns)})')
+        return spawns.pop()
+
     def trait_tier(self, trait_key):
         """The tier this champion's board reaches in a trait (0 = inactive), set at combat start (B11)."""
         return self.trait_tiers.get(trait_key, 0)

@@ -21,7 +21,7 @@ from vod_panel import video_fps  # noqa: E402
 
 FIELDS = {  # x, y, w, h of the number; crop shown for reading (x, y, w, h); text brightness threshold
     'as': ((1122, 572, 36, 16), (1080, 525, 200, 60), 120),
-    'mana': ((1150, 262, 80, 14), (1110, 250, 170, 40), 200),  # white text over the blue bar, which animates
+    'mana': ((1150, 262, 80, 14), (1110, 250, 170, 40), 120),  # text over the bar is dimmer than white: keep 120
 }
 
 

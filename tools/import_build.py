@@ -38,7 +38,8 @@ def champion(c):
                     'curve_table': c['ability']['curve_table'], 'rows': c['ability']['rows'],
                     'calcs': c['ability']['calcs']},
         'timing': {k: t.get(k) for k in ('attack_chrono', 'attack_launch', 'attack_launch_variants', 'attack_len',
-                                         'attack_release_base_as', 'projectile', 'proj_speed', 'proj_movement')}
+                                         'attack_release_base_as', 'attack_rate_scaling_threshold', 'projectile',
+                                         'proj_speed', 'proj_movement')}
         | {'spells': [{k: s.get(k) for k in ('ga', 'cast_chrono', 'cast_end', 'lockout', 'manalock_removed',
                                              'finish_cause', 'reads_attack_speed', 'cancels_attack', 'notes',
                                              'log')}
