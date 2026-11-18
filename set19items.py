@@ -2,12 +2,17 @@
 the champions; a class is live only when listed in one of the registries below. Status and evidence per item:
 docs/ITEMS.md (decision D6).
 """
+import status
 from buildstore import BuildDataError, load_build
 from item import Item
-from timing import ticks_up
+from timing import TPS, ticks_up
 
-offensive_craftables = ["ArchangelsStaff", "BlueBuff", "Deathblade", "GuinsoosRageblade", "InfinityEdge",
-                        "JeweledGauntlet", "Quicksilver", "RabadonsDeathcap", "SpearOfShojin", "TitansResolve"]
+# the DPS item table: offensive craftables only (owner, 2026-11-17: tank items such as Warmog's are not part of it)
+offensive_craftables = ["AdaptiveHelm", "ArchangelsStaff", "Bloodthirster", "BlueBuff", "Deathblade", "EdgeOfNight",
+                        "GiantSlayer", "GiantSlayerNoTank", "GuinsoosRageblade", "HandOfJustice", "HextechGunblade",
+                        "InfinityEdge", "JeweledGauntlet", "KrakensFury", "LastWhisper", "Morellonomicon",
+                        "NashorsTooth", "Quicksilver", "RabadonsDeathcap", "RedBuff", "SpearOfShojin", "SteraksGage",
+                        "StrikersFlail", "TitansResolve", "VoidStaff"]
 artifacts = []
 radiants = []
 emblems = []
@@ -348,3 +353,308 @@ class BlueBuff(BuildItem):
         if phase == "preCombat":
             champion.addMana(self.script_mana(champion, "GE_BlueBuff_StartingMana"))
         return input_
+
+
+# ---------------------------------------------------------------- items whose scripts do nothing against dummies
+class Bloodthirster(BuildItem):
+    """Stats GE_Bloodthirster_Stats (15% AD, 15% AP, 20 MR, 20% omnivamp). Script GA_Bloodthirster: a shield and more
+    omnivamp at 60% health, which training dummies never cause (they never attack, G9)."""
+    KEY = "DA_Bloodthirster"
+    STATS = ("GE_Bloodthirster_Stats",)
+    display_name = _name(KEY)
+
+
+class EdgeOfNight(BuildItem):
+    """Stats GE_EdgeOfNight_Stats (10% AD, 10% AP, 15% AS, 20 armor). Script GA_EdgeOfNight: untargetable and a heal
+    at 40% health, which dummies never cause (G9)."""
+    KEY = "DA_EdgeOfNight"
+    STATS = ("GE_EdgeOfNight_Stats",)
+    display_name = _name(KEY)
+
+
+class SteraksGage(BuildItem):
+    """Stats GE_SteraksGage_Stats (45% AD, 300 HP). Script GA_SteraksGage: a shield at 40% health, which dummies never
+    cause (G9)."""
+    KEY = "DA_SteraksGage"
+    STATS = ("GE_SteraksGage_Stats",)
+    display_name = _name(KEY)
+
+
+class HextechGunblade(BuildItem):
+    """Stats GE_HextechGunblade_Stats (20% AD, 20% AP, 15% omnivamp, 1 mana regen). Script GA_HextechGunblade: heals the
+    lowest-health ally for 20% of damage dealt, nothing against dummies."""
+    KEY = "DA_HextechGunblade"
+    STATS = ("GE_HextechGunblade_Stats",)
+    display_name = _name(KEY)
+
+
+class HandOfJustice(BuildItem):
+    """Stats GE_HandOfJustice_Stats (20% crit, 1 mana regen). Script GA_HandOfJustice: on activation ApplyEffect
+    applies AboveThresholdGE = GE_HandOfJustice_HighHealthEffect (36% AD, 36% AP, 12% omnivamp) while health is above
+    HealthThreshold (50%) and swaps to the low-health effect below it (WaitForAttributeChangeRatioThreshold). Dummies
+    never hit back (G9), so the high-health effect holds all fight."""
+    KEY = "DA_HandOfJustice"
+    STATS = ("GE_HandOfJustice_Stats",)
+    display_name = _name(KEY)
+
+    def applyStats(self, champion):
+        super().applyStats(champion)
+        for attr, stat in (("AttackDamage", champion.bonus_ad), ("AbilityPower", champion.ap)):
+            v, scale = self.script_modifier(champion, "GE_HandOfJustice_HighHealthEffect", attr, "+")
+            if scale is not None:
+                raise BuildDataError(f"{self.KEY}: HighHealthEffect {attr} is not a plain number ({scale})")
+            stat.addStat(v * 100)
+
+
+class AdaptiveHelm(BuildItem):
+    """Stats GE_AdaptiveHelm_Stats (20 MR, 3 mana regen, +15% mana from all sources). Script GA_AdaptiveHelm (0x3d5):
+    a holder whose role tags include Tank or Fighter gets GE_AdaptiveHelm_TankFighter (armor and MR, nothing against
+    dummies); any other role gets GE_AdaptiveHelm_OtherRoles (10% AD, 10% AP)."""
+    KEY = "DA_AdaptiveHelm"
+    STATS = ("GE_AdaptiveHelm_Stats",)
+    display_name = _name(KEY)
+
+    def applyStats(self, champion):
+        super().applyStats(champion)
+        if champion.role.archetype in ("Tank", "Fighter"):
+            return
+        for attr, stat in (("AttackDamage", champion.bonus_ad), ("AbilityPower", champion.ap)):
+            v, scale = self.script_modifier(champion, "GE_AdaptiveHelm_OtherRoles", attr, "+")
+            if scale is not None:
+                raise BuildDataError(f"{self.KEY}: OtherRoles {attr} is not a plain number ({scale})")
+            stat.addStat(v * 100)
+
+
+class GiantSlayer(BuildItem):
+    """Stats GE_GiantSlayer_Stats (15% AD, 15% AP, 15% AS, 15% damage amp). Script GA_GiantSlayer: before each damage
+    the holder deals as a unit (WaitForDealDamage, Damage.Source.Unit), a target with Role.Tank (0x310) gives
+    GE_GiantSlayer_ConditionalAmp (+AmpRatioAgainstTanks, 15%) for that damage, removed after it. Whether the dummies
+    are Tanks is the choice between this entry (they are) and GiantSlayerNoTank (set18's two entries)."""
+    KEY = "DA_GiantSlayer"
+    STATS = ("GE_GiantSlayer_Stats",)
+    display_name = _name(KEY) + " (vs Tank)"
+    VS_TANK = True
+
+    def applyStats(self, champion):
+        super().applyStats(champion)
+        if self.VS_TANK:
+            v, scale = self.script_modifier(champion, "GE_GiantSlayer_ConditionalAmp", "OutgoingDamageMultiplier", "+")
+            if scale is not None:
+                raise BuildDataError(f"{self.KEY}: ConditionalAmp is not a plain number ({scale})")
+            champion.dmgMultiplier.addStat(v)
+
+
+class GiantSlayerNoTank(GiantSlayer):
+    """Giant Slayer against targets that are not Tanks: its stats only."""
+    display_name = _name(GiantSlayer.KEY) + " (vs non-Tank)"
+    VS_TANK = False
+
+
+# ---------------------------------------------------------------- on-attack and on-crit items
+class KrakensFury(BuildItem):
+    """Stats GE_KrakensFury_Stats (10% AD, 10% AS, 20 MR). Script GA_KrakensFury: every Combat.Event.LaunchAttack of
+    the holder (WaitGameplayEvent, not exact: simulated attacks count, G11, as Titan's Resolve) while Stack <
+    MaxStacks (15) applies ItemStackGE = GE_KrakensFury_ItemStack (Stack2 + ADCounter 3.5) and
+    GE_KrakensFury_ItemStackCounter (Stack + 1); GE_KrakensFury_StackingAD gives AttackDamage + 0.01 x Stack2 (3.5% per
+    stack). When Stack reaches MaxStacks (WaitForAttributeChanged) it applies BonusAS = GE_KrakensFury_BonusAS:
+    AttackSpeed MultiplyAdditive by row Bonus_AS (15%)."""
+    KEY = "DA_KrakensFury"
+    STATS = ("GE_KrakensFury_Stats",)
+    display_name = _name(KEY)
+
+    def __init__(self):
+        super().__init__(phases=["preCombat", "onLaunch"])
+        self.stacks = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            self.stacks = 0
+        elif phase == "onLaunch" and self.stacks < self.row(champion, "MaxStacks"):
+            self.stacks += 1
+            stack2, _ = self.script_modifier(champion, "GE_KrakensFury_ItemStack", "Stack2", "+")
+            coef, scale = self.script_modifier(champion, "GE_KrakensFury_StackingAD", "AttackDamage", "+")
+            if scale != "Stack2":
+                raise BuildDataError(f"{self.KEY}: StackingAD no longer scales with Stack2 ({scale})")
+            champion.bonus_ad.addStat(coef * stack2 * 100)
+            if self.stacks == self.row(champion, "MaxStacks"):
+                champion.aspd.addStat(self.row(champion, "Bonus_AS") * 100)
+        return input_
+
+
+class NashorsTooth(BuildItem):
+    """Stats GE_NashorsTooth_Stats (10% AS, 15% AP, 150 HP, 20% crit, ManaPerAttack 2: paid with the role's attack
+    mana, I3). Script GA_NashorsTooth: every damage the holder deals with Damage.Result.WasCrit and
+    Damage.Specifiers.AppliesOnHit.IsAttack (a critical attack) applies UpgradeHandler = GE_NashorsTooth_Mana
+    (+ManaPerAttack_BonusOnCrit 2, BankIfOverflow) when it lands. The engine averages crits: its onCrit phase fires
+    each time the accumulated crit chance passes 1 (I6)."""
+    KEY = "DA_NashorsTooth"
+    STATS = ("GE_NashorsTooth_Stats",)
+    display_name = _name(KEY)
+
+    def __init__(self):
+        super().__init__(phases=["onCrit"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "onCrit" and not input_:  # input_: is it spell damage
+            champion.addMana(self.script_mana(champion, "GE_NashorsTooth_Mana"))
+        return input_
+
+
+class StrikersFlail(BuildItem):
+    """Stats GE_StrikersFlail_Stats (150 HP, 10% AS, 20% crit, 10% damage amp). Script GA_StrikersFlail: every damage
+    the holder deals with Damage.Result.WasCrit (attacks and spells) applies BuffGE = GE_StrikersFlail_Buff
+    (OutgoingDamageMultiplier + DABuff 5%, BuffDuration 5 s) after it (PostApply). The buff's
+    TFTStackGameplayEffectInstancesEffectComponent keeps separate instances up to MaxStacks (4); the simulator renews
+    the oldest when a 5th lands (set18's rule; I6). The engine averages crits (onCrit, I6)."""
+    KEY = "DA_StrikersFlail"
+    STATS = ("GE_StrikersFlail_Stats",)
+    display_name = _name(KEY)
+
+    def __init__(self):
+        super().__init__(phases=["preCombat", "onCrit"])
+        self.slot = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            self.slot = 0
+        elif phase == "onCrit":
+            amp, scale = self.script_modifier(champion, "GE_StrikersFlail_Buff", "OutgoingDamageMultiplier", "+")
+            if scale is not None:
+                raise BuildDataError(f"{self.KEY}: the buff is not a plain number ({scale})")
+            champion.applyStatus(status.DmgAmpModifier(f"StrikersFlail {id(self)} {self.slot}"), self, time,
+                                 self.row(champion, "BuffDuration"), amp)
+            self.slot = (self.slot + 1) % int(self.row(champion, "MaxStacks"))
+        return input_
+
+
+# ---------------------------------------------------------------- debuffs on the damaged target (I7)
+def debuff_value(champion, row, level):
+    """A shared debuff's value at the level an item passes (MakeDebuffGameplayEffectSpecHandle): the build's
+    globals.debuff_level_to_value row (CT_DebuffLevelToValue; ShredSunderChill 30 -> 0.7, BurnWound 1 -> 0.01)."""
+    from build_champion import curve_at  # build_champion imports the item registries
+    g = ((getattr(champion, "build", None) or load_build()).data.get("globals") or {}).get("debuff_level_to_value")
+    if not g or row not in g:
+        raise BuildDataError(f"the build has no globals.debuff_level_to_value.{row} (re-snapshot)")
+    return curve_at(g[row]["points"], level, g[row]["interp"] or "Linear")
+
+
+class DebuffItem(BuildItem):
+    """An item whose script answers the holder's attack and spell damage (WaitForDealDamage, Damage.Source.Unit) by
+    applying a debuff to the damaged unit after the damage (PostApply): the next hit is reduced, not that one.
+    LEVEL_PARAM / DURATION_PARAM name the GA parameters whose curve rows give the level and duration."""
+    GA = None
+    LEVEL_PARAM = DURATION_PARAM = None
+
+    def __init__(self, phases=("PostOnDealDamage",)):
+        super().__init__(phases=phases)
+
+    def param_row(self, champion, param):
+        ref = next(r for r in self.build_entry(champion).d["ability_refs"] if r["ga"] == self.GA)
+        return self.row(champion, ref["params"][param]["RowName"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        target = getattr(champion, "lastDamagedOpponent", None)
+        if phase == "PostOnDealDamage" and target is not None and input_ and input_[0]:
+            self.debuff(champion, target, time, self.param_row(champion, self.LEVEL_PARAM),
+                        self.param_row(champion, self.DURATION_PARAM))
+        return input_
+
+    def debuff(self, champion, target, time, level, duration):
+        raise NotImplementedError
+
+
+class LastWhisper(DebuffItem):
+    """Stats GE_LastWhisper_Stats (20% AS, 15% AD, 20% crit). Script GA_LastWhisper: after each damage the holder
+    deals (0x4fe Damage.Source.Unit, 0x6f7 attacks) it applies GE_ArmorSunder at level SunderPercent (30) for
+    SunderDuration (3 s): Armor MultiplyAdditive ShredSunderChill(30) = x0.7. Sunders don't stack (the engine keeps
+    the strongest, status.ArmorReduction)."""
+    KEY = "DA_LastWhisper"
+    STATS = ("GE_LastWhisper_Stats",)
+    GA = "GA_LastWhisper"
+    LEVEL_PARAM, DURATION_PARAM = "SunderPercentCurve", "DurationCurve"
+    display_name = _name(KEY)
+
+    def debuff(self, champion, target, time, level, duration):
+        target.applyStatus(status.ArmorReduction("Sunder"), champion, time, duration,
+                           debuff_value(champion, "ShredSunderChill", level))
+
+
+class VoidStaff(DebuffItem):
+    """Stats GE_VoidStaff_Stats (35% AP, 15% AS, 1 mana regen). Script GA_VoidStaff: after each damage the holder
+    deals (0x572 Damage.Source.Unit, 0x76b attacks) it applies GE_MRShred at level ShredPercent (30) for
+    ShredDuration (5 s): MagicResist MultiplyAdditive ShredSunderChill(30) = x0.7, not stacking."""
+    KEY = "DA_VoidStaff"
+    STATS = ("GE_VoidStaff_Stats",)
+    GA = "GA_VoidStaff"
+    LEVEL_PARAM, DURATION_PARAM = "ShredPercentCurve", "ShredDurationCurve"
+    display_name = _name(KEY)
+
+    def debuff(self, champion, target, time, level, duration):
+        target.applyStatus(status.MRReduction("Shred"), champion, time, duration,
+                           debuff_value(champion, "ShredSunderChill", level))
+
+
+def apply_burn(champion, target, level, duration):
+    """GE_Burn on `target` from `champion` (I7): one burn per target (StackLimitCount 1); a new application renews
+    the duration but not the period (NeverReset); the first tick is one period after application
+    (bExecutePeriodicEffectOnApplication false)."""
+    g = champion.build.data["globals"]["burn"]
+    burns = champion.__dict__.setdefault("burns", {})
+    now, end = champion.tick, champion.tick + ticks_up(duration)
+    b = burns.get(id(target))
+    if b is None or b["end"] < now:
+        burns[id(target)] = {"target": target, "next": now + ticks_up(g["period"]), "end": end, "level": level}
+    else:
+        b["end"], b["level"] = max(b["end"], end), max(b["level"], level)
+
+
+def tick_burns(champion):
+    """Deal the burns due this tick, once per tick however many burn items the holder has: true damage of
+    BurnWound(level) x the target's max HP, amplified like the holder's other damage (I7)."""
+    if getattr(champion, "burn_tick", None) == champion.tick:
+        return
+    champion.burn_tick = champion.tick
+    period = ticks_up(champion.build.data["globals"]["burn"]["period"])
+    for b in (getattr(champion, "burns", None) or {}).values():
+        while b["next"] <= champion.tick and b["next"] <= b["end"]:
+            dmg = debuff_value(champion, "BurnWound", b["level"]) * b["target"].hp.stat * champion.dmgMultiplier.stat
+            # items=[]: a burn tick is not an attack or a spell, so no on-hit effect answers it
+            champion.doDamage(b["target"], [], 0, dmg, dmg, "true", champion.tick / TPS)
+            b["next"] += period
+
+
+class BurnItem(DebuffItem):
+    """An item that burns (and wounds: nothing against dummies) the targets of the holder's attacks and spells."""
+    def __init__(self):
+        super().__init__(phases=("preCombat", "PostOnDealDamage", "onUpdate"))
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.burns = {}
+        elif phase == "onUpdate":
+            tick_burns(champion)
+        return super().performAbility(phase, time, champion, input_)
+
+    def debuff(self, champion, target, time, level, duration):
+        apply_burn(champion, target, level, duration)
+
+
+class Morellonomicon(BurnItem):
+    """Stats GE_Morellonomicon (150 HP, 20% AP, 1 mana regen). Script GA_Morellonomicon: after each damage the holder
+    deals (Damage.Source.Unit) with AppliesOnHit.IsAttack or AppliesOnSpell (0x53), ApplyBurnAndWoundToTarget: GE_Burn
+    at level BurnPercent (1) and GE_Wound for BurnAndWoundDuration (10 s)."""
+    KEY = "DA_Morellonomicon"
+    STATS = ("GE_Morellonomicon",)
+    GA = "GA_Morellonomicon"
+    LEVEL_PARAM, DURATION_PARAM = "BurnPercentRow", "BurnAndWoundDurationRow"
+    display_name = _name(KEY)
+
+
+class RedBuff(BurnItem):
+    """Stats GE_RedBuff (3% damage amp, 45% AS). Script GA_RedBuff: after each damage the holder deals as a unit with
+    IsAttack (0xa) or AppliesOnSpell (0x64e), GE_Burn at level Burn (1) and GE_Wound for Duration (5 s)."""
+    KEY = "DA_RedBuff"
+    STATS = ("GE_RedBuff",)
+    GA = "GA_RedBuff"
+    LEVEL_PARAM, DURATION_PARAM = "BurnCurveRow", "DurationCurveRow"
+    display_name = _name(KEY)

@@ -93,6 +93,10 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Illbeats (4) (a trait, read the same way) | the mix's values x1.5 (StatMult at level 3) | the mixer readouts at Illbeats (4) | B20 |
 | Rabadon's Deathcap | every bonus AP × 1.15 (same structure as Deathblade, which VOD3 confirmed); panel 63% alone, 104% with Jeweled Gauntlet | panel AP % with a Rabadon's | I5, docs/ITEMS.md |
 | Archangel's Staff stacks | first stack 5 s after combat start, then every 5 s | panel AP over the first ~15 s | I4 |
+| Burn damage | 1% of the target's max HP as true damage every second from 1 s after the first hit, times the holder's damage amp (Red Buff: 18.5 a tick on 1800 HP) | burn numbers on a target of known HP, with and without other damage amp | I7 |
+| Last Whisper / Void Staff | x0.7 armor / MR from the hit after the first, for 3 s / 5 s after the latest hit | a holder's damage numbers on one target: 1st hit vs 2nd | I7 |
+| Kraken's Fury stacks | +3.5% AD per attack release (simulated attacks count), 15 max, then +15% AS | panel AD % of a holder over its first attacks (and a cast) | docs/ITEMS.md |
+| Striker's Flail stacking | separate 5 s instances of +5% damage amp, 4 at most | the damage-amp line of a crit carrier's panel | I6 |
 | Spear of Shojin's mana | its 5 mana per attack is paid with the role's attack mana, at the same moment | a Shojin holder's mana steps (+12 for a caster) | I3 |
 
 ## No clip needed
