@@ -22,9 +22,9 @@ Guinsoo's would show a wrong number.
 | Item | Key | Stats effect (attributes) | Script | Status | Evidence / notes |
 |---|---|---|---|---|---|
 | Adaptive Helm | `DA_AdaptiveHelm` | IncomingManaMultiplier, MagicResist, ManaPerSecond | `GA_AdaptiveHelm` | not started | |
-| Archangel's Staff | `DA_ArchangelsStaff` | AbilityPower, ManaPerSecond | `GA_ArchangelsStaff_RampingStats` | not started | |
+| Archangel's Staff | `DA_ArchangelsStaff` | AbilityPower, ManaPerSecond | `GA_ArchangelsStaff_RampingStats` | implemented (script read) | +20 AP every 5 s from combat start (I4, predicted; no VOD yet). |
 | Bloodthirster | `DA_Bloodthirster` | AbilityPower, AttackDamage, MagicResist, Omnivamp | `GA_Bloodthirster` | not started | |
-| Blue Buff | `DA_BlueBuff` | AbilityPower, AttackDamage, ManaPerSecond | `GA_BlueBuff` | not started | |
+| Blue Buff | `DA_BlueBuff` | AbilityPower, AttackDamage, ManaPerSecond | `GA_BlueBuff` | confirmed (VOD) | [worksheet](../items/BlueBuff.md): +10 mana at combat start, 6 regen; VOD 2026-11-17. |
 | Bramble Vest | `DA_BrambleVest` | Armor, HealthMax | `GA_BrambleVest` | not started | |
 | Crownguard | `DA_Crownguard` | AbilityPower, Armor, HealthMax, IncomingHealMultiplier, IncomingShieldMultiplier | `GA_Crownguard` | not started | |
 | Deathblade | `DA_Deathblade` | AttackDamage | none | not started | "15% additional AD from all sources": three more AttackDamage modifiers with operations `Multiplicitive` (×) and MultiplyAdditive; meaning to check before use. No script. |
@@ -33,7 +33,7 @@ Guinsoo's would show a wrong number.
 | Evenshroud | `DA_Evenshroud` | HealthMax, MagicResist | none | not started | `GE_Evenshroud_ApplyGA` grants an ability though the item has none listed. |
 | Gargoyle Stoneplate | `DA_GargoyleStoneplate` | Armor, HealthMax, MagicResist | none | not started | `GE_GargoyleStoneplate_TargetedBuff` is conditional (+10 armor/MR per targeting enemy); defensive. |
 | Giant Slayer | `DA_GiantSlayer` | AbilityPower, AttackDamage, AttackSpeed, OutgoingDamageMultiplier | `GA_GiantSlayer` | not started | |
-| Guinsoo's Rageblade | `DA_GuinsoosRageblade` | AbilityPower, AttackSpeed | `GA_GuinsoosRageblade` | not started | |
+| Guinsoo's Rageblade | `DA_GuinsoosRageblade` | AbilityPower, AttackSpeed | `GA_GuinsoosRageblade` | confirmed (VOD) | [worksheet](../items/GuinsoosRageblade.md): stacks on the 1 s timer from combat start, +7% base AS each (I4); VOD 2026-11-17. |
 | Hand Of Justice | `DA_HandOfJustice` | CritChance, ManaPerSecond | `GA_HandOfJustice` | not started | |
 | Hextech Gunblade | `DA_HextechGunblade` | AbilityPower, AttackDamage, ManaPerSecond, Omnivamp | `GA_HextechGunblade` | not started | |
 | Infinity Edge | `DA_InfinityEdge` | AttackDamage, CritChance | none | implemented (stats) | 2026-11-17: stats + Precision (I1, I2); no script. |

@@ -99,3 +99,10 @@ Source for all rows below: `Outplayed/…PBE_11-17-2026_15-16-17-933.mp4` (owner
 
 - 2026-11-17: Varus pays at the release (E2, E4, seen on screen). Open: his cast lock (E4 suggests ~24 ticks
   against a predicted 31, while the mana lock matched its prediction): needs more casts, ideally at base AS.
+- 2026-11-17, second VOD (`…PBE_11-17-2026_16-35-16-966.mp4`, 60 fps, rls-19.1.0.5973071): Varus 1★ with Blue Buff
+  and Guinsoo's (AS 0.77 at combat start). Combat start f15365 (mana text 30 → 40, Blue Buff); his first attack's
+  +7 shows at f15381 = **8 ticks** after combat start; the client predicts 13 (LaunchAttack 0.425, not stretched
+  at period 1.30 s < attack length 2.5). With the first VOD's post-cast arrow (E4: ~7 ticks earlier than predicted)
+  that is two sightings of his release coming ~5-7 ticks before LaunchAttack. A release scaled to the attack period
+  (0.425 x 1.30 / 2.5 = 0.22 s ≈ 7 ticks) would fit both, but Neeko's attacks fit the unscaled 13 ticks (Neeko E3,
+  E4), so no rule is changed. Open: zoom on his bow to see the arrow leave (as for Draven E2).

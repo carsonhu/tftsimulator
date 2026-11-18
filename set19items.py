@@ -4,8 +4,10 @@ docs/ITEMS.md (decision D6).
 """
 from buildstore import BuildDataError, load_build
 from item import Item
+from timing import ticks_up
 
-offensive_craftables = ["InfinityEdge", "JeweledGauntlet", "SpearOfShojin"]
+offensive_craftables = ["ArchangelsStaff", "BlueBuff", "GuinsoosRageblade", "InfinityEdge", "JeweledGauntlet",
+                        "SpearOfShojin"]
 artifacts = []
 radiants = []
 emblems = []
@@ -105,6 +107,62 @@ class BuildItem(Item):
         for t in tags:
             TAG_MAP[t](champion)
 
+    # ------------------------------------------------------------ what an item's script applies (P8, script_effects)
+    def script_modifier(self, champion, effect, attribute, op):
+        """The single modifier of `attribute` with `op` in an effect the item's script applies: (values[0], scale).
+        scale None = a plain number; 'Stack' etc. = coefficient x that attribute."""
+        entry = self.build_entry(champion)
+        ge = (entry.d.get("script_effects") or {}).get(effect)
+        if ge is None:
+            raise BuildDataError(f"item {self.KEY}: no script effect {effect!r} in build {entry.build.version}")
+        ms = [m for m in ge["modifiers"] if m["attribute"] == attribute and m["op"] == op]
+        if len(ms) != 1 or len(set(ms[0]["values"])) != 1:
+            raise BuildDataError(f"item {self.KEY}: {effect} has no single {attribute} {op} modifier")
+        return ms[0]["values"][0], ms[0].get("scale")
+
+    def script_mana(self, champion, effect):
+        """The mana an effect the item's script applies gives (a plain number)."""
+        entry = self.build_entry(champion)
+        ge = (entry.d.get("script_effects") or {}).get(effect)
+        terms = (ge or {}).get("mana") or []
+        if len(terms) != 1 or terms[0].get("scale") is not None or len(set(terms[0]["values"])) != 1:
+            raise BuildDataError(f"item {self.KEY}: {effect} has no single plain mana term in build {entry.build.version}")
+        return terms[0]["values"][0]
+
+    def row(self, champion, name):
+        """The item's curve row (single point) from the champion's build."""
+        pts = self.build_entry(champion).row(name)
+        if len({v for _, v in pts}) != 1:
+            raise BuildDataError(f"item {self.KEY}: row {name} differs per point")
+        return pts[0][1]
+
+
+class StackingItem(BuildItem):
+    """An item whose script runs a looping timer from combat start and, on each expiry, adds to the item's Stack;
+    another effect turns Stack into a stat (ledger I4). Timer expiries land on ticks_up(k x period) after combat
+    start, in onUpdate (set18 used onUpdate with `time > k x period`, a tick later; O5)."""
+    PERIOD_SECONDS = None  # a literal in the script (cite it), or None: read by period_seconds()
+
+    def __init__(self):
+        super().__init__(phases=["preCombat", "onUpdate"])
+        self.next_k = 1
+
+    def period_seconds(self, champion):
+        return self.PERIOD_SECONDS
+
+    def per_stack(self, champion):
+        """Apply one timer expiry's stat gain to the champion."""
+        raise NotImplementedError
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":  # the timer starts at combat start (I4)
+            self.next_k = 1
+        elif phase == "onUpdate":
+            while champion.tick >= ticks_up(self.next_k * self.period_seconds(champion)):
+                self.per_stack(champion)
+                self.next_k += 1
+        return input_
+
 
 def _name(key):
     return load_build().item(key).name  # the newest build's display name
@@ -130,3 +188,63 @@ class SpearOfShojin(BuildItem):
     KEY = "DA_SpearOfShojin"
     STATS = ("GE_SpearOfShojin",)
     display_name = _name(KEY)
+
+
+class GuinsoosRageblade(StackingItem):
+    """Stats GE_GuinsoosRageblade_Base (10% AP, 10% AS). Script GA_GuinsoosRageblade: at activation (combat start)
+    it applies GE_GuinsoosRageblade_StackingAS (AttackSpeed MultiplyAdditive 0.01 x Stack) and starts a looping
+    1-second timer (0x1b9: K2_SetTimerDelegate(Stack, 1, true)); each expiry in combat applies the ItemStackGE
+    parameter, GE_GuinsoosRageblade_ItemStack (Stack + ASCounter = 7). So +7% AS per second, additive with other AS.
+    VOD (items/GuinsoosRageblade.md E1, Varus): first stack exactly 1.000 s after combat start, then every second,
+    AS = base x (1.10 + 0.07n)."""
+    KEY = "DA_GuinsoosRageblade"
+    STATS = ("GE_GuinsoosRageblade_Base",)
+    PERIOD_SECONDS = 1.0  # script literal (0x1b9)
+    display_name = _name(KEY)
+
+    def per_stack(self, champion):
+        stack, _ = self.script_modifier(champion, "GE_GuinsoosRageblade_ItemStack", "Stack", "+")
+        coef, scale = self.script_modifier(champion, "GE_GuinsoosRageblade_StackingAS", "AttackSpeed", "MultiplyAdditive")
+        if scale != "Stack":
+            raise BuildDataError(f"{self.KEY}: StackingAS no longer scales with Stack ({scale})")
+        champion.aspd.addStat(coef * stack * 100)
+
+
+class ArchangelsStaff(StackingItem):
+    """Stats GE_ArchangelsStaff_Stats (30% AP, 1 mana regen). Script GA_ArchangelsStaff_RampingStats: at time 0 of
+    phase 9 (combat; Blue Buff's script tests the same phase at combat start) it applies GE_ArchangelsStaff_StackToAP
+    (AbilityPower + 0.01 x Stack) and starts a looping timer whose period is the FrequencyCurveRow parameter (row
+    Period = 5 s); each expiry in combat applies RampingStatGE = GE_ArchangelsStaff_RampingStats (Stack + APStack =
+    20). So +20 AP every 5 s from combat start. No VOD yet (predicted; set18: the same, a tick later)."""
+    KEY = "DA_ArchangelsStaff"
+    STATS = ("GE_ArchangelsStaff_Stats",)
+    display_name = _name(KEY)
+
+    def period_seconds(self, champion):
+        ref = next(r for r in self.build_entry(champion).d["ability_refs"] if r["ga"] == "GA_ArchangelsStaff_RampingStats")
+        return self.row(champion, ref["params"]["FrequencyCurveRow"]["RowName"])
+
+    def per_stack(self, champion):
+        stack, _ = self.script_modifier(champion, "GE_ArchangelsStaff_RampingStats", "Stack", "+")
+        coef, scale = self.script_modifier(champion, "GE_ArchangelsStaff_StackToAP", "AbilityPower", "+")
+        if scale != "Stack":
+            raise BuildDataError(f"{self.KEY}: StackToAP no longer scales with Stack ({scale})")
+        champion.ap.addStat(coef * stack * 100)
+
+
+class BlueBuff(BuildItem):
+    """Stats GE_BlueBuff_Stats (6 mana regen, 15% AP, 15% AD). Script GA_BlueBuff: on activation, if the round's
+    elapsed time is under 0.01 s in phase 9 (combat start), apply CombatStartManaGain = GE_BlueBuff_StartingMana
+    (mana + StartingMana = 10, item source, AlwaysBank). preCombat, as set18's Blue Buff. VOD (items/BlueBuff.md E1,
+    Varus): the panel's mana goes 30 -> 40 on the combat-start frame."""
+    KEY = "DA_BlueBuff"
+    STATS = ("GE_BlueBuff_Stats",)
+    display_name = _name(KEY)
+
+    def __init__(self):
+        super().__init__(phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.addMana(self.script_mana(champion, "GE_BlueBuff_StartingMana"))
+        return input_

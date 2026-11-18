@@ -32,7 +32,14 @@ every frame (layout measured at 1280x720). From the mana series:
   and matching the mana step to the projectile leaving. In PvE rounds targets walk in, so a ranged unit's first
   attack need not start at combat start; don't time from combat start without seeing the attack.
 
-Combat start: the frame the round timer flips to the combat timer and the "Combat" banner disappears.
+Combat start: the frame the round timer flips to the combat timer and the "Combat" banner disappears. With Blue
+Buff on the inspected unit there is a better marker: its +10 mana lands on the combat-start frame itself.
+
+**Prefer the printed numbers to the bars.** The mana and HP bars animate over several frames after a change; the
+"current / max" text and the stats grid change on the frame the value does. `tools/vod_text_changes.py <video>
+<first> <last> --field mana|as --out DIR` lists every frame where the mana text or the attack-speed number changes
+and saves a crop of each for reading the digits (confirm each change from its crop: a cursor or tooltip over the
+field also registers). At 60 fps two frames make a tick, so intervals like Guinsoo's 1 s read as 60 frames exactly.
 
 ## Events to mark
 

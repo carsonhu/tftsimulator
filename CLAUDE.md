@@ -27,7 +27,7 @@ Read `docs/ASSUMPTIONS.md` before changing any game rule, and the champion's wor
 | How to measure timing from VODs | `docs/evidence-method.md` |
 | Which units are in scope (65 non-tanks) and removals with reasons | `roster.json` (hand-edited) |
 | One worksheet per in-scope champion: build data, questions, evidence log, decisions | `champions/<Name>.md` |
-| One row per item: stats effect, script, status, evidence (worksheet only when timing needs a VOD) | `docs/ITEMS.md` |
+| One row per item: stats effect, script, status, evidence (worksheet only when timing needs a VOD) | `docs/ITEMS.md`, `items/<Name>.md` |
 | Client builds the simulator can use | `builds/<version>.json`, `builds/index.json` (newest first) |
 | Reading a build from Python | `buildstore.py` (`load_build`, `.champion(key).row(name)`, `.role(name).modifier(attr)`) |
 

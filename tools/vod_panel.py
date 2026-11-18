@@ -5,7 +5,7 @@
 Right-clicking a unit in game keeps its panel open on the right of the screen; the panel's HP bar (green) and mana
 bar (blue) fill from the left in proportion to current / max. This reads, for every frame:
 
-    frame, t (s), hp_px, mana_px, portrait (a 16-value signature of the unit portrait, to split the video by which
+    frame (the video's own frame number, at its own fps), t (s), hp_px, mana_px, portrait (a 16-value signature of the unit portrait, to split the video by which
     unit is inspected)
 
 Layout measured on a 1280x720 recording (Outplayed, PBE 2026-11-17): both bars span x 1120-1279 (160 px); HP rows
@@ -40,6 +40,13 @@ def fill(row, x0, is_on, max_gap=2):
     return last + 1
 
 
+def video_fps(path):
+    out = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=r_frame_rate',
+                          '-of', 'default=nw=1:nk=1', path], capture_output=True, text=True, check=True).stdout.strip()
+    num, _, den = out.partition('/')
+    return float(num) / float(den or 1)
+
+
 def blue(p):
     return p[2] > 150 and p[0] < 90
 
@@ -61,7 +68,7 @@ def main():
     args += ['-vf', f'crop={CROP_W}:{CROP_H}:{CROP_X}:{CROP_Y}', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-']
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     size = CROP_W * CROP_H * 3
-    fps = 30.0
+    fps = video_fps(a.video)  # 'frame' counts the video's own frames (60 fps: 2 per game tick)
     with open(a.out, 'w', newline='') as fh:
         w = csv.writer(fh)
         w.writerow(['frame', 't', 'hp_px', 'mana_px', 'portrait'])
