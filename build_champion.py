@@ -153,3 +153,30 @@ class BuildChampion(Champion):
     def row(self, name, star=None):
         """This champion's curve row at its star level (or `star`), from the selected build."""
         return self.data.row(name, star=star or self.level)
+
+    # ------------------------------------------------------------ spell timelines from the build
+    def chrono(self, name):
+        """One timeline (chrono) in the champion's folder: {'length', 'events': [[name, t], ...], 'projectiles'}."""
+        ch = (self.data.d.get('chronos') or {}).get(name)
+        if ch is None:
+            raise BuildDataError(f'{self.KEY} has no chrono {name!r} in build {self.build.version}')
+        return ch
+
+    def chrono_event(self, chrono, event):
+        """Seconds from the chrono's start to `event` (the first one of that name)."""
+        for n, t in self.chrono(chrono)['events']:
+            if n == event:
+                return t
+        raise BuildDataError(f'{self.KEY}: chrono {chrono} has no event {event!r} in build {self.build.version}')
+
+    def chrono_projectile_speed(self, chrono, projectile):
+        """Move speed (units/s) of the projectile named `projectile` that `chrono` spawns."""
+        speeds = {p['speed'] for p in self.chrono(chrono).get('projectiles') or [] if p['name'] == projectile}
+        if len(speeds) != 1 or None in speeds:
+            raise BuildDataError(f'{self.KEY}: chrono {chrono} has no single speed for projectile {projectile!r} '
+                                 f'in build {self.build.version} ({sorted(speeds, key=str)})')
+        return speeds.pop()
+
+    def trait_value(self, trait_key, row, trait_level):
+        """A trait's curve row at a trait level (0 = inactive), from the selected build (exact curve point)."""
+        return self.build.trait(trait_key).row(row, col=trait_level)

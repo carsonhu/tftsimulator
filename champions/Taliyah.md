@@ -49,7 +49,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Taliyah19_Attack` | Chronos | 1.6667 | LaunchAttackVariant2 0.2284, LaunchAttackVariant1 0.2284, Unlock 0.6667 |
+| `CD_Taliyah19_Attack` | Chronos | 1.6667 | LaunchAttackVariant1 0.2284, LaunchAttackVariant2 0.2284, Unlock 0.6667 |
 | `CD_Taliyah19_HopOff` | Chronos | 0.6007 | Unlock 0.5807 |
 | `CD_Taliyah19_SmallCast` | Chronos | 1.9324 | Unlock 1.9113 |
 | `CD_Taliyah19_Windup` | Chronos | 1.3191 | BeginSurf 1.271 |

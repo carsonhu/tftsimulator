@@ -26,6 +26,14 @@ def ticks(seconds):
     return max(0, round(seconds * TPS))
 
 
+def projectile_ticks(speed, hexes):
+    """Release -> hit for a projectile at `speed` units/s over `hexes` hexes (G4: straight-line distance, any arc
+    height ignored). 0 for speed <= 0 (no projectile)."""
+    if not speed or speed <= 0:
+        return 0
+    return ticks_up(hexes * HEX_UNITS / speed)
+
+
 class Timing:
     """How one champion's attacks and casts are timed. Seconds in, ticks out.
 
@@ -41,7 +49,8 @@ class Timing:
     mana_lock    cast start -> mana can be gained again (G6); None = cast_lock
     lock_scales_with_as  the spell's script reads attack speed: both locks scale by base AS / current AS (G7, a
                  generic rule; a champion whose script uses its own curve overrides scaled_locks)
-    cast_cancels_attack  a ranged attack under way when the cast starts never releases (T4); default: it still releases
+    cast_cancels_attack  a ranged attack under way when the cast starts never releases (T4); from the build's spell
+                 (`CancelAbilitiesWithTag` has `Combat.Attacking`); default when the build doesn't say: it still releases
     source       {field: where the value came from}, e.g. 'build rls-19.1.0.5973071' or a VOD with its timestamp
     """
 
@@ -86,7 +95,11 @@ class Timing:
                 src['mana_lock'] = f'{where} {sp["ga"]}'
             kw['lock_scales_with_as'] = bool(sp.get('reads_attack_speed'))
             src['lock_scales_with_as'] = f'{where} {sp["ga"]}'
-        for f in ('launch', 'attack_len', 'proj_speed', 'cast_lock', 'mana_lock'):
+            if sp.get('cancels_attack') is not None:
+                # T4: the spell's CancelAbilitiesWithTag has Combat.Attacking
+                kw['cast_cancels_attack'] = bool(sp['cancels_attack'])
+                src['cast_cancels_attack'] = f'{where} {sp["ga"]}'
+        for f in ('launch', 'attack_len', 'proj_speed', 'cast_lock', 'mana_lock', 'cast_cancels_attack'):
             src.setdefault(f, 'default')
         return cls(source=src, **kw)
 
@@ -100,10 +113,8 @@ class Timing:
 
     def flight_ticks(self, attack_range):
         """Release -> hit for a projectile (G4); 0 for melee."""
-        if self.proj_speed <= 0:
-            return 0
         hexes = self.distance if self.distance is not None else max(1, attack_range or 1)
-        return ticks_up(hexes * HEX_UNITS / self.proj_speed)
+        return projectile_ticks(self.proj_speed, hexes)
 
     def mana_moment(self, ranged):
         """'start', 'release' or 'hit' (T3 default: ranged at the release, melee on the hit)."""

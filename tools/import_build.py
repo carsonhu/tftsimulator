@@ -40,7 +40,8 @@ def champion(c):
         'timing': {k: t.get(k) for k in ('attack_chrono', 'attack_launch', 'attack_launch_variants', 'attack_len',
                                          'attack_release_base_as', 'projectile', 'proj_speed', 'proj_movement')}
         | {'spells': [{k: s.get(k) for k in ('ga', 'cast_chrono', 'cast_end', 'lockout', 'manalock_removed',
-                                             'finish_cause', 'reads_attack_speed', 'notes', 'log')}
+                                             'finish_cause', 'reads_attack_speed', 'cancels_attack', 'notes',
+                                             'log')}
                       for s in t.get('spells') or []]},
         'abilities': [a['ga'] for a in c['abilities']],
         'effects': c.get('effects') or [],

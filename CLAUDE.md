@@ -32,7 +32,10 @@ Champions are done **one at a time** (decision D5): fill the worksheet's questio
 A Set 19 champion subclasses `build_champion.BuildChampion` with `KEY = 'DA_<Name>19'`: HP/AD per star, mana,
 attack speed and cap, range, role mana and timing all come from the selected build (ledger B1-B9), and ability
 numbers are read by curve-row name (`self.row('APDamage')`), never typed in. A missing value raises
-`BuildDataError` naming the build; don't catch it to default to 0.
+`BuildDataError` naming the build; don't catch it to default to 0. Spell effects are timed from the build's chronos
+(`self.chrono_event(...)`, `self.chrono_projectile_speed(...)`, B10) and scheduled with `self.schedule_tick`; trait
+values a spell reads come from `self.trait_value(...)` (B11). `set19champs.Neeko` is the worked example: its
+docstring and worksheet decision D1 cite the script for each structural fact.
 
 ## Commands
 
@@ -80,8 +83,9 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   spell effects go through `self.schedule(seconds, fn)`, never a hand-made status. Attack damage and on-attack item
   effects happen when the attack lands.
 - Registries: a class is live only when listed (`set19champs.champ_list`, `set19buffs.class_buffs` /
-  `augments` / ..., `set19items` lists); all start empty. `worker.js` `PY_FILES` lists every module the browser
-  loads; a new module must be added there too. The browser can't load `builds/` yet (B9).
+  `augments` / ..., `set19items` lists); champions so far: Neeko; the others are empty. `worker.js` `PY_FILES`
+  lists every module the browser loads; a new module must be added there too. The browser can't load `builds/`
+  yet (B9).
 - Items/buffs: behaviour in `performAbility(phase, time, champion, input_)` for the phases listed in `phases`
   (`preCombat`, `onUpdate`, `preAttack`, `onAttack`, `postAttack`, `onCrit`, `preAbility`, `postAbility`,
   `onDealDamage`, ...). Units differ per stat (item `crit=20` is 20%; `omnivamp=0.15` is a fraction; `ad`, `ap`,

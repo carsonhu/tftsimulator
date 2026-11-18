@@ -43,7 +43,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Jhin19_Attack_new` | Chronos | 1.2519 | CustomEventOnAttack1 0, CustomEventOnAttack4 0, CustomLaunchAttack2 0.2508, CustomLaunchAttack3 0.2508, LaunchAttack 0.534, CustomLaunchAttack1 0.534, EncorePiercing 0.7508, Encore 1.0321, Unlock 1.2338 |
+| `CD_Jhin19_Attack_new` | Chronos | 1.2519 | CustomEventOnAttack1 0, CustomEventOnAttack4 0, CustomLaunchAttack2 0.2508, CustomLaunchAttack3 0.2508, CustomLaunchAttack1 0.534, LaunchAttack 0.534, EncorePiercing 0.7508, Encore 1.0321, Unlock 1.2338 |
 | `CD_Jhin19_CastAnim` | Chronos | 0.8387 | Unlock 0.8358 |
 | `CD_Jhin19_ViolinAttack` | Chronos | 0.5004 | Shoot 0, Encore 0.494 |
 | `CD_Jhin19_ViolinAttackEncore` | Chronos | 0.402 | Shoot 0, Death 0.3997 |

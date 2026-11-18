@@ -37,7 +37,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Draven19_Attack` | Chronos | 1.4667 | LaunchAttackVariant2 0.2587, LaunchAttackVariant1 0.2587, Unlock 1.1733 |
+| `CD_Draven19_Attack` | Chronos | 1.4667 | LaunchAttackVariant1 0.2587, LaunchAttackVariant2 0.2587, Unlock 1.1733 |
 
 ### Scripts on the unit
 

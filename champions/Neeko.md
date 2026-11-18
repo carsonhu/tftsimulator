@@ -52,8 +52,8 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **in progress** (first VOD read 2026-11-17)
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-17); open: Q5, Q6 (arc), Q8, Q10, Q13 (no damage evidence yet)
+- Keep in the simulator: **yes**
 
 ## Questions
 
@@ -67,16 +67,16 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q3 | First attack at combat start: when does it land? | G3: a fresh attack at combat start, released 13 ticks in | **consistent** (mana at +14 frames from the combat banner ending) | E4 |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.4219 s (12.66 → 13 ticks) | **consistent, indirect**: E3 and E4 both fit a 13-tick windup with mana at the release | E3, E4 |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
-| Q6 | Projectile travel time (ranged only) | speed 2000 | predicted | |
+| Q6 | Projectile travel time (ranged only) | speed 2000 | predicted: attack 2000 (13 ticks at 4 hexes). Spell missiles also 2000 but arc (height 400); engine assumes straight-line time (G4), ~20 ticks if speed is along the arc | build (P7) |
 | Q7 | Cast time: cast start to the next attack starting | 0.8333 s (25 ticks) | **consistent, indirect**: next attack's mana at +38/39 frames = 25 + 13-tick windup | E3 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted (only base AS seen) | |
 | Q9 | Mana lock: from cast start, when can mana be gained again? | 0.8 s (24 ticks) | **consistent**: lock ended between +22.5 and +30 frames | E6 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted (only base AS seen) | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | **0 for role mana** (no +7 at or after the cast until the next attack) | E3 |
-| Q12 | Does the cast cancel or reset an attack in progress? | yes (script cancels `Combat.Attacking`) | **consistent**: both casts started ~4 frames after the next attack would have started, and that attack never paid mana | E7 |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q12 | Does the cast cancel or reset an attack in progress? | yes (script cancels `Combat.Attacking`) | **consistent**; now from data: the spell cancels `Combat.Attacking` (T4, `cancels_attack`), so the attack in its windup never releases. E7 can't separate cancel from "released during the cast" (mana is blocked during the cast lock either way); a damage number would | E7, T4 |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted, implemented from the script: 6 throws (CD_Neeko19_CastAnimWithClone Throw1-6); 1, 2, 4 = Popper missiles at full damage, 3, 5, 6 = Encore missiles × CT_Encore19 RecastEffectiveness (0 / 25% / 50%); each applies GE_Neeko19_Damage on arrival = DamageAP × AP × effectiveness, magic, no spell crit (RollIfCanSpellCrit) | script, build; D1 below |
+| Q14 | Passives and other mechanics that need modelling | see ability text | kill passive (+1% AP per spell kill, KillBuffer 0.2 s): **not modelled**, dummies never die | D1 below |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-17 (`set19champs.Neeko`) | D1 below |
 
 ## Evidence log
 
@@ -106,5 +106,19 @@ to within 0.3 mana at 9 checked frames).
   (Draven and Varus seen on screen; Set 18's "Hold" event was the release), so she needs no override.
   The idea that "spell cancels attacks" marks release-payers is withdrawn: every Set 19 spell checked has
   that flag.
-- Still open: Q5/Q8/Q10 need a fight at clearly higher attack speed; Q13/Q14 need damage numbers (the inspection
+- Still open: Q5/Q8/Q10 need a fight at clearly higher attack speed; Q13 (implemented from the script, D1) needs damage numbers (the inspection
   panel doesn't show them; a damage recap or the dummy HP bar is needed).
+- D1 2026-11-17: implemented as `set19champs.Neeko` (tests: `test_neeko.py`, local). Script
+  `GA_Neeko19_SpellUsingVFX` (build ga_scripts.zip): the cast chrono's `Throw1`-`Throw6` events each play a
+  projectile chrono (switch at 0x18e3): Throw1/2/4 -> `CD_Neeko19_Projectile1/2/4` ('Popper', effectiveness 1),
+  Throw3/5/6 -> `..._Encore` ('Encore', effectiveness `RecastEffectiveness` at the Encore level, read at
+  activation, 0x4423). Damage on each missile's `OnArrived` (0x329, 0x76c, 0xc9d, 0x10e4, 0x3d71, 0x3f27):
+  `GE_Neeko19_Damage` = MagicDamageCalc1 × SetByCaller `Set19.Trait.Encore.Effectiveness` (MultiplyAdditive), magic.
+  Throws fire at ticks 7, 11, 14, 18, 21, 24 after the cast; each lands 13 ticks later at range 4 (G4).
+  Assumptions made here: one damage per throw (each projectile chrono holds two identical 'Popper' modules; the text
+  says "3 confetti streams that each deal"); arc travel time (G4); Encore level as a scenario input (B11).
+  Checked in tests against the VOD: attack mana every 43 ticks from tick 13 (E4, E5), the next attack's mana 38
+  ticks after a cast (E3: 39 frames).
+- Known gap vs the VOD: the engine's first cast is at tick 174 from combat start; the VOD's at ~177-178 frames.
+  Attacks and the cast lock match, so the difference is the regen grid's phase (G17: the engine pays regen from
+  tick 0, the VOD's grid started ~4.5 frames after the banner). Left open until more units show the phase.

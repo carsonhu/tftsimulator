@@ -37,7 +37,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Ziggs19_Attack` | CD_Ziggs19_Attack | 1.001 | LaunchAttackVariant2 0.4, LaunchAttackVariant1 0.4, Unlock 0.7 |
+| `CD_Ziggs19_Attack` | CD_Ziggs19_Attack | 1.001 | LaunchAttackVariant1 0.4, LaunchAttackVariant2 0.4, Unlock 0.7 |
 | `CD_Ziggs19_CastAnim` | CD_Ziggs19_CastAnim | 0.8002 | Unlock 0.779 |
 | `CD_Ziggs19_HyperpopHypemeter_Intro` | CD_Ziggs19_HyperpopHypemeter_Intro | 1 | StartHype 0.95 |
 | `CD_Ziggs19_HyperpopHypemeter_Outro` | CD_Ziggs19_HyperpopHypemeter_Outro | 1.0312 | EndOutro 0.9791 |

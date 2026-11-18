@@ -41,7 +41,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_MissFortune19_3StarCastanim` | Chronos/3Star | 15.3279 | LaunchProjectile 0.2033, LaunchProjectile 0.4707, LaunchProjectile 0.7301, LaunchProjectile 1.0053, LaunchProjectile 1.2696, LaunchProjectile 1.5369, LaunchProjectile 1.7964, LaunchProjectile 2.0716, LaunchProjectile 2.3326, LaunchProjectile 2.6, LaunchProjectile 2.8595, LaunchProjectile 3.1347, Unlock 15.0814 |
-| `CD_MissFortune19_Attack` | Chronos | 2.6667 | LaunchAttackVariant2 0.2664, LaunchAttackVariant1 0.2664, Unlock 1.0667 |
+| `CD_MissFortune19_Attack` | Chronos | 2.6667 | LaunchAttackVariant1 0.2664, LaunchAttackVariant2 0.2664, Unlock 1.0667 |
 | `CD_MissFortune19_CashoutCeremony` | Chronos | 3.9561 | Loot 1.9859 |
 | `CD_MissFortune19_CastAnim` | Chronos | 1.0696 | LaunchProjectile 0.2862, Unlock 1.0482 |
 

@@ -31,7 +31,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Zoe19_Attack` | Chronos | 2.1333 | LaunchAttackVariant2 0.3387, LaunchAttackVariant1 0.3387, Unlock 0.8533 |
+| `CD_Zoe19_Attack` | Chronos | 2.1333 | LaunchAttackVariant1 0.3387, LaunchAttackVariant2 0.3387, Unlock 0.8533 |
 | `CD_Zoe19_CastAnim` | Chronos | 1.8492 | LaunchProjectile 0.2884, Splash 0.6738, RedirectProjectile 1.3167, Unlock 1.8147 |
 
 ### Scripts on the unit
