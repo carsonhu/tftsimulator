@@ -126,3 +126,7 @@ to within 0.3 mana at 9 checked frames).
   the Encore projectile chronos on every cast) and applies `GE_Neeko19_Damage` at effectiveness 0, i.e. three 0-damage
   hits. Same damage either way; it would matter only for an effect that counts spell hits regardless of size. If one
   is implemented, deal the 0 hits instead of skipping them (and see E20).
+- 2026-11-17, second VOD (`…PBE_11-17-2026_16-35-16-966.mp4`, 60 fps, rls-19.1.0.5973071), f20438: Neeko with
+  Guinsoo's + Blue Buff showed max mana **36**. Source (owner): the K/DA trait, whose tiers count the members' total
+  star level; (3) POP/STARS = "0.1 reduced max Mana" (`CT` row `ManaReduction` 0.1): 40 x 0.9 = 36 exactly. K/DA is
+  not implemented yet; when it is, this is its first check.

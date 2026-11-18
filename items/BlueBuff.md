@@ -22,5 +22,6 @@ Source: `Outplayed/…PBE_11-17-2026_16-35-16-966.mp4` (owner's PBE recording, 2
 
 ## Notes
 
-- Neeko with Blue Buff + Guinsoo's (f20438) showed max mana 36, not 40. Blue Buff has no ManaMax modifier, so
-  something else on that board lowered it (her traits that round: K/DA, Encore, Prodigy); not explained yet.
+- Neeko with Blue Buff + Guinsoo's (f20438) showed max mana 36, not 40. Not Blue Buff (it has no ManaMax
+  modifier): the K/DA trait's first tier, (3) POP/STARS, "0.1 reduced max Mana" (`ManaReduction` 0.1):
+  40 x 0.9 = 36 (owner, 2026-11-17; see champions/Neeko.md).
