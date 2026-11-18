@@ -94,3 +94,15 @@ def test_composer():
         v = Varus(1, build=load_build(V))
         Simulator().itemStats([set19buffs.Composer(1, n)] + v.items, v)
         assert v.ap.stat == pytest.approx(1 + 0.03 * n)
+
+
+def test_vod5_cast_lock():
+    # VOD5 (0-57-11-500, f21295 combat start): Blue Buff + Quicksilver, AS 0.92; the attack that fills the bar, then
+    # the next attack's mana 90.5 ticks later (cast 1 tick after the fill, cast lock 76, then the windup): engine 91
+    m = LoggedMalzahar(1)
+    fight(m, items=[set19items.BlueBuff(), set19items.Quicksilver()], seconds=7)
+    assert m.manaRegen.stat == 8  # 2 + 6 (Blue Buff), the panel's 8/s
+    attacks = [t for t, a, before, after in m.mana_log if a == 7]
+    fill = next(t for t, a, before, after in m.mana_log if a == 7 and after >= 50)
+    assert m.casts[0] == fill + 1
+    assert next(t for t in attacks if t > fill) - fill == 91
