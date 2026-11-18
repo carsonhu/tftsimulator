@@ -25,6 +25,7 @@ Change a status only with evidence: cite the worksheet evidence row, VOD or repl
 | D3 | Every PBE build is snapshotted automatically (scheduled task "TFT build snapshot", every 3 h). The user picks the build the simulator uses. | 2026-11-17 | A build that is never installed on this PC (the Riot Client skipped it) cannot be snapshotted. |
 | D4 | Scope: every Set 19 shop unit whose game role is not a Tank role (role name contains "Tank"). 65 units in, 29 tanks out (`roster.json`). Units may be removed later if they can't be simulated realistically, with a dated reason. | 2026-11-17 | Annie, Elise and Lillia are MagicTank in the data, so they are out, although they play partly as casters. |
 | D5 | Each champion is done one at a time, with VOD evidence for its timing questions before its timing is treated as known. | 2026-11-17 | |
+| D6 | Items: one row per item in `docs/ITEMS.md` (stats effect, script, status, evidence); a worksheet only for items whose timing needs VOD evidence. All 39 craftables listed first. | 2026-11-17 (owner) | |
 
 ## Data pipeline
 
@@ -37,6 +38,7 @@ Change a status only with evidence: cite the worksheet evidence row, VOD or repl
 | P5 | Ability text values without a column, inside a trait tier's line, mean that tier's column. | predicted | Matches the in-game reading for Collab (8% at 3, 20% at 5). | |
 | P6 | The game build a VOD was played on is known. | per VOD | Match the recording time to the build's install time (`pak_mtime` in the manifest) and check no later build was snapshotted. First VOD (2026-11-17 15:08-15:16) → rls-19.1.0.5973071 (installed 13:28). | PBE changes daily; a VOD from the wrong day measures the wrong build. |
 | P7 | Spell timelines carry what a spell's effects need (added 2026-11-17, snapshot of rls-19.1.0.5973071 redone with `--force`): every chrono's spawned projectiles (`chronos.<CD>.projectiles`: name, movement class, speed, arc height) and each spell's `cancels_attack` flag (the ability's defaults). Tied event times are now ordered by name, so re-snapshots diff cleanly. | from data | `tftDatamine/tools/set_dump.py` `chrono_info`, `spell_timing.py` | A missile whose speed is set in script, not in its chrono: the chrono shows no projectile or a different one. Check against the script. |
+| P8 | Items and shared scripts are in the snapshot (2026-11-17, rls-19.1.0.5973071 redone with `--force`): each item's stats effects (`effects`: per modifier the attribute, operation as stored (`op_raw`) and as read, curve row, values; the effect's lifetime and targets) and its abilities with parameters (`ability_refs`). The script dump also decodes `Set_Shared` (attacks, mana), `Item_Shared` and `Augment_Shared` (782 scripts, 0 decode errors), under their plugin name in `ga_scripts.zip`; the set's own paths are unchanged. 146 of 172 items have a stats effect, all 39 craftables. | from data | `set_dump.py` `item`, `ge_modifiers`; `dump_ga_scripts.py` | Operation meaning: GAS ops are read by name (MultiplyAdditive 1.1 = +10%, as for roles, B5); `Multiplicitive` and `MultiplyCompound` appear on a few items (Rabadon's) and are checked per item before use. |
 
 ## Game rules (global)
 

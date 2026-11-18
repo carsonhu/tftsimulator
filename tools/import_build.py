@@ -68,7 +68,8 @@ def convert(src_dir):
         'traits': {t['key']: simple(t, ('key', 'name', 'kind', 'rows', 'calcs', 'curve_table'))
                    | {'tiers': [{'threshold': x['threshold'], 'text': plain(x['html']), 'unlock': x.get('unlock')}
                                 for x in t['tiers']]} for t in d['traits']},
-        'items': {i['key']: simple(i, ('key', 'name', 'kind', 'tags', 'rows', 'calcs', 'recipes'))
+        'items': {i['key']: simple(i, ('key', 'name', 'kind', 'tags', 'rows', 'calcs', 'recipes', 'upgrade', 'source',
+                                       'abilities', 'ability_refs', 'effects'))
                   | {'stat_text': plain(i.get('stat_html'))} for i in d['items']},
         'augments': {a['key']: simple(a, ('key', 'name', 'tier', 'round_variant', 'rows', 'calcs', 'never_select'))
                      for a in d['augments']},
