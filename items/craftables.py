@@ -5,7 +5,7 @@ from registry import register
 from items.base import BuildItem, StackingItem, item_name
 from effects import ActiveEffect, apply_effect, last_tick
 from events import CRIT, IS_ATTACK, LAUNCH
-from items.debuffs import BurnItem, DebuffItem, debuff_value
+from items.debuffs import BurnItem, DebuffItem, apply_shred, debuff_value
 
 
 @register("craftable")
@@ -392,9 +392,7 @@ class VoidStaff(DebuffItem):
     display_name = item_name(KEY)
 
     def debuff(self, champion, target, time, level, duration):
-        op, channel = self.script_rule(champion, "GE_MRShred", "MagicResist")
-        shred = ActiveEffect("Shred", [("mr", op, debuff_value(champion, "ShredSunderChill", level), channel)])
-        apply_effect(target, shred, champion.tick, last_tick(champion.tick, duration))
+        apply_shred(champion, target, level, duration)
 
 
 @register("craftable")

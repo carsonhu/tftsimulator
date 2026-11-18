@@ -90,6 +90,13 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|---|
 | Rock damage | 120/180/270 x AD physical, crits only with Precision, on-hit effects apply | damage numbers of his 3rd attacks on a target of known armor | champions/Gnar.md D1 |
 
+### 7d. Malzahar again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Cast to the next attack | cast lock 76 ticks (the build), then a fresh attack | a Malzahar cast with a target that stays in range (VOD3's was followed by a walk) | champions/Malzahar.md E3 |
+| Beam and burst damage | 9 beam ticks of 380/570/960 x AP / 9 on the target; 4 bursts of 40/60/110 x AP within 1 hex, each after a 30% shred | damage numbers of a cast on targets of known MR | champions/Malzahar.md D1 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

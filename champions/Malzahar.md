@@ -60,8 +60,8 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Malzahar`, D1); mana and mana lock checked against VOD3
+- Keep in the simulator: **yes**
 
 ## Questions
 
@@ -70,29 +70,45 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed with his items (1★) | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster | confirmed: 7 per attack and 2/s (+5 / +1 Shojin) | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.445 s (13.35 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 2000 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 2.5333 s (76 ticks) | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | 2.5333 s (76 ticks) | predicted (VOD3's one cast was followed by a walk) | E3 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 2.5 s (75 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 2.5 s (75 ticks) | consistent: overflow shown 75.5 ticks after the filling attack | E3 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | predicted: 0 (no GE_SimulateLaunchAttack in GA_Malzahar19_SpellNew) | D1 |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted (script read: D1); no damage number read yet | D1 |
+| Q14 | Passives and other mechanics that need modelling | see ability text | the shred (D1); Composer (B26) and Prodigy (B24) implemented | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+Source for all rows below: VOD3 (`…PBE_11-17-2026_17-13-37-283.mp4`, 60 fps), the owner's PBE recording, build
+`rls-19.1.0.5973071`; Malzahar 1★, round 1-7, panel open f24365-24895.
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 6:51 (owner's screenshot) | 60 | inspection panel | 950/950, 0/50, 3/s; AD 53 (+50%), AP 15%, AS 0.88, crit 80%, armor/MR 35; Striker's Flail, Infinity Edge, Spear of Shojin | 800 + 150 HP, 0.8 x 1.1 AS, crit 25 + 35 + 20, AD +35 +15%, AP +15%, regen 2 + 1: as built | Q1 |
+| E2 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 f24365-24595 (`tools/vod_text_changes.py`, mana) | 60 | mana text | 0, 1, 13, 14, 15, 16, 28, 29, 30, 31, 32, 44, 45, 46, 47, cast: regen 0.75 a step, attacks +12, 34 ticks apart (f24391, 24459, 24527, 24595) | the floor of 0.75k + 12n; period 1 / 0.88 = 34.1 ticks | Q2 |
+| E3 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 f24595-24869 (mana text; board every 16 frames) | 60 | the cast | overflow 9 shown at f24746 (+151 frames), then 10, 11, 12, 13, 25 (attack at f24833, +119 ticks); the first target died mid-beam (the beam moved to a far enemy) and he walked after the cast | mana lock 75 ticks + T4: lifted 76 after the filling attack, shown at 75.5; the attack after the cast includes a walk, so the cast lock is unmeasured | Q7, Q9 |
 
 ## Decisions and notes
+
+- 2026-11-18, D1 (implemented, `set19champs.Malzahar`):
+  - **Spell (GA_Malzahar19_SpellNew):** mana lock at activation; CD_Malzahar19_CastAnim_new at his attack target.
+    BeginBeam (0.3523 s): a burst, and the beam: RepeatAction(PrimaryTickRate 0.25, 9), first tick at once, each
+    MagicDamageCalc1 / 9 (SetByCaller NumTicks) to the target, magic, DOT. Burst (0.9923, 1.6323, 2.2723 s): 4 bursts
+    in all, each GE_MRShred (30%, 4 s) then MagicDamageCalc2 on the enemies within AOEHexRange (1) of the target,
+    target included. Unlock (2.4688 s) ends it (build: mana lock 75, cast lock 76 ticks). Crits only with Precision.
+  - **Shred:** the shared GE_MRShred, one "Shred" per target whoever applies it (Void Staff's too: the later end and
+    the higher level win). The burst shreds before it damages, so it amplifies itself.
+  - **Not modelled:** the beam's retarget when its target dies (dummies never die).
 

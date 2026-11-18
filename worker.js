@@ -56,6 +56,7 @@ const PY_FILES = [
   "traits/true_damage.py",
   "traits/prodigy.py",
   "traits/pentakill.py",
+  "traits/composer.py",
 ];
 
 async function boot() {

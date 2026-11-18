@@ -101,9 +101,10 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
 - Registries: an item or buff is live only when decorated `@register(kind)` (`registry.py`; kinds craftable,
   radiant, artifact, emblem, trait, augment), which fills `set19items.offensive_craftables` / `radiants` /
   `artifacts` / `emblems` and `set19buffs.class_buffs` / `augments`; champions are live when listed in
-  `set19champs.champ_list` (Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal, Lux, Gnar; traits: Encore,
-  Trickshot, K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats, Heartsteel, Hyperpop, Ionic Spark, Prodigy,
-  Pentakill). A new trait is
+  `set19champs.champ_list` (Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal, Lux, Gnar, Malzahar; traits:
+  Encore, Trickshot, K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats, Heartsteel, Hyperpop, Ionic Spark,
+  Prodigy, Pentakill, Composer). A debuff a spell applies uses the shared helpers in `items/debuffs.py`
+  (`apply_shred`, `apply_burn`). A new trait is
   a module in `traits/` plus its import line in `set19buffs.py`. `worker.js` `PY_FILES` lists every module the
   browser loads; a new module must be added there too (`test_sim_entry.py` checks the `items/` and `traits/` ones). Builds reach the browser through
   the worker (B9): the newest at boot, others when the page's "Game build" picker names one. After changing the

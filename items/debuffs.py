@@ -41,6 +41,28 @@ class DebuffItem(BuildItem):
         raise NotImplementedError
 
 
+def shared_rule(champion, effect, attribute):
+    """(op, channel) of the single `attribute` modifier of a shared effect (GE_MRShred, GE_ArmorSunder, ...): the
+    effect is one asset whoever applies it, read from the first item script in the build that lists it."""
+    build = getattr(champion, "build", None) or load_build()
+    for entry in (build.data.get("items") or {}).values():
+        ge = (entry.get("script_effects") or {}).get(effect)
+        if ge:
+            ms = [m for m in ge.get("modifiers") or [] if m["attribute"] == attribute]
+            if len(ms) != 1:
+                raise BuildDataError(f"{effect} has no single {attribute} modifier in build {build.version}")
+            return ms[0]["op"], ms[0].get("channel", 1)
+    raise BuildDataError(f"no item script in build {build.version} lists {effect}")
+
+
+def apply_shred(champion, target, level, duration):
+    """GE_MRShred on `target` at debuff `level` for `duration` s: MagicResist x ShredSunderChill(level) on Channel2,
+    one "Shred" per target whoever applies it (the later end and the higher level win, effects.py)."""
+    op, channel = shared_rule(champion, "GE_MRShred", "MagicResist")
+    shred = ActiveEffect("Shred", [("mr", op, debuff_value(champion, "ShredSunderChill", level), channel)])
+    apply_effect(target, shred, champion.tick, last_tick(champion.tick, duration))
+
+
 def apply_burn(champion, target, level, duration):
     """GE_Burn on `target` from `champion` (I7), as an effects.ActiveEffect with the build's rules (globals.burn):
     one burn per target (StackLimitCount 1); a new application renews the duration but not the period

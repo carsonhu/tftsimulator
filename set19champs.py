@@ -7,6 +7,7 @@ how the damage is built) is the champion's script, cited by file and offset.
 import set19buffs
 from build_champion import BuildChampion
 from champion import Champion
+from items.debuffs import apply_shred
 from events import IS_ATTACK, ON_HIT, ON_SPELL, ONHIT_AFTER, ONHIT_PRE, UNIT, CombatEvent, damage_tags
 from timing import TPS, Timing, projectile_ticks, ticks_up
 
@@ -598,7 +599,59 @@ class Gnar(BuildChampion):
             self.schedule_tick(self.tick + step, lambda: self._rock_lands(nxt, hit + [nxt], k + 1))
 
 
-champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar']
+class Malzahar(BuildChampion):
+    """Forbidden Cacophony (champions/Malzahar.md, D1). Script: GA_Malzahar19_SpellNew (build ga_scripts.zip).
+
+    The cast applies the mana lock (0xb96) and plays CD_Malzahar19_CastAnim_new at his attack target. At its
+    'BeginBeam' event (0.3523 s, 0x2a1) a burst goes off and the beam starts: RepeatAction(PrimaryTickRate,
+    NumTicks), acting at once, NumTicks = Round(DamageOverSecondsDONTCHANGE / PrimaryTickRate + 1) = 9 (0x40a); each
+    tick applies GE_Malzahar19_BeamDamageTick = MagicDamageCalc1 (DamageAP x AP) / NumTicks (SetByCaller) to the
+    target, magic, DOT. Each 'Burst' event (0.9923, 1.6323, 2.2723 s) is another burst, so 4 in all: DoAOEBurst
+    takes the enemies within AOEHexRange (1) of the target (TR_Add_EnemiesWithinHexRange, the target included), shreds
+    them (GE_MRShred at ShredPercent 30 for ShredDuration 4 s, ShredTargets) and then applies
+    GE_Malzahar19_AreaDamageTick = MagicDamageCalc2 (SecondaryDamageAP x AP), magic. All spell damage crits only with
+    Precision. 'Unlock' (2.4688 s) removes the mana lock and finishes the cast (the build's timeline: 75 / 76 ticks).
+    """
+    KEY = 'DA_Malzahar19'
+    CAST = 'CD_Malzahar19_CastAnim_new'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        events = self.chrono(self.CAST).get('events') or []
+        self.begin = self.chrono_event(self.CAST, 'BeginBeam')
+        self.bursts = [self.begin] + sorted(t for name, t in events if name == 'Burst')
+        self.tick_rate = self.row('PrimaryTickRate')
+        self.beam_ticks = round(self.row('DamageOverSecondsDONTCHANGE') / self.tick_rate + 1)
+        self.aoe = int(self.row('AOEHexRange'))
+        self.shred_level, self.shred_duration = self.row('ShredPercent'), self.row('ShredDuration')
+        self.notes = ('Beam: 9 ticks over 2 s on the target. Bursts: 4, each shredding (30% MR, 4 s) then damaging the '
+                      'target and the enemies next to it (the layout).')
+
+    def beam_damage(self, level, AD, AP):
+        return self.row('DamageAP', star=level) * AP / self.beam_ticks
+
+    def burst_damage(self, level, AD, AP):
+        return self.row('SecondaryDamageAP', star=level) * AP
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+
+        def burst():
+            hit = [target] + self.nearby(target, self.aoe)
+            for t in hit:
+                apply_shred(self, t, self.shred_level, self.shred_duration)
+            self.multiTargetSpell(hit, self.items, self.tick / TPS, len(hit), self.burst_damage, 'magical')
+
+        def beam_tick():
+            self.multiTargetSpell([target], self.items, self.tick / TPS, 1, self.beam_damage, 'magical')
+
+        for t in self.bursts:
+            self.schedule_tick(self.tick + ticks_up(t), burst)
+        for j in range(self.beam_ticks):
+            self.schedule_tick(self.tick + ticks_up(self.begin + j * self.tick_rate), beam_tick)
+
+
+champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar']
 
 
 class TrainingDummy(Champion):
