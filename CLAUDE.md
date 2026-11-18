@@ -90,6 +90,9 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   the worker (B9): the newest at boot, others when the page's "Game build" picker names one. After changing the
   worker, the page or build loading, run `tools/browser_check/` (`npm install` there once; `node worker_e2e.js`,
   and `node page_e2e.js` with `python serve.py 8619` running).
+- Items: `set19items.BuildItem` subclasses with `KEY` and `STATS` (the effects reviewed as the item's unconditional
+  stats, `docs/ITEMS.md`); stats and tags are applied at combat start from the champion's build (ledger I1-I3), and
+  anything the layer can't apply exactly raises. A scripted item is listed only once its script is implemented.
 - Items/buffs: behaviour in `performAbility(phase, time, champion, input_)` for the phases listed in `phases`
   (`preCombat`, `onUpdate`, `preAttack`, `onAttack`, `postAttack`, `onCrit`, `preAbility`, `postAbility`,
   `onDealDamage`, ...). Units differ per stat (item `crit=20` is 20%; `omnivamp=0.15` is a fraction; `ad`, `ap`,

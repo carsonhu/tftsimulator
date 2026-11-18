@@ -103,6 +103,18 @@ number below is read from the selected build. `champion.sources` lists where eac
 | B10 | Spell effects are timed from the build's chronos: `chrono_event(chrono, event)` for when an effect fires (`ticks_up` from the cast tick), `chrono_projectile_speed(chrono, name)` for its missile (G4). Which event triggers which effect is the champion's script, cited in the class docstring; values are read at construction so a build lacking one fails before the fight. | from data + script | `build_champion.py`; first used by Neeko |
 | B11 | Traits are buffs read from the build (`set19buffs.BuildTrait`, first: `Encore`). The buff's level is the number of trait units on the board, offered at the newest build's breakpoints (Encore 0 / 2 / 4); at combat start it sets `champion.trait_tiers[KEY]` = how many of the **selected** build's thresholds that count reaches. A member's spell reads the trait's rows at that tier (`trait_value(key, row)`). A champion's own implemented traits are preselected in the page's buff bar, off (`default_traits`, from the build's trait list). Tier n = the trait's n-th curve key, as the tier text shows (Encore: 1 → 25% at (2), 2 → 50% at (4)). | from data; tier ↔ curve key predicted | `CT_Encore19`; tests `test_neeko.py` |
 
+## Items (2026-11-17)
+
+`set19items.BuildItem`: an item names its data asset (`KEY`) and the effects that are its unconditional stats
+(`STATS`, reviewed per item in `docs/ITEMS.md`); at combat start it applies them from the champion's own build.
+Mechanics (scripts, conditional effects) are written per item. Tests: `test_items.py` (local).
+
+| ID | Rule as implemented | Status | Source |
+|---|---|---|---|
+| I1 | Stat modifiers map to the engine by (attribute, operation): AbilityPower +v → AP +100v points; AttackDamage +v → bonus AD +100v%; AttackSpeed MultiplyAdditive v → AS +100(v−1)%; CritChance +v; HealthMax +v, and MultiplyAdditive v → HP multiplier +(v−1); Armor, MagicResist, ManaPerSecond, ManaPerAttack, Omnivamp +v; OutgoingDamageMultiplier +v → the engine's damage-amp pool (additive with other amps: predicted); IncomingManaMultiplier +v → mana gain multiplier (predicted). Incoming damage/heal/shield multipliers and MaxTeamSizeBonus change nothing against dummies and are skipped. Anything else (an unknown pair, a magnitude computed in game, a value differing per curve point, a non-permanent effect) raises `BuildDataError`. | from data; units match each item's stat line (e.g. Guinsoo's "10%AS" = MultiplyAdditive 1.1) | `items.<key>.effects` (P8) |
+| I2 | Granted tags: `Damage.Status.CanSpellCrit` = Precision: spell damage can crit, and n sources give `CT_SpellCritToCritDamageConversion`(n) bonus crit damage (0 at 1, +0.1 per extra; replaces set18's constant 0.1, same values). Other tags raise. | from data | `globals.spell_crit_bonus_crit_damage`; `BuildChampion.addPrecision` |
+| I3 | Item ManaPerAttack (Spear of Shojin's "Attacks grant 5 bonus Mana") is the same attribute as the role's, so it is paid with the role's attack mana, at the same moment (T3). | predicted | VOD: a Shojin holder's mana steps (+12 for a caster) |
+
 ## Engine (set18 code carried over)
 
 Filled in as the engine is reviewed and adapted. Each entry: what the set18 engine assumes, where, and whether it

@@ -141,6 +141,7 @@ class BuildChampion(Champion):
         # traits (B11): tiers are set at combat start by the board's trait buffs (set19buffs.BuildTrait); the page
         # preselects the champion's own traits that the simulator implements
         self.trait_tiers = {}
+        self.spell_crit_sources = 0  # Precision sources (Damage.Status.CanSpellCrit), see addPrecision
         self.default_traits = [name for name in set19buffs.class_buffs
                                if getattr(set19buffs, name).KEY in (c.d.get('trait_keys') or [])]
         self.sources = {
@@ -155,6 +156,20 @@ class BuildChampion(Champion):
             'crit_damage': 'CritDamage' if 'CritDamage' in s else f'{BASE_CRIT_DAMAGE} (owner, 2026-11-17: unchanged in Set 19)',
             'timing': self.timing.source,
         }
+
+    def addPrecision(self):
+        """One Precision source (an effect granting Damage.Status.CanSpellCrit): spell damage can crit, and with n
+        sources the unit has CT_SpellCritToCritDamageConversion(n) bonus crit damage (B7: 0 at 1, +0.1 per extra)."""
+        curve = (self.build.data.get('globals') or {}).get('spell_crit_bonus_crit_damage')
+        if not curve:
+            raise BuildDataError(f'no spell_crit_bonus_crit_damage curve in build {self.build.version}')
+
+        def bonus(n):
+            return curve_at(curve['points'], n, curve.get('interp') or 'Constant')
+
+        self.spell_crit_sources += 1
+        self.canSpellCrit = True
+        self.critDmg.addStat(bonus(self.spell_crit_sources) - bonus(self.spell_crit_sources - 1))
 
     def row(self, name, star=None):
         """This champion's curve row at its star level (or `star`), from the selected build."""
