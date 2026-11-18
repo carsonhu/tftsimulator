@@ -1,0 +1,63 @@
+"""The site's JSON entry point on the Set 19 registries (E16): catalog, champion info and a run, with a temporary
+build-driven champion registered for the test."""
+import json
+
+import pytest
+
+import set19champs
+import sim_entry
+from build_champion import BuildChampion
+
+
+class AhriForTest(BuildChampion):
+    KEY = 'DA_Ahri19'
+
+
+@pytest.fixture
+def registered(monkeypatch):
+    monkeypatch.setattr(set19champs, 'AhriForTest', AhriForTest, raising=False)
+    monkeypatch.setattr(set19champs, 'champ_list', ['AhriForTest'])
+
+
+def cfg(**kw):
+    return {'champ': 'AhriForTest', 'level': 2, 'items': [], 'buffs': [], 'enemy': {'hp': 1800, 'armor': 100, 'mr': 100},
+            't': 10, 'slice': 'Craftable', 'stage': '4-1'} | kw
+
+
+def test_catalog_with_no_champions(monkeypatch):
+    monkeypatch.setattr(set19champs, 'champ_list', [])
+    cat = json.loads(sim_entry.catalog_json())
+    assert cat['champions'] == [] and 'blackthorn' not in cat and 'Wisp' not in cat['slices']
+    assert cat['defaults']['frameRates'] == [30]
+
+
+def test_catalog_info_and_run(registered):
+    cat = json.loads(sim_entry.catalog_json())
+    assert [c['name'] for c in cat['champions']] == ['AhriForTest']
+    info = json.loads(sim_entry.champ_info_json(json.dumps(cfg())))
+    assert info['stats']['role'] == 'MagicCaster' and info['stats']['castTime'] == 1
+    assert info['stats']['build'].startswith('rls-19.1.0')
+    out = json.loads(sim_entry.run_json(json.dumps(cfg())))
+    import set19items
+    listed = {getattr(set19items, c).display_name for c in set19items.offensive_craftables}
+    assert {r['extra'] for r in out['rows']} == listed | {'NoItem'}
+    assert out['rows'][0]['dps']['5'] > 0
+
+
+def test_unknown_champion_is_refused():
+    with pytest.raises(KeyError, match='not a Set 19 champion'):
+        sim_entry.run_slice(cfg(champ='Ahri'))
+
+
+def test_catalog_lists_the_builds_for_the_picker():
+    # B9: the page offers every imported build, newest first; the value is the version cfg["build"] names
+    cat = json.loads(sim_entry.catalog_json())
+    assert cat['builds'][0] == {'version': 'rls-19.1.0.5973071.Set19.Shipping.pbe',
+                                'label': 'PBE 19.1 #5973071 (Nov 17 13:28)'}
+
+
+def test_a_run_uses_the_build_it_names(registered):
+    out = json.loads(sim_entry.champ_info_json(json.dumps(cfg(build='rls-19.1.0.5973071.Set19.Shipping.pbe'))))
+    assert out['stats']['build'] == 'rls-19.1.0.5973071.Set19.Shipping.pbe'
+    with pytest.raises(KeyError, match='no-such-build'):
+        sim_entry.champ_info_json(json.dumps(cfg(build='no-such-build')))

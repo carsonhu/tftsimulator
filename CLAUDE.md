@@ -17,7 +17,8 @@ Read `docs/ASSUMPTIONS.md` before changing any game rule, and the champion's wor
   outside `set19/` must put `set19/` first on `sys.path`. `conftest.py` / `pytest.ini` handle this for pytest.
 - Files carried over from set18 are CRLF; new files are LF. Keep each file's existing endings (Edit preserves
   them; a Python read/write round trip without `newline=''` rewrites every line).
-- `test_*.py` and `verify_*.py` are gitignored on purpose (local-only tests).
+- `test_*.py` are committed on branch `set19` (2026-11-17: the restructure needs a durable copy, docs/RESTRUCTURE.md);
+  on `main` they are still gitignored. `verify_*.py` stay gitignored (local-only).
 
 ## How the work is organised
 
@@ -104,7 +105,7 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   `onDealDamage`, ...). A trait's parameter (`extraParameters`) is a number, a named choice (`Options`) or tick
   boxes (`Flags`: bit i is Flags[i]; `TeamFlags` limits the Team Traits panel to the leading ones; Heartsteel).
   Units differ per stat (item `crit=20` is 20%; `omnivamp=0.15` is a fraction; `ad`, `ap`, `aspd` are percent points).
-- Tests (local, gitignored): `python -m pytest -q` with set18's venv (`../set18/.venv/Scripts/python`) until this
+- Tests (committed on `set19`): `python -m pytest -q` with set18's venv (`../set18/.venv/Scripts/python`) until this
   repo has its own.
 
 ## Conventions

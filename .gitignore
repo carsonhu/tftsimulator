@@ -178,7 +178,6 @@ pyrightconfig.json
 
 # icons.py --contact-sheet output: a check-by-eye aid, not a page asset.
 icons/*_sheet.png
-test_*.py 
 verify_*.py 
 
 # tools/browser_check dependencies (npm install there)

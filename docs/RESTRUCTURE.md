@@ -30,9 +30,8 @@ numbers are the part that must never move:
 | Release and cast ticks: Varus, Neeko, Ziggs, Senna, Ezreal, Kai'Sa, Yunara | `test_<champion>.py` |
 | Ziggs's attack and bomb damage, True Damage (3) | `test_ziggs.py`, `test_senna.py` |
 
-**Decision needed (owner):** the tests are gitignored on purpose, so they exist only on this PC. Before a
-restructure, keep a durable copy (commit them, or a backup), because they are what proves the restructure changed
-nothing.
+**Decided (owner, 2026-11-17):** the tests were gitignored, so they existed only on this PC. They are now committed on
+branch `set19`, where the restructuring work continues; `main` still ignores them.
 
 Each step below ends with: all tests pass unchanged (except tests that test the removed mechanism itself), both
 browser checks pass (`tools/browser_check/`), and the tables for every champion give the same numbers as before, to
@@ -174,7 +173,7 @@ sliders become layout settings.
 
 | Step | Status |
 |---|---|
-| 0. Durable copy of the tests; table-diff script | table-diff script done (`tools/table_dump.py`); test copy awaits the owner |
+| 0. Durable copy of the tests; table-diff script | done: `tools/table_dump.py`; tests committed on branch `set19` |
 | 1. Delete set18 leftovers | done (2026-11-17) |
 | 2. Split modules, decorator registration | not started |
 | 3. Game-shaped attributes | not started |
