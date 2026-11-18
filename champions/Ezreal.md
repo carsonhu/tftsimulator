@@ -79,7 +79,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | **confirmed**: two simulated attacks per cast, at the cast and at stage 2: two Titan's Resolve stacks (docs/ITEMS.md); role mana falls inside the mana lock | G11 |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | cancels Combat.Attacking (T4) | script |
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | **consistent**: the second cast's detonation dealt 327 (a crit vs a frontliner), so FirstCastHit resets each cast (D1); the exact value is not checkable (Titan's stacks, unknown armor) | E3 |
-| Q14 | Passives and other mechanics that need modelling | see ability text | two-stage cast and the Encore second missile (D1); Heartsteel upgrade not implemented | D1 |
+| Q14 | Passives and other mechanics that need modelling | see ability text | two-stage cast, the Encore second missile and the Heartsteel Bias upgrade (D1) | D1 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-17 | D1 |
 
 ## Evidence log
@@ -103,6 +103,10 @@ VOD was played on (check the patch shown in game or the date against builds/inde
     hex. CastAnim2's Unlock ends the spell (cast lock 36 ticks, mana lock 35).
   - **Encore:** with the Set19.Trait.Encore tag the chrono's SecondCast group fires a second SpellMis at 0.319 s.
     FirstCastHit (set by the cast's first detonation, reset every cast: E3) makes it deal x RecastEffectiveness.
-  - **Not modelled:** the Heartsteel upgrade (+25%, 2-hex radius every 3rd cast; Heartsteel is not implemented); the
-    stage-1 simulated attack (mana lock, G11). The script's W/Q chrono speed variables are never read.
+  - **Heartsteel Bias** (IsHeartsteelUpgradeActive: SpellUpgradeTierIsActive + Selected, a Bias at Heartsteel (3)+):
+    DetermineDamageForSpell multiplies the primary and the secondary damage by 1 + HeartsteelStan_PercentIncreasedAbilityDamage
+    (0.25). Each cast first adds 1 to the combat-only spell Stack (GE_IncSpellStackBy1_CombatOnly, 0x10ed); Stack % 3 == 0
+    (casts 3, 6, ...) sets Is2HexCast, and TR_Add_EnemiesWithinHexRange then takes HexRange 2 instead of 1 for the
+    secondary targets. The extra enemies (2 hexes from the target, not 1) are the extra-targets slider (default 1). B21.
+  - **Not modelled:** the stage-1 simulated attack (mana lock, G11). The script's W/Q chrono speed variables are never read.
   - **Assumed:** the detonating missile flies his attack range (4 hexes); adjacent enemies hit = targets - 1.

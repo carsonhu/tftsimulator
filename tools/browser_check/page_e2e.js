@@ -80,6 +80,44 @@ const puppeteer = require("puppeteer-core");
   } catch (e) {
     console.log("FAIL Hitmaker not preselected for Senna");
   }
+  // Ezreal: Heartsteel's tick boxes (Kayn, Alune, Aphelios, Ezreal, Bias; default Ezreal + Bias) on their own line
+  await page.evaluate(() => {
+    const sel = document.querySelector("#champ");
+    sel.value = "Ezreal";
+    sel.dispatchEvent(new Event("change"));
+  });
+  try {
+    await page.waitForFunction(() => [...document.querySelectorAll(".buff-row select")].some((s) => s.value === "Heartsteel"),
+                               { timeout: 30000 });
+    const flags = () => page.evaluate(() => {
+      const row = [...document.querySelectorAll(".buff-row")].find((r) => r.querySelector("select").value === "Heartsteel");
+      const box = row.querySelector(".param-flags");
+      return { hidden: box.hidden, title: box.querySelector(".col-label").textContent,
+               ticks: [...box.querySelectorAll("label")].map((l) => l.textContent + "=" + l.querySelector("input").checked) };
+    });
+    const hs = await flags();
+    console.log("Ezreal Heartsteel flags:", JSON.stringify(hs));
+    if (hs.hidden || hs.ticks.join() !== "Kayn=false,Alune=false,Aphelios=false,Ezreal=true,Bias=true") {
+      console.log("FAIL Heartsteel tick boxes");
+    }
+    const before = (await read()).rows[1];
+    await page.evaluate(() => {
+      const row = [...document.querySelectorAll(".buff-row")].find((r) => r.querySelector("select").value === "Heartsteel");
+      const level = row.querySelectorAll("select")[1];
+      level.value = "3";
+      level.dispatchEvent(new Event("change"));
+      row.querySelector(".param-flags input").click();  // Kayn
+    });
+    await page.waitForFunction((b) => {
+      const r = document.querySelectorAll("#resultsTable tr")[1];
+      return r && r.textContent.replace(/\s+/g, " ").trim() !== b;
+    }, { timeout: 60000 }, before);
+    const after = await flags();
+    console.log("Heartsteel 3 + Kayn:", JSON.stringify(after.ticks), JSON.stringify((await read()).rows));
+    if (!after.ticks[0].endsWith("true")) console.log("FAIL Kayn tick did not stick");
+  } catch (e) {
+    console.log("FAIL Heartsteel row for Ezreal: " + e.message);
+  }
   console.log("console errors:", errors.length ? errors : "none");
   await browser.close();
 })();

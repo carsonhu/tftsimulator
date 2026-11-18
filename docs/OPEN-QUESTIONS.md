@@ -74,6 +74,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Cast to the next attack | the bar fills at a release, the cast is the next tick, cast lock 36 ticks, then an 11-tick windup: 48 ticks from that release; VOD4 showed 46 and 44 | another Ezreal fight, ideally against a stationary target (no retargeting) | T4, T10, champions/Ezreal.md E2 |
 | Detonation damage | 190 x AD + 30 x AP on the target, 0.33x that within 1 hex | damage numbers without Titan's Resolve, on a target of known armor | champions/Ezreal.md D1 |
 | Encore's second missile | x RecastEffectiveness (25/50%) at 0.319 s into stage 2 | an Ezreal with Encore (2) | champions/Ezreal.md D1 |
+| Heartsteel Bias upgrade | x1.25 on both hits; casts 3, 6, ... also hit the enemies 2 hexes from the target (0.33x) | an Ezreal chosen as Bias at Heartsteel (3)+: damage numbers of his 1st-3rd casts | B21, champions/Ezreal.md D1 |
 
 ### 8. Spell projectiles and damage numbers
 
@@ -88,6 +89,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
 | Hitmaker's AD (a trait, checked the same way) | every member +12% AD, a Big Shot +20/35% more (32/47% in all) | panel AD % of a Big Shot and of another Hitmaker at Hitmaker (2) | B18 |
+| Heartsteel's team bonuses (a trait, read the same way) | each fielded member gives every ally Kayn +7% AD, Alune +7% AP, Aphelios +6% AS, Ezreal +10% crit; at (7) members get 2.5x (Ezreal's crit by the tooltip: the files give members only +10% more) | panel stats of a non-member and of a member with Kayn/Alune/Aphelios fielded, and at Heartsteel (7) | B21 |
 | Illbeats (4) (a trait, read the same way) | the mix's values x1.5 (StatMult at level 3) | the mixer readouts at Illbeats (4) | B20 |
 | Rabadon's Deathcap | every bonus AP × 1.15 (same structure as Deathblade, which VOD3 confirmed); panel 63% alone, 104% with Jeweled Gauntlet | panel AP % with a Rabadon's | I5, docs/ITEMS.md |
 | Archangel's Staff stacks | first stack 5 s after combat start, then every 5 s | panel AP over the first ~15 s | I4 |
@@ -99,4 +101,4 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|
 | Draven's vortex: the decoded damage effect has no tick-rate factor, yet each 0.5 s hit is half the per-second value (owner's ruling). Where does the game halve it? | implemented as the owner ruled; the decode is incomplete somewhere (calc component or attribute) | champions/Draven.md D1 |
 | Trickshot ricochets' on-hit effects (at RichochetDamage^k) | not modelled; no listed item has an on-hit effect yet | B12 |
-| Ionic Spark (Yunara's), Hyperpop (Ziggs's), Heartsteel (Ezreal's: also his spell upgrade), True Damage's B-Side and Prismatic tiers | not implemented | - |
+| Ionic Spark (Yunara's), Hyperpop (Ziggs's), True Damage's B-Side and Prismatic tiers, Heartsteel's Prismatic car and the other members' Bias upgrades (Kayn, Alune, Aphelios: not implemented champions) | not implemented | - |

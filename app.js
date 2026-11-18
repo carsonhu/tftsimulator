@@ -897,6 +897,13 @@ function renderBuffRows() {
     // The stored value is still the index, so nothing downstream changes --
     // only what the row shows for it.
     const paramSelect = document.createElement("select");
+    // A parameter that is a set of yes/no facts (Heartsteel: which members are
+    // fielded, and whether this unit is a Bias). Stored as one number, bit i
+    // for Flags[i], so the tuple keeps its shape; drawn on its own line under
+    // the row because a row of tick boxes does not fit the third column.
+    const flagBox = document.createElement("div");
+    flagBox.className = "param-flags";
+    let flagBits = 0;
 
     // Column headers per row, like buff_bar's widget labels: the third one
     // is the buff's own parameter title (Stacks, Casts, ...) and follows the
@@ -918,13 +925,39 @@ function renderBuffRows() {
 
     const paramValue = (meta) => {
       if (!meta.extra) return 0;
+      if (meta.extra.Flags) return flagBits;
       return Number(meta.extra.Options ? paramSelect.value : paramInput.value);
     };
 
+    const drawFlags = (meta) => {
+      flagBox.innerHTML = "";
+      const caption = document.createElement("span");
+      caption.className = "col-label";
+      caption.textContent = meta.extra.Title;
+      flagBox.appendChild(caption);
+      meta.extra.Flags.forEach((name, bit) => {
+        const label = document.createElement("label");
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.checked = Boolean((flagBits >> bit) & 1);
+        check.onchange = () => {
+          flagBits ^= 1 << bit;
+          syncRow(false);
+          onConfigChanged();
+        };
+        label.appendChild(check);
+        label.appendChild(document.createTextNode(name));
+        flagBox.appendChild(label);
+      });
+    };
+
     const syncParamColumn = (meta) => {
+      const flags = Boolean(meta.extra && meta.extra.Flags);
+      flagBox.hidden = !flags;
+      if (flags) drawFlags(meta);
       // Hidden rather than removed: rows keep their columns aligned when
       // some buffs in the bar take a parameter and others don't.
-      paramCol.style.visibility = meta.extra ? "visible" : "hidden";
+      paramCol.style.visibility = meta.extra && !flags ? "visible" : "hidden";
       paramCaption.textContent = meta.extra ? meta.extra.Title : "Param";
       const named = Boolean(meta.extra && meta.extra.Options);
       paramInput.hidden = named;
@@ -952,6 +985,7 @@ function renderBuffRows() {
         levelSel.value = meta.levels[0];
         paramInput.value = meta.extra ? meta.extra.Default : 0;
         paramSelect.value = String(meta.extra ? meta.extra.Default : 0);
+        flagBits = meta.extra ? meta.extra.Default : 0;
       } else if ([...levelSel.options].some((o) => o.value === previousLevel)) {
         levelSel.value = previousLevel;
       }
@@ -1001,6 +1035,7 @@ function renderBuffRows() {
     for (const l of meta.levels) levelSel.add(new Option(l, l));
     levelSel.value = tuple[1];
     paramInput.value = tuple[2];
+    flagBits = tuple[2];
     if (meta.extra) {
       paramInput.min = meta.extra.Min;
       paramInput.max = meta.extra.Max;
@@ -1013,6 +1048,7 @@ function renderBuffRows() {
     row.appendChild(nameCol);
     row.appendChild(levelCol);
     row.appendChild(paramCol);
+    row.appendChild(flagBox);
     container.appendChild(row);
   });
   updateBuffParamLayout();
@@ -1023,9 +1059,11 @@ function updateBuffParamLayout() {
   // When nothing in the bar takes a parameter there is no third column to
   // align against, so Name and Level take the whole width instead of
   // leaving a permanent empty gutter.
-  const anyParam = state.cfg.buffs.some(
-    ([cls]) => state.buffMeta.get(cls) && state.buffMeta.get(cls).extra
-  );
+  // A tick-box parameter has its own line, so it needs no third column.
+  const anyParam = state.cfg.buffs.some(([cls]) => {
+    const meta = state.buffMeta.get(cls);
+    return meta && meta.extra && !meta.extra.Flags;
+  });
   $("buffRows").classList.toggle("no-param", !anyParam);
 }
 
@@ -1059,15 +1097,21 @@ function renderTeamTraits() {
     // Only a trait that asks a real question starts on its own default.
     const params = picked
       ? picked.params
-      : trait.options
+      : trait.options || trait.flags
         ? trait.paramDefault
         : 0;
-    const label = document.createElement("label");
+    // Tick-box facts (Heartsteel's fielded members), stored as bits.
+    let flagBits = trait.flags ? params : 0;
+    // A div when it holds tick boxes: each has its own label, and labels must
+    // not nest (a click on one would also toggle the trait's own control).
+    const label = document.createElement(trait.flags ? "div" : "label");
     label.className = trait.scales ? "team-trait" : "team-trait flat";
-    if (trait.options) label.classList.add("with-option");
+    if (trait.options || trait.flags) label.classList.add("with-option");
     label.title = trait.options
       ? trait.name + " on the board, at Ivern's star level"
-      : "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)";
+      : trait.flags
+        ? "Team-wide " + trait.name + ": the bonuses of the ticked units"
+        : "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)";
 
     const caption = document.createElement("span");
     caption.className = "col-label";
@@ -1076,7 +1120,10 @@ function renderTeamTraits() {
     // Coloured by the level actually selected, so the badge tracks the picker
     // beside it; an unselected trait shows its first breakpoint's tier rather
     // than going colourless, which would read as "no icon" instead of "off".
-    const badge = traitBadge(trait.cls, current || trait.onLevel);
+    // Without its icon (no icons/ folder yet) an empty cell keeps the badge
+    // column, or the name would fall into it and the switch would cover it.
+    const badge =
+      traitBadge(trait.cls, current || trait.onLevel) || document.createElement("span");
 
     // Level 0 is kept rather than deleted so that choosing the Hex before
     // switching the trait on doesn't throw the choice away: cfgForSlice skips
@@ -1135,7 +1182,10 @@ function renderTeamTraits() {
         };
       }
       sel.onchange = () =>
-        store(Number(sel.value), optionSel ? Number(optionSel.value) : 0);
+        store(
+          Number(sel.value),
+          optionSel ? Number(optionSel.value) : trait.flags ? flagBits : 0
+        );
     } else {
       // A non-member gets the same bonus at every breakpoint, so asking for
       // one would be asking a question with no answer: on/off is the whole
@@ -1143,10 +1193,32 @@ function renderTeamTraits() {
       const check = document.createElement("input");
       check.type = "checkbox";
       check.checked = current > 0;
-      check.onchange = () => store(check.checked ? trait.onLevel : 0, 0);
+      check.onchange = () =>
+        store(check.checked ? trait.onLevel : 0, trait.flags ? flagBits : 0);
       if (badge) label.appendChild(badge);
       label.appendChild(caption);
       label.appendChild(check);
+    }
+
+    if (trait.flags) {
+      const box = document.createElement("span");
+      box.className = "team-flags";
+      box.title = trait.paramTitle;
+      trait.flags.forEach((name, bit) => {
+        const item = document.createElement("label");
+        const tick = document.createElement("input");
+        tick.type = "checkbox";
+        tick.checked = Boolean((flagBits >> bit) & 1);
+        tick.onchange = () => {
+          flagBits ^= 1 << bit;
+          const now = state.teamBuffs.get(trait.cls);
+          store(now ? now.level : 0, flagBits);
+        };
+        item.appendChild(tick);
+        item.appendChild(document.createTextNode(name));
+        box.appendChild(item);
+      });
+      label.appendChild(box);
     }
 
     container.appendChild(label);

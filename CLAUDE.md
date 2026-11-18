@@ -88,7 +88,7 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   spell effects go through `self.schedule(seconds, fn)`, never a hand-made status. Attack damage and on-attack item
   effects happen when the attack lands.
 - Registries: a class is live only when listed (`set19champs.champ_list`, `set19buffs.class_buffs` /
-  `augments` / ..., `set19items` lists); see each list for what is live (champions: Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal; traits: Encore, Trickshot, K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats). `worker.js` `PY_FILES`
+  `augments` / ..., `set19items` lists); see each list for what is live (champions: Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal; traits: Encore, Trickshot, K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats, Heartsteel). `worker.js` `PY_FILES`
   lists every module the browser loads; a new module must be added there too. Builds reach the browser through
   the worker (B9): the newest at boot, others when the page's "Game build" picker names one. After changing the
   worker, the page or build loading, run `tools/browser_check/` (`npm install` there once; `node worker_e2e.js`,
@@ -99,8 +99,9 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
 - Items/buffs: behaviour in `performAbility(phase, time, champion, input_)` for the phases listed in `phases`
   (`preCombat`, `onUpdate`, `onLaunch` (attack release and simulated attacks, G11), `preAttack`, `onAttack`,
   `postAttack`, `onCrit`, `preAbility`, `postAbility`,
-  `onDealDamage`, ...). Units differ per stat (item `crit=20` is 20%; `omnivamp=0.15` is a fraction; `ad`, `ap`,
-  `aspd` are percent points).
+  `onDealDamage`, ...). A trait's parameter (`extraParameters`) is a number, a named choice (`Options`) or tick
+  boxes (`Flags`: bit i is Flags[i]; `TeamFlags` limits the Team Traits panel to the leading ones; Heartsteel).
+  Units differ per stat (item `crit=20` is 20%; `omnivamp=0.15` is a fraction; `ad`, `ap`, `aspd` are percent points).
 - Tests (local, gitignored): `python -m pytest -q` with set18's venv (`../set18/.venv/Scripts/python`) until this
   repo has its own.
 

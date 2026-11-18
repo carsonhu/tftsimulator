@@ -190,7 +190,11 @@ def get_catalog():
         if not extra:
             continue
         options = extra.get("Options")
-        if not options and (extra.get("Min"), extra.get("Max")) != (0, 1):
+        # Tick boxes (Heartsteel's fielded members): the team-wide half is what
+        # the ticked facts give, so the panel asks them. TeamFlags limits the
+        # panel to the leading flags that matter to a non-member (not "Bias").
+        flags = extra.get("Flags")
+        if not options and not flags and (extra.get("Min"), extra.get("Max")) != (0, 1):
             continue
         levels = list(cls.levels)
         # A trait that asks which variant is on always needs its level asked
@@ -209,6 +213,8 @@ def get_catalog():
                 # None -> the param is the 0/1 flag and the panel passes 0.
                 # A list -> the panel offers these and passes the index.
                 "options": list(options) if options else None,
+                # A list -> the panel shows these tick boxes and passes the bits.
+                "flags": list(flags[: extra.get("TeamFlags", len(flags))]) if flags else None,
                 # Per-option stat icons, when the trait has art to show for
                 # each choice (Greenfather's hexes). None -> just the picker.
                 "optionIcons": list(getattr(cls, "option_stats", []) or []) or None,

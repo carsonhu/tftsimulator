@@ -411,8 +411,13 @@ class Ezreal(BuildChampion):
     RecastEffectiveness (DetermineDamageForSpell). CastAnim2's Unlock ends the spell (the build's 36-tick cast lock,
     35-tick mana lock). Physical spell damage, crits only with Precision.
     Each stage applies GE_SimulateLaunchAttack (0x168a, 0x1ce5 -> 0xf): on-attack items hear both (G11; VOD4: two
-    Titan's Resolve stacks per cast). Not modelled: the Heartsteel upgrade (+25% and a 2-hex radius every 3rd cast:
-    Heartsteel is not implemented).
+    Titan's Resolve stacks per cast).
+    Heartsteel upgrade (IsHeartsteelUpgradeActive: the SpellUpgradeTierIsActive and Selected tags, i.e. a Bias at
+    Heartsteel (3)+, `heartsteel_bias`): DetermineDamageForSpell multiplies both the primary and the secondary damage
+    by 1 + HeartsteelStan_PercentIncreasedAbilityDamage (0.25). Every cast first adds 1 to the combat-only spell Stack
+    (GE_IncSpellStackBy1_CombatOnly, 0x10ed); Stack % 3 == 0 (casts 3, 6, ...) makes it a 2-hex cast (Is2HexCast,
+    0x11b5): TR_Add_EnemiesWithinHexRange with HexRange 2 instead of 1 picks the secondary targets. Those extra
+    enemies (within 2 hexes, not 1) are the extra-targets slider.
     """
     KEY = 'DA_Ezreal19'
     MARK = 'CD_Ezreal19_CastAnim'
@@ -427,8 +432,10 @@ class Ezreal(BuildChampion):
         if len(spawns) != 2:
             raise ValueError(f'Ezreal: expected the root and Encore SpellMis in {self.SHOT}, got {spawns}')
         self.shot_spawn, self.encore_spawn = spawns
-        self.notes = ('Heartsteel upgrade not modelled. Adjacent enemies hit = '
-                      'targets - 1. The detonating missile flies his attack range.')
+        self.num_extra_targets = 1  # Heartsteel Bias 2-hex casts: enemies 2 hexes from the target (not 1)
+        self.spell_stack = 0  # the combat-only spell Stack
+        self.notes = ('Adjacent enemies hit = targets - 1. Extra targets: enemies 2 hexes from the target, hit '
+                      'only by every 3rd cast of a Heartsteel Bias. The detonating missile flies his attack range.')
 
     def detonation(self, level, AD, AP):
         return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
@@ -440,16 +447,20 @@ class Ezreal(BuildChampion):
         if self.trait_tier('DA_Encore19') > 0:
             shots.append((self.encore_spawn, self.trait_value('DA_Encore19', 'RecastEffectiveness')))
         splash = self.row('AoEPercentDamage')
+        self.spell_stack += 1  # GE_IncSpellStackBy1_CombatOnly (0x10ed)
+        bias = getattr(self, 'heartsteel_bias', False)
+        boost = 1 + self.row('HeartsteelStan_PercentIncreasedAbilityDamage') if bias else 1
+        splash_targets = self.num_targets - 1 + (self.num_extra_targets if bias and self.spell_stack % 3 == 0 else 0)
         # GE_SimulateLaunchAttack at stage 1 (0x168a) and again at stage 2 (0x1ce5 -> 0xf): VOD4, Titan's stacks
         self.simulateLaunch(items)
         self.schedule_tick(stage2, lambda: self.simulateLaunch(items))
         for spawn, eff in shots:
-            def land(eff=eff):
+            def land(eff=eff * boost, splash_targets=splash_targets):
                 now = self.tick / TPS
                 self.multiTargetSpell(opponents[:1], items, now, 1,
                                       lambda level, AD, AP: self.detonation(level, AD, AP) * eff, 'physical')
-                if self.num_targets > 1:
-                    self.multiTargetSpell(opponents[1:], items, now, self.num_targets - 1,
+                if splash_targets > 0:
+                    self.multiTargetSpell(opponents[1:], items, now, splash_targets,
                                           lambda level, AD, AP: self.detonation(level, AD, AP) * splash * eff,
                                           'physical')
 

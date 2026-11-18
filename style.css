@@ -498,6 +498,35 @@ select:disabled {
   display: none;
 }
 
+/* A tick-box parameter (Heartsteel's fielded members): its own line under
+   the row's Name / Level / Param columns. */
+.param-flags {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+}
+
+.param-flags[hidden] {
+  display: none;
+}
+
+/* #sidebar label makes every label a column; these are one line each. */
+#sidebar .param-flags label {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 3px;
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.param-flags input[type="checkbox"] {
+  accent-color: #ff4b4b;
+  margin: 0;
+}
+
 /* ---------------- pills (radio groups) ---------------- */
 
 .pills {
@@ -1032,4 +1061,20 @@ td input[type="checkbox"] {
 
 .caption a:hover {
   color: #ff4b4b;
+}
+
+/* Team Traits: a trait's tick-box facts (Heartsteel's fielded members). */
+.team-flags {
+  /* its own line under the trait's name and switch */
+  grid-column: 1 / -1;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  font-size: 0.85em;
+}
+
+.team-flags label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
 }
