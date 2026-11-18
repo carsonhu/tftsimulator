@@ -119,9 +119,10 @@ class Draven(BuildChampion):
     vortex (CD_Draven19_BladeRiftBase -> CD_Draven19_BladeRift, both spawning at 0 and attached to the target) and
     sends the Trickshot bounce event (0x753). The vortex (0xe49) repeats every TickRate 0.5 s (the script's default)
     trunc(Duration / TickRate) = 6 times, the first at once (UAbilityTask_Repeat); each applies
-    GE_Draven19_SpellSecondaryDamage = PhysicalDamageCalc2 (BladeRiftPerSecondAD x AD + BladeRiftPerSecondAP x AP,
-    the tooltip's per-second value, not halved) x 1 / (enemies in it) to the enemies in it (the attached target alone
-    when none). Total per vortex: 6 x Calc2, split among identical dummies, so it is booked on the target.
+    GE_Draven19_SpellSecondaryDamage x 1 / (enemies in it) to the enemies in it (the attached target alone when
+    none). PhysicalDamageCalc2 (BladeRiftPerSecondAD x AD + BladeRiftPerSecondAP x AP) is a per-second value, so a
+    hit is Calc2 x TickRate (owner, 2026-11-17: the tooltip's per-second damage, not double it); total per vortex
+    3 x Calc2, split among identical dummies, so it is booked on the target.
     Trickshot (TrickshotHandler): ricochet k flies CD_Draven19_Spell_Trickshot's Blade (speed 2000) to the next
     enemy and does the same at MMC_TrickshotReduction = RichochetDamage^k (base hit and its own vortex), up to
     NumRichochets. All hits are physical spell damage that crits only with Precision (RollIfCanSpellCrit).
@@ -158,7 +159,8 @@ class Draven(BuildChampion):
         for j in range(self.vortex_hits):
             def vortex_hit():
                 self.multiTargetSpell([target], items, self.tick / TPS, 1,
-                                      lambda level, AD, AP: self.vortex_damage(level, AD, AP) * eff, 'physical')
+                                      lambda level, AD, AP: self.vortex_damage(level, AD, AP) * self.VORTEX_TICK * eff,
+                                      'physical')
             self.schedule_tick(self.tick + ticks_up(j * self.VORTEX_TICK), vortex_hit)
         if k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
             step = self.chrono_projectile_ticks(self.BOUNCE, 'Blade', set19buffs.bounce_hexes(opponents))

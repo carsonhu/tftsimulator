@@ -74,7 +74,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | implemented from the script (D1). The record leaves at +21 frames after the cast (predicted 20, T10-like +1). **Vortex: 6 hits of the full per-second value (0.5 s apart), twice the tooltip's 3 s x per-second: script, unverified** | E4, script |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | implemented from the script (D1). The record leaves at +21 frames after the cast (predicted 20, T10-like +1). Vortex: 6 hits 0.5 s apart, each half the per-second value (**owner, 2026-11-17**: the tooltip's total, not double) | E4, script |
 | Q14 | Passives and other mechanics that need modelling | see ability text | Trickshot ricochets on attacks and on the record (B12); Illbeats not implemented | E5, B12 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-17 | D1 |
 
@@ -101,11 +101,11 @@ Source for all rows below: `Outplayed/…PBE_11-17-2026_15-16-17-933.mp4` (owner
   - **Record:** CD_Draven19_Spell throws 'Blade' at the attack target at 0.6566 s on an accelerating spline (P12).
   - **Arrival:** 140/210/340 x AD (PhysicalDamageCalc1) on the target, then the vortex attached to it.
   - **Vortex:** RepeatAction every 0.5 s (TickRate, a script default), trunc(3 / 0.5) = 6 hits, the first at once.
-    Each hit is PhysicalDamageCalc2 = 100/150/250 x AD + 15/25/35 x AP (the tooltip's per-second value) split
+    Each hit is PhysicalDamageCalc2 = 100/150/250 x AD + 15/25/35 x AP (a per-second value) x 0.5 s, split
     1 / n among the enemies inside, which is the same total on identical dummies, so it is booked on the target.
   - **Trickshot:** each ricochet repeats arrival and vortex on the next enemy at RichochetDamage^k (B12), flying
     CD_Draven19_Spell_Trickshot's Blade (2000) 1 hex.
   - **Crits and AD:** all physical, crit only with Precision; AD and AP are the attribute multipliers.
-  - **Open:** the vortex totals 2x what "per second for 3 seconds" says. That is the script read literally
-    (GE_Draven19_SpellSecondaryDamage has no tick-rate factor). A VOD with an isolated vortex on a known-armor
-    target would settle it.
+  - **Vortex per hit = per-second x 0.5** (owner, 2026-11-17: "if it procs every .5s, then the per-second damage
+    should be halved"). The decoded GE_Draven19_SpellSecondaryDamage shows no tick-rate factor, so the halving
+    happens somewhere the dump doesn't reach (the calc component or the per-second attribute itself).
