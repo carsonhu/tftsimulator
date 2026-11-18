@@ -60,6 +60,18 @@ const path = require("path");
   await new Promise((r) => setTimeout(r, 1300));
   await page.click("#vizPlay");
   console.log("after playing:", (await viewer()).time);
+
+  // a new item in the sidebar: the fight starts again from 0 s
+  const before = (await viewer()).card;
+  await page.evaluate(() => {
+    const sel = document.querySelector("#itemRows select");
+    sel.value = "InfinityEdge";
+    sel.dispatchEvent(new Event("change"));
+  });
+  await page.waitForFunction((b) => document.querySelector("#vizCard").innerText.split("\n").slice(0, 12).join(" | ") !== b &&
+    document.querySelector("#vizCard").innerText.includes("Infinity Edge"), { timeout: 120000 }, before);
+  const restarted = (await viewer()).time;
+  console.log(restarted.startsWith("0.00 s") ? "PASS" : "FAIL", "a new item restarts the fight:", restarted);
   await viz.screenshot({ path: path.join(out, "viz_play.png") });
   await page.screenshot({ path: path.join(out, "viz_page.png") });
   console.log("errors:", errors.length ? errors : "none");

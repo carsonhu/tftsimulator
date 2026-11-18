@@ -135,7 +135,6 @@ const FightViewer = (() => {
   }
 
   function show(trace) {
-    const sameFight = v.trace && v.trace.ticks === trace.ticks;
     v.trace = trace;
     prepare(trace);
     const src = iconUrl(trace.champion.cls);
@@ -150,8 +149,9 @@ const FightViewer = (() => {
       };
       img.src = src;
     }
-    if (!sameFight) v.now = 0;
-    v.now = Math.min(v.now, trace.ticks - 1);
+    // a new fight (another row, item, buff or setting) starts from the beginning; playing carries on from there
+    v.now = 0;
+    v.lastFrame = null;
     v.shownTick = -1;
     draw();
   }
