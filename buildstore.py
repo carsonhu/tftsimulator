@@ -28,6 +28,9 @@ class _Entry:
         self.build, self.kind, self.d = build, kind, d
         self.key, self.name = d.get('key'), d.get('name')
 
+    def __deepcopy__(self, memo):
+        return self  # read-only build data: copies share it (see Build.__deepcopy__)
+
     def _missing(self, what):
         return BuildDataError(f'{self.kind} {self.key} has no {what} in build {self.build.version}')
 
@@ -147,6 +150,11 @@ class Build:
         self.data = data
         self.meta = data['meta']
         self.version = self.meta['version']
+
+    def __deepcopy__(self, memo):
+        # A build is read-only. Every table row deep-copies the champion, which holds its build: copying the whole
+        # client data each time was 97% of a run (Ashe, Craftable slice: 10.9 s of 11.2 s profiled).
+        return self
 
     def _get(self, kind, cls, key):
         d = self.data[kind].get(key)

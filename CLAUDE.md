@@ -54,6 +54,9 @@ python tools/worksheets.py           # refresh the AUTO block of each worksheet 
                                      # also warns if a build disagrees with roster.json
 python tools/worksheets.py --build <version>
 python tools/table_dump.py out.json  # every table for every champion; --diff a.json b.json before/after a refactor
+python tools/icons.py                # icons/ for every registered item, augment and trait, from the client's art
+                                     # (tftDatamine runs/set19: data.json + TftExport textures); rerun after adding one
+python serve.py                      # the page on http://127.0.0.1:8618/
 ```
 
 Snapshots are made on the datamining side: `F:/tft_projects/tftDatamine/tools/snapshot_build.py`, run every 3 hours
