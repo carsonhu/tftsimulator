@@ -1,7 +1,7 @@
 # Ziggs (1-cost MagicMarksman) · `DA_Ziggs19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
 
 - **Role** MagicMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 1, pool 30; traits: Hyperpop, Arcanist, Swiftstriker
@@ -16,9 +16,9 @@
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 10 | 15 | 22.5 |
-| InitialDamage | 180 | 270 | 405 |
+| InitialDamage | 155 | 235 | 355 |
 | AADamageAP | 40 | 60 | 90 |
-| SecondaryDamageAP | 80 | 120 | 180 |
+| SecondaryDamageAP | 70 | 105 | 160 |
 
 Formulas (as stored; AD and AP are multipliers):
 
@@ -53,6 +53,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_SimulateLaunchAttack`: applies the "simulate a launched attack" effect (may count as an attack for on-attack effects): GA_Ziggs19_Spell.txt
 - `AttackSpeed`: reads or changes attack speed: GA_Ziggs19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Ziggs19_Spell.txt
+
+### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+
+- row InitialDamage: 180 / 270 / 405 -> 155 / 235 / 355
+- row SecondaryDamageAP: 80 / 120 / 180 -> 70 / 105 / 160
 
 <!-- AUTO END -->
 
@@ -110,3 +115,4 @@ VOD was played on (check the patch shown in game or the date against builds/inde
     to attacks, and role mana from it (if the native mana handler hears it) would fall inside the mana lock.
   - **Assumed:** the bomb flies his attack range (4 hexes); the splash hits the enemies next to the target on the
     dummy layout (`layout.py`, default one). MiniBombs / FindMiniBombTargets in the script are never called.
+- 2026-11-18, Day 1 PBE patch notes (rls-19.1.0.5983251, its archives encrypted: the page's build rls-19.1.0.5983251.Set19.Shipping.pbe.notes, B33): InitialDamage 180/270/405 -> 155/235/355, SecondaryDamageAP 80/120/180 -> 70/105/160. Timing and everything else unchanged from rls-19.1.0.5973071 until a readable build says otherwise.

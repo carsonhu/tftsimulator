@@ -1,7 +1,7 @@
 # Renata Glasc (2-cost MagicCaster) · `DA_RenataGlasc19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Classical, Choreographer
@@ -28,7 +28,7 @@
 | TickRate | 0.25 | 0.25 | 0.25 |
 | ToxinDuration | 15 | 15 | 15 |
 | CaptivateDurationShort | 3 | 3 | 3 |
-| CaptivateDurationLong | 6 | 6 | 6 |
+| CaptivateDurationLong | 9 | 9 | 9 |
 
 Formulas (as stored; AD and AP are multipliers):
 
@@ -59,6 +59,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_RenataGlasc19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_RenataGlasc19_Spell.txt
+
+### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+
+- row CaptivateDurationLong: 6 -> 9
 
 <!-- AUTO END -->
 
@@ -116,4 +120,4 @@ Source for all rows below: VOD2 (`…PBE_11-17-2026_16-35-16-966.mp4`, 60 fps), 
     applies MagicDamageCalc3 (160/240/580 x AP) each period, which would be 60x the tooltip; the tooltip is right (owner,
     2026-11-18): 160 x AP spread over the 60 ticks. The first tick on application (open). Magic, DOT, on-spell, crit only
     with Precision.
-
+- 2026-11-18, Day 1 PBE patch notes (rls-19.1.0.5983251, its archives encrypted: the page's build rls-19.1.0.5983251.Set19.Shipping.pbe.notes, B33): CaptivateDurationLong 6 -> 9, and the long Captivate now needs a target below her star level (was: at or below; `patch_rules` CaptivateLongIfStarBelow): a 1-star Renata on the 1-star dummies now Captivates for the short 3 s. Timing and everything else unchanged from rls-19.1.0.5973071 until a readable build says otherwise.

@@ -1,7 +1,7 @@
 # Gnar (1-cost HybridSpecialist_Ammo) · `DA_Gnar19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
 
 - **Role** HybridSpecialist_Ammo: "Specialists generate resources in a unique way." ()
 - **Cost** 1, pool 30; traits: Pentakill, Trickshot
@@ -45,6 +45,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Gnar19_Passive.txt
 - `AttackSpeed`: reads or changes attack speed: GA_Gnar19_Passive.txt
 - `OnHitEffectivenessMultiplier`: scales on-hit effects: GA_Gnar19_TrickshotHandler.txt
+
+### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

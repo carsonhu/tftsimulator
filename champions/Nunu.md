@@ -1,7 +1,7 @@
 # Nunu & Willump (5-cost MagicSpecialist) · `DA_Nunu19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
 
 - **Role** MagicSpecialist: "Specialists generate resources in a unique way." ()
 - **Cost** 5, pool 9; traits: Disco, Frontman
@@ -57,6 +57,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: Abilities/GA_Nunu19_Passive.txt, Abilities/GA_Nunu19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Nunu19_Spell.txt
 - `AttackSpeed`: reads or changes attack speed: UniqueTrait/Abilities/GA_Nunu19_UniqueTrait_TakedownManager.txt
+
+### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

@@ -1,7 +1,7 @@
 # Vayne (4-cost AttackMarksman) · `DA_Vayne19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Rock, Trickshot
@@ -60,6 +60,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: GA_Vayne19_Spell.txt, GA_Vayne19_Tumble.txt
 - `GE_ManaLock`: applies mana lock: GA_Vayne19_Spell.txt
 - `OnHitEffectivenessMultiplier`: scales on-hit effects: GA_Vayne19_TrickshotHandler.txt
+
+### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

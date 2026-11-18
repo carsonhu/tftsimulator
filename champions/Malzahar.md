@@ -1,7 +1,7 @@
 # Malzahar (3-cost MagicCaster) · `DA_Malzahar19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Composer, Prodigy
@@ -23,7 +23,7 @@
 | UniqueTrait_GLP_NumShops | 10 | 10 | 10 |
 | UniqueTrait_GLP_NumInstruments | 2 | 2 | 2 |
 | UniqueTrait_DamageDealt_TOOLTIPONLYEDITUNLOCKCONDITION | 60000 | 60000 | 60000 |
-| DamageAP | 380 | 570 | 960 |
+| DamageAP | 355 | 530 | 850 |
 | PrimaryTickRate | 0.25 | 0.25 | 0.25 |
 | AOEHexRange | 1 | 1 | 1 |
 | UniqueTrait_APPerInstrument | 0.03 | 0.03 | 0.03 |
@@ -55,6 +55,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Malzahar19_SpellNew.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Malzahar19_SpellNew.txt
+
+### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+
+- row DamageAP: 380 / 570 / 960 -> 355 / 530 / 850
 
 <!-- AUTO END -->
 
@@ -120,4 +124,4 @@ f21000-22000. Ticks below count from combat start, f21295 (Quicksilver's first +
   - **Shred:** the shared GE_MRShred, one "Shred" per target whoever applies it (Void Staff's too: the later end and
     the higher level win). The burst shreds before it damages, so it amplifies itself.
   - **Not modelled:** the beam's retarget when its target dies (dummies never die).
-
+- 2026-11-18, Day 1 PBE patch notes (rls-19.1.0.5983251, its archives encrypted: the page's build rls-19.1.0.5983251.Set19.Shipping.pbe.notes, B33): DamageAP 380/570/960 -> 355/530/850. Timing and everything else unchanged from rls-19.1.0.5973071 until a readable build says otherwise.

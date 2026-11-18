@@ -76,8 +76,8 @@ function check(name, ok, detail) {
   check("boot", messages.some((m) => m.type === "ready"), JSON.stringify(messages.filter((m) => m.type)));
   check("catalog ok", cat.ok, cat.error);
   const c = JSON.parse(cat.data);
-  check("catalog lists both builds, newest first", c.builds.map((b) => b.version).join() ===
-        [newest.version, FAKE.version].join(), JSON.stringify(c.builds));
+  check("catalog lists every build, newest first", c.builds.map((b) => b.version).join() ===
+        [...realIndex.builds.map((b) => b.version), FAKE.version].join(), JSON.stringify(c.builds));
   console.log("  labels:", c.builds.map((b) => b.label));
   check("champions include Neeko", c.champions.some((x) => x.name === "Neeko"), JSON.stringify(c.champions));
   check("boot fetched the index and only the newest build",

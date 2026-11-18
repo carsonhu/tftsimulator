@@ -127,9 +127,13 @@ def main():
     for f in os.listdir(OUT):
         if f.endswith('.json') and f != 'index.json':
             meta = json.load(open(os.path.join(OUT, f), encoding='utf-8'))['meta']
-            index.append({'version': meta['version'], 'install': meta['install'], 'pak_mtime': meta['pak_mtime'],
-                          'file': f})
-    index.sort(key=lambda x: x['pak_mtime'], reverse=True)
+            entry = {'version': meta['version'], 'install': meta['install'], 'pak_mtime': meta['pak_mtime'], 'file': f}
+            notes = meta.get('patch_notes')
+            if notes:  # a build made from patch notes (tools/patch_notes_build.py, B33): no archive of its own
+                entry.update(label='patch notes', date=notes.get('date'), base=notes.get('base'))
+            index.append(entry)
+    # newest first: a snapshot by its archives' time, a patch-notes build by the notes' date (end of that day)
+    index.sort(key=lambda x: x['pak_mtime'] or f'{x.get("date")}T23:59:59', reverse=True)
     json.dump({'builds': index}, open(os.path.join(OUT, 'index.json'), 'w', encoding='utf-8', newline='\n'), indent=1)
     print(f'{done} imported, {len(index)} builds in builds/index.json')
     return 0

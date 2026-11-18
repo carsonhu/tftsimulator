@@ -1,7 +1,7 @@
 # Lux (2-cost MagicCaster) · `DA_Lux19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Ionic Spark, Prodigy
@@ -15,8 +15,8 @@
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
 | NumSecondaryTargets | 1 | 1 | 1 |
-| PrimaryDamageAP | 330 | 500 | 800 |
-| SecondaryDamageAP | 170 | 255 | 425 |
+| PrimaryDamageAP | 300 | 450 | 675 |
+| SecondaryDamageAP | 160 | 240 | 360 |
 | ManaRefundOnKill | 8 | 8 | 8 |
 
 Formulas (as stored; AD and AP are multipliers):
@@ -45,6 +45,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Lux19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Lux19_Spell.txt
+
+### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+
+- row PrimaryDamageAP: 330 / 500 / 800 -> 300 / 450 / 675
+- row SecondaryDamageAP: 170 / 255 / 425 -> 160 / 240 / 360
 
 <!-- AUTO END -->
 
@@ -104,4 +109,4 @@ Shojin and Adaptive Helm, round 1-9, panel open f28459-29741 and later.
     the one behind the target). SortByRowDistance's tie rule is not decoded; among identical dummies it changes
     nothing but debuffs.
   - **Not modelled:** ManaRefundOnKill (8 per beam target that dies: dummies never die).
-
+- 2026-11-18, Day 1 PBE patch notes (rls-19.1.0.5983251, its archives encrypted: the page's build rls-19.1.0.5983251.Set19.Shipping.pbe.notes, B33): PrimaryDamageAP 330/500/800 -> 300/450/675, SecondaryDamageAP 170/255/425 -> 160/240/360. Timing and everything else unchanged from rls-19.1.0.5973071 until a readable build says otherwise.

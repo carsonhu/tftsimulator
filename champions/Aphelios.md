@@ -1,7 +1,7 @@
 # Aphelios (5-cost AttackMarksman) · `DA_Aphelios19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Heartsteel
@@ -70,6 +70,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Aphelios19_Ability.txt
 - `AppliesOnHit`: something in the script is flagged as applying on-hit effects: Abilities/GA_Aphelios19_CombatPassive.txt
 - `IsAttack`: damage flagged as an attack (or checked for it): Abilities/GA_Aphelios19_CombatPassive.txt
+
+### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

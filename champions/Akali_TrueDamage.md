@@ -1,7 +1,7 @@
 # Akali (5-cost MagicFighter) · `DA_Akali_TrueDamage19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: True Damage, Freestyle
@@ -72,6 +72,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Akali_TrueDamage19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Akali_TrueDamage19_Spell.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Abilities/GA_Akali_TrueDamage19_Spell.txt
+
+### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

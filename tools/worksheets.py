@@ -79,7 +79,9 @@ def tick(t):
 
 def script_hints(build, c):
     """{identifier: [script files]} for the champion's own folder in the build's decoded scripts."""
-    z = os.path.join(SNAPSHOTS, build.version, 'ga_scripts.zip')
+    # a build made from patch notes (B33) has no snapshot of its own: its scripts are its base's
+    snap = (build.data['meta'].get('patch_notes') or {}).get('base') or build.version
+    z = os.path.join(SNAPSHOTS, snap, 'ga_scripts.zip')
     if not os.path.exists(z):
         return None
     folder = 'Champions/' + c.d['package'].split('/Champions/')[1].split('/')[0] + '/'

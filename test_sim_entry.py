@@ -50,10 +50,12 @@ def test_unknown_champion_is_refused():
 
 
 def test_catalog_lists_the_builds_for_the_picker():
-    # B9: the page offers every imported build, newest first; the value is the version cfg["build"] names
+    # B9: the page offers every imported build, newest first; the value is the version cfg["build"] names. A build
+    # made from patch notes (B33) says so and sorts by the notes' date
     cat = json.loads(sim_entry.catalog_json())
-    assert cat['builds'][0] == {'version': 'rls-19.1.0.5973071.Set19.Shipping.pbe',
-                                'label': 'PBE 19.1 #5973071 (Nov 17 13:28)'}
+    assert cat['builds'][:2] == [
+        {'version': 'rls-19.1.0.5983251.Set19.Shipping.pbe.notes', 'label': 'PBE 19.1 #5983251 (patch notes, Nov 18)'},
+        {'version': 'rls-19.1.0.5973071.Set19.Shipping.pbe', 'label': 'PBE 19.1 #5973071 (Nov 17 13:28)'}]
 
 
 def test_a_run_uses_the_build_it_names(registered):

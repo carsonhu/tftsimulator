@@ -336,6 +336,9 @@ def _build_option(b):
     if b.get("pak_mtime"):
         d = datetime.datetime.fromisoformat(b["pak_mtime"])
         when = f" ({d.strftime('%b')} {d.day} {d.strftime('%H:%M')})"
+    elif b.get("label"):  # a build made from patch notes (B33): the base's numbers with the notes' changes
+        d = datetime.date.fromisoformat(b["date"]) if b.get("date") else None
+        when = f" ({b['label']}{', ' + d.strftime('%b') + ' ' + str(d.day) if d else ''})"
     return {"version": v, "label": f"{b.get('install') or ''} {name}{when}".strip()}
 
 

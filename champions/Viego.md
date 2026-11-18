@@ -1,7 +1,7 @@
 # Viego (3-cost AttackFighter) · `DA_Viego19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5973071.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5973071.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Pentakill, Choreographer, Slayer
@@ -19,7 +19,7 @@
 | KillsToGainSword | 8 | 8 | 8 |
 | SwordPerStack | 1 | 1 | 1 |
 | NumBaseSwords | 10 | 10 | 10 |
-| DamagePerSwordAD | 36 | 54 | 86 |
+| DamagePerSwordAD | 34 | 51 | 82 |
 | DamagePerSwordAP | 3 | 5 | 7 |
 
 Formulas (as stored; AD and AP are multipliers):
@@ -51,6 +51,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_SimulateLaunchAttack`: applies the "simulate a launched attack" effect (may count as an attack for on-attack effects): Abilities/GA_Viego19_Spell.txt
 - `LaunchAttack`: launches or listens for attacks: Abilities/GA_Viego19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Viego19_Spell.txt
+
+### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+
+- row DamagePerSwordAD: 36 / 54 / 86 -> 34 / 51 / 82
 
 <!-- AUTO END -->
 
@@ -109,4 +113,4 @@ Buff's +10). Ticks count from combat start.
     AbilityPower: both terms capture AP (the row name says AD; the tooltip shows AP twice). **Owner, 2026-11-18: the AD
     row scales with AD**, so each sword deals DamagePerSwordAD x AD + DamagePerSwordAP x AP. Physical, on-spell, crit
     only with Precision.
-
+- 2026-11-18, Day 1 PBE patch notes (rls-19.1.0.5983251, its archives encrypted: the page's build rls-19.1.0.5983251.Set19.Shipping.pbe.notes, B33): DamagePerSwordAD 36/54/86 -> 34/51/82. Timing and everything else unchanged from rls-19.1.0.5973071 until a readable build says otherwise.

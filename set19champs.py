@@ -1473,7 +1473,10 @@ class RenataGlasc(BuildChampion):
         return self.row('ToxinDamageAP', star=level) * AP / self.toxin_ticks
 
     def _toxin(self, target, stacks):
-        long = target.level <= self.level
+        # the long Captivate: a target of her star level or lower (the script); from the 2026-11-18 PBE notes only a
+        # lower one (a patch-notes rule in the build, B33)
+        strict = 'CaptivateLongIfStarBelow' in (self.data.d.get('patch_rules') or [])
+        long = target.level < self.level if strict else target.level <= self.level
         captivate(self, target, self.row('CaptivateDurationLong' if long else 'CaptivateDurationShort'))
         start = self.tick
         end = start + round(self.row('ToxinDuration') * TPS)
