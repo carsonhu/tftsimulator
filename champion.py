@@ -340,7 +340,8 @@ class Champion(FastDeepCopy):
         self.attacking = True
         self.attack_start_tick = self.tick
         self.start_exact = float(self.tick)
-        self.release_tick = self.tick + self.timing.release_ticks(self.period_ticks(), *self._next_animation())
+        self.release_tick = self.tick + self.timing.release_ticks(self.period_ticks(), *self._next_animation(),
+                                                                 crit=self._animation_crit())
         self.release_exact = float(self.release_tick)
         self._paid = self._begin_attack(items, time)
 
@@ -350,13 +351,17 @@ class Champion(FastDeepCopy):
             return None, None
         return self.launches % self.timing.animations + 1, self.aspd.stat
 
+    def _animation_crit(self):
+        """The attack's crit chance, for a unit whose crits play their own animation (B17)."""
+        return self.crit.stat if self.timing.crit_animation else 0.0
+
     def _time_next_attack(self):
         """B13: the next attack starts one period (at the current attack speed) after the last one started and
         releases its own animation's windup later."""
         tick = self.tick
         self.start_exact = self.last_start_exact + self.period_exact()
         self.release_exact = self.start_exact + self.timing.windup_seconds(
-            self.period_ticks(), *self._next_animation()) * TPS
+            self.period_ticks(), *self._next_animation(), crit=self._animation_crit()) * TPS
         self.release_tick = max(_round_half_up(self.release_exact), tick + 1)
         self.attack_start_tick = max(tick + 1, min(_round_half_up(self.start_exact), self.release_tick - 1))
 
@@ -387,7 +392,8 @@ class Champion(FastDeepCopy):
             base = self.release_exact if tick == self.release_tick else float(tick)
             self.release_exact = base + self.period_exact()
             self.release_tick = max(_round_half_up(self.release_exact), tick + 1)
-            self.attack_start_tick = max(tick + 1, self.release_tick - self.timing.release_ticks(self.period_ticks()))
+            self.attack_start_tick = max(tick + 1, self.release_tick - self.timing.release_ticks(
+                self.period_ticks(), crit=self._animation_crit()))
             self._paid = False
         flight = self.timing.flight_ticks(self.attack_range)
 

@@ -332,7 +332,72 @@ class Ziggs(BuildChampion):
         self.schedule_tick(self.tick + ticks_up(self.bomb_spawn / rate) + flight, land)
 
 
-champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs']
+class Senna(BuildChampion):
+    """Reverberation Devastation (champions/Senna.md, D1). Script: GA_Senna19_Spell (build ga_scripts.zip).
+
+    The cast checks the attack target for her GE_Senna19_Marker (0xf25-0x11de):
+    - unmarked: FireBlast (0x17ba) plays CD_Senna19_CastAnim1; its 'SennaMis' missile (0.7859 s, 4000 units/s)
+      applies GE_Senna19_Marker and GE_Senna19_Damage (PhysicalDamageCalc1 = SpellAD x AD + SpellAP x AP) on arrival
+      (0x509). It also applies GE_SimulateLaunchAttack at once (0x1bfe), under the mana lock (G11: not modelled).
+    - marked: CD_Senna19_CastAnim2; at its 'Damage' event (0.2851 s, 0x761 -> 0x36) the marker is removed and
+      GE_Senna19_MarkerDamage (PhysicalDamageCalc2 = MarkerPercentOfSpellAD x Calc1) applied; the SoulRip projectile
+      flying back to her gives GE_Senna19_Cast2Buff (OutgoingDamageMultiplier + BonusDA, infinite, no stack limit,
+      0xc5b) for the rest of combat.
+    The marker is infinite (its Duration row is not used), so against dummies her casts alternate blast, detonate.
+    Each cast ends at its own Unlock (EndSpell: mana lock removed, FinishCasting): CastAnim1 1.1984 s, CastAnim2
+    0.9864 s. Both damages are physical spell damage that crits only with Precision.
+    """
+    KEY = 'DA_Senna19'
+    BLAST = 'CD_Senna19_CastAnim1'
+    RIP = 'CD_Senna19_CastAnim2'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.marked = False
+        self.blast_spawn = self.chrono_projectile_spawn(self.BLAST, 'SennaMis')
+        self.rip_damage = self.chrono_event(self.RIP, 'Damage')
+        # cast lock = the Unlock event rounded up to a tick, + 1 tick; mana lock = the Unlock tick (the build's rule
+        # for the spell timeline it predicts, which is CastAnim1's)
+        self.locks = {name: self._locks(name) for name in (self.BLAST, self.RIP)}
+        if abs(self.locks[self.BLAST][0] - self.timing.cast_lock) > 1e-3:
+            raise ValueError(f'Senna: CastAnim1 lock {self.locks[self.BLAST]} differs from the build timeline '
+                             f'{self.timing.cast_lock}')
+        self.notes = ('True Damage and Hitmaker not modelled. The detonation buff (+8% damage amp, stacking) is '
+                      'applied at the detonation: nothing of hers lands before that cast ends, so its return flight '
+                      'time does not matter. Crits play a slower attack animation: the windup is weighted by crit '
+                      'chance (B17).')
+
+    def _locks(self, chrono):
+        unlock = ticks_up(self.chrono_event(chrono, 'Unlock')) / TPS
+        return unlock + 1 / TPS, unlock
+
+    def blast_damage(self, level, AD, AP):
+        return self.row('SpellAD', star=level) * AD + self.row('SpellAP', star=level) * AP
+
+    def rip_damage_value(self, level, AD, AP):
+        return self.row('MarkerPercentOfSpellAD', star=level) * self.blast_damage(level, AD, AP)
+
+    def performAbility(self, opponents, items, time):
+        # the spell's own timeline sets this cast's locks; Champion._cast reads them after this call
+        chrono = self.RIP if self.marked else self.BLAST
+        self.timing.cast_lock, self.timing.mana_lock = self.locks[chrono]
+        if not self.marked:
+            def land():
+                self.multiTargetSpell(opponents[:1], items, self.tick / TPS, 1, self.blast_damage, 'physical')
+                self.marked = True
+
+            flight = self.chrono_projectile_ticks(self.BLAST, 'SennaMis', self.attack_range)
+            self.schedule_tick(self.tick + ticks_up(self.blast_spawn) + flight, land)
+        else:
+            def detonate():
+                self.multiTargetSpell(opponents[:1], items, self.tick / TPS, 1, self.rip_damage_value, 'physical')
+                self.marked = False
+                self.dmgMultiplier.addStat(self.row('BonusDA'))
+
+            self.schedule_tick(self.tick + ticks_up(self.rip_damage), detonate)
+
+
+champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna']
 
 
 class TrainingDummy(Champion):

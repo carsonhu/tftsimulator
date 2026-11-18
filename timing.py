@@ -68,6 +68,10 @@ class Timing:
     mana_lock    cast start -> mana can be gained again (G6); None = cast_lock
     lock_scales_with_as  the spell's script reads attack speed: both locks scale by base AS / current AS (G7, a
                  generic rule; a champion whose script uses its own curve overrides scaled_locks)
+    crit_animation  (launch, animation length) of the attack a crit plays, when the attack chrono has a crit group
+                 (a 'Crit...' group behind TFTChronoTagCondition ChronoTags.Dynamic.CritAttack, Senna); None = crits
+                 play the normal attack. The engine averages crits, so an attack's windup is the crit-chance-weighted
+                 mean of the two (B17)
     lock_speed_clamp  (low, high) bounds on the cast's play rate current AS / base AS, when the script clamps it
                  (Ziggs: FClamp(AttackSpeed / base, 1, 2)); None = unbounded
     cast_cancels_attack  a ranged attack under way when the cast starts never releases (T4); from the build's spell
@@ -83,7 +87,8 @@ class Timing:
 
     def __init__(self, launch=0.0, attack_len=0.0, proj_speed=0.0, distance=None, mana_at=None, cast_lock=0.0,
                  mana_lock=None, lock_scales_with_as=False, cast_cancels_attack=False, release_scales_with_period=False,
-                 variants=None, animations=0, cast_keeps_rhythm=False, lock_speed_clamp=None, source=None):
+                 variants=None, animations=0, cast_keeps_rhythm=False, lock_speed_clamp=None, crit_animation=None,
+                 source=None):
         self.launch = launch
         self.attack_len = attack_len
         self.release_scales_with_period = release_scales_with_period
@@ -98,6 +103,7 @@ class Timing:
         self.animations = animations
         self.cast_keeps_rhythm = cast_keeps_rhythm
         self.lock_speed_clamp = lock_speed_clamp
+        self.crit_animation = crit_animation
         self.source = dict(source or {})
 
     @classmethod
@@ -123,6 +129,13 @@ class Timing:
             kw['variants'] = v  # B13: only selector-cycled variants; crit/sequence groups keep the single launch
             kw['animations'] = t['attack_animations']
             src['variants'] = f'{where} (attack chrono groups, GA_ForceSequentialAttack x{t["attack_animations"]})'
+        crit = [x for x in v if str(x.get('group', '')).startswith('Crit')
+                and x.get('other_conditions') == ['TFTChronoTagCondition']]
+        if len(crit) == 1 and not kw.get('variants'):
+            # B17: a crit plays its own animation; the other group (TFTSequenceCondition) is the normal attack, whose
+            # launch is the build's attack_launch
+            kw['crit_animation'] = (crit[0]['launch'], crit[0]['length'])
+            src['crit_animation'] = f'{where} (attack chrono group {crit[0]["group"]})'
         spells = t.get('spells') or []
         sp = next((s for s in spells if s['ga'] == spell), None) if spell else (spells[0] if spells else None)
         if spell and sp is None:
@@ -144,7 +157,7 @@ class Timing:
                 kw['cast_cancels_attack'] = bool(sp['cancels_attack'])
                 src['cast_cancels_attack'] = f'{where} {sp["ga"]}'
         for f in ('launch', 'attack_len', 'proj_speed', 'cast_lock', 'mana_lock', 'cast_cancels_attack',
-                  'release_scales_with_period', 'variants', 'cast_keeps_rhythm'):
+                  'release_scales_with_period', 'variants', 'cast_keeps_rhythm', 'crit_animation'):
             src.setdefault(f, 'default')
         return cls(source=src, **kw)
 
@@ -155,10 +168,18 @@ class Timing:
                 return x['launch'], x['length']
         raise ValueError(f'no attack animation for selector {selector} at AS {aspd}')
 
-    def windup_seconds(self, period_ticks, selector=None, aspd=None):
+    def windup_seconds(self, period_ticks, selector=None, aspd=None, crit=0.0):
         """Attack start -> release/hit in seconds (G2): the attack animation stretches to the period when the period
-        is longer, never shrinks; with release_scales_with_period it also shrinks (G19)."""
+        is longer, never shrinks; with release_scales_with_period it also shrinks (G19). `crit`: the attack's crit
+        chance, weighting the crit animation's windup (B17)."""
         launch, length = self.variant(selector, aspd) if self.variants and selector else (self.launch, self.attack_len)
+        normal = self._stretched(launch, length, period_ticks)
+        if self.crit_animation is None:
+            return normal
+        p = min(max(crit, 0.0), 1.0)
+        return (1 - p) * normal + p * self._stretched(*self.crit_animation, period_ticks)
+
+    def _stretched(self, launch, length, period_ticks):
         stretch = 1.0
         if length > 0:
             stretch = (period_ticks / TPS) / length
@@ -166,9 +187,9 @@ class Timing:
                 stretch = max(1.0, stretch)  # G2: stretch, never shrink
         return launch * stretch
 
-    def release_ticks(self, period_ticks, selector=None, aspd=None):
+    def release_ticks(self, period_ticks, selector=None, aspd=None, crit=0.0):
         """Attack start -> release/hit, in whole ticks (at least 1), for an attack period of `period_ticks`."""
-        return max(1, ticks_up(self.windup_seconds(period_ticks, selector, aspd)))
+        return max(1, ticks_up(self.windup_seconds(period_ticks, selector, aspd, crit)))
 
     def flight_ticks(self, attack_range):
         """Release -> hit for a projectile (G4); 0 for melee."""

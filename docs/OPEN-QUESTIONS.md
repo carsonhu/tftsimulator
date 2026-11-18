@@ -60,7 +60,15 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | First attack at combat start | a stationary ranged unit releases one windup in (18 ticks at base AS); VOD2's fight was minions walking in | a fight with a combat-start marker (Blue Buff) | G3, Ziggs Q3 |
 | The bomb's simulated attack (`GE_SimulateLaunchAttack`) | not modelled (no listed item reacts to attacks) | once an on-attack item is added: does a cast trigger it? | G11, champions/Ziggs.md D1 |
 
-### 6. Spell projectiles and damage numbers
+### 6. Senna again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Does a crit attack release later (0.6364 s vs 0.531 s)? | the windup is weighted by crit chance: 17 ticks at 25% crit (16 normal, 20 crit) | a Senna fight with few items and no mana regen items, damage numbers (crits) next to the mana steps | B17 |
+| Blast and detonation damage | 140 x AD + 25 x AP, then 1.5x that, +8% damage amp per detonation (stacking) | damage numbers on a target of known armor | champions/Senna.md D1 |
+| First attack at combat start | one averaged windup in (17 ticks at 25% crit) | a fight with a combat-start marker | G3, Senna Q3 |
+
+### 7. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
@@ -68,7 +76,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Draven's record flight | 14 ticks at 4 hexes; VOD1 showed 16 (5 hexes would give 16) | a Draven cast at a target at a known distance | P12, Draven E4 |
 | Trickshot ricochet distance between dummies | the next dummy is 1 hex away (timing only; damage unchanged) | a ricochet's travel between two adjacent enemies | B12 |
 
-### 7. Items
+### 8. Items
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
@@ -81,6 +89,5 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Question | Status | Where |
 |---|---|---|
 | Draven's vortex: the decoded damage effect has no tick-rate factor, yet each 0.5 s hit is half the per-second value (owner's ruling). Where does the game halve it? | implemented as the owner ruled; the decode is incomplete somewhere (calc component or attribute) | champions/Draven.md D1 |
-| Crit-conditioned attack animations (Senna's crit attack winds up 0.636 s vs 0.531 s; Varus, Jinx, ... have CritAttack / SequentialAttack groups) | not modelled: the single launch time is used. Needed before Senna. | B13, P13 |
 | Trickshot ricochets' on-hit effects (at RichochetDamage^k) | not modelled; no listed item has an on-hit effect yet | B12 |
-| Illbeats (Draven's second trait), Ionic Spark (Yunara's), Hyperpop (Ziggs's) | not implemented | - |
+| Illbeats (Draven's second trait), Ionic Spark (Yunara's), Hyperpop (Ziggs's), True Damage and Hitmaker (Senna's) | not implemented | - |

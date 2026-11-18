@@ -88,7 +88,7 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   spell effects go through `self.schedule(seconds, fn)`, never a hand-made status. Attack damage and on-attack item
   effects happen when the attack lands.
 - Registries: a class is live only when listed (`set19champs.champ_list`, `set19buffs.class_buffs` /
-  `augments` / ..., `set19items` lists); see each list for what is live (champions: Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs; traits: Encore, Trickshot, K/DA, Swiftstriker, Arcanist). `worker.js` `PY_FILES`
+  `augments` / ..., `set19items` lists); see each list for what is live (champions: Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna; traits: Encore, Trickshot, K/DA, Swiftstriker, Arcanist). `worker.js` `PY_FILES`
   lists every module the browser loads; a new module must be added there too. Builds reach the browser through
   the worker (B9): the newest at boot, others when the page's "Game build" picker names one. After changing the
   worker, the page or build loading, run `tools/browser_check/` (`npm install` there once; `node worker_e2e.js`,
