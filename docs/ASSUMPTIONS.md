@@ -174,6 +174,27 @@ Mechanics (scripts, conditional effects) are written per item. Tests: `test_item
 
 I5 evidence: VOD3 (`…PBE_11-17-2026_17-13-37-283.mp4`, 60 fps, rls-19.1.0.5973071), the inspection panel's bonus AD % and AD. Samira 1★ (42 AD), Deathblade, 5:00: 63% / 69 (predicted 63.25% / 68.6). Samira, Infinity Edge + Deathblade, 5:04: 103% / 85, crit 60% (predicted 103.5% / 85.5). Kai'Sa 1★ (30 AD), Infinity Edge + 2 Deathblades, 11:12-11:44: 189% / 87 (predicted 188.5% / 86.6; compounding 1.15² would show 192%, a plain sum 145%).
 
+## Augments (2026-11-18)
+
+`augments/combat.py` (`augments.base.BuildAugment`: `KEY` = the augment's data asset, rows read by name from the
+build's augment entry). The owner's list of offensive combat augments, 2026-11-18; Stakeholder Management waits for
+a Manager champion (owner). Tests: `test_augments.py`.
+
+| # | Rule | Status | Source | To check |
+|---|---|---|---|---|
+| A1 | Timed stacks follow their script: WaitOnTimePassedInPhase(start, combat), then RepeatAction(interval, n) whose first action is at once (as Quicksilver, I9 evidence): Focused Fire (+10% AD at once; +4% at 5, 10, 15 s), Baron's Lair (+4% AD and AP at 8, 9, 10 s), Submit to the Pit (+3% at 1, 2, 3 s while in the center rows). | from data (scripts) | GA_FocusedFire, GA_BaronsLair, GA_SubmitToThePit | a holder's AD % on the panel |
+| A2 | Augments with no script (effects only) and a delay row act on the tick at or after it: Ascension (+35% amp at 12 s), Partial Ascension (+20%), Espresso (x1.1 AS, x1.3 from 12 s). | assumed | the rows ActivationDelay / Delay | the panel's AS (Espresso) at 12 s |
+| A3 | Augments that grow after player combats take the stage as a parameter (2-1 ... 6-1): player combats since a 2-1 pick = 5 per stage (X-1, X-2, X-3, X-5, X-6; X-4 carousel, X-7 PvE). Early Learnings: 3% + 1% per combat (1-costs double); No Scout No Pivot: 1% per combat. | assumed (owner asked for the stage toggle) | DA_EarlyLearnings, DA_NoScoutNoPivot rows | the round structure of Set 19 |
+| A4 | Soul Awakening: 10 stacks of 1.5% AD and AP, the first 0.8 s into combat, then each second (set18's 18.5 replay timing; the Set 19 script is RepeatAction(1 s, 10)); at the 10th, 12% of each damage the unit deals is dealt again as true damage. | set18 verified (timing); from data (values) | GA_SoulAwakening; set18 SoulAwakening | a Set 19 holder's AD % steps |
+| A5 | Positional augments are taken to apply to the simulated unit: Glass Cannon I/II (back row), Strange Duet I-III (isolated in pairs), It's Me Baby (in the hex), Double Trouble (one of the pair), Hold the Line (back rows, 5 or 7 front-row allies), Battle of the Bands (owner: always active), Chalice of Power and Zeke's Herald (owner: an ally holds it, this unit in range). Submit to the Pit's place is a parameter ('By range': melee in the center rows). | owner (BotB, Chalice); assumed (the rest) | | |
+| A6 | U.R.F.: the unit holds a Spatula or Frying Pan item (+20% AS, +3 mana regen). | assumed | DA_URF | |
+| A7 | Seraphim's Staff: needs Archangel's Staff on the unit; +2 mana regen from the tick its AP multiplier reaches APThreshold (2.1). | from data | DA_SeraphimsStaff | |
+| A8 | Sunder30 / Shred30 (page entries, not augments; owner): every dummy has GE_ArmorSunder / GE_MRShred at debuff level 30 (x0.7, CT_DebuffLevelToValue) for the whole combat. | from data | items/debuffs.py `apply_sunder`, `apply_shred` | |
+
+Trait augments: Dig on This (a Jazz member gets 150% more of its Jazz amp), Big Solo (a Heartsteel Bias +150% of its
+Heartsteel bonuses), Small Squad (+100% with 3 or fewer Heartsteel champions fielded): the Heartsteel trait adds their
+share (`heartsteel_extra`).
+
 ## Engine (set18 code carried over)
 
 Filled in as the engine is reviewed and adapted. Each entry: what the set18 engine assumes, where, and whether it

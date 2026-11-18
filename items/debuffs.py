@@ -63,6 +63,14 @@ def apply_shred(champion, target, level, duration):
     apply_effect(target, shred, champion.tick, last_tick(champion.tick, duration))
 
 
+def apply_sunder(champion, target, level, duration):
+    """GE_ArmorSunder on `target` at debuff `level` for `duration` s: Armor x ShredSunderChill(level) on Channel2, one
+    "Sunder" per target whoever applies it (the later end and the higher level win, effects.py)."""
+    op, channel = shared_rule(champion, "GE_ArmorSunder", "Armor")
+    sunder = ActiveEffect("Sunder", [("armor", op, debuff_value(champion, "ShredSunderChill", level), channel)])
+    apply_effect(target, sunder, champion.tick, last_tick(champion.tick, duration))
+
+
 def apply_burn(champion, target, level, duration):
     """GE_Burn on `target` from `champion` (I7), as an effects.ActiveEffect with the build's rules (globals.burn):
     one burn per target (StackLimitCount 1); a new application renews the duration but not the period

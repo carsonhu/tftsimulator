@@ -63,6 +63,9 @@ const PY_FILES = [
   "traits/choreographer.py",
   "traits/jazz.py",
   "traits/beach_pop.py",
+  "augments/__init__.py",
+  "augments/base.py",
+  "augments/combat.py",
 ];
 
 async function boot() {

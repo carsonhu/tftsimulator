@@ -23,6 +23,7 @@ from traits.slayer import *  # noqa: F401,F403
 from traits.choreographer import *  # noqa: F401,F403
 from traits.jazz import *  # noqa: F401,F403
 from traits.beach_pop import *  # noqa: F401,F403
+from augments.combat import *  # noqa: F401,F403
 from registry import REGISTRIES
 
 class_buffs = REGISTRIES["trait"]  # traits

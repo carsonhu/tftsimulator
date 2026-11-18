@@ -164,6 +164,16 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Beach Pop's breakpoints | the page picks the trait level 1-3 | (owner) the unit counts per level (the panel showed the first at 3) | B32 |
 | Beach Pop's mana timer | +5/8/8 at 3, 6, 9 ... s from combat start | an empowered Beach Pop unit's mana text | B32 |
 
+### 7n. Augments
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Timed augments' first step | Focused Fire at 5 s, Baron's Lair at 8 s, Submit to the Pit at 1 s, then each interval | a holder's AD % on the panel | A1 |
+| Ascension, Espresso | on the tick at 12 s | a holder's AS (Espresso) on the panel | A2 |
+| Player combats per stage | 5 (Early Learnings, No Scout No Pivot) | (owner) the Set 19 round structure | A3 |
+| Soul Awakening's timing | set18's: first stack 0.8 s in | a Set 19 holder's AD % steps | A4 |
+| Stakeholder Management | not implemented | (owner) waits for a Manager champion | |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

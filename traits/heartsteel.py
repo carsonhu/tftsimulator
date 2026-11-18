@@ -51,10 +51,14 @@ class Heartsteel(BuildTrait):
             return
         member = self.KEY in (champion.data.d.get("trait_keys") or [])
         stan = champion.trait_value(self.KEY, "StanPercentIncrease") if member else 0
-        for bit, (name, key, row, attr, op) in enumerate(self.MEMBERS):
-            if not (self.params >> bit) & 1 and getattr(champion, "KEY", None) != key:
-                continue
-            v = champion.trait_value(self.KEY, row) * (1 + stan)
+        fielded = [m for bit, m in enumerate(self.MEMBERS)
+                   if (self.params >> bit) & 1 or getattr(champion, "KEY", None) == m[1]]
+        bias = member and tier >= 2 and bool((self.params >> self.BIAS) & 1)
+        # Big Solo / Small Squad (augments/combat.py): an extra share of the bonuses
+        extra = sum(i.heartsteel_extra(champion, bias, len(fielded)) for i in getattr(champion, "items", None) or []
+                    if getattr(i, "level", 0) and hasattr(i, "heartsteel_extra"))
+        for name, key, row, attr, op in fielded:
+            v = champion.trait_value(self.KEY, row) * (1 + stan + extra)
             champion.attribute(attr).modify(op, 1 + v if op == "MultiplyAdditive" else v)
         champion.heartsteel_bias = member and tier >= 2 and bool((self.params >> self.BIAS) & 1)
 
