@@ -632,7 +632,7 @@ def get_champ_info(cfg):
         "crit": _panel(champ.crit),
         "critDmg": _panel(champ.critDmg),
         "manaPerAttack": _panel(champ.manaPerAttack),
-        "role": champ.role.value if champ.role else None,
+        "role": champ.role.name if champ.role else None,  # the game's display name ('Magic Caster')
         "build": champ.build.version if getattr(champ, "build", None) else None,
         "canSpellCrit": bool(champ.canSpellCrit),
         "notes": champ.notes,

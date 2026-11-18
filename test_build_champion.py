@@ -35,7 +35,7 @@ def test_base_stats_mana_range_and_cap():
     assert (a.curMana, a.fullMana.stat) == (0, 30)
     a.aspd.modify('MultiplyAdditive', 100)
     assert a.attack_range == 4 and a.aspd.stat == 5  # B4: GE_AttackSpeedMax caps it
-    assert a.role.key == 'MagicCaster' and a.role.archetype == 'Caster'
+    assert a.role.key == 'MagicCaster' and a.role.archetype == 'Caster' and a.role.name == 'Magic Caster'
     assert a.timing.launch == 0.3067 and a.timing.cast_lock == 1
 
 

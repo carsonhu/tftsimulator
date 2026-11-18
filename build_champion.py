@@ -44,11 +44,13 @@ def curve_at(points, t, interp='Constant'):
 
 class BuildRole:
     """The champion's role as the build names it (e.g. 'MagicCaster', 'AttackSpecialist_Ammo'). `archetype` is the
-    middle word (Caster, Fighter, ...), which items read as `champion.role.archetype`."""
+    middle word (Caster, Fighter, ...), which items read as `champion.role.archetype`. `name` is what the game shows
+    ('Magic Caster', 'Hybrid Specialist': the role entry's display name in the build)."""
 
-    def __init__(self, key):
+    def __init__(self, key, name=None):
         self.key = key
         self.value = key
+        self.name = name or key
         core = key
         for prefix in ('Attack', 'Magic', 'Hybrid'):
             if core.startswith(prefix):
@@ -126,7 +128,7 @@ class BuildChampion(Champion):
         self.build = b
         self.data = c
         self.attack_range = s.get('AttackRange', 1)
-        self.role = BuildRole(c.role)
+        self.role = BuildRole(c.role, b.role(c.role).d.get('name'))
         self.items = [RoleEffects(b.role(c.role))]
         g = b.data.get('globals') or {}
         cap = (g.get('attack_speed_cap') or {}).get('value')

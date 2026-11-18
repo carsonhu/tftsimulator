@@ -35,7 +35,7 @@ def test_catalog_info_and_run(registered):
     cat = json.loads(sim_entry.catalog_json())
     assert [c['name'] for c in cat['champions']] == ['AhriForTest']
     info = json.loads(sim_entry.champ_info_json(json.dumps(cfg())))
-    assert info['stats']['role'] == 'MagicCaster' and info['stats']['castTime'] == 1
+    assert info['stats']['role'] == 'Magic Caster' and info['stats']['castTime'] == 1
     assert info['stats']['build'].startswith('rls-19.1.0')
     out = json.loads(sim_entry.run_json(json.dumps(cfg())))
     import set19items
