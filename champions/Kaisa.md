@@ -55,8 +55,8 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented 2026-11-17** (`set19champs.Kaisa`, D1; tests `test_kaisa.py`)
+- Keep in the simulator: **yes**
 
 ## Questions
 
@@ -66,28 +66,41 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
 | Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackMarksman | predicted | |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackMarksman | **consistent**: +10 per attack, no regen; the steps match the engine's releases | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
-| Q4 | Attack windup at base AS (attack start to hit / release) | 0.1361 s (4.08 ticks) | predicted | |
-| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
+| Q4 | Attack windup at base AS (attack start to hit / release) | 0.1361 s (4.08 ticks) | **refuted for the single launch**: 4 sequential animations, LowAS below 1.75 AS (0.3255/0.4242/0.3578/0.4242 s), fast from 1.75 (B13) | E2, P13 |
+| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | **consistent**: the 2.6-2.8 s animations never stretch at her periods; the fast set from 1.75 AS fits the 102-frame cycle after the 9th cast | E2 |
 | Q6 | Projectile travel time (ranged only) | speed 2000 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 0.0333 s (1 ticks) | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | 0.0333 s (1 ticks) | **consistent**: the cast doesn't interrupt the rhythm (T12) | E2 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
 | Q9 | Mana lock: from cast start, when can mana be gained again? | – | predicted | |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
-| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | **no** (no Combat.Attacking cancel; rhythm unbroken, T12) | E2 |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | spell **confirmed**: +15% AS per cast, stacking (panel 0.86 ... 2.10 = 0.75 x (1 + 0.15k)); missiles implemented from the script (D1), their damage not yet checked | E3, script |
+| Q14 | Passives and other mechanics that need modelling | see ability text | missiles every 3 launches (D1); Trickshot ricochets (B12); K/DA (B14) | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-17 | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 11:12 (f40506) | 60 | inspection panel | 1★, Infinity Edge + 2 Deathblades: AD 87, bonus AD 189%, AS 0.75, crit 60%, 811 HP, 0/30 mana; Trickshot (2), K/DA 1/3 (inactive) | stats as built (I5) | Q1 |
+| E2 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 f40531-42287 (`tools/vod_text_changes.py`, mana) | 60 | attack releases (+10 mana each) | first gaps 88, 76 frames at 0.75 AS; 3-attack cycles shrink with each cast; f41895-41986 a 75-frame gap as her HP drops 811 -> 698 (likely CC; left out) | engine within 1 tick for 11 releases, then +4 by the 20th (T13); casts don't break the rhythm (T12) | Q2, Q4, Q5, Q7, Q12 |
+| E3 | 2026-11-17 | rls-19.1.0.5973071 | VOD3 f40506-42261 (AS text) | 60 | AS after each cast | 0.75, 0.86, 0.97, 1.09, 1.20, 1.31, 1.42, 1.54, 1.65, 1.76, 1.88, 1.99, 2.10, changing on the cast frame | 0.75 x (1 + 0.15k): MultiplyAdditive, stacking | Q13 |
 
 ## Decisions and notes
 
+- 2026-11-17, D1 (implemented, `set19champs.Kaisa`):
+  - **Passive (GA_Kaisa19_Passive):** every NumAttacksForMissiles (3) attack launches, NumMissiles (3) missiles fire
+    at once (CD_Kaisa19_SpellMissile, 1900 units/s), alternating by a running count between her target and up to 2
+    enemies within 2 hexes of it. Each deals ADDamage x AD + APDamage x AP physical (spell crit with Precision) and
+    ricochets with Trickshot (CD_Kaisa19_SpellMissileTrickshot, x RichochetDamage^k).
+  - **Spell (GA_Kaisa19_Spell):** +ASOnCast as MultiplyAdditive (+15% of base) for 60 s, stacking; it finishes on
+    activation (T12).
+  - **Attacks:** 4 sequential animations, LowAS or fast at 1.75 AS (B13).
+  - **Assumed:** secondary targets at her attack range (5 hexes) for missile flight; identical dummies make the split
+    irrelevant to the total.

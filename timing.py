@@ -70,12 +70,18 @@ class Timing:
                  generic rule; a champion whose script uses its own curve overrides scaled_locks)
     cast_cancels_attack  a ranged attack under way when the cast starts never releases (T4); from the build's spell
                  (`CancelAbilitiesWithTag` has `Combat.Attacking`); default when the build doesn't say: it still releases
+    variants     sequential attack animations (B13, Kai'Sa): [{'selector', 'min_as', 'launch', 'length'}] in the chrono's
+                 pick-first order; attack n (from 0 at combat start) plays selector n % animations + 1, the first
+                 group whose min_as the attack speed meets. [] = one animation (launch, attack_len)
+    animations   how many selectors the unit cycles (GA_ForceSequentialAttack NumAttackAnimations)
+    cast_keeps_rhythm  the spell finishes on activation and doesn't cancel attacks: a cast leaves the attack rhythm
+                 running (T12, Kai'Sa); otherwise a fresh attack starts after the cast lock (T5)
     source       {field: where the value came from}, e.g. 'build rls-19.1.0.5973071' or a VOD with its timestamp
     """
 
     def __init__(self, launch=0.0, attack_len=0.0, proj_speed=0.0, distance=None, mana_at=None, cast_lock=0.0,
                  mana_lock=None, lock_scales_with_as=False, cast_cancels_attack=False, release_scales_with_period=False,
-                 source=None):
+                 variants=None, animations=0, cast_keeps_rhythm=False, source=None):
         self.launch = launch
         self.attack_len = attack_len
         self.release_scales_with_period = release_scales_with_period
@@ -86,6 +92,9 @@ class Timing:
         self.mana_lock = mana_lock
         self.lock_scales_with_as = lock_scales_with_as
         self.cast_cancels_attack = cast_cancels_attack
+        self.variants = list(variants or [])
+        self.animations = animations
+        self.cast_keeps_rhythm = cast_keeps_rhythm
         self.source = dict(source or {})
 
     @classmethod
@@ -106,6 +115,11 @@ class Timing:
         if t.get('attack_rate_scaling_threshold') == [False]:  # G19: every attack module lacks the flag
             kw['release_scales_with_period'] = True
             src['release_scales_with_period'] = f'{where} (attack modules without bUseRateScalingThreshold, G19)'
+        v = t.get('attack_variants') or []
+        if t.get('attack_animations') and v and all(x.get('selector') and not x.get('other_conditions') for x in v):
+            kw['variants'] = v  # B13: only selector-cycled variants; crit/sequence groups keep the single launch
+            kw['animations'] = t['attack_animations']
+            src['variants'] = f'{where} (attack chrono groups, GA_ForceSequentialAttack x{t["attack_animations"]})'
         spells = t.get('spells') or []
         sp = next((s for s in spells if s['ga'] == spell), None) if spell else (spells[0] if spells else None)
         if spell and sp is None:
@@ -119,25 +133,39 @@ class Timing:
                 src['mana_lock'] = f'{where} {sp["ga"]}'
             kw['lock_scales_with_as'] = bool(sp.get('reads_attack_speed'))
             src['lock_scales_with_as'] = f'{where} {sp["ga"]}'
+            if sp.get('cast_end') == 0 and sp.get('cancels_attack') is False:
+                kw['cast_keeps_rhythm'] = True  # T12: FinishCasting on activation, no Combat.Attacking cancel
+                src['cast_keeps_rhythm'] = f'{where} {sp["ga"]}'
             if sp.get('cancels_attack') is not None:
                 # T4: the spell's CancelAbilitiesWithTag has Combat.Attacking
                 kw['cast_cancels_attack'] = bool(sp['cancels_attack'])
                 src['cast_cancels_attack'] = f'{where} {sp["ga"]}'
         for f in ('launch', 'attack_len', 'proj_speed', 'cast_lock', 'mana_lock', 'cast_cancels_attack',
-                  'release_scales_with_period'):
+                  'release_scales_with_period', 'variants', 'cast_keeps_rhythm'):
             src.setdefault(f, 'default')
         return cls(source=src, **kw)
 
-    def release_ticks(self, period_ticks):
-        """Attack start -> release/hit, in ticks, for an attack period of `period_ticks` (G2): the attack animation
-        stretches to the period when the period is longer, never shrinks; with release_scales_with_period it also
-        shrinks (G19). At least 1 tick."""
+    def variant(self, selector, aspd):
+        """(launch, animation length) of the animation attack `selector` plays at attack speed `aspd` (B13)."""
+        for x in self.variants:
+            if x['selector'] == selector and (x.get('min_as') is None or aspd >= x['min_as'] - 1e-9):
+                return x['launch'], x['length']
+        raise ValueError(f'no attack animation for selector {selector} at AS {aspd}')
+
+    def windup_seconds(self, period_ticks, selector=None, aspd=None):
+        """Attack start -> release/hit in seconds (G2): the attack animation stretches to the period when the period
+        is longer, never shrinks; with release_scales_with_period it also shrinks (G19)."""
+        launch, length = self.variant(selector, aspd) if self.variants and selector else (self.launch, self.attack_len)
         stretch = 1.0
-        if self.attack_len > 0:
-            stretch = (period_ticks / TPS) / self.attack_len
+        if length > 0:
+            stretch = (period_ticks / TPS) / length
             if not self.release_scales_with_period:
                 stretch = max(1.0, stretch)  # G2: stretch, never shrink
-        return max(1, ticks_up(self.launch * stretch))
+        return launch * stretch
+
+    def release_ticks(self, period_ticks, selector=None, aspd=None):
+        """Attack start -> release/hit, in whole ticks (at least 1), for an attack period of `period_ticks`."""
+        return max(1, ticks_up(self.windup_seconds(period_ticks, selector, aspd)))
 
     def flight_ticks(self, attack_range):
         """Release -> hit for a projectile (G4); 0 for melee."""

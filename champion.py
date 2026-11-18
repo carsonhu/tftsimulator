@@ -83,6 +83,9 @@ class Champion(FastDeepCopy):
         self.release_tick = -1  # its release (ranged) or hit (melee)
         self.release_exact = 0.0  # exact release time in ticks: repeat attacks keep the fraction (T2)
         self.attacks_started = 0
+        self.launches = 0  # attack releases this combat (LaunchAttack events; picks sequential animations, B13)
+        self.start_exact = 0.0  # exact start of the current attack, for units with sequential animations (B13)
+        self.last_start_exact = 0.0
         self._paid = False  # the current attack's mana is already paid
         self.full_since = None  # tick the bar became full; a cast comes one tick later (T4)
         self.events = []  # heap of (tick, seq, fn): projectile hits, delayed spell effects (T6)
@@ -336,9 +339,29 @@ class Champion(FastDeepCopy):
         windup later (G2, T5)."""
         self.attacking = True
         self.attack_start_tick = self.tick
-        self.release_tick = self.tick + self.timing.release_ticks(self.period_ticks())
+        self.start_exact = float(self.tick)
+        self.release_tick = self.tick + self.timing.release_ticks(self.period_ticks(), *self._next_animation())
         self.release_exact = float(self.release_tick)
         self._paid = self._begin_attack(items, time)
+
+    def _next_animation(self):
+        """(selector, attack speed) for the attack starting next (B13): GA_ForceSequentialAttack counts launches."""
+        if not self.timing.variants:
+            return None, None
+        return self.launches % self.timing.animations + 1, self.aspd.stat
+
+    def _time_next_attack(self):
+        """B13: the next attack starts one period (at the current attack speed) after the last one started and
+        releases its own animation's windup later."""
+        tick = self.tick
+        self.start_exact = self.last_start_exact + self.period_exact()
+        self.release_exact = self.start_exact + self.timing.windup_seconds(
+            self.period_ticks(), *self._next_animation()) * TPS
+        self.release_tick = max(_round_half_up(self.release_exact), tick + 1)
+        self.attack_start_tick = max(tick + 1, min(_round_half_up(self.start_exact), self.release_tick - 1))
+
+    def onLaunch(self, opponents, items):
+        """An attack releases (the LaunchAttack event). Champions whose passive counts launches override this."""
 
     def _release(self, opponents, items, rhythm=True, paid=None):
         """The attack releases (ranged) or hits (melee) this tick. With `rhythm`, the next attack is scheduled one
@@ -351,7 +374,15 @@ class Champion(FastDeepCopy):
         if not paid and (moment == 'release' or (moment == 'hit' and self.ranged and self._fills_bar())):
             self.addMana(self.manaPerAttack.stat)
             paid = True
-        if rhythm:
+        self.launches += 1
+        self.onLaunch(opponents, items)
+        if rhythm and self.timing.variants:
+            # B13: attack starts are one period apart and each releases its own animation's windup later, so the
+            # releases of different animations are not a period apart (Kai'Sa, VOD3)
+            self.last_start_exact = self.start_exact
+            self._time_next_attack()
+            self._paid = False
+        elif rhythm:
             tick = self.tick
             base = self.release_exact if tick == self.release_tick else float(tick)
             self.release_exact = base + self.period_exact()
@@ -387,6 +418,17 @@ class Champion(FastDeepCopy):
         self.performAbility(opponents, items, time)
         cast_lock, mana_lock = self.timing.scaled_locks(self.base_aspd, self.aspd.stat)
         tick = self.tick
+        if self.timing.cast_keeps_rhythm:
+            # T12: the spell ends on activation and cancels nothing: the attack rhythm runs on (Kai'Sa, VOD3); the
+            # attack after it keeps the period it was timed with (re-timing it at the new attack speed ran 6 ticks
+            # early within four attacks on VOD3)
+            self.mana_locked_until = tick + ticks(mana_lock)
+            self.curMana = self.curMana - self.fullMana.stat + self.startingMana
+            self.full_since = None
+            self.attacksOnLastCast = self.attacks_started
+            for item in items:
+                item.ability("postAbility", time, self)
+            return
         self.busy_until = tick + max(1, ticks(cast_lock))
         self.mana_locked_until = tick + ticks(mana_lock)
         # overflow mana is kept (G10, inherited, open); startingMana is the bar after a cast (some champions)

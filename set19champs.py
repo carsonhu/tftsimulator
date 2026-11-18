@@ -167,7 +167,68 @@ class Draven(BuildChampion):
             self.schedule_tick(self.tick + step, lambda: self._record_lands(opponents, k + 1))
 
 
-champ_list = ['Neeko', 'Varus', 'Draven']
+class Kaisa(BuildChampion):
+    """Make it Rain (champions/Kaisa.md, D1). Scripts: GA_Kaisa19_Passive, GA_Kaisa19_Spell,
+    GA_Kaisa19_TrickshotHandler (build ga_scripts.zip).
+
+    Passive (GA_Kaisa19_Passive): it counts her attack launches (Combat.Event.LaunchAttack, 0x2b9a) and every
+    NumAttacksForMissiles-th fires NumMissiles missiles at once (FireMissiles, 0x2c54): each plays
+    CD_Kaisa19_SpellMissile ('SpellMis', speed 1900, spawning at 0). A running missile count alternates them between her
+    target and up to MaxSecondaryTargets enemies within HexSearchRangeAroundCurrentTarget of it
+    (1 / PercentMissilesOnCurrentTarget). Each arrival (0x33a8) applies GE_Kaisa19_MissileDamage =
+    PhysicalDamageCalc1 = ADDamage x AD + APDamage x AP (physical spell damage, crits only with Precision) and sends
+    the Trickshot bounce event. Ricochet k (GA_Kaisa19_TrickshotHandler) flies CD_Kaisa19_SpellMissileTrickshot (1900)
+    to the next enemy for the same damage x RichochetDamage^k (B12).
+    Spell (GA_Kaisa19_Spell): GE_Kaisa19_AttackSpeedBuff = AttackSpeed MultiplyAdditive (1 + ASOnCast) for ASDuration
+    (60 s: the rest of combat), stacking per cast; it finishes on activation and cancels nothing (T12).
+    Her attacks cycle 4 animations whose windups differ (B13).
+    """
+    KEY = 'DA_Kaisa19'
+    MISSILE = 'CD_Kaisa19_SpellMissile'
+    BOUNCE = 'CD_Kaisa19_SpellMissileTrickshot'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.every = int(self.row('NumAttacksForMissiles'))
+        self.num_missiles = int(self.row('NumMissiles'))
+        self.missiles_fired = 0
+        self.launch_count = 0
+        self.notes = ("Missiles alternate between the target and nearby enemies (identical dummies, same total); "
+                      "secondary targets are taken at her attack range. Ricochets go to the next dummy, 1 hex away.")
+
+    def missile_damage(self, level, AD, AP):
+        return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
+
+    def onLaunch(self, opponents, items):
+        self.launch_count += 1
+        if self.launch_count % self.every:
+            return
+        flight = self.chrono_projectile_ticks(self.MISSILE, 'SpellMis', self.attack_range)
+        secondaries = opponents[1:1 + int(self.row('MaxSecondaryTargets'))] or opponents[:1]
+        on_target = 1 / self.row('PercentMissilesOnCurrentTarget')
+        for _ in range(self.num_missiles):
+            if self.missiles_fired % on_target > 0:
+                target = secondaries[self.missiles_fired // 2 % len(secondaries)]
+            else:
+                target = opponents[0]
+            self.missiles_fired += 1
+            self.schedule_tick(self.tick + flight, lambda target=target: self._missile_lands(opponents, target, 0))
+
+    def _missile_lands(self, opponents, target, k):
+        eff = self.trait_value('DA_Trickshot19', 'RichochetDamage') ** k if k else 1
+        self.multiTargetSpell([target], self.items, self.tick / TPS, 1,
+                              lambda level, AD, AP: self.missile_damage(level, AD, AP) * eff, 'physical')
+        if k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
+            nxt = opponents[(opponents.index(target) + 1) % len(opponents)]
+            step = self.chrono_projectile_ticks(self.BOUNCE, 'SpellMis', set19buffs.bounce_hexes(opponents))
+            self.schedule_tick(self.tick + step, lambda: self._missile_lands(opponents, nxt, k + 1))
+
+    def performAbility(self, opponents, items, time):
+        # MultiplyAdditive (1 + ASOnCast): +ASOnCast x 100 attack speed points, for the rest of combat (ASDuration 60)
+        self.aspd.addStat(self.row('ASOnCast') * 100)
+
+
+champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa']
 
 
 class TrainingDummy(Champion):
