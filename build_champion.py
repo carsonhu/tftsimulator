@@ -18,7 +18,7 @@ import set19buffs
 from buildstore import BuildDataError, load_build
 from champion import Champion
 from item import Item
-from timing import Timing
+from timing import Timing, accelerating_projectile_ticks, projectile_ticks
 
 # Base crit is in no shared asset (native defaults). The owner confirmed on 2026-11-17 that Set 19 keeps
 # 25% chance / 140% damage (E12).
@@ -196,6 +196,18 @@ class BuildChampion(Champion):
             raise BuildDataError(f'{self.KEY}: chrono {chrono} has no single speed for projectile {projectile!r} '
                                  f'in build {self.build.version} ({sorted(speeds, key=str)})')
         return speeds.pop()
+
+    def chrono_projectile_ticks(self, chrono, projectile, hexes):
+        """Flight ticks over `hexes` for the projectile named `projectile` that `chrono` spawns (G4): a fixed speed,
+        or an accelerating one (initial speed, acceleration, max speed; P12)."""
+        ps = [p for p in self.chrono(chrono).get('projectiles') or [] if p['name'] == projectile]
+        accel = {(p['initial_speed'], p['acceleration'], p['max_speed']) for p in ps if 'acceleration' in p}
+        if accel:
+            if len(accel) != 1 or len(ps) != len([p for p in ps if 'acceleration' in p]):
+                raise BuildDataError(f'{self.KEY}: chrono {chrono} has mixed movements for {projectile!r} '
+                                     f'in build {self.build.version}')
+            return accelerating_projectile_ticks(*accel.pop(), hexes)
+        return projectile_ticks(self.chrono_projectile_speed(chrono, projectile), hexes)
 
     def chrono_projectile_spawn(self, chrono, projectile):
         """Seconds from the chrono's start to the spawn of the projectile named `projectile` (its module's PlayPoint;

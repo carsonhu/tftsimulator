@@ -52,8 +52,8 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **in progress (first VOD read 2026-11-17)**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented 2026-11-17** (`set19champs.Draven`, D1; tests `test_draven.py`)
+- Keep in the simulator: **yes**
 
 ## Questions
 
@@ -67,16 +67,16 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.2587 s (7.76 ticks) | **consistent**: attack start ~f13409, release f13416-13417 (≈ 8 frames; predicted 8) | E2 |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
-| Q6 | Projectile travel time (ranged only) | speed 1600 | predicted | |
+| Q6 | Projectile travel time (ranged only) | speed 1600; record: 1500 +2000/s (max 2500), 14 ticks at 4 hexes (P12) | record **consistent** within the target's distance: 16 frames from spawn to hit (5 hexes predicts 16; 4 hexes 14) | E4 |
 | Q7 | Cast time: cast start to the next attack starting | 1.7 s (51 ticks) | **consistent**: next attack started +50 frames after the cast (predicted 51), released +58 (predicted 59) | E2, E3 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
 | Q9 | Mana lock: from cast start, when can mana be gained again? | 1.6667 s (50 ticks) | **confirmed**: banked overflow appeared +51 frames after the cast (predicted mana lock 50; the panel shows it the frame after) | E3 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | implemented from the script (D1). The record leaves at +21 frames after the cast (predicted 20, T10-like +1). **Vortex: 6 hits of the full per-second value (0.5 s apart), twice the tooltip's 3 s x per-second: script, unverified** | E4, script |
+| Q14 | Passives and other mechanics that need modelling | see ability text | Trickshot ricochets on attacks and on the record (B12); Illbeats not implemented | E5, B12 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-17 | D1 |
 
 ## Evidence log
 
@@ -90,8 +90,22 @@ Source for all rows below: `Outplayed/…PBE_11-17-2026_15-16-17-933.mp4` (owner
 | E1 | 2026-11-17 | rls-19.1.0.5973071 | 446.8 s (f13405) | 30 | inspection panel | 1 star, 3 items, AS 1.16, crit 80%; Illbeats 1/2, Trickshot 2/3 | itemised: mana per attack and regen here are not the role's alone | Q1 (not usable) |
 | E2 | 2026-11-17 | rls-19.1.0.5973071 | f13404-13427 (zoomed) and the mana series | 30 | first attack after the cast at f13359 | idle f13404-13408; attack animation from ~f13409; axe leaves f13416-13417; +9 mana at f13417 | mana at the **release**; windup ≈ 8 | Q2, Q4, Q7 |
 | E3 | 2026-11-17 | rls-19.1.0.5973071 | cast f13359 (bar 53.25 → 0); +2.25 at f13410 | 30 | mana lock, overflow | the filling attack (+9) was never displayed; +2.25 appears at +51 = 53.25 + 9 - 60 exactly | overflow is **banked** (G10); the panel shows 0 during the lock and the overflow when it ends | Q9, G10 |
+| E4 | 2026-11-17 | rls-19.1.0.5973071 | f13356-13407 (zoomed, every frame) | 30 | the cast at f13359 (mana bar to 0) | record appears in his hand / leaves f13380; lands on the target f13396 ("170" pops) | throw +21 (predicted 20 = ticks_up(0.6566 s)); flight 16 (predicted 14 at 4 hexes, 16 at 5; target distance not measured) | Q6, Q13 |
+| E5 | 2026-11-17 | rls-19.1.0.5973071 | f13378-13383 | 30 | Trickshot (2) attack ricochet | an attack's "54" at f13378, then "12" on the neighbouring enemy at f13383 | 54 x 0.22 = 11.9: RichochetDamage at tier 1; 5 frames ≈ 1 hex at 1600 (4.03 ticks) | Q14, B12 |
 
 ## Decisions and notes
 
 - 2026-11-17: Draven pays attack mana at the release (E2, seen on screen). His items change his mana per attack
   and regen, so Q2's role numbers need an itemless fight.
+- 2026-11-17, D1 (implemented, `set19champs.Draven`). From GA_Draven19_Spell:
+  - **Record:** CD_Draven19_Spell throws 'Blade' at the attack target at 0.6566 s on an accelerating spline (P12).
+  - **Arrival:** 140/210/340 x AD (PhysicalDamageCalc1) on the target, then the vortex attached to it.
+  - **Vortex:** RepeatAction every 0.5 s (TickRate, a script default), trunc(3 / 0.5) = 6 hits, the first at once.
+    Each hit is PhysicalDamageCalc2 = 100/150/250 x AD + 15/25/35 x AP (the tooltip's per-second value) split
+    1 / n among the enemies inside, which is the same total on identical dummies, so it is booked on the target.
+  - **Trickshot:** each ricochet repeats arrival and vortex on the next enemy at RichochetDamage^k (B12), flying
+    CD_Draven19_Spell_Trickshot's Blade (2000) 1 hex.
+  - **Crits and AD:** all physical, crit only with Precision; AD and AP are the attribute multipliers.
+  - **Open:** the vortex totals 2x what "per second for 3 seconds" says. That is the script read literally
+    (GE_Draven19_SpellSecondaryDamage has no tick-rate factor). A VOD with an isolated vortex on a known-armor
+    target would settle it.

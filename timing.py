@@ -34,6 +34,22 @@ def projectile_ticks(speed, hexes):
     return ticks_up(hexes * HEX_UNITS / speed)
 
 
+def accelerating_projectile_ticks(initial_speed, acceleration, max_speed, hexes):
+    """Release -> hit for a projectile that starts at `initial_speed` units/s and gains `acceleration` per second up
+    to `max_speed` (TFTAcceleratingSplineMovement), over `hexes` hexes in a straight line (G4)."""
+    d = hexes * HEX_UNITS
+    if d <= 0:
+        return 0
+    v0, a, vmax = initial_speed, acceleration, max_speed
+    t_max = (vmax - v0) / a if a > 0 and vmax > v0 else 0.0  # time to reach the top speed
+    d_max = v0 * t_max + a * t_max ** 2 / 2
+    if d <= d_max and a > 0:
+        t = (-v0 + (v0 ** 2 + 2 * a * d) ** 0.5) / a
+    else:
+        t = t_max + (d - d_max) / max(vmax, v0)
+    return ticks_up(t)
+
+
 class Timing:
     """How one champion's attacks and casts are timed. Seconds in, ticks out.
 

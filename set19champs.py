@@ -4,6 +4,7 @@ Each champion is added after its worksheet (champions/<Name>.md) has the evidenc
 Numbers are read from the selected build by name; what the code itself states (which event spawns which projectile,
 how the damage is built) is the champion's script, cited by file and offset.
 """
+import set19buffs
 from build_champion import BuildChampion
 from champion import Champion
 from timing import TPS, Timing, projectile_ticks, ticks_up
@@ -108,7 +109,63 @@ class Varus(BuildChampion):
             self.schedule_tick(self.tick + ticks_up(t) + projectile_ticks(speed, hexes), land)
 
 
-champ_list = ['Neeko', 'Varus']
+class Draven(BuildChampion):
+    """You Spin Me Round (Like An Axe) (champions/Draven.md, D1). Scripts: GA_Draven19_Spell,
+    GA_Draven19_TrickshotHandler (build ga_scripts.zip).
+
+    The cast chrono CD_Draven19_Spell throws 'Blade' at the attack target at its PlayPoint (0.6566 s) on an
+    accelerating spline (1500 units/s, +2000/s, max 2500: 14 ticks over 4 hexes, P12). Its arrival (OnArrived ->
+    0x0f) applies GE_Draven19_SpellBaseDamage (PhysicalDamageCalc1 = BladeDamage x AD) to the target, starts the
+    vortex (CD_Draven19_BladeRiftBase -> CD_Draven19_BladeRift, both spawning at 0 and attached to the target) and
+    sends the Trickshot bounce event (0x753). The vortex (0xe49) repeats every TickRate 0.5 s (the script's default)
+    trunc(Duration / TickRate) = 6 times, the first at once (UAbilityTask_Repeat); each applies
+    GE_Draven19_SpellSecondaryDamage = PhysicalDamageCalc2 (BladeRiftPerSecondAD x AD + BladeRiftPerSecondAP x AP,
+    the tooltip's per-second value, not halved) x 1 / (enemies in it) to the enemies in it (the attached target alone
+    when none). Total per vortex: 6 x Calc2, split among identical dummies, so it is booked on the target.
+    Trickshot (TrickshotHandler): ricochet k flies CD_Draven19_Spell_Trickshot's Blade (speed 2000) to the next
+    enemy and does the same at MMC_TrickshotReduction = RichochetDamage^k (base hit and its own vortex), up to
+    NumRichochets. All hits are physical spell damage that crits only with Precision (RollIfCanSpellCrit).
+    """
+    KEY = 'DA_Draven19'
+    CAST = 'CD_Draven19_Spell'
+    BOUNCE = 'CD_Draven19_Spell_Trickshot'
+    VORTEX_TICK = 0.5  # GA_Draven19_Spell default TickRate (script literal, not a curve row)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.throw_at = self.chrono_projectile_spawn(self.CAST, 'Blade')
+        self.vortex_hits = int(self.row('Duration') / self.VORTEX_TICK)
+        self.notes = ("The vortex's damage is booked on the record's target: it splits among the enemies inside, which "
+                      "adds up to the same total on identical dummies. Ricochets go to the next dummy, 1 hex away.")
+
+    def record_damage(self, level, AD, AP):
+        return self.row('BladeDamage', star=level) * AD
+
+    def vortex_damage(self, level, AD, AP):
+        return self.row('BladeRiftPerSecondAD', star=level) * AD + self.row('BladeRiftPerSecondAP', star=level) * AP
+
+    def performAbility(self, opponents, items, time):
+        flight = self.chrono_projectile_ticks(self.CAST, 'Blade', self.attack_range)
+        self.schedule_tick(self.tick + ticks_up(self.throw_at) + flight, lambda: self._record_lands(opponents, 0))
+
+    def _record_lands(self, opponents, k):
+        """The record (k = 0) or its k-th Trickshot ricochet arrives."""
+        items = self.items
+        eff = self.trait_value('DA_Trickshot19', 'RichochetDamage') ** k if k else 1
+        target = opponents[k % len(opponents)]
+        self.multiTargetSpell([target], items, self.tick / TPS, 1,
+                              lambda level, AD, AP: self.record_damage(level, AD, AP) * eff, 'physical')
+        for j in range(self.vortex_hits):
+            def vortex_hit():
+                self.multiTargetSpell([target], items, self.tick / TPS, 1,
+                                      lambda level, AD, AP: self.vortex_damage(level, AD, AP) * eff, 'physical')
+            self.schedule_tick(self.tick + ticks_up(j * self.VORTEX_TICK), vortex_hit)
+        if k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
+            step = self.chrono_projectile_ticks(self.BOUNCE, 'Blade', set19buffs.bounce_hexes(opponents))
+            self.schedule_tick(self.tick + step, lambda: self._record_lands(opponents, k + 1))
+
+
+champ_list = ['Neeko', 'Varus', 'Draven']
 
 
 class TrainingDummy(Champion):
