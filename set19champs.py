@@ -64,7 +64,7 @@ class Neeko(BuildChampion):
                 self.multiTargetSpell(opponents, items, self.tick / TPS, 1,
                                       lambda level, AD, AP: self.abilityScaling(level, AD, AP) * eff, 'magical')
 
-            self.schedule_tick(self.tick + ticks_up(t) + projectile_ticks(speed, hexes), land)
+            self.fly(self.tick + ticks_up(t), projectile_ticks(speed, hexes), opponents[0], land, name='missile')
 
 
 class Varus(BuildChampion):
@@ -108,11 +108,12 @@ class Varus(BuildChampion):
                 self.multiTargetSpell(opponents[:1], items, now, 1,
                                       lambda level, AD, AP: self.abilityScaling(level, AD, AP) * eff, 'physical')
                 splash = self.nearby(opponents[0], self.aoe)  # within AOEHexRange of the target
+                self.trace('area', at=opponents[0], hit=splash)
                 self.multiTargetSpell(splash, items, now, len(splash),
                                       lambda level, AD, AP: self.abilityScaling(level, AD, AP) * eff * self.splash,
                                       'physical')
 
-            self.schedule_tick(self.tick + ticks_up(t) + projectile_ticks(speed, hexes), land)
+            self.fly(self.tick + ticks_up(t), projectile_ticks(speed, hexes), opponents[0], land, name='missile')
 
 
 class Draven(BuildChampion):
@@ -155,7 +156,8 @@ class Draven(BuildChampion):
     def performAbility(self, opponents, items, time):
         target = opponents[0]
         flight = self.chrono_projectile_ticks(self.CAST, 'Blade', self.target_hexes(target))
-        self.schedule_tick(self.tick + ticks_up(self.throw_at) + flight, lambda: self._record_lands(target, [target], 0))
+        self.fly(self.tick + ticks_up(self.throw_at), flight, target, lambda: self._record_lands(target, [target], 0),
+                 name='record')
 
     def _record_lands(self, target, hit, k):
         """The record (k = 0) or its k-th Trickshot ricochet arrives at `target`; `hit` = the enemies hit so far."""
@@ -163,6 +165,7 @@ class Draven(BuildChampion):
         eff = self.trait_value('DA_Trickshot19', 'RichochetDamage') ** k if k else 1
         self.multiTargetSpell([target], items, self.tick / TPS, 1,
                               lambda level, AD, AP: self.record_damage(level, AD, AP) * eff, 'physical')
+        self.trace('area', at=target, hit=[], name='vortex', seconds=self.vortex_hits * self.VORTEX_TICK)
         for j in range(self.vortex_hits):
             def vortex_hit():
                 self.multiTargetSpell([target], items, self.tick / TPS, 1,
@@ -172,7 +175,8 @@ class Draven(BuildChampion):
         if k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
             nxt, hexes = self.ricochet(target, hit)
             step = self.chrono_projectile_ticks(self.BOUNCE, 'Blade', hexes)
-            self.schedule_tick(self.tick + step, lambda: self._record_lands(nxt, hit + [nxt], k + 1))
+            self.fly(self.tick, step, nxt, lambda: self._record_lands(nxt, hit + [nxt], k + 1), source=target,
+                     name='ricochet')
 
 
 class Kaisa(BuildChampion):
@@ -223,7 +227,8 @@ class Kaisa(BuildChampion):
             self.missiles_fired += 1
             # each missile flies its own target's distance on the layout (owner, 2026-11-17)
             flight = self.chrono_projectile_ticks(self.MISSILE, 'SpellMis', self.target_hexes(target))
-            self.schedule_tick(self.tick + flight, lambda target=target: self._missile_lands(target, [target], 0))
+            self.fly(self.tick, flight, target, lambda target=target: self._missile_lands(target, [target], 0),
+                     name='missile')
 
     def _missile_lands(self, target, hit, k):
         eff = self.trait_value('DA_Trickshot19', 'RichochetDamage') ** k if k else 1
@@ -232,7 +237,8 @@ class Kaisa(BuildChampion):
         if k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
             nxt, hexes = self.ricochet(target, hit)
             step = self.chrono_projectile_ticks(self.BOUNCE, 'SpellMis', hexes)
-            self.schedule_tick(self.tick + step, lambda: self._missile_lands(nxt, hit + [nxt], k + 1))
+            self.fly(self.tick, step, nxt, lambda: self._missile_lands(nxt, hit + [nxt], k + 1), source=target,
+                     name='ricochet')
 
     def performAbility(self, opponents, items, time):
         # MultiplyAdditive (1 + ASOnCast), for the rest of combat (ASDuration 60)
@@ -279,9 +285,9 @@ class Yunara(BuildChampion):
         flight = self.chrono_projectile_ticks(self.ORBS, 'Yunara19_OrbMis', self.target_hexes())
         for t in self.orb_times[:visual]:
             spawn = t / self.orb_chrono_len * duration
-            self.schedule_tick(self.tick + ticks_up(spawn) + flight, lambda: self.multiTargetSpell(
+            self.fly(self.tick + ticks_up(spawn), flight, opponents[0], lambda: self.multiTargetSpell(
                 opponents[:1], self.items, self.tick / TPS, 1,
-                lambda level, AD, AP: self.orb_damage(level, AD, AP) * per_orb, 'physical'))
+                lambda level, AD, AP: self.orb_damage(level, AD, AP) * per_orb, 'physical'), name='orb')
 
     def performAbility(self, opponents, items, time):
         self.stacks += self.row('NumOrbsToAdd')
@@ -337,11 +343,12 @@ class Ziggs(BuildChampion):
             now = self.tick / TPS
             self.multiTargetSpell(opponents[:1], items, now, 1, self.bomb_damage, 'magical')
             splash = self.nearby(opponents[0], 1)  # the other enemies within 1 hex (0x5d)
+            self.trace('area', at=opponents[0], hit=splash)
             self.multiTargetSpell(splash, items, now, len(splash), self.splash_damage, 'magical')
 
         spawn = self.tick + ticks_up(self.bomb_spawn / rate)
         self.schedule_tick(spawn, lambda: self.simulateLaunch(items))  # 0x9f5: the bomb's first OnFired (G11)
-        self.schedule_tick(spawn + flight, land)
+        self.fly(spawn, flight, opponents[0], land, name='bomb')
 
 
 class Senna(BuildChampion):
@@ -399,7 +406,7 @@ class Senna(BuildChampion):
                 self.marked = True
 
             flight = self.chrono_projectile_ticks(self.BLAST, 'SennaMis', self.target_hexes())
-            self.schedule_tick(self.tick + ticks_up(self.blast_spawn) + flight, land)
+            self.fly(self.tick + ticks_up(self.blast_spawn), flight, opponents[0], land, name='blast')
             self.simulateLaunch(items)  # 0x1bfe: the blast's GE_SimulateLaunchAttack, at once (G11)
         else:
             def detonate():
@@ -471,11 +478,12 @@ class Ezreal(BuildChampion):
                 self.multiTargetSpell(opponents[:1], items, now, 1,
                                       lambda level, AD, AP: self.detonation(level, AD, AP) * eff, 'physical')
                 if splash_targets:
+                    self.trace('area', at=opponents[0], hit=splash_targets)
                     self.multiTargetSpell(splash_targets, items, now, len(splash_targets),
                                           lambda level, AD, AP: self.detonation(level, AD, AP) * splash * eff,
                                           'physical')
 
-            self.schedule_tick(stage2 + ticks_up(spawn) + flight, land)
+            self.fly(stage2 + ticks_up(spawn), flight, opponents[0], land, name='shot')
 
 
 class Lux(BuildChampion):
@@ -518,6 +526,7 @@ class Lux(BuildChampion):
             # GetRepeatingListFromTargetData: the list repeated to NumSecondaryTargets entries
             secondaries = [others[i % len(others)] for i in range(self.num_secondaries)]
             now = self.tick / TPS
+            self.trace('beam', at=target, hit=secondaries)
             self.multiTargetSpell([target], items, now, 1, self.primary_damage, 'magical')
             self.multiTargetSpell(secondaries, items, now, len(secondaries), self.secondary_damage, 'magical')
 
@@ -584,7 +593,7 @@ class Gnar(BuildChampion):
             return super().fire_attack(opponents, items, moment, paid)
         target = opponents[0]
         flight = self.chrono_projectile_ticks(self.ROCK, 'SpellProjectile', self.target_hexes(target))
-        self.schedule_tick(self.tick + flight, lambda: self._rock_lands(target, [target], 0))
+        self.fly(self.tick, flight, target, lambda: self._rock_lands(target, [target], 0), name='rock')
 
     def _rock_lands(self, target, hit, k):
         """The rock (k = 0) or its k-th Trickshot ricochet arrives at `target`."""
@@ -603,7 +612,8 @@ class Gnar(BuildChampion):
         if self.trait_tier('DA_Trickshot19') > 0 and k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
             nxt, hexes = self.ricochet(target, hit)
             step = self.chrono_projectile_ticks(self.BOUNCE, 'SpellProjectile', hexes)
-            self.schedule_tick(self.tick + step, lambda: self._rock_lands(nxt, hit + [nxt], k + 1))
+            self.fly(self.tick, step, nxt, lambda: self._rock_lands(nxt, hit + [nxt], k + 1), source=target,
+                     name='ricochet')
 
 
 class Malzahar(BuildChampion):
@@ -646,11 +656,13 @@ class Malzahar(BuildChampion):
 
         def burst():
             hit = [target] + self.nearby(target, self.aoe)
+            self.trace('area', at=target, hit=hit)
             for t in hit:
                 apply_shred(self, t, self.shred_level, self.shred_duration)
             self.multiTargetSpell(hit, self.items, self.tick / TPS, len(hit), self.burst_damage, 'magical')
 
         def beam_tick():
+            self.trace('beam', at=target, hit=[])
             self.multiTargetSpell([target], self.items, self.tick / TPS, 1, self.beam_damage, 'magical')
 
         for t in self.bursts:
@@ -705,7 +717,7 @@ class Samira(BuildChampion):
                 if k == 0:
                     self.simulateLaunch(self.items)  # GE_SimulateLaunchAttack on the first OnFired (DoOnce)
                 flight = self.chrono_projectile_ticks(self.BULLETS[k % 2], 'Bullet', self.target_hexes(target))
-                self.schedule_tick(self.tick + flight, lambda: self._bullet_lands(target, [target], 0))
+                self.fly(self.tick, flight, target, lambda: self._bullet_lands(target, [target], 0), name='bullet')
             self.schedule_tick(self.tick + ticks_up(self.begin_fire + k * self.bullet_gap), fire)
 
     def _bullet_lands(self, target, hit, k):
@@ -715,7 +727,8 @@ class Samira(BuildChampion):
         if self.trait_tier('DA_Trickshot19') > 0 and k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
             nxt, hexes = self.ricochet(target, hit)
             step = self.chrono_projectile_ticks(self.BOUNCE, 'Bounce', hexes)
-            self.schedule_tick(self.tick + step, lambda: self._bullet_lands(nxt, hit + [nxt], k + 1))
+            self.fly(self.tick, step, nxt, lambda: self._bullet_lands(nxt, hit + [nxt], k + 1), source=target,
+                     name='ricochet')
 
 
 class Karthus(BuildChampion):
@@ -745,6 +758,7 @@ class Karthus(BuildChampion):
 
     def performAbility(self, opponents, items, time):
         target = opponents[0]
+        self.trace('area', tick=self.tick + ticks_up(self.damage_at), at=target, hit=[], name='requiem')
         self.schedule_tick(self.tick + ticks_up(self.damage_at), lambda: self.multiTargetSpell(
             [target], items, self.tick / TPS, 1, self.requiem, 'magical'))
 
@@ -827,7 +841,7 @@ class OlafHeroAugment(BuildChampion):
             return super().fire_attack(opponents, items, moment, paid)
         target = opponents[0]
         flight = self.chrono_projectile_ticks(self.AXE, 'BigAxe', self.target_hexes(target))
-        self.schedule_tick(self.tick + flight, lambda: self._axe_lands(target))
+        self.fly(self.tick, flight, target, lambda: self._axe_lands(target), name='axe')
 
     def _axe_lands(self, target):
         items, now = self.items, self.tick / TPS
@@ -921,8 +935,8 @@ class Ashe(BuildChampion):
         target = opponents[0]
         hexes = self.target_hexes(target)
         for i, (name, spawn) in enumerate(self.arrows):
-            at = self.tick + ticks_up(spawn) + self.chrono_projectile_ticks(self.FLURRY, name, hexes)
-            self.schedule_tick(at, lambda first=(i == 0): self._arrow_lands(target, first))
+            self.fly(self.tick + ticks_up(spawn), self.chrono_projectile_ticks(self.FLURRY, name, hexes), target,
+                     lambda first=(i == 0): self._arrow_lands(target, first), name='arrow')
 
     def _arrow_lands(self, target, first):
         items, now = self.items, self.tick / TPS
@@ -977,6 +991,12 @@ class Viego(BuildChampion):
         def land():
             for _ in range(self.num_swords):
                 self.multiTargetSpell([target], self.items, self.tick / TPS, 1, self.sword_damage, 'physical')
+        if self.tracer is not None:  # the swords, from around the target (the fight viewer)
+            tx, ty = layout.world(target.hex)
+            for k in range(self.num_swords):
+                a = 2 * math.pi * k / self.num_swords
+                self.trace_projectile(fire, fire + ticks_up(self.collapse),
+                                      (tx + 170 * math.cos(a), ty + 170 * math.sin(a)), target, 'sword')
         self.schedule_tick(fire + ticks_up(self.collapse), land)
 
 
@@ -1072,6 +1092,7 @@ class Kayle(BuildChampion):
             self.busy_until = now + ticks_up(self.finale_unlock / f)
             hit = now + ticks_up(self.big_hit / f)
             area = [target] + self.nearby(target, self.aoe)  # TR_Add_EnemiesWithinHexRange, the target included
+            self.trace('area', tick=hit, at=target, hit=area)
             self.schedule_tick(hit, lambda: self.multiTargetSpell(area, self.items, self.tick / TPS, len(area),
                                                                   self.aoe_damage, 'magical'))
             for k in range(1, swords + 1):
@@ -1131,6 +1152,7 @@ class Lucian(BuildChampion):
         self.set_locks(chrono)
         mult = self.trait_value('DA_Encore19', 'RecastEffectiveness') if self.encore() else 1
         fire = self.tick + self.dash
+        self.trace('dash', ticks=self.dash, hexes=self.dash_hexes)
         hexes = self.target_hexes(target)
         for name, eff in (('SpellMis', 1), ('EncoreMis', mult)):
             spawns = [t for p in self.chrono(chrono).get('projectiles') or [] if p['name'] == name
@@ -1139,6 +1161,7 @@ class Lucian(BuildChampion):
                 at = fire + ticks_up(spawn)
                 self.schedule_tick(at, lambda: self.simulateLaunch(self.items))
                 land = at + self.chrono_projectile_ticks(chrono, name, hexes)
+                self.trace_projectile(at, land, self, target, 'shot')
                 self.schedule_tick(land, lambda eff=eff: self.multiTargetSpell(
                     [target], self.items, self.tick / TPS, 1,
                     lambda level, AD, AP: self.shot_damage(level, AD, AP) * eff, 'physical'))
@@ -1192,6 +1215,12 @@ class Bard(BuildChampion):
         target = opponents[0]
         fire = self.tick + ticks_up(self.fire)
         falloff, step, floor = 1.0, self.row('FalloffPerUnit'), self.row('MinimumDamagePercent')
+        if self.tracer is not None:  # the wave, from behind him along the line (the fight viewer)
+            (ux, uy), _ = layout.line_hits(self, target, self.opponents, self.LENGTH, self.WIDTH)
+            bx, by = layout.world(self.hex)
+            back = self.BEHIND * HEX_UNITS
+            self.trace_projectile(fire, fire + ticks_up(self.LENGTH / self.wave_speed), (bx - ux * back, by - uy * back),
+                                  (bx + ux * (self.LENGTH - back), by + uy * (self.LENGTH - back)), 'wave')
         for d, along in self.line(target, self.LENGTH, self.WIDTH):
             hit = fire + ticks_up((self.BEHIND * HEX_UNITS + along) / self.wave_speed)
             for k in range(self.halves):
@@ -1266,8 +1295,8 @@ class Syndra(BuildChampion):
 
     def performAbility(self, opponents, items, time):
         target = opponents[0]
-        hit = self.tick + ticks_up(self.launch) + self.chrono_projectile_ticks(self.CAST, 'Volleyball',
-                                                                              self.target_hexes(target))
+        launch = self.tick + ticks_up(self.launch)
+        flight = self.chrono_projectile_ticks(self.CAST, 'Volleyball', self.target_hexes(target))
 
         def lands():
             now = self.tick / TPS
@@ -1278,10 +1307,10 @@ class Syndra(BuildChampion):
             else:
                 at = self.tick + self.chrono_projectile_ticks(self.BOUNCE, 'Bounce', layout.distance(target, other))
                 victim = other
-            self.schedule_tick(at, lambda: self.multiTargetSpell([victim], self.items, self.tick / TPS, 1,
-                                                                 self.secondary_damage, 'magical'))
+            self.fly(self.tick, at - self.tick, victim, lambda: self.multiTargetSpell(
+                [victim], self.items, self.tick / TPS, 1, self.secondary_damage, 'magical'), source=target, name='bounce')
 
-        self.schedule_tick(hit, lands)
+        self.fly(launch, flight, target, lands, name='volleyball')
 
 
 class Briar(BuildChampion):
@@ -1370,6 +1399,7 @@ class Briar(BuildChampion):
         dash = self.SHORT if math.hypot(x - sx, y - sy) / 214.5 < 2.5 else self.LONG  # 0xab1: literals
         self._set_cast_lock(dash)
         start, ev = self.tick + self.kick, self.dash[dash]
+        self.trace('dash', tick=start, ticks=ev['Land'], to=snack, name=dash.rsplit('_', 1)[1].lower())
 
         def boom():
             self.aspd.modify('MultiplyAdditive', 1 + self.row('FrenzyAS'), key='briar_frenzy')
@@ -1377,6 +1407,7 @@ class Briar(BuildChampion):
 
         def land():
             hit = [target] + self.nearby(target, self.row('HexRangeAOE'))  # the page's targets (G22, docstring)
+            self.trace('area', at=target, hit=hit)
             self.multiTargetSpell(hit, self.items, self.tick / TPS, len(hit), self.aoe_damage, 'physical')
 
         self.schedule_tick(start + ev['Boom'], boom)
@@ -1458,13 +1489,15 @@ class RenataGlasc(BuildChampion):
         unlock = hit - self.tick + ticks_up(self.end_unlock)
         self.timing.mana_lock = unlock / TPS
         self.timing.cast_lock = (unlock + 1) / TPS
-        self.schedule_tick(hit, lambda: self._toxin(target, int(self.row('PrimaryTargetStacks'))))
+        self.fly(launch, hit - launch, target, lambda: self._toxin(target, int(self.row('PrimaryTargetStacks'))),
+                 name='chain')
         n = int(self.row('NumSecondaryTargets'))
         others = self.nearby(target, 99)
         others.sort(key=lambda d: self.toxin_until.get(id(d), 0) > self.tick)  # unpoisoned first, then nearest
         for d in others[:n]:
             land = launch + self.chrono_projectile_ticks(self.MISSILE, 'Missile', self.target_hexes(d))
-            self.schedule_tick(land, lambda d=d: self._toxin(d, int(self.row('SecondaryTargetStacks'))))
+            self.fly(launch, land - launch, d, lambda d=d: self._toxin(d, int(self.row('SecondaryTargetStacks'))),
+                     name='missile')
 
 
 class Zoe(BuildChampion):
@@ -1499,6 +1532,13 @@ class Zoe(BuildChampion):
         hexes = self.target_hexes(target) + self.BEHIND / HEX_UNITS
         land = (self.tick + ticks_up(self.redirect_at + self.ball_spawn)
                 + self.chrono_projectile_ticks(self.REDIRECT, 'Ball', hexes))
+        if self.tracer is not None:  # thrown behind her, then redirected through her to the target (the fight viewer)
+            (zx, zy), (tx, ty) = layout.world(self.hex), layout.world(target.hex)
+            n = math.hypot(tx - zx, ty - zy) or 1
+            behind = (zx - (tx - zx) / n * self.BEHIND, zy - (ty - zy) / n * self.BEHIND)
+            redirect = self.tick + ticks_up(self.redirect_at)
+            self.trace_projectile(self.tick + ticks_up(self.chrono_event(self.CAST, 'LaunchProjectile')), redirect, self, behind, 'ball')
+            self.trace_projectile(redirect + ticks_up(self.ball_spawn), land, behind, target, 'ball')
         self.schedule_tick(land, lambda: self.multiTargetSpell([target], self.items, self.tick / TPS, 1,
                                                                self.ball_damage, 'magical'))
 

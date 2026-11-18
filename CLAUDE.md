@@ -118,7 +118,7 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   browser loads; a new module must be added there too (`test_sim_entry.py` checks the `items/` and `traits/` ones). Builds reach the browser through
   the worker (B9): the newest at boot, others when the page's "Game build" picker names one. After changing the
   worker, the page or build loading, run `tools/browser_check/` (`npm install` there once; `node worker_e2e.js`,
-  and `node page_e2e.js` with `python serve.py 8619` running).
+  and `node page_e2e.js` / `node viz_e2e.js` (the fight viewer) with `python serve.py 8619` running).
 - Items: `set19items.BuildItem` subclasses with `KEY` and `STATS` (the effects reviewed as the item's unconditional
   stats, `docs/ITEMS.md`); stats and tags are applied at combat start from the champion's build (ledger I1-I3), and
   anything the layer can't apply exactly raises. A scripted item is registered only once its script is implemented.
@@ -140,6 +140,13 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   `self.nearby(target, hexes)` for a splash (the script's HexRange), `self.ricochet(previous, hit)` for a bounce, `self.line(target, length, width)` for a
   line (Bard's wave).
   `opponents[0]` is the target.
+- The fight viewer (the panel beside the table: `viz.js`, `fight_trace.py`, `sim_entry.run_trace`) replays one row's
+  fight. A `fight_trace.Tracer` on `champion.tracer` records every hit, cast, attack launch and a stat snapshot per
+  tick; table runs have none, and every engine hook is one `is not None` check (`test_fight_trace.py`: a recorded
+  fight equals the unrecorded one). A spell projectile is scheduled with `self.fly(launch_tick, flight_ticks, target,
+  fn, source=..., name=...)` (the same as `schedule_tick(launch + flight, fn)`, plus the drawing); a visual-only one
+  with `self.trace_projectile(...)`; an area, beam or dash with `self.trace('area', at=target, hit=[...])`. Add these
+  with each new champion so its spell shows.
 - Tests (committed on `set19`): `python -m pytest -q` with set18's venv (`../set18/.venv/Scripts/python`) until this
   repo has its own.
 

@@ -104,6 +104,7 @@ class Champion(FastDeepCopy):
         self.opponents = []
         self.hex = None  # (q, r) on the dummy layout, set when the fight starts (layout.py)
         self.dmgVector = []
+        self.tracer = None  # fight_trace.Tracer for the page's fight viewer; None (every table run): nothing is recorded
         self.dmgDealt = 0 # no need to serialize
         self.alive = True
 
@@ -282,6 +283,23 @@ class Champion(FastDeepCopy):
         self._event_seq += 1
         heapq.heappush(self.events, (tick, self._event_seq, fn))
 
+    def fly(self, launch_tick, flight, target, fn, source=None, name="spell"):
+        """A projectile leaves `source` (default: this unit) at `launch_tick`, reaches `target` `flight` ticks later and
+        fn() runs then. The same scheduling as schedule_tick(launch_tick + flight, fn); the fight viewer draws it."""
+        self.trace_projectile(launch_tick, launch_tick + flight, source or self, target, name)
+        self.schedule_tick(launch_tick + flight, fn)
+
+    def trace_projectile(self, t0, t1, source, target, name="spell"):
+        """A projectile for the fight viewer only (its effect is scheduled elsewhere). `source` and `target`: units,
+        or world points (x, y)."""
+        if self.tracer is not None:
+            self.tracer.projectile(t0, t1, source, target, name)
+
+    def trace(self, kind, tick=None, **data):
+        """A mark for the fight viewer (an area, a beam, a dash...); nothing when no viewer is recording."""
+        if self.tracer is not None:
+            self.tracer.mark(self.tick if tick is None else tick, kind, **data)
+
     def _run_events(self):
         while self.events and self.events[0][0] <= self.tick:
             _, _, fn = heapq.heappop(self.events)
@@ -394,6 +412,8 @@ class Champion(FastDeepCopy):
             self.addMana(self.manaPerAttack.stat)
             paid = True
         self.launches += 1
+        if self.tracer is not None:
+            self.tracer.mark(self.tick, "launch", to=opponents[0] if opponents else None)
         self.onLaunch(opponents, items)
         self.emit(LAUNCH, CombatEvent(self, time=self.tick / TPS), items)  # Combat.Event.LaunchAttack (Titan's Resolve)
         if rhythm and self.timing.variants:
@@ -425,7 +445,7 @@ class Champion(FastDeepCopy):
         if flight == 0:
             land()
         else:
-            self.schedule_tick(self.tick + flight, land)
+            self.fly(self.tick, flight, opponents[0], land, name="attack")
 
     def _attack_phase(self, opponents, items, time):
         if self.tick < self.busy_until:
@@ -452,11 +472,15 @@ class Champion(FastDeepCopy):
             self.curMana = self.curMana - self.fullMana.stat + self.startingMana
             self.full_since = None
             self.attacksOnLastCast = self.attacks_started
+            if self.tracer is not None:
+                self.tracer.mark(tick, "cast", lock=0, manaLock=self.mana_locked_until - tick)
             for item in items:
                 item.ability("postAbility", time, self)
             return
         self.busy_until = tick + max(1, ticks(cast_lock))
         self.mana_locked_until = tick + ticks(mana_lock)
+        if self.tracer is not None:
+            self.tracer.mark(tick, "cast", lock=self.busy_until - tick, manaLock=self.mana_locked_until - tick)
         # overflow mana is kept (G10, inherited, open); startingMana is the bar after a cast (some champions)
         self.curMana = self.curMana - self.fullMana.stat + self.startingMana
         self.full_since = None
@@ -586,6 +610,8 @@ class Champion(FastDeepCopy):
 
         avgDmg = self.damage(avgDmg, dtype, opponent, ability_armor_pierce, ability_mr_pierce)
         self.dmgDealt += avgDmg[0]
+        if self.tracer is not None:
+            self.tracer.damage(self.tick, opponent, avgDmg[0], dtype, tags, critChance)
         self.emit(DAMAGE_POST, CombatEvent(self, opponent, avgDmg[0], dtype, tags, time), items)
 
         if avgDmg:

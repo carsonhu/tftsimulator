@@ -10,6 +10,7 @@
 #   catalog_json()            -> everything needed to draw the sidebar
 #   champ_info_json(config)   -> stat panel + per-champ UI hints for one config
 #   run_json(config)          -> table rows + plot timelines for one slice
+#   trace_json(config)        -> one row's fight, tick by tick, for the fight viewer
 #
 # The config schema is documented on _build_champion. The DPS arithmetic keeps
 # the old site's rules (int() truncation above 10, keep-first duplicates).
@@ -263,6 +264,7 @@ def get_catalog():
             "numItems": 3,
             "numBuffs": {"min": 1, "max": 10, "default": 2},
             "layout": {"targets": TARGETS, "max": MAX_TARGETS},
+            "traceSeconds": list(TRACE_SECONDS),
         },
         "dpsWindows": [{"key": _window_key(w), "label": f"{w[0]}–{w[1]} s"} for w in DPS_WINDOWS],
         "headline": HEADLINE,
@@ -546,6 +548,42 @@ def run_slice(cfg):
 
 
 # ---------------------------------------------------------------------------
+# The fight viewer
+# ---------------------------------------------------------------------------
+
+TRACE_SECONDS = (30, 60, 90)
+
+
+def run_trace(cfg):
+    """One table row's fight, recorded tick by tick for the page's fight viewer (fight_trace.Tracer).
+
+    cfg is a run config plus "row": the row's idx in its slice (sim_core's order: the slice's items, then its buffs)
+    and "seconds": the fight's length (TRACE_SECONDS). The fight is the very one the row's numbers come from."""
+    from fight_trace import Tracer
+
+    champ = _build_champion(cfg)
+    enemy = _build_enemy(cfg)
+    items, buffs = _slice_inputs(cfg.get("slice", "Craftable"), cfg)
+    idx = int(cfg.get("row", len(items) - 1))  # default: NoItem, the last item
+    extras = [(x, False) for x in items] + [(x, True) for x in buffs]
+    extra, is_buff = extras[idx]
+    seconds = float(cfg.get("seconds", TRACE_SECONDS[0]))
+    holder = {}
+
+    def attach(c, dummies):
+        c.tracer = holder["tracer"] = Tracer(c, dummies)
+
+    c, results = sim_core.run_one(champ, enemy, extra, is_buff, seconds, int(cfg.get("frame_rate", 30)),
+                                  _layout(cfg), setup=attach)
+    out = holder["tracer"].to_dict(math.ceil(seconds * 30 - 1e-9))
+    out["extra"] = _row_label(extra)
+    out["champion"] = {"cls": cfg["champ"], "label": getattr(type(c), "display_name", c.name), "level": c.level,
+                       "range": c.attack_range}
+    out["enemy"] = {"hp": enemy.hp.stat, "armor": enemy.armor.stat, "mr": enemy.mr.stat}
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Champ info / stats panel
 # ---------------------------------------------------------------------------
 
@@ -616,3 +654,7 @@ def champ_info_json(config_json):
 
 def run_json(config_json):
     return json.dumps(run_slice(json.loads(config_json)))
+
+
+def trace_json(config_json):
+    return json.dumps(run_trace(json.loads(config_json)), separators=(",", ":"))

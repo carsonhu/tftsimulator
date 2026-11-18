@@ -35,6 +35,7 @@ class Trickshot(BuildTrait):
         # one's arrival, to the nearest dummy not yet hit (the layout, B12)
         target, hit, at = input_.target, [input_.target], champion.tick
         for k in range(1, n + 1):
+            previous, departs = target, at
             target, hexes = champion.ricochet(target, hit)
             hit.append(target)
             at += projectile_ticks(champion.timing.proj_speed, hexes)
@@ -44,7 +45,7 @@ class Trickshot(BuildTrait):
                                 canCrit=True, canOnHit=False, attackType="physical", numTargets=1,
                                 regularAuto=False)
                 champion.doAttack(attack, champion.items, champion.tick / TPS)
-            champion.schedule_tick(at, ricochet)
+            champion.fly(departs, at - departs, target, ricochet, source=previous, name='ricochet')
         return input_
 
 

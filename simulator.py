@@ -53,6 +53,8 @@ class Simulator(object):
                 if opponent.effects:
                     expire_effects(opponent, tick)
             champion.update(opponents, items, self.current_time)
+            if champion.tracer is not None:  # the fight viewer: every stat as this tick ends
+                champion.tracer.snapshot(tick)
         self.current_time = n_ticks / TPS
         return champion.dmgVector
 

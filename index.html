@@ -17,6 +17,7 @@
       src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@3.7.0/plotly.min.js"
       defer
     ></script>
+    <script src="viz.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
@@ -200,8 +201,50 @@
         <div class="pills" id="sliceRadio"></div>
         <div id="runStatus" class="run-status" hidden></div>
 
-        <div class="table-wrap results-wrap">
-          <table id="resultsTable"></table>
+        <!-- The table and the fight viewer side by side; the viewer drops
+             below the table when the window is too narrow for both. -->
+        <div class="results-row">
+          <div class="table-wrap results-wrap">
+            <table id="resultsTable"></table>
+          </div>
+
+          <!-- Fight viewer (viz.js): replays one row's fight tick by tick. -->
+          <section id="viz" class="viz" tabindex="0" aria-label="Fight viewer">
+            <div class="viz-head">
+              <h3>Fight viewer</h3>
+              <span id="vizWhat" class="viz-what"></span>
+              <label class="viz-length"
+                >Fight
+                <select id="vizLength"></select>
+              </label>
+            </div>
+            <p class="hint viz-hint">
+              Click a table row to watch its fight. Space plays or pauses,
+              arrow keys step a tick (Shift: a second).
+            </p>
+            <div id="vizStatus" class="viz-status-line" hidden></div>
+            <div class="viz-body">
+              <div class="viz-left">
+                <div id="vizStage" class="viz-stage"><canvas id="vizCanvas"></canvas></div>
+                <div class="viz-controls">
+                  <button id="vizBack" type="button" aria-label="Back one tick">&#9664;&#9664;</button>
+                  <button id="vizPlay" type="button" class="viz-play" aria-label="Play">&#9654;</button>
+                  <button id="vizFwd" type="button" aria-label="Forward one tick">&#9654;&#9654;</button>
+                  <select id="vizSpeed" aria-label="Speed"></select>
+                  <span id="vizTime" class="viz-time"></span>
+                </div>
+                <div class="viz-strip-wrap"><canvas id="vizStrip"></canvas></div>
+                <div class="viz-legend">
+                  <span><i style="background:#ff9f43"></i>physical</span>
+                  <span><i style="background:#5aa9ff"></i>magic</span>
+                  <span><i style="background:#f2f2f2"></i>true</span>
+                  <span><i style="background:rgba(255,75,75,.5)"></i>cast lock</span>
+                </div>
+                <div id="vizLog" class="viz-log"></div>
+              </div>
+              <div id="vizCard" class="viz-card"></div>
+            </div>
+          </section>
         </div>
 
         <div id="plotArea">

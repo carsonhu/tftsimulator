@@ -30,6 +30,44 @@ class ChampLabel:
         return f"ChampLabel({self.name!r}, {self.level!r})"
 
 
+def run_one(champion, opponent, extra, is_buff, duration, frame_rate=30, layout=None, setup=None):
+    """One fight: a fresh copy of the configured champion with `extra` (an item, or a buff that replaces any copy of
+    the same trait the champion already carries) against copies of the opponent placed by `layout`. `setup(champ,
+    dummies)` runs before the fight (the fight viewer attaches its recorder there). Returns (champion, results)."""
+    simulator = Simulator()
+    layout = layout or Layout()
+    champ = copy.deepcopy(champion)
+    if is_buff:
+        equal_buffs = [
+            champ_buff
+            for champ_buff in champ.items
+            if (
+                champ_buff.name.rsplit(" ", 1)[0] == extra.name.rsplit(" ", 1)[0]
+                or type(champ_buff) == type(extra)
+            )
+            and (
+                champ_buff.name.rsplit(" ", 1)[0].replace(" ", "") in class_buffs
+                or type(champ_buff).__name__ in class_buffs
+                or (champ_buff.name == extra.name)
+            )
+        ]
+        for equal_buff in equal_buffs:
+            champ.items.remove(equal_buff)
+    dummies = [copy.deepcopy(opponent) for _ in range(layout.count)]
+    if setup is not None:
+        setup(champ, dummies)
+    results = simulator.simulate(
+        [] if is_buff else [copy.deepcopy(extra)],
+        [copy.deepcopy(extra)] if is_buff else [],
+        champ,
+        dummies,
+        duration,
+        frameRate=frame_rate,
+        layout=layout,
+    )
+    return champ, results
+
+
 def do_experiment_one_extra(
     champion,
     opponent,
@@ -39,52 +77,11 @@ def do_experiment_one_extra(
     frame_rate: int = 30,
     layout: Layout = None,
 ) -> List[Dict[str, Any]]:
-    """One simulation per extra item, then per extra buff, each on a fresh copy of the configured champion
-    against copies of the opponent placed by `layout` (layout.py; 8 by default). A buff replaces any copy of the
-    same trait the champion already carries."""
-    simulator = Simulator()
-    layout = layout or Layout()
+    """One simulation per extra item, then per extra buff (run_one), each on a fresh copy of the configured champion
+    against copies of the opponent placed by `layout` (layout.py)."""
     sim_list: List[Dict[str, Any]] = []
-
-    for item in item_list:
-        champ = copy.deepcopy(champion)
-        results = simulator.simulate(
-            [copy.deepcopy(item)],
-            [],
-            champ,
-            [copy.deepcopy(opponent) for _ in range(layout.count)],
-            duration,
-            frameRate=frame_rate,
-            layout=layout,
-        )
-        sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": item, "Results": results})
-
-    for buff in buff_list:
-        champ = copy.deepcopy(champion)
-        equal_buffs = [
-            champ_buff
-            for champ_buff in champ.items
-            if (
-                champ_buff.name.rsplit(" ", 1)[0] == buff.name.rsplit(" ", 1)[0]
-                or type(champ_buff) == type(buff)
-            )
-            and (
-                champ_buff.name.rsplit(" ", 1)[0].replace(" ", "") in class_buffs
-                or type(champ_buff).__name__ in class_buffs
-                or (champ_buff.name == buff.name)
-            )
-        ]
-        for equal_buff in equal_buffs:
-            champ.items.remove(equal_buff)
-        results = simulator.simulate(
-            [],
-            [copy.deepcopy(buff)],
-            champ,
-            [copy.deepcopy(opponent) for _ in range(layout.count)],
-            duration,
-            frameRate=frame_rate,
-            layout=layout,
-        )
-        sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": buff, "Results": results})
-
+    for extras, is_buff in ((item_list, False), (buff_list, True)):
+        for extra in extras:
+            champ, results = run_one(champion, opponent, extra, is_buff, duration, frame_rate, layout)
+            sim_list.append({"Champ": ChampLabel(champ.name, champ.level), "Extra": extra, "Results": results})
     return sim_list

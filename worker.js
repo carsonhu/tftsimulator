@@ -42,6 +42,7 @@ const PY_FILES = [
   "simulator.py",
   "stats.py",
   "timing.py",
+  "fight_trace.py",
   "traits/__init__.py",
   "traits/arcanist.py",
   "traits/base.py",
@@ -167,6 +168,9 @@ onmessage = async (event) => {
     } else if (cmd === "run") {
       await ensureBuild(pyodide, arg);
       result = entry.run_json(arg);
+    } else if (cmd === "trace") {
+      await ensureBuild(pyodide, arg);
+      result = entry.trace_json(arg);
     } else {
       throw new Error("unknown cmd: " + cmd);
     }

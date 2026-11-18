@@ -118,6 +118,10 @@ const state = {
   selections: new Map(), // slice -> Set(idx)
   cache: new Map(), // config-json -> payload
   gen: 0,
+  // The fight viewer's row (viz.js): {slice, extra} by the row's label, so it survives a re-run; none or not in the
+  // table = the NoItem row. vizSeconds: the fight's length.
+  vizRow: null,
+  vizSeconds: 30,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -154,6 +158,14 @@ async function init() {
   state.cfg.build = state.catalog.builds.length ? state.catalog.builds[0].version : null;
 
   buildStaticControls();
+  FightViewer.init(rpc, (cls) => state.icons.get(cls));
+  const lengths = state.catalog.defaults.traceSeconds || [30];
+  for (const s of lengths) $("vizLength").appendChild(new Option(s + " s", String(s)));
+  state.vizSeconds = lengths[0];
+  $("vizLength").onchange = () => {
+    state.vizSeconds = Number($("vizLength").value);
+    updateViz();
+  };
   await selectChampion(state.catalog.defaultChampion || state.catalog.champions[0].name, { keepLevel: false });
 
   $("boot-status").hidden = true;
@@ -1380,6 +1392,7 @@ function renderResults() {
   for (const col of columns) headRow.appendChild(sortableHeader(col));
 
   const tbody = table.createTBody();
+  const viewed = vizRow();
   for (const row of rows) {
     const tr = tbody.insertRow();
     const slot = selection.get(row.idx);
@@ -1392,8 +1405,11 @@ function renderResults() {
     tr.tabIndex = 0;
     tr.setAttribute("aria-pressed", slot !== undefined ? "true" : "false");
     tr.title = slot !== undefined ? "Click to remove from the chart" : "Click to plot";
+    if (row === viewed) tr.classList.add("viewing");
     const toggle = () => {
       togglePlotted(row.idx);
+      // the fight viewer follows the row clicked last
+      state.vizRow = { slice: state.slice, extra: row.extra };
       renderResults();
     };
     tr.onclick = toggle;
@@ -1415,6 +1431,28 @@ function renderResults() {
   }
 
   renderPlot();
+  updateViz();
+}
+
+// The row the fight viewer shows: the one clicked last, if this table has it, else NoItem.
+function vizRow() {
+  const payload = state.current;
+  if (!payload) return null;
+  const want = state.vizRow;
+  const picked = want && want.slice === state.slice ? payload.rows.find((r) => r.extra === want.extra) : null;
+  return picked || payload.rows.find((r) => r.extraCls === "NoItem") || payload.rows[0] || null;
+}
+
+function updateViz() {
+  const row = vizRow();
+  if (!row) return;
+  const cfg = Object.assign(cfgForSlice(state.slice), { row: row.idx, seconds: state.vizSeconds });
+  const champ = state.catalog.champions.find((c) => c.name === state.cfg.champ);
+  FightViewer.load(JSON.stringify(cfg), {
+    label: row.extra,
+    champLabel: champ ? champ.label || champ.name : state.cfg.champ,
+    level: state.cfg.level,
+  });
 }
 
 function sortableHeader(col) {

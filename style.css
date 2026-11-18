@@ -1051,3 +1051,339 @@ td input[type="checkbox"] {
   align-items: center;
   gap: 3px;
 }
+
+/* ---------------- fight viewer (viz.js) ---------------- */
+
+/* The results table and the viewer share a row: the table keeps its own
+   width, the viewer takes the rest, and drops below the table when there is
+   less than its minimum left. */
+.results-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.results-row .results-wrap {
+  flex: 0 0 auto;
+}
+
+.viz {
+  flex: 1 1 560px;
+  min-width: 0;
+  margin: 10px 0;
+  padding: 10px 12px 12px;
+  border: 1px solid #31333f;
+  border-radius: 8px;
+  background: #11141b;
+  outline: none;
+}
+
+.viz:focus-visible {
+  border-color: #ff4b4b;
+}
+
+.viz-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.viz-head h3 {
+  margin: 0;
+  font-size: 1.05em;
+}
+
+.viz-what {
+  color: #c7cad6;
+  font-size: 0.92em;
+}
+
+.viz-length {
+  margin-left: auto;
+  font-size: 0.85em;
+  color: #a3a8b8;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.viz-hint {
+  margin: 4px 0 8px;
+}
+
+.viz-status-line {
+  color: #ffd166;
+  font-size: 0.88em;
+  margin: 0 0 6px;
+}
+
+.viz-body {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.viz-left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.viz-stage,
+.viz-strip-wrap {
+  width: 100%;
+  line-height: 0;
+}
+
+.viz-stage canvas {
+  display: block;
+  border-radius: 6px;
+  background: #0d1016;
+}
+
+.viz-strip-wrap canvas {
+  display: block;
+  border-radius: 4px;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.viz-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 6px;
+}
+
+.viz-controls button {
+  min-width: 34px;
+  height: 28px;
+  padding: 0 8px;
+  color: #fafafa;
+  background: #262730;
+  border: 1px solid #4a4d5a;
+  border-radius: 6px;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.viz-controls button:hover {
+  border-color: #ff4b4b;
+}
+
+.viz-controls .viz-play {
+  min-width: 44px;
+  background: #ff4b4b;
+  border-color: #ff4b4b;
+  font-size: 0.9em;
+}
+
+.viz-controls select {
+  height: 28px;
+}
+
+.viz-time {
+  margin-left: auto;
+  color: #a3a8b8;
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+}
+
+.viz-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin: 5px 0 6px;
+  color: #8a90a2;
+  font-size: 0.78em;
+}
+
+.viz-legend i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 4px;
+  border-radius: 2px;
+  vertical-align: -1px;
+}
+
+.viz-log {
+  max-height: 150px;
+  overflow-y: auto;
+  border-top: 1px solid #262a36;
+  padding-top: 4px;
+  font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
+  color: #c7cad6;
+}
+
+.viz-log div {
+  padding: 1px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.viz-log div:hover {
+  background: #1d212c;
+}
+
+.viz-log div.now {
+  background: #22202a;
+}
+
+.viz-cast {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+.viz-dim {
+  color: #7f8597;
+}
+
+/* the champion's card */
+.viz-card {
+  flex: 0 0 215px;
+  font-size: 0.82em;
+  color: #c7cad6;
+  background: #171a23;
+  border: 1px solid #2a2e3b;
+  border-radius: 8px;
+  padding: 9px 10px;
+}
+
+.viz-card-head strong {
+  color: #fafafa;
+  font-size: 1.12em;
+}
+
+.viz-stars {
+  color: #e8c26a;
+}
+
+.viz-sub {
+  color: #8a90a2;
+  margin-top: 2px;
+}
+
+.viz-status {
+  margin: 7px 0 6px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  background: #1f2430;
+}
+
+.viz-status.is-casting {
+  background: #3a1f24;
+  color: #ffb3b3;
+}
+
+.viz-status span {
+  color: #9aa3b8;
+}
+
+.viz-mana {
+  position: relative;
+  height: 16px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+  background: #0b0d12;
+  overflow: hidden;
+}
+
+.viz-mana-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: #3f74d6;
+}
+
+.viz-mana-fill.locked {
+  background: #4b5468;
+}
+
+.viz-mana span {
+  position: relative;
+  display: block;
+  text-align: center;
+  line-height: 16px;
+  font-size: 0.92em;
+  color: #fafafa;
+}
+
+.viz-stats {
+  width: 100%;
+  white-space: normal;
+}
+
+.viz-stats td {
+  padding: 2px 3px;
+}
+
+.viz-stats td:last-child {
+  text-align: right;
+  color: #fafafa;
+  font-variant-numeric: tabular-nums;
+}
+
+.viz-stats tr[data-stat] {
+  cursor: pointer;
+}
+
+.viz-stats tr[data-stat]:hover td {
+  background: #1f2430;
+}
+
+.viz-stats tr.selected td {
+  background: #262b38;
+}
+
+.viz-mods {
+  margin: 4px 0 6px;
+  padding: 4px 6px;
+  border-left: 2px solid #4a4d5a;
+  font-size: 0.95em;
+  overflow-wrap: anywhere;
+}
+
+.viz-mods span {
+  color: #fafafa;
+}
+
+.viz-totals {
+  border-top: 1px solid #2a2e3b;
+  margin-top: 2px;
+}
+
+.viz-effects,
+.viz-dummies {
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+
+.viz-dummies div {
+  margin-top: 2px;
+}
+
+/* the row the viewer is showing */
+#resultsTable tr.viewing td:first-child {
+  box-shadow: inset 0 0 0 1px #e8c26a;
+}
+
+@media (max-width: 700px) {
+  .viz-body {
+    flex-direction: column;
+  }
+  .viz-card {
+    flex: none;
+    width: 100%;
+  }
+}
+
+.viz-controls select {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+.viz-time {
+  white-space: nowrap;
+}
