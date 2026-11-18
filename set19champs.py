@@ -397,7 +397,60 @@ class Senna(BuildChampion):
             self.schedule_tick(self.tick + ticks_up(self.rip_damage), detonate)
 
 
-champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna']
+class Ezreal(BuildChampion):
+    """Bite the Bullet (champions/Ezreal.md, D1). Script: GA_Ezreal19_Spell (build ga_scripts.zip).
+
+    Stage 1 (0x1247): CD_Ezreal19_CastAnim fires 'SpellMis' (the mark: CD_Ezreal19_Spell1_Tar, no damage). Its Unlock
+    event (0.6663 s) calls FireAtTarget (0x16ba), which plays CD_Ezreal19_CastAnim2: its root 'SpellMis' (0.1729 s,
+    2200 units/s) detonates on arrival (0x66 -> 0x382): GE_Ezreal19_DamagePrimary = PhysicalDamageCalc1 (ADDamage x
+    AD + APDamage x AP) on the target and GE_Ezreal19_DamageSecondary = PhysicalDamageCalc2 (AoEPercentDamage x Calc1)
+    on the other enemies within 1 hex. With the Set19.Trait.Encore tag the chrono's SecondCast group adds a second
+    'SpellMis' (0.319 s): FirstCastHit, set by the first detonation of the cast, makes it deal x CT_Encore19
+    RecastEffectiveness (DetermineDamageForSpell). CastAnim2's Unlock ends the spell (the build's 36-tick cast lock,
+    35-tick mana lock). Physical spell damage, crits only with Precision.
+    Not modelled: the Heartsteel upgrade (+25% and a 2-hex radius every 3rd cast: Heartsteel is not implemented) and
+    the stage-1 GE_SimulateLaunchAttack (under the mana lock, G11).
+    """
+    KEY = 'DA_Ezreal19'
+    MARK = 'CD_Ezreal19_CastAnim'
+    SHOT = 'CD_Ezreal19_CastAnim2'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.num_targets = 2  # set18 convention (as Varus): the splash hits num_targets - 1 adjacent enemies
+        self.second_stage = self.chrono_event(self.MARK, 'Unlock')
+        spawns = sorted(t for p in self.chrono(self.SHOT).get('projectiles') or [] if p['name'] == 'SpellMis'
+                        for t in p.get('spawn_at') or [])
+        if len(spawns) != 2:
+            raise ValueError(f'Ezreal: expected the root and Encore SpellMis in {self.SHOT}, got {spawns}')
+        self.shot_spawn, self.encore_spawn = spawns
+        self.notes = ('Heartsteel upgrade and Titan\'s-style item stacks not modelled. Adjacent enemies hit = '
+                      'targets - 1. The detonating missile flies his attack range.')
+
+    def detonation(self, level, AD, AP):
+        return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
+
+    def performAbility(self, opponents, items, time):
+        flight = self.chrono_projectile_ticks(self.SHOT, 'SpellMis', self.attack_range)
+        stage2 = self.tick + ticks_up(self.second_stage)
+        shots = [(self.shot_spawn, 1)]
+        if self.trait_tier('DA_Encore19') > 0:
+            shots.append((self.encore_spawn, self.trait_value('DA_Encore19', 'RecastEffectiveness')))
+        splash = self.row('AoEPercentDamage')
+        for spawn, eff in shots:
+            def land(eff=eff):
+                now = self.tick / TPS
+                self.multiTargetSpell(opponents[:1], items, now, 1,
+                                      lambda level, AD, AP: self.detonation(level, AD, AP) * eff, 'physical')
+                if self.num_targets > 1:
+                    self.multiTargetSpell(opponents[1:], items, now, self.num_targets - 1,
+                                          lambda level, AD, AP: self.detonation(level, AD, AP) * splash * eff,
+                                          'physical')
+
+            self.schedule_tick(stage2 + ticks_up(spawn) + flight, land)
+
+
+champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal']
 
 
 class TrainingDummy(Champion):

@@ -33,7 +33,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
-| Do fresh attacks start one tick later than the engine starts them? | no; every precise sighting says +1 tick (4 Varus, 2 Neeko, 1 Ziggs), Draven by eye at 30 fps said the opposite | first attack's mana step after combat start; first attack after a cast lock | T10 |
+| Do fresh attacks start one tick later than the engine starts them? | no; every precise sighting says +1 tick (4 Varus, 2 Neeko, 1 Ziggs, 1 Ezreal at combat start), Draven by eye at 30 fps said the opposite | first attack's mana step after combat start; first attack after a cast lock | T10 |
 | When does the first mana-regen step come? | at combat start (tick 0); two sightings say ~4 ticks after | the first +regen step of a caster after combat start | G17, T7 |
 | Must a unit attack between casts? | yes (set18's rule) | a unit whose regen + items refill the bar during its own cast lock | G18, T8 |
 
@@ -68,7 +68,15 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Blast and detonation damage | 140 x AD + 25 x AP, then 1.5x that, +8% damage amp per detonation (stacking) | damage numbers on a target of known armor | champions/Senna.md D1 |
 | First attack at combat start | one averaged windup in (17 ticks at 25% crit) | a fight with a combat-start marker | G3, Senna Q3 |
 
-### 7. Spell projectiles and damage numbers
+### 7. Ezreal again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Cast to the next attack | the bar fills at a release, the cast is the next tick, cast lock 36 ticks, then an 11-tick windup: 48 ticks from that release; VOD4 showed 46 and 44 | another Ezreal fight, ideally against a stationary target (no retargeting) | T4, T10, champions/Ezreal.md E2 |
+| Detonation damage | 190 x AD + 30 x AP on the target, 0.33x that within 1 hex | damage numbers without Titan's Resolve, on a target of known armor | champions/Ezreal.md D1 |
+| Encore's second missile | x RecastEffectiveness (25/50%) at 0.319 s into stage 2 | an Ezreal with Encore (2) | champions/Ezreal.md D1 |
+
+### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
@@ -76,7 +84,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Draven's record flight | 14 ticks at 4 hexes; VOD1 showed 16 (5 hexes would give 16) | a Draven cast at a target at a known distance | P12, Draven E4 |
 | Trickshot ricochet distance between dummies | the next dummy is 1 hex away (timing only; damage unchanged) | a ricochet's travel between two adjacent enemies | B12 |
 
-### 8. Items
+### 9. Items
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
@@ -91,4 +99,4 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|
 | Draven's vortex: the decoded damage effect has no tick-rate factor, yet each 0.5 s hit is half the per-second value (owner's ruling). Where does the game halve it? | implemented as the owner ruled; the decode is incomplete somewhere (calc component or attribute) | champions/Draven.md D1 |
 | Trickshot ricochets' on-hit effects (at RichochetDamage^k) | not modelled; no listed item has an on-hit effect yet | B12 |
-| Illbeats (Draven's second trait), Ionic Spark (Yunara's), Hyperpop (Ziggs's), True Damage (Senna's) | not implemented | - |
+| Illbeats (Draven's second trait), Ionic Spark (Yunara's), Hyperpop (Ziggs's), Heartsteel (Ezreal's: also his spell upgrade), True Damage's B-Side and Prismatic tiers; items Titan's Resolve and Quicksilver (both in VOD4) | not implemented | - |

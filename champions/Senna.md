@@ -82,7 +82,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | the blast applies GE_SimulateLaunchAttack at cast start, under the mana lock (G11): not modelled | script |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | cancels Combat.Attacking (T4) | script |
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | implemented from the script (D1): blast Calc1 + mark, detonation 1.5 x Calc1 + 8% damage amp; damage not yet checked | script |
-| Q14 | Passives and other mechanics that need modelling | see ability text | mark/detonate alternation and the stacking amp (D1); Hitmaker implemented (B18); True Damage not implemented | D1 |
+| Q14 | Passives and other mechanics that need modelling | see ability text | mark/detonate alternation and the stacking amp (D1); Hitmaker (B18) and True Damage A-Side (B19) implemented | D1 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-17 | D1 |
 
 ## Evidence log
@@ -94,6 +94,7 @@ VOD was played on (check the patch shown in game or the date against builds/inde
 |---|---|---|---|---|---|---|---|---|
 | E1 | 2026-11-17 | rls-19.1.0.5973071 | VOD2 f25700 (planning, round 1-10) | 60 | inspection panel | 1★, three items: AD 63 (15%), AP 25%, AS 0.94, crit 45%, armor 50, MR 70, 0/20 mana, 8/s regen; True Damage 2/3, Hitmaker 1/2 | base stats as built (items not all modelled) | Q1 |
 | E2 | 2026-11-17 | rls-19.1.0.5973071 | VOD2 f25637-28024 (`tools/vod_text_changes.py`, mana) | 60 | the 0 shown at each cast and the first mana after it | casts at f26197, 26332, 26474, 26611, 26737, 26873, 26995, 27115, 27216, 27314, 27424, 27520, 27639, 27743; first mana after: +77, 74, 62, 74, 62, 76, 62, 59, 62, 74, 64, 86, 74, 76 frames | two lock lengths, as the two casts predict (36 and 30 ticks); not a strict alternation because a real fight changes target. Attack releases not separable from the 8/s regen with the detector (it misses some +2 steps); crit vs normal windup not measured | Q9 |
+| E3 | 2026-11-17 | rls-19.1.0.5973071 | VOD4 (19-0-51-650) 11:37-11:41 (round 1-4, board every 8 frames) | 60 | damage numbers, True Damage (3) A-Side | 1★ with Quicksilver and Guinsoo's (AS 0.94, crit 45%, AP 10%, MR 55); every physical number followed by a true one: 30 -> 5, 22 -> 4, 18 -> 3, 12 -> 2, 35 -> 6, 25 -> 4, magic 7 -> 1 | true = 18% of the damage dealt, rounded down (B19) | Q14 |
 
 ## Decisions and notes
 
