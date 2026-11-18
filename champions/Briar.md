@@ -76,7 +76,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.3289 s (10 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 (bUseRateScalingThreshold set, no threshold: G20) | open; matters for the frenzy (AS x3: period 12.5 ticks, slash windup 15) | D1 |
 | Q6 | Projectile travel time (ranged only) | – | not applicable | |
-| Q7 | Cast time: cast start to the next attack starting | 31 ticks (Short dash): Kick 6 + Unlock 24 + 1; 36 with the Long dash (Unlock 29) | predicted | D1 |
+| Q7 | Cast time: cast start to the next attack starting | 36 ticks (Long dash: the enemy 2 hexes behind the target is 3 from her, G22): Kick 6 + Unlock 29 + 1; 31 with the Short dash (Unlock 24) | predicted | D1 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
 | Q9 | Mana lock: from cast start, when can mana be gained again? | the tick after the 3rd slash | predicted | D1 |
 | Q10 | Does the mana lock scale with attack speed? | ends with the slashes, so it shortens with AS | predicted | |

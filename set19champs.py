@@ -1184,7 +1184,8 @@ class Bard(BuildChampion):
     The cast chrono's 'Unlock' (0.8402 s) removes the mana lock and finishes the cast.
 
     Assumed (D1): the wave starts half a hex behind him (he stands in his back row); it meets the page's number of
-    targets (owner, 2026-11-18: 3 by default), all next to the target and so in its width.
+    targets (owner, 2026-11-18: 2 by default), all next to the target and so in its width, and the enemy 2 hexes
+    behind the target, in the line (G22).
     """
     KEY = 'DA_Bard19'
     AREA = True  # its damage depends on the page's number of targets (layout.py)

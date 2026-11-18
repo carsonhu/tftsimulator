@@ -5,8 +5,10 @@ Hexes are axial coordinates (q, r). The champion stands at (0, 0) and its target
 attack range (G4: the target is at attack range). The page sets one number, the targets (owner, 2026-11-18): the
 target and `targets` - 1 enemies on the hexes next to it, filled starting behind the target (away from the champion)
 and going round, so each is next to the one before (ricochets fly 1 hex, B12). Every splash, line or nearby-enemies
-rule of 1 hex or more meets all of them. A champion whose damage does not depend on it gets no slider and the
-default (3).
+rule of 1 hex or more meets all of them. One more enemy always stands 2 hexes behind the target, in line with the
+champion and the target (`far`): a 2-hex area meets it, a 1-hex one doesn't. The default is 2 targets (owner,
+2026-11-18): the target, one enemy behind it and one 2 hexes behind it, in a line, the layout before the slider.
+A champion whose damage does not depend on the targets gets no slider and the default.
 
 A fight with one target also holds a spare dummy far away, out of play: no area, line or ricochet sees it; only
 Titanic Hydra's assumed neighbour (owner: always one enemy next to the target) uses it (`neighbour`).
@@ -18,7 +20,7 @@ import math
 
 DIRECTIONS = ((1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1))
 HEX_UNITS = 215.0  # world units between hex centres (timing.HEX_UNITS, G4)
-TARGETS = 3  # the page's default (owner, 2026-11-18)
+TARGETS = 2  # the page's default (owner, 2026-11-18: the target and 1 enemy next to it, plus the one 2 hexes away)
 MAX_TARGETS = 7  # the target and its 6 neighbours
 
 
@@ -49,15 +51,17 @@ class Layout:
 
     @property
     def count(self):
-        """Dummies a fight needs: the targets, and a spare when there is only one (`neighbour`)."""
-        return max(2, self.targets)
+        """Dummies a fight needs: the targets, the one 2 hexes behind, and a spare when there is only one target
+        (`neighbour`)."""
+        return self.targets + 1 + (self.targets == 1)
 
     def place(self, champion, dummies):
         """Put the champion and `dummies` (the target first) on their hexes; any beyond the targets are out of play."""
         target = (max(1, champion.attack_range or 1), 0)
+        far = (target[0] + 2, 0)  # 2 hexes behind the target, in line with the champion
         # a melee unit stands on one of the target's neighbouring hexes: skip it (a 7th target then stands 2 away)
-        free = [h for h in ring(target, 1) + ring(target, 2) if h != (0, 0)]
-        spots = [target] + free[:self.targets - 1]
+        free = [h for h in ring(target, 1) + ring(target, 2) if h not in ((0, 0), far)]
+        spots = [target] + free[:self.targets - 1] + [far]
         champion.hex = (0, 0)
         for i, dummy in enumerate(dummies):
             dummy.in_play = i < len(spots)
@@ -92,7 +96,10 @@ def neighbour(target, dummies):
     """One enemy next to `target` whatever the page's targets (owner, 2026-11-18: Titanic Hydra): the nearest in play,
     else the spare."""
     near = around(target, 1, dummies)
-    return near[0] if near else next(d for d in dummies if d is not target)
+    if near:
+        return near[0]
+    spare = [d for d in dummies if d is not target and not getattr(d, 'in_play', True)]
+    return spare[0] if spare else next(d for d in dummies if d is not target)
 
 
 def world(h):

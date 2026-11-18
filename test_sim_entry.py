@@ -94,7 +94,7 @@ def test_the_number_of_targets_reaches_an_area_champion_only():
     # show it (AREA); Varus's splash hits each target, so more targets, more damage. Draven's damage doesn't depend
     # on it (no slider): any value runs the default, and Titanic Hydra always hits one enemy next to the target
     cat = json.loads(sim_entry.catalog_json())
-    assert cat['defaults']['layout'] == {'targets': 3, 'max': 7}
+    assert cat['defaults']['layout'] == {'targets': 2, 'max': 7}
     area = {c['name'] for c in cat['champions'] if c['area']}
     assert area == {'Varus', 'Ziggs', 'Ezreal', 'Malzahar', 'Kayle', 'Bard', 'RenataGlasc', 'Briar'}
 
@@ -103,7 +103,7 @@ def test_the_number_of_targets_reaches_an_area_champion_only():
         return next(r['dps']['20-30'] for r in out['rows'] if r['extra'] == extra)
 
     assert dps('Varus', 'Craftable', 'NoItem', {'targets': 5}) > dps('Varus', 'Craftable', 'NoItem', None) \
-        == dps('Varus', 'Craftable', 'NoItem', {'targets': 3}) > dps('Varus', 'Craftable', 'NoItem', {'targets': 1})
+        == dps('Varus', 'Craftable', 'NoItem', {'targets': 2}) > dps('Varus', 'Craftable', 'NoItem', {'targets': 1})
     assert dps('Draven', 'Artifact', 'Titanic Hydra (1 adjacent)', {'targets': 7}) == dps('Draven', 'Artifact', 'Titanic Hydra (1 adjacent)', None)
 
 

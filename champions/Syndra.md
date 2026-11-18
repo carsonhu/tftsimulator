@@ -79,7 +79,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | 300/450/720 x AP on the target, 110/165/265 x AP on the bounce target | predicted (script and effects read) | D1 |
 | Q14 | Passives and other mechanics that need modelling | the bounce's target choice; Shred rows unused | predicted | D1 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
-| Q16 | When the volleyball and the bounce land | ball 40 + 11 ticks after the cast (4 hexes), bounce 4 ticks later (1 hex), 15 when bouncing in place | open (VOD5 11:35-12:30 has her fighting) | D1 |
+| Q16 | When the volleyball and the bounce land | ball 40 + 11 ticks after the cast (4 hexes), bounce 7 ticks later (2 hexes, to the enemy 2 hexes behind, G22), 15 when bouncing in place | open (VOD5 11:35-12:30 has her fighting) | D1 |
 
 ## Evidence log
 

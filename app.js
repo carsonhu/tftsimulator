@@ -82,7 +82,7 @@ const state = {
   cfg: {
     champ: null,
     level: 1,
-    layout: { targets: 3 }, // the number of targets (layout.py); boot reads the default
+    layout: { targets: 2 }, // the number of targets (layout.py); boot reads the default
     takedowns: 0,
     bonus: { ad: 0, ap: 0, as: 0, dmgamp: 0, crit: 0, critdmg: 0, manaregen: 0, mpa: 0 },
     stage: "4-1",

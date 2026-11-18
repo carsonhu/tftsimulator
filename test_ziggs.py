@@ -64,7 +64,7 @@ def test_attack_and_bomb_damage():
     assert sorted(d for t, d in rows if t == first_hit) == [11, 40]  # 10 x expected crit 1.1; magic can't crit
     c = z.casts[0]
     land = c + ticks_up(0.3183) + projectile_ticks(1900, 4)
-    assert sorted(d for t, d in rows if t == land and d > 40) == [80, 80, 180]
+    assert sorted(d for t, d in rows if t == land and d > 40) == [80, 180]  # the enemy next to the target splashed
     assert not any(d in (80, 180) for t, d in rows if t != land and t < land + 30)
 
 

@@ -62,20 +62,21 @@ def test_vod3_mana_and_lock():
 
 
 def test_beam_and_bursts():
-    # 1-star at AP 1.0 on 0-MR dummies: 4 bursts of 40 on the 3 targets (cast + 11, 30, 49, 69 ticks),
+    # 1-star at AP 1.0 on 0-MR dummies: 4 bursts of 40 on the 2 targets (cast + 11, 30, 49, 69 ticks),
     # 9 beam ticks of 380 / 9 on the target from cast + 11, every 0.25 s
     m = LoggedMalzahar(1)
     ds, rows = fight(m, seconds=12)
     cast = m.casts[0]
     spell = [(t - cast, d) for t, d in rows if t >= cast and d != round(35 * 1.1, 4)]
     bursts = sorted(t for t, d in spell if d == 40)
-    assert bursts == [11] * 3 + [30] * 3 + [49] * 3 + [69] * 3
+    assert bursts == [11] * 2 + [30] * 2 + [49] * 2 + [69] * 2
     beam = [t for t, d in spell if d == pytest.approx(380 / 9)]
     assert beam == [11, 19, 26, 34, 41, 49, 56, 64, 71]
-    # the shred: 30% for 4 s on everyone a burst hits (MR x 0.7): with 2 targets, the target and its neighbour
+    # the shred: 30% for 4 s on everyone a burst hits (MR x 0.7): with 2 targets, the target and its neighbour, not
+    # the one 2 hexes behind
     m = LoggedMalzahar(1)
     ds, rows = fight(m, seconds=7.5, mr=100, layout=Layout(2))
-    assert [d.mr.stat for d in ds] == [70, 70]
+    assert [d.mr.stat for d in ds] == [70, 70, 100]
 
 
 def test_bursts_hit_every_neighbour():

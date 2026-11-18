@@ -118,7 +118,7 @@ const puppeteer = require("puppeteer-core");
   } catch (e) {
     console.log("FAIL Heartsteel row for Ezreal: " + e.message);
   }
-  // The number of targets (layout.py): shown for Ezreal (his splash), default 3; 5 targets means more splash.
+  // The number of targets (layout.py): shown for Ezreal (his splash), default 2; 5 targets means more splash.
   // Hidden for a champion whose damage doesn't depend on it.
   try {
     const layout = () => page.evaluate(() => ({
@@ -127,7 +127,7 @@ const puppeteer = require("puppeteer-core");
     }));
     const shown = await layout();
     console.log("targets slider:", JSON.stringify(shown));
-    if (shown.hidden || shown.value !== "3/3") console.log("FAIL targets slider for Ezreal (shown, default 3)");
+    if (shown.hidden || shown.value !== "2/2") console.log("FAIL targets slider for Ezreal (shown, default 2)");
     const before = (await read()).rows[1];
     await page.evaluate(() => {
       const s = document.querySelector("#layoutTargets");
