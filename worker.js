@@ -61,6 +61,7 @@ const PY_FILES = [
   "traits/classical.py",
   "traits/slayer.py",
   "traits/choreographer.py",
+  "traits/jazz.py",
 ];
 
 async function boot() {

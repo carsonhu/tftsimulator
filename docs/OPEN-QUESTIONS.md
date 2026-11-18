@@ -142,6 +142,13 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | The buff's length | 4 s + 0.75 x 0.5 s / S | the frames of the AS change in and out (VOD5's panel moved 10 ticks after the Buff event) | champions/Kayle.md D1 |
 | Her attack projectile's speed in the build | 2250 typed from the client asset | (tool) the snapshot should read projectiles that a champion's own attack script names | champions/Kayle.md D1 |
 
+### 7k. Lucian again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Dash length | MinDashDistance (1 hex, 4 ticks at 2000 units/s): the nearest of the equally safe hexes on the dummy layout | VOD1's casts lasted ~4 ticks longer (lock 37-39 after the fill, engine 33) | champions/Lucian.md E2 |
+| Jazz's default count | 5 active traits | (owner) the default you want | B31 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

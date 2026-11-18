@@ -1074,8 +1074,63 @@ class Kayle(BuildChampion):
         self.schedule_tick(start, buff)
 
 
+class Lucian(BuildChampion):
+    """Relentless Pursuit (champions/Lucian.md, D1). Script: GA_Lucian19_Spell (build ga_scripts.zip).
+
+    The cast commits, reads Encore (IsEncoreCast = a Encore member with the trait active; EncoreDamageMult = CT_Encore19
+    RecastEffectiveness at the board's tier) and applies the mana lock (0x1020). He dashes (CD_Lucian19_Dash) to the
+    safest hex at least MinDashDistance away that keeps his target in range (TR_Add_SafestHexesWithinHexRange): a
+    TFTFixedSpeedMovement at 2000 units/s (3400 past 700 units) whose 'Arrive' event fires the shots; the engine takes a
+    MinDashDistance (1 hex) dash (D1; VOD1 suggests a little more). FireAtTarget plays CD_Lucian19_CastAnim at his
+    target: 'SpellMis' at 0.1494 and 0.3282 s (1800 units/s); with Encore CD_Lucian19_CastAnim_Encore: 'SpellMis' at
+    0.1009 and 0.2018 s and 'EncoreMis' at 0.2923 and 0.3834 s. Each missile's OnFired applies GE_SimulateLaunchAttack
+    (G11); each arrival GE_Lucian19_Damage = PhysicalDamageCalc1 (ADDamage x AD + APDamage x AP) x the multiplier (1
+    for SpellMis, EncoreDamageMult for EncoreMis), physical, on-spell, crit only with Precision. The cast chrono's
+    'Unlock' (0.9298 s; Encore 0.8029 s) removes the mana lock and finishes the cast.
+    """
+    KEY = 'DA_Lucian19'
+    DASH = 'CD_Lucian19_Dash'
+    CAST, ENCORE_CAST = 'CD_Lucian19_CastAnim', 'CD_Lucian19_CastAnim_Encore'
+    DASH_SPEED = 2000  # CD_Lucian19_Dash TFTFixedSpeedMovement MoveSpeed (client asset; the build has no movement modules)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        t = self.timing
+        t.mana_lock = None  # set per cast: dash + the cast chrono's Unlock
+        self.dash_hexes = self.row('MinDashDistance')
+        self.dash = projectile_ticks(self.DASH_SPEED, self.dash_hexes)
+        self.notes = ('A cast: a 1-hex dash, then 2 shots (with Encore active, 2 more at the Encore recast strength); '
+                      'each shot counts as an attack for on-attack items.')
+
+    def shot_damage(self, level, AD, AP):
+        return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
+
+    def encore(self):
+        return self.trait_tier('DA_Encore19') > 0 and 'DA_Encore19' in (self.data.d.get('trait_keys') or [])
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        chrono = self.ENCORE_CAST if self.encore() else self.CAST
+        unlock = self.dash + ticks_up(self.chrono_event(chrono, 'Unlock'))
+        self.timing.mana_lock = unlock / TPS
+        self.timing.cast_lock = (unlock + 1) / TPS
+        mult = self.trait_value('DA_Encore19', 'RecastEffectiveness') if self.encore() else 1
+        fire = self.tick + self.dash
+        hexes = self.target_hexes(target)
+        for name, eff in (('SpellMis', 1), ('EncoreMis', mult)):
+            spawns = [t for p in self.chrono(chrono).get('projectiles') or [] if p['name'] == name
+                      for t in p['spawn_at']]
+            for spawn in spawns:
+                at = fire + ticks_up(spawn)
+                self.schedule_tick(at, lambda: self.simulateLaunch(self.items))
+                land = at + self.chrono_projectile_ticks(chrono, name, hexes)
+                self.schedule_tick(land, lambda eff=eff: self.multiTargetSpell(
+                    [target], self.items, self.tick / TPS, 1,
+                    lambda level, AD, AP: self.shot_damage(level, AD, AP) * eff, 'physical'))
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
-              'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle']
+              'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian']
 
 
 class TrainingDummy(Champion):
