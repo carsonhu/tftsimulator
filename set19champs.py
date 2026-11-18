@@ -1136,6 +1136,64 @@ class Lucian(BuildChampion):
                     lambda level, AD, AP: self.shot_damage(level, AD, AP) * eff, 'physical'))
 
 
+class Bard(BuildChampion):
+    """Come Chime with Me (champions/Bard.md, D1). Script: GA_Bard19_Spell (build ga_scripts.zip).
+
+    The Horn of the Traveler (GA_Bard19_UniqueItem: casts give XP, attacks bonus mana ManaPerAttack, +max mana) is not
+    simulated (owner, 2026-11-18): its cast (SpawnMeep, CD_Bard19_CastAnim) only applies with the horn's
+    Set19.Unit.Bard.SpecialCast tag, so every cast here is the wave (WaveCast, 0x1bcc). The cast commits, sets Falloff
+    = 1 and applies the mana lock (0x197d); CD_Bard19_CastAnimMeeps plays. At 'FireMeeps' (0.4381 s) it aims a 2000 x
+    600 rectangle from Bard to hit the most enemies with his attack target among them
+    (FindRectangleRotationFromLocationToHitActorsWithRequired, 0x4f5) and plays CD_Bard19_MeepProjectile from the board's
+    edge behind him along that line to beyond the far edge: its 'MeepHitbox' moves at 1000 units/s. Each enemy it
+    overlaps (0xf49) gets GE_Bard19_MeepWaveDamage with SetByCaller Falloff, then Falloff = max(Falloff x (1 -
+    FalloffPerUnit), MinimumDamagePercent) (0x113f, 0x1f4): 1, 0.7, 0.49, ... down to 0.2. The effect (client asset):
+    MagicDamageCalc1 (MeepsDamage x AP) x Falloff, magic, AOE, on-spell, crit only with Precision, its total spread
+    over its 0.2 s duration at a 0.1 s period (bDoTotalDamageOverDuration), so two halves, the first on application.
+    The cast chrono's 'Unlock' (0.8402 s) removes the mana lock and finishes the cast.
+
+    Assumed (D1): the wave starts half a hex behind him (he stands in his back row), and it meets the target and the
+    dummies the page places next to it or 2 hexes from it that lie in its width; the filler dummies beyond are off the
+    board.
+    """
+    KEY = 'DA_Bard19'
+    CAST, WAVE = 'CD_Bard19_CastAnimMeeps', 'CD_Bard19_MeepProjectile'
+    LENGTH, WIDTH = 2000, 600  # GA_Bard19_Spell defaults 'Line Length', 'Line Width'
+    BEHIND = 0.5  # hexes from the board's back edge to Bard (assumed, D1)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.fire = self.chrono_event(self.CAST, 'FireMeeps')
+        unlock = ticks_up(self.chrono_event(self.CAST, 'Unlock'))
+        self.timing.mana_lock = unlock / TPS
+        self.timing.cast_lock = (unlock + 1) / TPS
+        self.timing.source['cast_lock'] = self.timing.source['mana_lock'] = f'{self.CAST} Unlock (WaveCast; D1)'
+        speeds = {p['speed'] for p in self.chrono(self.WAVE).get('projectiles') or [] if p['name'] == 'MeepHitbox'}
+        if len(speeds) != 1:
+            raise BuildDataError(f'{self.KEY}: {self.WAVE} has no single MeepHitbox speed in build {self.build.version}')
+        self.wave_speed = speeds.pop()
+        self.halves = round(0.2 / 0.1)  # GE_Bard19_MeepWaveDamage: duration 0.2 s, period 0.1 s (client asset)
+        self.notes = ('A cast: a wave of meeps along the line through his target; each enemy it meets takes 210 x AP '
+                      'magic, 30% less for each one before it (at least 20%). The Horn of the Traveler is not '
+                      'simulated.')
+
+    def wave_damage(self, level, AD, AP):
+        return self.row('Meeps Damage', star=level) * AP
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        fire = self.tick + ticks_up(self.fire)
+        pool = [target] + self.nearby(target, 2)
+        falloff, step, floor = 1.0, self.row('FalloffPerUnit'), self.row('MinimumDamagePercent')
+        for d, along in self.line(target, self.LENGTH, self.WIDTH, pool):
+            hit = fire + ticks_up((self.BEHIND * HEX_UNITS + along) / self.wave_speed)
+            for k in range(self.halves):
+                self.schedule_tick(hit + ticks_up(k * 0.1), lambda d=d, f=falloff: self.multiTargetSpell(
+                    [d], self.items, self.tick / TPS, 1,
+                    lambda level, AD, AP: self.wave_damage(level, AD, AP) * f / self.halves, 'magical'))
+            falloff = max(falloff * (1 - step), floor)
+
+
 class RenataGlasc(BuildChampion):
     """Hostile Measures (champions/RenataGlasc.md, D1). Script: GA_RenataGlasc19_Spell (build ga_scripts.zip).
 
@@ -1234,7 +1292,7 @@ class Zoe(BuildChampion):
 
 
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
-              'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe']
+              'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard']
 
 
 class TrainingDummy(Champion):

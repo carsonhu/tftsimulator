@@ -107,7 +107,7 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   radiant, artifact, emblem, trait, augment), which fills `set19items.offensive_craftables` / `radiants` /
   `artifacts` / `emblems` and `set19buffs.class_buffs` / `augments`; champions are live when listed in
   `set19champs.champ_list` (Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal, Lux, Gnar, Malzahar, Samira,
-  Karthus, Ashe, Viego, Kayle, Lucian, RenataGlasc, Zoe, OlafHeroAugment (hero augment units are separate champions: `roster.json` `hero_augments`);
+  Karthus, Ashe, Viego, Kayle, Lucian, RenataGlasc, Zoe, Bard, OlafHeroAugment (hero augment units are separate champions: `roster.json` `hero_augments`);
   traits: Encore, Trickshot, K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats, Heartsteel, Hyperpop, Ionic
   Spark, Prodigy, Pentakill, Composer, Renegade, Classical, Slayer, Choreographer, Jazz, Beach Pop). A debuff a spell applies uses the shared helpers in `items/debuffs.py`
   (`apply_shred`, `apply_sunder`). A new trait is
@@ -134,7 +134,8 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   `champion.attribute("AttackSpeed")` finds one by the game's name (ledger I1, I5).
 - Where the dummies stand is `layout.py` (the page's 'Enemies next to the target' / '2 hexes from the target';
   default: one of each, then a line). Ask it, never index `opponents[1:]`: `self.target_hexes()` for a flight,
-  `self.nearby(target, hexes)` for a splash (the script's HexRange), `self.ricochet(previous, hit)` for a bounce.
+  `self.nearby(target, hexes)` for a splash (the script's HexRange), `self.ricochet(previous, hit)` for a bounce, `self.line(target, length, width)` for a
+  line (Bard's wave).
   `opponents[0]` is the target.
 - Tests (committed on `set19`): `python -m pytest -q` with set18's venv (`../set18/.venv/Scripts/python`) until this
   repo has its own.

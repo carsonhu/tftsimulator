@@ -10,7 +10,10 @@ one 2 hexes away. Each ring is filled starting behind the target (away from the 
 `opponents[0]` stays the target: the dummies are placed, and kept, in that order (nearest the target first).
 """
 
+import math
+
 DIRECTIONS = ((1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1))
+HEX_UNITS = 215.0  # world units between hex centres (timing.HEX_UNITS, G4)
 COUNT = 8  # dummies in a fight unless the layout needs more
 
 
@@ -73,6 +76,51 @@ def nearest(unit, n, dummies, exclude=()):
     """The `n` dummies nearest `unit` (e.g. the champion), leaving out `exclude`; ties in placement order."""
     near = [d for d in dummies if d is not unit and all(d is not x for x in exclude)]
     return sorted(near, key=lambda d: distance(d, unit))[:n]
+
+
+def world(h):
+    """A hex's centre in world units (axial coordinates, neighbours HEX_UNITS apart)."""
+    q, r = h
+    return HEX_UNITS * (q + r / 2), HEX_UNITS * math.sqrt(3) / 2 * r
+
+
+def line_hits(source, target, dummies, length, width, pool=None):
+    """A rectangle `length` x `width` (world units) from `source`, turned to hit the most dummies with `target` among
+    them (TFTMathSubsystem.FindRectangleRotationFromLocationToHitActorsWithRequired; directions tried: every degree and
+    straight at each dummy, ties to the one nearest the target's direction). Returns (direction, [(dummy, distance
+    along the line from source)]) for the dummies of `pool` (default: all) within width / 2 of that line, in front
+    of the source, nearest first."""
+    sx, sy = world(source.hex)
+    pts = {id(d): world(d.hex) for d in dummies}
+
+    def along(d, ux, uy):
+        x, y = pts[id(d)][0] - sx, pts[id(d)][1] - sy
+        return x * ux + y * uy, abs(x * uy - y * ux)
+
+    def inside(d, ux, uy, limit):
+        a, off = along(d, ux, uy)
+        return -1e-9 <= a <= limit and off <= width / 2 + 1e-9
+
+    tx, ty = pts[id(target)][0] - sx, pts[id(target)][1] - sy
+    aim = math.atan2(ty, tx)
+    angles = [math.radians(a) for a in range(360)] + [math.atan2(pts[id(d)][1] - sy, pts[id(d)][0] - sx)
+                                                      for d in dummies if d.hex != source.hex]
+    best = None
+    for ang in angles:
+        ux, uy = math.cos(ang), math.sin(ang)
+        if not inside(target, ux, uy, length):
+            continue
+        n = sum(inside(d, ux, uy, length) for d in dummies)
+        dev = abs(math.remainder(ang - aim, 2 * math.pi))
+        if best is None or (n, -dev) > (best[0], -best[1]):
+            best = (n, dev, ux, uy)
+    if best is None:  # the target is out of reach: straight at it
+        ux, uy = math.cos(aim), math.sin(aim)
+    else:
+        ux, uy = best[2], best[3]
+    hits = [(d, along(d, ux, uy)[0]) for d in (dummies if pool is None else pool)
+            if along(d, ux, uy)[0] >= -1e-9 and along(d, ux, uy)[1] <= width / 2 + 1e-9]
+    return (ux, uy), sorted(hits, key=lambda h: h[1])
 
 
 def ricochet(previous, hit, dummies):

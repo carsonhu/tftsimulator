@@ -56,8 +56,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Bard`, D1); predicted from the script, stats and
+  tooltip checked on VOD1's panel (E1); no cast timed yet
+- Keep in the simulator: **yes** (owner, 2026-11-18: add Bard; the Horn of the Traveler is not active)
 
 ## Questions
 
@@ -66,29 +67,48 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicMarksman | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed for HP, AD, mana, range | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicMarksman: 10 per attack | predicted; the horn's bonus mana per attack (ManaPerAttack row) not simulated | D1 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
-| Q4 | Attack windup at base AS (attack start to hit / release) | 0.2 s (6 ticks) | predicted | |
-| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
+| Q4 | Attack windup at base AS (attack start to hit / release) | 0.2 s (6 ticks); a second variant at 0.35 s | predicted | |
+| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G19 (release scales with the period: the build's flag) | predicted | |
 | Q6 | Projectile travel time (ranged only) | speed 2000 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 1.1 s (33 ticks) | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | 0.9 s (27 ticks): CD_Bard19_CastAnimMeeps Unlock + 1 tick (the AUTO block's 1.1 s follows the horn's cast) | predicted | D1 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.0667 s (32 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 0.8667 s (26 ticks) | predicted | D1 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
-| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 (the script applies no GE_SimulateLaunchAttack) | predicted | D1 |
+| Q12 | Does the cast cancel or reset an attack in progress? | cancels (CancelAbilitiesWithTag Combat.Attacking) | predicted | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | 210/315/505 x AP per enemy, x0.7 for each one before it (at least x0.2), two halves 0.1 s apart | predicted (script and effect read); tooltip 231 = 210 x 1.10 AP | D1, E1 |
+| Q14 | Passives and other mechanics that need modelling | the Horn of the Traveler | not applicable: not simulated (owner) | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
+| Q16 | Where the wave starts (the board's edge behind Bard) and so when it reaches the target | half a hex behind him: 29 ticks after FireMeeps at 4 hexes | open (a VOD of the wave's damage numbers) | D1 |
+| Q17 | Which enemies the wave meets | the target and the page's dummies next to it / 2 hexes from it within its 600 width; fillers beyond: none | open (owner) | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-18 | rls-19.1.0.5973071 | VOD1 (`…PBE_11-17-2026_15-16-17-933.mp4`) 4:44, owner's screenshot | 30 | inspection panel, ability tooltip (round 1-6, planning) | 650/650, 20/80; AD 30, AP 10%, AS 0.90, crit 25%, range 4 hex, armor 58, MR 58; one item (red blade); Jazz, Swiftstriker. Tooltip: Damage 231 (210/315/505) | HP, mana, AD, range as built; 231 = 210 x 1.10 AP. Armor/MR 58 and AS 0.90 come from the board and item, not checked | Q1, Q13 |
 
 ## Decisions and notes
 
+- 2026-11-18, D1 (implemented, `set19champs.Bard`):
+  - **Horn of the Traveler not simulated** (owner): GA_Bard19_UniqueItem's horn gives casts XP (GA_Bard19_Spell's
+    SpawnMeep path, CD_Bard19_CastAnim, taken only with Set19.Unit.Bard.SpecialCast) and bonus mana per attack (the
+    ManaPerAttack row, ManaCalc1 2/7/20 x AP) and max mana (GE_Bard19_UniqueItem_Stats). Every cast is the wave.
+    The build's predicted spell timing (AUTO block) followed the horn path; Bard's locks come from
+    CD_Bard19_CastAnimMeeps instead (Unlock 0.8402 s).
+  - **Wave (WaveCast):** mana lock; at FireMeeps (0.4381 s) a 2000 x 600 rectangle from Bard turned to hit the most
+    enemies with his attack target among them (FindRectangleRotationFromLocationToHitActorsWithRequired;
+    `layout.line_hits`); CD_Bard19_MeepProjectile's MeepHitbox (1000 units/s) runs from the board's edge behind him
+    along it. Each enemy it overlaps: GE_Bard19_MeepWaveDamage (client asset: HasDuration 0.2 s, Period 0.1 s,
+    bDoTotalDamageOverDuration) = MagicDamageCalc1 x SetByCaller Falloff, magic, AOE, on-spell, crit only with
+    Precision; then Falloff = max(Falloff x 0.7, 0.2). Two halves 3 ticks apart, the first on application (as
+    Renata's Toxin).
+  - **Assumed:** the wave starts half a hex behind Bard (back row) (Q16); it meets the target and the dummies the
+    page places next to it or 2 hexes from it within its width, nearest Bard first; the filler dummies beyond are
+    off the board (Q17). On the default layout: 3 enemies, 1 + 0.7 + 0.49 = 2.19 x one hit.

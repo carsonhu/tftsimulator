@@ -212,6 +212,11 @@ class Champion(FastDeepCopy):
         """The `n` enemies nearest this unit, leaving out `exclude` (TR_Add_N_NearestEnemies...)."""
         return layout.nearest(self, n, self.opponents, exclude)
 
+    def line(self, target, length, width, pool=None):
+        """The dummies a `length` x `width` line from this unit, aimed to hit the most with `target` among them, passes
+        over: [(dummy, world units along the line)], nearest first (layout.line_hits)."""
+        return layout.line_hits(self, target, self.opponents, length, width, pool)[1]
+
     def ricochet(self, previous, hit):
         """(next target, hexes) for a ricochet from `previous` that has already hit `hit` (B12)."""
         return layout.ricochet(previous, hit, self.opponents)
