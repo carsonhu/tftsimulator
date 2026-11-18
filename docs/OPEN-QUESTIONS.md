@@ -84,6 +84,13 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Which enemy the secondary beam hits | the enemy nearest Lux other than her target (not the one nearest the target) | a Lux cast with an enemy beside her and one beside her target | champions/Lux.md D1 |
 | Prodigy | members +2/3/6/7 + 1 mana regen, everyone else +1 | the regen shown in the panel with Prodigy (2)+ active | B24 |
 
+### 7c. Gnar again
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Rock damage | 120/180/270 x AD physical, crits only with Precision, on-hit effects apply | damage numbers of his 3rd attacks on a target of known armor | champions/Gnar.md D1 |
+| Does mana from items fill Ammo? | ignored (he never casts) | a Gnar with Spear of Shojin or Blue Buff: the Ammo text | champions/Gnar.md D1 |
+
 ### 8. Spell projectiles and damage numbers
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

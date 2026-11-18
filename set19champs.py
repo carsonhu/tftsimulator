@@ -7,6 +7,7 @@ how the damage is built) is the champion's script, cited by file and offset.
 import set19buffs
 from build_champion import BuildChampion
 from champion import Champion
+from events import IS_ATTACK, ON_HIT, ON_SPELL, ONHIT_AFTER, ONHIT_PRE, UNIT, CombatEvent, damage_tags
 from timing import TPS, Timing, projectile_ticks, ticks_up
 
 
@@ -515,7 +516,89 @@ class Lux(BuildChampion):
         self.schedule_tick(self.tick + ticks_up(self.beam_at), beam)
 
 
-champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux']
+class Gnar(BuildChampion):
+    """Hard Rock (champions/Gnar.md, D1). Scripts: GA_Gnar19_Passive, GA_Gnar19_TrickshotHandler (build ga_scripts.zip).
+
+    His mana bar is Ammo (max 3, no role mana) and he has no spell. GA_Gnar19_Passive, on each attack launch
+    (Combat.Event.LaunchAttack, 0x1720): Ammo 0 -> +1; Ammo 1 -> +1 and GE_Gnar19_UseEmpoweredAttack, whose tag
+    ChronoTags.Dynamic.CustomAttack.1 makes the next attack play the attack chrono's SpecialAttack group
+    (CustomLaunchAttack1 at 0.38 s in a 1.2333 s animation, rate-scaled like the others, instead of LaunchAttack at
+    0.2678 s in 1.9667 s). So every 3rd attack is the empowered one. Its Combat.Event.LaunchAttack.Custom.1 (0x4fe):
+    +1 Ammo, GE_Gnar19_AttackSpeedBuff (AttackSpeed MultiplyAdditive AttackSpeedCalc1 = 0.09 x AP + 1, infinite,
+    stacking) and the rock, CD_Gnar19_Projectile's 'SpellProjectile' (1800 units/s) at his target; 0.3 / AS later the
+    Ammo resets. The custom launch is not one of the events GA_LaunchProjectileAttack fires a projectile on, so the
+    rock replaces the attack. On arrival (0x1c66 -> 0x1371): GE_Gnar19_PhysicalDamage = PhysicalDamageCalc1
+    (ADDamage x AD, AD the AttackDamage multiplier), physical, tagged AppliesOnHit.IsAttack and AppliesOnSpell (on-hit
+    effects apply), crits only with Precision (RollIfCanSpellCrit); then the Trickshot bounce event.
+    Trickshot (GA_Gnar19_TrickshotHandler): the rock ricochets k = 1..NumRichochets to the nearest enemy not yet hit
+    (CD_Gnar19_Projectile_TrickshotBounce, 1800) for the same damage x RichochetDamage^k; its on-hit effects at
+    RichochetDamage^k are not modelled (as for attack ricochets, B12). His other attacks ricochet as every Trickshot's
+    (B12). Assumed: the attack rhythm of units with several attack animations (B13: starts a period apart).
+    """
+    KEY = 'DA_Gnar19'
+    ATTACK = 'CD_Gnar19__Attack'
+    ROCK = 'CD_Gnar19_Projectile'
+    BOUNCE = 'CD_Gnar19_Projectile_TrickshotBounce'
+    EVERY = 3  # Ammo max 3: two attacks fill it to 2, the third is empowered (GA_Gnar19_Passive 0x1720)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        t = self.timing
+        # the attack chrono's SpecialAttack group (CustomAttack.1): CustomLaunchAttack1 in a module ending at the
+        # chrono's length (1.2333 s); the SequentialAttack modules are the build's attack timeline
+        special = {'selector': self.EVERY, 'min_as': None, 'launch': self.chrono_event(self.ATTACK, 'CustomLaunchAttack1'),
+                   'length': self.chrono(self.ATTACK)['length']}
+        t.variants = [{'selector': s, 'min_as': None, 'launch': t.launch, 'length': t.attack_len}
+                      for s in range(1, self.EVERY)] + [special]
+        t.animations = self.EVERY
+        t.source['variants'] = f'{self.ATTACK} SequentialAttack x2 + SpecialAttack (GA_Gnar19_Passive Ammo, every 3rd)'
+        self.rock_speed = self.chrono_projectile_speed(self.ROCK, 'SpellProjectile')
+        self.notes = ('Every 3rd attack is the rock (its own, slower windup); each rock gives +9% x AP attack speed '
+                      'for the rest of combat. Mana items would add Ammo in game; not modelled.')
+
+    def canCast(self, time=None):
+        return False  # no spell: the bar is Ammo, spent by the passive
+
+    def rock_damage(self, level, AD, AP):
+        return self.row('ADDamage', star=level) * AD
+
+    def _empowered(self):
+        """Is the attack released just now (launches already counted) the empowered one?"""
+        return (self.launches - 1) % self.EVERY == self.EVERY - 1
+
+    def onLaunch(self, opponents, items):
+        if self._empowered():
+            # GE_Gnar19_AttackSpeedBuff at the custom launch: MultiplyAdditive 0.09 x AP + 1, stacking
+            self.aspd.modify("MultiplyAdditive", self.row('AttackSpeedAP') * self.ap.stat + 1)
+
+    def fire_attack(self, opponents, items, moment, paid):
+        if not self._empowered():
+            return super().fire_attack(opponents, items, moment, paid)
+        target = opponents[0]
+        flight = self.chrono_projectile_ticks(self.ROCK, 'SpellProjectile', self.target_hexes(target))
+        self.schedule_tick(self.tick + flight, lambda: self._rock_lands(target, [target], 0))
+
+    def _rock_lands(self, target, hit, k):
+        """The rock (k = 0) or its k-th Trickshot ricochet arrives at `target`."""
+        items, now = self.items, self.tick / TPS
+        eff = self.trait_value('DA_Trickshot19', 'RichochetDamage') ** k if k else 1
+        dmg = self.rock_damage(self.level, self.bonus_ad.stat, self.ap.stat) * eff
+        crit_dmg = dmg * self.critDamage() if self.canSpellCrit else dmg
+        amp = self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        tags = damage_tags('physical', UNIT, IS_ATTACK, ON_SPELL, *((ON_HIT,) if k == 0 else ()))
+        if k == 0:
+            self.emit(ONHIT_PRE, CombatEvent(self, target, dtype='physical', tags=tags, time=now), items)
+        self.doDamage(target, items, self.crit.stat if self.canSpellCrit else 0, crit_dmg * amp, dmg * amp,
+                      'physical', now, tags=tags)
+        if k == 0:
+            self.emit(ONHIT_AFTER, CombatEvent(self, target, tags=tags, time=now), items)
+        if self.trait_tier('DA_Trickshot19') > 0 and k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
+            nxt, hexes = self.ricochet(target, hit)
+            step = self.chrono_projectile_ticks(self.BOUNCE, 'SpellProjectile', hexes)
+            self.schedule_tick(self.tick + step, lambda: self._rock_lands(nxt, hit + [nxt], k + 1))
+
+
+champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar']
 
 
 class TrainingDummy(Champion):

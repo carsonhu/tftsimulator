@@ -401,6 +401,11 @@ class Champion(FastDeepCopy):
             self.attack_start_tick = max(tick + 1, self.release_tick - self.timing.release_ticks(
                 self.period_ticks(), crit=self._animation_crit()))
             self._paid = False
+        self.fire_attack(opponents, items, moment, paid)
+
+    def fire_attack(self, opponents, items, moment, paid):
+        """The released attack's projectile flies to the target and lands (G4). A champion whose attack is sometimes
+        replaced (Gnar's rock) overrides this."""
         flight = self.timing.flight_ticks(self.target_hexes())
 
         def land():

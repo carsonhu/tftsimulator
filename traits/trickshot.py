@@ -2,7 +2,7 @@
 from registry import register
 from stats import Attack
 from timing import TPS, projectile_ticks
-from events import ONHIT_PRE
+from events import ON_SPELL, ONHIT_PRE
 from traits.base import BuildTrait
 
 
@@ -27,6 +27,8 @@ class Trickshot(BuildTrait):
     def performAbility(self, phase, time, champion, input_=0):
         if self.KEY not in (champion.data.d.get("trait_keys") or []) or champion.trait_tier(self.KEY) == 0:
             return input_
+        if ON_SPELL in input_.tags:
+            return input_  # an on-hit spell (Gnar's rock) is not a launched attack: its own script ricochets it
         n = int(champion.trait_value(self.KEY, "NumRichochets"))
         r = champion.trait_value(self.KEY, "RichochetDamage")
         # the dummies stand still, so the whole chain is known at the hit: each ricochet departs on the previous
