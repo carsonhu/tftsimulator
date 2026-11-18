@@ -64,7 +64,7 @@ def test_build_numbers_and_timing():
     assert (a.curMana, a.fullMana.stat, a.aspd.stat, a.attack_range, a.atk.stat) == (20, 60, 0.75, 5, 50)
     t = a.timing
     assert [(v['selector'], v['launch']) for v in t.variants] == [(1, 0.2971), (2, 0.2971), (3, 0)]
-    assert t.release_scales_with_period and not t.lock_scales_with_as
+    assert t.rate_threshold == 1.0 and not t.lock_scales_with_as  # G20 from the build
     assert [x[1] for x in a.arrows] == [0, 0.075, 0.15]
     # CT_Ashe19_ASToCastSpeed: 0.3333 s up to 1 AS, linear to 0.15 s at 5 AS
     assert a.table_value('CT_Ashe19_ASToCastSpeed', 'ASToCastTime', 0.93) == pytest.approx(0.33333, abs=1e-5)

@@ -74,6 +74,25 @@ def test_release_stretches_only_when_the_period_is_longer_than_the_animation():
     assert hits[0] == 10
 
 
+def test_release_shrinks_below_the_play_rate_threshold():
+    # G20: with PlayRateScalingThreshold T, release = launch * period / (T * attack_len) once that is below launch.
+    # Malzahar's attack (launch 0.445 s, 1.0 s, T 0.941): at AS 1.0 (1 s period) G2's 0.445 s -> 14 ticks
+    t = Timing(launch=0.445, attack_len=1.0, rate_threshold=0.941)
+    assert t.release_ticks(30) == 14
+    # AS 1.5 (20-tick period): 0.445 * 0.6667 / 0.941 = 0.3153 s = 9.46 ticks -> 10 (G2: 14)
+    assert t.release_ticks(20) == 10
+    assert Timing(launch=0.445, attack_len=1.0).release_ticks(20) == 14
+    # T = 1 is G19's rule
+    assert Timing(launch=0.445, attack_len=1.0, rate_threshold=1.0).release_ticks(20) == \
+        Timing(launch=0.445, attack_len=1.0, release_scales_with_period=True).release_ticks(20)
+    # longer periods still stretch (G2)
+    assert t.release_ticks(60) == Timing(launch=0.445, attack_len=1.0).release_ticks(60) == 27
+    # a variant's own threshold wins over the unit's; a variant with None set keeps G2
+    v = Timing(launch=0.445, attack_len=1.0, rate_threshold=0.5, animations=1,
+               variants=[{'selector': 1, 'min_as': None, 'launch': 0.445, 'length': 1.0, 'rate_threshold': None}])
+    assert v.release_ticks(20, selector=1, aspd=1.5) == 14
+
+
 def test_projectile_lands_after_its_flight():
     # G4: range 4, speed 1500: 4 * 215 / 1500 = 0.5733 s -> 17.2 - 0.06 -> 18 ticks after the release (tick 9)
     hits, _ = run(Probe(Timing(launch=0.3, proj_speed=1500), aspd=1.0, mana=(0, -1), attack_range=4), seconds=2)

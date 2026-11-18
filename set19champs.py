@@ -776,10 +776,14 @@ class OlafHeroAugment(BuildChampion):
         t, ch = self.timing, self.chrono(self.ATTACK)
         # CD_Olaf19_Attack's modules: the unempowered ones end at the chrono's length (1.0 s), the empowered one at its
         # anim_end (1.1667 s)
+        # G20: each animation's PlayRateScalingThreshold by its launch event (the build's launch_thresholds; the
+        # unempowered modules set none: G2; the empowered one 0.6)
+        thresholds = ch.get('launch_thresholds') or {}
         normal = [{'selector': s, 'min_as': None, 'launch': self.chrono_event(self.ATTACK, f'LaunchAttackVariant{s}'),
-                   'length': ch['length']} for s in (1, 2)]
+                   'length': ch['length'], 'rate_threshold': thresholds.get(f'LaunchAttackVariant{s}')} for s in (1, 2)]
         empowered = {'selector': self.EMPOWERED, 'min_as': None,
-                     'launch': self.chrono_event(self.ATTACK, 'CustomLaunchAttack1'), 'length': ch['anim_end']}
+                     'launch': self.chrono_event(self.ATTACK, 'CustomLaunchAttack1'), 'length': ch['anim_end'],
+                     'rate_threshold': thresholds.get('CustomLaunchAttack1')}
         t.variants, t.animations = normal + [empowered], 2
         t.launch, t.attack_len = normal[0]['launch'], normal[0]['length']
         t.source['variants'] = f'{self.ATTACK} HeroAugment groups: Unempowered x2, Empowered (CustomAttack.1)'
@@ -862,11 +866,8 @@ class Ashe(BuildChampion):
                      'launch': self.chrono_event(self.ATTACK, 'CustomLaunchAttack1'), 'length': length}
         t.variants, t.animations = normal + [empowered], 2
         t.source['variants'] = f'{self.ATTACK}: SequentialAttack x2, EmpoweredAttack (CustomAttack.1)'
-        # every module of her attack chrono has PlayRateScalingThreshold 1.0 (client asset; not yet in the build):
-        # the animation plays at the attack period, shorter as well as longer, as G19 (VOD5 E2: first attack 5.5 ticks
-        # after combat start at AS 0.86, G2 would give 9; G20 open)
-        t.release_scales_with_period = True
-        t.source['release_scales_with_period'] = f'{self.ATTACK} PlayRateScalingThreshold 1.0 (G20, VOD5 E2)'
+        # her attack modules' PlayRateScalingThreshold is 1.0 (the build, G20): the animation plays at the attack
+        # period, shorter as well as longer (VOD5 E2: first attack 5.5 ticks after combat start at AS 0.86, G2: 9)
         t.mana_lock = 10 ** 6  # lifted the tick after the last flurry (onLaunch)
         t.source['mana_lock'] = 'GA_Ashe19_Spell: removed the tick after the last flurry launch (0x1ae, 0xf)'
         t.source['cast_lock'] = f'{self.CAST_TIME[0]} {self.CAST_TIME[1]} at her AS at the cast (GA_Ashe19_Spell 0x3e3)'

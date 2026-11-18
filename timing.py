@@ -59,6 +59,10 @@ class Timing:
     release_scales_with_period  the attack animation always plays at the attack period, so the release also shrinks
                  when the period is shorter than attack_len (G19: attack modules without bUseRateScalingThreshold,
                  Varus). Default False: G2.
+    rate_threshold  the attack animation module's PlayRateScalingThreshold T (G20): when the period is shorter than
+                 T x attack_len the release shrinks to launch x period / (T x attack_len); between that and
+                 attack_len it stays at launch (G2). None = not set: G2. T = 1 is G19. A variant may carry its own
+                 'rate_threshold' (the build's attack_variants); without the key it uses this one.
     proj_speed   attack projectile speed (units/s); 0 = the attack lands at the release (melee) (G4)
     mana_at      when an attack pays its mana: 'start', 'release' or 'hit'. Default (T3): ranged at the release
                  (Set 19 VOD: Neeko, Draven, Varus; Set 18 replays' "Hold" event, which is the release), melee on
@@ -87,10 +91,11 @@ class Timing:
     def __init__(self, launch=0.0, attack_len=0.0, proj_speed=0.0, mana_at=None, cast_lock=0.0,
                  mana_lock=None, lock_scales_with_as=False, cast_cancels_attack=False, release_scales_with_period=False,
                  variants=None, animations=0, cast_keeps_rhythm=False, lock_speed_clamp=None, crit_animation=None,
-                 source=None):
+                 rate_threshold=None, source=None):
         self.launch = launch
         self.attack_len = attack_len
         self.release_scales_with_period = release_scales_with_period
+        self.rate_threshold = rate_threshold
         self.proj_speed = proj_speed
         self.mana_at = mana_at
         self.cast_lock = cast_lock
@@ -122,6 +127,11 @@ class Timing:
         if t.get('attack_rate_scaling_threshold') == [False]:  # G19: every attack module lacks the flag
             kw['release_scales_with_period'] = True
             src['release_scales_with_period'] = f'{where} (attack modules without bUseRateScalingThreshold, G19)'
+        ts = t.get('attack_play_rate_threshold') or []
+        if len(ts) == 1 and ts[0] is not None:
+            # G20: the attack modules' one PlayRateScalingThreshold (mixed values: per variant, or G2)
+            kw['rate_threshold'] = ts[0]
+            src['rate_threshold'] = f'{where} (attack modules PlayRateScalingThreshold, G20)'
         v = t.get('attack_variants') or []
         if t.get('attack_animations') and v and all(x.get('selector') and not x.get('other_conditions') for x in v):
             kw['variants'] = v  # B13: only selector-cycled variants; crit/sequence groups keep the single launch
@@ -155,35 +165,42 @@ class Timing:
                 kw['cast_cancels_attack'] = bool(sp['cancels_attack'])
                 src['cast_cancels_attack'] = f'{where} {sp["ga"]}'
         for f in ('launch', 'attack_len', 'proj_speed', 'cast_lock', 'mana_lock', 'cast_cancels_attack',
-                  'release_scales_with_period', 'variants', 'cast_keeps_rhythm', 'crit_animation'):
+                  'release_scales_with_period', 'variants', 'cast_keeps_rhythm', 'crit_animation', 'rate_threshold'):
             src.setdefault(f, 'default')
         return cls(source=src, **kw)
 
     def variant(self, selector, aspd):
         """(launch, animation length) of the animation attack `selector` plays at attack speed `aspd` (B13)."""
+        return self._variant(selector, aspd)[:2]
+
+    def _variant(self, selector, aspd):
+        """(launch, animation length, play-rate threshold) of that animation (G20: its own, else the unit's)."""
         for x in self.variants:
             if x['selector'] == selector and (x.get('min_as') is None or aspd >= x['min_as'] - 1e-9):
-                return x['launch'], x['length']
+                return x['launch'], x['length'], x.get('rate_threshold', self.rate_threshold)
         raise ValueError(f'no attack animation for selector {selector} at AS {aspd}')
 
     def windup_seconds(self, period_ticks, selector=None, aspd=None, crit=0.0):
         """Attack start -> release/hit in seconds (G2): the attack animation stretches to the period when the period
         is longer, never shrinks; with release_scales_with_period it also shrinks (G19). `crit`: the attack's crit
         chance, weighting the crit animation's windup (B17)."""
-        launch, length = self.variant(selector, aspd) if self.variants and selector else (self.launch, self.attack_len)
-        normal = self._stretched(launch, length, period_ticks)
+        launch, length, threshold = (self._variant(selector, aspd) if self.variants and selector
+                                     else (self.launch, self.attack_len, self.rate_threshold))
+        normal = self._stretched(launch, length, period_ticks, threshold)
         if self.crit_animation is None:
             return normal
         p = min(max(crit, 0.0), 1.0)
-        return (1 - p) * normal + p * self._stretched(*self.crit_animation, period_ticks)
+        return (1 - p) * normal + p * self._stretched(*self.crit_animation, period_ticks, self.rate_threshold)
 
-    def _stretched(self, launch, length, period_ticks):
-        stretch = 1.0
-        if length > 0:
-            stretch = (period_ticks / TPS) / length
-            if not self.release_scales_with_period:
-                stretch = max(1.0, stretch)  # G2: stretch, never shrink
-        return launch * stretch
+    def _stretched(self, launch, length, period_ticks, threshold=None):
+        if length <= 0:
+            return launch
+        period = period_ticks / TPS
+        if self.release_scales_with_period or period >= length:
+            return launch * period / length  # G19 (always at the period); G2 (stretch when the period is longer)
+        if threshold:
+            return launch * min(1.0, period / (threshold * length))  # G20: shrink once T x length doesn't fit
+        return launch  # G2: never shrink
 
     def release_ticks(self, period_ticks, selector=None, aspd=None, crit=0.0):
         """Attack start -> release/hit, in whole ticks (at least 1), for an attack period of `period_ticks`."""

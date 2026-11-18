@@ -58,7 +58,8 @@ def champion(c, curves):
                     'curve_table': c['ability']['curve_table'], 'rows': c['ability']['rows'],
                     'calcs': c['ability']['calcs']},
         'timing': {k: t.get(k) for k in ('attack_chrono', 'attack_launch', 'attack_launch_variants', 'attack_len',
-                                         'attack_release_base_as', 'attack_rate_scaling_threshold', 'projectile',
+                                         'attack_release_base_as', 'attack_rate_scaling_threshold',
+                                         'attack_play_rate_threshold', 'projectile',
                                          'proj_speed', 'proj_movement')}
         | {k: t[k] for k in ('attack_variants', 'attack_animations') if k in t}  # Kai'Sa's sequential attacks (B13)
         | {'spells': [{k: s.get(k) for k in ('ga', 'cast_chrono', 'cast_end', 'lockout', 'manalock_removed',
