@@ -120,3 +120,10 @@ Ahri with items. Mana from `tools/vod_text_changes.py --field mana` (crops read 
     (0.9443 s) ends the cast.
   - **Simulated:** each fox-fire's flight over its target's whole distance at its speed; the split's secondary
     enemies in turn.
+
+- 2026-11-18, D2 (build data, ledger B36): the projectile modules' Delay, read since the snapshot tool's fix. A basic
+  fox-fire waits 0.1 s before flying. In the flow the heart leaves at 0.3642 + 0.2 = 0.5642 s, and the eight
+  'SpellMis' modules (spawned 0.0355-0.3894 s, waits 0.6338 down to 0.1667 s) all leave 0.5561-0.6693 s into the
+  cast, in turn; each fox-fire flies half its target's distance at 1600, waits 0.05 + 0.1 s at the split
+  (CD_Ahri19_EmpowedSpell_SpreadMissile) and flies on at 2100. D1's spawn times without the waits had them leave
+  0.04-0.39 s in. The cast lengths (E2) don't change.

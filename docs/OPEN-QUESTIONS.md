@@ -179,7 +179,6 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
 | When her feathers land | 1.37-1.77 s into the cast at 4 hexes (waits 0.88 / 0.4 s, 3200 units/s from the fan behind her) | a cast on a target 4 hexes away: the frames of the damage numbers | champions/Xayah.md Q16 |
-| Her feathers' waits in the build | 0.88 / 0.4 s typed from the client asset | (tool) the snapshot should read a chrono projectile module's Delay | champions/Xayah.md D1 |
 
 ### 7r. Katarina (VOD6 has her at 1-2)
 

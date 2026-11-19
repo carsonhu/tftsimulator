@@ -1561,8 +1561,8 @@ class Xayah(BuildChampion):
     (0xfe). Each feather plays CD_Xayah19_SpellMis at Xayah's attack target from its own place
     (ComputeFeatherStartLocations: a fan behind her, 90 + i x 200 / (NumFeathers / 2) degrees from her facing, 100
     units out for wave 1 and 250 for wave 2). The chrono's first active group picks the missile: wave 1 (no tag)
-    waits 0.88 s, wave 2 (MissileSelector.1) 0.4 s, then flies at 3200 units/s (both TFTFixedSpeedMovement; the delays
-    are on the projectile module, which the snapshot doesn't read: typed from the asset). On reaching the target:
+    waits 0.88 s, wave 2 (MissileSelector.1) 0.4 s (the projectile modules' Delay, from the build), then flies at
+    3200 units/s (both TFTFixedSpeedMovement). On reaching the target:
     GE_Xayah19_InitialDamage = PhysicalDamageCalc1 (FeatherDamage x AD + FeatherDamageAP x AP), physical, on-spell,
     crit only with Precision, and GE_Xayah19_ArmorReduction (-ArmorReduction flat Armor until combat ends: flat
     armor reduction is not modelled, owner policy). The feather then flies on behind the target (MissileSelector.2)
@@ -1574,12 +1574,14 @@ class Xayah(BuildChampion):
     SPAWN_SPREAD = 0.8  # GA_Xayah19_Spell 0x1d83: spawn delay = 0.8 / NumFeathers
     FAN_START, FAN_WIDTH = 90, 200  # ComputeFeatherStartLocations: 90 + i x 200 / (NumFeathers / 2) degrees
     WAVE_RADIUS = (100, 250)  # FeatherVectorDistance for the offsets wave 1 / wave 2 use (0x2b7b, 0x2bd1)
-    WAVE_DELAY = (0.88, 0.4)  # CD_Xayah19_SpellMis 'MissileWithDelay - Wave 1' / 'MissileWithLessDelay - Wave 2'
+    WAVE_TAGS = ((), ('ChronoTags.Dynamic.Generic.MissileSelector.1',))  # the missile each wave plays (D1)
 
     def __init__(self, level, build=None):
         super().__init__(level, build)
         self.wave_events = (self.chrono_event(self.CAST, 'StartFeathers'), self.chrono_event(self.CAST, 'MoreFeathers'))
         self.feather_speed = self.chrono_projectile_speed_fixed(self.MISSILE, 'FeatherMis')
+        # CD_Xayah19_SpellMis 'MissileWithDelay - Wave 1' (no tag) / 'MissileWithLessDelay - Wave 2'
+        self.wave_delay = tuple(self.chrono_projectile_delay(self.MISSILE, 'FeatherMis', tags) for tags in self.WAVE_TAGS)
         self.notes = ('A cast: 30 feathers (60 at 3 stars) gather behind her and fly at her target, each '
                       'FeatherDamage x AD + FeatherDamageAP x AP physical; they land 1.1-1.6 s into the cast. Their '
                       '-1 Armor per feather is not modelled (flat armor reduction).')
@@ -1613,8 +1615,8 @@ class Xayah(BuildChampion):
                 r = self.WAVE_RADIUS[wave]
                 dx, dy = r * math.cos(angle), r * math.sin(angle)
                 fly = math.hypot(reach - dx, dy) / self.feather_speed  # G4: straight line, height ignored
-                out.append((self.wave_events[wave] + k * spacing + self.WAVE_DELAY[wave] + fly, (dx, dy),
-                            self.wave_events[wave] + k * spacing + self.WAVE_DELAY[wave]))
+                out.append((self.wave_events[wave] + k * spacing + self.wave_delay[wave] + fly, (dx, dy),
+                            self.wave_events[wave] + k * spacing + self.wave_delay[wave]))
         return out
 
     def performAbility(self, opponents, items, time):
@@ -2375,26 +2377,30 @@ class Ahri(BuildChampion):
     Fox-fires: BaseFoxFires (6) at combat start (the unit's Stack attribute); each basic cast's 'Unlock' adds
     FoxFiresPerCast (AddFoxFires), up to MaxFoxFires (14). The cast applies the mana lock (0x481e); with fewer than
     MaxFoxFires it plays CD_19_Ahri_CastAnim_Basic: 'StartMissiles' (0.1398 s) fires every fox-fire,
-    RepeatAction(0.5 / N, N) first at once, each CD_Ahri19_FoxFireAtTarget (2100 units/s) at her target:
+    RepeatAction(0.5 / N, N) first at once, each CD_Ahri19_FoxFireAtTarget (waits 0.1 s, then 2100 units/s) at her target:
     GE_19_Ahri_PrimaryDamage = MagicDamageCalc1 (APDamage x AP). Its 'Unlock' (0.9981 s) adds the fox-fires; when
     that reaches the max, CD_19_Ahri_SpiritRushActivationPose plays ('PowerUp' 0.2009 s: GE_Ahri19_SpiritRush, the
     flow; 'Unlock' 0.7512 s) before the cast ends; else the cast ends there (EndSpell).
-    In the flow (fox-fires at the max) she plays CD_19_Ahri_CastAnim_Empowered: a 'HeartMis' (spawned 0.3642 s, 1600)
-    at her target: GE_19_Ahri_SecondaryDamage = MagicDamageCalc2 (APDamage_Secondary x AP); the fox-fires ('SpellMis',
-    1600, spawned at the chrono's eight times in turn) fly PercentDistanceBeforeSplit (half) of the way and split
-    (CD_Ahri19_EmpowedSpell_SpreadMissile): every other one at her target (PercentMissilesOnCurrentTarget 0.5), the
+    In the flow (fox-fires at the max) she plays CD_19_Ahri_CastAnim_Empowered: a 'HeartMis' (spawned 0.3642 s, waits
+    0.2 s, 1600) at her target: GE_19_Ahri_SecondaryDamage = MagicDamageCalc2 (APDamage_Secondary x AP); the fox-fires
+    ('SpellMis', 1600; eight modules spawned 0.0355-0.3894 s, each waiting so that they leave 0.556-0.669 s in turn,
+    used in turn) fly PercentDistanceBeforeSplit (half) of the way and split (CD_Ahri19_EmpowedSpell_SpreadMissile:
+    spawned 0.05 s, waits 0.1 s, 2100): every other one at her target (PercentMissilesOnCurrentTarget 0.5), the
     others at enemies within HexRangeAroundTarget (2) of it (her target if none); each MagicDamageCalc1. 'Unlock'
-    (0.9443 s) ends the cast. All magic, on-spell, crit only with Precision.
-    Simulated: a fox-fire's whole flight at its own speed (the split's second leg at the same speed); the split's
-    secondary enemies in turn.
+    (0.9443 s) ends the cast. All magic, on-spell, crit only with Precision. The waits are the projectile modules'
+    Delay (build data since the 2026-11-18 refresh).
+    Simulated: straight legs (G4): half the target's distance at 1600, the split's wait, then from that point to the
+    enemy at 2100; the split's secondary enemies in turn.
     """
     KEY = 'DA_Ahri19'
     AREA = True  # the flow's fox-fires split to enemies within 2 hexes of the target
     BASIC, POSE, EMPOWERED = ('CD_19_Ahri_CastAnim_Basic', 'CD_19_Ahri_SpiritRushActivationPose',
                               'CD_19_Ahri_CastAnim_Empowered')
     FOX = 'CD_Ahri19_FoxFireAtTarget'
+    SPREAD = 'CD_Ahri19_EmpowedSpell_SpreadMissile'
     BASIC_SPREAD = 0.5  # RepeatAction(0.5 / N, N) (script literal)
     SPLIT_EVERY = 2  # 1 / PercentMissilesOnCurrentTarget (0.5, a script default)
+    SPLIT_AT = 0.5  # PercentDistanceBeforeSplit (a script default)
 
     def __init__(self, level, build=None):
         super().__init__(level, build)
@@ -2402,10 +2408,19 @@ class Ahri(BuildChampion):
         self.basic_unlock = ticks_up(self.chrono_event(self.BASIC, 'Unlock'))
         self.pose_unlock = ticks_up(self.chrono_event(self.POSE, 'Unlock'))
         self.empowered_unlock = ticks_up(self.chrono_event(self.EMPOWERED, 'Unlock'))
-        proj = {p['name']: p for p in self.chrono(self.EMPOWERED).get('projectiles') or []
-                if p['movement'] == 'TFTFixedSpeedMovement'}
-        self.heart_spawn, self.heart_speed = proj['HeartMis']['spawn_at'][0], proj['HeartMis']['speed']
-        self.split_spawns, self.split_speed = proj['SpellMis']['spawn_at'], proj['SpellMis']['speed']
+        emp = self.chrono(self.EMPOWERED).get('projectiles') or []
+        # each module's spawn + its Delay: when the missile leaves
+        self.heart_launch = self.chrono_projectile_spawn(self.EMPOWERED, 'HeartMis') +             self.chrono_projectile_delay(self.EMPOWERED, 'HeartMis')
+        self.heart_speed = self.chrono_projectile_speed(self.EMPOWERED, 'HeartMis')
+        self.split_launches = sorted(t + (p.get('delay') or 0) for p in emp if p['name'] == 'SpellMis'
+                                     for t in p['spawn_at'])
+        self.split_speed = self.chrono_projectile_speed(self.EMPOWERED, 'SpellMis')
+        spread = [p for p in self.chrono(self.SPREAD).get('projectiles') or [] if p['name'] == 'SpellMis']
+        waits = {t + (p.get('delay') or 0) for p in spread for t in p['spawn_at']}
+        if len(waits) != 1:
+            raise BuildDataError(f'{self.KEY}: {self.SPREAD} spread missiles wait {sorted(waits)}')
+        self.split_wait = waits.pop()
+        self.spread_speed = self.chrono_projectile_speed(self.SPREAD, 'SpellMis')
         self.fox = int(self.row('BaseFoxFires'))
         self.notes = ('Casts throw her fox-fires (6, +2 a cast, up to 14) at her target; at 14 she enters the flow: a '
                       'heart at her target and the fox-fires split between it and enemies within 2 hexes.')
@@ -2429,17 +2444,22 @@ class Ahri(BuildChampion):
         n = self.fox
         if n >= top:
             self._locks(self.empowered_unlock)
-            self.schedule_tick(cast + ticks_up(self.heart_spawn), lambda: self.fly(
+            self.schedule_tick(cast + ticks_up(self.heart_launch), lambda: self.fly(
                 self.tick, projectile_ticks(self.heart_speed, self.target_hexes(target)), target,
                 lambda: self._hit(target, self.heart_damage), name='heart'))
             near = layout.around(target, self.row('HexRangeAroundTarget'), self.opponents) or [target]
+            (sx, sy), (tx, ty) = layout.world(self.hex), layout.world(target.hex)
+            mid = ((sx + tx) / 2, (sy + ty) / 2)
+            first = math.hypot(tx - sx, ty - sy) * self.SPLIT_AT / self.split_speed
             for k in range(n):
                 d = target if k % self.SPLIT_EVERY == 0 else near[(k // self.SPLIT_EVERY) % len(near)]
+                dx, dy = layout.world(d.hex)
+                second = math.hypot(dx - mid[0], dy - mid[1]) / self.spread_speed
 
-                def fire(d=d):
-                    self.fly(self.tick, projectile_ticks(self.split_speed, self.target_hexes(d)), d,
+                def fire(d=d, second=second):
+                    self.fly(self.tick, ticks_up(first + self.split_wait + second), d,
                              lambda: self._hit(d, self.fox_damage), name='fox-fire')
-                self.schedule_tick(cast + ticks_up(self.split_spawns[k % len(self.split_spawns)]), fire)
+                self.schedule_tick(cast + ticks_up(self.split_launches[k % len(self.split_launches)]), fire)
             return
         after = min(top, n + int(self.row('FoxFiresPerCast')))
         self._locks(self.basic_unlock + (self.pose_unlock if after >= top else 0))

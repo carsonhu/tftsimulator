@@ -105,3 +105,9 @@ def test_gu_feng():
     fight(x, buffs=[set19buffs.GuFeng(0)], seconds=0.04)
     assert (x.bonus_ad.stat, x.armor.stat) == (1, 40)
     assert set19buffs.GuFeng.levels == [0, 2, 3, 4]
+
+
+def test_feather_waits_from_the_build():
+    # CD_Xayah19_SpellMis: wave 1's missile (no tag) waits 0.88 s, wave 2's (MissileSelector.1) 0.4 s: the projectile
+    # modules' Delay, in the build since the 2026-11-18 refresh (no longer typed in)
+    assert LoggedXayah(1).wave_delay == (0.88, 0.4)

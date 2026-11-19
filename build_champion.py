@@ -211,15 +211,33 @@ class BuildChampion(Champion):
 
     def chrono_projectile_ticks(self, chrono, projectile, hexes):
         """Flight ticks over `hexes` for the projectile named `projectile` that `chrono` spawns (G4): a fixed speed,
-        or an accelerating one (initial speed, acceleration, max speed; P12)."""
+        or an accelerating one (initial speed, acceleration, max speed; P12), after its Delay (the wait where it
+        spawned: Ahri's fox-fires 0.1 s). Modules of that name with different delays raise."""
         ps = [p for p in self.chrono(chrono).get('projectiles') or [] if p['name'] == projectile]
+        delays = {p.get('delay') or 0 for p in ps}
+        if len(delays) > 1:
+            raise BuildDataError(f'{self.KEY}: chrono {chrono} has several delays for {projectile!r} in build '
+                                 f'{self.build.version} ({sorted(delays)}): pick one with chrono_projectile_delay')
+        delay = delays.pop() if delays else 0
         accel = {(p['initial_speed'], p['acceleration'], p['max_speed']) for p in ps if 'acceleration' in p}
         if accel:
             if len(accel) != 1 or len(ps) != len([p for p in ps if 'acceleration' in p]):
                 raise BuildDataError(f'{self.KEY}: chrono {chrono} has mixed movements for {projectile!r} '
                                      f'in build {self.build.version}')
-            return accelerating_projectile_ticks(*accel.pop(), hexes)
-        return projectile_ticks(self.chrono_projectile_speed(chrono, projectile), hexes)
+            return accelerating_projectile_ticks(*accel.pop(), hexes, delay=delay)
+        return projectile_ticks(self.chrono_projectile_speed(chrono, projectile), hexes, delay=delay)
+
+    def chrono_projectile_delay(self, chrono, projectile, requires=()):
+        """Seconds the projectile named `projectile` waits before it moves (its module's ProjectileData.Delay; 0 when
+        unset), for the module whose group requires exactly the tags `requires` (a missile picked by tag: Xayah's
+        MissileSelector.1). Needs a build snapshotted with the delays (set_dump.py, 2026-11-18)."""
+        ps = [p for p in self.chrono(chrono).get('projectiles') or []
+              if p['name'] == projectile and set(p.get('requires') or ()) == set(requires)]
+        delays = {p.get('delay') or 0 for p in ps}
+        if len(delays) != 1:
+            raise BuildDataError(f'{self.KEY}: chrono {chrono} has no single delay for {projectile!r} requiring '
+                                 f'{list(requires)} in build {self.build.version} ({sorted(delays)})')
+        return delays.pop()
 
     def chrono_projectile_spawn(self, chrono, projectile):
         """Seconds from the chrono's start to the spawn of the projectile named `projectile` (its module's PlayPoint;

@@ -123,8 +123,8 @@ the fill; her target had died) and the casts cut short by the end of the round (
     (ComputeFeatherStartLocations: 90 + i x 200 / 15 degrees from her facing; 100 units out for wave 1, 250 for
     wave 2; wave 2 in reverse order) to her attack target. The chrono's first active group picks the missile:
     wave 1 (no tag) waits 0.88 s, wave 2 (MissileSelector.1) 0.4 s, then 3200 units/s (TFTFixedSpeedMovement).
-    The waits sit on the projectile modules, which the snapshot doesn't read: typed from the client asset
-    (docs/OPEN-QUESTIONS.md, tool). Flight = straight line from the feather's place to the target (G4).
+    The waits are the projectile modules' Delay, build data since 2026-11-18 (ledger B36; typed in before).
+    Flight = straight line from the feather's place to the target (G4).
   - **Damage:** on reaching the target, GE_Xayah19_InitialDamage = PhysicalDamageCalc1 = FeatherDamage x AD +
     FeatherDamageAP x AP (E2): physical, on-spell, Damage.CritCondition.RollIfCanSpellCrit (crits with Precision,
     e.g. Infinity Edge). The feather then flies 300 / 400 units on behind the target (MissileSelector.2) and hits

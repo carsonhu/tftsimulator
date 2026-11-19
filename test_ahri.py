@@ -43,3 +43,13 @@ def test_damage():
                                            if t0 <= round(t * 30) < t1 and d[1] == 'magical'))
     assert by_cast[0] == {28: 6}  # 6 fox-fires of 28 x AP
     assert by_cast[4] == {28: 14, 235: 1}  # the flow: the heart and 14 fox-fires
+
+
+def test_projectile_waits():
+    # the projectile modules' Delay (build data since the 2026-11-18 refresh): the flow's fox-fires spawn 0.0355-0.3894 s
+    # but leave 0.556-0.669 s in, the heart at 0.3642 + 0.2 s; the split waits 0.05 + 0.1 s; a basic fox-fire 0.1 s
+    from timing import HEX_UNITS, ticks_up
+    a = Ahri(1, build=load_build(V))
+    assert a.heart_launch == 0.5642 and a.split_launches[0] == 0.5561 and a.split_launches[-1] == 0.6693
+    assert len(a.split_launches) == 8 and round(a.split_wait, 4) == 0.15
+    assert a.chrono_projectile_ticks(a.FOX, 'SpellMis', 4) == ticks_up(0.1 + 4 * HEX_UNITS / 2100)

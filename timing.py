@@ -26,20 +26,21 @@ def ticks(seconds):
     return max(0, round(seconds * TPS))
 
 
-def projectile_ticks(speed, hexes):
+def projectile_ticks(speed, hexes, delay=0.0):
     """Release -> hit for a projectile at `speed` units/s over `hexes` hexes (G4: straight-line distance, any arc
-    height ignored). 0 for speed <= 0 (no projectile)."""
+    height ignored), after waiting `delay` s where it spawned (its module's ProjectileData.Delay). 0 for speed <= 0
+    (no projectile)."""
     if not speed or speed <= 0:
         return 0
-    return ticks_up(hexes * HEX_UNITS / speed)
+    return ticks_up(delay + hexes * HEX_UNITS / speed)
 
 
-def accelerating_projectile_ticks(initial_speed, acceleration, max_speed, hexes):
+def accelerating_projectile_ticks(initial_speed, acceleration, max_speed, hexes, delay=0.0):
     """Release -> hit for a projectile that starts at `initial_speed` units/s and gains `acceleration` per second up
-    to `max_speed` (TFTAcceleratingSplineMovement), over `hexes` hexes in a straight line (G4)."""
+    to `max_speed` (TFTAcceleratingSplineMovement), over `hexes` hexes in a straight line (G4), after `delay` s."""
     d = hexes * HEX_UNITS
     if d <= 0:
-        return 0
+        return ticks_up(delay)
     v0, a, vmax = initial_speed, acceleration, max_speed
     t_max = (vmax - v0) / a if a > 0 and vmax > v0 else 0.0  # time to reach the top speed
     d_max = v0 * t_max + a * t_max ** 2 / 2
@@ -47,7 +48,7 @@ def accelerating_projectile_ticks(initial_speed, acceleration, max_speed, hexes)
         t = (-v0 + (v0 ** 2 + 2 * a * d) ** 0.5) / a
     else:
         t = t_max + (d - d_max) / max(vmax, v0)
-    return ticks_up(t)
+    return ticks_up(delay + t)
 
 
 class Timing:
