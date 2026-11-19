@@ -55,6 +55,9 @@ python tools/patch_notes_build.py builds/patch_notes/<file>.json
                                      # archives are encrypted since 2026-11-18); checks every old value.
                                      # An encrypted build can also be read from an FModel raw export (B34):
                                      # tftDatamine snapshot_build.py with TFT_LOOSE=F:/tft_projects/Output/Exports
+python tools/new_build_report.py     # a report on each snapshot not imported yet (builds/<version>/sim_report.md
+                                     # in tftDatamine): data changes, every table on both builds, failures, read
+                                     # problems; changes nothing here. The snapshot task runs it every 3 hours
 python tools/worksheets.py           # refresh the AUTO block of each worksheet from the newest build;
                                      # also warns if a build disagrees with roster.json
 python tools/worksheets.py --build <version>
