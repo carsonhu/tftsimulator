@@ -1,12 +1,12 @@
 # Janna (5-cost MagicCaster) · `DA_Janna19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Windblessed, Gu Feng, Prodigy
 - **HP** 900 / 1620 / 2916 · **AD** 35 / 52.5 / 78.75 · **AS** 0.85 · **Range** 4 · **Armor** 45 · **MR** 45 · **Mana** 0 / 45
-- **Unlock**: Earn 20 interest while fielding Xayah.
+- **Unlock**: Earn 25 interest while fielding Xayah.
 
 ### Ability: Hymn of the Heaven's Gale
 
@@ -57,7 +57,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Janna19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Janna19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

@@ -1,7 +1,7 @@
 # Nidalee (5-cost MagicFighter) · `DA_Nidalee19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Mariachi, Choreographer
@@ -9,9 +9,9 @@
 
 ### Ability: Pounce Party/Dance of Life
 
-> Pounce Party: Pounce 4/4/99 times on enemies, dealing 135/200/1500 × AP magic damage, increased by 40% each pounce.
+> Pounce Party: Pounce 4/4/99 times on enemies, dealing 125/185/1500 × AP magic damage, increased by 40% each pounce.
 > 
-> Dance of Life: Heal 325/500/2000 × AP. Hurl a javelin at the target, dealing 380/570/3000 × AP magic damage and scattering 3 flowers around them. Flowers deal 80/120/500 × AP magic damage to enemies in a 1 Hex radius after a brief delay.
+> Dance of Life: Heal 325/500/2000 × AP. Hurl a javelin at the target, dealing 360/540/3000 × AP magic damage and scattering 3 flowers around them. Flowers deal 80/120/500 × AP magic damage to enemies in a 1 Hex radius after a brief delay.
 > 
 > Casts Pounce Party in Cougar Form and Dance of Life in Human form.
 
@@ -19,8 +19,8 @@
 |---|---|---|---|
 | AutoAttackDamage | 50 | 75 | 112.5 |
 | ExtraDamagePercentPerPounce | 0.4 | 0.4 | 0.4 |
-| SpearDamageAP | 380 | 570 | 3000 |
-| PounceDamageAP | 135 | 200 | 1500 |
+| SpearDamageAP | 360 | 540 | 3000 |
+| PounceDamageAP | 125 | 185 | 1500 |
 | FlowerDamageAP | 80 | 120 | 500 |
 | AOEHexRange | 1 | 1 | 1 |
 | HealAP | 325 | 500 | 2000 |
@@ -39,8 +39,8 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 380/570/3000 × AP
-- `MagicDamageCalc2` = 135/200/1500 × AP
+- `MagicDamageCalc1` = 360/540/3000 × AP
+- `MagicDamageCalc2` = 125/185/1500 × AP
 - `MagicDamageCalc3` = 80/120/500 × AP
 - `DurabilityCalc1` = 1 + 0
 - `HealthCalc1` = 325/500/2000 × AP
@@ -82,9 +82,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Nidalee19_LaunchAttack_MeleeOrRanged.txt
 - `GE_ManaLock`: applies mana lock: GA_Nidalee19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row PounceDamageAP: 135 / 200 / 1500 -> 125 / 185 / 1500
+- row SpearDamageAP: 380 / 570 / 3000 -> 360 / 540 / 3000
+- ability text changed
 
 <!-- AUTO END -->
 

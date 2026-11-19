@@ -1,7 +1,7 @@
 # Vayne (4-cost AttackMarksman) · `DA_Vayne19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Rock, Trickshot
@@ -10,28 +10,28 @@
 
 ### Ability: Darkest Hour
 
-> Passive: On cast or when hit, tumble and gain 0.5 × AP + 1 × GenericCalc2 Durability for 2 seconds. (4 second cooldown)
+> Passive: On cast or when hit, tumble and gain 0.5 × AP ÷ 1 × GenericCalc2 Durability for 2 seconds. (4 second cooldown)
 > 
-> Active: Gain demonic power, enhancing the next 3 attacks to deal 175/265/2000 × AD + 2%/3%/20% of the target's max Health as physical damage.
+> Active: Gain demonic power, enhancing the next 3 attacks to deal 165/250/2000 × AD physical damage + 1.5%/2.5%/20% of the target's max Health as true damage.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 62 | 93 | 139.5 |
 | TumbleDurability | 0.5 | 0.5 | 0.5 |
 | NumAttacks | 3 | 3 | 3 |
-| DamageAD | 175 | 265 | 2000 |
-| PercentMaxHealthDamage | 0.02 | 0.03 | 0.2 |
+| DamageAD | 165 | 250 | 2000 |
+| PercentMaxHealthDamage | 0.015 | 0.025 | 0.2 |
 | DurabilityDuration | 2 | 2 | 2 |
 | TumbleCooldown | 4 | 4 | 4 |
 | MaxTumbleHexDistance | 3 | 3 | 3 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `GenericCalc1` = 0.5 × AP + 1 × GenericCalc2
+- `GenericCalc1` = 0.5 × AP ÷ 1 × GenericCalc2
 - `GenericCalc2` = 1 + 0.5 × AP + -0.5
 - `DurabilityCalc1` = 1 + -1 × GenericCalc1
-- `PhysicalDamageCalc1` = 175/265/2000 × AD
-- `GenericCalc3` = 4 + 1 × AP
+- `PhysicalDamageCalc1` = 165/250/2000 × AD
+- `GenericCalc3` = 4 ÷ 1 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -61,9 +61,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: GA_Vayne19_Spell.txt
 - `OnHitEffectivenessMultiplier`: scales on-hit effects: GA_Vayne19_TrickshotHandler.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row DamageAD: 175 / 265 / 2000 -> 165 / 250 / 2000
+- row PercentMaxHealthDamage: 0.02 / 0.03 / 0.2 -> 0.015 / 0.025 / 0.2
+- ability text changed
 
 <!-- AUTO END -->
 

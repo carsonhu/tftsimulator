@@ -1,7 +1,7 @@
 # Pyke (5-cost AttackFighter) · `DA_Pyke19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Rock, Renegade
@@ -12,7 +12,7 @@
 
 > Passive: Whenever an enemy drops below 0.08 + 0.02/0.02/0.85 × AP max Health, instantly cast on them, then dash back to the current target.
 > 
-> Active: Deal 300/470/4000 × AD physical damage to the target and 130/215/800 × AD to all other enemies in an X shape. Execute any enemies below 0.08 + 0.02/0.02/0.85 × AP Health.
+> Active: Deal 320/515/4000 × AD physical damage to the target and 130/215/800 × AD to all other enemies in an X shape. Execute any enemies below 0.08 + 0.02/0.02/0.85 × AP Health.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -20,14 +20,14 @@
 | ExecuteAP | 0.02 | 0.02 | 0.85 |
 | ExecuteBase | 0.08 | 0.08 | 0.08 |
 | ExecutesForBigBoom | 5 | 5 | 1 |
-| BigBoomADDamage | 300 | 470 | 4000 |
+| BigBoomADDamage | 320 | 515 | 4000 |
 | DashADDamage | 130 | 215 | 800 |
 | ShadowADDamage | 320 | 480 | 1600 |
 | PercentDealtToOtherUnits | 0.3 | 0.3 | 0.3 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 300/470/4000 × AD
+- `PhysicalDamageCalc1` = 320/515/4000 × AD
 - `PhysicalDamageCalc2` = 130/215/800 × AD
 - `PhysicalDamageCalc3` = 1 × AD
 - `GenericCalc1` = 0.08 + 0.02/0.02/0.85 × AP
@@ -59,9 +59,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Pyke19_SlamOnEnemy.txt, Abilities/GA_Pyke19_SpellNew.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Abilities/GA_Pyke19_SlamOnEnemy.txt, Abilities/GA_Pyke19_SpellNew.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row BigBoomADDamage: 300 / 470 / 4000 -> 320 / 515 / 4000
+- ability text changed
 
 <!-- AUTO END -->
 

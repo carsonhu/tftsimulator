@@ -1,7 +1,7 @@
 # Sona (5-cost MagicSpecialist) · `DA_Sona19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** MagicSpecialist: "Specialists generate resources in a unique way." ()
 - **Cost** 5, pool 9; traits: Producer, Collab
@@ -76,13 +76,13 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Champion/Abilities/GA_Sona19_Spell.txt
 - `LaunchAttack`: launches or listens for attacks: Champion/Abilities/GA_Sona19_Passive.txt, Champion/Abilities/GA_Sona19_Spell.txt
+- `ManaPerAttack`: reads or changes mana per attack: Champion/Abilities/GA_Sona19_Passive.txt
 - `GE_SimulateLaunchAttack`: applies the "simulate a launched attack" effect (may count as an attack for on-attack effects): Champion/Abilities/GA_Sona19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Champion/Abilities/GA_Sona19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- row ActiveDamage: 1400 / 2200 / 9999999 -> 1500 / 2400 / 9999999
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

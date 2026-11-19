@@ -1,7 +1,7 @@
 # Ashe (2-cost AttackMarksman) · `DA_Ashe19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Beach Pop, Swiftstriker
@@ -10,7 +10,7 @@
 
 ### Ability: Feelin' Shot Shot Shot
 
-> The next 6 attacks have 0.3 + 0.2 × AP Attack Speed and are replaced with flurries of 3 arrows. Each arrow deals 33/50/75 × AD physical damage.
+> The next 6 attacks have 0.3 + 0.2 × AP Attack Speed and are replaced with flurries of 3 arrows. Each arrow deals 35/53/80 × AD physical damage.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -18,14 +18,14 @@
 | SpellASBase | 0.3 | 0.3 | 0.3 |
 | NumFlurryAttacks | 6 | 6 | 6 |
 | ArrowsPerFlurry | 3 | 3 | 3 |
-| ArrowDamageAD | 33 | 50 | 75 |
+| ArrowDamageAD | 35 | 53 | 80 |
 | SpellASAP | 0.2 | 0.2 | 0.2 |
 | OnHitEffectivenessPerFlurryArrow | 0.6 | 0.6 | 0.6 |
 
 Formulas (as stored; AD and AP are multipliers):
 
 - `AttackSpeedCalc1` = 0.3 + 0.2 × AP
-- `PhysicalDamageCalc1` = 33/50/75 × AD
+- `PhysicalDamageCalc1` = 35/53/80 × AD
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -51,9 +51,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: Abilities/GA_Ashe19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Ashe19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row ArrowDamageAD: 33 / 50 / 75 -> 35 / 53 / 80
+- ability text changed
 
 <!-- AUTO END -->
 

@@ -1,7 +1,7 @@
 # Miss Fortune (5-cost AttackCaster) · `DA_MissFortune19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: 8-Bit, Hitmaker
@@ -9,14 +9,14 @@
 
 ### Ability: Pinball Wizard
 
-> Fire a pinball towards the target, dealing 130/200/1337 × AD + 15/25/908 × AP physical damage. After hitting an enemy, it continues bouncing until damaging enemies 12 times, reducing its damage by 30% each hit. (Minimum damage: 20%)
+> Fire a pinball towards the target, dealing 140/210/1337 × AD + 15/25/908 × AP physical damage. After hitting an enemy, it continues bouncing until damaging enemies 12 times, reducing its damage by 30% each hit. (Minimum damage: 20%)
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 80 | 120 | 180 |
 | DamageReductionPerHit | 0.3 | 0.3 | 0.3 |
 | 8BitMissFortuneBonusScoreMultiplier | 3 | 3 | 3 |
-| DamageAmountPhysical | 130 | 200 | 1337 |
+| DamageAmountPhysical | 140 | 210 | 1337 |
 | DamageAmountMagic | 15 | 25 | 908 |
 | PinballAimbotMaxAngleCheck | 30 | 30 | 30 |
 | PinballBounceRandomAngleAmount | 25 | 25 | 25 |
@@ -28,7 +28,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 130/200/1337 × AD + 15/25/908 × AP
+- `PhysicalDamageCalc1` = 140/210/1337 × AD + 15/25/908 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -56,9 +56,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_MissFortune19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_MissFortune19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row DamageAmountPhysical: 130 / 200 / 1337 -> 140 / 210 / 1337
+- ability text changed
 
 <!-- AUTO END -->
 

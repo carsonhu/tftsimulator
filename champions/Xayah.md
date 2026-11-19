@@ -1,7 +1,7 @@
 # Xayah (4-cost AttackCaster) · `DA_Xayah19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Gu Feng, Hitmaker
@@ -9,12 +9,12 @@
 
 ### Ability: Feathers Flying Like Leaves on the Wind
 
-> Summon 30/30/60 feathers that strike the target, each dealing 20/30/150 × AD + 3/5/16 × AP physical damage and reducing Armor by 1.
+> Summon 30/30/60 feathers that strike the target, each dealing 22/33/150 × AD + 3/5/16 × AP physical damage and reducing Armor by 1.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 55 | 82.5 | 123.75 |
-| FeatherDamage | 20 | 30 | 150 |
+| FeatherDamage | 22 | 33 | 150 |
 | RetractionDamage | 0 | 0 | 0 |
 | ArmorReduction | 1 | 1 | 1 |
 | NumFeathers | 30 | 30 | 60 |
@@ -23,10 +23,10 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 20/30/150 × AD + 3/5/16 × AP
+- `PhysicalDamageCalc1` = 22/33/150 × AD + 3/5/16 × AP
 - `PhysicalDamageCalc2` = 0 × AD
 - `PhysicalDamageCalc3` = 0 × PhysicalDamageCalc2
-- `GenericCalc1` = 1 + 1
+- `GenericCalc1` = 1 ÷ 1
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -53,9 +53,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: Abilities/GA_Xayah19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Xayah19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row FeatherDamage: 20 / 30 / 150 -> 22 / 33 / 150
+- ability text changed
 
 <!-- AUTO END -->
 

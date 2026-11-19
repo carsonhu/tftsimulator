@@ -1,7 +1,7 @@
 # Taliyah (5-cost MagicCaster) · `DA_Taliyah19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Beach Pop, Encore
@@ -10,7 +10,7 @@
 
 ### Ability: Crowd Surfing
 
-> Throw 3 rocks at the target, each dealing 185/280/2000 × AP magic damage.
+> Throw 3 rocks at the target, each dealing 200/300/2000 × AP magic damage.
 > 
 > Every 3/3/1rd cast, quickly reposition and surf in a line instead. Enemies hit take 160/240/2000 × AP + 0.02/0.03/0.5 × AP max Health magic damage and are briefly knocked up.
 
@@ -27,7 +27,7 @@
 | PercentTreasurePerHit | 0 | 0 | 1.5 |
 | PercentJunkPerHit | 0 | 0 | 0 |
 | ChanceCoin | 0 | 0 | 0.75 |
-| SmallSpellDamageAP | 185 | 280 | 2000 |
+| SmallSpellDamageAP | 200 | 300 | 2000 |
 | SmallSpellNumRocks | 3 | 3 | 3 |
 | WaveEveryNthCast | 3 | 3 | 1 |
 | ComponentCooldown | 5 | 5 | 0 |
@@ -36,7 +36,7 @@ Formulas (as stored; AD and AP are multipliers):
 
 - `MagicDamageCalc1` = 160/240/2000 × AP
 - `GenericCalc1` = 0.02/0.03/0.5 × AP
-- `MagicDamageCalc2` = 185/280/2000 × AP
+- `MagicDamageCalc2` = 200/300/2000 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -67,9 +67,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Taliyah19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Taliyah19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row SmallSpellDamageAP: 185 / 280 / 2000 -> 200 / 300 / 2000
+- ability text changed
 
 <!-- AUTO END -->
 

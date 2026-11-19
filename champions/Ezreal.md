@@ -1,7 +1,7 @@
 # Ezreal (2-cost AttackCaster) · `DA_Ezreal19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Heartsteel, Encore
@@ -9,21 +9,21 @@
 
 ### Ability: Bite the Bullet
 
-> Fire a missile that marks the target, then fire a second blast that detonates it. The explosion deals 190/285/430 × AD + 30/45/70 × AP physical damage to the target and 0.33 × PhysicalDamageCalc1 physical damage to enemies within 1 hex.
+> Fire a missile that marks the target, then fire a second blast that detonates it. The explosion deals 210/315/475 × AD + 30/45/70 × AP physical damage to the target and 0.33 × PhysicalDamageCalc1 physical damage to enemies within 1 hex.
 > 
 > Heartsteel Upgrade: Detonation deals 25% more damage. Every 3rd cast hits enemies in a 2 hex radius instead.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 40 | 60 | 90 |
-| ADDamage | 190 | 285 | 430 |
+| ADDamage | 210 | 315 | 475 |
 | APDamage | 30 | 45 | 70 |
 | AoEPercentDamage | 0.33 | 0.33 | 0.33 |
 | HeartsteelStan_PercentIncreasedAbilityDamage | 0.25 | 0.25 | 0.25 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 190/285/430 × AD + 30/45/70 × AP
+- `PhysicalDamageCalc1` = 210/315/475 × AD + 30/45/70 × AP
 - `PhysicalDamageCalc2` = 0.33 × PhysicalDamageCalc1
 
 ### Timing the client predicts (unverified for Set 19)
@@ -52,9 +52,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Ezreal19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Ezreal19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row ADDamage: 190 / 285 / 430 -> 210 / 315 / 475
+- ability text changed
 
 <!-- AUTO END -->
 

@@ -1,7 +1,7 @@
 # Ziggs (1-cost MagicMarksman) · `DA_Ziggs19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** MagicMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 1, pool 30; traits: Hyperpop, Arcanist, Swiftstriker
@@ -54,11 +54,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: GA_Ziggs19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Ziggs19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- row InitialDamage: 180 / 270 / 405 -> 155 / 235 / 355
-- row SecondaryDamageAP: 80 / 120 / 180 -> 70 / 105 / 160
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

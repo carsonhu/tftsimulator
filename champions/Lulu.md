@@ -1,7 +1,7 @@
 # Lulu (2-cost MagicCaster) · `DA_Lulu19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Hyperpop, Choreographer
@@ -34,7 +34,7 @@ Formulas (as stored; AD and AP are multipliers):
 - `AttackSpeedCalc1` = 0.45/0.55/0.65 × AP + 0.35
 - `HealthCalc1` = 175/260/395 × AP
 - `MagicDamageCalc1` = 400/600/900 × AP
-- `GenericCalc1` = 5 + 1 + 1
+- `GenericCalc1` = 5 ÷ 1 + 1
 - `MagicDamageCalc2` = 20/30/45 × AP
 - `MagicDamageCalc3` = 20/30/45 × AP
 
@@ -69,7 +69,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AppliesOnHit`: something in the script is flagged as applying on-hit effects: GA_Lulu19_Whismy.txt
 - `IsAttack`: damage flagged as an attack (or checked for it): GA_Lulu19_Whismy.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

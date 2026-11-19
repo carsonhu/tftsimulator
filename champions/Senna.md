@@ -1,7 +1,7 @@
 # Senna (3-cost AttackCaster) · `DA_Senna19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: True Damage, Hitmaker
@@ -9,14 +9,14 @@
 
 ### Ability: Reverberation Devastation
 
-> Blast the target, dealing 140/210/340 × AD + 25/35/60 × AP physical damage and marking them. If they are marked, detonate it instead, dealing 1.5 × PhysicalDamageCalc1 damage.
+> Blast the target, dealing 160/240/385 × AD + 25/35/60 × AP physical damage and marking them. If they are marked, detonate it instead, dealing 1.5 × PhysicalDamageCalc1 damage.
 > 
 > On detonation or killing a marked enemy, gain 8% Damage Amp until the end of combat.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 55 | 82.5 | 123.75 |
-| SpellAD | 140 | 210 | 340 |
+| SpellAD | 160 | 240 | 385 |
 | BonusDA | 0.08 | 0.08 | 0.08 |
 | SpellAP | 25 | 35 | 60 |
 | Duration | 10 | 10 | 10 |
@@ -25,7 +25,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 140/210/340 × AD + 25/35/60 × AP
+- `PhysicalDamageCalc1` = 160/240/385 × AD + 25/35/60 × AP
 - `PhysicalDamageCalc2` = 1.5 × PhysicalDamageCalc1
 
 ### Timing the client predicts (unverified for Set 19)
@@ -56,9 +56,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: Abilities/GA_Senna19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Senna19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row SpellAD: 140 / 210 / 340 -> 160 / 240 / 385
+- ability text changed
 
 <!-- AUTO END -->
 

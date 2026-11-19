@@ -1,7 +1,7 @@
 # Olaf with the hero augment Axe Crescendo (AttackMarksman) · `DA_Olaf19_HeroAugment_Override`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 0, pool –; traits: Pentakill, Juggernaut
@@ -10,19 +10,19 @@
 
 ### Ability: Axe Crescendo
 
-> For the next 2 attacks, throw flaming axes that deal 150/225/360 × AD + 15/20/30 × AP physical damage. Each time this is cast, increase the number of flaming axe throws by 1 for the rest of combat.
+> For the next 3 attacks, throw flaming axes that deal 140/210/335 × AD + 15/20/30 × AP physical damage. Each time this is cast, increase the number of flaming axe throws by 1 for the rest of combat.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
-| NumAttacks | 2 | 2 | 2 |
+| NumAttacks | 3 | 3 | 3 |
 | AutoAttackDamage | 45 | 67.5 | 101.25 |
 | ExtraAttacksPerCast | 1 | 1 | 1 |
-| ADDamage | 150 | 225 | 360 |
+| ADDamage | 140 | 210 | 335 |
 | APDamage | 15 | 20 | 30 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 150/225/360 × AD + 15/20/30 × AP
+- `PhysicalDamageCalc1` = 140/210/335 × AD + 15/20/30 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -49,9 +49,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Olaf19_HeroAugment.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Abilities/GA_Olaf19_Passive.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row ADDamage: 150 / 225 / 360 -> 140 / 210 / 335
+- row NumAttacks: 2 -> 3
+- ability text changed
 
 <!-- AUTO END -->
 

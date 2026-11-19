@@ -1,7 +1,7 @@
 # Lee Sin (5-cost AttackFighter) · `DA_LeeSin19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Gu Feng
@@ -40,7 +40,7 @@ Formulas (as stored; AD and AP are multipliers):
 
 - `PhysicalDamageCalc1` = 175/280/9900 × AD + 15/20/660 × AP
 - `PhysicalDamageCalc2` = 1.35 × PhysicalDamageCalc1
-- `GenericCalc1` = 1 × PhysicalDamageCalc2 + 3
+- `GenericCalc1` = 1 × PhysicalDamageCalc2 ÷ 3
 - `PhysicalDamageCalc3` = 2.5 × PhysicalDamageCalc1
 - `GenericCalc2` = 2/2/99
 
@@ -64,14 +64,14 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 ### Scripts on the unit
 
-`GA_DoLaunchAttackLogic`, `GA_SetAATarget`, `GA_Play3Star5CostCamera`, `GA_GainDamageReductionAt3Star`, `GA_MoveToTarget`, `GA_Celebration`, `GA_Death`, `GA_AutoAttack`, `GA_LaunchMeleeAttack`, `GA_LeeSin19_Spell`, `GA_ShopEvents`, `GA_PlayAdditionalChronoOnStarUp`
+`GA_DoLaunchAttackLogic`, `GA_SetAATarget`, `GA_Play3Star5CostCamera`, `GA_GainDamageReductionAt3Star`, `GA_LeeSin19_CleanUpMarks`, `GA_MoveToTarget`, `GA_Celebration`, `GA_Death`, `GA_AutoAttack`, `GA_LaunchMeleeAttack`, `GA_LeeSin19_Spell`, `GA_ShopEvents`, `GA_PlayAdditionalChronoOnStarUp`
 
 Script hints (identifiers present in this champion's decoded scripts; leads, not evidence):
 
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_LeeSin19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_LeeSin19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

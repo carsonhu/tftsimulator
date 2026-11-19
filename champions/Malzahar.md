@@ -1,7 +1,7 @@
 # Malzahar (3-cost MagicCaster) · `DA_Malzahar19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Composer, Prodigy
@@ -9,7 +9,7 @@
 
 ### Ability: Forbidden Cacophony
 
-> Fire a beam at the target for 2 seconds, dealing 355/530/850 × AP magic damage. The energy rhythmically explodes 4 times, 30% Shredding enemies in a 1 hex area for 4 seconds, and dealing 40/60/110 × AP magic damage each time.
+> Fire a beam at the target for 2 seconds, dealing 325/485/815 × AP magic damage. The energy rhythmically explodes 4 times, 30% Shredding enemies in a 1 hex area for 4 seconds, and dealing 40/60/110 × AP magic damage each time.
 > 
 > Shred: Reduce Magic Resist
 
@@ -23,7 +23,7 @@
 | UniqueTrait_GLP_NumShops | 10 | 10 | 10 |
 | UniqueTrait_GLP_NumInstruments | 2 | 2 | 2 |
 | UniqueTrait_DamageDealt_TOOLTIPONLYEDITUNLOCKCONDITION | 60000 | 60000 | 60000 |
-| DamageAP | 355 | 530 | 850 |
+| DamageAP | 325 | 485 | 815 |
 | PrimaryTickRate | 0.25 | 0.25 | 0.25 |
 | AOEHexRange | 1 | 1 | 1 |
 | UniqueTrait_APPerInstrument | 0.03 | 0.03 | 0.03 |
@@ -31,7 +31,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 355/530/850 × AP
+- `MagicDamageCalc1` = 325/485/815 × AP
 - `MagicDamageCalc2` = 40/60/110 × AP
 
 ### Timing the client predicts (unverified for Set 19)
@@ -56,9 +56,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Malzahar19_SpellNew.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Malzahar19_SpellNew.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- row DamageAP: 380 / 570 / 960 -> 355 / 530 / 850
+- row DamageAP: 355 / 530 / 850 -> 325 / 485 / 815
 - ability text changed
 
 <!-- AUTO END -->

@@ -1,15 +1,15 @@
 # Yuumi (4-cost MagicCaster) · `DA_Yuumi19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Illbeats, Encore
-- **HP** 850 / 1530 / 2754 · **AD** 30 / 45 / 67.5 · **AS** 0.75 · **Range** 4 · **Armor** 40 · **MR** 40 · **Mana** 0 / 20
+- **HP** 850 / 1530 / 2754 · **AD** 30 / 45 / 67.5 · **AS** 0.8 · **Range** 4 · **Armor** 40 · **MR** 40 · **Mana** 0 / 20
 
 ### Ability: Girl, Put Your Records On (Your Head)
 
-> Throw a spinning disc that deals 175/265/1400 × AP magic damage and stacks on the target's head, reducing their Magic Resist by 1 every second. 
+> Throw a spinning disc that deals 185/280/1400 × AP magic damage and stacks on the target's head, reducing their Magic Resist by 1 every second. 
 > 
 > When they have 4 + 1 discs, the stack topples over, dealing 40% of the stacked discs' total damage to the target and another 40% split among 4 nearby enemies.
 > 
@@ -22,7 +22,7 @@
 | TickRate | 0.25 | 0.25 | 0.25 |
 | DoTDuration | 999 | 999 | 999 |
 | NumDiscsToPop | 4 | 4 | 4 |
-| DoTDamageAP | 175 | 265 | 1400 |
+| DoTDamageAP | 185 | 280 | 1400 |
 | PoppedDotPercentToMainTarget | 0.4 | 0.4 | 0.4 |
 | PoppedDotPercentToOtherTargets | 0.4 | 0.4 | 0.4 |
 | NumTargetsToDistributeDiscs | 4 | 4 | 4 |
@@ -30,11 +30,11 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 175/265/1400 × AP
+- `MagicDamageCalc1` = 185/280/1400 × AP
 - `MagicDamageCalc2` = 0 × AP
 - `GenericCalc1` = 4 + 1
-- `GenericCalc2` = 1 + 0.25
-- `GenericCalc3` = 1 + 1
+- `GenericCalc2` = 1 × 0.25
+- `GenericCalc3` = 1 ÷ 1
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -60,9 +60,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Yuumi19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Yuumi19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- stat AttackSpeed: 0.75 -> 0.8
+- row DoTDamageAP: 175 / 265 / 1400 -> 185 / 280 / 1400
+- ability text changed
 
 <!-- AUTO END -->
 

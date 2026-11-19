@@ -1,7 +1,7 @@
 # Seraphine (2-cost MagicCaster) · `DA_SeraphineIndie19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Indie
@@ -10,7 +10,7 @@
 
 ### Ability: Livestream of Note
 
-> Indie: Release a stream of notes at the target while posing for the fans, dealing 570/855/1280 × AP magic damage over 2.5 seconds.
+> Indie: Release a stream of notes at the target while posing for the fans, dealing 550/825/1240 × AP magic damage over 2.5 seconds.
 > 
 > Rising Star: Release bonus notes at nearby enemies.
 > 
@@ -20,7 +20,7 @@
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
 | ShieldAmount | 0 | 0 | 0 |
-| DamageAP | 570 | 855 | 1280 |
+| DamageAP | 550 | 825 | 1240 |
 | HealRadius | 0 | 0 | 0 |
 | HealAmount | 0 | 0 | 0 |
 | ShieldDuration | 0 | 0 | 0 |
@@ -29,17 +29,17 @@
 | PopularityPerPaidReroll | 2 | 2 | 2 |
 | RewardsForSecondUpgrade | 4 | 4 | 4 |
 | PopularityForReward | 20 | 20 | 20 |
-| HighNoteDamageAP | 60 | 90 | 135 |
+| HighNoteDamageAP | 45 | 68 | 100 |
 | ExtraNoteDamageAP | 20 | 30 | 45 |
 | RisingStarExtraNotes | 8 | 8 | 8 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 570/855/1280 × AP
+- `MagicDamageCalc1` = 550/825/1240 × AP
 - `HealthCalc1` = 0
 - `ShieldCalc1` = 0
 - `MagicDamageCalc2` = 20/30/45 × AP
-- `MagicDamageCalc3` = 60/90/135 × AP
+- `MagicDamageCalc3` = 45/68/100 × AP
 - `GenericCalc1` = 8
 
 ### Timing the client predicts (unverified for Set 19)
@@ -70,10 +70,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Seraphine19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Seraphine19_Spell.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- row DamageAP: 600 / 900 / 1350 -> 570 / 855 / 1280
-- row HighNoteDamageAP: 70 / 105 / 160 -> 60 / 90 / 135
+- row DamageAP: 570 / 855 / 1280 -> 550 / 825 / 1240
+- row HighNoteDamageAP: 60 / 90 / 135 -> 45 / 68 / 100
 - ability text changed
 
 <!-- AUTO END -->

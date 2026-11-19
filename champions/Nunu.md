@@ -1,7 +1,7 @@
 # Nunu & Willump (5-cost MagicSpecialist) · `DA_Nunu19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - **Role** MagicSpecialist: "Specialists generate resources in a unique way." ()
 - **Cost** 5, pool 9; traits: Disco, Frontman
@@ -10,7 +10,7 @@
 
 ### Ability: It's the Time to Disco!
 
-> Passive: Gain 10/10/40 Mana Regen. Slowly roll around a Disco Ball, dealing 120/180/1500 × AP + 1 × MagicDamageCalc2 magic damage to all enemies it passes through.
+> Passive: Gain 10/10/40 Mana Regen. Slowly roll around a Disco Ball, dealing 120/180/1500 × AP × 1 × MagicDamageCalc2 magic damage to all enemies it passes through.
 > 
 > Active: For the rest of combat, move faster and increase the size and damage of the Disco Ball by 30%/30%/200%.
 
@@ -29,7 +29,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 120/180/1500 × AP + 1 × MagicDamageCalc2
+- `MagicDamageCalc1` = 120/180/1500 × AP × 1 × MagicDamageCalc2
 - `MagicDamageCalc2` = 0.3/0.3/2 × Stack + 1
 - `MagicDamageCalc3` = 1000 × AP
 
@@ -58,9 +58,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Nunu19_Spell.txt
 - `AttackSpeed`: reads or changes attack speed: UniqueTrait/Abilities/GA_Nunu19_UniqueTrait_TakedownManager.txt
 
-### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- ability text changed
 
 <!-- AUTO END -->
 
