@@ -75,7 +75,8 @@ def test_cast_rate_is_clamped_between_1_and_2():
     assert abs(t.cast_rate(0.7, 1.05) - 1.5) < 1e-12
     assert t.cast_rate(0.7, 2.1) == 2  # never faster than 2x
     lock, mana = t.scaled_locks(0.7, 2.1)
-    assert (lock, mana) == (0.8333 / 2, 0.8 / 2)
+    # the cast chrono's end (0.8 s) plays in half; G5's tick after it doesn't scale (VOD6 E4)
+    assert abs(lock - (0.8 / 2 + 1 / 30)) < 1e-4 and mana == 0.8 / 2
 
 
 def stats_with(c, buffs, items=()):

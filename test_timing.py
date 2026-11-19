@@ -136,13 +136,13 @@ def test_mana_lock_blocks_mana_until_it_ends():
 
 
 def test_locks_scale_with_attack_speed_when_the_script_reads_it():
-    # G7: base AS 1.0, current 2.0 (item) -> cast lock 1.0 s becomes 0.5 s (15 ticks)
+    # G7: base AS 1.0, current 2.0 (item) -> the cast's 29 ticks to its end play in 14.5, then G5's tick: 0.5167 s
     # one cast only: starts full, no mana afterwards
     p = Probe(Timing(launch=0.3, cast_lock=1.0, lock_scales_with_as=True), aspd=1.0, mana=(30, 30), per_attack=0)
     p.aspd.modify('MultiplyAdditive', 2)  # +100% AS
     run(p, seconds=2)
     assert len(p.cast_ticks) == 1
-    assert p.busy_until - p.cast_ticks[0] == 15
+    assert p.busy_until - p.cast_ticks[0] == 16
 
 
 def test_overflow_mana_is_kept():

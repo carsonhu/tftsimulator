@@ -228,7 +228,12 @@ class Timing:
         return rate
 
     def scaled_locks(self, base_as, current_as):
-        """(cast lock, mana lock) in seconds at the current attack speed."""
+        """(cast lock, mana lock) in seconds at the current attack speed. The cast chrono plays faster, so its end
+        comes sooner; the cast lock's last tick (G5: the next attack starts the tick after the cast ends) doesn't
+        scale (VOD6 Ziggs, champions/Ziggs.md E4)."""
         mana_lock = self.cast_lock if self.mana_lock is None else self.mana_lock
         rate = self.cast_rate(base_as, current_as)
-        return self.cast_lock / rate, mana_lock / rate
+        if rate == 1:
+            return self.cast_lock, mana_lock
+        tick = 1 / TPS
+        return max(self.cast_lock - tick, 0) / rate + tick, mana_lock / rate

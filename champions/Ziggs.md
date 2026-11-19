@@ -76,14 +76,14 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 |---|---|---|---|---|
 | Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | **consistent**: 500 HP, 0/50 mana, AD 10, AS 0.70, armor/MR 25, range 4 Hex | E1 |
 | Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicMarksman | **consistent**: +10 per release, no regen | E2 |
-| Q3 | First attack at combat start: when does it land? | G3 | not measurable here: minions walk in first; no combat-start marker | E2 |
+| Q3 | First attack at combat start: when does it land? | G3 | VOD6: released 16 ticks after combat start (Guinsoo's first stack 1 s in marks it), engine 15 (T10's +1) | E2, E4 |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.4 s (12 ticks) | **consistent**: 18 ticks at base AS (0.4 s stretched to the 1.43 s period, G2), in the cast-to-release gap | E2 |
-| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open: only base AS seen | |
+| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | **confirmed** G20 (T = 0.7, shrinks above AS 1.43): 8 ticks after a cast at AS 2.0-2.3, not 12; attacks 12 ticks apart at AS 2.4 | E4 |
 | Q6 | Projectile travel time (ranged only) | not fixed speed | attacks: not measured (minion targets moved, flights 13-24 frames); bomb: lands ~10 frames after it is first seen, target ~2 hexes away | E2, E3 |
 | Q7 | Cast time: cast start to the next attack starting | 0.8333 s (25 ticks) | **consistent**: cast to next release 44 ticks = 25 + 18 + T10's tick | E2 |
-| Q8 | Does the cast time scale with attack speed? | script reads AS | predicted from the script: the cast plays at FClamp(AS / base AS, 1, 2) (D1); not seen above base AS | script |
+| Q8 | Does the cast time scale with attack speed? | script reads AS | **confirmed**, with the 2x cap: cast to next release 28 / 23 / 22 ticks at AS 1.23 / 2.02 / 2.31, engine 28 / 22 / 22 (unscaled 38 / 34 / 33; uncapped 19 / 17); G5's tick after the cast end doesn't scale (D2) | E4, D2 |
 | Q9 | Mana lock: from cast start, when can mana be gained again? | 0.8 s (24 ticks) | **consistent** (the panel shows 0 through the lock; the next mana is the next release) | E2 |
-| Q10 | Does the mana lock scale with attack speed? | script reads AS | predicted: same rate as the cast (D1) | script |
+| Q10 | Does the mana lock scale with attack speed? | script reads AS | predicted: same rate as the cast (D1); the panel shows 0 until the next release, so not seen | script |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | one simulated attack when the bomb fires (D1): on-attack items hear it (Titan's Resolve stack, G11); role mana falls inside the mana lock | G11 |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | cancels Combat.Attacking (T4); the rhythm restarts with a fresh attack after the lock | E2 |
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | **confirmed**: attack 9 physical + 36 magic on the same hit, bomb 163 on the target + 72 on an adjacent minion (all four fit 10, 40, 180, 80 against minion armor = MR = 10, shown rounded down) | E3 |
@@ -100,6 +100,7 @@ VOD was played on (check the patch shown in game or the date against builds/inde
 | E1 | 2026-11-17 | rls-19.1.0.5973071 | VOD2 0:16 (planning, round 1-1) | 60 | inspection panel | 1★, no items, 500 HP, 0/50 mana, AD 10, AS 0.70, armor/MR 25, 4 Hex; Arcanist, Hyperpop, Swiftstriker 1/2 (inactive) | as built | Q1 |
 | E2 | 2026-11-17 | rls-19.1.0.5973071 | VOD2 f1133-1963 (`tools/vod_text_changes.py`, mana) | 60 | releases (+10 mana) and the cast | 10, 20, 30, 40 at f1133, 1217, 1301, 1378; 0/50 (cast) at f1476; 10, 20, 30, 40 at f1564, 1648, 1734, 1820 (44, 86, 129, 172 ticks after the cast). Before the cast the attacks' hits are regular (f1314, 1402, 1488: 88, 86 frames) but the mana steps aren't (84, 84, 77, ~98): the minion target moves, so flight times differ; left out | after the cast the engine gives 43, 86, 129, 172: the first is T10's open tick, the rest exact | Q2, Q4, Q7, Q9, Q12 |
 | E3 | 2026-11-17 | rls-19.1.0.5973071 | VOD2 f1300-1520 (board, every 4-8 frames) | 60 | damage numbers | each attack 9 (orange) + 36 (blue) on one hit; the bomb (seen above him at f1500, on the target at f1512) 163 on the target and 72 on the minion next to it at f1516 | minion armor = MR = 10, numbers rounded down: 10 x 100/110 = 9.1, 40 -> 36.4, 180 -> 163.6, 80 -> 72.7 | Q6, Q13 |
+| E4 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f18780-19900 (round 1-7; VOD6 = `…PBE_11-18-2026_18-40-41-766.mp4`), mana and AS text | 60 | releases (+10), casts (bar to 0), AS | 1 star with two Guinsoo's Rageblades: AS 0.84, then +0.098 every 60 frames from f18845 (0.70 x (1.2 + 0.14 n)), to 2.51; combat start f18785 (the first stack 1 s in). Releases (ticks after combat start) 16, 50, 81, 110, 136 (fills: cast), 164, 187, 209, 229, 249.5 (cast), 299.5 (a 50-tick pause), ..., 378.5 (cast), 401.5, ..., 456.5 (cast), 478.5, 491.5, 503.5, 515.5, 527.5 (cast) | from the filling release to the next: 28 / 23 / 22 ticks at AS 1.23 / 2.02 / 2.31; engine (D2) 28 / 22 / 22; the first release 16 (engine 15) | Q3, Q5, Q8 |
 
 ## Decisions and notes
 
@@ -117,3 +118,7 @@ VOD was played on (check the patch shown in game or the date against builds/inde
   - **Assumed:** the bomb flies his attack range (4 hexes); the splash hits the enemies next to the target on the
     dummy layout (`layout.py`, default one). MiniBombs / FindMiniBombTargets in the script are never called.
 - 2026-11-18, Day 1 PBE patch notes, confirmed in the client build rls-19.1.0.5986094 (read from an FModel raw export, B34; it replaced the patch-notes stand-in, B33): InitialDamage 180/270/405 -> 155/235/355, SecondaryDamageAP 80/120/180 -> 70/105/160. Its timing is unchanged from rls-19.1.0.5973071.
+
+- 2026-11-18, D2 (VOD6 E4): the cast chrono plays at FClamp(AS / base AS, 1, 2) as D1 says, and its end (0.8 s)
+  is what scales: the cast lock = 0.8 s / rate + G5's one tick (the next attack starts the tick after the cast
+  ends), not 0.8333 s / rate (`Timing.scaled_locks`). At 2x: 13 ticks, not 12. The mana lock 0.8 s / rate.

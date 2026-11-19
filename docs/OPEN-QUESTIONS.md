@@ -52,13 +52,6 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Orb damage and timing | each orb Calc1 (13/20/30 x AD + 3/5/7 x AP), the i-th orb spawning at the orb chrono's i-th time scaled to 0.5 / AS, flying 1850 units/s | damage numbers after her 2nd and 3rd casts | champions/Yunara.md D1 |
 | First attack at combat start | a stationary ranged unit releases one windup in (8 ticks); VOD2 she walked first (21.5 ticks) | a fight where she starts in range | G3, Yunara Q3 |
 
-### 5. Ziggs with attack speed
-
-| Question | What the simulator assumes now | What the clip shows | Ledger |
-|---|---|---|---|
-| Does his cast speed up with attack speed, capped at 2x? | the cast chrono plays at FClamp(AS / base AS, 1, 2): cast lock 25 ticks at base AS, 12 at 2x | a Ziggs with attack-speed items or Swiftstriker stacks: cast to next release | G7, champions/Ziggs.md D1 |
-| First attack at combat start | a stationary ranged unit releases one windup in (18 ticks at base AS); VOD2's fight was minions walking in | a fight with a combat-start marker (Blue Buff) | G3, Ziggs Q3 |
-
 ### 6. Senna again
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
@@ -124,7 +117,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|---|
 | The second empowered phase | 6 flurries at the attack period (AS 1.53-1.60: ~19 ticks apart), lock lifted 109 ticks after the filling attack | VOD5 showed 122.5 (the first phase matched to 1.5 ticks); a clip of a longer Ashe fight on a target that stays alive | champions/Ashe.md E2 |
 | Arrow damage | 3 x 33/50/75 x AD per flurry, on-hit at 0.6 | damage numbers of a flurry on a target of known armor | champions/Ashe.md D1, I11 |
-| Play-rate threshold below 1 (G20) | applied (owner): Draven's release shrinks above AS 0.85, Malzahar's above 1.06, Ziggs's above 1.43 | a Draven or Malzahar attack at AS above ~1.2 (Guinsoo's or Quicksilver late in a fight) | G20 |
+| Play-rate threshold below 1 (G20) | applied (owner): Draven's release shrinks above AS 0.85, Malzahar's above 1.06, Ziggs's above 1.43 (confirmed on Ziggs, VOD6) | a Draven or Malzahar attack at AS above ~1.2 (Guinsoo's or Quicksilver late in a fight) | G20 |
 
 ### 7i. Viego again
 
