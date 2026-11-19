@@ -1550,9 +1550,91 @@ class Zoe(BuildChampion):
                                                                self.ball_damage, 'magical'))
 
 
+class Xayah(BuildChampion):
+    """Feathers Flying Like Leaves on the Wind (champions/Xayah.md, D1). Script: GA_Xayah19_Spell (build
+    ga_scripts.zip); effects and chronos from the client assets (rls-19.1.0.5986094 export).
+
+    The cast reads NumFeathers (0x1cdf), sets the spawn delay to 0.8 / NumFeathers (0x1d83), applies the mana lock
+    (0x1df9) and plays CD_Xayah19_CastAnim. 'StartFeathers': one GE_SimulateLaunchAttack (0x2ba1) and wave 1 =
+    RepeatAction(spawn delay, NumFeathers / 2) (0x2caa; first action at once, A1); 'MoreFeathers': wave 2, the same
+    (0xfe). Each feather plays CD_Xayah19_SpellMis at Xayah's attack target from its own place
+    (ComputeFeatherStartLocations: a fan behind her, 90 + i x 200 / (NumFeathers / 2) degrees from her facing, 100
+    units out for wave 1 and 250 for wave 2). The chrono's first active group picks the missile: wave 1 (no tag)
+    waits 0.88 s, wave 2 (MissileSelector.1) 0.4 s, then flies at 3200 units/s (both TFTFixedSpeedMovement; the delays
+    are on the projectile module, which the snapshot doesn't read: typed from the asset). On reaching the target:
+    GE_Xayah19_InitialDamage = PhysicalDamageCalc1 (FeatherDamage x AD + FeatherDamageAP x AP), physical, on-spell,
+    crit only with Precision, and GE_Xayah19_ArmorReduction (-ArmorReduction flat Armor until combat ends: flat
+    armor reduction is not modelled, owner policy). The feather then flies on behind the target (MissileSelector.2)
+    and hits whoever it crosses with GE_Xayah19_SecondaryDamage (PhysicalDamageCalc2 = RetractionDamage x AD = 0):
+    nothing. 'Unlock' removes the mana lock and finishes the cast (the build: 64 / 65 ticks; VOD4 confirms).
+    """
+    KEY = 'DA_Xayah19'
+    CAST, MISSILE = 'CD_Xayah19_CastAnim', 'CD_Xayah19_SpellMis'
+    SPAWN_SPREAD = 0.8  # GA_Xayah19_Spell 0x1d83: spawn delay = 0.8 / NumFeathers
+    FAN_START, FAN_WIDTH = 90, 200  # ComputeFeatherStartLocations: 90 + i x 200 / (NumFeathers / 2) degrees
+    WAVE_RADIUS = (100, 250)  # FeatherVectorDistance for the offsets wave 1 / wave 2 use (0x2b7b, 0x2bd1)
+    WAVE_DELAY = (0.88, 0.4)  # CD_Xayah19_SpellMis 'MissileWithDelay - Wave 1' / 'MissileWithLessDelay - Wave 2'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.wave_events = (self.chrono_event(self.CAST, 'StartFeathers'), self.chrono_event(self.CAST, 'MoreFeathers'))
+        self.feather_speed = self.chrono_projectile_speed_fixed(self.MISSILE, 'FeatherMis')
+        self.notes = ('A cast: 30 feathers (60 at 3 stars) gather behind her and fly at her target, each '
+                      'FeatherDamage x AD + FeatherDamageAP x AP physical; they land 1.1-1.6 s into the cast. Their '
+                      '-1 Armor per feather is not modelled (flat armor reduction).')
+
+    def chrono_projectile_speed_fixed(self, chrono, projectile):
+        """The speed of the chrono's fixed-speed `projectile` (CD_Xayah19_SpellMis also has the old retracting
+        fixed-time missile of the same name, MissileSelector.3, which the script no longer plays)."""
+        speeds = {p['speed'] for p in self.chrono(chrono).get('projectiles') or []
+                  if p['name'] == projectile and p['movement'] == 'TFTFixedSpeedMovement'}
+        if len(speeds) != 1:
+            raise BuildDataError(f'{self.KEY}: chrono {chrono} has no single fixed speed for {projectile!r} '
+                                 f'in build {self.build.version} ({sorted(speeds)})')
+        return speeds.pop()
+
+    def feather_damage(self, level, AD, AP):
+        # PhysicalDamageCalc1 (VOD4 19:19 tooltip: 38 = 20 x 1.72 + 3 x 1.10)
+        return self.row('FeatherDamage', star=level) * AD + self.row('FeatherDamageAP', star=level) * AP
+
+    def feathers(self, hexes):
+        """[(seconds from the cast start to the hit, (dx, dy) start offset in units along / across her facing)]
+        for every feather, in spawn order."""
+        n = int(self.row('NumFeathers'))
+        half = int(n / 2)
+        spacing = self.SPAWN_SPREAD / n
+        reach = hexes * HEX_UNITS
+        out = []
+        for wave in (0, 1):
+            for k in range(half):
+                number = k + 1 if wave == 0 else half - k  # FireFeather(1, 1..half); FireFeather(2, half..1)
+                angle = math.radians(self.FAN_START + (number - 1) * self.FAN_WIDTH / half)
+                r = self.WAVE_RADIUS[wave]
+                dx, dy = r * math.cos(angle), r * math.sin(angle)
+                fly = math.hypot(reach - dx, dy) / self.feather_speed  # G4: straight line, height ignored
+                out.append((self.wave_events[wave] + k * spacing + self.WAVE_DELAY[wave] + fly, (dx, dy),
+                            self.wave_events[wave] + k * spacing + self.WAVE_DELAY[wave]))
+        return out
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        cast = self.tick
+        self.schedule_tick(cast + ticks_up(self.wave_events[0]), lambda: self.simulateLaunch(self.items))  # G11
+
+        def hit():
+            self.multiTargetSpell([target], self.items, self.tick / TPS, 1, self.feather_damage, 'physical')
+        sx, sy = layout.world(self.hex)
+        tx, ty = layout.world(target.hex)
+        n = math.hypot(tx - sx, ty - sy) or 1
+        fx, fy = (tx - sx) / n, (ty - sy) / n  # her facing
+        for land, (dx, dy), launch in self.feathers(self.target_hexes(target)):
+            t0, t1 = cast + ticks_up(launch), cast + ticks_up(land)
+            self.fly(t0, t1 - t0, target, hit, source=(sx + dx * fx - dy * fy, sy + dx * fy + dy * fx), name='feather')
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
-              'Syndra', 'Briar']
+              'Syndra', 'Briar', 'Xayah']
 
 
 class TrainingDummy(Champion):

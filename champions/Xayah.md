@@ -61,8 +61,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Xayah`, D1); the cast's locks and the next attack
+  checked on VOD4 (E3-E5), the damage formula on its tooltip (E2)
+- Keep in the simulator: **yes** (owner, 2026-11-18: "we have a vod for xayah")
 
 ## Questions
 
@@ -71,29 +72,63 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackCaster | predicted | |
-| Q3 | First attack at combat start: when does it land? | G3 | open | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed for HP, mana, range, armor, MR, AS (with items); AD 5% above the simulator (open) | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackCaster: 7 per attack, 2/s | confirmed (+7 steps, +1 every 0.5 s) | E3 |
+| Q3 | First attack at combat start: when does it land? | G3 | open (VOD4's targets walk in) | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.22 s (6.6 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 2500 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 2.1667 s (65 ticks) | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | 2.1667 s (65 ticks) | confirmed to a tick: the attack after the cast pays at +71.5 / +72.5 / +70 ticks (engine 72) | E3-E5 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 2.1333 s (64 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 2.1333 s (64 ticks) | confirmed to a tick: the banked overflow shows +64.5 / +65.5 ticks after the bar emptied | E3, E4 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
-| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 1 GE_SimulateLaunchAttack at StartFeathers (G11) | predicted (script) | D1 |
+| Q12 | Does the cast cancel or reset an attack in progress? | cancels (CancelAbilitiesWithTag Combat.Attacking) | predicted | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | 30/30/60 feathers on the target, each FeatherDamage x AD + FeatherDamageAP x AP | formula confirmed (tooltip 38 = 20 x 1.72 + 3 x 1.10); hit count predicted | E2, D1 |
+| Q14 | Passives and other mechanics that need modelling | -1 flat Armor per feather; pass-through feathers | Armor: not modelled (flat armor reduction, owner policy); pass-through: PhysicalDamageCalc2 = 0 | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
+| Q16 | When the feathers land | 1.37-1.77 s into the cast at 4 hexes (engine 42-53 ticks) | consistent, not frame-exact (the VOD target was farther than 4 hexes) | E6 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+VOD4 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-17-2026_16-22-12-687/` `…PBE_11-17-2026_19-0-51-650.mp4` (owner's
+clip, 2026-11-17, build rls-19.1.0.5973071; Xayah's data is the same in 5986094). Xayah 1 star with Infinity Edge,
+Quicksilver and Guinsoo's Rageblade (owner); Hitmaker (2) with her as the Big Shot; Gu Feng 1/2 (inactive). Mana
+from `tools/vod_text_changes.py --field mana` (crops read by eye).
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 19:16-19:26 (round 1-10, planning) | 60 | inspection panel | 850/850, 0/60, 2/s, range 4 hex, Back; AD 95, bonus AD 72%, AP 10%, armor 40, MR 60, AS 0.94, crit 80% | the simulator: 850, 0/60, AP 110%, AS 0.938, crit 80%, armor 40, MR 60; AD 91.85 (bonus 67%: Hitmaker 12 + 20, IE 35): **5% AD unexplained** | Q1 |
+| E2 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 19:19 (ability tooltip) | 60 | damage per feather | 38 | 20 x 1.72 + 3 x 1.10 = 37.7: AD and AP are the multipliers (the panel's 172%, 110%) | Q13 |
+| E3 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 f70941-71084 (round 1-10, first cast) | 60 | bar empties (56 + 7 = 63); banked 3 shows; next +7 | f70941; f71070 (+129 fr = 64.5 ticks); f71084 (+143 fr = 71.5 ticks) | mana lock 64, plus up to a tick if the cast starts the tick after the fill; the attack after the cast at 65 + windup (engine 72) | Q2, Q7, Q9 |
+| E4 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 f73741-73886 (round 2-1, cast A) | 60 | as E3 (55 + 7 = 62) | banked 2 at f73872 (+131 fr = 65.5 ticks); next +7 at f73886 (+145 fr = 72.5 ticks) | as E3 | Q7, Q9 |
+| E5 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 f74137-74277 (round 2-1, cast B) | 60 | as E3 (53 + 7 = 60, nothing banked) | next +7 at f74277 (+140 fr = 70 ticks) | as E3 | Q7 |
+| E6 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 f73735-73887 (cast A, the board every 8 frames) | 60 | feathers | gather behind her ~1.0-1.4 s, fly ~1.5 s, damage numbers on the target ~1.6-1.9 s | consistent with D1's 0.88 / 0.4 s waits and 3200 units/s over more than 4 hexes | Q16 |
+
+Not used: fight 1's second cast (f71290: the lock end shows 157 frames later, so the cast started ~28 frames after
+the fill; her target had died) and the casts cut short by the end of the round (f71682, f74569).
 
 ## Decisions and notes
 
+- 2026-11-18, D1 (implemented, `set19champs.Xayah`):
+  - **Cast (GA_Xayah19_Spell):** mana lock (0x1df9); CD_Xayah19_CastAnim. NumFeathers from the curve row; spawn
+    delay 0.8 / NumFeathers (0x1d83). 'StartFeathers' (0.2466 s): one GE_SimulateLaunchAttack (0x2ba1) and wave 1,
+    RepeatAction(spawn delay, NumFeathers / 2) (0x2caa; first action at once, A1). 'MoreFeathers' (0.6989 s): wave 2
+    (0xfe). 'Unlock' (2.1237 s) ends the mana lock and the cast (build: 64 / 65 ticks; E3-E5).
+  - **Feathers:** each plays CD_Xayah19_SpellMis from its place in a fan behind her
+    (ComputeFeatherStartLocations: 90 + i x 200 / 15 degrees from her facing; 100 units out for wave 1, 250 for
+    wave 2; wave 2 in reverse order) to her attack target. The chrono's first active group picks the missile:
+    wave 1 (no tag) waits 0.88 s, wave 2 (MissileSelector.1) 0.4 s, then 3200 units/s (TFTFixedSpeedMovement).
+    The waits sit on the projectile modules, which the snapshot doesn't read: typed from the client asset
+    (docs/OPEN-QUESTIONS.md, tool). Flight = straight line from the feather's place to the target (G4).
+  - **Damage:** on reaching the target, GE_Xayah19_InitialDamage = PhysicalDamageCalc1 = FeatherDamage x AD +
+    FeatherDamageAP x AP (E2): physical, on-spell, Damage.CritCondition.RollIfCanSpellCrit (crits with Precision,
+    e.g. Infinity Edge). The feather then flies 300 / 400 units on behind the target (MissileSelector.2) and hits
+    whoever it crosses with GE_Xayah19_SecondaryDamage (Tanks: _SecondaryDamageTank) = PhysicalDamageCalc2 / 3 =
+    RetractionDamage x AD = 0: nothing (both effects sit in an OLD folder).
+  - **Not modelled:** GE_Xayah19_ArmorReduction (Armor - ArmorReduction, flat, until combat ends; one per feather).
+    Flat armor reduction is not modelled (owner policy), so later feathers do a little less than in game.
+  - **Gu Feng** (owner, 2026-11-18: realistically only the (2) is relevant): ledger B35.

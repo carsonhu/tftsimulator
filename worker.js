@@ -65,6 +65,7 @@ const PY_FILES = [
   "traits/choreographer.py",
   "traits/jazz.py",
   "traits/beach_pop.py",
+  "traits/gu_feng.py",
   "augments/__init__.py",
   "augments/base.py",
   "augments/combat.py",
