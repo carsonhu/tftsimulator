@@ -38,6 +38,23 @@ class FastDeepCopy(object):
 OPS = ("+", "MultiplyAdditive", "DivideAdditive", "MultiplyCompound", "AddFinal", "=", "at least", "at most")
 
 
+class AttributeBased(FastDeepCopy):
+    """A modifier's magnitude read from another attribute each time it is needed (GAS AttributeBased, not snapshot):
+    coefficient x (that attribute + pre) + post, the attribute evaluated through channel `up_to`
+    (AttributeMagnitudeEvaluatedUpToChannel; None = its final value). Jhin's AS -> AD converter (champions/Jhin.md)."""
+
+    def __init__(self, attribute, coefficient, post=0.0, pre=0.0, up_to=None):
+        self.attribute = attribute
+        self.coefficient, self.post, self.pre, self.up_to = coefficient, post, pre, up_to
+
+    def value(self):
+        return self.coefficient * (self.attribute.evaluate(self.up_to) + self.pre) + self.post
+
+
+def _magnitude(x):
+    return x.value() if isinstance(x, AttributeBased) else x
+
+
 class Attribute(FastDeepCopy):
     """A unit attribute, evaluated the way the game evaluates it (GAS; ledger I5).
 
@@ -77,6 +94,8 @@ class Attribute(FastDeepCopy):
             self.mods = [m for m in self.mods if m[3] != key]
         self.mods.append((channel, op, value, key))
         self._value = None
+        if isinstance(value, AttributeBased):
+            self.dynamic = True  # never cached: the other attribute can change at any time
 
     def remove(self, key):
         self.mods = [m for m in self.mods if m[3] != key]
@@ -87,6 +106,7 @@ class Attribute(FastDeepCopy):
         (the last two as sum of (v - 1)), the product for MultiplyCompound."""
         t = 1.0 if op == "MultiplyCompound" else 0.0
         for c, o, x, _ in self.mods:
+            x = _magnitude(x)
             if c == channel and o == op:
                 if op == "MultiplyCompound":
                     t *= x
@@ -96,21 +116,32 @@ class Attribute(FastDeepCopy):
                     t += x
         return t
 
+    dynamic = False  # True once a modifier is AttributeBased
+
     @property
     def stat(self):
+        if self.dynamic:
+            return self._evaluate()
         if self._value is None:
             self._value = self._evaluate()
         return self._value
 
-    def _evaluate(self):
+    def evaluate(self, up_to=None):
+        """The value through channel `up_to` (None: every channel)."""
+        return self._evaluate(up_to)
+
+    def _evaluate(self, up_to=None):
         v = self._base
         for ch in sorted({m[0] for m in self.mods}):  # a channel without modifiers changes nothing
+            if up_to is not None and ch > up_to:
+                break
             add = ma = da = af = 0.0
             mc = 1.0
             over = lo = hi = None
             for c, op, x, _ in self.mods:
                 if c != ch:
                     continue
+                x = _magnitude(x)
                 if op == "+":
                     add += x
                 elif op == "MultiplyAdditive":

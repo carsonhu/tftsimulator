@@ -10,7 +10,7 @@ import set19buffs
 from build_champion import BuildChampion
 from buildstore import BuildDataError
 from champion import Champion
-from stats import Attack, Stat
+from stats import Attack, AttributeBased, Stat
 from items.debuffs import apply_shred
 from traits.classical import captivate
 from events import CRIT, IS_ATTACK, ON_HIT, ON_SPELL, ONHIT_AFTER, ONHIT_PRE, TRAIT, UNIT, CombatEvent, damage_tags
@@ -2454,6 +2454,213 @@ class Ahri(BuildChampion):
         self.schedule_tick(cast + self.basic_unlock, add)
 
 
+class Jhin(BuildChampion):
+    """String Quartet (champions/Jhin.md, D1). Scripts: GA_Jhin19_Passive, GA_ForceSequentialAttack_Jhin (build
+    ga_scripts.zip); effects GE_Jhin19_*.
+
+    No spell: his bar is Ammo (4). GE_Jhin19_ASToADConverter (infinite): AttackSpeed Override 1.0 on Channel0, so
+    Channel1 (items, traits) leaves AttackSpeed = 1 + every bonus; AttackDamage AddBase on Channel2 = ASToADRatio x
+    (that AttackSpeed through Channel1 - 1) (AttributeMagnitudeEvaluatedUpToChannel, not snapshot: it follows every
+    later bonus); AttackSpeed clamped to BaseAttackSpeed on Channel2 (0.84; 1.04 at 3 stars). So he attacks at 0.84
+    and each 1% bonus AS is 0.8% AD (VOD6 E1: AS 0.84 all fight, AD 16% at +20%).
+    Every launch (any Combat.Event.LaunchAttack, 0x8e9b): GE_Jhin19_AmmoTracker (-1 Ammo), attacks blocked for
+    AttackLockout / (AS / 0.8) (GetJhinASScalar); then, Ammo 0 -> GE_Jhin19_Reload (+4). The block ends before his next
+    attack is due, so Ammo never delays him (E2).
+    The sequence (CurrentAttackCounter 1..4, advanced at each launch): each attack's start (CustomEventOnAttack1)
+    spawns a violin until he ascends. Attacks 1-3 (LaunchAttack, 0.534 s): his attack plus ShootViolins(3000): every
+    violin out fires CD_Jhin19_ViolinAttack's 'ViolinMis' at his target; the first to arrive applies
+    GE_Jhin19_ViolinDamage = PhysicalDamageCalc1 (ViolinDamageAD x AD) x NumViolins (SetByCaller) and Captivates
+    (CaptivateDuration, with Classical). Attack 4 (CustomLaunchAttack1, 0.534 s; no attack projectile): ShootViolins
+    (4200) and CD_Jhin19_4thShotMis '4thShot' (4000): GE_Jhin19_4thShotDamage = PhysicalDamageCalc2, AppliesOnSpell +
+    AppliesOnHit.IsAttack, crit only with Precision, Captivate; the violins then despawn. Per cycle: 1+2+3+4 violin
+    hits and the empowered shot.
+    Ascension: the Num4thShotsToAscend-th 4th shot, UltDelay / scalar later, stops him (GE_UnitStopAttackingMoving
+    Casting) for CD_Jhin19_CastAnim; its 'Unlock' applies GE_Jhin19_UltiForm (range 44, CustomAttack.2) (E2: 54
+    ticks from that shot to the next launch). From then the 4 violins stay out, launches come at 'CustomLaunchAttack2/3'
+    (0.2508 s) and everything pierces: a 'PiercingMis' (GE_Jhin19_PiercingAutoAttack, his attack damage, AOE,
+    IsAttack) or on the 4th a '4thPiercingMis' (Calc2), and every violin its own 'ViolinMisPierce' (Calc1, no
+    NumViolins), each 4000 units/s through the target to 3000 units, a box 300 wide: per projectile the first enemy
+    takes x1, each later one x max(previous x (1 - DamageReductionPerHit), MinDamagePercent) = x0.4.
+    Encore (members, RecastEffectiveness r at the Encore tier): each violin attack's 'Encore' (0.494 s / scalar)
+    fires again (ViolinAttackEncore: Calc1 x r x NumViolins once; piercing: per violin, x r x the multiplier); the
+    4th shot fires a second one EncoreDelay / scalar later (Calc2 x r, AppliesOnHit at r). Damage terms on one
+    damage component multiply (champions/Jhin.md D1: added, r + 0.4 - 1 would be negative).
+    Simulated: violins fly from his hex (they float beside him); the dummies along a piercing line are those within
+    150 units of it (G22 layout); on-hit effects of pierced enemies are not scaled by their x0.4.
+    """
+    KEY = 'DA_Jhin19'
+    AREA = True  # piercing shots after ascension hit the dummies behind the target (layout.py)
+    ATTACK = 'CD_Jhin19_Attack_new'
+    VIOLIN = 'CD_Jhin19_ViolinAttack'
+    VIOLIN_PIERCE = 'CD_Jhin19_ViolinAttack_Piercing'
+    SHOT, PIERCE_SHOT, PIERCE = 'CD_Jhin19_4thShotMis', 'CD_Jhin19_4thPiercingMis', 'CD_Jhin19_PiercingMis'
+    ULT = 'CD_Jhin19_CastAnim'
+    # GA_Jhin19_Passive defaults and literals: EncoreDelay, UltDelay, AttackLockout (s), ShootViolins' speeds, the
+    # piercing distance, GetJhinASScalar's divisor, the projectiles' half width (BoxExtent Y)
+    ENCORE_DELAY, ULT_DELAY, ATTACK_LOCKOUT = 0.1, 0.6, 0.6
+    VIOLIN_SPEED, FOURTH_VIOLIN_SPEED, PIERCE_LENGTH, AS_SCALAR, HALF_WIDTH = 3000, 4200, 3000, 0.8, 150
+    AMMO = 4
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        # GE_Jhin19_ASToADConverter
+        base_as = self.row('BaseAttackSpeed', star=level)
+        ratio = self.row('ASToADRatio')
+        self.aspd.modify('=', 1.0, channel=0)
+        self.aspd.modify('at most', base_as, channel=2)
+        self.aspd.modify('at least', base_as, channel=2)
+        self.bonus_ad.modify('+', AttributeBased(self.aspd, ratio, post=-ratio, up_to=1), channel=2)
+        self.seq, self.fourth_shots, self.ascended = 1, 0, False
+        self.ammo = self.AMMO
+        self.ascend_at = self.row('Num4thShotsToAscend', star=level)
+        self.pierce_launch = self.chrono_event(self.ATTACK, 'CustomLaunchAttack2')
+        self.violin_encore_at = self.chrono_event(self.VIOLIN, 'Encore')
+        self.notes = ('No spell: every attack summons a violin; the violins out fire with each attack, the 4th is '
+                      'empowered. After the 3rd empowered shot (1st at 3 stars) he ascends: 4 violins, faster '
+                      'launches, everything pierces (later enemies take 40%). Bonus attack speed becomes AD (x0.8).')
+
+    def canCast(self, time=None):
+        return False  # no spell: the bar is Ammo (GE_Jhin19_AmmoTracker / _Reload)
+
+    def violin_damage(self, level, AD, AP):
+        return self.row('ViolinDamageAD', star=level) * AD
+
+    def shot_damage(self, level, AD, AP):
+        return self.row('4thShotDamageAD', star=level) * AD + self.row('4thShotDamageAP', star=level) * AP
+
+    def scalar(self):
+        return self.aspd.stat / self.AS_SCALAR  # GetJhinASScalar
+
+    def encore(self):
+        return self.trait_value('DA_Encore19', 'RecastEffectiveness') if self.trait_tier('DA_Encore19') else 0
+
+    def pierce_hits(self, target):
+        """[(dummy, units along)] within HALF_WIDTH of the line from him through `target`, PIERCE_LENGTH long."""
+        sx, sy = layout.world(self.hex)
+        tx, ty = layout.world(target.hex)
+        n = math.hypot(tx - sx, ty - sy) or 1
+        ux, uy = (tx - sx) / n, (ty - sy) / n
+        hit = []
+        for d in layout.in_play(self.opponents):
+            x, y = layout.world(d.hex)
+            a, off = (x - sx) * ux + (y - sy) * uy, abs((x - sx) * uy - (y - sy) * ux)
+            if 0 < a <= self.PIERCE_LENGTH and off <= self.HALF_WIDTH + 1e-9:
+                hit.append((d, a))
+        return sorted(hit, key=lambda h: h[1]) or [(target, n)]
+
+    # ------------------------------------------------------------------ the launch
+    def onLaunch(self, opponents, items):
+        self._shot = (self.seq, self.ascended)
+        self.ammo -= 1  # GE_Jhin19_AmmoTracker
+        self.curMana = self.ammo
+
+        def reload():
+            if self.ammo == 0:
+                self.ammo = self.curMana = self.AMMO  # GE_Jhin19_Reload
+        self.schedule_tick(self.tick + ticks_up(self.ATTACK_LOCKOUT / self.scalar()), reload)
+        if self.seq == 4 and not self.ascended:
+            self.fourth_shots += 1
+            if self.fourth_shots >= self.ascend_at:
+                self.schedule_tick(self.tick + ticks_up(self.ULT_DELAY / self.scalar()), self._ascend)
+        self.seq = self.seq % 4 + 1
+
+    def _ascend(self):
+        """GE_UnitStopAttackingMovingCasting and CD_Jhin19_CastAnim; its 'Unlock' applies GE_Jhin19_UltiForm and the
+        next attack starts the tick after (T5)."""
+        unlock = ticks_up(self.chrono_event(self.ULT, 'Unlock'))
+        self.busy_until = self.tick + unlock + 1
+        self.attacking = False
+        self.ascend_tick = self.tick
+
+        def ulti_form():
+            self.ascended = True
+            self.timing.launch = self.pierce_launch  # CustomLaunchAttack2 / 3
+        self.schedule_tick(self.tick + unlock, ulti_form)
+
+    def fire_attack(self, opponents, items, moment, paid):
+        seq, ascended = self._shot
+        target = opponents[0]
+        r = self.encore()
+        encore_tick = self.tick + ticks_up(self.ENCORE_DELAY / self.scalar())
+        if not ascended:
+            if seq < 4:
+                super().fire_attack(opponents, items, moment, paid)
+            else:
+                self._fourth_shot(target, 1, IS_ATTACK)
+                if r:
+                    self.schedule_tick(encore_tick, lambda: self._fourth_shot(target, r))
+            self._violins(target, seq, self.FOURTH_VIOLIN_SPEED if seq == 4 else self.VIOLIN_SPEED, r)
+            return
+        if seq < 4:
+            self._pierce(target, self.PIERCE, 'PiercingMis', self._pierced_attack)
+        else:
+            self._pierce(target, self.PIERCE_SHOT, '4thPiercingMis',
+                         lambda d, m: self._shot_lands(d, m, IS_ATTACK, eff=m))
+            if r:
+                self.schedule_tick(encore_tick, lambda: self._pierce(
+                    target, self.PIERCE_SHOT, '4thPiercingMis', lambda d, m: self._shot_lands(d, m * r, eff=m * r)))
+        for _ in range(self.AMMO):
+            self._pierce(target, self.VIOLIN_PIERCE, 'ViolinMisPierce', self._violin_pierces, name='violin')
+        if r:
+            def encore_violins():
+                for _ in range(self.AMMO):
+                    self._pierce(target, self.VIOLIN_PIERCE, 'ViolinMisPierce',
+                                 lambda d, m: self._violin_pierces(d, m * r), name='violin')
+            self.schedule_tick(self.tick + ticks_up(self.violin_encore_at / self.scalar()), encore_violins)
+
+    def _violins(self, target, n, speed, r):
+        """ShootViolins: n violins fire; the first arrival deals Calc1 x n (the others none); with Encore the violins
+        fire again at 'Encore', the first of those dealing Calc1 x r x n."""
+        flight = projectile_ticks(speed, self.target_hexes(target))
+
+        def lands(mult):
+            captivate(self, target, self.row('CaptivateDuration'))
+            self.multiTargetSpell([target], self.items, self.tick / TPS, 1,
+                                  lambda level, AD, AP: self.violin_damage(level, AD, AP) * mult, 'physical')
+        self.fly(self.tick, flight, target, lambda: lands(n), name='violin')
+        if r:
+            at = self.tick + ticks_up(self.violin_encore_at / self.scalar())
+            self.fly(at, flight, target, lambda: lands(r * n), name='violin')
+
+    def _fourth_shot(self, target, mult, *extra):
+        flight = self.chrono_projectile_ticks(self.SHOT, '4thShot', self.target_hexes(target))
+        self.fly(self.tick, flight, target, lambda: self._shot_lands(target, mult, *extra, eff=mult), name='4th shot')
+
+    def _shot_lands(self, target, mult, *tags, eff=1.0):
+        """GE_Jhin19_4thShot*Damage: Calc2 x mult, physical, on-spell and on-hit (at `eff`), crit only with Precision."""
+        items, now = self.items, self.tick / TPS
+        captivate(self, target, self.row('CaptivateDuration'))
+        dmg = self.shot_damage(self.level, self.bonus_ad.stat, self.ap.stat) * mult
+        crit_dmg = dmg * self.critDamage() if self.canSpellCrit else dmg
+        amp = self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        tags = damage_tags('physical', UNIT, ON_SPELL, ON_HIT, *tags)
+        self.emit(ONHIT_PRE, CombatEvent(self, target, dtype='physical', tags=tags, time=now, effectiveness=eff), items)
+        self.doDamage(target, items, self.crit.stat if self.canSpellCrit else 0, crit_dmg * amp, dmg * amp,
+                      'physical', now, tags=tags)
+        self.emit(ONHIT_AFTER, CombatEvent(self, target, tags=tags, time=now, effectiveness=eff), items)
+
+    def _pierce(self, target, chrono, projectile, land, name='pierce'):
+        """A projectile through `target`: each dummy on its line when the box's front reaches it, x1 then x0.4."""
+        speed = self.chrono_projectile_speed(chrono, projectile)
+        reduction, floor = self.row('DamageReductionPerHit'), self.row('MinDamagePercent')
+        mult = 1.0
+        hits = self.pierce_hits(target)
+        self.trace_projectile(self.tick, self.tick + ticks_up(hits[-1][1] / speed), self, hits[-1][0], name)
+        for d, along in hits:
+            self.schedule_tick(self.tick + ticks_up(max(0, along - 50) / speed), lambda d=d, m=mult: land(d, m))
+            mult = max(mult * (1 - reduction), floor)
+
+    def _violin_pierces(self, d, mult):
+        captivate(self, d, self.row('CaptivateDuration'))
+        self.multiTargetSpell([d], self.items, self.tick / TPS, 1,
+                              lambda level, AD, AP: self.violin_damage(level, AD, AP) * mult, 'physical')
+
+    def _pierced_attack(self, d, mult):
+        """GE_Jhin19_PiercingAutoAttack: his attack's damage x mult, an attack hit (on-hit effects, normal crits)."""
+        self.numAttacks += 1
+        self.performAttack([d], self.items, self.tick / TPS, Stat(0, mult, 0), generateMana=False)
+
+
 class SeraphineRisingStar(Seraphine):
     """Seraphine's Rising Star form (DA_SeraphineRisingStar19): the stream plus the bonus notes (see Seraphine)."""
     KEY = 'DA_SeraphineRisingStar19'
@@ -2471,7 +2678,7 @@ class SeraphineSuperstar(Seraphine):
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
-              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri']
+              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin']
 
 
 class TrainingDummy(Champion):

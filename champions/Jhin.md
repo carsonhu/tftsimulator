@@ -70,8 +70,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Jhin`, D1); the AS -> AD conversion, the launch rhythm,
+  the Ammo reload and the ascension's pause checked on VOD6 (E1, E2)
+- Keep in the simulator: **yes** (owner, 2026-11-18: VOD6 has him at 1-9 and 1-10)
 
 ## Questions
 
@@ -80,29 +81,68 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackSpecialist_Ammo | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | AS 0.84, Ammo 4, range 5 confirmed; HP 979 vs 804 (items / traits not identified) | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | Ammo: -1 per launch, +4 when empty, AttackLockout / scalar after the launch | confirmed: -1 at each launch; 4 again 36-37 frames after the 4th (18 ticks) | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
-| Q4 | Attack windup at base AS (attack start to hit / release) | 0.534 s (16.02 ticks) | predicted | |
-| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
-| Q6 | Projectile travel time (ranged only) | speed 2600 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | no spell timeline | open | |
-| Q8 | Does the cast time scale with attack speed? | no spell timeline | open | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | no spell timeline | open | |
-| Q10 | Does the mana lock scale with attack speed? | no spell timeline | open | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
-| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q4 | Attack windup at base AS (attack start to hit / release) | 0.534 s; ascended 0.2508 s (CustomLaunchAttack2/3) | predicted | |
+| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | his AS is clamped to BaseAttackSpeed | not applicable | D1 |
+| Q6 | Projectile travel time (ranged only) | attack 2600; violins 3000 (4th: 4200); 4th shot and piercing 4000 | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | no spell; the ascension pauses him UltDelay / scalar + CD_Jhin19_CastAnim | the pause: 53 ticks from the 3rd 4th shot to the next launch, VOD 54 | E2 |
+| Q8 | Does the cast time scale with attack speed? | the delays divide by AS / 0.8 (AS fixed) | predicted (script) | D1 |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | no spell | not applicable | |
+| Q10 | Does the mana lock scale with attack speed? | no spell | not applicable | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | every launch (custom ones too) is a LaunchAttack | predicted (script) | D1 |
+| Q12 | Does the cast cancel or reset an attack in progress? | the ascension stops him (GE_UnitStopAttackingMovingCasting) | modelled: the attack restarts after it | D1 |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | violins Calc1 x NumViolins (1, 2, 3, 4 per cycle); 4th shot Calc2; ascended: piercing x1 then x0.4 | predicted | D1 |
+| Q14 | Passives and other mechanics that need modelling | AS -> AD (0.8), the 4-attack sequence, the ascension, Encore copies | AS -> AD confirmed (16% AD at +20% AS); the ascension after the 3rd 4th shot seen (range 44 at 8:14) | E1, E2 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
+| Q16 | Encore copies: do the damage terms (Encore effectiveness, NumViolins, the piercing multiplier) multiply or add? | GAS adds MultiplyAdditive terms (1 + sum(v - 1)); added, a piercing Encore violin on a second enemy (0.25 + 0.4 - 1) would be negative | simulated as a product (D1) | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+VOD6 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-18-2026_18-15-31-219/` `…PBE_11-18-2026_18-40-41-766.mp4` (owner's
+clip, 2026-11-18, 60 fps; client rls-19.1.0.5986652, not exported: the simulator's newest is 5986094). Round 1-10:
+Jhin 1 star with two items. Panel read every second (7:56-8:25); Ammo from `tools/vod_text_changes.py --field mana`.
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 7:57-8:25 (round 1-10) | 60 | inspection panel each second | 979/979, x/4, range 5 Hex (44 Hex from 8:14 to the round's end), Back, Attack Specialist; AS 0.84 throughout; AD 35 / 16% at the start, rising about 11% a second to 122 / 307% (the two items' attack speed stacking) | AS clamped to BaseAttackSpeed; AD 16% = 0.8 x 20% bonus AS at the start (the items' base AS), and AD keeps following the AS stacking; the range 44 after the ascension (GE_Jhin19_UltiForm) | Q1, Q14 |
+| E2 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f28655-30196 | 60 | Ammo text | 3,2,1,0 then 4 and so on; launches f28655, 28725, 28797, 28923, 28994, 29066, 29138, 29208, 29280, 29352, 29483, 29553, 29661, 29731, 29803, 29875, 29946, 30018, 30088, 30160; reloads (0 -> 4) 37 / 36 / 36 / 36 / 35 / 36 frames after each 4th launch | launches 70 / 72 frames (35 / 36 ticks) apart, the engine's; two gaps of 126 / 131 frames (a retarget, not modelled); the reload 18 ticks after the 4th launch (AttackLockout / scalar = 17.1 -> 18); after the 3rd 4th launch (f29553) the next launch 108 frames (54 ticks) later, engine 53 (UltDelay 18 + CastAnim 27 + piercing windup 8) | Q2, Q7, Q14 |
 
 ## Decisions and notes
 
+- 2026-11-18, D1 (implemented, `set19champs.Jhin`):
+  - **AS -> AD (GE_Jhin19_ASToADConverter, infinite):** AttackSpeed Override 1.0 on Channel0; AttackDamage AddBase on
+    Channel2 = ASToADRatio x AttackSpeed (evaluated up to Channel1) - ASToADRatio; AttackSpeed at least and at most
+    BaseAttackSpeed on Channel2. Modelled with `stats.AttributeBased` (not cached; follows later bonuses).
+  - **Ammo (GA_Jhin19_Passive 0x8be2):** every LaunchAttack (non-exact, custom launches too): GE_Jhin19_AmmoTracker
+    (-1), GE_Jhin19_BlockAttackTemporarily for AttackLockout / GetJhinASScalar (AttackSpeed / 0.8), then Ammo 0 ->
+    GE_Jhin19_Reload (+4). Never delays an attack at his fixed AS.
+  - **Sequence:** CurrentAttackCounter 1..4 (+1 at each launch). CustomEventOnAttack1 (attack start) spawns violin n
+    (positions at 45 / -45 / 90 / -90 degrees behind him) unless ascended. LaunchAttack (attacks 1-3): ShootViolins
+    (3000); Custom.1 (attack 4): EncoreDelay copy, 4thShotCounter + 1, ShootViolins(4200), CD_Jhin19_4thShotMis.
+    ShootViolins: each violin plays CD_Jhin19_ViolinAttack (speed GetJhinASScalar) at his target; the first
+    'ViolinMis' to arrive (DealtDamage) captivates and applies GE_Jhin19_ViolinDamage (Calc1, Encore effectiveness 1,
+    NumViolins); its 'Encore' event (Encore active) replays CD_Jhin19_ViolinAttackEncore, the first arrival dealing
+    Calc1 x r x NumViolins. After the 4th's violin attacks (counter 4, not ascended) the violins despawn.
+  - **4th shot:** GE_Jhin19_4thShotDamage (Calc2; AppliesOnSpell, AppliesOnHit.IsAttack; RollIfCanSpellCrit) +
+    Captivate; Encore: CD_Jhin19_4thShotMisEncore EncoreDelay / scalar later, GE_Jhin19_4thShotDamageEncore (Calc2 x
+    r, AppliesOnHit, on-hit at r).
+  - **Ascension:** 4thShotCounter >= Num4thShotsToAscend: WaitDelay(UltDelay / scalar) -> GE_UnitStopAttackingMoving
+    Casting + CD_Jhin19_CastAnim; 'Unlock' -> GE_Jhin19_UltiForm (AttackRange 44, ChronoTags.Dynamic.CustomAttack.2),
+    the stop removed.
+  - **Ascended:** no more spawns (the 4 violins stay). Custom.2 (0.2508 s): ShootViolinsPiercing + CD_Jhin19_PiercingMis
+    (GE_Jhin19_PiercingAutoAttack: BasicAttackDamage x multiplier, AOE, CanBeDodged, IsAttack, the attack's crit).
+    Custom.3 (4th): Encore copy, ShootViolinsPiercing, CD_Jhin19_4thPiercingMis (GE_Jhin19_4thShotPiercingDamage).
+    Every piercing projectile: to ProjectDistanceThroughTarget(3000), 4000 units/s, box 100 x 300; per projectile
+    (ChronoToDamageMultiplierMap) the multiplier starts at 1 and after each enemy becomes max(m x (1 - 0.6), 0.4).
+    Each violin's 'ViolinMisPierce' deals GE_Jhin19_ViolinDamage_Piercing (Calc1 x Encore x multiplier), no
+    NumViolins.
+  - **Damage terms multiply** (Q16): a piercing Encore violin's second enemy would take 0.25 + 0.4 - 1 < 0 if the
+    MultiplyAdditive terms added; the owner's Seraphine reading (champions/SeraphineIndie.md D2) is the same rule.
+  - **Simulated:** violins fly from his hex; a piercing line hits the dummies within 150 units of it, each when the
+    box's front reaches it; pierced enemies' on-hit effects are at full effectiveness; the retarget pauses (E2) not
+    modelled.

@@ -106,7 +106,8 @@ class Tracer:
     # ------------------------------------------------------------------ snapshots
     @staticmethod
     def _mods(attr):
-        return [[op, _r(value), key] for channel, op, value, key in attr.mods if key not in ("cap", "floor")]
+        return [[op, _r(value.value() if hasattr(value, "value") else value), key]  # AttributeBased: its value now
+                for channel, op, value, key in attr.mods if key not in ("cap", "floor")]
 
     def _state(self, tick):
         c = self.champion

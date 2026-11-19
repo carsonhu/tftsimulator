@@ -208,6 +208,13 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | His cast timelines | the non-Alt CD_Yone19_CastAnim / _Part2 (VOD6 2-1 fits them; the script's decoded default UseAltAnims = True names the Alt ones, in an OLD folder) | 2-2 / 2-4 (AD form): the frames from the cast to the final slash's number | champions/Yone.md Q16 |
 | The Heartsteel Bias strikes | 12 strikes in the time of 10, 25% armor ignored | 2-2 / 2-4: count the strike numbers | champions/Yone.md D1 |
 
+### 7w. Jhin (VOD6 has him at 1-9 and 1-10)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| The pause when he ascends | 53 ticks from the ascending 4th shot to the next launch (UltDelay 18 + CastAnim 27 + the piercing windup 8); VOD6 1-10: 54 | another ascension: the Ammo text's frames around it | champions/Jhin.md E2 |
+| Encore copies (Jhin with Encore active) | the damage terms multiply: a violin copy Calc1 x 0.25 x violins, a piercing copy x 0.25 x 0.4 on later enemies | a fight with Encore (2): the copy's damage numbers on a target with known armor | champions/Jhin.md Q16 |
+
 ### 7n. Augments
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
