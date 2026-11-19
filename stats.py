@@ -64,7 +64,9 @@ class Attribute(FastDeepCopy):
         ((input + sum of AddBase) x (1 + sum of (MultiplyAdditive - 1)) / (1 + sum of (DivideAdditive - 1))
          x product of MultiplyCompound) + sum of AddFinal
 
-    then an Override ("=") replaces the result and bounds clamp it ("at least" is a minimum, "at most" a maximum).
+    then bounds clamp it ("at least" is a minimum, "at most" a maximum). An Override ("=") on a channel is that
+    channel's result outright, its other modifiers and bounds skipped (GAS's FAggregatorModChannel returns the first
+    qualifying Override; ledger I5: Silvermere Dawn's 0.5 beats Jhin's own BaseAttackSpeed bounds, owner).
     Items, roles and traits sit on Channel1; Channel2 comes after them (caps, Overrides such as Silvermere Dawn's,
     debuffs on the target).
 
@@ -153,14 +155,15 @@ class Attribute(FastDeepCopy):
                 elif op == "AddFinal":
                     af += x
                 elif op == "=":
-                    over = x
+                    over = x if over is None else over  # the first one applied
                 elif op == "at least":
                     lo = x if lo is None else max(lo, x)
                 else:
                     hi = x if hi is None else min(hi, x)
-            v = (v + add) * (1 + ma) / (1 + da) * mc + af
             if over is not None:
                 v = over
+                continue
+            v = (v + add) * (1 + ma) / (1 + da) * mc + af
             if lo is not None:
                 v = max(v, lo)
             if hi is not None:

@@ -85,7 +85,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | Ammo: -1 per launch, +4 when empty, AttackLockout / scalar after the launch | confirmed: -1 at each launch; 4 again 36-37 frames after the 4th (18 ticks) | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.534 s; ascended 0.2508 s (CustomLaunchAttack2/3) | predicted | |
-| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | his AS is clamped to BaseAttackSpeed | not applicable | D1 |
+| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | his AS is clamped to BaseAttackSpeed; Silvermere Dawn's Channel2 Override sets it to 0.5 (I5) | not applicable, except Silvermere Dawn: 0.5 (owner, earlier sets; D2) | D1, D2 |
 | Q6 | Projectile travel time (ranged only) | attack 2600; violins 3000 (4th: 4200); 4th shot and piercing 4000 | predicted | |
 | Q7 | Cast time: cast start to the next attack starting | no spell; the ascension pauses him UltDelay / scalar + CD_Jhin19_CastAnim | the pause: 53 ticks from the 3rd 4th shot to the next launch, VOD 54 | E2 |
 | Q8 | Does the cast time scale with attack speed? | the delays divide by AS / 0.8 (AS fixed) | predicted (script) | D1 |
@@ -146,3 +146,8 @@ Jhin 1 star with two items. Panel read every second (7:56-8:25); Ammo from `tool
   - **Simulated:** violins fly from his hex; a piercing line hits the dummies within 150 units of it, each when the
     box's front reaches it; pierced enemies' on-hit effects are at full effectiveness; the retarget pauses (E2) not
     modelled.
+- 2026-11-18, D2 (owner, from earlier sets; no VOD this set): **Silvermere Dawn overrides his fixed AS to 0.5.** Its
+  GE_Artifact_SilvermereDawn_Stats Overrides AttackSpeed on Channel2, the same channel as his converter's
+  BaseAttackSpeed bounds. The engine had applied the bounds after the Override (0.84); now an Override is its
+  channel's result (ledger I5, as GAS's aggregator does). His AS -> AD reads AttackSpeed up to Channel1, so it is
+  unchanged; GetJhinASScalar follows the 0.5 (0.625), so his lockout, ascension and Encore delays lengthen.

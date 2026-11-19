@@ -5,6 +5,7 @@ import collections
 import pytest
 
 import set19buffs
+import set19items
 from buildstore import load_build
 from set19champs import Jhin
 from simulator import Simulator
@@ -78,3 +79,14 @@ def test_encore():
     j, ds, hits = fight(seconds=6, buffs=[set19buffs.Encore(2)])
     dmg = sorted(d for t, ds_ in hits.items() if t < j.launch_log[4][0] for d in ds_)
     assert sorted(d for d in dmg if d not in (33,)) == sorted([25, 50, 75, 100, 94, 6.25, 12.5, 18.75, 25, 23.5])
+
+
+def test_silvermere_dawn_overrides_his_fixed_attack_speed():
+    # owner, 2026-11-18 (earlier sets, no VOD): Silvermere Dawn's Channel2 Override 0.5 beats his own Channel2
+    # BaseAttackSpeed bounds (ledger I5: an Override is its channel's result); the AS -> AD converter reads Channel1,
+    # so its AD is unchanged, and GetJhinASScalar follows the 0.5
+    j = LoggedJhin(1)
+    Simulator().simulate([set19items.SilvermereDawn()], [], j, [dummy()], 10)
+    assert j.aspd.stat == 0.5 and j.scalar() == pytest.approx(0.625) and j.bonus_ad.stat == pytest.approx(2.5)
+    ticks = [t for t, _, _ in j.launch_log]
+    assert {b - a for a, b in zip(ticks, ticks[1:])} == {60}  # one launch every 2 s
