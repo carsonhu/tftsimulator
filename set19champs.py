@@ -12,7 +12,7 @@ from buildstore import BuildDataError
 from champion import Champion
 from items.debuffs import apply_shred
 from traits.classical import captivate
-from events import CRIT, IS_ATTACK, ON_HIT, ON_SPELL, ONHIT_AFTER, ONHIT_PRE, UNIT, CombatEvent, damage_tags
+from events import CRIT, IS_ATTACK, ON_HIT, ON_SPELL, ONHIT_AFTER, ONHIT_PRE, TRAIT, UNIT, CombatEvent, damage_tags
 from timing import HEX_UNITS, TPS, Timing, projectile_ticks, ticks_up
 
 
@@ -1688,9 +1688,87 @@ class Katarina(BuildChampion):
         self.schedule_tick(self.tick + ticks_up(self.eviscerate_at), eviscerate)
 
 
+class Kayn(BuildChampion):
+    """Shadow of the Night (champions/Kayn.md, D1). Scripts: GA_Kayn19_Spell, GA_Kayn19_Heartsteel_Passive (build
+    ga_scripts.zip).
+
+    The cast commits, applies the mana lock (0x1729) and reads SpellWidth (100), SpellLength (429), SpellHexLength (2)
+    and ExtraDashRangeAboveAttackRange (1). MakeDashDecision compares the enemies a SpellLength x SpellWidth rectangle
+    from him toward his target holds standing still (EvalNumHitAtStandStill) with the best unoccupied hex within
+    SpellHexLength of the target and within his range + 1 of him (TR_Sort_ByNumEnemiesInNHexLineThroughTarget; ties
+    to the row nearest the middle): standing still hits more -> Cast(); else he dashes there first (CD_Kayn19_Dash,
+    Cast() at 'FinishJump') unless he is already on it (0x1f26). Cast() plays CD_Kayn19_Spell at his target;
+    'DealDamage' (0.4591 s): GE_19_KaynDamageEnemies on the enemies in the rectangle from him toward the target, the
+    target if none (0x1092): PhysicalDamageCalc1 = SpellPhysicalDamage x AD + SpellMagicDamage x AP, physical,
+    on-spell, crit only with Precision. The chrono's end (0.7304 s) lifts the mana lock and finishes the cast
+    (CleanupAbility; the build's 22 / 23 ticks).
+    Heartsteel Bias (GA_Kayn19_Heartsteel_Passive, when he has the SpellUpgradeTierIsActive and Selected tags): the
+    first time his Health + Shield falls to HeartsteelStan_PercentHealthTrigger (70%) of max he becomes the Shadow
+    Assassin (1 s untargetable). From then every damage of his with Damage.Source.Unit, at PreMitigation (after crit
+    and amps, before resistances), adds GE_Kayn19_Heartsteel_BonusMagicDamage: that amount x
+    HeartsteelStan_MagicDamagePostTransform (35%) as magic damage, Damage.Source.Trait (it triggers nothing), no tags,
+    never crits.
+    Simulated: he stands still (stationary dummies; the dash's length is open, champions/Kayn.md Q16). Dummies never
+    hit back, so as the Bias he is assumed to be the Shadow Assassin from combat start (champions/Kayn.md Q17, owner
+    question); the bonus is not amplified again (as True Damage's, B19).
+    """
+    KEY = 'DA_Kayn19'
+    AREA = True  # the rectangle can hold enemies behind the target (layout.py)
+    CAST = 'CD_Kayn19_Spell'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.deal_damage_at = self.chrono_event(self.CAST, 'DealDamage')
+        self.notes = ('A cast: a swipe in a 2-hex line toward his target. As the Heartsteel Bias he is the Shadow '
+                      'Assassin from combat start (assumed: he transforms at 70% Health), adding 35% of his damage as '
+                      'magic damage.')
+
+    def spell_damage(self, level, AD, AP):
+        return self.row('SpellPhysicalDamage', star=level) * AD + self.row('SpellMagicDamage', star=level) * AP
+
+    def shadow_assassin(self):
+        return bool(getattr(self, 'heartsteel_bias', False))
+
+    def swipe_targets(self, target):
+        """The dummies in the SpellLength x SpellWidth rectangle from him toward `target`
+        (TR_Add_UnitsWithinRectanglePointProjection), nearest first; the target if none."""
+        sx, sy = layout.world(self.hex)
+        tx, ty = layout.world(target.hex)
+        n = math.hypot(tx - sx, ty - sy) or 1
+        ux, uy = (tx - sx) / n, (ty - sy) / n
+        length, width = self.row('SpellLength'), self.row('SpellWidth')
+        hit = []
+        for d in layout.in_play(self.opponents):
+            x, y = layout.world(d.hex)
+            a, off = (x - sx) * ux + (y - sy) * uy, abs((x - sx) * uy - (y - sy) * ux)
+            if -1e-9 <= a <= length + 1e-9 and off <= width / 2 + 1e-9:
+                hit.append((a, d))
+        return [d for _, d in sorted(hit, key=lambda h: h[0])] or [target]
+
+    def doDamage(self, opponent, items, critChance, damageIfCrit, damage, dtype, time, tags=frozenset(),
+                 ability_armor_pierce=0, ability_mr_pierce=0):
+        super().doDamage(opponent, items, critChance, damageIfCrit, damage, dtype, time, tags, ability_armor_pierce,
+                         ability_mr_pierce)
+        if UNIT in tags and self.shadow_assassin():
+            c = min(1, critChance)
+            pre = damage * (1 - c) + damageIfCrit * c  # PreMitigation: after crit (averaged) and amps
+            bonus = pre * self.row('HeartsteelStan_MagicDamagePostTransform')
+            super().doDamage(opponent, items, 0, bonus, bonus, 'magical', time, tags=damage_tags('magical', TRAIT))
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+
+        def swipe():
+            hit = self.swipe_targets(target)
+            self.trace('area', at=target, hit=[d for d in hit if d is not target])
+            self.multiTargetSpell(hit, self.items, self.tick / TPS, len(hit), self.spell_damage, 'physical')
+
+        self.schedule_tick(self.tick + ticks_up(self.deal_damage_at), swipe)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
-              'Syndra', 'Briar', 'Xayah', 'Katarina']
+              'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn']
 
 
 class TrainingDummy(Champion):
