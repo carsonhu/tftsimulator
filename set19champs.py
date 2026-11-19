@@ -1873,9 +1873,109 @@ class Qiyana(BuildChampion):
         self.schedule_tick(cast + self.mana_unlock_ticks, refund)
 
 
+class Seraphine(BuildChampion):
+    """Livestream of Note (champions/SeraphineIndie.md, D1). Script: GA_Seraphine19_Spell (build ga_scripts.zip). Her
+    three forms are three units with the same stats and rows (DA_SeraphineIndie19, _RisingStar19, _Superstar19); the
+    spell reads the form (SeraphineFormIndex 1 / 2 / 3, 0x3e8c).
+
+    The cast commits, applies the mana lock (0x4449) and plays CD_Seraphine19_CastAnim at her target. NumFires =
+    Round(SpellDuration / SpellTickRate + 1) = Round(2.1 / 0.15 + 1) = 15 (script defaults, 0x3f2a).
+    'BeginFire' (0.2997 s): RepeatAction(SpellTickRate, NumFires), first action at once (A1): each fire sends a note
+    (CD_Seraphine19_Splines 'SpellMis', 1900 units/s) from her left speaker and, SpellTickRate / 2 later, one from her
+    right (0x2929), both at her target. Each note: GE_Seraphine19_Damage = MagicDamageCalc1 (DamageAP x AP) with two
+    DivideAdditive modifiers, SetByCaller NumFires and 2: magic, on-spell, crit only with Precision.
+    Rising Star and Superstar (form >= 2): 'SecondFire' (1.1739 s) and 'ThirdFire' (2.0487 s) each fire bonus notes
+    (FireBonusNotes): RisingStarExtraNotes - Round(it / 2) = 4, then Round(it / 2) = 4 notes, spread in turn over the
+    N nearest enemies (TR_Add_N_NearestEnemiesWithoutTags, her target if none; GetRepeatingListFromTargetData), each
+    CD_Seraphine19_SplinesBonus (1900) and GE_Seraphine19_DamageBonusNote = MagicDamageCalc2 (ExtraNoteDamageAP x AP).
+    Superstar (form 3): 'HighNote' (0.269 s): a CD_Seraphine19_HighNoteMis ('HighNote', 1800, arc 500) at every enemy,
+    GE_Seraphine19_DamageHighNote = MagicDamageCalc3 (HighNoteDamageAP x AP). 'Unlock' (2.6974 s) ends the cast
+    (the build's 81 / 82 ticks).
+    Each note's divisor follows the evaluation rule the engine uses for every channel (ledger I5, GAS): DivideAdditive
+    terms add as 1 + sum(d - 1) = 1 + 14 + 1 = 16, so the 30 notes deal 30 / 16 x MagicDamageCalc1, 1.875x the
+    tooltip's total (VOD6's per-note numbers fit 16, not 30: champions/SeraphineIndie.md Q16, owner question).
+    Flights: the target's distance at 1900 (the speakers beside her and the spline's curve not modelled, G4).
+    """
+    KEY = 'DA_SeraphineIndie19'
+    FORM = 1
+    CAST = 'CD_Seraphine19_CastAnim'
+    NOTE, BONUS, HIGH = 'CD_Seraphine19_Splines', 'CD_Seraphine19_SplinesBonus', 'CD_Seraphine19_HighNoteMis'
+    SPELL_DURATION, SPELL_TICK_RATE = 2.1, 0.15  # GA_Seraphine19_Spell defaults (script literals)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.cast_events = {e: self.chrono_event(self.CAST, e) for e in ('HighNote', 'BeginFire', 'SecondFire', 'ThirdFire')}
+        self.num_fires = round(self.SPELL_DURATION / self.SPELL_TICK_RATE + 1)
+        self.note_divisor = 1 + (self.num_fires - 1) + (2 - 1)  # DivideAdditive: 1 + sum(d - 1) (I5)
+        extra = round(self.row('RisingStarExtraNotes'))
+        self.bonus_volleys = (extra - round(extra / 2), round(extra / 2))  # 'SecondFire', 'ThirdFire'
+        forms = {1: 'a stream of 30 notes at her target', 2: 'a stream of 30 notes at her target and 2 x 4 bonus '
+                 'notes at the nearest enemies', 3: 'a high note at every enemy, a stream of 30 notes at her target '
+                 'and 2 x 4 bonus notes at the nearest enemies'}
+        self.notes = (f'A cast: {forms[self.FORM]}. Each stream note deals DamageAP x AP / 16 (the game\'s divide rule; '
+                      f'the tooltip implies / 30, owner question).')
+
+    def note_damage(self, level, AD, AP):
+        return self.row('DamageAP', star=level) * AP / self.note_divisor
+
+    def bonus_damage(self, level, AD, AP):
+        return self.row('ExtraNoteDamageAP', star=level) * AP
+
+    def high_damage(self, level, AD, AP):
+        return self.row('HighNoteDamageAP', star=level) * AP
+
+    def _note(self, at, chrono, projectile, target, damage, name):
+        def land():
+            self.multiTargetSpell([target], self.items, self.tick / TPS, 1, damage, 'magical')
+        flight = self.chrono_projectile_ticks(chrono, projectile, self.target_hexes(target))
+        self.fly(at, flight, target, land, name=name)
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        cast = self.tick
+
+        def at(seconds, fn):
+            if ticks_up(seconds) == 0:
+                fn()
+            else:
+                self.schedule_tick(cast + ticks_up(seconds), fn)
+
+        if self.FORM >= 3:
+            def high_notes():
+                for d in layout.in_play(self.opponents):
+                    self._note(self.tick, self.HIGH, 'HighNote', d, self.high_damage, 'high note')
+            at(self.cast_events['HighNote'], high_notes)
+        for k in range(self.num_fires):
+            for side in (0, 1):
+                t = self.cast_events['BeginFire'] + k * self.SPELL_TICK_RATE + side * self.SPELL_TICK_RATE / 2
+                at(t, lambda: self._note(self.tick, self.NOTE, 'SpellMis', target, self.note_damage, 'note'))
+        if self.FORM >= 2:
+            for event, n in zip(('SecondFire', 'ThirdFire'), self.bonus_volleys):
+                def volley(n=n):
+                    near = self.nearest(n) or [target]
+                    for j in range(n):
+                        self._note(self.tick, self.BONUS, 'SpellMis', near[j % len(near)], self.bonus_damage, 'bonus note')
+                at(self.cast_events[event], volley)
+
+
+class SeraphineRisingStar(Seraphine):
+    """Seraphine's Rising Star form (DA_SeraphineRisingStar19): the stream plus the bonus notes (see Seraphine)."""
+    KEY = 'DA_SeraphineRisingStar19'
+    FORM = 2
+    display_name = 'Seraphine (Rising Star)'
+
+
+class SeraphineSuperstar(Seraphine):
+    """Seraphine's Superstar form (DA_SeraphineSuperstar19): high notes, the stream and the bonus notes."""
+    KEY = 'DA_SeraphineSuperstar19'
+    FORM = 3
+    display_name = 'Seraphine (Superstar)'
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
-              'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana']
+              'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
+              'SeraphineSuperstar']
 
 
 class TrainingDummy(Champion):

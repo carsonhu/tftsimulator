@@ -201,6 +201,12 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | (owner) Her ring colour | averaged: each cast deals +20% x 1/3 (Red) and refunds 10 x 1/3 mana (Blue), the ring's long-run shares | your call: averaged, or a fixed colour per fight | champions/Qiyana.md Q14 |
 | Her Collab trait | not in build 5986094 (VOD6's client 5986652 shows it) | (tool) export 5986652 | champions/Qiyana.md |
 
+### 7u. Seraphine (VOD6 has her at 1-6 and 2-4)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| (owner) A stream note's damage | DamageAP x AP / 16 (DivideAdditive 15 and 2 add as 1 + 14 + 1, the engine's channel rule I5): a cast's 30 notes deal 1.875x the tooltip's 570; the tooltip implies / 30. VOD6 1-6: 25s on her target at AP 120%, which / 30 can't reach without a damage amp | a cast on a target whose MR is known (inspect it): one note's number | champions/SeraphineIndie.md Q16 |
+
 ### 7n. Augments
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

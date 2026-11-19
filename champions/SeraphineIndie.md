@@ -80,8 +80,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Seraphine`, `SeraphineRisingStar`, `SeraphineSuperstar`;
+  D1); the mana lock checked on VOD6 (E2); the per-note damage divisor is an owner question (Q16)
+- Keep in the simulator: **yes** (owner, 2026-11-18: VOD6 has her at 1-6 and 2-4). Her three forms are three
+  champions on the page (same stats; the spell reads the form)
 
 ## Questions
 
@@ -90,29 +92,56 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed (HP 775 = 700 + Heartsteel's Sett 75; mana 50, 2/s, range 4) | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster: 7 per attack, 2/s | confirmed (+7 steps, +1 every 0.5 s) | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.2682 s (8.05 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 1300 | predicted | |
 | Q7 | Cast time: cast start to the next attack starting | 2.7333 s (82 ticks) | predicted | |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 2.7 s (81 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 2.7 s (81 ticks) | confirmed: the banked 2 shows 82 ticks after the bar empties (81 + the tick after the fill) | E2 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
-| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 (no GE_SimulateLaunchAttack) | predicted (script) | D1 |
+| Q12 | Does the cast cancel or reset an attack in progress? | cancels (CancelAbilitiesWithTag Combat.Attacking) | predicted | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | 30 notes at the target; Rising Star 2 x 4 bonus notes; Superstar a high note at every enemy | predicted | D1 |
+| Q14 | Passives and other mechanics that need modelling | the forms (Indie / Rising Star / Superstar, from rerolls) | three champions on the page | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
+| Q16 | Each stream note's damage: MagicDamageCalc1 with DivideAdditive NumFires (15) and 2 | the engine's channel rule (I5, GAS): / (1 + 14 + 1) = / 16, so 30 notes = 1.875 x the tooltip's total; the tooltip implies / 30 | **open, owner**: simulated / 16. VOD6: the numbers on her target were 25 and 12; at AP 120% a note is 42.75 (/16) or 22.8 (/30) before MR, and the panel shows no damage amp, so 25 can't be / 30 (it needs ~71 MR at / 16) | E3 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+VOD6 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-18-2026_18-15-31-219/` `…PBE_11-18-2026_18-40-41-766.mp4` (owner's
+clip, 2026-11-18, 60 fps; client rls-19.1.0.5986652, not exported: the simulator's newest is 5986094). Round 1-6:
+Seraphine 1 star, Indie, two items; Heartsteel (3) on the board (Sett fielded). Mana from
+`tools/vod_text_changes.py --field mana` (crops read by eye).
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 4:24.6 (round 1-6) | 60 | inspection panel | 775/775, x/50, 2/s, range 4 hex, Back, Magic Caster; AD 30, AP 20%, armor 38, MR 38, AS 1.43, crit 35% | HP 700 + 75 (Sett), AD, mana, regen, range match; AP, AS, crit, armor and MR carry items and traits not identified | Q1 |
+| E2 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f15542-16518 | 60 | mana text | +7 steps and +1 every 30 frames; casts f15819 (45 + 7 = 52), f16168, f16518; after f15819 the banked 2 shows at f15983 (+164 frames = 82 ticks) | mana lock 81 + the tick after the fill; the cast at f16518 was cut by the round's end | Q2, Q9 |
+| E3 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 4:23.9-4:26.4 (the target every 1/15 s) | 60 | magic damage numbers on her target during the cast | 25 and 12, alternating, about every 0.08 s | see Q16; the target's MR is not known, and the 12s may be another unit's | Q16 |
 
 ## Decisions and notes
 
+- 2026-11-18, D1 (implemented, `set19champs.Seraphine` and its two form subclasses):
+  - **Forms:** DA_SeraphineIndie19 (in the shop), _RisingStar19, _Superstar19: the same stats and rows; the spell
+    reads the unit's data asset (SeraphineFormIndex 1 / 2 / 3, 0x3e8c). The page lists each.
+  - **Cast (GA_Seraphine19_Spell):** commit, mana lock (0x4449), CD_Seraphine19_CastAnim at her target. NumFires =
+    Round(SpellDuration / SpellTickRate + 1) = 15 (defaults 2.1 s, 0.15 s).
+  - **Stream:** 'BeginFire' (0.2997 s): RepeatAction(0.15, 15), first at once (A1); each fire: a left-speaker note
+    and, 0.075 s later, a right-speaker note (CD_Seraphine19_Splines 'SpellMis', 1900 units/s) at her target.
+    GE_Seraphine19_Damage: MagicDamageCalc1 (DamageAP x AP), DivideAdditive SetByCaller (NumFires) and DivideAdditive
+    2; magic, on-spell, RollIfCanSpellCrit. Divisor (I5): 1 + (15 - 1) + (2 - 1) = 16 (Q16).
+  - **Rising Star / Superstar:** 'SecondFire' (1.1739 s): FireBonusNotes(8 - Round(8 / 2) = 4); 'ThirdFire' (2.0487
+    s): FireBonusNotes(Round(8 / 2) = 4). The notes go in turn to the N nearest enemies (TR_Add_N_NearestEnemies...,
+    SortByRowDistance; her target if none; GetRepeatingListFromTargetData), CD_Seraphine19_SplinesBonus (1900),
+    GE_Seraphine19_DamageBonusNote = MagicDamageCalc2 (ExtraNoteDamageAP x AP).
+  - **Superstar:** 'HighNote' (0.269 s): CD_Seraphine19_HighNoteMis ('HighNote', 1800, arc 500) at every enemy,
+    GE_Seraphine19_DamageHighNote = MagicDamageCalc3 (HighNoteDamageAP x AP).
+  - **End:** 'Unlock' (2.6974 s) ends the cast (81 / 82 ticks).
+  - **Simulated:** flights over the target's distance (G4; the speakers' places and the splines' curves not
+    modelled); the Indie trait itself (rerolls, popularity, loot) gives no combat power.
