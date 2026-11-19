@@ -644,6 +644,34 @@ def get_champ_info(cfg):
 
 
 # ---------------------------------------------------------------------------
+# Cards: the in-game text of every item, augment and trait the page can show
+# ---------------------------------------------------------------------------
+
+def get_cards(cfg):
+    """{class name: card} for every item and buff class with a build key: the build's name, kind (item kind, augment
+    tier or trait kind), stat line, text and (traits) breakpoints, all from the selected build. The page shows one
+    when a row or a menu entry is hovered."""
+    build = _build(cfg)
+    cards = {}
+    for module, group in ((set19items, "items"), (set19buffs, "augments"), (set19buffs, "traits")):
+        for name, cls in vars(module).items():
+            key = getattr(cls, "KEY", None) if isinstance(cls, type) else None
+            entry = build.data[group].get(key) if isinstance(key, str) else None
+            if entry is None or name in cards:
+                continue
+            cards[name] = {
+                "key": key,
+                "name": entry.get("name") or key,
+                "kind": entry.get("kind") or entry.get("tier") or "",
+                "stats": entry.get("stat_text") or "",
+                "text": entry.get("text") or "",
+                "tiers": [{"threshold": t.get("threshold"), "text": t.get("text") or ""}
+                          for t in entry.get("tiers") or []],
+            }
+    return cards
+
+
+# ---------------------------------------------------------------------------
 # JSON wrappers -- what the worker actually calls
 # ---------------------------------------------------------------------------
 
@@ -657,6 +685,10 @@ def champ_info_json(config_json):
 
 def run_json(config_json):
     return json.dumps(run_slice(json.loads(config_json)))
+
+
+def cards_json(config_json):
+    return json.dumps(get_cards(json.loads(config_json)))
 
 
 def trace_json(config_json):

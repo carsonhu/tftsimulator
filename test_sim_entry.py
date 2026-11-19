@@ -141,3 +141,20 @@ def test_champion_menu_by_cost_then_name():
     assert order == sorted(order) and all(c['cost'] > 0 for c in cat['champions'])
     assert next(c['cost'] for c in cat['champions'] if c['name'] == 'OlafHeroAugment') == 1
     assert cat['defaultChampion'] == sorted(c['name'] for c in cat['champions'])[0]
+
+
+def test_cards_come_from_the_build():
+    # hovering an item, augment or trait row shows its card: the build's name, kind, stat line, text and breakpoints
+    import set19buffs
+    import set19items
+    cards = json.loads(sim_entry.cards_json(json.dumps({})))
+    assert cards['BlueBuff'] == {'key': 'DA_BlueBuff', 'name': 'Blue Buff', 'kind': 'Craftable',
+                                 'stats': '15%AD 15%AP 6ManaRegen', 'text': 'Combat Start: Gain 10 Mana.', 'tiers': []}
+    assert cards['GlassCannonI']['kind'] == 'Silver' and '16% Damage Amp' in cards['GlassCannonI']['text']
+    assert [t['threshold'] for t in cards['Arcanist']['tiers']] == [2, 4, 6]
+    rows = (set19items.offensive_craftables + set19items.artifacts + set19items.radiants + set19items.emblems
+            + set19buffs.class_buffs + set19buffs.augments)
+    # the two generic debuff rows (Sunder / Shred 30%) are not in the client, so they have no card
+    assert [c for c in rows if c not in cards] == ['Sunder30', 'Shred30']
+    old = json.loads(sim_entry.cards_json(json.dumps({'build': 'rls-19.1.0.5973071.Set19.Shipping.pbe'})))
+    assert 'BlueBuff' in old

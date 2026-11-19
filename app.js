@@ -107,6 +107,9 @@ const state = {
   // art only if its class is in here, so rows without art cost no failed
   // requests.
   icons: new Map(),
+  // Class name -> the build's card for that item, augment or trait (sim_entry.get_cards), shown on hover. Reloaded
+  // when the build changes; empty if the request fails, which only means no cards.
+  cards: new Map(),
   // icons/traits/tiers.json: {tiers: {cls: {level: tier}}, colours: {...}}.
   traitTiers: null,
   // Which header the table is sorted by. key null = the order sim_entry
@@ -156,6 +159,7 @@ async function init() {
   state.buffMeta = new Map(state.catalog.buffs.map((b) => [b.cls, b]));
   // Named explicitly (not left to "newest") so the run cache keys on it.
   state.cfg.build = state.catalog.builds.length ? state.catalog.builds[0].version : null;
+  await loadCards();
 
   buildStaticControls();
   FightViewer.init(rpc, (cls) => state.icons.get(cls));
@@ -171,6 +175,117 @@ async function init() {
   $("boot-status").hidden = true;
   $("layout").hidden = false;
 }
+
+// ---------------------------------------------------------------------------
+// Cards: an item's, augment's or trait's in-game text on hover
+// ---------------------------------------------------------------------------
+
+async function loadCards() {
+  try {
+    const cards = await rpc("cards", JSON.stringify({ build: state.cfg.build }));
+    state.cards = new Map(Object.entries(cards));
+  } catch (err) {
+    state.cards = new Map();
+  }
+}
+
+function cardElement() {
+  let el = $("hoverCard");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "hoverCard";
+    el.setAttribute("role", "tooltip");
+    el.hidden = true;
+    document.body.appendChild(el);
+  }
+  return el;
+}
+
+// Fills the card for a class; false when the build has none (NoItem, a debuff row), so nothing is shown.
+// level: a trait row's breakpoint, whose tier line is marked.
+function fillCard(cls, level, hint) {
+  const card = state.cards.get(cls);
+  if (!card) return false;
+  const el = cardElement();
+  el.innerHTML = "";
+  const head = document.createElement("div");
+  head.className = "card-head";
+  const src = state.icons.get(cls);
+  if (src && !card.tiers.length) {
+    const icon = document.createElement("img");
+    icon.src = src;
+    icon.alt = "";
+    head.appendChild(icon);
+  } else if (src) {
+    const badge = traitBadge(cls, level);
+    if (badge) head.appendChild(badge);
+  }
+  const title = document.createElement("div");
+  title.className = "card-title";
+  const name = document.createElement("div");
+  name.className = "card-name";
+  name.textContent = card.name;
+  title.appendChild(name);
+  if (card.kind) {
+    const kind = document.createElement("div");
+    kind.className = "card-kind";
+    kind.textContent = card.kind;
+    title.appendChild(kind);
+  }
+  head.appendChild(title);
+  el.appendChild(head);
+  const add = (cls_, text) => {
+    const div = document.createElement("div");
+    div.className = cls_;
+    div.textContent = text;
+    el.appendChild(div);
+    return div;
+  };
+  if (card.stats) add("card-stats", card.stats.split(" ").join("  ·  "));
+  if (card.text) add("card-text", card.text);
+  const active = card.tiers.filter((t) => level != null && t.threshold <= level).pop();
+  for (const t of card.tiers) add("card-tier" + (t === active ? " active" : ""), t.text);
+  if (hint) add("card-hint", hint);
+  return true;
+}
+
+function placeCard(event) {
+  const el = cardElement();
+  const pad = 14;
+  const { innerWidth: w, innerHeight: h } = window;
+  const r = el.getBoundingClientRect();
+  let x = event.clientX + pad;
+  let y = event.clientY + pad;
+  if (x + r.width > w - 8) x = Math.max(8, event.clientX - pad - r.width);
+  if (y + r.height > h - 8) y = Math.max(8, event.clientY - pad - r.height);
+  el.style.left = x + "px";
+  el.style.top = y + "px";
+}
+
+// Shows cls's card while the pointer is over target. getLevel/hint are read at each entry, so a re-rendered row
+// needs no rebinding. Returns whether the build has a card for cls.
+function attachCard(target, cls, getLevel = () => null, hint = null) {
+  if (!state.cards.has(cls)) return false;
+  target.addEventListener("mouseenter", (event) => {
+    if (!fillCard(cls, getLevel(), typeof hint === "function" ? hint() : hint)) return;
+    cardElement().hidden = false;
+    placeCard(event);
+  });
+  target.addEventListener("mousemove", placeCard);
+  target.addEventListener("mouseleave", () => {
+    cardElement().hidden = true;
+  });
+  return true;
+}
+
+function hideCard() {
+  const el = $("hoverCard");
+  if (el) el.hidden = true;
+}
+// A click re-renders the table and closes menus, which removes the hovered element without a mouseleave; the
+// next pointer move over the new row shows its card again.
+document.addEventListener("mousedown", hideCard, true);
+window.addEventListener("scroll", hideCard, true);
 
 // icons.py writes one directory per group. Class names are unique across the
 // modules they come from, so a flat class -> URL map is enough.
@@ -284,6 +399,7 @@ function buildStaticControls() {
   buildSel.onchange = () => {
     state.cfg.build = buildSel.value;
     buildSel.title = buildSel.value;
+    loadCards();
     selectChampion(state.cfg.champ, { keepLevel: true, keepConfig: true });
   };
 
@@ -530,6 +646,7 @@ function makeSearchable(select) {
         row.appendChild(gap);
       }
       row.appendChild(document.createTextNode(option.text));
+      attachCard(row, option.value);
       // mousedown, not click: blur fires first on click and would close the
       // list out from under the pointer.
       row.onmousedown = (event) => {
@@ -1404,7 +1521,9 @@ function renderResults() {
     }
     tr.tabIndex = 0;
     tr.setAttribute("aria-pressed", slot !== undefined ? "true" : "false");
-    tr.title = slot !== undefined ? "Click to remove from the chart" : "Click to plot";
+    const hint = slot !== undefined ? "Click to remove from the chart" : "Click to plot";
+    // the card carries the hint where there is one (a native title would pop up over it)
+    if (!attachCard(tr, row.extraCls, () => row.extraLevel, hint)) tr.title = hint;
     if (row === viewed) tr.classList.add("viewing");
     const toggle = () => {
       togglePlotted(row.idx);

@@ -1434,3 +1434,69 @@ td input[type="checkbox"] {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ---------------- hover card ---------------- */
+
+/* An item's, augment's or trait's in-game text from the selected build, shown
+   beside the pointer (app.js attachCard). Fixed, so table and sidebar scroll
+   never clip it; pointer-events off so it never steals the hover it follows. */
+#hoverCard {
+  position: fixed;
+  z-index: 50;
+  max-width: min(340px, calc(100vw - 16px));
+  padding: 10px 12px;
+  background: #1a1d26;
+  border: 1px solid #3a3f4f;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  font-size: 0.88em;
+  line-height: 1.4;
+}
+
+#hoverCard .card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+#hoverCard .card-head img {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  flex: none;
+}
+
+#hoverCard .card-name {
+  font-weight: 600;
+  font-size: 1.08em;
+}
+
+#hoverCard .card-kind {
+  color: #a3a8b8;
+  font-size: 0.9em;
+}
+
+#hoverCard .card-stats {
+  color: #ffd27a;
+  margin-bottom: 4px;
+}
+
+#hoverCard .card-tier {
+  color: #8a8f9e;
+  margin-top: 2px;
+}
+
+#hoverCard .card-tier.active {
+  color: #fafafa;
+  font-weight: 600;
+}
+
+#hoverCard .card-hint {
+  color: #8a8f9e;
+  font-size: 0.85em;
+  margin-top: 6px;
+  border-top: 1px solid #31333f;
+  padding-top: 4px;
+}

@@ -3,7 +3,7 @@
 // The only place Python runs in the v2 frontend. Boots Pyodide (no packages
 // -- the sim is pure stdlib, which is the entire speed story vs stlite),
 // mounts the repo's .py files into the virtual FS, and serves three RPCs
-// over postMessage: catalog / champInfo / run. Payloads cross the boundary
+// over postMessage: catalog / champInfo / run / trace / cards. Payloads cross the boundary
 // as JSON strings so no PyProxy ever leaks to the page.
 
 // Pinned to the same Pyodide the stlite build has been running this exact
@@ -169,6 +169,9 @@ onmessage = async (event) => {
     } else if (cmd === "run") {
       await ensureBuild(pyodide, arg);
       result = entry.run_json(arg);
+    } else if (cmd === "cards") {
+      await ensureBuild(pyodide, arg);
+      result = entry.cards_json(arg);
     } else if (cmd === "trace") {
       await ensureBuild(pyodide, arg);
       result = entry.trace_json(arg);
