@@ -13,7 +13,8 @@ class GuFeng(BuildTrait):
     level: +2% AD and AP and +2 Armor and MR per level (VOD4 19:16 tooltip: "2% AD AP and 2 Armor MR per level").
     Infinite, Channel1, with the item stats (I1). (3) GE_Heavenscale19_HPStats: HealthMax x (1 + HeavenscaleHPPercent x
     level), applied too (it changes no damage against dummies). (4)'s Scrolls (and Level 11) are not modelled: the
-    owner, 2026-11-18: realistically only the (2) is relevant. The player level is the parameter, default 8.
+    owner, 2026-11-18: realistically only the (2) is relevant. The player level is the parameter, default 8 (owner,
+    2026-11-18).
     """
     KEY = "DA_Heavenscale19"
     display_name = "Gu Feng"

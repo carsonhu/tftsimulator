@@ -73,7 +73,8 @@ def test_feather_damage_and_simulated_launch():
 
 
 def test_vod4_panel_and_cast_rhythm():
-    # VOD4 19:16 panel: AP 110%, AS 0.94, crit 80%, MR 60 (AD 95 there, 91.85 here: 5% unexplained, E1)
+    # VOD4 19:16 panel: AP 110%, AS 0.94, crit 80%, MR 60; AD 95 there, 91.85 here without the board's Illbeats (2)
+    # (owner: 3 AD decibels at half strength for a non-member = 5.1% -> 94.7, E1)
     x = LoggedXayah(1)
     fight(x, items=[c() for c in VOD_ITEMS], buffs=[set19buffs.Hitmaker(2, 1)], seconds=20)
     assert x.casts

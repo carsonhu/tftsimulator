@@ -178,9 +178,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
-| Xayah's AD on the panel | 167% bonus AD with IE + Hitmaker Big Shot; VOD4 19:16 showed 172% (95 AD): 5% from a source not seen | her panel with each AD source visible (augments, emblems) | champions/Xayah.md E1 |
 | When her feathers land | 1.37-1.77 s into the cast at 4 hexes (waits 0.88 / 0.4 s, 3200 units/s from the fan behind her) | a cast on a target 4 hexes away: the frames of the damage numbers | champions/Xayah.md Q16 |
-| Gu Feng's player level | default 8 (assumed) | (owner) the level to default to | B35 |
 | Her feathers' waits in the build | 0.88 / 0.4 s typed from the client asset | (tool) the snapshot should read a chrono projectile module's Delay | champions/Xayah.md D1 |
 
 ### 7n. Augments

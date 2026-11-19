@@ -72,7 +72,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed for HP, mana, range, armor, MR, AS (with items); AD 5% above the simulator (open) | E1 |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed (with items and traits; the AD with Illbeats, owner) | E1 |
 | Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackCaster: 7 per attack, 2/s | confirmed (+7 steps, +1 every 0.5 s) | E3 |
 | Q3 | First attack at combat start: when does it land? | G3 | open (VOD4's targets walk in) | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.22 s (6.6 ticks) | predicted | |
@@ -96,12 +96,12 @@ VOD was played on (check the patch shown in game or the date against builds/inde
 
 VOD4 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-17-2026_16-22-12-687/` `…PBE_11-17-2026_19-0-51-650.mp4` (owner's
 clip, 2026-11-17, build rls-19.1.0.5973071; Xayah's data is the same in 5986094). Xayah 1 star with Infinity Edge,
-Quicksilver and Guinsoo's Rageblade (owner); Hitmaker (2) with her as the Big Shot; Gu Feng 1/2 (inactive). Mana
+Quicksilver and Guinsoo's Rageblade (owner); Hitmaker (2) with her as the Big Shot; Illbeats (2) on the board (she isn't a member); Gu Feng 1/2 (inactive). Mana
 from `tools/vod_text_changes.py --field mana` (crops read by eye).
 
 | # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
 |---|---|---|---|---|---|---|---|---|
-| E1 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 19:16-19:26 (round 1-10, planning) | 60 | inspection panel | 850/850, 0/60, 2/s, range 4 hex, Back; AD 95, bonus AD 72%, AP 10%, armor 40, MR 60, AS 0.94, crit 80% | the simulator: 850, 0/60, AP 110%, AS 0.938, crit 80%, armor 40, MR 60; AD 91.85 (bonus 67%: Hitmaker 12 + 20, IE 35): **5% AD unexplained** | Q1 |
+| E1 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 19:16-19:26 (round 1-10, planning) | 60 | inspection panel | 850/850, 0/60, 2/s, range 4 hex, Back; AD 95, bonus AD 72%, AP 10%, armor 40, MR 60, AS 0.94, crit 80% | the simulator: 850, 0/60, AP 110%, AS 0.938, crit 80%, armor 40, MR 60; AD 91.85 (bonus 67%: Hitmaker 12 + 20, IE 35). The other 5%: Illbeats (2) on the board (owner, 2026-11-18); she isn't a member, so half the mix: 3 AD decibels = (3.5 + 3.5 + 3.2)% x 0.5 = 5.1% -> 172.1%, 94.7 AD; AP unchanged, so no AP decibels. Matches | Q1 |
 | E2 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 19:19 (ability tooltip) | 60 | damage per feather | 38 | 20 x 1.72 + 3 x 1.10 = 37.7: AD and AP are the multipliers (the panel's 172%, 110%) | Q13 |
 | E3 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 f70941-71084 (round 1-10, first cast) | 60 | bar empties (56 + 7 = 63); banked 3 shows; next +7 | f70941; f71070 (+129 fr = 64.5 ticks); f71084 (+143 fr = 71.5 ticks) | mana lock 64, plus up to a tick if the cast starts the tick after the fill; the attack after the cast at 65 + windup (engine 72) | Q2, Q7, Q9 |
 | E4 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 f73741-73886 (round 2-1, cast A) | 60 | as E3 (55 + 7 = 62) | banked 2 at f73872 (+131 fr = 65.5 ticks); next +7 at f73886 (+145 fr = 72.5 ticks) | as E3 | Q7, Q9 |
