@@ -1,7 +1,7 @@
 # Twisted Fate (5-cost MagicMarksman) · `DA_TwistedFate19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** MagicMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Tango, Trickshot

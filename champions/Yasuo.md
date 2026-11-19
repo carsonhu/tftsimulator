@@ -1,7 +1,7 @@
 # Yasuo (4-cost AttackFighter) · `DA_Yasuo19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: True Damage, Slayer

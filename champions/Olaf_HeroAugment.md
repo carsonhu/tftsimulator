@@ -1,7 +1,7 @@
 # Olaf with the hero augment Axe Crescendo (AttackMarksman) · `DA_Olaf19_HeroAugment_Override`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 0, pool –; traits: Pentakill, Juggernaut

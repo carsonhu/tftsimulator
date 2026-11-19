@@ -1,7 +1,7 @@
 # Locke (4-cost MagicAssassin) · `DA_Locke19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** MagicAssassin: "Attacks grant 10 Mana. Take 15% less damage from all enemies except the current target." (ManaPerAttack + 10; ManaMax at least 10; MovementSpeed + 200; Threat + -10)
 - **Cost** 4, pool 10; traits: Rock, Swiftstriker

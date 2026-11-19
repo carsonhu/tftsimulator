@@ -18,10 +18,15 @@ ROOT = os.path.abspath(os.path.join(HERE, '..'))
 OUT = os.path.join(ROOT, 'builds')
 
 
-def main(path):
+def main(path, out=OUT):
+    """Write the notes build into `out` (default builds/; tests pass a temp folder) and list it in out/index.json."""
     notes = json.load(open(path, encoding='utf-8'))
-    index_path = os.path.join(OUT, 'index.json')
-    index = json.load(open(index_path, encoding='utf-8'))
+    if notes.get('superseded_by') and out == OUT:
+        sys.exit(f'{path} is superseded by the client build {notes["superseded_by"]}; not written')
+    index = json.load(open(os.path.join(OUT, 'index.json'), encoding='utf-8'))
+    index_path = os.path.join(out, 'index.json')
+    if out != OUT:  # a separate folder: its index lists only what is written there
+        index = {'builds': [b for b in index['builds'] if b['version'] == notes['base']]}
     base_entry = next((b for b in index['builds'] if b['version'] == notes['base']), None)
     if base_entry is None:
         sys.exit(f'base build {notes["base"]} is not imported')
@@ -56,10 +61,11 @@ def main(path):
     meta.update(version=notes['version'], install=notes.get('install', meta.get('install')), pak_mtime=None,
                 snapshot_at=None)
     meta['patch_notes'] = {'base': notes['base'], 'client_build': notes.get('client_build'), 'date': notes.get('date'),
-                           'source': notes['source'], 'file': os.path.relpath(path, ROOT).replace(os.sep, '/'),
+                           'source': notes['source'], 'file': os.path.basename(path),
                            'rows': len(notes['rows']), 'rules': len(notes.get('rules', []))}
     file = notes['version'] + '.json'
-    with open(os.path.join(OUT, file), 'w', encoding='utf-8', newline='\n') as f:
+    os.makedirs(out, exist_ok=True)
+    with open(os.path.join(out, file), 'w', encoding='utf-8', newline='\n') as f:
         json.dump(build, f, ensure_ascii=False, separators=(',', ':'))
 
     entry = {'version': notes['version'], 'install': notes.get('install', 'PBE'), 'pak_mtime': None, 'file': file,
@@ -75,4 +81,4 @@ def main(path):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1], *(sys.argv[2:3]))

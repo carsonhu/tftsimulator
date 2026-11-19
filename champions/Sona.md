@@ -1,18 +1,18 @@
 # Sona (5-cost MagicSpecialist) · `DA_Sona19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** MagicSpecialist: "Specialists generate resources in a unique way." ()
 - **Cost** 5, pool 9; traits: Producer, Collab
 - **HP** – · **AD** 0 · **AS** 0.8 · **Range** 10 · **Armor** 50 · **MR** 50 · **Mana** 0 / 220
-- **Unlock**: Collab Champions are inspired 15 times.
+- **Unlock**: Collab Champions are inspired 15 times during player combat.
 
 ### Ability: feat. Sona
 
 > Passive: Cannot attack, instead every 3 seconds, gain 30/30/100 + 1 × ManaPerAttack Mana, deal 120/180/1000 × AP magic damage to the 3/3/10 nearest enemies, and 2/2/5 allies gain 40/65/9999 × AP Shield for 3/3/10 seconds. Sona is Unstoppable.
 > 
-> Active: Unleash a sonic wave across the battlefield, dealing 1400/2200/1e+07 × AP magic damage split between all enemies and Stunning them for 2/2/30 seconds. Allies gain 250/450/99999 × AP Shield split amongst allies for 5/5/10 seconds.
+> Active: Unleash a sonic wave across the battlefield, dealing 1500/2400/1e+07 × AP magic damage split between all enemies and Stunning them for 2/2/30 seconds. Allies gain 250/450/99999 × AP Shield split amongst allies for 5/5/10 seconds.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -28,7 +28,7 @@
 | PassiveCadence | 3 | 3 | 3 |
 | ResourceStartCast | 0 | 0 | 0 |
 | PassiveDuration | 3 | 3 | 10 |
-| ActiveDamage | 1400 | 2200 | 9999999 |
+| ActiveDamage | 1500 | 2400 | 9999999 |
 | ActiveStunDuration | 2 | 2 | 30 |
 | StatConversionMult | 1 | 1 | 1 |
 | ManaRegenConversionMult | 0 | 0 | 0 |
@@ -48,7 +48,7 @@ Formulas (as stored; AD and AP are multipliers):
 - `ShieldCalc1` = 40/65/9999 × AP
 - `MagicDamageCalc2` = 120/180/1000 × AP
 - `AttackSpeedCalc1` = 1 + 0 × AP
-- `MagicDamageCalc1` = 1400/2200/1e+07 × AP
+- `MagicDamageCalc1` = 1500/2400/1e+07 × AP
 - `ShieldCalc2` = 250/450/99999 × AP
 - `ManaCalc1` = 30/30/100 + 1 × ManaPerAttack
 
@@ -81,7 +81,8 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row ActiveDamage: 1400 / 2200 / 9999999 -> 1500 / 2400 / 9999999
+- ability text changed
 
 <!-- AUTO END -->
 

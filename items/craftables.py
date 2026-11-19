@@ -2,7 +2,7 @@
 docs/ITEMS.md."""
 from buildstore import BuildDataError
 from registry import register
-from items.base import BuildItem, StackingItem, item_name
+from items.base import BuildItem, StackingItem, apply_modifier, item_name, item_stats
 from effects import ActiveEffect, apply_effect, last_tick
 from events import CRIT, IS_ATTACK, LAUNCH
 from items.debuffs import DebuffItem, apply_shred, debuff_value
@@ -232,7 +232,10 @@ class HandOfJustice(BuildItem):
 class AdaptiveHelm(BuildItem):
     """Stats GE_AdaptiveHelm_Stats (20 MR, 3 mana regen, +15% mana from all sources). Script GA_AdaptiveHelm (0x3d5):
     a holder whose role tags include Tank or Fighter gets GE_AdaptiveHelm_TankFighter (armor and MR, nothing against
-    dummies); any other role gets GE_AdaptiveHelm_OtherRoles (10% AD, 10% AP)."""
+    dummies); any other role gets GE_AdaptiveHelm_OtherRoles (10% AD, 10% AP).
+    From rls-19.1.0.5986094 there is no script: the item lists both role effects itself, each with the condition on it
+    (client asset, 2026-11-18: GE_AdaptiveHelm_OtherRoles OngoingTagRequirements IgnoreTags Role.Tank, Role.Fighter;
+    GE_AdaptiveHelm_TankFighter ANY(Role.Tank, Role.Fighter)). The same rule; the class reads whichever the build has."""
     KEY = "DA_AdaptiveHelm"
     STATS = ("GE_AdaptiveHelm_Stats",)
     display_name = item_name(KEY)
@@ -241,11 +244,25 @@ class AdaptiveHelm(BuildItem):
         super().applyStats(champion)
         if champion.role.archetype in ("Tank", "Fighter"):
             return
-        for attr in ("AttackDamage", "AbilityPower"):
-            v, scale = self.script_modifier(champion, self.ga_param(champion, "GA_AdaptiveHelm", "OtherRolesGE"), attr, "+")
-            if scale is not None:
-                raise BuildDataError(f"{self.KEY}: OtherRoles {attr} is not a plain number ({scale})")
-            champion.attribute(attr).modify("+", v)
+        entry = self.build_entry(champion)
+        if any(r["ga"] == "GA_AdaptiveHelm" for r in entry.d.get("ability_refs") or []):
+            for attr in ("AttackDamage", "AbilityPower"):
+                v, scale = self.script_modifier(champion, self.ga_param(champion, "GA_AdaptiveHelm", "OtherRolesGE"),
+                                                attr, "+")
+                if scale is not None:
+                    raise BuildDataError(f"{self.KEY}: OtherRoles {attr} is not a plain number ({scale})")
+                champion.attribute(attr).modify("+", v)
+            return
+        # the item's own OtherRoles effect (GE_AdaptiveHelm_OtherRoles; the Radiant's _Radiant)
+        others = [e["effect"] for e in entry.d.get("effects") or [] if "_OtherRoles" in e["effect"]]
+        if len(others) != 1:
+            raise BuildDataError(f"{self.KEY}: neither GA_AdaptiveHelm nor one OtherRoles effect in build "
+                                 f"{entry.build.version}")
+        mods, _ = item_stats(entry, others)
+        if sorted(m[0] for m in mods) != ["AbilityPower", "AttackDamage"] or any(m[1] != "+" for m in mods):
+            raise BuildDataError(f"{self.KEY}: {others[0]} is not AD + AP as before: {mods}")
+        for attr, op, value, _, channel in mods:
+            apply_modifier(champion, attr, op, value, channel)
 
 
 @register("craftable")

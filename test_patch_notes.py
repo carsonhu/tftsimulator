@@ -1,39 +1,68 @@
-"""Builds made from patch notes (ledger B33, tools/patch_notes_build.py): the 2026-11-18 Day 1 PBE notes on top of
-rls-19.1.0.5973071, standing in for rls-19.1.0.5983251 (its archives are encrypted)."""
+"""Builds made from patch notes (ledger B33, tools/patch_notes_build.py). The 2026-11-18 Day 1 PBE notes stood in for
+the encrypted client until it was read (FModel raw export): rls-19.1.0.5986094 carries them. The notes file stays as
+the record and as the tool's test data."""
 import json
 import os
 import subprocess
 import sys
 
 import set19champs
-from buildstore import load_build
+from buildstore import Build, load_build
 from set19champs import RenataGlasc
 from test_timing import dummy
 
 BASE = 'rls-19.1.0.5973071.Set19.Shipping.pbe'
-NOTES = 'rls-19.1.0.5983251.Set19.Shipping.pbe.notes'
+REAL = 'rls-19.1.0.5986094.Set19.Shipping.pbe'
 HERE = os.path.dirname(os.path.abspath(__file__))
+TOOL = os.path.join(HERE, 'tools', 'patch_notes_build.py')
 PATCH = os.path.join(HERE, 'builds', 'patch_notes', 'rls-19.1.0.5983251.json')
 
 
-def test_only_the_noted_rows_change():
-    base, notes = load_build(BASE), load_build(NOTES)
-    patch = json.load(open(PATCH, encoding='utf-8'))
-    noted = {(r['champion'], r['row']): r for r in patch['rows']}
+def patch():
+    return json.load(open(PATCH, encoding='utf-8'))
+
+
+def test_the_notes_match_the_client_build():
+    # every row the notes changed: the old value is the base snapshot's, the new one the client build's
+    base, real = load_build(BASE), load_build(REAL)
+    for r in patch()['rows']:
+        assert list(base.champion(r['champion']).row(r['row'])) == r['old']
+        assert list(real.champion(r['champion']).row(r['row'])) == r['new'], r['note']
+
+
+def test_the_tool_changes_only_the_noted_rows(tmp_path):
+    p = patch()
+    p.pop('superseded_by', None)
+    src = tmp_path / 'notes.json'
+    src.write_text(json.dumps(p), encoding='utf-8')
+    subprocess.run([sys.executable, TOOL, str(src), str(tmp_path / 'out')], check=True, capture_output=True)
+    notes = Build(json.load(open(tmp_path / 'out' / (p['version'] + '.json'), encoding='utf-8')))
+    base = load_build(BASE)
+    noted = {(r['champion'], r['row']): r for r in p['rows']}
     for key, c in base.data['champions'].items():
         after = notes.data['champions'][key]
         for row, vals in c['ability']['rows'].items():
-            if (key, row) in noted:
-                assert list(vals) == noted[(key, row)]['old'] and after['ability']['rows'][row] == noted[(key, row)]['new']
-            else:
-                assert after['ability']['rows'][row] == vals, (key, row)
-    assert notes.champion('DA_Ziggs19').row('InitialDamage') == (155, 235, 355)
-    assert notes.data['meta']['patch_notes']['base'] == BASE
+            expect = noted[(key, row)]['new'] if (key, row) in noted else vals
+            assert after['ability']['rows'][row] == expect, (key, row)
+    assert notes.data['champions']['DA_RenataGlasc19']['patch_rules'] == ['CaptivateLongIfStarBelow']
+    assert json.load(open(tmp_path / 'out' / 'index.json'))['builds'][0]['label'] == 'patch notes'
 
 
-def test_renata_long_captivate_needs_a_lower_star_target():
-    # the notes: the long Captivate needs a target below her star level (was: at or below), and lasts 9 s (was 6)
-    for version, level, expected in ((BASE, 1, 6), (NOTES, 1, 3), (NOTES, 2, 9)):
+def test_a_wrong_old_value_or_a_superseded_file_writes_nothing(tmp_path):
+    p = patch()
+    p.pop('superseded_by', None)
+    p['rows'][0]['old'] = [1, 2, 3]
+    bad = tmp_path / 'bad.json'
+    bad.write_text(json.dumps(p), encoding='utf-8')
+    run = subprocess.run([sys.executable, TOOL, str(bad), str(tmp_path / 'out')], capture_output=True, text=True)
+    assert run.returncode != 0 and 'not written' in run.stderr and not (tmp_path / 'out').exists()
+    run = subprocess.run([sys.executable, TOOL, PATCH], capture_output=True, text=True)  # into builds/: refused
+    assert run.returncode != 0 and 'superseded' in run.stderr
+
+
+def test_renata_long_captivate_needs_a_lower_star_target_from_5986094():
+    # GA_RenataGlasc19_Spell: LessEqual_IntInt to 5973071, Less_IntInt from 5986094; CaptivateDurationLong 6 -> 9
+    for version, level, expected in ((BASE, 1, 6), (REAL, 1, 3), (REAL, 2, 9)):
         r = RenataGlasc(level, build=load_build(version))
         got = []
         r.tick = 0
@@ -45,15 +74,3 @@ def test_renata_long_captivate_needs_a_lower_star_target():
         finally:
             set19champs.captivate = orig
         assert got == [expected], (version, level, got)
-
-
-def test_a_wrong_old_value_writes_nothing(tmp_path):
-    patch = json.load(open(PATCH, encoding='utf-8'))
-    patch['version'] = 'test-wrong-old'
-    patch['rows'][0]['old'] = [1, 2, 3]
-    bad = tmp_path / 'bad.json'
-    bad.write_text(json.dumps(patch), encoding='utf-8')
-    run = subprocess.run([sys.executable, os.path.join(HERE, 'tools', 'patch_notes_build.py'), str(bad)],
-                         capture_output=True, text=True)
-    assert run.returncode != 0 and 'not written' in run.stderr
-    assert not os.path.exists(os.path.join(HERE, 'builds', 'test-wrong-old.json'))

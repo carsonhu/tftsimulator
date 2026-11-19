@@ -1,7 +1,7 @@
 # Seraphine (2-cost MagicCaster) · `DA_SeraphineIndie19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Indie
@@ -10,7 +10,7 @@
 
 ### Ability: Livestream of Note
 
-> Indie: Release a stream of notes at the target while posing for the fans, dealing 600/900/1350 × AP magic damage over 2.5 seconds.
+> Indie: Release a stream of notes at the target while posing for the fans, dealing 570/855/1280 × AP magic damage over 2.5 seconds.
 > 
 > Rising Star: Release bonus notes at nearby enemies.
 > 
@@ -20,7 +20,7 @@
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
 | ShieldAmount | 0 | 0 | 0 |
-| DamageAP | 600 | 900 | 1350 |
+| DamageAP | 570 | 855 | 1280 |
 | HealRadius | 0 | 0 | 0 |
 | HealAmount | 0 | 0 | 0 |
 | ShieldDuration | 0 | 0 | 0 |
@@ -29,17 +29,17 @@
 | PopularityPerPaidReroll | 2 | 2 | 2 |
 | RewardsForSecondUpgrade | 4 | 4 | 4 |
 | PopularityForReward | 20 | 20 | 20 |
-| HighNoteDamageAP | 70 | 105 | 160 |
+| HighNoteDamageAP | 60 | 90 | 135 |
 | ExtraNoteDamageAP | 20 | 30 | 45 |
 | RisingStarExtraNotes | 8 | 8 | 8 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 600/900/1350 × AP
+- `MagicDamageCalc1` = 570/855/1280 × AP
 - `HealthCalc1` = 0
 - `ShieldCalc1` = 0
 - `MagicDamageCalc2` = 20/30/45 × AP
-- `MagicDamageCalc3` = 70/105/160 × AP
+- `MagicDamageCalc3` = 60/90/135 × AP
 - `GenericCalc1` = 8
 
 ### Timing the client predicts (unverified for Set 19)
@@ -72,7 +72,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row DamageAP: 600 / 900 / 1350 -> 570 / 855 / 1280
+- row HighNoteDamageAP: 70 / 105 / 160 -> 60 / 90 / 135
+- ability text changed
 
 <!-- AUTO END -->
 

@@ -1,7 +1,7 @@
 # Viego (3-cost AttackFighter) · `DA_Viego19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Pentakill, Choreographer, Slayer
@@ -9,7 +9,7 @@
 
 ### Ability: Singled Out
 
-> Summon 10 + 1 × GenericCalc2 swords around the target. After a brief delay, impale them, dealing 36/54/86 × AP + 3/5/7 × AP physical damage per sword.
+> Summon 10 + 1 × GenericCalc2 swords around the target. After a brief delay, impale them, dealing 34/51/82 × AP + 3/5/7 × AP physical damage per sword.
 > 
 > Every 8 takedowns, gain a permanent sword. (Current Takedowns: ⟨live⟩)
 
@@ -24,7 +24,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 36/54/86 × AP + 3/5/7 × AP
+- `PhysicalDamageCalc1` = 34/51/82 × AP + 3/5/7 × AP
 - `GenericCalc1` = 10 + 1 × GenericCalc2
 
 ### Timing the client predicts (unverified for Set 19)
@@ -55,6 +55,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 ### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
 
 - row DamagePerSwordAD: 36 / 54 / 86 -> 34 / 51 / 82
+- ability text changed
 
 <!-- AUTO END -->
 
@@ -113,4 +114,4 @@ Buff's +10). Ticks count from combat start.
     AbilityPower: both terms capture AP (the row name says AD; the tooltip shows AP twice). **Owner, 2026-11-18: the AD
     row scales with AD**, so each sword deals DamagePerSwordAD x AD + DamagePerSwordAP x AP. Physical, on-spell, crit
     only with Precision.
-- 2026-11-18, Day 1 PBE patch notes (rls-19.1.0.5983251, its archives encrypted: the page's build rls-19.1.0.5983251.Set19.Shipping.pbe.notes, B33): DamagePerSwordAD 36/54/86 -> 34/51/82. Timing and everything else unchanged from rls-19.1.0.5973071 until a readable build says otherwise.
+- 2026-11-18, Day 1 PBE patch notes, confirmed in the client build rls-19.1.0.5986094 (read from an FModel raw export, B34; it replaced the patch-notes stand-in, B33): DamagePerSwordAD 36/54/86 -> 34/51/82. Its timing is unchanged from rls-19.1.0.5973071.

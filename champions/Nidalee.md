@@ -1,7 +1,7 @@
 # Nidalee (5-cost MagicFighter) · `DA_Nidalee19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Mariachi, Choreographer
@@ -69,8 +69,8 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | `CD_Nidalee19_ShortPounce4` | Chronos | 0.4903 | Damage 0.4496, Arrived 0.4847 |
 | `CD_Nidalee19_SlideBack` | Chronos | 0.2042 | Arrived 0.2, Unlock 0.2029 |
 | `CD_Nidalee19_Spear` | Chronos | 1.4899 | Heal 0, Throw 0.7567, Unlock 1.4829 |
-| `CD_Nidalee19_CougarAttack` | Chronos/old | 1.3333 | LaunchAttack 0.3213, Unlock 0.5333 |
-| `CD_Nidalee19_CougarCelebration` | Chronos/old | 2.136 | Default 0, Loop 1.3027 |
+| `CD_Nidalee19_CougarAttack` | Chronos/OLD | 1.3333 | LaunchAttack 0.3213, Unlock 0.5333 |
+| `CD_Nidalee19_CougarCelebration` | Chronos/OLD | 2.136 | Default 0, Loop 1.3027 |
 
 ### Scripts on the unit
 

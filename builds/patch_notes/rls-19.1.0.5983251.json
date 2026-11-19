@@ -7,31 +7,140 @@
  "date": "2026-11-18",
  "source": "Day 1 PBE patch notes, posted by TFT's live balance lead (@TheTruexy, 2026-11-18 18:21 UTC): https://x.com/TheTruexy/status/2123119511285227920. The client build itself can't be read: its archives are encrypted (owner, 2026-11-18: rely on the patch notes for now).",
  "rows": [
-  {"champion": "DA_Ziggs19", "row": "InitialDamage", "old": [180, 270, 405], "new": [155, 235, 355],
-   "note": "Spell Damage (Primary Target): 180/270/405 AP >>> 155/235/355 AP"},
-  {"champion": "DA_Ziggs19", "row": "SecondaryDamageAP", "old": [80, 120, 180], "new": [70, 105, 160],
-   "note": "Spell Damage (AoE): 80/120/180 AP >>> 70/105/160 AP"},
-  {"champion": "DA_Lux19", "row": "PrimaryDamageAP", "old": [330, 500, 800], "new": [300, 450, 675],
-   "note": "Main Spell Damage AP: 330/500/800/1360 >>> 300/450/675/1150"},
-  {"champion": "DA_Lux19", "row": "SecondaryDamageAP", "old": [170, 255, 425], "new": [160, 240, 360],
-   "note": "Split Spell Damage AP: 170/255/425/725 >>> 160/240/360/610"},
-  {"champion": "DA_RenataGlasc19", "row": "CaptivateDurationLong", "old": [6, 6, 6], "new": [9, 9, 9],
-   "note": "Long Captivate Duration: 6 -> 9 seconds"},
-  {"champion": "DA_Kaisa19", "row": "ADDamage", "old": [36, 54, 85], "new": [33, 50, 80],
-   "note": "Spell Damage AD: 36/54/85/145 >>> 33/50/80/135"},
-  {"champion": "DA_Malzahar19", "row": "DamageAP", "old": [380, 570, 960], "new": [355, 530, 850],
-   "note": "Spell Damage AP: 380/570/960/1630 >>> 355/530/850/1445"},
-  {"champion": "DA_Viego19", "row": "DamagePerSwordAD", "old": [36, 54, 86], "new": [34, 51, 82],
-   "note": "Spell Damage AD: 36/54/86/153 >>> 34/51/82/140"}
+  {
+   "champion": "DA_Ziggs19",
+   "row": "InitialDamage",
+   "old": [
+    180,
+    270,
+    405
+   ],
+   "new": [
+    155,
+    235,
+    355
+   ],
+   "note": "Spell Damage (Primary Target): 180/270/405 AP >>> 155/235/355 AP"
+  },
+  {
+   "champion": "DA_Ziggs19",
+   "row": "SecondaryDamageAP",
+   "old": [
+    80,
+    120,
+    180
+   ],
+   "new": [
+    70,
+    105,
+    160
+   ],
+   "note": "Spell Damage (AoE): 80/120/180 AP >>> 70/105/160 AP"
+  },
+  {
+   "champion": "DA_Lux19",
+   "row": "PrimaryDamageAP",
+   "old": [
+    330,
+    500,
+    800
+   ],
+   "new": [
+    300,
+    450,
+    675
+   ],
+   "note": "Main Spell Damage AP: 330/500/800/1360 >>> 300/450/675/1150"
+  },
+  {
+   "champion": "DA_Lux19",
+   "row": "SecondaryDamageAP",
+   "old": [
+    170,
+    255,
+    425
+   ],
+   "new": [
+    160,
+    240,
+    360
+   ],
+   "note": "Split Spell Damage AP: 170/255/425/725 >>> 160/240/360/610"
+  },
+  {
+   "champion": "DA_RenataGlasc19",
+   "row": "CaptivateDurationLong",
+   "old": [
+    6,
+    6,
+    6
+   ],
+   "new": [
+    9,
+    9,
+    9
+   ],
+   "note": "Long Captivate Duration: 6 -> 9 seconds"
+  },
+  {
+   "champion": "DA_Kaisa19",
+   "row": "ADDamage",
+   "old": [
+    36,
+    54,
+    85
+   ],
+   "new": [
+    33,
+    50,
+    80
+   ],
+   "note": "Spell Damage AD: 36/54/85/145 >>> 33/50/80/135"
+  },
+  {
+   "champion": "DA_Malzahar19",
+   "row": "DamageAP",
+   "old": [
+    380,
+    570,
+    960
+   ],
+   "new": [
+    355,
+    530,
+    850
+   ],
+   "note": "Spell Damage AP: 380/570/960/1630 >>> 355/530/850/1445"
+  },
+  {
+   "champion": "DA_Viego19",
+   "row": "DamagePerSwordAD",
+   "old": [
+    36,
+    54,
+    86
+   ],
+   "new": [
+    34,
+    51,
+    82
+   ],
+   "note": "Spell Damage AD: 36/54/86/153 >>> 34/51/82/140"
+  }
  ],
  "rules": [
-  {"champion": "DA_RenataGlasc19", "rule": "CaptivateLongIfStarBelow",
-   "note": "Star level Captivate hook now requires the enemy to be less than Renata's star level, rather than less than or equal to"}
+  {
+   "champion": "DA_RenataGlasc19",
+   "rule": "CaptivateLongIfStarBelow",
+   "note": "Star level Captivate hook now requires the enemy to be less than Renata's star level, rather than less than or equal to"
+  }
  ],
  "not_simulated": [
   "Boy Band: tooltip only",
   "Kobuko, Seraphine, Teemo, Smeech, Sona, Evelynn, Jhin, Nunu: not in the simulator",
   "Augments Management Track, Pain into Passion, Punch Line, Tibbers I Can't See the Stage, exclusions: not in the simulator",
   "Bug, tooltip and VFX fixes: none touch a simulated mechanic (Trickshot's change is tooltip capitalisation)"
- ]
+ ],
+ "superseded_by": "rls-19.1.0.5986094.Set19.Shipping.pbe",
+ "superseded_note": "2026-11-18: read from the client (FModel raw export of rls-19.1.0.5986094, the afternoon build that carries these notes; 5983251 was the morning build). Every row here matches that build; Renata Glasc's script compares with Less_IntInt there. The .notes build was removed; this file stays as the record and as a test of tools/patch_notes_build.py."
 }

@@ -1,7 +1,7 @@
 # Malzahar (3-cost MagicCaster) · `DA_Malzahar19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Composer, Prodigy
@@ -9,7 +9,7 @@
 
 ### Ability: Forbidden Cacophony
 
-> Fire a beam at the target for 2 seconds, dealing 380/570/960 × AP magic damage. The energy rhythmically explodes 4 times, 30% Shredding enemies in a 1 hex area for 4 seconds, and dealing 40/60/110 × AP magic damage each time.
+> Fire a beam at the target for 2 seconds, dealing 355/530/850 × AP magic damage. The energy rhythmically explodes 4 times, 30% Shredding enemies in a 1 hex area for 4 seconds, and dealing 40/60/110 × AP magic damage each time.
 > 
 > Shred: Reduce Magic Resist
 
@@ -31,7 +31,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 380/570/960 × AP
+- `MagicDamageCalc1` = 355/530/850 × AP
 - `MagicDamageCalc2` = 40/60/110 × AP
 
 ### Timing the client predicts (unverified for Set 19)
@@ -59,6 +59,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 ### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
 
 - row DamageAP: 380 / 570 / 960 -> 355 / 530 / 850
+- ability text changed
 
 <!-- AUTO END -->
 
@@ -124,4 +125,4 @@ f21000-22000. Ticks below count from combat start, f21295 (Quicksilver's first +
   - **Shred:** the shared GE_MRShred, one "Shred" per target whoever applies it (Void Staff's too: the later end and
     the higher level win). The burst shreds before it damages, so it amplifies itself.
   - **Not modelled:** the beam's retarget when its target dies (dummies never die).
-- 2026-11-18, Day 1 PBE patch notes (rls-19.1.0.5983251, its archives encrypted: the page's build rls-19.1.0.5983251.Set19.Shipping.pbe.notes, B33): DamageAP 380/570/960 -> 355/530/850. Timing and everything else unchanged from rls-19.1.0.5973071 until a readable build says otherwise.
+- 2026-11-18, Day 1 PBE patch notes, confirmed in the client build rls-19.1.0.5986094 (read from an FModel raw export, B34; it replaced the patch-notes stand-in, B33): DamageAP 380/570/960 -> 355/530/850. Its timing is unchanged from rls-19.1.0.5973071.

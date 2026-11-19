@@ -1,13 +1,10 @@
 {
  "builds": [
   {
-   "version": "rls-19.1.0.5983251.Set19.Shipping.pbe.notes",
+   "version": "rls-19.1.0.5986094.Set19.Shipping.pbe",
    "install": "PBE",
-   "pak_mtime": null,
-   "file": "rls-19.1.0.5983251.Set19.Shipping.pbe.notes.json",
-   "label": "patch notes",
-   "date": "2026-11-18",
-   "base": "rls-19.1.0.5973071.Set19.Shipping.pbe"
+   "pak_mtime": "2026-11-18T15:33:00",
+   "file": "rls-19.1.0.5986094.Set19.Shipping.pbe.json"
   },
   {
    "version": "rls-19.1.0.5973071.Set19.Shipping.pbe",

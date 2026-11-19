@@ -292,6 +292,21 @@ def test_adaptive_helm_by_role():
     assert (f.bonus_ad.stat, f.ap.stat) == (1, 1)
 
 
+def test_adaptive_helm_without_its_script():
+    # rls-19.1.0.5986094 removed GA_AdaptiveHelm: the item lists GE_AdaptiveHelm_OtherRoles itself (its condition on the
+    # effect, client asset). The same stats for a non-Tank/Fighter, nothing extra for a Fighter, Radiant included
+    new = load_build('rls-19.1.0.5986094.Set19.Shipping.pbe')
+    assert not new.item('DA_AdaptiveHelm').d.get('ability_refs')
+    for item, gain in ((set19items.AdaptiveHelm, 1.1), (set19items.AdaptiveHelmRadiant, 1.35)):
+        n = Neeko(1, build=new)
+        Simulator().itemStats([item()] + n.items, n)
+        assert (n.bonus_ad.stat, n.ap.stat) == (pytest.approx(gain), pytest.approx(gain))
+        f = Neeko(1, build=new)
+        f.role.archetype = 'Fighter'
+        Simulator().itemStats([item()] + f.items, f)
+        assert (f.bonus_ad.stat, f.ap.stat) == (1, 1)
+
+
 def test_giant_slayer_vs_tank_or_not():
     assert equipped(set19items.GiantSlayer()).dmgMultiplier.stat == pytest.approx(1.30)
     assert equipped(set19items.GiantSlayerNoTank()).dmgMultiplier.stat == pytest.approx(1.15)

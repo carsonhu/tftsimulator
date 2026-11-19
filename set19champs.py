@@ -1457,6 +1457,7 @@ class RenataGlasc(BuildChampion):
     AREA = True  # its damage depends on the page's number of targets (layout.py)
     CAST, END = 'CD_RenataGlasc19_Spell', 'CD_RenataGlasc19_SpellEnd'
     CHAIN, MISSILE = 'CD_RenataGlasc19_Projectile', 'CD_RenataGlasc19_Projectile2'
+    STRICT_CAPTIVATE_FROM = 5986094  # the build whose script compares star levels with Less_IntInt (above)
 
     def __init__(self, level, build=None):
         super().__init__(level, build)
@@ -1473,9 +1474,11 @@ class RenataGlasc(BuildChampion):
         return self.row('ToxinDamageAP', star=level) * AP / self.toxin_ticks
 
     def _toxin(self, target, stacks):
-        # the long Captivate: a target of her star level or lower (the script); from the 2026-11-18 PBE notes only a
-        # lower one (a patch-notes rule in the build, B33)
-        strict = 'CaptivateLongIfStarBelow' in (self.data.d.get('patch_rules') or [])
+        # the long Captivate: a target of her star level or lower (GA_RenataGlasc19_Spell LessEqual_IntInt, to
+        # rls-19.1.0.5973071); only a lower one from rls-19.1.0.5986094 (Less_IntInt at 0x183c and 0x256a; the
+        # 2026-11-18 PBE notes), or in a patch-notes build that says so (B33)
+        strict = (self.build.changelist >= self.STRICT_CAPTIVATE_FROM
+                  or 'CaptivateLongIfStarBelow' in (self.data.d.get('patch_rules') or []))
         long = target.level < self.level if strict else target.level <= self.level
         captivate(self, target, self.row('CaptivateDurationLong' if long else 'CaptivateDurationShort'))
         start = self.tick

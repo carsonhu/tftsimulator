@@ -21,7 +21,7 @@ Guinsoo's would show a wrong number.
 
 | Item | Key | Stats effect (attributes) | Script | Status | Evidence / notes |
 |---|---|---|---|---|---|
-| Adaptive Helm | `DA_AdaptiveHelm` | IncomingManaMultiplier, MagicResist, ManaPerSecond | `GA_AdaptiveHelm` | confirmed (VOD) | 2026-11-17: non-Tank/Fighter roles get GE_AdaptiveHelm_OtherRoles (10% AD, 10% AP); +15% mana gained, 3 regen. VOD3 Lux (champions/Lux.md E1-E2): AD 38 with Shojin, regen 6.9/s and attacks +13.8, i.e. every source x1.15. |
+| Adaptive Helm | `DA_AdaptiveHelm` | IncomingManaMultiplier, MagicResist, ManaPerSecond | `GA_AdaptiveHelm` (to 5973071) | confirmed (VOD) | 2026-11-17: non-Tank/Fighter roles get GE_AdaptiveHelm_OtherRoles (10% AD, 10% AP); from rls-19.1.0.5986094 no script: the item lists the role effects, each with its role condition (B34), same stats; +15% mana gained, 3 regen. VOD3 Lux (champions/Lux.md E1-E2): AD 38 with Shojin, regen 6.9/s and attacks +13.8, i.e. every source x1.15. |
 | Archangel's Staff | `DA_ArchangelsStaff` | AbilityPower, ManaPerSecond | `GA_ArchangelsStaff_RampingStats` | implemented (script read) | +20 AP every 5 s from combat start (I4, predicted; no VOD yet). |
 | Bloodthirster | `DA_Bloodthirster` | AbilityPower, AttackDamage, MagicResist, Omnivamp | `GA_Bloodthirster` | implemented (stats) | 2026-11-17: the 60%-health shield and omnivamp never trigger against dummies (I8). |
 | Blue Buff | `DA_BlueBuff` | AbilityPower, AttackDamage, ManaPerSecond | `GA_BlueBuff` | confirmed (VOD) | [worksheet](../items/BlueBuff.md): +10 mana at combat start, 6 regen; VOD 2026-11-17. |

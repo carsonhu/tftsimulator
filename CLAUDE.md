@@ -52,7 +52,9 @@ docstring and worksheet decision D1 cite the script for each structural fact.
 python tools/import_build.py         # copy new snapshots from tftDatamine/builds into builds/
 python tools/patch_notes_build.py builds/patch_notes/<file>.json
                                      # a build from patch notes when the client can't be read (B33: PBE's
-                                     # archives are encrypted since 2026-11-18); checks every old value
+                                     # archives are encrypted since 2026-11-18); checks every old value.
+                                     # An encrypted build can also be read from an FModel raw export (B34):
+                                     # tftDatamine snapshot_build.py with TFT_LOOSE=F:/tft_projects/Output/Exports
 python tools/worksheets.py           # refresh the AUTO block of each worksheet from the newest build;
                                      # also warns if a build disagrees with roster.json
 python tools/worksheets.py --build <version>

@@ -1,7 +1,7 @@
 # Ziggs (1-cost MagicMarksman) · `DA_Ziggs19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** MagicMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 1, pool 30; traits: Hyperpop, Arcanist, Swiftstriker
@@ -11,7 +11,7 @@
 
 > Passive: Attacks deal 40/60/90 × AP bonus magic damage.
 > 
-> Active: Throw a bomb at the target that deals 180/270/405 × AP magic damage to them and 80/120/180 × AP magic damage to adjacent enemies.
+> Active: Throw a bomb at the target that deals 155/235/355 × AP magic damage to them and 70/105/160 × AP magic damage to adjacent enemies.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -22,8 +22,8 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 180/270/405 × AP
-- `MagicDamageCalc2` = 80/120/180 × AP
+- `MagicDamageCalc1` = 155/235/355 × AP
+- `MagicDamageCalc2` = 70/105/160 × AP
 - `MagicDamageCalc3` = 40/60/90 × AP
 
 ### Timing the client predicts (unverified for Set 19)
@@ -58,6 +58,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 - row InitialDamage: 180 / 270 / 405 -> 155 / 235 / 355
 - row SecondaryDamageAP: 80 / 120 / 180 -> 70 / 105 / 160
+- ability text changed
 
 <!-- AUTO END -->
 
@@ -115,4 +116,4 @@ VOD was played on (check the patch shown in game or the date against builds/inde
     to attacks, and role mana from it (if the native mana handler hears it) would fall inside the mana lock.
   - **Assumed:** the bomb flies his attack range (4 hexes); the splash hits the enemies next to the target on the
     dummy layout (`layout.py`, default one). MiniBombs / FindMiniBombTargets in the script are never called.
-- 2026-11-18, Day 1 PBE patch notes (rls-19.1.0.5983251, its archives encrypted: the page's build rls-19.1.0.5983251.Set19.Shipping.pbe.notes, B33): InitialDamage 180/270/405 -> 155/235/355, SecondaryDamageAP 80/120/180 -> 70/105/160. Timing and everything else unchanged from rls-19.1.0.5973071 until a readable build says otherwise.
+- 2026-11-18, Day 1 PBE patch notes, confirmed in the client build rls-19.1.0.5986094 (read from an FModel raw export, B34; it replaced the patch-notes stand-in, B33): InitialDamage 180/270/405 -> 155/235/355, SecondaryDamageAP 80/120/180 -> 70/105/160. Its timing is unchanged from rls-19.1.0.5973071.

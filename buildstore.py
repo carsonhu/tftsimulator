@@ -13,6 +13,7 @@ A missing name raises BuildDataError naming the build, so a row Riot renames or 
 loudly instead of silently becoming 0. No number in here is edited; see docs/ASSUMPTIONS.md for how each is used.
 """
 import json
+import re
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -150,6 +151,10 @@ class Build:
         self.data = data
         self.meta = data['meta']
         self.version = self.meta['version']
+        # rls-19.1.0.5986094.Set19.Shipping.pbe -> 5986094: builds are ordered by it (a rule that follows a script
+        # change between builds compares it)
+        m = re.match(r'rls-[\d.]+?\.(\d{6,})\.', self.version)
+        self.changelist = int(m.group(1)) if m else 0
 
     def __deepcopy__(self, memo):
         # A build is read-only. Every table row deep-copies the champion, which holds its build: copying the whole

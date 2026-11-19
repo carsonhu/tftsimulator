@@ -1,7 +1,7 @@
 # Kai'Sa (3-cost AttackMarksman) · `DA_Kaisa19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: K/DA, Trickshot
@@ -9,7 +9,7 @@
 
 ### Ability: Make it Rain
 
-> Passive: Every 3 attacks, fire 3 missiles that deal 36/54/85 × AD + 6/9/15 × AP physical damage. 
+> Passive: Every 3 attacks, fire 3 missiles that deal 33/50/80 × AD + 6/9/15 × AP physical damage. 
 > 
 > Active: Gain 15% Attack Speed for the rest of combat.
 
@@ -28,7 +28,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 36/54/85 × AD + 6/9/15 × AP
+- `PhysicalDamageCalc1` = 33/50/80 × AD + 6/9/15 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -54,6 +54,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 ### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
 
 - row ADDamage: 36 / 54 / 85 -> 33 / 50 / 80
+- ability text changed
 
 <!-- AUTO END -->
 
@@ -109,4 +110,4 @@ VOD was played on (check the patch shown in game or the date against builds/inde
   - **Assumed:** each missile flies its own target's distance on the dummy layout (`layout.py`; owner, 2026-11-17):
     5 hexes to her target, 6 to the default layout's dummy next to it; identical dummies make the split irrelevant
     to the total.
-- 2026-11-18, Day 1 PBE patch notes (rls-19.1.0.5983251, its archives encrypted: the page's build rls-19.1.0.5983251.Set19.Shipping.pbe.notes, B33): ADDamage 36/54/85 -> 33/50/80. Timing and everything else unchanged from rls-19.1.0.5973071 until a readable build says otherwise.
+- 2026-11-18, Day 1 PBE patch notes, confirmed in the client build rls-19.1.0.5986094 (read from an FModel raw export, B34; it replaced the patch-notes stand-in, B33): ADDamage 36/54/85 -> 33/50/80. Its timing is unchanged from rls-19.1.0.5973071.

@@ -1,7 +1,7 @@
 # Evelynn (3-cost MagicFighter) · `DA_Evelynn19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: K/DA, Renegade
@@ -12,7 +12,7 @@
 
 > Passive: At combat start, teleport behind the current target, then become enshrouded for 15 seconds. While enshrouded, become untargetable to attacks and gain 50% Durability if at least 3 other allies are alive.
 > 
-> Active: Deal 280/420/700 × AP magic damage to the current target and 120/180/300 × AP magic damage to other enemies in a semi-circle. Ignore 40% of enemy Magic Resist.
+> Active: Deal 280/420/700 × AP magic damage to the current target and 120/180/300 × AP magic damage to other enemies in a semicircle. Ignore 40% of enemy Magic Resist.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -42,7 +42,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Evelynn19_Attack` | Chronos | 2.3 | LaunchAttack 0.3514, Unlock 0.932 |
-| `CD_Evelynn19_CombatStartDash` | Chronos | 0.2009 | Arrive 0.1262 |
+| `CD_Evelynn19_CombatStartDash` | Chronos | 0.3403 | Arrive 0.15 |
 | `CD_Evelynn19_Spell` | Chronos | 0.5995 | EndFizzle 0.1803, Damage 0.2042 |
 
 ### Scripts on the unit
@@ -56,7 +56,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ### Changed since `rls-19.1.0.5973071.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- ability text changed
 
 <!-- AUTO END -->
 

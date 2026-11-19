@@ -1,7 +1,7 @@
 # Yone (4-cost AttackFighter) · `DA_Yone19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Heartsteel, Slayer
@@ -54,8 +54,8 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | `CD_Yone19_CastAnim_Part2` | Chrono | 0.7915 | DealDamage 0.3453, Unlock 0.6589 |
 | `CD_Yone19_Celebration` | Chrono | 12.2141 | Default 0, Loop 3.0894 |
 | `CD_Yone19_SpellMissile` | Chrono | 0.3999 | Damage 0.0576, Damage 0.0793, Damage 0.0831, Damage 0.1619 |
-| `CD_Yone19_CastAnimAlt` | Chrono/old | 9.9957 | Default 0, Loop 0.3478, StartStrikes 0.5504 |
-| `CD_Yone19_CastAnim_Part2_Alt` | Chrono/old | 1.0058 | DealDamage 0.7784, Unlock 0.9879 |
+| `CD_Yone19_CastAnimAlt` | Chrono/OLD | 9.9957 | Default 0, Loop 0.3478, StartStrikes 0.5504 |
+| `CD_Yone19_CastAnim_Part2_Alt` | Chrono/OLD | 1.0058 | DealDamage 0.7784, Unlock 0.9879 |
 
 ### Scripts on the unit
 

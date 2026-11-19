@@ -1,7 +1,7 @@
 # Pyke (5-cost AttackFighter) · `DA_Pyke19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Rock, Renegade
@@ -43,6 +43,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | chrono | folder | length | events (s) |
 |---|---|---|---|
 | `CD_Pyke19_3StarDashAnim` | 3Star | 1.3987 | Spawn 0.3372 |
+| `CD_Pyke19_3StarInfernalIdol19_Cast` | 3Star | 2.6976 | Redirect 1.4941, Damage 1.6902, Unlock 2.1123 |
 | `CD_Pyke19_3StarTeleport` | 3Star | 0.2019 | Teleport 0.0189 |
 | `CD_Pyke19_AttackNew` | Chronos/Basic | 1.5667 | LaunchAttack 0.2646, Unlock 0.624 |
 | `CD_Pyke19_MoveToFinalHex` | Chronos/Cast | 0.2871 | Default 0, Arrive 0.01, LoopAnim 0.01 |

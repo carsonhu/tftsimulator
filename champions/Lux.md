@@ -1,7 +1,7 @@
 # Lux (2-cost MagicCaster) · `DA_Lux19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Ionic Spark, Prodigy
@@ -9,7 +9,7 @@
 
 ### Ability: Lux Lux Beam!
 
-> Toss a prism into the air, then blast it with a beam of light. The beam splits, dealing 330/500/800 × AP magic damage to the target, and 170/255/425 × AP to another nearby enemy. For each one that dies, gain 8 Mana.
+> Toss a prism into the air, then blast it with a beam of light. The beam splits, dealing 300/450/675 × AP magic damage to the target, and 160/240/360 × AP to another nearby enemy. For each one that dies, gain 8 Mana.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -21,8 +21,8 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 330/500/800 × AP
-- `MagicDamageCalc2` = 170/255/425 × AP
+- `MagicDamageCalc1` = 300/450/675 × AP
+- `MagicDamageCalc2` = 160/240/360 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -50,6 +50,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 - row PrimaryDamageAP: 330 / 500 / 800 -> 300 / 450 / 675
 - row SecondaryDamageAP: 170 / 255 / 425 -> 160 / 240 / 360
+- ability text changed
 
 <!-- AUTO END -->
 
@@ -109,4 +110,4 @@ Shojin and Adaptive Helm, round 1-9, panel open f28459-29741 and later.
     the one behind the target). SortByRowDistance's tie rule is not decoded; among identical dummies it changes
     nothing but debuffs.
   - **Not modelled:** ManaRefundOnKill (8 per beam target that dies: dummies never die).
-- 2026-11-18, Day 1 PBE patch notes (rls-19.1.0.5983251, its archives encrypted: the page's build rls-19.1.0.5983251.Set19.Shipping.pbe.notes, B33): PrimaryDamageAP 330/500/800 -> 300/450/675, SecondaryDamageAP 170/255/425 -> 160/240/360. Timing and everything else unchanged from rls-19.1.0.5973071 until a readable build says otherwise.
+- 2026-11-18, Day 1 PBE patch notes, confirmed in the client build rls-19.1.0.5986094 (read from an FModel raw export, B34; it replaced the patch-notes stand-in, B33): PrimaryDamageAP 330/500/800 -> 300/450/675, SecondaryDamageAP 170/255/425 -> 160/240/360. Its timing is unchanged from rls-19.1.0.5973071.

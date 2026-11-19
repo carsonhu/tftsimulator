@@ -1,7 +1,7 @@
 # Nunu & Willump (5-cost MagicSpecialist) · `DA_Nunu19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** MagicSpecialist: "Specialists generate resources in a unique way." ()
 - **Cost** 5, pool 9; traits: Disco, Frontman

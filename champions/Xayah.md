@@ -1,7 +1,7 @@
 # Xayah (4-cost AttackCaster) · `DA_Xayah19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5983251.Set19.Shipping.pbe.notes; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5983251.Set19.Shipping.pbe.notes`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5986094.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.5986094.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Gu Feng, Hitmaker
@@ -40,7 +40,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 |---|---|---|---|
 | `CD_Xayah19_Attack` | Chronos | 1.3004 | LaunchAttackVariant1 0.22, LaunchAttackVariant2 0.4, Unlock 0.6, Unlock 0.65 |
 | `CD_Xayah19_CastAnim` | Chronos | 2.1334 | StartFeathers 0.2466, MoreFeathers 0.6989, FinishLaunching 1.3031, Unlock 2.1237 |
-| `CD_Xayah19_RetractAnim` | Chronos/old | 0.6998 | RecallFeathers 0.3663, Unlock 0.6771 |
+| `CD_Xayah19_RetractAnim` | Chronos/OLD | 0.6998 | RecallFeathers 0.3663, Unlock 0.6771 |
 
 ### Scripts on the unit
 
