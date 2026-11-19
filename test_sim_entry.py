@@ -46,7 +46,7 @@ def test_catalog_info_and_run(registered):
 
 def test_unknown_champion_is_refused():
     with pytest.raises(KeyError, match='not a Set 19 champion'):
-        sim_entry.run_slice(cfg(champ='Ahri'))
+        sim_entry.run_slice(cfg(champ='Sett'))  # a tank: out of scope (roster.json)
 
 
 def test_catalog_lists_the_builds_for_the_picker():
