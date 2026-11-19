@@ -62,7 +62,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 ## Status
 
 - Worksheet status: **implemented** (2026-11-18, `set19champs.Xayah`, D1); the cast's locks and the next attack
-  checked on VOD4 (E3-E5), the damage formula on its tooltip (E2)
+  checked on VOD4 (E3-E5) and again on VOD6 (E7), the damage formula on its tooltip (E2)
 - Keep in the simulator: **yes** (owner, 2026-11-18: "we have a vod for xayah")
 
 ## Questions
@@ -78,9 +78,9 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.22 s (6.6 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 2500 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 2.1667 s (65 ticks) | confirmed to a tick: the attack after the cast pays at +71.5 / +72.5 / +70 ticks (engine 72) | E3-E5 |
+| Q7 | Cast time: cast start to the next attack starting | 2.1667 s (65 ticks) | confirmed to a tick: the attack after the cast pays at +71.5 / +72.5 / +70 ticks (engine 72); VOD6 +72.5 | E3-E5, E7 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 2.1333 s (64 ticks) | confirmed to a tick: the banked overflow shows +64.5 / +65.5 ticks after the bar emptied | E3, E4 |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 2.1333 s (64 ticks) | confirmed to a tick: the banked overflow shows +64.5 / +65.5 ticks after the bar emptied; VOD6 +65.5 / +65 | E3, E4, E7 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 1 GE_SimulateLaunchAttack at StartFeathers (G11) | predicted (script) | D1 |
 | Q12 | Does the cast cancel or reset an attack in progress? | cancels (CancelAbilitiesWithTag Combat.Attacking) | predicted | |
@@ -107,6 +107,7 @@ from `tools/vod_text_changes.py --field mana` (crops read by eye).
 | E4 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 f73741-73886 (round 2-1, cast A) | 60 | as E3 (55 + 7 = 62) | banked 2 at f73872 (+131 fr = 65.5 ticks); next +7 at f73886 (+145 fr = 72.5 ticks) | as E3 | Q7, Q9 |
 | E5 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 f74137-74277 (round 2-1, cast B) | 60 | as E3 (53 + 7 = 60, nothing banked) | next +7 at f74277 (+140 fr = 70 ticks) | as E3 | Q7 |
 | E6 | 2026-11-18 | rls-19.1.0.5973071 | VOD4 f73735-73887 (cast A, the board every 8 frames) | 60 | feathers | gather behind her ~1.0-1.4 s, fly ~1.5 s, damage numbers on the target ~1.6-1.9 s | consistent with D1's 0.88 / 0.4 s waits and 3200 units/s over more than 4 hexes | Q16 |
+| E7 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f55930-56672 (round 2-6; VOD6 = `…PBE_11-18-2026_18-40-41-766.mp4`, 60 fps) | 60 | mana text (attacks +12 / +13, 3/s; she takes damage) | cast at f55958 (58 -> 0): the next attack's +12 at f56103 (+145 fr = 72.5 ticks); cast at f56307 (59 -> 0): banked 12 at f56438 (+131 fr = 65.5 ticks); cast at f56534 (52 -> 0): banked 4 at f56664 (+130 fr = 65 ticks) | the mana lock 64 + the tick after the fill, the attack after the cast at 72: as on VOD4 (the first cast banked nothing: filled by regen, not seen) | Q7, Q9 |
 
 Not used: fight 1's second cast (f71290: the lock end shows 157 frames later, so the cast started ~28 frames after
 the fill; her target had died) and the casts cut short by the end of the round (f71682, f74569).
