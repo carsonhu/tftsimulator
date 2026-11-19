@@ -74,8 +74,8 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | mana 30 confirmed; HP 1025 vs 850, 3 regen, +12 per attack (items / traits not identified) | E2 |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster: 7 per attack, 2/s | consistent (+12 = 7 + 5, 3/s) | E2 |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | mana 30 confirmed; 3/s and +12 per attack are the role's 2 and 7 + Spear of Shojin's 1 and 5 (owner: she held one, D3); HP 1025 vs 850 not identified | E2, D3 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster: 7 per attack, 2/s | confirmed with Spear of Shojin: +12 = 7 + 5, 3/s = 2 + 1; when it is paid: open | E2, D3 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.3067 s (9.2 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
@@ -101,7 +101,7 @@ Ahri with items. Mana from `tools/vod_text_changes.py --field mana` (crops read 
 
 | # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
 |---|---|---|---|---|---|---|---|---|
-| E2 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f66695-67914 | 60 | mana text | 1025/1025, x/30, 3/s, +12 per attack. Casts and the overflow's frame: f66786 -> f66868 (+82), f66958 -> f67020 (+62), f67073 -> f67135 (+62), f67181 -> f67289 (+108), f67347 -> f67407 (+60), f67471 -> f67531, f67564 -> f67624, f67654 -> f67714, f67766 -> f67826, f67854 -> f67914 (+60 each) | basic 31, the 4th cast (12 -> 14 + pose) 54, the flow 30 ticks: the locks + the tick after the fill. The first cast's +82 (41 ticks) is not explained | Q1, Q2, Q9, Q14 |
+| E2 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f66695-67914 | 60 | mana text | 1025/1025, x/30, 3/s, +12 per attack. Casts and the overflow's frame: f66786 -> f66868 (+82), f66958 -> f67020 (+62), f67073 -> f67135 (+62), f67181 -> f67289 (+108), f67347 -> f67407 (+60), f67471 -> f67531, f67564 -> f67624, f67654 -> f67714, f67766 -> f67826, f67854 -> f67914 (+60 each) | basic 31, the 4th cast (12 -> 14 + pose) 54, the flow 30 ticks: the locks + the tick after the fill. The first cast's +82 is not a lock: that cast filled from regen (29 at f66772, 0 at f66786), so nothing was banked and f66868's 0 -> 12 is the next attack (D3) | Q1, Q2, Q9, Q14 |
 
 ## Decisions and notes
 
@@ -127,3 +127,12 @@ Ahri with items. Mana from `tools/vod_text_changes.py --field mana` (crops read 
   cast, in turn; each fox-fire flies half its target's distance at 1600, waits 0.05 + 0.1 s at the split
   (CD_Ahri19_EmpowedSpell_SpreadMissile) and flies on at 2100. D1's spawn times without the waits had them leave
   0.04-0.39 s in. The cast lengths (E2) don't change.
+
+- 2026-11-19, D3 (owner: VOD6's Ahri held a Spear of Shojin; E2's crops re-read):
+  - **Mana:** Shojin's ManaPerAttack 5 and ManaRegen 1 (GE_SpearOfShojin) on the MagicCaster role's 7 and 2 give the
+    clip's +12 per attack and 3/s (Q1, Q2). The HP (1025, build 850) comes from something else.
+  - **The first cast (E2's +82):** it filled from regen, not an attack: 28 -> 29 (f66772) -> cast (f66786, 0), so
+    no overflow was banked and the next change, 0 -> 12 at f66868, is an attack's mana. Regen then shows 13 at f66876,
+    which puts the lock's end at about f66848-66856 (at 3/s the bar reaches 1 about 20 frames after mana is gained
+    again): 31-35 ticks after the cast, so consistent with the 31-tick basic lock the other casts show.
+    Nothing to change in the engine.
