@@ -98,9 +98,10 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 1 GE_SimulateLaunchAttack at 'Fire' | predicted (script) | D1 |
 | Q12 | Does the cast cancel or reset an attack in progress? | cancels (CancelAbilitiesWithTag Combat.Attacking) | predicted | |
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | target DamageAP x AP + DamageAD x AD; others x SecondaryDamagePercent; Red +20% | predicted | D1 |
-| Q14 | Passives and other mechanics that need modelling | the ring: Red +20% damage, Blue 10 mana, Green heal, Gold gold | Red and Blue averaged by their long-run share (1/3 each); Green and Gold change no damage | D1 |
+| Q14 | Passives and other mechanics that need modelling | the ring: Red +20% damage, Blue 10 mana, Green heal, Gold gold | Red and Blue by the ring's colour at the cast, the ring cycling Red -> Green -> Blue (D2); Green and Gold change no damage | D1, D2 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 | Q16 | Does she dash before the wave against stationary enemies? | she picks the hex within her range of the target with the most enemies in the line through it; her own hex -> no dash | simulated without the dash (NoMove); VOD6's three casts played NoMove (the refund at 27 ticks, not Move's 38) | E2 |
+| Q17 | How fast does the ring switch, and in what order? | every TimeRingChange (1.5 s), to one of the other two at random | **open**: simulated as a cycle (owner, D2) at 1.5 s; E2's three Blue casts 3.13 and 3.48 s apart need ~1.1 s per colour for a cycle, or the random pick (1 in 4) | E2, D2 |
 
 ## Evidence log
 
@@ -133,6 +134,10 @@ Collab, which 5986094 doesn't give her. Mana from `tools/vod_text_changes.py --f
     (Calc2 = 0.5 x Calc1); physical, AOE, on-spell, RollIfCanSpellCrit. Red: the _Red effects add Calc x
     RedBonusDamagePercent.
   - **ManaUnlock:** lifts the lock; Blue: GE_Qiyana19_ManaRefundBlue (+BlueManaRefund). 'Unlock': FinishCasting.
-  - **Simulated:** NoMove; the colour averaged like crits (I6): damage x (1 + 0.2 x 1/3), refund 10 x 1/3 at
+  - **Simulated:** NoMove; the colour averaged like crits (I6, replaced by D2): damage x (1 + 0.2 x 1/3), refund 10 x 1/3 at
     'ManaUnlock' (paid during the cast, E2); the wave hits every dummy within 220 units of its path, each when the
     box's front reaches it.
+
+- 2026-11-18, D2 (owner: "it should probably cycle between them"): the ring cycles Red -> Green -> Blue
+  (`Qiyana.RING`), Red at combat start, one colour every TimeRingChange (1.5 s, the build); a cast takes the colour
+  at its start tick: Red x 1.2 damage, Blue +10 mana at 'ManaUnlock'. The rate is open (Q17).

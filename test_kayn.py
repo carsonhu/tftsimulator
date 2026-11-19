@@ -59,17 +59,21 @@ def test_swipe_line():
 
 
 def test_shadow_assassin():
-    # Heartsteel (3) with Kayn as the Bias: +7% AD (his own fielded bonus) and, as the Shadow Assassin from combat
-    # start (assumed, Q17), 35% of each damage's pre-mitigation amount again as magic damage
+    # Heartsteel (3) with Kayn as the Bias: +7% AD (his own fielded bonus) and, as the Shadow Assassin from 5 s into
+    # combat (owner, Q17), 35% of each damage's pre-mitigation amount again as magic damage
     k = LoggedKayn(1)
-    rows = fight(k, buffs=[set19buffs.Heartsteel(3, BIAS)])
+    rows = fight(k, buffs=[set19buffs.Heartsteel(3, BIAS)], seconds=9)
     assert k.heartsteel_bias and k.bonus_ad.stat == pytest.approx(1.07)
-    first = [(d, kind) for t, d, kind in rows if t == rows[0][0]]
-    assert first == [(pytest.approx(42 * 1.07 * 1.1), 'physical'), (pytest.approx(42 * 1.07 * 1.1 * 0.35), 'magical')]
-    cast = k.casts[0]
+    assert all(kind == 'physical' for t, d, kind in rows if t < 150)
+    late = [t for t, d, kind in rows if t >= 150 and kind == 'physical']
+    assert late and all(any(t2 == t and kind == 'magical' and d2 == pytest.approx(d * 0.35)
+                            for t2, d2, kind in rows) for t, d, k_ in rows if t >= 150 and k_ == 'physical')
+    attack = next((t, d) for t, d, kind in rows if t >= 150 and kind == 'physical' and t not in [c + 14 for c in k.casts])
+    assert attack[1] == pytest.approx(42 * 1.07 * 1.1)
+    cast = next(c for c in k.casts if c + 14 >= 150)
     swipe = [(d, kind) for t, d, kind in rows if t == cast + 14]
     assert swipe == [(pytest.approx(130 + 115 * 0.07), 'physical'), (pytest.approx((130 + 115 * 0.07) * 0.35), 'magical')]
     # no Bias: no bonus
     k = LoggedKayn(1)
-    rows = fight(k, buffs=[set19buffs.Heartsteel(3, 0)])
+    rows = fight(k, buffs=[set19buffs.Heartsteel(3, 0)], seconds=9)
     assert not k.heartsteel_bias and {kind for t, d, kind in rows} == {'physical'}

@@ -81,7 +81,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 ## Status
 
 - Worksheet status: **implemented** (2026-11-18, `set19champs.Seraphine`, `SeraphineRisingStar`, `SeraphineSuperstar`;
-  D1); the mana lock checked on VOD6 (E2); the per-note damage divisor is an owner question (Q16)
+  D1); the mana lock checked on VOD6 (E2); the per-note damage / 30 (owner, D2)
 - Keep in the simulator: **yes** (owner, 2026-11-18: VOD6 has her at 1-6 and 2-4). Her three forms are three
   champions on the page (same stats; the spell reads the form)
 
@@ -107,7 +107,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | 30 notes at the target; Rising Star 2 x 4 bonus notes; Superstar a high note at every enemy | predicted | D1 |
 | Q14 | Passives and other mechanics that need modelling | the forms (Indie / Rising Star / Superstar, from rerolls) | three champions on the page | D1 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
-| Q16 | Each stream note's damage: MagicDamageCalc1 with DivideAdditive NumFires (15) and 2 | the engine's channel rule (I5, GAS): / (1 + 14 + 1) = / 16, so 30 notes = 1.875 x the tooltip's total; the tooltip implies / 30 | **open, owner**: simulated / 16. VOD6: the numbers on her target were 25 and 12; at AP 120% a note is 42.75 (/16) or 22.8 (/30) before MR, and the panel shows no damage amp, so 25 can't be / 30 (it needs ~71 MR at / 16) | E3 |
+| Q16 | Each stream note's damage: MagicDamageCalc1 with DivideAdditive NumFires (15) and 2 | the engine's channel rule (I5, GAS): / (1 + 14 + 1) = / 16, so 30 notes = 1.875 x the tooltip's total; the tooltip implies / 30 | **owner, 2026-11-18**: / 30 (D2): VOD6's 12s are single notes, the 25s two shown merged. At AP 120% a note is 22.8 before MR, so 12 implies ~90 MR on the target (not inspected) | E3, D2 |
 
 ## Evidence log
 
@@ -135,7 +135,7 @@ Seraphine 1 star, Indie, two items; Heartsteel (3) on the board (Sett fielded). 
   - **Stream:** 'BeginFire' (0.2997 s): RepeatAction(0.15, 15), first at once (A1); each fire: a left-speaker note
     and, 0.075 s later, a right-speaker note (CD_Seraphine19_Splines 'SpellMis', 1900 units/s) at her target.
     GE_Seraphine19_Damage: MagicDamageCalc1 (DamageAP x AP), DivideAdditive SetByCaller (NumFires) and DivideAdditive
-    2; magic, on-spell, RollIfCanSpellCrit. Divisor (I5): 1 + (15 - 1) + (2 - 1) = 16 (Q16).
+    2; magic, on-spell, RollIfCanSpellCrit. Divisor (I5): 1 + (15 - 1) + (2 - 1) = 16 (Q16; replaced by D2).
   - **Rising Star / Superstar:** 'SecondFire' (1.1739 s): FireBonusNotes(8 - Round(8 / 2) = 4); 'ThirdFire' (2.0487
     s): FireBonusNotes(Round(8 / 2) = 4). The notes go in turn to the N nearest enemies (TR_Add_N_NearestEnemies...,
     SortByRowDistance; her target if none; GetRepeatingListFromTargetData), CD_Seraphine19_SplinesBonus (1900),
@@ -145,3 +145,8 @@ Seraphine 1 star, Indie, two items; Heartsteel (3) on the board (Sett fielded). 
   - **End:** 'Unlock' (2.6974 s) ends the cast (81 / 82 ticks).
   - **Simulated:** flights over the target's distance (G4; the speakers' places and the splines' curves not
     modelled); the Indie trait itself (rerolls, popularity, loot) gives no combat power.
+
+- 2026-11-18, D2 (owner): each stream note deals DamageAP x AP / (NumFires x 2) = / 30, so a cast's 30 notes deal
+  the tooltip's total. The owner reads VOD6's numbers as 12 per note, with the left and right notes (0.075 s apart)
+  merged into one 25. The two DivideAdditive SetByCallers are taken as a product here, not GAS's 1 + sum(d - 1)
+  (ledger I5's note).

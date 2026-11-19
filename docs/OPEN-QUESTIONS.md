@@ -191,21 +191,15 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
-| (owner) When the Bias Kayn becomes the Shadow Assassin | from combat start (dummies never hit back; the game: at 70% Health, VOD6 ~4.8 s in) | your call: from the start, never, or a time | champions/Kayn.md Q17 |
+| When a fronted Bias Kayn becomes the Shadow Assassin | 5 s into combat (owner, 2026-11-18, tentative: dummies never hit back; the game: at 70% Health, VOD6 1-4 ~4.8 s in) | fights with him behind a frontline: when his Health crosses 70% | champions/Kayn.md Q17 |
 | Does he dash before each swipe against stationary enemies? | he stands still (the script dashes when another hex within 2 of the target hits at least as many, unless he is on it) | a cast on stationary enemies: does he move, and the next attack's timing | champions/Kayn.md Q16 |
 
 ### 7t. Qiyana (VOD6 has her at 1-5)
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
-| (owner) Her ring colour | averaged: each cast deals +20% x 1/3 (Red) and refunds 10 x 1/3 mana (Blue), the ring's long-run shares | your call: averaged, or a fixed colour per fight | champions/Qiyana.md Q14 |
+| How fast her ring switches, and in what order | Red -> Green -> Blue from Red at combat start, one every TimeRingChange (1.5 s) (owner, 2026-11-18: a cycle; the script picks one of the other two at random). VOD6 1-5's three casts were all Blue, 3.13 and 3.48 s apart: a three-colour cycle would need about 1.1 s per colour, the build's 1.5 s random pick gives that 1 time in 4 | a fight where the ring's colour can be seen: the times it changes and the colours in order | champions/Qiyana.md Q17 |
 | Her Collab trait | not in build 5986094 (VOD6's client 5986652 shows it) | (tool) export 5986652 | champions/Qiyana.md |
-
-### 7u. Seraphine (VOD6 has her at 1-6 and 2-4)
-
-| Question | What the simulator assumes now | What the clip shows | Ledger |
-|---|---|---|---|
-| (owner) A stream note's damage | DamageAP x AP / 16 (DivideAdditive 15 and 2 add as 1 + 14 + 1, the engine's channel rule I5): a cast's 30 notes deal 1.875x the tooltip's 570; the tooltip implies / 30. VOD6 1-6: 25s on her target at AP 120%, which / 30 can't reach without a damage amp | a cast on a target whose MR is known (inspect it): one note's number | champions/SeraphineIndie.md Q16 |
 
 ### 7v. Yone (VOD6 has him at 2-1, 2-2, 2-4)
 

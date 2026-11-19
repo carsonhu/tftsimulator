@@ -39,13 +39,13 @@ def test_build_numbers():
     assert (s.fullMana.stat, s.aspd.stat, s.attack_range, s.hp.stat) == (50, 0.75, 4, 700)
     # VOD6 E2: the banked 2 mana shows 82 ticks after the bar empties (81 + the tick after the fill)
     assert (round(s.timing.mana_lock * 30), round(s.timing.cast_lock * 30)) == (81, 82)
-    assert (s.num_fires, s.note_divisor, s.bonus_volleys) == (15, 16, (4, 4))
+    assert (s.num_fires, s.note_divisor, s.bonus_volleys) == (15, 30, (4, 4))
 
 
 def test_indie_stream():
     s, cast, hits = cast_hits(Seraphine)
-    # 30 notes at the target, each 570 x AP / 16; the first fire at 'BeginFire' (9 ticks) + the flight over 4 hexes
-    assert len(hits) == 30 and all(d == pytest.approx(570 / 16) for _, d in hits)
+    # 30 notes at the target, each 570 x AP / 30; the first fire at 'BeginFire' (9 ticks) + the flight over 4 hexes
+    assert len(hits) == 30 and all(d == pytest.approx(570 / 30) for _, d in hits)
     # the last: fire 15's right note leaves at 0.2997 + 14 x 0.15 + 0.075 = 2.4747 s (tick 75), lands 14 ticks later
     assert hits[0][0] == 9 + 14 and hits[-1][0] == 75 + 14
 
@@ -53,7 +53,7 @@ def test_indie_stream():
 def test_rising_star_and_superstar():
     _, _, hits = cast_hits(SeraphineRisingStar)
     c = collections.Counter(round(d, 2) for _, d in hits)
-    assert c[round(570 / 16, 2)] == 30 and c[20] == 8  # 4 + 4 bonus notes at ExtraNoteDamageAP
+    assert c[round(570 / 30, 2)] == 30 and c[20] == 8  # 4 + 4 bonus notes at ExtraNoteDamageAP
     _, _, hits = cast_hits(SeraphineSuperstar)
     c = collections.Counter(round(d, 2) for _, d in hits)
     assert c[60] == 3 and c[20] == 8  # a high note at each of the 3 dummies

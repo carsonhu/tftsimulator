@@ -90,7 +90,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q14 | Passives and other mechanics that need modelling | Heartsteel Bias: Shadow Assassin at 70% Health, +35% of his damage as magic | modelled (D1); the trigger seen at 70% | E3, D1 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 | Q16 | Does he dash before the swipe against stationary enemies? | MakeDashDecision: dashes when the best hex within 2 of the target hits at least as many as standing still, unless he is on it | **open**: simulated standing still; VOD6's casts mixed (E3) | E3 |
-| Q17 | When does the Bias Kayn become the Shadow Assassin in the simulator (dummies never hit back)? | at 70% Health | **open, owner**: assumed from combat start; VOD6 fight crossed 70% ~4.8 s in | E3 |
+| Q17 | When does the Bias Kayn become the Shadow Assassin in the simulator (dummies never hit back)? | at 70% Health | **owner, 2026-11-18 (tentative)**: 5 s into combat (he is fronted, then transforms); VOD6 1-4 crossed 70% ~4.8 s in | E3, D2 |
 
 ## Evidence log
 
@@ -126,5 +126,9 @@ Kayn 1 star with one item, Heartsteel (3) with him as the Bias; enemies walk in.
     at PreMitigation adds GE_Kayn19_Heartsteel_BonusMagicDamage = that amount x 0.35: magic, Damage.Source.Trait,
     no tags, CritCondition.Never.
   - **Simulated:** standing still (Q16); the swipe hits the dummies in the rectangle (the target, plus any straight
-    behind it); as the Bias he is the Shadow Assassin from combat start (Q17, owner question); the bonus is not
+    behind it); as the Bias he is the Shadow Assassin from combat start (Q17; changed in D2); the bonus is not
     amplified again (as True Damage's bonus, B19) and the averaged crit is in its base.
+
+- 2026-11-18, D2 (owner): the Bias becomes the Shadow Assassin `Kayn.SHADOW_ASSASSIN_AT` = 5 s into combat, not from
+  the start: he is meant to be fronted, then take enough damage to transform (tentative; VOD6 1-4: ~4.8 s, E3). The
+  bonus is on his damage from that tick on (`test_kayn.py`).

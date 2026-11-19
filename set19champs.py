@@ -1710,25 +1710,27 @@ class Kayn(BuildChampion):
     HeartsteelStan_MagicDamagePostTransform (35%) as magic damage, Damage.Source.Trait (it triggers nothing), no tags,
     never crits.
     Simulated: he stands still (stationary dummies; the dash's length is open, champions/Kayn.md Q16). Dummies never
-    hit back, so as the Bias he is assumed to be the Shadow Assassin from combat start (champions/Kayn.md Q17, owner
-    question); the bonus is not amplified again (as True Damage's, B19).
+    hit back, so as the Bias he becomes the Shadow Assassin SHADOW_ASSASSIN_AT (5 s) into combat (owner, 2026-11-18:
+    he is fronted for a while, then transforms; VOD6 crossed 70% ~4.8 s in; champions/Kayn.md Q17); the bonus is on
+    damage from then on and is not amplified again (as True Damage's, B19).
     """
     KEY = 'DA_Kayn19'
     AREA = True  # the rectangle can hold enemies behind the target (layout.py)
     CAST = 'CD_Kayn19_Spell'
+    SHADOW_ASSASSIN_AT = 5.0  # seconds into combat the Bias transforms (owner, 2026-11-18, Q17)
 
     def __init__(self, level, build=None):
         super().__init__(level, build)
         self.deal_damage_at = self.chrono_event(self.CAST, 'DealDamage')
-        self.notes = ('A cast: a swipe in a 2-hex line toward his target. As the Heartsteel Bias he is the Shadow '
-                      'Assassin from combat start (assumed: he transforms at 70% Health), adding 35% of his damage as '
-                      'magic damage.')
+        self.notes = ('A cast: a swipe in a 2-hex line toward his target. As the Heartsteel Bias he becomes the '
+                      'Shadow Assassin 5 s into combat (in game: at 70% Health), adding 35% of his damage as magic '
+                      'damage from then.')
 
     def spell_damage(self, level, AD, AP):
         return self.row('SpellPhysicalDamage', star=level) * AD + self.row('SpellMagicDamage', star=level) * AP
 
     def shadow_assassin(self):
-        return bool(getattr(self, 'heartsteel_bias', False))
+        return bool(getattr(self, 'heartsteel_bias', False)) and self.tick >= round(self.SHADOW_ASSASSIN_AT * TPS)
 
     def swipe_targets(self, target):
         """The dummies in the SpellLength x SpellWidth rectangle from him toward `target`
@@ -1767,22 +1769,6 @@ class Kayn(BuildChampion):
         self.schedule_tick(self.tick + ticks_up(self.deal_damage_at), swipe)
 
 
-def roulette_shares(weights):
-    """Long-run share of each colour of a ring that changes, every period, to one of the other colours with
-    probability proportional to its weight (GA_Qiyana19_PassiveRingRoulette): the stationary distribution."""
-    names = list(weights)
-    p = {n: 1 / len(names) for n in names}
-    for _ in range(500):
-        q = {n: 0.0 for n in names}
-        for a in names:
-            others = sum(weights[b] for b in names if b != a)
-            for b in names:
-                if b != a and others:
-                    q[b] += p[a] * weights[b] / others
-        p = q
-    return p
-
-
 class Qiyana(BuildChampion):
     """Shuffled Playlist (champions/Qiyana.md, D1). Scripts: GA_Qiyana19_Spell, GA_Qiyana19_PassiveRingRoulette
     (build ga_scripts.zip).
@@ -1800,16 +1786,18 @@ class Qiyana(BuildChampion):
     SecondaryDamagePercent x Calc1); physical, AOE, on-spell, crit only with Precision. Red: the _Red versions add
     Calc x RedBonusDamagePercent (20%). Green heals (nothing against dummies). 'ManaUnlock' (0.8491 s) lifts the mana
     lock and, Blue, GE_Qiyana19_ManaRefundBlue gives BlueManaRefund (10) mana; 'Unlock' (1.0912 s) ends the cast.
-    Simulated: she stands still (CastAnimNoMove). The colour is random; the engine averages it like crits (I6): each
-    cast deals x (1 + RedBonusDamagePercent x the Red share) and refunds BlueManaRefund x the Blue share, the shares
-    being the ring's long-run ones (1/3 each). The refund lands at 'ManaUnlock' although the cast is still running
-    (VOD6: +10 27 ticks after the cast). The wave hits the target and every dummy within 220 units of its path.
+    Simulated: she stands still (CastAnimNoMove). The ring cycles Red -> Green -> Blue, starting Red at combat start
+    and changing every TimeRingChange (owner, 2026-11-18: cycle, not a random pick; champions/Qiyana.md Q17); a cast
+    takes the colour the ring shows when it starts: Red x (1 + RedBonusDamagePercent), Blue refunds BlueManaRefund.
+    The refund lands at 'ManaUnlock' although the cast is still running (VOD6: +10 27 ticks after the cast). The wave
+    hits the target and every dummy within 220 units of its path.
     """
     KEY = 'DA_Qiyana19'
     AREA = True  # the wave hits the enemies along and beside its path (layout.py)
     CAST = 'CD_Qiyana19_CastAnimNoMove'
     HEX = 214.5  # GA_Qiyana19_Spell 0xb3: the wave's end point, in units per hex behind the target (script literal)
     WAVE_HALF_LENGTH, WAVE_HALF_WIDTH = 50, 220  # the 'Wave' projectile's Shape BoxExtent (client asset)
+    RING = ('Red', 'Green', 'Blue')  # the cycle's order and first colour (owner, Q17)
 
     def __init__(self, level, build=None):
         super().__init__(level, build)
@@ -1824,13 +1812,18 @@ class Qiyana(BuildChampion):
         t.cast_lock = (ticks_up(unlock) + 1) / TPS  # FinishCasting at 'Unlock'; the next attack the tick after (T5)
         t.source['mana_lock'] = f'{ch} ManaUnlock'
         t.source['cast_lock'] = f'{ch} Unlock'
-        self.shares = roulette_shares({c: self.row(c + 'Weight') for c in ('Red', 'Green', 'Blue')})
+        self.ring_ticks = round(self.row('TimeRingChange') * TPS)
         self.notes = ('A cast: a wave through her target hitting the enemies along and beside it (others take half). '
-                      'Her ring colour is random; averaged: Red (+20% damage) and Blue (10 mana back) a third of the '
-                      'casts each. She is assumed to cast without dashing.')
+                      'Her ring cycles Red (+20% damage), Green (a heal), Blue (10 mana back), changing every 1.5 s '
+                      'from Red at combat start (in game: a random pick of the other two). She is assumed to cast '
+                      'without dashing.')
 
-    def wave_damage(self, level, AD, AP):
-        red = 1 + self.row('RedBonusDamagePercent', star=level) * self.shares['Red']
+    def ring_colour(self, tick):
+        """The ring's colour at `tick`: RING in turn, one every TimeRingChange from combat start."""
+        return self.RING[(tick // self.ring_ticks) % len(self.RING)]
+
+    def wave_damage(self, level, AD, AP, colour='Green'):
+        red = 1 + (self.row('RedBonusDamagePercent', star=level) if colour == 'Red' else 0)
         return (self.row('DamageAP', star=level) * AP + self.row('DamageAD', star=level) * AD) * red
 
     def wave_hits(self, target):
@@ -1852,6 +1845,7 @@ class Qiyana(BuildChampion):
     def performAbility(self, opponents, items, time):
         target = opponents[0]
         cast = self.tick
+        colour = self.ring_colour(cast)  # the colour tags are read at the cast (0x2779)
         self.schedule_tick(cast + ticks_up(self.chrono_event(self.CAST, 'Fire')), lambda: self.simulateLaunch(self.items))
         spawn = cast + ticks_up(self.wave_spawn)
         hits = self.wave_hits(target)
@@ -1864,14 +1858,15 @@ class Qiyana(BuildChampion):
 
             def land(d=d, eff=eff):
                 self.multiTargetSpell([d], self.items, self.tick / TPS, 1,
-                                      lambda level, AD, AP: self.wave_damage(level, AD, AP) * eff, 'physical')
+                                      lambda level, AD, AP: self.wave_damage(level, AD, AP, colour) * eff, 'physical')
             self.schedule_tick(spawn + ticks_up(max(0, along - self.WAVE_HALF_LENGTH) / self.wave_speed), land)
 
         def refund():
             # GE_Qiyana19_ManaRefundBlue after the mana lock comes off, while the cast still runs (addMana would wait
             # for the cast lock)
-            self.curMana += self.row('BlueManaRefund') * self.shares['Blue'] * self.manaGainMultiplier.stat
-        self.schedule_tick(cast + self.mana_unlock_ticks, refund)
+            self.curMana += self.row('BlueManaRefund') * self.manaGainMultiplier.stat
+        if colour == 'Blue':
+            self.schedule_tick(cast + self.mana_unlock_ticks, refund)
 
 
 class Seraphine(BuildChampion):
@@ -1892,9 +1887,9 @@ class Seraphine(BuildChampion):
     Superstar (form 3): 'HighNote' (0.269 s): a CD_Seraphine19_HighNoteMis ('HighNote', 1800, arc 500) at every enemy,
     GE_Seraphine19_DamageHighNote = MagicDamageCalc3 (HighNoteDamageAP x AP). 'Unlock' (2.6974 s) ends the cast
     (the build's 81 / 82 ticks).
-    Each note's divisor follows the evaluation rule the engine uses for every channel (ledger I5, GAS): DivideAdditive
-    terms add as 1 + sum(d - 1) = 1 + 14 + 1 = 16, so the 30 notes deal 30 / 16 x MagicDamageCalc1, 1.875x the
-    tooltip's total (VOD6's per-note numbers fit 16, not 30: champions/SeraphineIndie.md Q16, owner question).
+    Each note deals MagicDamageCalc1 / (NumFires x 2) = / 30, the 30 notes the tooltip's total (owner, 2026-11-18:
+    VOD6's numbers are 12 per note, the 25s two notes shown merged; champions/SeraphineIndie.md Q16). GAS's own
+    rule would add the two DivideAdditive terms (1 + 14 + 1 = 16, ledger I5); the owner's reading is used.
     Flights: the target's distance at 1900 (the speakers beside her and the spline's curve not modelled, G4).
     """
     KEY = 'DA_SeraphineIndie19'
@@ -1907,14 +1902,14 @@ class Seraphine(BuildChampion):
         super().__init__(level, build)
         self.cast_events = {e: self.chrono_event(self.CAST, e) for e in ('HighNote', 'BeginFire', 'SecondFire', 'ThirdFire')}
         self.num_fires = round(self.SPELL_DURATION / self.SPELL_TICK_RATE + 1)
-        self.note_divisor = 1 + (self.num_fires - 1) + (2 - 1)  # DivideAdditive: 1 + sum(d - 1) (I5)
+        self.note_divisor = self.num_fires * 2  # the two DivideAdditive SetByCallers as a product (owner, Q16)
         extra = round(self.row('RisingStarExtraNotes'))
         self.bonus_volleys = (extra - round(extra / 2), round(extra / 2))  # 'SecondFire', 'ThirdFire'
         forms = {1: 'a stream of 30 notes at her target', 2: 'a stream of 30 notes at her target and 2 x 4 bonus '
                  'notes at the nearest enemies', 3: 'a high note at every enemy, a stream of 30 notes at her target '
                  'and 2 x 4 bonus notes at the nearest enemies'}
-        self.notes = (f'A cast: {forms[self.FORM]}. Each stream note deals DamageAP x AP / 16 (the game\'s divide rule; '
-                      f'the tooltip implies / 30, owner question).')
+        self.notes = (f'A cast: {forms[self.FORM]}. Each stream note deals DamageAP x AP / 30, the 30 notes the '
+                      f'tooltip\'s total.')
 
     def note_damage(self, level, AD, AP):
         return self.row('DamageAP', star=level) * AP / self.note_divisor

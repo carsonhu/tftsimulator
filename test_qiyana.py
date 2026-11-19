@@ -3,7 +3,7 @@
 import pytest
 
 from buildstore import load_build
-from set19champs import Qiyana, roulette_shares
+from set19champs import Qiyana
 from simulator import Simulator
 from test_timing import dummy
 from test_viego import LaunchCounter
@@ -35,16 +35,17 @@ def test_build_numbers():
     # CD_Qiyana19_CastAnimNoMove: 'ManaUnlock' 0.8491 s, 'Unlock' 1.0912 s; the wave at 0.3779 s, 1200 units/s
     assert (round(q.timing.mana_lock * 30), round(q.timing.cast_lock * 30)) == (26, 34)
     assert (q.wave_spawn, q.wave_speed) == (0.3779, 1200)
-    assert q.shares == pytest.approx({'Red': 1 / 3, 'Green': 1 / 3, 'Blue': 1 / 3})
-    # unequal weights: the ring never repeats a colour, so the shares aren't the weights' shares
-    assert roulette_shares({'A': 2, 'B': 1, 'C': 1})['A'] == pytest.approx(0.4)
+    # the ring (owner, Q17): Red from combat start, then Green, Blue, Red ... every TimeRingChange (1.5 s, 45 ticks)
+    assert [q.ring_colour(t) for t in (0, 44, 45, 90, 134, 135)] == ['Red', 'Red', 'Green', 'Blue', 'Blue', 'Red']
 
 
 def test_wave_and_rhythm():
     q, counter = LoggedQiyana(2), LaunchCounter()
     rows = fight(q, items=[counter])
     cast = q.casts[0]
-    hit = (290 + 45) * (1 + 0.2 / 3)  # the Red share's 20% averaged in
+    assert [q.ring_colour(c) for c in q.casts[:2]] == ['Blue', 'Blue']  # ticks 117, 232
+    hit = 290 + 45
+    assert q.wave_damage(2, 1, 1, 'Red') == pytest.approx(hit * 1.2)  # RedBonusDamagePercent
     spell = [(t - cast, d) for t, d, _ in rows if d > 100]
     assert spell[0] == (17, pytest.approx(hit))  # the wave spawns 12 ticks in and reaches the target 1 hex away
     assert all(d == pytest.approx(hit / 2) for _, d in spell[1:2])  # the others: SecondaryDamagePercent
@@ -52,5 +53,5 @@ def test_wave_and_rhythm():
     # VOD6 E3: the next attack's mana 88 / 88 / 86 frames (44 / 44 / 43 ticks) after the cast; engine 43
     nxt = min(t for t, d, _ in rows if t > cast and d < 100)
     assert nxt - cast == 43
-    # the Blue share of the refund is paid at 'ManaUnlock' (26 ticks), inside the cast: the next attack starts from it
-    assert [m for t, d, m in rows if t == nxt] == [pytest.approx(10 / 3)]
+    # Blue's refund is paid at 'ManaUnlock' (26 ticks), inside the cast: the next attack starts from it
+    assert [m for t, d, m in rows if t == nxt] == [10]
