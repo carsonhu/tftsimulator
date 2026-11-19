@@ -2161,6 +2161,67 @@ class Yone(BuildChampion):
         self.schedule_tick(cast + ticks_up(final + self.deal), lambda: self._hit([target], 'SecondaryDamage'))
 
 
+class Tristana(BuildChampion):
+    """Head Banger (champions/Tristana.md, D1). Script: GA_Tristana19_Spell (build ga_scripts.zip).
+
+    The cast applies the mana lock (0x2b49) and plays CD_Tristana19_CastAnim_Part1. 'Fire', 'Fire2', 'Fire3' (0.1549,
+    0.1738, 0.1906 s) each throw a bomb (CD_Tristana19_CastAnim_Part1_BIGProjectile for the first, _Projectile for
+    the others; fixed-time splines) at the nearest enemy not yet bombed (GetTargets: row distance; her target when
+    none is left); the bombs stick. Part1's 'Unlock' (0.5454 s) starts KnockThemDown: CD_Tristana19_CastAnim_FinalShot
+    at the first small bomb's enemy, then the second's, then the big bomb's (0x2bce), played at rate 1.25, 1.25, 1
+    (0x1163); each shot's 'SmallBomb' / 'MainBomb' (spawned 0.1549 s / rate, 1800 units/s) detonates that bomb:
+    GE_Tristana19_Damage = PhysicalDamageCalc1 (ADDamage x AD + APDamage x AP), the last GE_Tristana19_DamageBig =
+    PhysicalDamageCalc2 (FinalShotPercentOfNormalShot (2) x Calc1); physical, on-spell, crit only with Precision. The
+    last detonation also applies GE_SimulateLaunchAttack (0x2067). Each shot's 'Unlock' (0.6386 s / rate) starts the
+    next; after the third EndSpell lifts the lock and ends the cast.
+    Simulated: the big bomb on her target (the nearest), the small ones on the next nearest enemies (the target again
+    when there are none); each chrono starts on the tick its predecessor's 'Unlock' lands.
+    """
+    KEY = 'DA_Tristana19'
+    AREA = True  # the small bombs go to the enemies near her
+    PART1, SHOT = 'CD_Tristana19_CastAnim_Part1', 'CD_Tristana19_CastAnim_FinalShot'
+    SHOT_RATES = (1.25, 1.25, 1.0)  # KnockThemDown's play rates for the 1st, 2nd and 3rd shot (script literals)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.part1_unlock = ticks_up(self.chrono_event(self.PART1, 'Unlock'))
+        self.shot_unlock = self.chrono_event(self.SHOT, 'Unlock')
+        self.shot_spawn = next(p['spawn_at'][0] for p in self.chrono(self.SHOT)['projectiles'] if p['name'] == 'MainBomb')
+        self.shot_starts = [self.part1_unlock]
+        for rate in self.SHOT_RATES[:-1]:
+            self.shot_starts.append(self.shot_starts[-1] + ticks_up(self.shot_unlock / rate))
+        end = self.shot_starts[-1] + ticks_up(self.shot_unlock / self.SHOT_RATES[-1])
+        t = self.timing
+        t.mana_lock, t.cast_lock = end / TPS, (end + 1) / TPS
+        t.source['mana_lock'] = t.source['cast_lock'] = f'{self.PART1} + 3 x {self.SHOT} (rates {self.SHOT_RATES})'
+        self.notes = ('A cast: bombs on her target and the 2 enemies nearest her, then she shoots each one; the last '
+                      '(her target\'s) deals double.')
+
+    def bomb_damage(self, level, AD, AP):
+        return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        cast = self.tick
+        others = [d for d in self.nearest(3) if d is not target][:2]
+        order = [others[0] if others else target, others[1] if len(others) > 1 else target, target]
+        big = self.row('FinalShotPercentOfNormalShot')
+        for k, (d, start, rate) in enumerate(zip(order, self.shot_starts, self.SHOT_RATES)):
+            last = k == len(order) - 1
+
+            def shoot(d=d, last=last):
+                flight = self.chrono_projectile_ticks(self.SHOT, 'MainBomb', self.target_hexes(d))
+
+                def detonate():
+                    if last:
+                        self.simulateLaunch(self.items)
+                    self.multiTargetSpell([d], self.items, self.tick / TPS, 1,
+                                          lambda level, AD, AP: self.bomb_damage(level, AD, AP) * (big if last else 1),
+                                          'physical')
+                self.fly(self.tick, flight, d, detonate, name='bomb')
+            self.schedule_tick(cast + start + ticks_up(self.shot_spawn / rate), shoot)
+
+
 class SeraphineRisingStar(Seraphine):
     """Seraphine's Rising Star form (DA_SeraphineRisingStar19): the stream plus the bonus notes (see Seraphine)."""
     KEY = 'DA_SeraphineRisingStar19'
@@ -2178,7 +2239,7 @@ class SeraphineSuperstar(Seraphine):
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
-              'SeraphineSuperstar', 'Yuumi', 'Yone']
+              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana']
 
 
 class TrainingDummy(Champion):

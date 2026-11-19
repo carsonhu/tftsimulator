@@ -60,8 +60,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Tristana`, D1); the cast's length (three shots) checked
+  on VOD6 to a tick (E2)
+- Keep in the simulator: **yes** (owner, 2026-11-18: VOD6 has her at 2-3)
 
 ## Questions
 
@@ -70,29 +71,46 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackCaster | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | mana 55, 2/s confirmed; HP 1025 at 2 stars vs 990 (+35 from a source not identified) | E2 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackCaster: 7 per attack, 2/s | confirmed (+7 steps, +1 every 0.5 s) | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.2217 s (6.65 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 2250 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 1.2667 s (38 ticks) | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | Part1 + 3 shots: 70 ticks (the build's 38 follows one shot) | consistent (the mana lock, Q9) | E2 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.2333 s (37 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 69 ticks (EndSpell after the third shot) | confirmed: the banked overflow shows 70 / 70.5 / 70 ticks after the bar empties (69 + the tick after the fill) | E2 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
-| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 1 GE_SimulateLaunchAttack at the last detonation | predicted (script) | D1 |
+| Q12 | Does the cast cancel or reset an attack in progress? | cancels (CancelAbilitiesWithTag Combat.Attacking) | predicted | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | 3 bombs, ADDamage x AD + APDamage x AP each, the last x2 | predicted | D1 |
+| Q14 | Passives and other mechanics that need modelling | none | not applicable | |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+VOD6 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-18-2026_18-15-31-219/` `…PBE_11-18-2026_18-40-41-766.mp4` (owner's
+clip, 2026-11-18, 60 fps; client rls-19.1.0.5986652, not exported: the simulator's newest is 5986094). Round 2-3:
+Tristana 2 stars. Mana from `tools/vod_text_changes.py --field mana` (crops read by eye).
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E2 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f39142-40289 (round 2-3) | 60 | mana and Health text | 1025/1025, x/55, +7 steps, +1 every 0.5 s; casts f39433 (52 + 7 = 59), f39741 (51 + 7 = 58), f40016 (50 + 7 = 57); the overflow 4 / 3 / 2 shows at f39573, f39882, f40156: +140, +141, +140 frames | the mana lock 69 ticks + the tick after the fill: Part1 and three shots (1.25, 1.25, 1) | Q1, Q2, Q7, Q9 |
 
 ## Decisions and notes
 
+- 2026-11-18, D1 (implemented, `set19champs.Tristana`):
+  - **Cast (GA_Tristana19_Spell):** mana lock (0x2b49); CD_Tristana19_CastAnim_Part1 at the targets' average spot.
+    'Fire' / 'Fire2' / 'Fire3' (0.1549 / 0.1738 / 0.1906 s): a bomb each (the first _BIGProjectile) at the nearest
+    enemy not yet bombed (GetTargets: N nearest by row distance, minus ActorsAlreadyCastedOn; her target when none
+    is left).
+  - **Detonations (KnockThemDown):** after Part1's 'Unlock' (0.5454 s), CD_Tristana19_CastAnim_FinalShot at small
+    bomb 1's enemy (rate 1.25), small bomb 2's (1.25), then the big bomb's (1): a 'SmallBomb' / 'MainBomb' (spawned
+    0.1549 s / rate, 1800 units/s); arrival: GE_Tristana19_Damage (PhysicalDamageCalc1), the last
+    GE_Tristana19_DamageBig (PhysicalDamageCalc2 = 2 x Calc1) and GE_SimulateLaunchAttack. Each shot's 'Unlock'
+    (0.6386 s / rate) starts the next; after the third, EndSpell (lock off, FinishCasting).
+  - **Simulated:** big bomb on her target, small ones on the next nearest (the target again if none); chronos
+    chained on whole ticks.
