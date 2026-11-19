@@ -1958,6 +1958,86 @@ class Seraphine(BuildChampion):
                 at(self.cast_events[event], volley)
 
 
+class Yuumi(BuildChampion):
+    """Girl, Put Your Records On (Your Head) (champions/Yuumi.md, D1). Scripts: GA_Yuumi19_Spell,
+    GA_Yuumi19_EnemyDiscHandler, GA_Yuumi19_GESpecReceiver (build ga_scripts.zip).
+
+    The cast commits and applies the mana lock (0x1ed8) and plays CD_Yuumi19_CastAnimLeft or _Right in turn (same
+    times). 'Disk' (0.365 s): a 'Disc' (1800 units/s) at her target; on arrival GE_Yuumi19_DiscDamage =
+    MagicDamageCalc1 (DoTDamageAP x AP), magic, on-spell, crit only with Precision, and a disc on the target's head
+    (GE_Yuumi19_Disc, proportion 1: no damage of its own; it grants the 1 MR per second shred, not modelled: flat
+    resist reduction). 'EncoreDisk' (0.4615 s), only with the Encore tag: an 'EncoreDisc' the same way, its damage and
+    its disc's proportion x CT_Encore19 RecastEffectiveness at the Encore level. 'Unlock' (0.9997 s) lifts the lock
+    and ends the cast.
+    The target's GA_Yuumi19_EnemyDiscHandler counts her discs on it; at NumDiscsToPop + 1 (5) the stack topples: the
+    discs come off, the target takes GE_Yuumi19_PoppedDiscDamage = MagicDamageCalc1 x PoppedDotPercentToMainTarget
+    (0.4) x the discs' summed proportion (a self-bounce, CD_Yuumi19_ToppleNormalDiscSelfBounce, 0.5997 s), and each of
+    the NumTargetsToDistributeDiscs (4) nearest other units MagicDamageCalc1 x PoppedDotPercentToOtherTargets (0.4) /
+    4 x that sum (CD_Yuumi19_ToppleNormalDisc, 1450 units/s from the target).
+    Simulated: one topple projectile per receiver (the game flies one per disc); discs keep their full proportion
+    (DoTDuration 999 s); a disc passing on when an enemy dies is not modelled (dummies don't die).
+    """
+    KEY = 'DA_Yuumi19'
+    AREA = True  # a topple splashes the units nearest the target
+    CAST = 'CD_Yuumi19_CastAnimRight'
+    SELF_BOUNCE, TOPPLE = 'CD_Yuumi19_ToppleNormalDiscSelfBounce', 'CD_Yuumi19_ToppleNormalDisc'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.disk_at, self.encore_at = self.chrono_event(self.CAST, 'Disk'), self.chrono_event(self.CAST, 'EncoreDisk')
+        unlock = ticks_up(self.chrono_event(self.CAST, 'Unlock'))
+        t = self.timing
+        t.mana_lock, t.cast_lock = unlock / TPS, (unlock + 1) / TPS  # FinishCasting at 'Unlock'; attack the tick after
+        t.source['mana_lock'] = t.source['cast_lock'] = f'{self.CAST} Unlock'
+        self.self_bounce = ticks_up(self.chrono(self.SELF_BOUNCE)['length'])
+        self.stacks = {}  # id(enemy) -> [disc proportions]
+        self.notes = ('A cast: a disc at her target (and an Encore disc with Encore). The 5th disc on an enemy topples '
+                      'the stack: 40% of the discs\' damage to it, 40% split over the 4 nearest others. MR shred not '
+                      'modelled.')
+
+    def disc_damage(self, level, AD, AP):
+        return self.row('DoTDamageAP', star=level) * AP
+
+    def encore_effectiveness(self):
+        return self.trait_value('DA_Encore19', 'RecastEffectiveness') if self.trait_tier('DA_Encore19') else 0
+
+    def _disc_lands(self, target, prop):
+        self.multiTargetSpell([target], self.items, self.tick / TPS, 1,
+                              lambda level, AD, AP: self.disc_damage(level, AD, AP) * prop, 'magical')
+        discs = self.stacks.setdefault(id(target), [])
+        discs.append(prop)
+        if len(discs) >= self.row('NumDiscsToPop') + 1:
+            total = sum(discs)
+            discs.clear()
+            self._topple(target, total)
+
+    def _topple(self, target, total):
+        main = self.row('PoppedDotPercentToMainTarget') * total
+        share = self.row('PoppedDotPercentToOtherTargets') / self.row('NumTargetsToDistributeDiscs') * total
+
+        def hit(d, prop):
+            return lambda: self.multiTargetSpell([d], self.items, self.tick / TPS, 1,
+                                                 lambda level, AD, AP: self.disc_damage(level, AD, AP) * prop,
+                                                 'magical')
+        self.fly(self.tick, self.self_bounce, target, hit(target, main), source=target, name='topple')
+        others = layout.around(target, 99, self.opponents)[:int(self.row('NumTargetsToDistributeDiscs'))]
+        for d in others:
+            flight = self.chrono_projectile_ticks(self.TOPPLE, 'ToppleDisc', layout.distance(target, d))
+            self.fly(self.tick, flight, d, hit(d, share), source=target, name='topple')
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        cast = self.tick
+        throws = [(self.disk_at, 'Disc', 1)]
+        if self.trait_tier('DA_Encore19'):
+            throws.append((self.encore_at, 'EncoreDisc', self.encore_effectiveness()))
+        for at, name, prop in throws:
+            def throw(name=name, prop=prop):
+                flight = self.chrono_projectile_ticks(self.CAST, name, self.target_hexes(target))
+                self.fly(self.tick, flight, target, lambda: self._disc_lands(target, prop), name='disc')
+            self.schedule_tick(cast + ticks_up(at), throw)
+
+
 class SeraphineRisingStar(Seraphine):
     """Seraphine's Rising Star form (DA_SeraphineRisingStar19): the stream plus the bonus notes (see Seraphine)."""
     KEY = 'DA_SeraphineRisingStar19'
@@ -1975,7 +2055,7 @@ class SeraphineSuperstar(Seraphine):
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
-              'SeraphineSuperstar']
+              'SeraphineSuperstar', 'Yuumi']
 
 
 class TrainingDummy(Champion):
