@@ -2297,6 +2297,83 @@ class Mel(BuildChampion):
             self.schedule_tick(cast + ticks_up(self.fire_at + (n - 1) * self.TIME_BETWEEN_MISSILES), fire)
 
 
+class Jinx(BuildChampion):
+    """Boom Boom POW POW (champions/Jinx.md, D1). Script: GA_Jinx19_Spell (build ga_scripts.zip).
+
+    The cast applies the mana lock (0x18c6) and plays CD_Jinx19_Spell_FixedTime (speed 1). NumMissilesToFire =
+    Round(AttackSpeedCalc1), a native MMC (MMC_Jinx19_AttackSpeedScaling) the tooltip spells out: BaseMissiles (16) +
+    1 per BonusASPerBonusMissile (35%) bonus attack speed, the bonus counted pro rata (VOD6: 17 at +30%, E1). The
+    missiles are dealt out (0x2faf): Round(N x share) each for 'AATarget' (PercentMissilesOnCurrentTarget 0.75),
+    'NHexRange' (PercentMissilesOnNHexWithinTarget 0.15: an enemy within NHex (2) hexes of the target) and 'Other'
+    (PercentMissilesEveryoneElse 0.1), padded with 'AATarget' to N, cut to N and shuffled. 'BeginFiring' (0.5604 s):
+    RepeatAction(FireOverTime (1.2 s) / (N - 1), N), first at once; each a CD_Jinx19_Missile_new 'Rocket' (2400
+    units/s); arrival: GE_Jinx19_RocketDamage = PhysicalDamageCalc1 (DamagePerMissileAD x AD + DamagePerMissileAP x
+    AP), physical, on-spell, crit only with Precision. Every NumMissilesPerSimulatedAuto (5) missiles:
+    GE_SimulateLaunchAttack. 'Unlock' (2.2235 s) lifts the lock and ends the cast (the build's 67 / 68 ticks).
+    Simulated: the shuffle replaced by an even interleave; NHexRange missiles spread over the enemies within 2 hexes
+    of the target (the target if none), Other over the rest (the NHexRange enemies, then the target, if none).
+    """
+    KEY = 'DA_Jinx19'
+    AREA = True  # a quarter of her missiles go to the other enemies
+    CAST, MISSILE = 'CD_Jinx19_Spell_FixedTime', 'CD_Jinx19_Missile_new'
+    FIRE_OVER_TIME = 1.2  # GA_Jinx19_Spell default (script literal)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.begin_firing = self.chrono_event(self.CAST, 'BeginFiring')
+        speeds = {p['speed'] for p in self.chrono(self.MISSILE).get('projectiles') or [] if p['name'] == 'Rocket'}
+        if len(speeds) != 1:
+            raise BuildDataError(f'{self.KEY}: {self.MISSILE} Rocket speeds {speeds}')
+        self.rocket_speed = speeds.pop()
+        self.notes = ('A cast: 16 missiles + 1 per 35% bonus attack speed over 1.2 s, 75% at her target, 15% at enemies '
+                      'within 2 hexes of it, 10% at the others.')
+
+    def num_missiles(self):
+        bonus = max(0.0, self.aspd.stat / self.base_aspd - 1)
+        return int(math.floor(self.row('BaseMissiles') + bonus / self.row('BonusASPerBonusMissile') + 0.5))
+
+    def missile_damage(self, level, AD, AP):
+        return self.row('DamagePerMissileAD', star=level) * AD + self.row('DamagePerMissileAP', star=level) * AP
+
+    def plan(self, n):
+        """The missiles' categories in firing order: the script's counts, its shuffle replaced by an even interleave."""
+        shares = [('AATarget', self.row('PercentMissilesOnCurrentTarget')),
+                  ('NHexRange', self.row('PercentMissilesOnNHexWithinTarget')),
+                  ('Other', self.row('PercentMissilesEveryoneElse'))]
+        total = sum(s for _, s in shares)
+        logic = []
+        for name, s in shares:
+            logic += [name] * int(math.floor(n * s / total + 0.5))
+        logic += ['AATarget'] * max(0, n - len(logic))
+        logic = logic[:n]
+        counts = {k: logic.count(k) for k in ('AATarget', 'NHexRange', 'Other')}
+        slots = sorted(((i + 0.5) / c, k) for k, c in counts.items() for i in range(c))
+        return [k for _, k in slots]
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        cast = self.tick
+        n = self.num_missiles()
+        near = layout.around(target, self.row('NHex'), self.opponents)
+        rest = [d for d in layout.in_play(self.opponents) if d is not target and d not in near]
+        pools = {'AATarget': [target], 'NHexRange': near or [target], 'Other': rest or near or [target]}
+        used = {k: 0 for k in pools}
+        interval = self.FIRE_OVER_TIME / (n - 1) if n > 1 else 0
+        per_launch = int(self.row('NumMissilesPerSimulatedAuto'))
+        for k, kind in enumerate(self.plan(n)):
+            pool = pools[kind]
+            d = pool[used[kind] % len(pool)]
+            used[kind] += 1
+
+            def fire(d=d, k=k):
+                if (k + 1) % per_launch == 0:
+                    self.simulateLaunch(self.items)
+                flight = projectile_ticks(self.rocket_speed, self.target_hexes(d))
+                self.fly(self.tick, flight, d, lambda: self.multiTargetSpell(
+                    [d], self.items, self.tick / TPS, 1, self.missile_damage, 'physical'), name='rocket')
+            self.schedule_tick(cast + ticks_up(self.begin_firing + k * interval), fire)
+
+
 class SeraphineRisingStar(Seraphine):
     """Seraphine's Rising Star form (DA_SeraphineRisingStar19): the stream plus the bonus notes (see Seraphine)."""
     KEY = 'DA_SeraphineRisingStar19'
@@ -2314,7 +2391,7 @@ class SeraphineSuperstar(Seraphine):
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
-              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel']
+              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx']
 
 
 class TrainingDummy(Champion):

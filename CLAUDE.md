@@ -118,7 +118,7 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   radiant, artifact, emblem, trait, augment), which fills `set19items.offensive_craftables` / `radiants` /
   `artifacts` / `emblems` and `set19buffs.class_buffs` / `augments`; champions are live when listed in
   `set19champs.champ_list` (Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal, Lux, Gnar, Malzahar, Samira,
-  Karthus, Ashe, Viego, Kayle, Lucian, RenataGlasc, Zoe, Bard, Syndra, Briar, Xayah, Katarina, Kayn, Qiyana, Seraphine (+ SeraphineRisingStar, SeraphineSuperstar), Yuumi, Yone, Tristana, Mel, OlafHeroAugment (hero augment units are separate champions: `roster.json` `hero_augments`);
+  Karthus, Ashe, Viego, Kayle, Lucian, RenataGlasc, Zoe, Bard, Syndra, Briar, Xayah, Katarina, Kayn, Qiyana, Seraphine (+ SeraphineRisingStar, SeraphineSuperstar), Yuumi, Yone, Tristana, Mel, Jinx, OlafHeroAugment (hero augment units are separate champions: `roster.json` `hero_augments`);
   traits: Encore, Trickshot, K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats, Heartsteel, Hyperpop, Ionic
   Spark, Prodigy, Pentakill, Composer, Renegade, Classical, Slayer, Choreographer, Jazz, Beach Pop, Gu Feng). A debuff a spell applies uses the shared helpers in `items/debuffs.py`
   (`apply_shred`, `apply_sunder`). A new trait is
