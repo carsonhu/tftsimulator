@@ -10,6 +10,7 @@ import set19buffs
 from build_champion import BuildChampion
 from buildstore import BuildDataError
 from champion import Champion
+from stats import Attack, Stat
 from items.debuffs import apply_shred
 from traits.classical import captivate
 from events import CRIT, IS_ATTACK, ON_HIT, ON_SPELL, ONHIT_AFTER, ONHIT_PRE, TRAIT, UNIT, CombatEvent, damage_tags
@@ -2038,6 +2039,128 @@ class Yuumi(BuildChampion):
             self.schedule_tick(cast + ticks_up(at), throw)
 
 
+class Yone(BuildChampion):
+    """Two Sides (champions/Yone.md, D1). Scripts: GA_Yone19_Passive, GA_Yone19_LaunchMeleeAttack, GA_Yone19_Spell
+    (build ga_scripts.zip).
+
+    Form (GA_Yone19_Passive, re-checked whenever AD or AP changes): AD form while AttackDamage >= AbilityPower, else
+    AP form (DA_Yone19_APOverride: role MagicFighter; attacks, strikes and the final slash use the Magic calcs).
+    Attacks deal AutoAttackDamage x AD physical, or x AP magic in AP form (MagicDamageCalc3).
+    Cast (GA_Yone19_Spell): commit, mana lock (0x1973), CD_Yone19_CastAnim (or _CastAnimAlt when UseAltAnims, which the
+    decoded defaults set; VOD6 plays the non-Alt times, champions/Yone.md E3). 'StartStrikes' (0.4992 s):
+    a strike at once and then on a looping timer GetTimeBetweenSlashes = TimeBetweenSlashes (0.085 s) / (1 +
+    Min((Max(AS / base AS, 1) - 1) x SpeedUpWithAS (0.5), MaxSpeedUp (2))), until NumSpirits strikes. A strike plays
+    CD_Yone19_SpellMissile (a clone) at its target: strike k even -> her attack target, odd -> the next of the
+    NumBonusEnemies (2) enemies within AOERangeAroundCurrentTarget (2) hexes of the target (row distance; refilled
+    when used up; the target if none) (GetSliceTarget, PercentStrikesOnTarget 0.5). At its 'Damage' event:
+    GE_Yone19_Damage = PhysicalDamageCalc1 (PrimaryDamage x AD; _Magic: x AP) x TankDamageMult (1 off tanks),
+    on-spell, crit only with Precision. Every NumSlashesForSimulatedAuto (3) strikes: GE_SimulateLaunchAttack. After
+    the last strike: FinalSlash, CD_Yone19_CastAnim_Part2 (_Alt): 'DealDamage' (0.3453 s) GE_Yone19_FinalDamage
+    (PhysicalDamageCalc2 = SecondaryDamage x AD; _Magic x AP) on the target; 'Unlock' (0.6589 s) lifts the lock and
+    ends the cast.
+    Heartsteel Bias (SpellUpgradeTierIsActive + Selected): HeartsteelStan_ExtraClones (2) more strikes, the slash time
+    x NumSpirits / (NumSpirits + 2) (the cast lasts as long), and while casting his spell damage carries
+    GE_Yone19_ArmorIgnore (Armor x GenericCalc1 = 1 - 0.25; _MRIgnore in AP form).
+    Simulated: the strike damage at the SpellMissile's k mod 4-th 'Damage' time (which selector maps to which of its
+    four groups isn't decoded); the timer on whole ticks from the exact times; the form at each attack and cast.
+    """
+    KEY = 'DA_Yone19'
+    AREA = True  # odd strikes go to the enemies near the target
+    # the non-Alt timelines: VOD6's casts fit them, not the Alt ones the script's defaults name (E3)
+    CAST, PART2, MISSILE = 'CD_Yone19_CastAnim', 'CD_Yone19_CastAnim_Part2', 'CD_Yone19_SpellMissile'
+    TIME_BETWEEN_SLASHES, SPEED_UP_WITH_AS, MAX_SPEED_UP = 0.085, 0.5, 2.0  # GA_Yone19_Spell defaults
+    SLASHES_PER_LAUNCH = 3  # NumSlashesForSimulatedAuto
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.start_strikes = self.chrono_event(self.CAST, 'StartStrikes')
+        self.deal, self.unlock = self.chrono_event(self.PART2, 'DealDamage'), self.chrono_event(self.PART2, 'Unlock')
+        self.damage_times = sorted(t for n, t in self.chrono(self.MISSILE)['events'] if n == 'Damage')
+        self.timing.lock_scales_with_as = False  # the script's own rule (GetTimeBetweenSlashes), set per cast
+        self.timing.source['lock_scales_with_as'] = 'GA_Yone19_Spell GetTimeBetweenSlashes (per cast)'
+        self._set_locks()
+        self.notes = ('A cast: 10 strikes alternating between his target and up to 2 enemies near it, then a final '
+                      'slash on the target; AP form (AP above AD) makes everything magic. As the Heartsteel Bias: 2 more '
+                      'strikes in the same time and 25% armor (MR) ignored.')
+
+    def ap_form(self):
+        return self.ap.stat > self.bonus_ad.stat
+
+    def bias(self):
+        return bool(getattr(self, 'heartsteel_bias', False))
+
+    def strikes(self):
+        n = int(self.row('NumSpirits'))
+        return n + (int(self.row('HeartsteelStan_ExtraClones')) if self.bias() else 0), n
+
+    def slash_interval(self):
+        n, base = self.strikes()
+        speed = min((max(self.aspd.stat / self.base_aspd, 1) - 1) * self.SPEED_UP_WITH_AS, self.MAX_SPEED_UP)
+        return self.TIME_BETWEEN_SLASHES * (base / n) / (1 + speed)
+
+    def _set_locks(self):
+        n, _ = self.strikes()
+        end = ticks_up(self.start_strikes + (n - 1) * self.slash_interval() + self.unlock)
+        self.timing.mana_lock, self.timing.cast_lock = end / TPS, (end + 1) / TPS
+        self.timing.source['mana_lock'] = self.timing.source['cast_lock'] = f'{self.CAST} + {self.PART2} Unlock'
+
+    def _scale(self, row):
+        ap = self.ap_form()
+        return lambda level, AD, AP: self.row(row, star=level) * (AP if ap else AD)
+
+    def _dtype(self):
+        return 'magical' if self.ap_form() else 'physical'
+
+    def performAttack(self, opponents, items, time, multiplier=None, generateMana=True):
+        if not self.ap_form():
+            return super().performAttack(opponents, items, time, multiplier, generateMana)
+        attack = Attack(opponents=opponents, multiplier=multiplier if multiplier is not None else Stat(0, 1, 0),
+                        scaling=lambda level, baseAD, AD, AP: self.row('AutoAttackDamage', star=level) * AP,
+                        attackType='magical')
+        self.doAttack(attack, items, time)
+        if generateMana:
+            self.addMana(self.manaPerAttack.stat)
+        if opponents:
+            self.emit(ONHIT_AFTER, CombatEvent(self, opponents[0], tags=damage_tags('magical', UNIT, IS_ATTACK, ON_HIT),
+                                               time=time), items)
+
+    def _hit(self, targets, row):
+        ignore = self.row('HeartsteelStan_ArmorIgnore') if self.bias() else 0
+        ap = self.ap_form()
+        self.multiTargetSpell(targets, self.items, self.tick / TPS, len(targets), self._scale(row), self._dtype(),
+                              ability_armor_pierce=0 if ap else ignore, ability_mr_pierce=ignore if ap else 0)
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        cast = self.tick
+        self._set_locks()  # read by _cast after this (attack speed and the Bias now)
+        n, _ = self.strikes()
+        interval = self.slash_interval()
+        bonus = []  # the secondary targets still to strike
+
+        def slice_target(k):
+            if k % 2 == 0:
+                return target
+            if not bonus:
+                near = [d for d in layout.around(target, self.row('AOERangeAroundCurrentTarget'), self.opponents)]
+                bonus.extend(near[:int(self.row('NumBonusEnemies'))] or [target])
+            return bonus.pop(0)
+
+        for k in range(n):
+            at = self.start_strikes + k * interval
+
+            def strike(k=k):
+                d = slice_target(k)
+                hit_at = self.tick + ticks_up(self.damage_times[k % len(self.damage_times)])
+                self.trace_projectile(self.tick, hit_at, self, d, 'strike')
+                self.schedule_tick(hit_at, lambda: self._hit([d], 'PrimaryDamage'))
+                if (k + 1) % self.SLASHES_PER_LAUNCH == 0:
+                    self.simulateLaunch(self.items)
+            self.schedule_tick(cast + ticks_up(at), strike)
+        final = self.start_strikes + (n - 1) * interval
+        self.schedule_tick(cast + ticks_up(final + self.deal), lambda: self._hit([target], 'SecondaryDamage'))
+
+
 class SeraphineRisingStar(Seraphine):
     """Seraphine's Rising Star form (DA_SeraphineRisingStar19): the stream plus the bonus notes (see Seraphine)."""
     KEY = 'DA_SeraphineRisingStar19'
@@ -2055,7 +2178,7 @@ class SeraphineSuperstar(Seraphine):
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
-              'SeraphineSuperstar', 'Yuumi']
+              'SeraphineSuperstar', 'Yuumi', 'Yone']
 
 
 class TrainingDummy(Champion):

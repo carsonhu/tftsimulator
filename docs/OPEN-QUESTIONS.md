@@ -207,6 +207,13 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|---|
 | (owner) A stream note's damage | DamageAP x AP / 16 (DivideAdditive 15 and 2 add as 1 + 14 + 1, the engine's channel rule I5): a cast's 30 notes deal 1.875x the tooltip's 570; the tooltip implies / 30. VOD6 1-6: 25s on her target at AP 120%, which / 30 can't reach without a damage amp | a cast on a target whose MR is known (inspect it): one note's number | champions/SeraphineIndie.md Q16 |
 
+### 7v. Yone (VOD6 has him at 2-1, 2-2, 2-4)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| His cast timelines | the non-Alt CD_Yone19_CastAnim / _Part2 (VOD6 2-1 fits them; the script's decoded default UseAltAnims = True names the Alt ones, in an OLD folder) | 2-2 / 2-4 (AD form): the frames from the cast to the final slash's number | champions/Yone.md Q16 |
+| The Heartsteel Bias strikes | 12 strikes in the time of 10, 25% armor ignored | 2-2 / 2-4: count the strike numbers | champions/Yone.md D1 |
+
 ### 7n. Augments
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
