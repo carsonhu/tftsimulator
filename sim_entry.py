@@ -647,10 +647,16 @@ def get_champ_info(cfg):
 # Cards: the in-game text of every item, augment and trait the page can show
 # ---------------------------------------------------------------------------
 
+def _stat_part(token):
+    m = re.fullmatch(r"([-+]?[\d.]+%?)([A-Za-z]\w*)?", token)
+    return [m.group(1), m.group(2)] if m else [token, None]
+
+
 def get_cards(cfg):
     """{class name: card} for every item and buff class with a build key: the build's name, kind (item kind, augment
     tier or trait kind), stat line, text and (traits) breakpoints, all from the selected build. The page shows one
-    when a row or a menu entry is hovered."""
+    when a row or a menu entry is hovered. The stat line is [[value, tag], ...]: "15%AD" -> ["15%", "AD"], the tag
+    the client's rich-text icon (icons/stats/<tag>.png, lower-cased); None when the line has no icon ("250")."""
     build = _build(cfg)
     cards = {}
     for module, group in ((set19items, "items"), (set19buffs, "augments"), (set19buffs, "traits")):
@@ -663,7 +669,7 @@ def get_cards(cfg):
                 "key": key,
                 "name": entry.get("name") or key,
                 "kind": entry.get("kind") or entry.get("tier") or "",
-                "stats": entry.get("stat_text") or "",
+                "stats": [_stat_part(s) for s in (entry.get("stat_text") or "").split()],
                 "text": entry.get("text") or "",
                 "tiers": [{"threshold": t.get("threshold"), "text": t.get("text") or ""}
                           for t in entry.get("tiers") or []],

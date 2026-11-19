@@ -12,6 +12,10 @@ Output follows set18's icons.py, which app.js reads: one 48x48 PNG per class, an
 traits a tiers.json ({tiers: {Class: {level: tier}}, colours}) so the page colours a trait's hexagon by the tier its
 breakpoint sits at (the build's tier `prestige`; the colours are the client UI's, not data: set18's values).
 Classes without a key (Sunder30 / Shred30, NoItem) get no icon; anything else unmatched is reported.
+
+Stat glyphs (icons/stats/<tag>.png, tag lower-cased, + index.json): the client's rich-text icon table
+(/UI_Shared/RichText/DT_RichTextIcons, tftDatamine/runs/set19/rich_text_icons.json: tag -> texture and tint), each
+glyph in its tint, as tftDatamine's set page draws them. An item card's stat line ("15%AD") names its tag.
 """
 import json
 import os
@@ -27,6 +31,8 @@ DATA = os.path.join(DATAMINE, 'runs', 'set19', 'data.json')
 TEX = os.path.join(DATAMINE, 'runs', 'set19', 'textures')
 OUT = os.path.join(ROOT, 'icons')
 SIZE = 48
+RICH = os.path.join(DATAMINE, 'runs', 'set19', 'rich_text_icons.json')
+STAT_SIZE = 32
 
 # set18's tier colours (icons.py there): the hexagon is drawn by the client UI, so these are not in the data
 TIER_COLOURS = {
@@ -126,5 +132,30 @@ def main():
             print('  missing:', m)
 
 
+def stat_icons():
+    """Every rich-text tag whose texture is exported -> icons/stats/<tag>.png, the glyph in the game's tint."""
+    out_dir = os.path.join(OUT, 'stats')
+    os.makedirs(out_dir, exist_ok=True)
+    written, missing = [], []
+    for tag, row in sorted(json.load(open(RICH, encoding='utf-8'))['icons'].items(), key=lambda kv: kv[0].lower()):
+        name = tag.lower()
+        src = texture(row.get('texture'))
+        if src is None or name in written:
+            if src is None:
+                missing.append(tag)
+            continue
+        colour = (row.get('tint') or '#ffffff').lstrip('#')
+        glyph = Image.open(src).convert('RGBA')
+        im = Image.new('RGBA', glyph.size, tuple(int(colour[i:i + 2], 16) for i in (0, 2, 4)) + (255,))
+        im.putalpha(glyph.getchannel('A'))
+        im.thumbnail((STAT_SIZE, STAT_SIZE), Image.LANCZOS)
+        im.save(os.path.join(out_dir, name + '.png'), optimize=True)
+        written.append(name)
+    with open(os.path.join(out_dir, 'index.json'), 'w', encoding='utf-8', newline='\n') as f:
+        json.dump(sorted(written), f, indent=0)
+    print(f'stats: {len(written)} icons; no texture: {", ".join(missing) or "none"}')
+
+
 if __name__ == '__main__':
     main()
+    stat_icons()

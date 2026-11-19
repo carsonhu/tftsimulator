@@ -110,6 +110,8 @@ const state = {
   // Class name -> the build's card for that item, augment or trait (sim_entry.get_cards), shown on hover. Reloaded
   // when the build changes; empty if the request fails, which only means no cards.
   cards: new Map(),
+  // Lower-cased rich-text tags with a glyph in icons/stats (tools/icons.py), for a card's stat line.
+  statIcons: new Set(),
   // icons/traits/tiers.json: {tiers: {cls: {level: tier}}, colours: {...}}.
   traitTiers: null,
   // Which header the table is sorted by. key null = the order sim_entry
@@ -181,6 +183,14 @@ async function init() {
 // ---------------------------------------------------------------------------
 
 async function loadCards() {
+  if (!state.statIcons.size) {
+    try {
+      const response = await fetch("icons/stats/index.json");
+      if (response.ok) state.statIcons = new Set(await response.json());
+    } catch (err) {
+      // no glyphs: the stat line falls back to the tags' names
+    }
+  }
   try {
     const cards = await rpc("cards", JSON.stringify({ build: state.cfg.build }));
     state.cards = new Map(Object.entries(cards));
@@ -241,7 +251,26 @@ function fillCard(cls, level, hint) {
     el.appendChild(div);
     return div;
   };
-  if (card.stats) add("card-stats", card.stats.split(" ").join("  ·  "));
+  // The stat line as the game draws it: each value followed by its stat's glyph, in the glyph's colour.
+  if (card.stats.length) {
+    const line = add("card-stats", "");
+    for (const [value, tag] of card.stats) {
+      const part = document.createElement("span");
+      part.className = "card-stat";
+      part.appendChild(document.createTextNode(value));
+      const glyph = tag && tag.toLowerCase();
+      if (glyph && state.statIcons.has(glyph)) {
+        const img = document.createElement("img");
+        img.src = `icons/stats/${glyph}.png`;
+        img.alt = tag;
+        img.title = tag;
+        part.appendChild(img);
+      } else if (tag) {
+        part.appendChild(document.createTextNode(tag));
+      }
+      line.appendChild(part);
+    }
+  }
   if (card.text) add("card-text", card.text);
   const active = card.tiers.filter((t) => level != null && t.threshold <= level).pop();
   for (const t of card.tiers) add("card-tier" + (t === active ? " active" : ""), t.text);

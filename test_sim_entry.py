@@ -149,7 +149,12 @@ def test_cards_come_from_the_build():
     import set19items
     cards = json.loads(sim_entry.cards_json(json.dumps({})))
     assert cards['BlueBuff'] == {'key': 'DA_BlueBuff', 'name': 'Blue Buff', 'kind': 'Craftable',
-                                 'stats': '15%AD 15%AP 6ManaRegen', 'text': 'Combat Start: Gain 10 Mana.', 'tiers': []}
+                                 'stats': [['15%', 'AD'], ['15%', 'AP'], ['6', 'ManaRegen']],
+                                 'text': 'Combat Start: Gain 10 Mana.', 'tiers': []}
+    # every stat tag has its glyph (tools/icons.py); Steadfast Heart's "250" (not simulated) has no icon in the line
+    glyphs = set(json.load(open('icons/stats/index.json')))
+    tags = {t for c in cards.values() for v, t in c['stats']}
+    assert {t.lower() for t in tags if t} <= glyphs and sim_entry._stat_part('250') == ['250', None]
     assert cards['GlassCannonI']['kind'] == 'Silver' and '16% Damage Amp' in cards['GlassCannonI']['text']
     assert [t['threshold'] for t in cards['Arcanist']['tiers']] == [2, 4, 6]
     rows = (set19items.offensive_craftables + set19items.artifacts + set19items.radiants + set19items.emblems
