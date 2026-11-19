@@ -57,8 +57,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Katarina`, D1); stats, mana and attack rhythm checked
+  on VOD6 (E1-E2); the one VOD cast took the dash branch (E3)
+- Keep in the simulator: **yes** (owner, 2026-11-18: VOD6 has her at 1-2)
 
 ## Questions
 
@@ -67,29 +68,54 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicFighter | predicted | |
-| Q3 | First attack at combat start: when does it land? | G3 | open | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | AD, AS, range, armor, MR, mana confirmed; HP 725 in game vs 650 (open: VOD6 ran on 5986652, not exported) | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicFighter: 10 per attack, no regen | confirmed (+10 steps, nothing between them) | E2 |
+| Q3 | First attack at combat start: when does it land? | G3 | open (VOD6's minions walk in) | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.2918 s (8.75 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
-| Q6 | Projectile travel time (ranged only) | none | not applicable? | |
-| Q7 | Cast time: cast start to the next attack starting | 1.3333 s (40 ticks) | predicted | |
+| Q6 | Projectile travel time (ranged only) | none | not applicable | |
+| Q7 | Cast time: cast start to the next attack starting | 1.3333 s (40 ticks) without the dash | predicted (the VOD cast dashed) | E3 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.3 s (39 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.3 s (39 ticks) without the dash | predicted | |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
-| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 (no GE_SimulateLaunchAttack) | predicted (script) | D1 |
+| Q12 | Does the cast cancel or reset an attack in progress? | cancels (CancelAbilitiesWithTag Combat.Attacking) | predicted | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | spin AoEDamageAp x AP on enemies within 1 hex of her; eviscerate TargetDamageAP x AP on her target | eviscerate formula consistent (218 on a 10 MR minion = 240 / 1.1); spin predicted | E3, D1 |
+| Q14 | Passives and other mechanics that need modelling | Captivate (5 s) on every enemy hit | modelled (Classical, traits/classical.py) | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+VOD6 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-18-2026_18-15-31-219/` `…PBE_11-18-2026_18-40-41-766.mp4` (owner's
+clip, 2026-11-18 18:15-18:40, 60 fps). The client patched to rls-19.1.0.5986652 at 16:20 that day and that build
+isn't exported yet; the simulator's newest is 5986094, so a mismatch may be a 5986652 change. Round 1-2: Katarina 1
+star, no items, Classical 1/2 and Slayer 1/2 (inactive); minions (armor and MR 10). Mana from
+`tools/vod_text_changes.py --field mana` (crops read by eye).
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 1:06 (round 1-2, combat start) | 60 | inspection panel | 725/725, 0/40, range 1 hex, Front, Magic Fighter; AD 30, AP 0%, armor 35, MR 35, AS 0.79, crit 25% | the simulator: 650 HP; AD 30, AS 0.7875 (0.75 x 1.05, stage 1), armor 35, MR 35, 0/40. HP differs (open) | Q1 |
+| E2 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f4094-4323, f4449-4602 | 60 | mana text | 10, 20, 30 at f4094, f4170, f4247; cast f4323; 10, 20, 30 at f4449, f4525, f4602 | +10 per attack, no regen; attacks 76-77 frames apart = 38.25 ticks (engine 38 at 0.7875 AS); she casts on the 4th attack | Q2 |
+| E3 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 1:12.05-1:14.2 (board every 0.1 s), f4323-4449 | 60 | the cast | spin at 1:12.1; she dashes; 218 magic on the target ~1:13.35-1:13.4; next +10 at f4449 (+126 fr = 63 ticks) | the dash branch: 'Eviscerate' at 1.285 s (the Movement group; 1:13.34) matches. The next attack came 63 ticks after the cast (Movement 'Unlock' 43 + windup ~9 = ~52; she walked to a new target) | Q7, Q13 |
+
+Not used: the second cast at ~f4678 (the panel was on other units; the round ended at 1:18.7).
 
 ## Decisions and notes
 
+- 2026-11-18, D1 (implemented, `set19champs.Katarina`):
+  - **Cast (GA_Katarina19_Spell):** mana lock (0x1f38); CD_Katarina19_CastAnimCombined at her target. Phases
+    Default 0.2995 s, Movement 0.6 s, MovementEnd 0.5504 s. A FirstActiveGroup picks Movement when she has
+    Set19.Unit.Katarina.ShouldMove (GE_Katarina19_MovementTag, applied at 'CheckIfMove' 0.2484 s when her target is
+    out of her attack range, 0xcb1), else NoMovement.
+  - **Timeline:** 'Spin' 0 s; NoMovement 'Eviscerate' 0.835 s and 'Unlock' 1.2743 s; Movement 1.285 s and
+    1.4251 s (E3 saw the Movement one). 'Unlock' lifts the mana lock and finishes the cast (0x170d).
+  - **Damage:** 'Spin': GE_Katarina19_SpinDamage on the enemies within AoERadius (1) hexes of her, her target if
+    none: MagicDamageCalc1 = AoEDamageAp x AP, magic, AOE, on-spell, RollIfCanSpellCrit. 'Eviscerate':
+    GE_Katarina19_EviscerateDamage on her target: MagicDamageCalc2 = TargetDamageAP x AP, same tags without AOE.
+  - **Captivate:** every enemy hit gets GE_Virtuosos19_Captivate for CaptivateDuration (5 s) when the board has
+    Classical (ApplyCaptivate checks the trait level >= 1); it feeds the Classical damage amp.
+  - **Simulated:** the target stands next to her, so the NoMovement group (the build's first 'Eviscerate' and
+    'Unlock'; the predicted 39 / 40-tick locks). The spin hits the page's targets (G22).

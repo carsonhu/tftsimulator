@@ -1632,9 +1632,65 @@ class Xayah(BuildChampion):
             self.fly(t0, t1 - t0, target, hit, source=(sx + dx * fx - dy * fy, sy + dx * fy + dy * fx), name='feather')
 
 
+class Katarina(BuildChampion):
+    """Blade Sonata (champions/Katarina.md, D1). Script: GA_Katarina19_Spell (build ga_scripts.zip).
+
+    The cast plays CD_Katarina19_CastAnimCombined at her attack target and applies the mana lock (0x1f38). Its phases
+    are Default (0.2995 s), Movement (0.6 s), MovementEnd (0.5504 s); a FirstActiveGroup picks the Movement group when
+    she has the tag Set19.Unit.Katarina.ShouldMove, else NoMovement. 'Spin' (0 s): GE_Katarina19_SpinDamage on the
+    enemies within AoERadius (1) hexes of her, her attack target if none (0x7a5): MagicDamageCalc1 = AoEDamageAp x AP,
+    magic, AOE, on-spell, crit only with Precision. 'CheckIfMove' (0.2484 s): if her target is within her attack range
+    nothing happens (0xcb1); else GE_Katarina19_MovementTag gives the tag and 'Movement' dashes her behind the target.
+    NoMovement: 'Eviscerate' 0.835 s, 'Unlock' 1.2743 s; Movement: 1.285 s, 1.4251 s. 'Eviscerate':
+    GE_Katarina19_EviscerateDamage on her target (MagicDamageCalc2 = TargetDamageAP x AP, magic, on-spell, crit only
+    with Precision); 'Unlock' lifts the mana lock and ends the cast (0x170d). Every enemy hit is Captivated for
+    CaptivateDuration (5 s) when the board has Classical (ApplyCaptivate: GE_Virtuosos19_Captivate).
+    Simulated: the target stands next to her, so the NoMovement group (the build's first 'Eviscerate' and 'Unlock').
+    The spin hits the page's targets (G22: the target and the enemies next to it).
+    """
+    KEY = 'DA_Katarina19'
+    AREA = True  # its damage depends on the page's number of targets (layout.py)
+    CAST = 'CD_Katarina19_CastAnimCombined'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.spin_at = self.chrono_event(self.CAST, 'Spin')
+        self.eviscerate_at = self.chrono_event(self.CAST, 'Eviscerate')  # the first: the NoMovement group's
+        self.captivate_duration = self.row('CaptivateDuration')
+        self.notes = ('A cast: a spin hitting her target and the enemies next to it, then a strike on her target. '
+                      'Everyone hit is Captivated (5 s) when Classical is active. Her target is assumed in range '
+                      '(no dash).')
+
+    def spin_damage(self, level, AD, AP):
+        return self.row('AoEDamageAp', star=level) * AP
+
+    def eviscerate_damage(self, level, AD, AP):
+        return self.row('TargetDamageAP', star=level) * AP
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+
+        def spin():
+            hit = [target] + self.nearby(target, self.row('AoERadius'))  # the page's targets (G22, docstring)
+            self.trace('area', at=self, hit=hit)
+            for enemy in hit:
+                captivate(self, enemy, self.captivate_duration)
+            self.multiTargetSpell(hit, self.items, self.tick / TPS, len(hit), self.spin_damage, 'magical')
+
+        def eviscerate():
+            captivate(self, target, self.captivate_duration)
+            self.multiTargetSpell([target], self.items, self.tick / TPS, 1, self.eviscerate_damage, 'magical')
+
+        if ticks_up(self.spin_at) == 0:
+            spin()  # an event scheduled now would run next tick (update: events before the cast)
+        else:
+            self.schedule_tick(self.tick + ticks_up(self.spin_at), spin)
+        self.schedule_tick(self.tick + ticks_up(self.eviscerate_at), eviscerate)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
-              'Syndra', 'Briar', 'Xayah']
+              'Syndra', 'Briar', 'Xayah', 'Katarina']
 
 
 class TrainingDummy(Champion):
