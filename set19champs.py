@@ -1766,9 +1766,116 @@ class Kayn(BuildChampion):
         self.schedule_tick(self.tick + ticks_up(self.deal_damage_at), swipe)
 
 
+def roulette_shares(weights):
+    """Long-run share of each colour of a ring that changes, every period, to one of the other colours with
+    probability proportional to its weight (GA_Qiyana19_PassiveRingRoulette): the stationary distribution."""
+    names = list(weights)
+    p = {n: 1 / len(names) for n in names}
+    for _ in range(500):
+        q = {n: 0.0 for n in names}
+        for a in names:
+            others = sum(weights[b] for b in names if b != a)
+            for b in names:
+                if b != a and others:
+                    q[b] += p[a] * weights[b] / others
+        p = q
+    return p
+
+
+class Qiyana(BuildChampion):
+    """Shuffled Playlist (champions/Qiyana.md, D1). Scripts: GA_Qiyana19_Spell, GA_Qiyana19_PassiveRingRoulette
+    (build ga_scripts.zip).
+
+    Ring (the passive): every TimeRingChange (1.5 s, a looping timer from when it is granted) the ring changes to one
+    of the two other colours of Red / Green / Blue, picked by RedWeight / GreenWeight / BlueWeight (1 each); in PvP
+    rounds a GoldChanceIndependent (10%) roll also adds Gold (1 gold; no combat power).
+    Cast: mana lock (0x2a1e); the colour tags are read at the cast (0x2779). She picks the hex within her range of
+    the target that puts the most enemies in a line through it (TR_Sort_ByNumEnemiesInLineOffsetNHexBehindTarget,
+    LineWidth 440): her own hex -> CD_Qiyana19_CastAnimNoMove, else she dashes (CastAnimMove). 'Fire' (NoMove 0.3498
+    s): GE_SimulateLaunchAttack (on-attack items hear one launch, G11) and the 'Wave' projectile is aimed at a point
+    WaveNumHexesBehindTarget x 214.5 units behind the target. The wave (spawned 0.3779 s, TFTFixedSpeedMovement 1200,
+    a box 100 long and 440 wide) hits each enemy it overlaps once: her target GE_Qiyana19_PrimaryDamage
+    (PhysicalDamageCalc1 = DamageAP x AP + DamageAD x AD), the others _SecondaryDamage (PhysicalDamageCalc2 =
+    SecondaryDamagePercent x Calc1); physical, AOE, on-spell, crit only with Precision. Red: the _Red versions add
+    Calc x RedBonusDamagePercent (20%). Green heals (nothing against dummies). 'ManaUnlock' (0.8491 s) lifts the mana
+    lock and, Blue, GE_Qiyana19_ManaRefundBlue gives BlueManaRefund (10) mana; 'Unlock' (1.0912 s) ends the cast.
+    Simulated: she stands still (CastAnimNoMove). The colour is random; the engine averages it like crits (I6): each
+    cast deals x (1 + RedBonusDamagePercent x the Red share) and refunds BlueManaRefund x the Blue share, the shares
+    being the ring's long-run ones (1/3 each). The refund lands at 'ManaUnlock' although the cast is still running
+    (VOD6: +10 27 ticks after the cast). The wave hits the target and every dummy within 220 units of its path.
+    """
+    KEY = 'DA_Qiyana19'
+    AREA = True  # the wave hits the enemies along and beside its path (layout.py)
+    CAST = 'CD_Qiyana19_CastAnimNoMove'
+    HEX = 214.5  # GA_Qiyana19_Spell 0xb3: the wave's end point, in units per hex behind the target (script literal)
+    WAVE_HALF_LENGTH, WAVE_HALF_WIDTH = 50, 220  # the 'Wave' projectile's Shape BoxExtent (client asset)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        ch = self.CAST
+        wave = next(p for p in self.chrono(ch).get('projectiles') or [] if p['name'] == 'Wave')
+        self.wave_spawn = wave['spawn_at'][0]
+        self.wave_speed = self.chrono_projectile_speed(ch, 'Wave')
+        mana_unlock, unlock = self.chrono_event(ch, 'ManaUnlock'), self.chrono_event(ch, 'Unlock')
+        self.mana_unlock_ticks = ticks_up(mana_unlock)
+        t = self.timing
+        t.mana_lock = self.mana_unlock_ticks / TPS
+        t.cast_lock = (ticks_up(unlock) + 1) / TPS  # FinishCasting at 'Unlock'; the next attack the tick after (T5)
+        t.source['mana_lock'] = f'{ch} ManaUnlock'
+        t.source['cast_lock'] = f'{ch} Unlock'
+        self.shares = roulette_shares({c: self.row(c + 'Weight') for c in ('Red', 'Green', 'Blue')})
+        self.notes = ('A cast: a wave through her target hitting the enemies along and beside it (others take half). '
+                      'Her ring colour is random; averaged: Red (+20% damage) and Blue (10 mana back) a third of the '
+                      'casts each. She is assumed to cast without dashing.')
+
+    def wave_damage(self, level, AD, AP):
+        red = 1 + self.row('RedBonusDamagePercent', star=level) * self.shares['Red']
+        return (self.row('DamageAP', star=level) * AP + self.row('DamageAD', star=level) * AD) * red
+
+    def wave_hits(self, target):
+        """[(dummy, units along the wave's path)]: every dummy within the wave's half-width of the line from her to
+        WaveNumHexesBehindTarget hexes behind the target, nearest first."""
+        sx, sy = layout.world(self.hex)
+        tx, ty = layout.world(target.hex)
+        n = math.hypot(tx - sx, ty - sy) or 1
+        ux, uy = (tx - sx) / n, (ty - sy) / n
+        end = n + self.row('WaveNumHexesBehindTarget') * self.HEX
+        hit = []
+        for d in layout.in_play(self.opponents):
+            x, y = layout.world(d.hex)
+            a, off = (x - sx) * ux + (y - sy) * uy, abs((x - sx) * uy - (y - sy) * ux)
+            if -1e-9 <= a <= end + 1e-9 and off <= self.WAVE_HALF_WIDTH + 1e-9:
+                hit.append((d, a))
+        return sorted(hit, key=lambda h: h[1])
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        cast = self.tick
+        self.schedule_tick(cast + ticks_up(self.chrono_event(self.CAST, 'Fire')), lambda: self.simulateLaunch(self.items))
+        spawn = cast + ticks_up(self.wave_spawn)
+        hits = self.wave_hits(target)
+        secondary = self.row('SecondaryDamagePercent')
+        if hits:
+            last = spawn + ticks_up(max(0, hits[-1][1] - self.WAVE_HALF_LENGTH) / self.wave_speed)
+            self.trace('dash', tick=spawn, ticks=last - spawn, to=hits[-1][0], name='wave')
+        for d, along in hits:
+            eff = 1 if d is target else secondary
+
+            def land(d=d, eff=eff):
+                self.multiTargetSpell([d], self.items, self.tick / TPS, 1,
+                                      lambda level, AD, AP: self.wave_damage(level, AD, AP) * eff, 'physical')
+            self.schedule_tick(spawn + ticks_up(max(0, along - self.WAVE_HALF_LENGTH) / self.wave_speed), land)
+
+        def refund():
+            # GE_Qiyana19_ManaRefundBlue after the mana lock comes off, while the cast still runs (addMana would wait
+            # for the cast lock)
+            self.curMana += self.row('BlueManaRefund') * self.shares['Blue'] * self.manaGainMultiplier.stat
+        self.schedule_tick(cast + self.mana_unlock_ticks, refund)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
-              'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn']
+              'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana']
 
 
 class TrainingDummy(Champion):

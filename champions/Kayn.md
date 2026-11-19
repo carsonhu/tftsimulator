@@ -74,7 +74,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | AD, AS, range, armor, MR, mana confirmed (with Heartsteel and an item); HP 725 in game vs 650 (as Katarina: open, 5986652) | E1 |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed (with Heartsteel and an item; HP 725 = 650 + Heartsteel's Sett 75) | E1 |
 | Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackFighter: 10 per attack, no regen | confirmed (+10 steps, nothing between them; casts at 30) | E3 |
 | Q3 | First attack at combat start: when does it land? | G3 | open (VOD6's enemies walk in) | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.3273 s (9.82 ticks) | predicted | |
@@ -104,7 +104,7 @@ Kayn 1 star with one item, Heartsteel (3) with him as the Bias; enemies walk in.
 
 | # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
 |---|---|---|---|---|---|---|---|---|
-| E1 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 1:57.6 (round 1-4, planning) | 60 | inspection panel | 725/725, 0/30, range 1 hex, Front, Attack Fighter; AD 45, bonus AD 7%, AP 10%, armor 35, MR 35, AS 0.86, crit 35% | AD 42 x 1.07 = 44.9 (Heartsteel: his own +7%); armor, MR, mana match; AS 0.86 = 0.75 x (1 + 0.05 + 0.10) with the item; HP 650 in 5986094 (open) | Q1 |
+| E1 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 1:57.6 (round 1-4, planning) | 60 | inspection panel | 725/725, 0/30, range 1 hex, Front, Attack Fighter; AD 45, bonus AD 7%, AP 10%, armor 35, MR 35, AS 0.86, crit 35% | AD 42 x 1.07 = 44.9 (Heartsteel: his own +7%); armor, MR, mana match; AS 0.86 = 0.75 x (1 + 0.05 + 0.10) with the item; HP 650 + 75 (Heartsteel SettHealth, Sett fielded) | Q1 |
 | E2 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 1:57.6 (ability tooltip) | 60 | damage | 140 | 115 x 1.07 + 15 x 1.10 = 139.6: AD and AP are the multipliers | Q13 |
 | E3 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f7832-8738 (round 1-4) | 60 | mana and Health text | +10 steps; casts f7968, f8155, f8345, f8569, f8738; next +10 at +79, +66, +78, +95 frames; Health 508/725 (70.07%) at f7968, 499 (68.8%) at f8032, then 472 for the rest of the round | the transform at 70% of max (Health falls past it ~4.8 s after f7745, then he is untargetable a while); casts at 30 mana; the after-cast gaps mix a standing cast (~64 frames: 23 ticks + windup at 0.86 AS) and dashes | Q2, Q7, Q14, Q16, Q17 |
 

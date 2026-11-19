@@ -74,8 +74,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Qiyana`, D1); the mana lock (with Blue's refund) and the
+  next attack after a cast checked on VOD6 to a tick (E2)
+- Keep in the simulator: **yes** (owner, 2026-11-18: VOD6 has her at 1-5)
 
 ## Questions
 
@@ -84,29 +85,54 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackFighter | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed at 2 stars: HP 1425 = 1350 + Heartsteel's Sett 75; AD 68, armor and MR 40, mana 40, range 1 | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackFighter: 10 per attack, no regen | confirmed (+10 steps, casts at 40) | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.2992 s (8.98 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
-| Q6 | Projectile travel time (ranged only) | none | not applicable? | |
-| Q7 | Cast time: cast start to the next attack starting | – | open | |
-| Q8 | Does the cast time scale with attack speed? | script does not read AS | open | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | – | open | |
-| Q10 | Does the mana lock scale with attack speed? | script does not read AS | open | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
-| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q6 | Projectile travel time (ranged only) | none | not applicable | |
+| Q7 | Cast time: cast start to the next attack starting | 'Unlock' 1.0912 s: 34 ticks (NoMove) | confirmed: the next attack's mana 44 / 44 / 43 ticks after the cast (engine 43) | E2 |
+| Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 'ManaUnlock' 0.8491 s: 26 ticks | confirmed: Blue's +10 shows 27 ticks after the bar empties (26 + the tick after the fill) | E2 |
+| Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 1 GE_SimulateLaunchAttack at 'Fire' | predicted (script) | D1 |
+| Q12 | Does the cast cancel or reset an attack in progress? | cancels (CancelAbilitiesWithTag Combat.Attacking) | predicted | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | target DamageAP x AP + DamageAD x AD; others x SecondaryDamagePercent; Red +20% | predicted | D1 |
+| Q14 | Passives and other mechanics that need modelling | the ring: Red +20% damage, Blue 10 mana, Green heal, Gold gold | Red and Blue averaged by their long-run share (1/3 each); Green and Gold change no damage | D1 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
+| Q16 | Does she dash before the wave against stationary enemies? | she picks the hex within her range of the target with the most enemies in the line through it; her own hex -> no dash | simulated without the dash (NoMove); VOD6's three casts played NoMove (the refund at 27 ticks, not Move's 38) | E2 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+VOD6 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-18-2026_18-15-31-219/` `…PBE_11-18-2026_18-40-41-766.mp4` (owner's
+clip, 2026-11-18, 60 fps; client rls-19.1.0.5986652, not exported: the simulator's newest is 5986094). Round 1-5:
+Qiyana 2 stars with one item; Heartsteel (3) on the board (Sett among its members). The panel lists a third trait,
+Collab, which 5986094 doesn't give her. Mana from `tools/vod_text_changes.py --field mana` (crops read by eye).
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f12150, f12600 (round 1-5) | 60 | inspection panel | 1425/1425, x/40, range 1 hex, Front, Attack Fighter; AD 68, AP 10%, armor 40, MR 40, AS 0.98 then 1.42, crit 35% | HP 1350 + 75 (Heartsteel SettHealth, Sett fielded), AD 67.5, armor, MR, mana match; the AS sources (item, traits) not identified | Q1 |
+| E2 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f12088-12756 | 60 | mana text; the board at each cast | 10, 20, 30 at f12088, f12152, f12215; casts f12273, f12461, f12670 (blue wave each time); +10 at f12327, f12515, f12724 (+54 frames each); the next +10 at f12361, f12549, f12756 (+88, +88, +86) | Blue's refund at 'ManaUnlock': 27 ticks = 26 + the tick after the fill (NoMove; Move would be 38); the next attack 44 / 44 / 43 ticks after the cast, engine 43 | Q2, Q7, Q9, Q16 |
 
 ## Decisions and notes
 
+- 2026-11-18, D1 (implemented, `set19champs.Qiyana`):
+  - **Ring (GA_Qiyana19_PassiveRingRoulette):** ChangeColor at once and every TimeRingChange (1.5 s, looping timer):
+    the new colour is one of the two others, by RedWeight / GreenWeight / BlueWeight (1 each), so the long-run
+    shares are 1/3 each (`roulette_shares`). In PvP rounds a GoldChanceIndependent roll adds Gold (no combat power).
+  - **Cast (GA_Qiyana19_Spell):** mana lock (0x2a1e); colour tags read at the cast. The dash hex: the hex within
+    her range of the target with the most enemies in the line offset behind it (LineWidth 440); her own hex ->
+    CD_Qiyana19_CastAnimNoMove (Fire 0.3498, ManaUnlock 0.8491, Unlock 1.0912 s), else CastAnimMove (0.7299,
+    1.2495, 1.4916 s). 'Fire': GE_SimulateLaunchAttack, the wave aimed WaveNumHexesBehindTarget x 214.5 units
+    behind the target.
+  - **Wave:** 'Wave' projectile (spawned 0.3779 s, 1200 units/s, box 100 x 440). Overlaps: her target ->
+    GE_Qiyana19_PrimaryDamage (PhysicalDamageCalc1 = DamageAP x AP + DamageAD x AD), others -> _SecondaryDamage
+    (Calc2 = 0.5 x Calc1); physical, AOE, on-spell, RollIfCanSpellCrit. Red: the _Red effects add Calc x
+    RedBonusDamagePercent.
+  - **ManaUnlock:** lifts the lock; Blue: GE_Qiyana19_ManaRefundBlue (+BlueManaRefund). 'Unlock': FinishCasting.
+  - **Simulated:** NoMove; the colour averaged like crits (I6): damage x (1 + 0.2 x 1/3), refund 10 x 1/3 at
+    'ManaUnlock' (paid during the cast, E2); the wave hits every dummy within 220 units of its path, each when the
+    box's front reaches it.

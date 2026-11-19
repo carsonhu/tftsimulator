@@ -68,7 +68,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | AD, AS, range, armor, MR, mana confirmed; HP 725 in game vs 650 (open: VOD6 ran on 5986652, not exported) | E1 |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above confirmed (HP 725 = 650 + Heartsteel's Sett 75) | E1 |
 | Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicFighter: 10 per attack, no regen | confirmed (+10 steps, nothing between them) | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open (VOD6's minions walk in) | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.2918 s (8.75 ticks) | predicted | |
@@ -92,12 +92,12 @@ VOD was played on (check the patch shown in game or the date against builds/inde
 VOD6 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-18-2026_18-15-31-219/` `…PBE_11-18-2026_18-40-41-766.mp4` (owner's
 clip, 2026-11-18 18:15-18:40, 60 fps). The client patched to rls-19.1.0.5986652 at 16:20 that day and that build
 isn't exported yet; the simulator's newest is 5986094, so a mismatch may be a 5986652 change. Round 1-2: Katarina 1
-star, no items, Classical 1/2 and Slayer 1/2 (inactive); minions (armor and MR 10). Mana from
+star, no items, Classical 1/2 and Slayer 1/2 (inactive), Heartsteel (1) with Sett fielded (+75 Health to the team, SettHealth); minions (armor and MR 10). Mana from
 `tools/vod_text_changes.py --field mana` (crops read by eye).
 
 | # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
 |---|---|---|---|---|---|---|---|---|
-| E1 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 1:06 (round 1-2, combat start) | 60 | inspection panel | 725/725, 0/40, range 1 hex, Front, Magic Fighter; AD 30, AP 0%, armor 35, MR 35, AS 0.79, crit 25% | the simulator: 650 HP; AD 30, AS 0.7875 (0.75 x 1.05, stage 1), armor 35, MR 35, 0/40. HP differs (open) | Q1 |
+| E1 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 1:06 (round 1-2, combat start) | 60 | inspection panel | 725/725, 0/40, range 1 hex, Front, Magic Fighter; AD 30, AP 0%, armor 35, MR 35, AS 0.79, crit 25% | the simulator: AD 30, AS 0.7875 (0.75 x 1.05, stage 1), armor 35, MR 35, 0/40; HP 650 + 75 (Sett's Heartsteel bonus) = 725. Matches | Q1 |
 | E2 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f4094-4323, f4449-4602 | 60 | mana text | 10, 20, 30 at f4094, f4170, f4247; cast f4323; 10, 20, 30 at f4449, f4525, f4602 | +10 per attack, no regen; attacks 76-77 frames apart = 38.25 ticks (engine 38 at 0.7875 AS); she casts on the 4th attack | Q2 |
 | E3 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 1:12.05-1:14.2 (board every 0.1 s), f4323-4449 | 60 | the cast | spin at 1:12.1; she dashes; 218 magic on the target ~1:13.35-1:13.4; next +10 at f4449 (+126 fr = 63 ticks) | the dash branch: 'Eviscerate' at 1.285 s (the Movement group; 1:13.34) matches. The next attack came 63 ticks after the cast (Movement 'Unlock' 43 + windup ~9 = ~52; she walked to a new target) | Q7, Q13 |
 

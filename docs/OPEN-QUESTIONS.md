@@ -185,7 +185,6 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
-| Her Health | 650 at 1 star (build 5986094); VOD6 (client 5986652) showed 725 (Kayn too: 1-cost Health raised?) | (tool) export 5986652 and compare; changes no damage | champions/Katarina.md Q1, Kayn.md Q1 |
 | Her cast with the target in range (no dash) | spin at once, eviscerate at 0.835 s, the next attack 40 ticks + windup after the cast | a cast on an enemy already next to her: the eviscerate's damage number and her next attack | champions/Katarina.md Q7, Q9 |
 
 ### 7s. Kayn (VOD6 has him at 1-3 and 1-4)
@@ -194,6 +193,13 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|---|
 | (owner) When the Bias Kayn becomes the Shadow Assassin | from combat start (dummies never hit back; the game: at 70% Health, VOD6 ~4.8 s in) | your call: from the start, never, or a time | champions/Kayn.md Q17 |
 | Does he dash before each swipe against stationary enemies? | he stands still (the script dashes when another hex within 2 of the target hits at least as many, unless he is on it) | a cast on stationary enemies: does he move, and the next attack's timing | champions/Kayn.md Q16 |
+
+### 7t. Qiyana (VOD6 has her at 1-5)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| (owner) Her ring colour | averaged: each cast deals +20% x 1/3 (Red) and refunds 10 x 1/3 mana (Blue), the ring's long-run shares | your call: averaged, or a fixed colour per fight | champions/Qiyana.md Q14 |
+| Her Collab trait | not in build 5986094 (VOD6's client 5986652 shows it) | (tool) export 5986652 | champions/Qiyana.md |
 
 ### 7n. Augments
 
