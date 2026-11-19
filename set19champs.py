@@ -2222,6 +2222,81 @@ class Tristana(BuildChampion):
             self.schedule_tick(cast + start + ticks_up(self.shot_spawn / rate), shoot)
 
 
+class Mel(BuildChampion):
+    """Chain of Blues (champions/Mel.md, D1). Scripts: GA_Mel19_Spell, GA_Mel19_Passive (build ga_scripts.zip).
+
+    The cast applies the mana lock (0x21c4) and plays CD_Mel19_CastAnim. 'Fire' (0.5076 s): RepeatAction(
+    TimeBetweenMissiles 0.04 s, NumMissiles), first at once (A1). Missile n (from 1) goes to her target when n mod
+    (1 / (1 - PercentDamageOnCurrentTarget)) = n mod 2.5 <= 1, else to the next of her secondary targets (the
+    NumEnemies nearest by row distance; her target if none): 3 of every 5 on the target. Each plays CD_Mel19_SpellMissile
+    ('SpellMis', 2100 units/s); arrival: GE_Mel19_TargetDamage = MagicDamageCalc1 (APDamage x AP), magic, on-spell, crit
+    only with Precision, then a Blues stack (GE_Mel19_RadianceDRReduction: infinite, AggregateByTarget, for the rest of
+    combat). The RepeatAction's OnFinished (one interval after the last missile, T15) plays CD_Mel19_CastAnimOut; its
+    'Unlock' (0.3214 s) lifts the lock and ends the cast (62 / 63 ticks).
+    Passive (GA_Mel19_Passive): her on-spell damage to an enemy with Blues stacks carries
+    GE_Mel19_RadianceDRReductionForDamageInstanceOnly: the target's IncomingDamageMultiplier x (1 + GenericCalc1 x
+    stacks), GenericCalc1 = NegativeDRForRadianceBundle (0.05) / RadianceStacksForNegativeDR (3): +5% per 3 stacks,
+    pro rata.
+    Simulated: the passive on her missiles (her only on-spell damage here); a missile's own stack comes after its
+    damage.
+    """
+    KEY = 'DA_Mel19'
+    AREA = True  # 2 of every 5 missiles go to the nearest other enemies
+    CAST, OUT, MISSILE = 'CD_Mel19_CastAnim', 'CD_Mel19_CastAnimOut', 'CD_Mel19_SpellMissile'
+    TIME_BETWEEN_MISSILES = 0.04  # GA_Mel19_Spell default (script literal)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.fire_at = self.chrono_event(self.CAST, 'Fire')
+        self.num_missiles = int(self.row('NumMissiles'))
+        # the RepeatAction's OnFinished (which plays the CastAnimOut) comes one interval after its last action (T15)
+        finished = ticks_up(self.fire_at + self.num_missiles * self.TIME_BETWEEN_MISSILES)
+        end = finished + ticks_up(self.chrono_event(self.OUT, 'Unlock'))
+        t = self.timing
+        t.mana_lock, t.cast_lock = end / TPS, (end + 1) / TPS
+        t.source['mana_lock'] = t.source['cast_lock'] = f'{self.CAST} Fire + missiles + {self.OUT} Unlock'
+        # MissileSelector 1-4 (the script's n mod 4) pick the TFTFixedSpeedSplineMovement modules; 5-6 (fixed time)
+        # aren't used
+        speeds = {p['speed'] for p in self.chrono(self.MISSILE).get('projectiles') or []
+                  if p['name'] == 'SpellMis' and p['movement'] == 'TFTFixedSpeedSplineMovement'}
+        if len(speeds) != 1:
+            raise BuildDataError(f'{self.KEY}: {self.MISSILE} fixed-speed SpellMis speeds {speeds}')
+        self.missile_speed = speeds.pop()
+        self.per_stack = self.row('NegativeDRForRadianceBundle') / self.row('RadianceStacksForNegativeDR')
+        self.blues = {}  # id(enemy) -> stacks
+        self.notes = ('A cast: 30 missiles, 3 of every 5 at her target, the rest at the nearest others. Each adds a Blues '
+                      'stack for the rest of combat; her ability deals +5% per 3 stacks to that enemy.')
+
+    def missile_damage(self, level, AD, AP):
+        return self.row('APDamage', star=level) * AP
+
+    def _missile_lands(self, d):
+        amp = 1 + self.per_stack * self.blues.get(id(d), 0)
+        self.multiTargetSpell([d], self.items, self.tick / TPS, 1,
+                              lambda level, AD, AP: self.missile_damage(level, AD, AP) * amp, 'magical')
+        self.blues[id(d)] = self.blues.get(id(d), 0) + 1
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        cast = self.tick
+        period = 1 / (1 - self.row('PercentDamageOnCurrentTarget'))
+        others = []
+
+        def pick(n):
+            if n % period <= 1 + 1e-9:
+                return target
+            if not others:
+                others.extend([d for d in self.nearest(int(self.row('NumEnemies'))) if d is not target] or [target])
+            return others.pop(0)
+
+        for n in range(1, self.num_missiles + 1):
+            def fire(n=n):
+                d = pick(n)
+                flight = projectile_ticks(self.missile_speed, self.target_hexes(d))
+                self.fly(self.tick, flight, d, lambda: self._missile_lands(d), name='missile')
+            self.schedule_tick(cast + ticks_up(self.fire_at + (n - 1) * self.TIME_BETWEEN_MISSILES), fire)
+
+
 class SeraphineRisingStar(Seraphine):
     """Seraphine's Rising Star form (DA_SeraphineRisingStar19): the stream plus the bonus notes (see Seraphine)."""
     KEY = 'DA_SeraphineRisingStar19'
@@ -2239,7 +2314,7 @@ class SeraphineSuperstar(Seraphine):
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
-              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana']
+              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel']
 
 
 class TrainingDummy(Champion):
