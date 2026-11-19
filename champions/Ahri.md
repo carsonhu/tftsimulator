@@ -63,8 +63,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-18, `set19champs.Ahri`, D1); the three cast lengths (basic, the one
+  reaching 14 fox-fires with the pose, the flow) checked on VOD6 to a tick (E2)
+- Keep in the simulator: **yes** (owner, 2026-11-18: VOD6 has her at 2-8)
 
 ## Questions
 
@@ -73,29 +74,49 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster | predicted | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | mana 30 confirmed; HP 1025 vs 850, 3 regen, +12 per attack (items / traits not identified) | E2 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster: 7 per attack, 2/s | consistent (+12 = 7 + 5, 3/s) | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.3067 s (9.2 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 1750 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 1 s (30 ticks) | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | basic 31, reaching 14 54, flow 30 ticks | consistent (Q9) | E2 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 0.9667 s (29 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | basic 'Unlock' 30; + the pose 53; empowered 29 ticks | confirmed: the banked overflow 31 / 31 (basic), 54 (reaching 14), 30 x 6 (flow) ticks after the bar empties | E2 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
-| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
-| Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 (no GE_SimulateLaunchAttack) | predicted (script) | D1 |
+| Q12 | Does the cast cancel or reset an attack in progress? | cancels | predicted | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | basic: every fox-fire APDamage x AP at the target; flow: heart APDamage_Secondary x AP + the fox-fires split | predicted | D1 |
+| Q14 | Passives and other mechanics that need modelling | fox-fires 6, +2 per cast, 14 max; the flow at 14 | modelled; the cast count to the flow confirmed (the 4th cast plays the pose) | E2 |
+| Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+VOD6 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-18-2026_18-15-31-219/` `…PBE_11-18-2026_18-40-41-766.mp4` (owner's
+clip, 2026-11-18, 60 fps; client rls-19.1.0.5986652, not exported: the simulator's newest is 5986094). Round 2-8:
+Ahri with items. Mana from `tools/vod_text_changes.py --field mana` (crops read by eye).
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E2 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 f66695-67914 | 60 | mana text | 1025/1025, x/30, 3/s, +12 per attack. Casts and the overflow's frame: f66786 -> f66868 (+82), f66958 -> f67020 (+62), f67073 -> f67135 (+62), f67181 -> f67289 (+108), f67347 -> f67407 (+60), f67471 -> f67531, f67564 -> f67624, f67654 -> f67714, f67766 -> f67826, f67854 -> f67914 (+60 each) | basic 31, the 4th cast (12 -> 14 + pose) 54, the flow 30 ticks: the locks + the tick after the fill. The first cast's +82 (41 ticks) is not explained | Q1, Q2, Q9, Q14 |
 
 ## Decisions and notes
 
+- 2026-11-18, D1 (implemented, `set19champs.Ahri`):
+  - **Fox-fires:** BaseFoxFires at combat start (the Stack attribute); each basic cast's 'Unlock' adds
+    FoxFiresPerCast (AddFoxFires), up to MaxFoxFires.
+  - **Basic (fewer than 14):** mana lock; CD_19_Ahri_CastAnim_Basic. 'StartMissiles' (0.1398 s):
+    RepeatAction(0.5 / N, N), first at once: CD_Ahri19_FoxFireAtTarget (2100) at her target,
+    GE_19_Ahri_PrimaryDamage (MagicDamageCalc1). 'Unlock' (0.9981 s): AddFoxFires; reaching the max ->
+    CD_19_Ahri_SpiritRushActivationPose ('PowerUp' 0.2009 s: GE_Ahri19_SpiritRush; 'Unlock' 0.7512 s) -> EndSpell;
+    else EndSpell.
+  - **Flow (14):** CD_19_Ahri_CastAnim_Empowered: 'HeartMis' (spawned 0.3642 s, 1600) at her target,
+    GE_19_Ahri_SecondaryDamage (MagicDamageCalc2); the fox-fires (spawned at the chrono's eight 'SpellMis' times in
+    turn, 1600) split half way (PercentDistanceBeforeSplit 0.5, CD_Ahri19_EmpowedSpell_SpreadMissile): every other
+    one at her target, the others at enemies within HexRangeAroundTarget (2) of it; MagicDamageCalc1 each. 'Unlock'
+    (0.9443 s) ends the cast.
+  - **Simulated:** each fox-fire's flight over its target's whole distance at its speed; the split's secondary
+    enemies in turn.

@@ -2374,6 +2374,91 @@ class Jinx(BuildChampion):
             self.schedule_tick(cast + ticks_up(self.begin_firing + k * interval), fire)
 
 
+class Ahri(BuildChampion):
+    """Burn it Down (champions/Ahri.md, D1). Script: GA_19_Ahri_Spell (build ga_scripts.zip).
+
+    Fox-fires: BaseFoxFires (6) at combat start (the unit's Stack attribute); each basic cast's 'Unlock' adds
+    FoxFiresPerCast (AddFoxFires), up to MaxFoxFires (14). The cast applies the mana lock (0x481e); with fewer than
+    MaxFoxFires it plays CD_19_Ahri_CastAnim_Basic: 'StartMissiles' (0.1398 s) fires every fox-fire,
+    RepeatAction(0.5 / N, N) first at once, each CD_Ahri19_FoxFireAtTarget (2100 units/s) at her target:
+    GE_19_Ahri_PrimaryDamage = MagicDamageCalc1 (APDamage x AP). Its 'Unlock' (0.9981 s) adds the fox-fires; when
+    that reaches the max, CD_19_Ahri_SpiritRushActivationPose plays ('PowerUp' 0.2009 s: GE_Ahri19_SpiritRush, the
+    flow; 'Unlock' 0.7512 s) before the cast ends; else the cast ends there (EndSpell).
+    In the flow (fox-fires at the max) she plays CD_19_Ahri_CastAnim_Empowered: a 'HeartMis' (spawned 0.3642 s, 1600)
+    at her target: GE_19_Ahri_SecondaryDamage = MagicDamageCalc2 (APDamage_Secondary x AP); the fox-fires ('SpellMis',
+    1600, spawned at the chrono's eight times in turn) fly PercentDistanceBeforeSplit (half) of the way and split
+    (CD_Ahri19_EmpowedSpell_SpreadMissile): every other one at her target (PercentMissilesOnCurrentTarget 0.5), the
+    others at enemies within HexRangeAroundTarget (2) of it (her target if none); each MagicDamageCalc1. 'Unlock'
+    (0.9443 s) ends the cast. All magic, on-spell, crit only with Precision.
+    Simulated: a fox-fire's whole flight at its own speed (the split's second leg at the same speed); the split's
+    secondary enemies in turn.
+    """
+    KEY = 'DA_Ahri19'
+    AREA = True  # the flow's fox-fires split to enemies within 2 hexes of the target
+    BASIC, POSE, EMPOWERED = ('CD_19_Ahri_CastAnim_Basic', 'CD_19_Ahri_SpiritRushActivationPose',
+                              'CD_19_Ahri_CastAnim_Empowered')
+    FOX = 'CD_Ahri19_FoxFireAtTarget'
+    BASIC_SPREAD = 0.5  # RepeatAction(0.5 / N, N) (script literal)
+    SPLIT_EVERY = 2  # 1 / PercentMissilesOnCurrentTarget (0.5, a script default)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.start_missiles = self.chrono_event(self.BASIC, 'StartMissiles')
+        self.basic_unlock = ticks_up(self.chrono_event(self.BASIC, 'Unlock'))
+        self.pose_unlock = ticks_up(self.chrono_event(self.POSE, 'Unlock'))
+        self.empowered_unlock = ticks_up(self.chrono_event(self.EMPOWERED, 'Unlock'))
+        proj = {p['name']: p for p in self.chrono(self.EMPOWERED).get('projectiles') or []
+                if p['movement'] == 'TFTFixedSpeedMovement'}
+        self.heart_spawn, self.heart_speed = proj['HeartMis']['spawn_at'][0], proj['HeartMis']['speed']
+        self.split_spawns, self.split_speed = proj['SpellMis']['spawn_at'], proj['SpellMis']['speed']
+        self.fox = int(self.row('BaseFoxFires'))
+        self.notes = ('Casts throw her fox-fires (6, +2 a cast, up to 14) at her target; at 14 she enters the flow: a '
+                      'heart at her target and the fox-fires split between it and enemies within 2 hexes.')
+
+    def fox_damage(self, level, AD, AP):
+        return self.row('APDamage', star=level) * AP
+
+    def heart_damage(self, level, AD, AP):
+        return self.row('APDamage_Secondary', star=level) * AP
+
+    def _locks(self, end):
+        self.timing.mana_lock, self.timing.cast_lock = end / TPS, (end + 1) / TPS
+
+    def _hit(self, d, damage):
+        self.multiTargetSpell([d], self.items, self.tick / TPS, 1, damage, 'magical')
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        cast = self.tick
+        top = int(self.row('MaxFoxFires'))
+        n = self.fox
+        if n >= top:
+            self._locks(self.empowered_unlock)
+            self.schedule_tick(cast + ticks_up(self.heart_spawn), lambda: self.fly(
+                self.tick, projectile_ticks(self.heart_speed, self.target_hexes(target)), target,
+                lambda: self._hit(target, self.heart_damage), name='heart'))
+            near = layout.around(target, self.row('HexRangeAroundTarget'), self.opponents) or [target]
+            for k in range(n):
+                d = target if k % self.SPLIT_EVERY == 0 else near[(k // self.SPLIT_EVERY) % len(near)]
+
+                def fire(d=d):
+                    self.fly(self.tick, projectile_ticks(self.split_speed, self.target_hexes(d)), d,
+                             lambda: self._hit(d, self.fox_damage), name='fox-fire')
+                self.schedule_tick(cast + ticks_up(self.split_spawns[k % len(self.split_spawns)]), fire)
+            return
+        after = min(top, n + int(self.row('FoxFiresPerCast')))
+        self._locks(self.basic_unlock + (self.pose_unlock if after >= top else 0))
+        for k in range(n):
+            def fire():
+                self.fly(self.tick, self.chrono_projectile_ticks(self.FOX, 'SpellMis', self.target_hexes(target)),
+                         target, lambda: self._hit(target, self.fox_damage), name='fox-fire')
+            self.schedule_tick(cast + ticks_up(self.start_missiles + k * self.BASIC_SPREAD / n), fire)
+
+        def add():
+            self.fox = after
+        self.schedule_tick(cast + self.basic_unlock, add)
+
+
 class SeraphineRisingStar(Seraphine):
     """Seraphine's Rising Star form (DA_SeraphineRisingStar19): the stream plus the bonus notes (see Seraphine)."""
     KEY = 'DA_SeraphineRisingStar19'
@@ -2391,7 +2476,7 @@ class SeraphineSuperstar(Seraphine):
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
-              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx']
+              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri']
 
 
 class TrainingDummy(Champion):
