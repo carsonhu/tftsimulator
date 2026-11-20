@@ -156,6 +156,28 @@ def stat_icons():
     print(f'stats: {len(written)} icons; no texture: {", ".join(missing) or "none"}')
 
 
+# The frames the client draws over an artifact's or a radiant's icon (/UI_Shared/Textures/T_Item_Frame_<kind>; the
+# middle is transparent, a corner ornament overlaps the art). Not named by any item in data.json: the UI picks them
+# by item kind. Exported from the live client (`TftExport --textures`, the 19.1 usmap reads Texture2D fine); 96 px,
+# twice the icon size, so they stay crisp over a 48 px icon on a 2x screen.
+FRAMES = {'Artifact': '/UI_Shared/Textures/T_Item_Frame_Artifact', 'Radiant': '/UI_Shared/Textures/T_Item_Frame_Radiant'}
+FRAME_SIZE = 96
+
+
+def item_frames():
+    out_dir = os.path.join(OUT, 'frames')
+    os.makedirs(out_dir, exist_ok=True)
+    for kind, soft in FRAMES.items():
+        src = texture(soft)
+        if src is None:
+            print(f'frames: {kind} not exported ({soft})')
+            continue
+        Image.open(src).convert('RGBA').resize((FRAME_SIZE, FRAME_SIZE), Image.LANCZOS).save(
+            os.path.join(out_dir, kind + '.png'), optimize=True)
+    print('frames:', ', '.join(sorted(os.listdir(out_dir))))
+
+
 if __name__ == '__main__':
     main()
     stat_icons()
+    item_frames()

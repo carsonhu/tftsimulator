@@ -790,7 +790,7 @@ class OlafHeroAugment(BuildChampion):
     ATTACK = 'CD_Olaf19_Attack'
     AXE = 'CD_Olaf19_Spell_HeroAugment'
     EMPOWERED = 3  # the selector this class gives the empowered animation
-    display_name = 'Olaf (Axe Crescendo)'
+    display_name = 'Olaf (Hero)'  # owner, 2026-11-19: "(Hero)", not the augment's name
 
     def __init__(self, level, build=None):
         super().__init__(level, build)
@@ -1896,6 +1896,7 @@ class Seraphine(BuildChampion):
     """
     KEY = 'DA_SeraphineIndie19'
     FORM = 1
+    MODE = 'Indie'  # the page lists her once and switches form here (sim_entry's catalog: variantOf / mode)
     CAST = 'CD_Seraphine19_CastAnim'
     NOTE, BONUS, HIGH = 'CD_Seraphine19_Splines', 'CD_Seraphine19_SplinesBonus', 'CD_Seraphine19_HighNoteMis'
     SPELL_DURATION, SPELL_TICK_RATE = 2.1, 0.15  # GA_Seraphine19_Spell defaults (script literals)
@@ -2685,6 +2686,7 @@ class SeraphineRisingStar(Seraphine):
     """Seraphine's Rising Star form (DA_SeraphineRisingStar19): the stream plus the bonus notes (see Seraphine)."""
     KEY = 'DA_SeraphineRisingStar19'
     FORM = 2
+    MODE = 'Rising Star'
     display_name = 'Seraphine (Rising Star)'
 
 
@@ -2692,6 +2694,7 @@ class SeraphineSuperstar(Seraphine):
     """Seraphine's Superstar form (DA_SeraphineSuperstar19): high notes, the stream and the bonus notes."""
     KEY = 'DA_SeraphineSuperstar19'
     FORM = 3
+    MODE = 'Superstar'
     display_name = 'Seraphine (Superstar)'
 
 

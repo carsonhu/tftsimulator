@@ -44,7 +44,7 @@ def gains(c):
 def test_build_numbers_and_animations():
     o = LoggedOlaf(1)
     assert (o.name, o.hp.stat, o.fullMana.stat, o.aspd.stat, o.attack_range, o.atk.stat) == (
-        'Olaf (Axe Crescendo)', 500, 50, 0.7, 4, 45)
+        'Olaf (Hero)', 500, 50, 0.7, 4, 45)
     fight(o, seconds=1)
     assert o.crit.stat == 0 and o.manaRegen.stat == 0 and o.manaPerAttack.stat == 10  # role stats at combat
     # CD_Olaf19_Attack: normal attacks 0.32 s of 1.0 s, the empowered one 0.5 s of 1.1667 s

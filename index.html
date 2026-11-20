@@ -32,239 +32,227 @@
     </div>
 
     <div id="layout" hidden>
-      <!-- Mobile only (see style.css): the sidebar becomes a drawer that
-           slides over the content, Streamlit-style, instead of stacking as a
-           page-long block of controls above the results. -->
-      <button
-        id="sidebarToggle"
-        type="button"
-        aria-label="Toggle settings"
-        aria-expanded="false"
-      >
-        &#9776;
-      </button>
-      <div id="sidebarBackdrop"></div>
-      <aside id="sidebar">
-        <section>
-          <h2>Champion</h2>
-          <div class="row">
-            <label class="grow"
-              >Champion
-              <select id="champ"></select>
-            </label>
-            <label
-              >Level
-              <select id="level"></select>
-            </label>
-          </div>
-          <label id="targetsRow" title="The target and the enemies next to it, which the champion's area damage hits. One more enemy always stands 2 hexes behind the target, in a line." hidden
-            >Number of targets
+      <!-- The fight: who, how starred, against what, in which build. One bar,
+           so the whole question the table answers reads left to right. -->
+      <header id="topbar">
+        <button
+          id="sidebarToggle"
+          type="button"
+          aria-label="Toggle setup"
+          aria-expanded="false"
+        >
+          &#9776;
+        </button>
+
+        <!-- The real <select>s stay (hidden): everything reads .value and
+             listens for change; the tiles are a skin over them. -->
+        <div class="champ-block">
+          <select id="champ" hidden></select>
+          <button id="champPick" type="button" class="champ-pick" aria-haspopup="dialog" title="Choose a champion">
+            <span class="champ-portrait"><img id="champIcon" alt="" /></span>
+            <span class="champ-name">
+              <span id="headerChamp"></span>
+            </span>
+            <span class="caret" aria-hidden="true">&#9662;</span>
+          </button>
+          <select id="level" hidden></select>
+          <div id="levelStars" class="stars" role="radiogroup" aria-label="Star level"></div>
+          <!-- a champion's form, for one with several (Seraphine): renderChampModes -->
+          <div id="champModes" class="seg" role="radiogroup" aria-label="Form" hidden></div>
+        </div>
+
+        <div id="header" class="enemy">
+          <span class="vs">vs</span>
+          <label class="enemy-stat"
+            ><input type="number" id="enemyHp" class="inline-num" min="1" max="99999" value="1800" aria-label="Enemy HP" /><span>HP</span></label
+          >
+          <label class="enemy-stat"
+            ><input type="number" id="enemyArmor" class="inline-num" min="0" max="99999" value="100" aria-label="Enemy Armor" /><span>Armor</span></label
+          >
+          <label class="enemy-stat"
+            ><input type="number" id="enemyMr" class="inline-num" min="0" max="99999" value="100" aria-label="Enemy MR" /><span>MR</span></label
+          >
+        </div>
+
+        <div class="top-fields">
+          <label class="top-field"
+            >Build
+            <select id="build"></select>
+          </label>
+          <label class="top-field"
+            >Stage
+            <select id="stage"></select>
+          </label>
+          <label class="top-field slider-field" title="Tactician level"
+            >Level
+            <input type="range" id="tactician" min="3" max="10" step="1" value="4" />
+            <span class="slider-value" id="tacticianValue">4</span>
+          </label>
+          <label
+            id="targetsRow"
+            class="top-field slider-field"
+            title="The target and the enemies next to it, which the champion's area damage hits. One more enemy always stands 2 hexes behind the target, in a line."
+            hidden
+            >Targets
             <input type="range" id="layoutTargets" min="1" max="7" step="1" />
             <span class="slider-value" id="layoutTargetsValue"></span>
           </label>
-        </section>
-
-        <details>
-          <summary>Extra options</summary>
-          <label
-            >Total takedowns
-            <input type="number" id="takedowns" min="0" max="100" value="0" />
+          <label class="top-field" title="Takedowns this game (Cappa Juice's Hats)"
+            >Takedowns
+            <input type="number" id="takedowns" class="small-num" min="0" max="100" value="0" />
           </label>
-        </details>
-
-        <section>
-          <label
-            >Game build
-            <select id="build"></select>
-          </label>
-          <label
-            >Current stage
-            <select id="stage"></select>
-          </label>
-          <label
-            >Tactician Level
-            <input
-              type="range"
-              id="tactician"
-              min="3"
-              max="10"
-              step="1"
-              value="4"
-            />
-            <span class="slider-value" id="tacticianValue">4</span>
-          </label>
-        </section>
-
-        <section>
-          <div class="section-head">
-            <h2>Global Items</h2>
-            <button id="resetItems" type="button">Reset items</button>
-          </div>
-          <div id="itemRows"></div>
-        </section>
-
-        <section>
-          <h2>Global Buffs</h2>
-          <label
-            >Number of Buffs
-            <input type="range" id="numBuffs" min="1" max="10" step="1" />
-            <span class="slider-value" id="numBuffsValue"></span>
-          </label>
-          <div id="buffRows"></div>
-        </section>
-
-      </aside>
-
-      <main id="content">
-        <!-- The enemy's stats are edited in place here rather than in their
-             own sidebar section: they read as part of the sentence, so the
-             sentence is where you change them. -->
-        <h1 id="header">
-          <span id="headerChamp"></span>
-          <span>vs</span>
-          <input
-            type="number"
-            id="enemyHp"
-            class="inline-num"
-            min="1"
-            max="99999"
-            value="1800"
-            aria-label="Enemy HP"
-          /><span>HP,</span>
-          <input
-            type="number"
-            id="enemyArmor"
-            class="inline-num"
-            min="0"
-            max="99999"
-            value="100"
-            aria-label="Enemy Armor"
-          /><span>Armor,</span>
-          <input
-            type="number"
-            id="enemyMr"
-            class="inline-num"
-            min="0"
-            max="99999"
-            value="100"
-            aria-label="Enemy MR"
-          /><span>MR</span>
-        </h1>
-        <p class="disclaimer">
-          Every number comes from the selected game build. Attack and cast
-          timing is read from the build's animations and checked against PBE
-          footage where noted. Units cast right after the attack that fills
-          their mana. Training dummies never attack back, so effects that need
-          the holder to lose health never trigger.
-        </p>
-
-        <!-- Team Traits sits beside Base stats and matches its height: the
-             table options below stay clear of it, full width. -->
-        <div class="stats-row">
-          <div class="stats-block">
-            <h3>Base stats</h3>
-            <p class="hint">
-              Type into the <strong>+</strong> boxes to add bonus stats (from
-              augments, emblems, etc.) on top of the base values.
-            </p>
-            <div id="statsPanel" class="stats-panel"></div>
-          </div>
-          <div id="teamTraitsPanel" class="team-block" hidden>
-            <h3>Team Traits</h3>
-            <p class="hint">
-              Traits your board runs that this champion is not a member of
-              &mdash; what a non-member gets.
-            </p>
-            <div id="teamTraits" class="team-traits"></div>
-          </div>
-        </div>
-        <p id="champNotes" class="notes" hidden></p>
-
-        <div class="option-row">
-          <label class="checkbox-row">
-            <input type="checkbox" id="displayDps" />
-            Display DPS
-          </label>
-          <label class="checkbox-row">
-            <input type="checkbox" id="colorScale" checked />
-            Colour scale
-          </label>
-          <!-- Sequential encoding ships with its scale legend. -->
-          <span id="scaleLegend" class="scale-legend">
-            <span>low</span>
-            <span class="ramp"></span>
-            <span>high</span>
-            <span class="scale-note">shaded within each column</span>
-          </span>
         </div>
 
-        <div class="pills" id="sliceRadio"></div>
-        <div id="runStatus" class="run-status" hidden></div>
+        <button
+          type="button"
+          class="info-dot"
+          title="Every number comes from the selected game build. Attack and cast timing is read from the build's animations and checked against PBE footage where noted. Units cast right after the attack that fills their mana. Training dummies never attack back, so effects that need the holder to lose health never trigger."
+          aria-label="About these numbers"
+        >
+          i
+        </button>
+      </header>
 
-        <!-- The table and the fight viewer side by side; the viewer drops
-             below the table when the window is too narrow for both. -->
-        <div class="results-row">
-          <div class="table-wrap results-wrap">
-            <table id="resultsTable"></table>
-          </div>
+      <div id="sidebarBackdrop"></div>
 
-          <!-- Fight viewer (viz.js): replays one row's fight tick by tick. -->
-          <section id="viz" class="viz" tabindex="0" aria-label="Fight viewer">
-            <div class="viz-head">
-              <h3>Fight viewer</h3>
-              <span id="vizWhat" class="viz-what"></span>
-              <span class="viz-keys" title="Click a table row to watch its fight. Space plays or pauses; the arrow keys step a tick (Shift: a second).">click a row &middot; Space &middot; &larr; &rarr;</span>
-              <label class="viz-length"
-                >Fight
-                <select id="vizLength"></select>
-              </label>
+      <div id="workspace">
+        <!-- Setup: what the champion carries into the fight. Scrolls on its
+             own, so the results never move. -->
+        <aside id="sidebar">
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Items</h2>
+              <button id="resetItems" type="button" class="link-btn">Clear</button>
             </div>
-            <div id="vizStatus" class="viz-status-line" hidden></div>
-            <div class="viz-body">
-              <div class="viz-left">
-                <div id="vizStage" class="viz-stage"><canvas id="vizCanvas"></canvas></div>
-                <div class="viz-controls">
-                  <button id="vizBack" type="button" aria-label="Back one tick">&#9664;&#9664;</button>
-                  <button id="vizPlay" type="button" class="viz-play" aria-label="Play">&#9654;</button>
-                  <button id="vizFwd" type="button" aria-label="Forward one tick">&#9654;&#9654;</button>
-                  <select id="vizSpeed" aria-label="Speed"></select>
-                  <span id="vizTime" class="viz-time"></span>
-                </div>
-                <div class="viz-strip-wrap"><canvas id="vizStrip"></canvas></div>
-                <div class="viz-legend">
-                  <span><i style="background:#ff9f43"></i>physical</span>
-                  <span><i style="background:#5aa9ff"></i>magic</span>
-                  <span><i style="background:#f2f2f2"></i>true</span>
-                  <span><i style="background:rgba(255,75,75,.5)"></i>cast lock</span>
-                </div>
-                <div id="vizLog" class="viz-log"></div>
-              </div>
-              <div id="vizCard" class="viz-card"></div>
-            </div>
+            <div id="itemRows" class="item-slots"></div>
           </section>
-        </div>
 
-        <div id="plotArea">
-          <p id="plotHint">Click a row in the table to plot it.</p>
-          <div id="plotColumns" hidden>
-            <div id="chart"></div>
-            <div id="logColumn">
-              <label
-                >Index Log
-                <select id="logSelect"></select>
-              </label>
-              <div class="table-wrap log-wrap">
-                <table id="logTable"></table>
-              </div>
-              <div id="pie"></div>
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Buffs</h2>
+              <button id="addBuff" type="button" class="link-btn">+ Add</button>
             </div>
-          </div>
-        </div>
+            <div id="buffRows"></div>
+          </section>
 
-        <p class="caption">
-          <span id="footerCaption"></span>
-        </p>
-      </main>
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Stats</h2>
+              <span class="hint">type bonus stats into the boxes</span>
+            </div>
+            <div id="statsPanel" class="stats-panel"></div>
+            <p id="champNotes" class="notes" hidden></p>
+          </section>
+
+          <section id="teamTraitsPanel" class="panel" hidden>
+            <div class="panel-head">
+              <h2>Team traits</h2>
+              <span class="hint">board traits this champion isn't in</span>
+            </div>
+            <div id="teamTraits" class="team-traits"></div>
+          </section>
+
+          <p class="caption"><span id="footerCaption"></span></p>
+        </aside>
+
+        <main id="content">
+          <!-- What each extra adds: the table. -->
+          <section class="results-col">
+            <div class="results-bar">
+              <div class="pills" id="sliceRadio"></div>
+              <div class="option-row">
+                <!-- What the window columns hold: DPS (plus the headline ratio), or every window's ratio. -->
+                <div class="seg-row">
+                  <span class="seg-label">Show</span>
+                  <div id="valueMode" class="seg" role="radiogroup" aria-label="Show">
+                    <button type="button" role="radio" data-mode="dps" title="DPS in each window, then the 20–30 s ratio">DPS</button>
+                    <button type="button" role="radio" data-mode="ratio" title="Each window's DPS divided by the base setup's (the NoItem row)">Ratio vs Base</button>
+                  </div>
+                </div>
+                <label class="checkbox-row">
+                  <input type="checkbox" id="colorScale" checked />
+                  Colour scale
+                </label>
+                <!-- Sequential encoding ships with its scale legend. -->
+                <span id="scaleLegend" class="scale-legend" title="Shaded within each column">
+                  <span>low</span>
+                  <span class="ramp"></span>
+                  <span>high</span>
+                </span>
+              </div>
+            </div>
+            <div id="runStatus" class="run-status" hidden></div>
+            <div class="table-wrap results-wrap">
+              <table id="resultsTable"></table>
+            </div>
+            <p class="table-hint">Click rows to plot them and watch their fight.</p>
+          </section>
+
+          <!-- One row up close: its fight, tick by tick, or the plotted rows'
+               damage over time. -->
+          <section class="pane">
+            <!-- Fight viewer (viz.js): replays one row's fight tick by tick. -->
+            <section id="viz" class="viz pane-body" tabindex="0" aria-label="Fight viewer">
+              <div class="viz-head">
+                <h2 class="pane-title">Fight viewer</h2>
+                <!-- the setup in pictures (renderSetupSummary), then which row's fight: one of the plotted rows -->
+                <div id="vizSetup" class="plot-summary"></div>
+                <span class="viz-pick">
+                  <span class="viz-plus">+</span>
+                  <span id="vizRowArt" class="viz-row-art"></span>
+                  <select id="vizRowSel" aria-label="Which row's fight"></select>
+                </span>
+                <!-- the same in words, for screen readers and the browser checks -->
+                <span id="vizWhat" class="sr-only"></span>
+                <span class="viz-keys" title="Click a table row to watch its fight. Space plays or pauses; the arrow keys step a tick (Shift: a second).">Space &middot; &larr; &rarr;</span>
+                <label class="viz-length"
+                  >Fight
+                  <select id="vizLength"></select>
+                </label>
+              </div>
+              <div id="vizStatus" class="viz-status-line" hidden></div>
+              <div class="viz-body">
+                <div class="viz-left">
+                  <div id="vizStage" class="viz-stage"><canvas id="vizCanvas"></canvas></div>
+                  <div class="viz-controls">
+                    <button id="vizBack" type="button" aria-label="Back one tick">&#9664;&#9664;</button>
+                    <button id="vizPlay" type="button" class="viz-play" aria-label="Play">&#9654;</button>
+                    <button id="vizFwd" type="button" aria-label="Forward one tick">&#9654;&#9654;</button>
+                    <select id="vizSpeed" aria-label="Speed"></select>
+                    <span id="vizTime" class="viz-time"></span>
+                  </div>
+                  <div class="viz-strip-wrap"><canvas id="vizStrip"></canvas></div>
+                  <div class="viz-legend">
+                    <span><i style="background:#ff9f43"></i>physical</span>
+                    <span><i style="background:#5aa9ff"></i>magic</span>
+                    <span><i style="background:#f2f2f2"></i>true</span>
+                    <span><i style="background:rgba(255,75,75,.5)"></i>cast lock</span>
+                  </div>
+                  <div id="vizLog" class="viz-log"></div>
+                </div>
+                <div id="vizCard" class="viz-card"></div>
+              </div>
+            </section>
+
+            <section id="plotArea" class="pane-body">
+              <div class="plot-head">
+                <h2 class="pane-title">Damage chart</h2>
+                <!-- What every plotted line shares: the champion, items, traits and bonuses (renderPlotSummary). -->
+                <div id="plotSummary" class="plot-summary"></div>
+                <span id="plotHint">Click rows in the table to plot their damage over time.</span>
+              </div>
+              <!-- The viewer's playhead over the chart: a line and each plotted row's damage so far (placePlayhead). -->
+              <div id="chartWrap" class="chart-wrap">
+                <div id="chart"></div>
+                <!-- the legend with each row's art (Plotly's can't hold images): renderChartLegend -->
+                <div id="chartLegend" class="chart-legend" hidden></div>
+                <div id="playLine" class="play-line" hidden></div>
+                <div id="playLabel" class="play-label" hidden></div>
+              </div>
+            </section>
+          </section>
+        </main>
+      </div>
     </div>
   </body>
 </html>

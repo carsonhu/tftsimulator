@@ -31,7 +31,7 @@ from simulator import Simulator
 
 # The table's DPS columns (owner, 2026-11-18): the average DPS over fights ending anywhere in each window (s), not at
 # one instant, so a cast landing just after a column's time no longer swings it. Most fights end between 20 and 30 s;
-# 10-20 s shows ramp-up. The last window is the headline: rows are sorted by it and the Extra DPS ratio is read there.
+# 10-20 s shows ramp-up. The last window is the headline: rows are sorted by it and the DPS ÷ NoItem ratio is read there.
 DPS_WINDOWS = [(10, 20), (20, 30)]
 HEADLINE = "20-30"
 
@@ -121,9 +121,13 @@ def get_catalog():
         levels = [1, 2, 3]
         if getattr(cls, "canFourStar", False):
             levels.append(4)
-        # label: what the page shows (a hero augment unit is "Olaf (Axe Crescendo)"); name: the class
+        # label: what the page shows (a hero augment unit is "Olaf (Hero)"); name: the class. A champion with forms
+        # (Seraphine) is listed once in the menu: each form names the class it is a form of (variantOf, a parent class
+        # in champ_list) and its mode, which the page offers as a switch once she's chosen (owner, 2026-11-19).
+        parent = next((b.__name__ for b in cls.__mro__[1:] if b.__name__ in set19champs.champ_list), None)
         champions.append({"name": name, "label": getattr(cls, "display_name", name), "levels": levels,
-                          "area": bool(getattr(cls, "AREA", False)), "cost": _cost(cls, build)})
+                          "area": bool(getattr(cls, "AREA", False)), "cost": _cost(cls, build),
+                          "variantOf": parent, "mode": getattr(cls, "MODE", None)})
     # the menu's order (owner, 2026-11-18): by cost, then name; the page opens on the first by name, as before
     default_champion = champions[0]["name"] if champions else None
     champions.sort(key=lambda c: (c["cost"], c["label"].lower()))
@@ -131,10 +135,17 @@ def get_catalog():
     def item_group(class_names):
         # item_display_map returns {display: cls} in the order given, and that
         # order is exactly what the sidebar shows -- see all_items below.
+        # kind: the picker's section (the table's slice names, None for NoItem).
         return [
-            {"cls": cls, "name": disp, "trait": emblem_traits.get(cls)}
+            {"cls": cls, "name": disp, "trait": emblem_traits.get(cls), "kind": item_kinds.get(cls)}
             for disp, cls in item_display_map(class_names).items()
         ]
+
+    item_kinds = {}
+    for kind, class_names in (("Craftable", set19items.offensive_craftables), ("Artifact", set19items.artifacts),
+                              ("Radiant", set19items.radiants), ("Emblem", set19items.emblems)):
+        for cls in class_names:
+            item_kinds.setdefault(cls, kind)
 
     # An emblem's trait, so picking one can put that trait in the buff bar.
     # None for every other item. Only traits the buff bar can show are kept.
@@ -176,6 +187,9 @@ def get_catalog():
                 # 0 means "no extra parameter"; otherwise
                 # {"Title", "Min", "Max", "Default"} straight from the class.
                 "extra": extra if extra else None,
+                # the picker's section: Trait, Augment, or None (NoBuff)
+                "kind": "Trait" if cls_name in set19buffs.class_buffs
+                else "Augment" if cls_name in set19buffs.augments else None,
             }
         )
 
@@ -443,7 +457,7 @@ def trait_sweep_buffs(buff_specs):
 def _slice_inputs(slice_name, cfg):
     """(item objects, buff objects) for one radio option.
 
-    Every slice carries NoItem because the "Extra DPS" columns are ratios
+    Every slice carries NoItem because the "DPS ÷ NoItem" columns are ratios
     against that row.
     """
     no_item = [set19items.NoItem()]
@@ -475,6 +489,11 @@ def _row_label(extra):
     return label
 
 
+def _row_params(extra):
+    p = getattr(extra, "params", None)
+    return p if isinstance(p, (int, float)) and not isinstance(p, bool) else None
+
+
 def _table_entries(sim_list):
     """One row per trial: DPS over each window (DPS_WINDOWS) and the ratio against the NoItem row (each row's own
     numbers: rows can share a name, e.g. a trait at several levels)."""
@@ -489,6 +508,9 @@ def _table_entries(sim_list):
             # Which breakpoint a trait row is, so the page can colour its icon
             # by tier. Items are not levelled and report None.
             "extraLevel": getattr(sim["Extra"], "level", None),
+            # a buff row's parameter (Hitmaker's Is Big Shot, Heartsteel's ticked units), so the page can add the
+            # row to the setup exactly as it ran; None for items
+            "extraParams": _row_params(sim["Extra"]),
         }
         entry["dps"] = {_window_key(w): _dps_window(sim["Results"], *w) for w in DPS_WINDOWS}
         entries.append(entry)
@@ -634,6 +656,8 @@ def get_champ_info(cfg):
         "aspd": _panel(champ.aspd, "aspd"),
         "crit": _panel(champ.crit),
         "critDmg": _panel(champ.critDmg),
+        # crit chance over 1 is crit damage instead (champion.critDamage): the panel shows the cap and the sum
+        "excessCritRatio": champ.excess_crit_ratio,
         "manaPerAttack": _panel(champ.manaPerAttack),
         "role": champ.role.name if champ.role else None,  # the game's display name ('Magic Caster')
         "build": champ.build.version if getattr(champ, "build", None) else None,

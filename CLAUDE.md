@@ -105,7 +105,7 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   run in. `items/` also holds the item worksheets (`items/<Name>.md`).
 
 - The table's DPS columns (`sim_entry.DPS_WINDOWS`, owner 2026-11-18): the average DPS over fights ending anywhere
-  in 10-20 s and 20-30 s, every hit counted (`_dps_window`); rows sort by the 20-30 s ratio (Extra DPS). Not DPS at
+  in 10-20 s and 20-30 s, every hit counted (`_dps_window`); rows sort by the 20-30 s ratio (the "DPS ÷ NoItem" column; it was "Extra DPS" until 2026-11-19: owner, misleading beside the DPS columns). Not DPS at
   one instant: a cast just after it would swing the number.
 - `simulator.Simulator.simulate` runs `prePreCombat -> preCombat -> postPreCombat`, then calls
   `champion.update()` once per 30 Hz tick. Opponents are `set19champs.TrainingDummy`: they never attack or die.
@@ -148,6 +148,13 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   `self.nearby(target, hexes)` for a splash (the script's HexRange), `self.ricochet(previous, hit)` for a bounce, `self.line(target, length, width)` for a
   line (Bard's wave).
   `opponents[0]` is the target.
+- The page (owner, 2026-11-19): a top bar (champion portrait + stars, enemy HP/armor/MR, build, stage, tactician,
+  targets, takedowns), then three columns that fill the window and scroll on their own: setup (item slots, buff
+  rows, stats grid, team traits), the table, and a pane with the fight viewer on top and the damage chart under it, both always visible (owner: no tabs); the chart heading pictures the run's setup (`renderPlotSummary`: portrait + stars, items, active traits with levels, augments, bonuses), drawn from `state.currentCfg`; the viewer's playhead is a line + per-row readout on the chart (`placePlayhead`, an HTML overlay; hovering the plot moves the same line and card to the pointer's time, Plotly's hover is off). The viewer heading has the same pictures plus a dropdown of the plotted rows (`renderVizPicker`): plotting a row shows its fight, un-plotting the one on view falls back to the last plotted row. The table's "Show: DPS | Ratio vs NoItem" switch (`#valueMode`; `state.displayDps` true = ratios) replaced the "Display DPS" checkbox, whose name said the opposite of what it did. A champion with forms (Seraphine: `MODE` on each class; the catalog's `variantOf` / `mode`) is one menu entry, its form a switch beside the stars that keeps items and buffs (`renderChampModes`); hero augment units read "Olaf (Hero)". Trait levels show 0, never "off" or "—" (owner). The ratio is "DPS ÷ Base" / "Ratio vs Base" (owner: Base, not NoItem, in names). The table takes 44% of the width at a larger font. Bonus tags in the headings use the icons/stats glyphs (`BONUS_GLYPHS`). Each table row has a "+" (on hover) that adds its extra to the setup (`rowAddPlan`: an item to the first empty slot; a trait or augment in the buff bar set to the row's level and parameter, the row's `extraParams` from sim_entry; a team trait in Team Traits; else a new buff row). The chart's legend is HTML (`renderChartLegend`: colour, row art, name; a click shows that fight), Plotly's is off. The Stats panel and the viewer card show AP, crit, crit damage and amp as percentages and say "Mana regen" (owner). The Stats panel shows crit capped at 1 and crit damage including the excess (`excessCritRatio`, as `champion.critDamage` computes it). With no row plotted the chart draws NoItem alone (`plottedSlots`); the first row plotted replaces it, and NoItem clicked on purpose stays with the others. Artifacts and radiants wear the client's item frames (`icons/frames`, `tools/icons.py item_frames`, CSS `.item-framed`). Below 1320 px the pane
+  drops under the table; below 900 px setup is a drawer. Champions, items and buffs are chosen in `Picker` icon grids
+  (by cost / item kind / trait-augment, search, arrow keys); each choice is still a hidden `<select>` (`hookValue`,
+  `pickInto`), which the browser checks drive directly. The catalog's `kind` on items and buffs names the grid's
+  sections. The Index Log and pie are gone: the viewer's log and its card's damage split replace them.
 - The fight viewer (the panel beside the table: `viz.js`, `fight_trace.py`, `sim_entry.run_trace`) replays one row's
   fight. A `fight_trace.Tracer` on `champion.tracer` records every hit, cast, attack launch and a stat snapshot per
   tick; table runs have none, and every engine hook is one `is not None` check (`test_fight_trace.py`: a recorded

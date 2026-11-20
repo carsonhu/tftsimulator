@@ -1,5 +1,8 @@
-/* style.css — dark theme matching the stlite build's look
-   (#0e1117 ground, #fafafa text, #ff4b4b accent). */
+/* style.css — dark theme (#0e1117 ground, #fafafa text, #ff4b4b accent).
+   Layout: a bar across the top (champion, enemy, build), then three columns
+   that fill the window and scroll on their own: setup, the table, and a
+   pane with the fight viewer over the damage chart. Narrower windows stack the pane
+   under the table; phones turn the setup column into a drawer. */
 
 * {
   box-sizing: border-box;
@@ -15,7 +18,7 @@
 html,
 body {
   margin: 0;
-  min-height: 100%;
+  height: 100%;
   background: #0e1117;
   color: #fafafa;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -36,10 +39,6 @@ body {
   padding: 24px;
   background: #0e1117;
   z-index: 10;
-}
-
-#boot-status[hidden] {
-  display: none;
 }
 
 #boot-status .spinner {
@@ -77,154 +76,12 @@ body {
   }
 }
 
-/* ---------------- layout ---------------- */
-
-#layout {
-  display: flex;
-  align-items: flex-start;
-  min-height: 100vh;
-}
-
-#sidebar {
-  width: 340px;
-  flex: 0 0 340px;
-  padding: 16px;
-  background: #262730;
-  /* Pinned to the viewport and scrolling internally, so the controls stay
-     reachable however far down the results the page is scrolled. */
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-/* Slim scrollbar so the pinned sidebar doesn't lose width to it. */
-#sidebar {
-  scrollbar-width: thin;
-  scrollbar-color: #4a4d5a transparent;
-}
-
-#sidebar::-webkit-scrollbar {
-  width: 8px;
-}
-
-#sidebar::-webkit-scrollbar-thumb {
-  background: #4a4d5a;
-  border-radius: 4px;
-}
-
-#sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-#content {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 20px 28px 40px;
-}
-
-/* Hidden on desktop; the drawer machinery only exists on narrow screens. */
-#sidebarToggle,
-#sidebarBackdrop {
-  display: none;
-}
-
-@media (max-width: 900px) {
-  /* Streamlit-style drawer: the content gets the full width and the sidebar
-     slides in from the left over it, rather than stacking as a page-long
-     block of controls the results sit underneath. */
-  #sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    height: 100dvh; /* keeps the bottom reachable under mobile browser bars */
-    width: min(85vw, 340px);
-    z-index: 30;
-    transform: translateX(-105%); /* 105: keep the shadow off-screen too */
-    transition: transform 0.2s ease;
-    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.5);
-  }
-  body.sidebar-open #sidebar {
-    transform: translateX(0);
-  }
-
-  #sidebarToggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 40; /* above the drawer, so it stays tappable to close it */
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    font-size: 1.2em;
-    color: #fafafa;
-    background: #262730;
-    border: 1px solid #4a4d5a;
-    border-radius: 8px;
-  }
-  body.sidebar-open #sidebarBackdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 20;
-    background: rgba(0, 0, 0, 0.55);
-  }
-
-  /* Clear the fixed toggle button so it doesn't sit on the header. */
-  #content {
-    padding: 60px 14px 40px;
-  }
-}
-
-/* ---------------- sidebar controls ---------------- */
-
-#sidebar h2 {
-  font-size: 1.05em;
-  margin: 0 0 8px;
-}
-
-#sidebar section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-#sidebar label,
-.field-label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.85em;
-  color: #c7cad6;
-}
-
-.row {
-  display: flex;
-  gap: 8px;
-}
-
-.row .grow {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-.grid3 {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
+/* ---------------- shared controls ---------------- */
 
 select,
-input[type="number"] {
-  width: 100%;
-  padding: 6px 8px;
+input[type="number"],
+input[type="search"] {
+  padding: 4px 6px;
   background: #0e1117;
   color: #fafafa;
   border: 1px solid #31333f;
@@ -237,107 +94,35 @@ input:focus {
   outline: 1px solid #ff4b4b;
 }
 
-/* ---------------- searchable select (see makeSearchable) ---------------- */
-
-.combo {
-  position: relative;
-  width: 100%;
-}
-
-/* The real <select> stays in the DOM so sel.value and sel.onchange keep
-   working; it is only the widget that is replaced. */
-.combo select {
-  display: none;
-}
-
-.combo-input {
-  width: 100%;
-  padding: 6px 8px;
-  background: #0e1117;
-  color: #fafafa;
-  border: 1px solid #31333f;
-  border-radius: 6px;
-  font: inherit;
-  cursor: pointer;
-  /* Long item names get an ellipsis rather than widening the sidebar. */
-  text-overflow: ellipsis;
-}
-
-.combo-list {
-  position: absolute;
-  top: calc(100% + 2px);
-  left: 0;
-  right: 0;
-  /* Above the controls below it, and above the table's sticky header. */
-  z-index: 40;
-  max-height: 260px;
-  overflow-y: auto;
-  background: #14161c;
-  border: 1px solid #3d4152;
-  border-radius: 6px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
-}
-
-.combo-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
-  cursor: pointer;
-  white-space: nowrap;
-  color: #fafafa;
-}
-
-/* One highlight, driven by the keyboard and by hover alike, so arrowing and
-   pointing cannot disagree about which row is about to be picked. */
-.combo-option.active {
-  background: #ff4b4b;
-  color: #fff;
-}
-
-.combo-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 3px;
-  flex: none;
-}
-
-/* Holds the column open for entries with no art, so the names still line up. */
-.combo-icon-blank {
-  visibility: hidden;
-}
-
-/* Dropped upward when the scrolling sidebar has no room below (see place). */
-.combo-list.above {
-  top: auto;
-  bottom: calc(100% + 2px);
-}
-
-/* A group's header in a grouped list (the champion menu's costs): not an option. */
-.combo-group {
-  padding: 6px 8px 3px;
-  color: #9aa0ae;
-  font-size: 0.8em;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  cursor: default;
-}
-
-.combo-empty {
-  padding: 6px 8px;
-  color: #9aa0ae;
-  font-style: italic;
+select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 input[type="range"] {
   accent-color: #ff4b4b;
-  width: 100%;
+}
+
+input[type="checkbox"] {
+  accent-color: #ff4b4b;
+}
+
+/* Spinners crowd the small number boxes and shift their text. */
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
 }
 
 .slider-value {
   color: #ff4b4b;
   font-weight: 600;
+  min-width: 1.2em;
 }
 
 button {
@@ -348,7 +133,6 @@ button {
   border-radius: 6px;
   font: inherit;
   cursor: pointer;
-  align-self: flex-start;
 }
 
 button:hover {
@@ -356,106 +140,634 @@ button:hover {
   color: #ff4b4b;
 }
 
-details {
-  background: #1a1c23;
-  border: 1px solid #31333f;
-  border-radius: 8px;
-  padding: 8px 12px;
+button:focus-visible {
+  outline: 2px solid #ff4b4b;
+  outline-offset: 1px;
 }
 
-details summary {
-  cursor: pointer;
-  font-size: 0.9em;
-  color: #c7cad6;
+/* A text action inside a panel head (Clear, + Add, Empty slot). */
+.link-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #7fb2ff;
+  font-size: 0.82em;
 }
 
-details[open] summary {
-  margin-bottom: 8px;
-}
-
-details > label {
-  margin-bottom: 8px;
-}
-
-.buff-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 6px;
-  margin-bottom: 6px;
-}
-
-/* No buff in the bar takes a parameter: drop the third column entirely so
-   Name and Level use the full sidebar width. */
-#buffRows.no-param .buff-row {
-  grid-template-columns: 2fr 1fr;
-}
-
-#buffRows.no-param .buff-row > label:nth-child(3) {
-  display: none;
+.link-btn:hover {
+  color: #ff4b4b;
 }
 
 .col-label {
-  font-size: 0.82em;
+  font-size: 0.8em;
   color: #9aa0b0;
 }
 
-.team-traits {
-  display: grid;
-  /* One fixed cell width for every trait, packed left: a trait with a level
-     picker must not claim more room than a trait with a tick box. */
-  grid-template-columns: repeat(auto-fill, 190px);
-  justify-content: start;
-  /* dense: a single may drop back into a cell a two-wide trait left empty
-     at the end of its row, so no column is ever half-used. */
-  grid-auto-flow: row dense;
-  /* Fills the column's remaining height, with the traits themselves parked
-     at the top rather than spread down it. */
-  flex: 1 1 auto;
-  align-content: start;
-  gap: 6px 18px;
-  background: #1a1c23;
-  border: 1px solid #31333f;
-  border-radius: 8px;
-  padding: 10px 14px;
+.hint {
+  font-size: 0.75em;
+  color: #7a7f8f;
 }
 
-/* Every trait is one line: the label, then its control. Left as a column,
-   the level picker stacked its caption above a full-width select and towered
-   over the tick boxes beside it. */
-/* This panel is in <main>, not the sidebar, so it misses the `#sidebar label`
-   rule that makes a label a flex box -- without display here, every line below
-   was inline text and the picker sat hard against its own caption. */
-/* Badge, name, then the control immediately after it -- a control belongs to
-   the trait it names, so it sits against the name rather than out at the
-   cell's edge where the next trait starts. The trailing 1fr holds nothing and
-   exists only to soak up the cell's spare width; without it the auto tracks
-   would stretch and push the control away again. */
+/* Slim scrollbars, so the columns don't lose width to them. */
+#sidebar,
+.results-wrap,
+.pane-body,
+.picker-body,
+.viz-log {
+  scrollbar-width: thin;
+  scrollbar-color: #4a4d5a transparent;
+}
+
+/* ---------------- layout ---------------- */
+
+#layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#workspace {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
+#sidebar {
+  flex: 0 0 330px;
+  width: 330px;
+  overflow-y: auto;
+  padding: 10px;
+  background: #14161d;
+  border-right: 1px solid #262833;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#content {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  gap: 14px;
+  padding: 10px 14px 12px;
+}
+
+/* Hidden on desktop; the drawer machinery only exists on narrow screens. */
+#sidebarToggle,
+#sidebarBackdrop {
+  display: none;
+}
+
+/* ---------------- top bar ---------------- */
+
+#topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  padding: 8px 16px;
+  background: #1a1c23;
+  border-bottom: 1px solid #2a2d38;
+}
+
+.champ-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.champ-pick {
+  --cost: #6c7286;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 12px 3px 3px;
+  border-radius: 8px;
+  background: #0e1117;
+}
+
+.champ-pick:hover {
+  color: #fafafa;
+  border-color: var(--cost);
+}
+
+.champ-portrait {
+  width: 42px;
+  height: 42px;
+  border: 2px solid var(--cost);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #262730;
+  flex: none;
+}
+
+.champ-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.champ-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+#headerChamp {
+  font-weight: 700;
+  font-size: 1.15em;
+}
+
+.caret {
+  color: #7a7f8f;
+  font-size: 0.8em;
+}
+
+/* Star level: one segmented control, the chosen level lit in gold. */
+.stars {
+  display: inline-flex;
+  border: 1px solid #31333f;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.star-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 0;
+  background: #0e1117;
+  color: #5d6273;
+  font-size: 0.78em;
+  letter-spacing: -1px;
+}
+
+.star-btn + .star-btn {
+  border-left: 1px solid #31333f;
+}
+
+.star-btn:hover {
+  color: #e8c26a;
+}
+
+.star-btn.active {
+  background: #2c2617;
+  color: #f0c75e;
+}
+
+/* A two-way switch (Show: DPS | Ratio vs NoItem), styled like the stars. */
+.seg-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85em;
+}
+
+#champModes {
+  font-size: 0.8em;
+}
+
+.seg-label {
+  color: #8a90a2;
+}
+
+.seg {
+  display: inline-flex;
+  border: 1px solid #31333f;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.seg button {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 0;
+  background: #0e1117;
+  color: #8a90a2;
+  font-size: 1em;
+}
+
+.seg button + button {
+  border-left: 1px solid #31333f;
+}
+
+.seg button:hover {
+  color: #fafafa;
+}
+
+.seg button.active {
+  background: #3a1d22;
+  color: #ff8a8a;
+  font-weight: 600;
+}
+
+/* The enemy, edited in place: "vs 1800 HP 100 Armor 100 MR". */
+.enemy {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.enemy .vs {
+  color: #7a7f8f;
+}
+
+.enemy-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: #c7cad6;
+  font-size: 0.85em;
+}
+
+#topbar input.inline-num {
+  font: inherit;
+  font-size: 1.35em;
+  font-weight: 700;
+  color: #ff4b4b;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed #4a4d5a;
+  border-radius: 0;
+  padding: 0 2px;
+  text-align: right;
+  width: 5ch;
+}
+
+#topbar input.inline-num:hover {
+  border-bottom-color: #ff4b4b;
+}
+
+#topbar input.inline-num:focus {
+  outline: none;
+  border-bottom: 1px solid #ff4b4b;
+  background: #0e1117;
+}
+
+.top-fields {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.top-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8em;
+  color: #9aa0b0;
+  white-space: nowrap;
+}
+
+.top-field select {
+  font-size: 1.05em;
+  max-width: 230px;
+}
+
+.top-field input[type="range"] {
+  width: 80px;
+}
+
+.small-num {
+  width: 4.5em;
+  text-align: right;
+}
+
+.info-dot {
+  margin-left: auto;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 0.8em;
+  font-weight: 700;
+  font-style: italic;
+  color: #9aa0b0;
+  cursor: help;
+}
+
+/* ---------------- setup column ---------------- */
+
+.panel {
+  background: #1a1c23;
+  border: 1px solid #262833;
+  border-radius: 8px;
+  padding: 8px 10px 10px;
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.panel-head h2 {
+  margin: 0;
+  font-size: 0.78em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #c7cad6;
+}
+
+/* Item slots: three tiles side by side. */
+.item-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.item-slot {
+  position: relative;
+  min-width: 0;
+}
+
+.slot-tile {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px 5px;
+  border-radius: 8px;
+  color: #c7cad6;
+}
+
+.slot-tile:hover {
+  color: #fafafa;
+}
+
+.slot-art {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: #262730;
+}
+
+.slot-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slot-art.no-icon {
+  font-weight: 700;
+  color: #9aa0b0;
+}
+
+.slot-plus {
+  background: none;
+  border: 1px dashed #4a4d5a;
+  color: #6c7286;
+  font-size: 1.4em;
+}
+
+.slot-name {
+  max-width: 100%;
+  font-size: 0.74em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slot-tile.empty .slot-name {
+  color: #6c7286;
+}
+
+.slot-clear {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 13px;
+  line-height: 1;
+  background: #262730;
+  color: #c7cad6;
+  opacity: 0;
+}
+
+.item-slot:hover .slot-clear,
+.slot-clear:focus-visible {
+  opacity: 1;
+}
+
+/* Buff rows: tile, level, remove; a parameter or tick boxes underneath. */
+.buff-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 4px 6px;
+  padding: 3px 0;
+  border-bottom: 1px solid #22242e;
+}
+
+.buff-row:last-child {
+  border-bottom: none;
+}
+
+.buff-tile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 3px 6px 3px 3px;
+  border-color: transparent;
+  background: none;
+  text-align: left;
+  color: #fafafa;
+}
+
+.buff-tile:hover {
+  border-color: #31333f;
+  color: #fafafa;
+}
+
+.buff-art {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 4px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: #262730;
+  font-size: 0.7em;
+}
+
+.buff-art img {
+  width: 100%;
+  height: 100%;
+}
+
+.buff-art.is-badge {
+  background: none;
+  overflow: visible;
+}
+
+.buff-art .trait-badge {
+  margin: 0;
+}
+
+.buff-name {
+  min-width: 0;
+  font-size: 0.9em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.buff-level {
+  padding: 2px 4px;
+  font-size: 0.85em;
+}
+
+.row-remove {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #6c7286;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.buff-param {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 37px;
+}
+
+.buff-param input[type="number"] {
+  width: 5em;
+  padding: 2px 6px;
+}
+
+.buff-param select {
+  padding: 2px 4px;
+}
+
+/* A tick-box parameter (Heartsteel's fielded members). */
+.param-flags {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+  padding-left: 37px;
+  font-size: 0.85em;
+}
+
+.param-flags label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.param-flags input[type="checkbox"] {
+  margin: 0;
+}
+
+.empty-note {
+  margin: 2px 0;
+  color: #7a7f8f;
+  font-size: 0.85em;
+}
+
+/* Stats: two cells to a row; name, value, bonus box. */
+.stats-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 12px;
+  font-size: 0.84em;
+}
+
+.stat-cell {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px;
+  min-height: 25px;
+  cursor: help;
+}
+
+.stat-cell.no-bonus {
+  grid-template-columns: auto 1fr;
+}
+
+.stat-label {
+  color: #9aa0b0;
+  white-space: nowrap;
+}
+
+.stat-val {
+  color: #4da3ff;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.stats-panel input[type="number"] {
+  width: 4.2em;
+  padding: 1px 4px;
+  font-size: 0.95em;
+  text-align: right;
+  border-radius: 4px;
+}
+
+.stats-panel input[type="number"]:hover {
+  border-color: #4a4d5a;
+}
+
+.notes {
+  margin: 8px 0 0;
+  color: #a3a8b8;
+  font-size: 0.8em;
+  line-height: 1.4;
+}
+
+/* Team traits: one trait to a line. */
+.team-traits {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+/* Badge, name, then its control right after the name; the trailing 1fr only
+   soaks up spare width. */
 .team-trait {
   display: grid;
   grid-template-columns: 22px auto auto 1fr;
   align-items: center;
   gap: 8px;
+  font-size: 0.9em;
   cursor: pointer;
 }
 
-/* A trait that asks a named choice (Illbeats' mix) or tick boxes (Heartsteel)
-   as well as how big it is needs one more column. It spans two cells rather
-   than squeezing two controls and a name into one -- at 190px the name would
-   have nowhere to go. */
 .team-trait.with-option {
-  grid-template-columns: 22px auto auto auto auto 1fr;
-  grid-column: span 2;
-  /* Laid out before every single-cell trait. Placed in catalog order, a
-     two-wide cell lands wherever the cursor happens to be, and the singles
-     under it then line up with only one of its halves. Packed first, the wide cells always
-     start at column 1 in pairs and the singles fill whole cells after them,
-     so every badge sits on a column edge. */
-  order: -1;
+  grid-template-columns: 22px auto auto auto 1fr;
+}
+
+.team-trait .trait-badge {
+  margin: 0;
 }
 
 .team-trait select {
-  /* The generic sidebar rule stretches selects to 100%; these are sized by
-     their content instead. */
   width: auto;
   min-width: 3.4em;
   padding: 1px 2px;
@@ -463,79 +775,60 @@ details > label {
 }
 
 .team-trait input[type="checkbox"] {
-  accent-color: #ff4b4b;
   justify-self: start;
   margin: 0;
 }
 
-.section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.section-head h2 {
-  margin: 0;
-}
-
-.hint {
-  margin: 0 0 4px;
-  font-size: 0.8em;
-  color: #9aa0b0;
-}
-
-select:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.buff-row input[hidden] {
-  display: none;
-}
-
-/* A tick-box parameter (Heartsteel's fielded members): its own line under
-   the row's Name / Level / Param columns. */
-.param-flags {
+.team-flags {
   grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px 10px;
-}
-
-.param-flags[hidden] {
-  display: none;
-}
-
-/* #sidebar label makes every label a column; these are one line each. */
-#sidebar .param-flags label {
   display: inline-flex;
-  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  padding-left: 30px;
+  font-size: 0.85em;
+}
+
+.team-flags label {
+  display: inline-flex;
   align-items: center;
   gap: 3px;
-  margin: 0;
-  font-size: 0.9em;
 }
 
-.param-flags input[type="checkbox"] {
-  accent-color: #ff4b4b;
-  margin: 0;
+.caption {
+  margin: auto 2px 0;
+  color: #5d6273;
+  font-size: 0.72em;
 }
 
-/* ---------------- pills (radio groups) ---------------- */
+/* ---------------- results column ---------------- */
+
+/* The table takes a fixed share of the width (more than its text needs at
+   small sizes), the viewer and chart the rest. */
+.results-col {
+  flex: 0 1 44%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.results-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
 
 .pills {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin: 10px 0;
+  gap: 5px;
 }
 
 .pill {
   border-radius: 999px;
-  padding: 5px 14px;
-  align-self: auto;
+  padding: 3px 11px;
+  font-size: 0.85em;
 }
 
 .pill.active {
@@ -548,240 +841,65 @@ select:disabled {
   color: #fff;
 }
 
-/* ---------------- content ---------------- */
-
-h1 {
-  font-size: 1.7em;
-  margin: 0 0 10px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 8px;
-}
-
-/* Enemy stats, edited in place in the heading. The id-scoped selector is
-   deliberate: the generic input[type="number"] rule above would otherwise
-   win on specificity and give these the full-width sidebar treatment. */
-#header input.inline-num {
-  font: inherit;
-  color: #ff4b4b;
-  background: transparent;
-  border: none;
-  border-bottom: 1px dashed #4a4d5a;
-  border-radius: 0;
-  padding: 0 2px;
-  text-align: right;
-  width: 5ch;
-}
-
-#header input.inline-num:hover {
-  border-bottom-color: #ff4b4b;
-}
-
-#header input.inline-num:focus {
-  outline: none;
-  border-bottom: 1px solid #ff4b4b;
-  background: #1a1c23;
-}
-
-/* Spinners would crowd the text and shift it as the value grows. */
-#header input.inline-num::-webkit-outer-spin-button,
-#header input.inline-num::-webkit-inner-spin-button {
-  appearance: none;
-  margin: 0;
-}
-
-#header input.inline-num {
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-h3 {
-  margin: 18px 0 8px;
-}
-
-.disclaimer {
-  color: #a3a8b8;
-  font-size: 0.9em;
-  max-width: 60em;
-}
-
-.stats-row {
-  display: flex;
-  /* stretch, not flex-start: the Team Traits column is meant to run the full
-     height of the left column (stats + Display DPS + slice pills), so it
-     covers the top-right corner down to the table. */
-  align-items: stretch;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.stats-block h3,
-.team-block h3 {
-  margin: 14px 0 6px;
-}
-
-.stats-block {
-  flex: 0 1 auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.team-block {
-  /* Takes whatever is left horizontally, and its inner box takes whatever is
-     left vertically. */
-  flex: 1 1 260px;
-  min-width: 240px;
-  display: flex;
-  flex-direction: column;
-}
-
-.stats-panel {
-  display: grid;
-  /* Two roomy columns, each filled top to bottom by app.js. */
-  grid-template-columns: repeat(2, minmax(290px, 1fr));
-  gap: 2px 32px;
-  background: #1a1c23;
-  border: 1px solid #31333f;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 0.84em;
-  line-height: 1.6;
-  width: fit-content;
-  max-width: 100%;
-}
-
-.stats-col {
-  min-width: 0;
-}
-
-/* Each stat line, with its additive input pushed to the column's right edge
-   so the inputs form a single aligned run. */
-.stat-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 1.9em;
-}
-
-.stat-bonus {
-  color: #7a7f8f;
-  flex: 0 0 auto;
-}
-
-.stats-panel input[type="number"] {
-  width: 4.5ch;
-  padding: 1px 4px;
-  margin-left: 2px;
-  font: inherit;
-  color: #fafafa;
-  background: #0e1117;
-  border: 1px solid #31333f;
-  border-radius: 4px;
-  text-align: right;
-  appearance: textfield;
-  -moz-appearance: textfield;
-}
-
-.stats-panel input[type="number"]::-webkit-outer-spin-button,
-.stats-panel input[type="number"]::-webkit-inner-spin-button {
-  appearance: none;
-  margin: 0;
-}
-
-.stats-panel input[type="number"]:hover {
-  border-color: #4a4d5a;
-}
-
-.stats-panel input[type="number"]:focus {
-  outline: none;
-  border-color: #ff4b4b;
-}
-
-.c-blue {
-  color: #4da3ff;
-  font-weight: 600;
-}
-
-.c-green {
-  color: #21c354;
-}
-
-.c-red {
-  color: #ff4b4b;
-}
-
-.notes {
-  color: #c7cad6;
-  font-size: 0.9em;
-}
-
 .option-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px 20px;
-  margin: 14px 0 4px;
+  gap: 4px 16px;
+  font-size: 0.82em;
+  color: #c7cad6;
 }
 
 .checkbox-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 14px 0 4px;
+  gap: 6px;
   cursor: pointer;
-}
-
-.option-row .checkbox-row {
-  margin: 0;
 }
 
 /* Legend for the table's sequential fill. */
 .scale-legend {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8em;
-  color: #9aa0b0;
-}
-
-.scale-legend .ramp {
-  width: 90px;
-  height: 10px;
-  border-radius: 2px;
-  border: 1px solid #31333f;
-  /* The same surface->step-500 ramp the cells paint with. */
-  background: linear-gradient(
-    90deg,
-    rgba(37, 106, 191, 0) 0%,
-    rgba(37, 106, 191, 1) 100%
-  );
-}
-
-.scale-legend .scale-note {
+  gap: 6px;
+  font-size: 0.9em;
   color: #7a7f8f;
 }
 
-.checkbox-row input {
-  accent-color: #ff4b4b;
+.scale-legend .ramp {
+  width: 70px;
+  height: 9px;
+  border-radius: 2px;
+  border: 1px solid #31333f;
+  /* The same surface->step-500 ramp the cells paint with. */
+  background: linear-gradient(90deg, rgba(37, 106, 191, 0) 0%, rgba(37, 106, 191, 1) 100%);
 }
 
 .run-status {
   color: #ffd166;
-  margin: 6px 0;
-  font-size: 0.9em;
+  margin: 0 0 6px;
+  font-size: 0.85em;
+}
+
+.table-hint {
+  margin: 6px 2px 0;
+  color: #5d6273;
+  font-size: 0.75em;
 }
 
 /* ---------------- tables ---------------- */
 
 .table-wrap {
-  overflow-x: auto;
-  overflow-y: auto;
-  max-height: 380px;
+  overflow: auto;
   border: 1px solid #31333f;
   border-radius: 8px;
-  margin: 10px 0;
+}
+
+/* The table fills the column's height and scrolls inside it; the border hugs
+   the table's width rather than framing empty space. */
+.results-wrap {
+  flex: 0 1 auto;
+  min-height: 0;
   width: 100%;
 }
 
@@ -790,93 +908,131 @@ table {
   white-space: nowrap;
 }
 
-/* Sized to its content, not to the page. Stretching to 100% put ~300px of
-   pure slack into seven columns that had nothing to put there, which pushed
-   "DPS at 5" and "DPS at 25" a third of a metre apart on a wide monitor --
-   the two numbers a reader most wants to compare. Shrink-to-fit closes that
-   gap without dropping a single character. The larger type stays: the numbers
-   are the reason this page exists. Scoped to the results table -- the index
-   log lives in a narrow column beside the chart. */
 #resultsTable {
-  width: auto;
-  font-size: 1.05em;
-}
-
-/* The border hugs the table rather than framing the empty space beside it.
-   max-width keeps the scroll behaviour on a narrow window, where the table is
-   wider than the column and .table-wrap's overflow-x takes over. */
-.results-wrap {
-  width: fit-content;
-  max-width: 100%;
-}
-
-#logTable {
   width: 100%;
-  font-size: 0.86em;
+  font-size: 1.06em;
 }
 
-#logTable td,
-#logTable th {
-  padding: 3px 8px;
+/* trait badges in the table: as small as the item art */
+#resultsTable .trait-badge {
+  width: 20px;
+  height: 22px;
+  margin-right: 8px;
+}
+
+#resultsTable .trait-glyph {
+  width: 12px;
+  height: 12px;
 }
 
 thead {
   position: sticky;
   top: 0;
+  z-index: 1;
   background: #262730;
 }
 
 td,
 th {
-  padding: 4px 14px;
+  padding: 3px 12px;
   border-bottom: 1px solid #22242e;
   text-align: right;
 }
 
-thead td,
 thead th {
   font-weight: 600;
+  font-size: 0.9em;
   color: #c7cad6;
-  text-align: right;
   white-space: nowrap;
 }
 
-/* Tighter gutters than the 14px default, horizontal only -- the 4px above and
-   below is what sets the row height, and that stays put. Each column is a
-   right-aligned number against a shaded cell, so the fill already separates
-   them and the extra gutter was only buying width. */
-#resultsTable td,
-#resultsTable th {
-  padding-left: 9px;
-  padding-right: 9px;
-}
-
-/* Results table: label column on the left, the To Plot checkbox column on
-   the far right. */
 #resultsTable td:first-child,
 #resultsTable thead :first-child {
   text-align: left;
 }
 
-#resultsTable td:last-child,
-#resultsTable thead :last-child {
-  text-align: center;
-}
-
-/* Item and augment art beside the name, like the stats sites. Inline rather
-   than a flex cell so the table's own column sizing still applies. */
+/* Item and augment art beside the name. Inline rather than a flex cell so the
+   table's own column sizing still applies. */
 #resultsTable .row-icon {
-  width: 24px;
-  height: 24px;
+  display: inline-block;
+  width: 22px;
+  height: 22px;
   vertical-align: middle;
   margin-right: 8px;
   border-radius: 3px;
 }
 
+/* "+": add the row's item, augment or trait (at the row's level) to the
+   setup. Shown on the row under the pointer or with focus. */
+.row-add {
+  float: right;
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0 10px;
+  padding: 0;
+  border: 1px solid #4a4d5a;
+  border-radius: 5px;
+  background: #1d212c;
+  color: #c7cad6;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 18px;
+  visibility: hidden;
+}
+
+#resultsTable tbody tr:hover .row-add,
+#resultsTable tbody tr:focus-within .row-add,
+.row-add:focus-visible {
+  visibility: visible;
+}
+
+.row-add:hover:not(:disabled) {
+  border-color: #ff4b4b;
+  color: #fff;
+  background: #3a1d22;
+}
+
+.row-add:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Artifacts and radiants wear the client's own item frame
+   (/UI_Shared/Textures/T_Item_Frame_*, icons/frames) over their icon, as in
+   game: a square with a transparent middle and an ornament in one corner. */
+.item-framed {
+  position: relative;
+  border-radius: 0 !important;
+  border-color: transparent !important;
+  overflow: visible !important;
+}
+
+.item-framed img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+.item-framed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.item-framed[data-frame="Artifact"]::after {
+  background-image: url("icons/frames/Artifact.png");
+}
+
+.item-framed[data-frame="Radiant"]::after {
+  background-image: url("icons/frames/Radiant.png");
+}
+
 /* A trait is a hexagon coloured by its tier with a white glyph inside, the
-   way the game draws it. The glyph ships as one white-on-nothing PNG per
-   trait and is painted by a mask, so a tier change is a colour change rather
-   than another file. */
+   way the game draws it. The glyph is painted by a mask, so a tier change is a
+   colour change rather than another file. */
 .trait-badge {
   display: inline-flex;
   align-items: center;
@@ -908,7 +1064,6 @@ thead th {
   background: #f4f1ee;
 }
 
-/* Sortable headers. */
 th.sortable {
   cursor: pointer;
   user-select: none;
@@ -927,10 +1082,6 @@ th.sorted {
   font-size: 0.85em;
 }
 
-#logTable td:nth-child(3) {
-  text-align: left;
-}
-
 tbody tr:hover {
   background: #1a1c23;
 }
@@ -943,7 +1094,6 @@ tbody tr:hover td {
     inset 0 -1px 0 #6b7183;
 }
 
-/* Rows are the plot control now. */
 #resultsTable tbody tr {
   cursor: pointer;
 }
@@ -954,8 +1104,7 @@ tbody tr:hover td {
 }
 
 /* A plotted row wears its series colour as a bar beside the name, never as
-   the text colour -- the label stays in ink and the mark carries identity.
-   --series is set per row in app.js from the same value the line uses. */
+   the text colour. --series is set per row from the value the line uses. */
 #resultsTable tbody tr.plotted td:first-child {
   box-shadow: inset 4px 0 0 var(--series);
   font-weight: 600;
@@ -968,127 +1117,369 @@ tbody tr:hover td {
     inset 0 -1px 0 #6b7183;
 }
 
-td input[type="checkbox"] {
-  accent-color: #ff4b4b;
+/* the row the viewer is showing */
+#resultsTable tr.viewing td:first-child {
+  box-shadow: inset 0 0 0 1px #e8c26a;
 }
 
-/* ---------------- plot area ---------------- */
+#resultsTable tr.viewing.plotted td:first-child {
+  box-shadow:
+    inset 4px 0 0 var(--series),
+    inset 0 0 0 1px #e8c26a;
+}
 
-#plotHint {
-  color: #a3a8b8;
-  background: #1a1c23;
+/* ---------------- the pane: fight viewer / damage chart ---------------- */
+
+.pane {
+  flex: 1 1 520px;
+  min-width: 440px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   border: 1px solid #31333f;
   border-radius: 8px;
-  padding: 10px 14px;
-  max-width: 30em;
+  background: #11141b;
+  overflow: hidden;
 }
 
-#plotColumns {
+/* Both halves are always on screen: the viewer at its natural height on top,
+   the chart taking the rest. */
+.pane-title {
+  margin: 0;
+  color: #fafafa;
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* The chart heading's picture of the setup: portrait with stars, items,
+   traits, bonuses, each group set apart by a hairline. */
+.plot-summary {
   display: flex;
-  gap: 16px;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-left: 6px;
+}
+
+.plot-summary:empty {
+  display: none;
+}
+
+.ps-champ {
+  position: relative;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 6px; /* room for the stars hanging off the bottom */
+}
+
+.ps-portrait {
+  display: block;
+  width: 38px;
+  height: 38px;
+  border: 2px solid var(--cost);
+  border-radius: 7px;
+  object-fit: cover;
+  background: #262730;
+}
+
+.ps-portrait.no-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c7cad6;
+  font-weight: 700;
+}
+
+.ps-stars {
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  transform: translateX(-50%);
+  padding: 0 4px;
+  border-radius: 6px;
+  background: #11141b;
+  color: #f2c94c;
+  font-size: 11px;
+  line-height: 13px;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+
+.ps-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  padding-left: 10px;
+  border-left: 1px solid #31333f;
+}
+
+.ps-item {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+}
+
+.ps-buff {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ps-buff .trait-badge {
+  margin: 0;
+}
+
+.ps-level {
+  color: #fafafa;
+  font-size: 0.8em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-chip {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #262730;
+  color: #c7cad6;
+  font-size: 0.78em;
+  white-space: nowrap;
+}
+
+.ps-bonus {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #8fd18f;
+  font-weight: 600;
+}
+
+.ps-bonus img {
+  width: 15px;
+  height: 15px;
+}
+
+.plot-head {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.pane-body {
+  min-height: 0;
+  padding: 8px 10px 10px;
+}
+
+#viz {
+  flex: none;
+}
+
+#plotArea {
+  flex: 1 1 auto;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #262a36;
+}
+
+#plotHint {
+  color: #8a90a2;
+  font-size: 0.82em;
+}
+
+.chart-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 #chart {
-  flex: 3 1 0;
-  min-width: 0;
-  height: 480px;
+  height: 100%;
 }
 
-#logColumn {
-  flex: 1 1 0;
-  min-width: 260px;
+/* The chart's own legend (Plotly's can't hold images): colour, art, name. */
+.chart-legend {
+  position: absolute;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 0.85em;
-  color: #c7cad6;
+  gap: 1px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: rgba(20, 20, 20, 0.85);
 }
 
-.log-wrap {
-  max-height: 300px;
-}
-
-@media (max-width: 1100px) {
-  #plotColumns {
-    flex-direction: column;
-  }
-  #chart {
-    width: 100%;
-    flex: none;
-  }
-  #logColumn {
-    width: 100%;
-  }
-}
-
-.caption {
-  color: #7a7f8f;
-  font-size: 0.8em;
-  margin-top: 24px;
-}
-
-.caption a {
-  color: #9aa0b0;
-}
-
-.caption a:hover {
-  color: #ff4b4b;
-}
-
-/* Team Traits: a trait's tick-box facts (Heartsteel's fielded members). */
-.team-flags {
-  /* its own line under the trait's name and switch */
-  grid-column: 1 / -1;
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 2px 8px;
-  font-size: 0.85em;
-}
-
-.team-flags label {
-  display: inline-flex;
+.legend-row {
+  display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 7px;
+  padding: 2px 8px 2px 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: #fafafa;
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.legend-row:hover {
+  background: #232733;
+}
+
+/* the row the viewer is showing */
+.legend-row.viewing {
+  border-color: #e8c26a;
+}
+
+.legend-row i {
+  flex: none;
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.legend-art {
+  display: block;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+}
+
+.legend-row .trait-badge {
+  width: 20px;
+  height: 22px;
+  margin: 0;
+}
+
+/* The fight viewer's playhead on the chart. It ignores the pointer, so
+   Plotly's own hover still works underneath it. */
+.play-line {
+  position: absolute;
+  width: 0;
+  border-left: 1px dashed #e8c26a;
+  pointer-events: none;
+}
+
+.play-label {
+  position: absolute;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  background: rgba(20, 20, 20, 0.85);
+  color: #fafafa;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.play-time {
+  margin-bottom: 3px;
+  color: #e8c26a;
+  font-weight: 600;
+}
+
+.play-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.5;
+}
+
+.play-row i {
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.play-row b {
+  margin-left: auto;
+  padding-left: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------------- fight viewer (viz.js) ---------------- */
 
-/* The results table and the viewer share a row: the table keeps its own
-   width, the viewer takes the rest, and drops below the table when there is
-   less than its minimum left. */
-.results-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 18px;
-}
-
-.results-row .results-wrap {
-  flex: 0 0 auto;
-}
-
 .viz {
-  flex: 1 1 560px;
-  min-width: 0;
-  margin: 10px 0;
-  padding: 8px 10px 8px;
-  border: 1px solid #31333f;
-  border-radius: 8px;
-  background: #11141b;
+  display: flex;
+  flex-direction: column;
   outline: none;
 }
 
 .viz:focus-visible {
-  border-color: #ff4b4b;
+  box-shadow: inset 0 0 0 1px #ff4b4b;
 }
 
 .viz-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: 4px 12px;
   margin-bottom: 6px;
+}
+
+/* Read by screen readers (and the browser checks), not shown. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* "+ [art] [row ▾]": the row whose fight is on view, one of the plotted ones. */
+.viz-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 10px;
+  border-left: 1px solid #31333f;
+}
+
+.viz-plus {
+  color: #8a90a2;
+  font-weight: 700;
+}
+
+.viz-row-art:empty {
+  display: none;
+}
+
+.viz-row-art .row-icon {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+}
+
+.viz-row-art .trait-badge {
+  width: 22px;
+  height: 24px;
+  margin: 0;
+}
+
+#vizRowSel {
+  width: auto;
+  max-width: 220px;
+  height: 28px;
+  padding: 0 6px;
+  border-left: 4px solid #4a4d5a;
+  font-size: 0.88em;
+  font-weight: 600;
+}
+
+#vizRowSel:disabled {
+  opacity: 1;
+  cursor: default;
 }
 
 .viz-keys {
@@ -1097,14 +1488,10 @@ td input[type="checkbox"] {
   cursor: help;
 }
 
-.viz-head h3 {
-  margin: 0;
-  font-size: 1.05em;
-}
-
 .viz-what {
   color: #c7cad6;
   font-size: 0.92em;
+  font-weight: 600;
 }
 
 .viz-length {
@@ -1123,14 +1510,18 @@ td input[type="checkbox"] {
 }
 
 .viz-body {
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   gap: 10px;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 .viz-left {
   flex: 1 1 auto;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .viz-stage,
@@ -1168,7 +1559,6 @@ td input[type="checkbox"] {
   border: 1px solid #4a4d5a;
   border-radius: 6px;
   font-size: 0.8em;
-  cursor: pointer;
 }
 
 .viz-controls button:hover {
@@ -1183,6 +1573,8 @@ td input[type="checkbox"] {
 }
 
 .viz-controls select {
+  width: auto;
+  flex: 0 0 auto;
   height: 26px;
   padding: 0 6px;
   font-size: 0.85em;
@@ -1194,18 +1586,20 @@ td input[type="checkbox"] {
   color: #a3a8b8;
   font-size: 0.85em;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .viz-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 2px 12px;
-  margin: 3px 0 3px;
+  margin: 3px 0;
   color: #8a90a2;
   font-size: 0.74em;
 }
 
-.viz-legend i {
+.viz-legend i,
+.viz-split-key i {
   display: inline-block;
   width: 9px;
   height: 9px;
@@ -1214,8 +1608,10 @@ td input[type="checkbox"] {
   vertical-align: -1px;
 }
 
+/* A few lines of log; the chart below gets the rest of the height. */
 .viz-log {
-  max-height: 92px;
+  flex: none;
+  height: 84px;
   overflow-y: auto;
   border-top: 1px solid #262a36;
   padding-top: 4px;
@@ -1250,6 +1646,9 @@ td input[type="checkbox"] {
 /* the champion's card */
 .viz-card {
   flex: 0 0 230px;
+  align-self: flex-start;
+  max-height: 100%;
+  overflow-y: auto;
   font-size: 0.8em;
   color: #c7cad6;
   background: #171a23;
@@ -1316,33 +1715,6 @@ td input[type="checkbox"] {
   color: #fafafa;
 }
 
-.viz-stats {
-  width: 100%;
-  white-space: normal;
-}
-
-.viz-stats td {
-  padding: 2px 3px;
-}
-
-.viz-stats td:last-child {
-  text-align: right;
-  color: #fafafa;
-  font-variant-numeric: tabular-nums;
-}
-
-.viz-stats tr[data-stat] {
-  cursor: pointer;
-}
-
-.viz-stats tr[data-stat]:hover td {
-  background: #1f2430;
-}
-
-.viz-stats tr.selected td {
-  background: #262b38;
-}
-
 .viz-mods {
   max-height: 64px;
   overflow-y: auto;
@@ -1355,6 +1727,12 @@ td input[type="checkbox"] {
 
 .viz-mods span {
   color: #fafafa;
+}
+
+.viz-mods div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* the card's numbers: two to a row, label left, value right; click one for its modifiers */
@@ -1395,6 +1773,33 @@ td input[type="checkbox"] {
   padding-top: 3px;
 }
 
+/* the damage so far by type */
+.viz-split {
+  margin: 5px 4px 2px;
+}
+
+.viz-split-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #0b0d12;
+}
+
+.viz-split-bar i {
+  display: block;
+  height: 100%;
+}
+
+.viz-split-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin-top: 3px;
+  color: #a3a8b8;
+  font-variant-numeric: tabular-nums;
+}
+
 .viz-effects,
 .viz-dummies {
   margin-top: 4px;
@@ -1405,44 +1810,151 @@ td input[type="checkbox"] {
   margin-top: 2px;
 }
 
-/* the row the viewer is showing */
-#resultsTable tr.viewing td:first-child {
-  box-shadow: inset 0 0 0 1px #e8c26a;
-}
+/* ---------------- picker (champions, items, buffs) ---------------- */
 
-@media (max-width: 700px) {
-  .viz-body {
-    flex-direction: column;
-  }
-  .viz-card {
-    flex: none;
-    width: 100%;
-  }
-}
-
-.viz-controls select {
-  width: auto;
-  flex: 0 0 auto;
-}
-
-.viz-time {
-  white-space: nowrap;
-}
-
-.viz-mods div {
-  white-space: nowrap;
+.picker {
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: #161922;
+  border: 1px solid #3a3f4f;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
   overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.picker-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #262a36;
+}
+
+.picker-title {
+  font-weight: 700;
+  font-size: 0.9em;
+}
+
+.picker-search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.picker-body {
+  overflow-y: auto;
+  padding: 0 8px 8px;
+}
+
+.picker-group {
+  margin: 6px 0 2px;
+  color: #9aa0ae;
+  font-size: 0.72em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  gap: 2px;
+}
+
+.picker-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 3px 1px 2px;
+  border-color: transparent;
+  border-radius: 8px;
+  background: none;
+  color: #c7cad6;
+}
+
+.picker-tile:hover,
+.picker-tile.active {
+  background: #232733;
+  border-color: #3a3f4f;
+  color: #fafafa;
+}
+
+.picker-tile.selected {
+  border-color: #ff4b4b;
+}
+
+.picker-art {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #3a3f4f;
+  border-radius: 6px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: #0e1117;
+}
+
+.picker-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.picker-art.no-icon {
+  font-weight: 700;
+  color: #9aa0ae;
+}
+
+.picker-art.is-badge {
+  border: none;
+  background: none;
+}
+
+.picker-art .trait-badge {
+  width: 34px;
+  height: 38px;
+  margin: 0;
+}
+
+.picker-art .trait-glyph {
+  width: 21px;
+  height: 21px;
+}
+
+/* Two lines, so "Giant Slayer (vs Tank)" and "Seraphine (Superstar)" read
+   whole instead of as "Giant Slaye...". */
+.picker-name {
+  max-width: 100%;
+  height: 2.3em;
+  font-size: 0.66em;
+  line-height: 1.15;
+  text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.picker-empty {
+  padding: 12px 2px;
+  color: #9aa0ae;
+  font-style: italic;
 }
 
 /* ---------------- hover card ---------------- */
 
 /* An item's, augment's or trait's in-game text from the selected build, shown
-   beside the pointer (app.js attachCard). Fixed, so table and sidebar scroll
-   never clip it; pointer-events off so it never steals the hover it follows. */
+   beside the pointer (app.js attachCard). Fixed, so column scroll never clips
+   it; pointer-events off so it never steals the hover it follows. */
 #hoverCard {
   position: fixed;
-  z-index: 50;
+  z-index: 70;
   max-width: min(340px, calc(100vw - 16px));
   padding: 10px 12px;
   background: #1a1d26;
@@ -1513,4 +2025,98 @@ td input[type="checkbox"] {
   margin-top: 6px;
   border-top: 1px solid #31333f;
   padding-top: 4px;
+}
+
+/* ---------------- narrower windows ---------------- */
+
+/* Not room for the table and the viewer side by side: the pane goes under
+   the table and the page scrolls. */
+@media (max-width: 1320px) {
+  #layout {
+    height: auto;
+    min-height: 100vh;
+  }
+  #workspace {
+    align-items: flex-start;
+  }
+  #sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  #content {
+    flex-direction: column;
+  }
+  .results-col {
+    flex: none; /* stacked: its 44% share was of the width */
+  }
+  .results-wrap {
+    max-height: 62vh;
+  }
+  .pane {
+    flex: none;
+    min-width: 0;
+    height: 860px;
+  }
+}
+
+/* Phones: the setup column becomes a drawer that slides over the content. */
+@media (max-width: 900px) {
+  #sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    height: 100dvh; /* keeps the bottom reachable under mobile browser bars */
+    width: min(88vw, 340px);
+    z-index: 30;
+    transform: translateX(-105%); /* 105: keep the shadow off-screen too */
+    transition: transform 0.2s ease;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.5);
+  }
+  body.sidebar-open #sidebar {
+    transform: translateX(0);
+  }
+  #sidebarToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    font-size: 1.2em;
+    z-index: 40;
+  }
+  body.sidebar-open #sidebarToggle {
+    position: fixed;
+    top: 8px;
+    left: calc(min(88vw, 340px) + 8px);
+  }
+  body.sidebar-open #sidebarBackdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.55);
+  }
+  #topbar {
+    padding: 8px 10px;
+    gap: 8px 14px;
+  }
+  #content {
+    padding: 10px;
+  }
+  .viz-body {
+    flex-direction: column;
+  }
+  .viz-card {
+    flex: none;
+    width: 100%;
+  }
+  .pane {
+    height: auto;
+  }
+  #plotArea {
+    height: 340px;
+  }
 }

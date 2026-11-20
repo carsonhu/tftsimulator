@@ -34,12 +34,13 @@ const puppeteer = require("puppeteer-core");
   console.log("after", Math.round((Date.now() - t0) / 1000), "s:", JSON.stringify(first, null, 1));
 
   // The champion's own traits are preselected in the buff bar (off); turning one up must change the results.
+  // a row: the buff's hidden select, then its level select; the parameter (when it has one) on the line under them
   const buffRows = () => page.evaluate(() => [...document.querySelectorAll(".buff-row")].map((r) => {
     const [buff, level] = r.querySelectorAll("select");
-    const param = r.querySelector("input[type=number]");
+    const paramBox = r.querySelector(".buff-param");
     return { buff: buff.value, level: level.value, levels: [...level.options].map((o) => o.value),
-             param: r.querySelectorAll("label")[2].style.visibility === "hidden" ? null : param.value,
-             paramTitle: r.querySelectorAll(".col-label")[2].textContent };
+             param: paramBox.hidden ? null : paramBox.querySelector("input[type=number]").value,
+             paramTitle: paramBox.querySelector(".col-label").textContent };
   }));
   const bar = await buffRows();
   console.log("buff bar:", JSON.stringify(bar));

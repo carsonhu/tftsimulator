@@ -22,6 +22,8 @@ const FightViewer = (() => {
 
   let rpc = null;
   let iconUrl = () => null;
+  let onTime = () => {}; // told the playhead in seconds (null at the start), for the damage chart's line
+  let lastTime;
   const cache = new Map(); // config json -> trace
   let loadSeq = 0;
 
@@ -44,9 +46,10 @@ const FightViewer = (() => {
   const el = {};
 
   // ------------------------------------------------------------------ setup
-  function init(rpcFn, iconFn) {
+  function init(rpcFn, iconFn, timeFn) {
     rpc = rpcFn;
     iconUrl = iconFn;
+    if (timeFn) onTime = timeFn;
     for (const id of ["vizCanvas", "vizStrip", "vizCard", "vizLog", "vizPlay", "vizBack", "vizFwd", "vizSpeed",
                       "vizTime", "vizWhat", "vizStatus", "vizStage", "viz", "vizLength"]) {
       el[id] = document.getElementById(id);
@@ -181,10 +184,15 @@ const FightViewer = (() => {
       v.perTick.set(d.t, bucket);
     }
     v.dealt = new Array(n);
+    v.byType = new Array(n); // per tick: damage so far by type, for the card's split
     let run = new Array(units + 1).fill(0);
+    let types = { physical: 0, magical: 0, true: 0 };
     for (let t = 0; t < n; t++) {
       if (add[t]) run = run.map((x, i) => x + add[t][i]);
+      const b = v.perTick.get(t);
+      if (b) types = { physical: types.physical + b.physical, magical: types.magical + b.magical, true: types.true + b.true };
       v.dealt[t] = run;
+      v.byType[t] = types;
     }
     // a cast's lock, for the board's cast ring and the strip
     v.casts = trace.marks.filter((m) => m.kind === "cast");
@@ -236,6 +244,12 @@ const FightViewer = (() => {
     const tick = Math.floor(v.now + 1e-6);
     const secs = (v.now / v.trace.tps).toFixed(2);
     el.vizTime.textContent = `${secs} s · tick ${tick} / ${v.trace.ticks - 1}`;
+    // nothing to mark at 0 s: a fresh fight clears the chart's line
+    const time = v.now > 0 ? v.now / v.trace.tps : null;
+    if (time !== lastTime) {
+      lastTime = time;
+      onTime(time);
+    }
     if (tick !== v.shownTick) {
       v.shownTick = tick;
       renderCard(tick);
@@ -280,7 +294,10 @@ const FightViewer = (() => {
     const ymax = Math.max(...pts.map((p) => p[1])) + ROW * 0.7;
     const width = el.vizStage.clientWidth;
     const scale = width / (xmax - xmin);
-    const height = Math.min(Math.max((ymax - ymin) * scale, 150), 230);
+    // as tall as the board's shape asks, up to ~28% of the pane the viewer shares with the chart
+    const pane = el.viz.parentElement;
+    const tallest = Math.min(Math.max(190, (pane ? pane.clientHeight : 0) * 0.28), 300);
+    const height = Math.min(Math.max((ymax - ymin) * scale, 150), tallest);
     const [ctx, W, H] = setupCanvas(el.vizCanvas, height);
     const s = Math.min(W / (xmax - xmin), H / (ymax - ymin));
     const ox = (W - (xmax - xmin) * s) / 2 - xmin * s;
@@ -614,12 +631,12 @@ const FightViewer = (() => {
       : `Mana locked until ${(s.lockedUntil / tr.tps).toFixed(2)} s`;
     const rows = [
       ["ad", "AD", num(s.ad, 1), s.adMult !== 1 ? `×${num(s.adMult)}` : ""],
-      ["ap", "AP", Math.round(s.ap * 100), ""],
+      ["ap", "AP", pct(s.ap), ""],
       ["as", "Atk speed", num(s.as, 3), ""],
       ["crit", "Crit", pct(s.crit), ""],
       ["critDmg", "Crit dmg", pct(s.critDmg), ""],
       ["amp", "Amp", pct(s.amp - 1), ""],
-      ["regen", "Regen", num(s.regen, 1) + "/s", ""],
+      ["regen", "Mana regen", num(s.regen, 1) + "/s", ""],
       ["mpa", "Mana/atk", num(s.mpa, 1), s.manaMult !== 1 ? `×${num(s.manaMult)}` : ""],
     ];
     if (s.armorPen) rows.push(["", "Armor pen", pct(s.armorPen), ""]);
@@ -654,6 +671,7 @@ const FightViewer = (() => {
         <div class="viz-cell"><span>Damage</span><b>${Math.round(dealt).toLocaleString()}</b></div>
         <div class="viz-cell"><span>DPS so far</span><b>${secs > 0 ? (dealt / secs).toFixed(1) : "–"}</b></div>
       </div>
+      ${splitBar(v.byType[tick], dealt)}
       ${s.effects && s.effects.length ? `<div class="viz-effects">Effects on the champion: ${s.effects.map(esc).join(", ")}</div>` : ""}
       <div class="viz-dummies">${tr.units.slice(1).filter((u) => u.inPlay).map((u) => {
         const i = tr.units.indexOf(u);
@@ -661,6 +679,19 @@ const FightViewer = (() => {
         return `<div><strong>${esc(u.name)}</strong> armor ${num(d.armor ?? 0, 0)}, MR ${num(d.mr ?? 0, 0)}` +
           `${d.effects && d.effects.length ? ` <span class="viz-dim">(${d.effects.map(esc).join(", ")})</span>` : ""}</div>`;
       }).join("")}</div>`;
+  }
+
+  // The damage so far by type: one bar in the strip's colours, the shares under it.
+  function splitBar(types, total) {
+    if (!types || !(total > 0)) return "";
+    const parts = ["physical", "magical", "true"].filter((k) => types[k] > 0);
+    const share = (k) => (types[k] / total) * 100;
+    return `<div class="viz-split" title="Damage dealt so far, by type">
+      <div class="viz-split-bar">${parts.map((k) =>
+        `<i style="width:${share(k).toFixed(2)}%;background:${DMG_COLOURS[k]}"></i>`).join("")}</div>
+      <div class="viz-split-key">${parts.map((k) =>
+        `<span><i style="background:${DMG_COLOURS[k]}"></i>${TYPE_SHORT[k]} ${share(k).toFixed(1)}%</span>`).join("")}</div>
+    </div>`;
   }
 
   function describe(e) {
