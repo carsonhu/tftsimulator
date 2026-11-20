@@ -1,7 +1,7 @@
 """The Manager trait."""
 from registry import register
 from timing import ticks_up
-from traits.base import BuildTrait
+from traits.base import BuildTrait, pct
 
 
 @register("trait")
@@ -50,6 +50,18 @@ class Manager(BuildTrait):
         for k in range(1, self.REPEATS):
             champion.schedule_tick(champion.tick + ticks_up(k * every), pulse)
         return input_
+
+    @classmethod
+    def team_card(cls, build):
+        t = build.trait(cls.KEY)
+
+        def at(i):
+            stats = [[pct(t.row("ADAP", col=i)), "AD"], [pct(t.row("ADAP", col=i)), "AP"]]
+            if t.row("Mana", col=i):
+                stats.append([f"{t.row('Mana', col=i):g}", "Mana"])
+            return stats
+        return {"text": "The ally who starts combat in the Spotlight Hex gains, at combat start and every "
+                        f"{t.row('Interval', col=1):g} seconds:", "rows": cls.team_tiers(build, at)}
 
 
 Manager.levels = [0] + Manager.breakpoints()

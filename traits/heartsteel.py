@@ -1,6 +1,6 @@
 """The Heartsteel trait."""
 from registry import register
-from traits.base import BuildTrait
+from traits.base import BuildTrait, pct
 
 
 @register("trait")
@@ -61,6 +61,45 @@ class Heartsteel(BuildTrait):
             v = champion.trait_value(self.KEY, row) * (1 + stan + extra)
             champion.attribute(attr).modify(op, 1 + v if op == "MultiplyAdditive" else v)
         champion.heartsteel_bias = member and tier >= 2 and bool((self.params >> self.BIAS) & 1)
+
+    # Levels whose effect differs (owner, 2026-11-19): (1)-(5) differ only in whether a Bias can be chosen (3+; a
+    # 2nd Bias is another unit), (7) adds StanPercentIncrease. So 0, 3 (a Bias, no 150%) and 7 cover them.
+    SWEEP_LEVELS = (0, 3, 7)
+    BIAS_LEVEL = 3
+
+    @classmethod
+    def sweep_rows(cls, level, params, member, champ_key=None):
+        """[(level, params, label)]: the table rows worth running from this setup.
+
+        A member (the buff bar, Trait tab): the other levels of SWEEP_LEVELS; the Bias ticked or not (at the level,
+        or (3) below it); each other member fielded or not. A non-member (Team Traits): each member fielded or not;
+        the level changes nothing for them.
+        """
+        params = int(params or 0)
+        name = cls.display_name
+        rows = []
+        if member:
+            rows += [(lvl, params, f"{name} {lvl}") for lvl in cls.SWEEP_LEVELS if lvl != level]
+            bias_at = level if level >= cls.BIAS_LEVEL else cls.BIAS_LEVEL
+            flipped = params ^ (1 << cls.BIAS)
+            rows.append((bias_at, flipped, f"{name} {bias_at} ({'Bias' if flipped >> cls.BIAS & 1 else 'No Bias'})"))
+        member_level = level or next(lvl for lvl in cls.levels if lvl)
+        for bit, (unit, key, *_rest) in enumerate(cls.MEMBERS):
+            if key == champ_key:
+                continue  # a unit always counts itself as fielded
+            flipped = params ^ (1 << bit)
+            sign = "+" if flipped >> bit & 1 else "-"
+            label = f"{name} {member_level} ({sign}{unit})" if member else f"{name} ({sign}{unit})"
+            rows.append((member_level if member else level or member_level, flipped, label))
+        return rows
+
+    @classmethod
+    def team_card(cls, build):
+        t = build.trait(cls.KEY)
+        tags = {"AttackDamage": "AD", "AbilityPower": "AP", "AttackSpeed": "AS", "CritChance": "CritChance"}
+        return {"text": "Each Heartsteel member you field grants your team a bonus (once, however many copies):",
+                "rows": [{"label": f"{name}:", "stats": [[pct(t.row(row, col=1)), tags[attr]]]}
+                         for name, key, row, attr, op in cls.MEMBERS]}
 
 
 Heartsteel.levels = [0] + sorted(set(Heartsteel.breakpoints()))

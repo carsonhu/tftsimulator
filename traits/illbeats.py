@@ -1,6 +1,6 @@
 """The Illbeats trait."""
 from registry import register
-from traits.base import BuildTrait
+from traits.base import BuildTrait, pct
 
 
 @register("trait")
@@ -57,6 +57,19 @@ class Illbeats(BuildTrait):
         ad, ap = self.ticks(champion)
         champion.bonus_ad.modify("+", self.channel_value(champion, "PercentAD", ad) * share)
         champion.ap.modify("+", self.channel_value(champion, "PercentAP", ap) * share)
+
+    @classmethod
+    def team_card(cls, build):
+        t = build.trait(cls.KEY)
+
+        def at(i):
+            return [[f"{t.row('Remix', col=i):g}", None]]
+        rows = cls.team_tiers(build, at, "Decibels")
+        for i, row in enumerate(rows, start=1):
+            if t.row("StatMult", col=i) != 1:
+                row["text"] += f", the mix x{t.row('StatMult', col=i):g}"
+        return {"text": f"Your team gains {pct(t.row('SelflessStatMult', col=1))} of the mix's AD and AP.",
+                "rows": rows}
 
 
 Illbeats.levels = [0] + Illbeats.breakpoints()

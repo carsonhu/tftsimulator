@@ -141,7 +141,19 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   Team Traits lists a trait with an "Is X" flag, `Options` or `Flags`, or one that says `team_trait = True` (its
   team-wide half reaches non-members: Arcanist, Choreographer, Swiftstriker, Composer, Prodigy, Jazz, Manager; owner,
   2026-11-19); a plain number parameter there is a number box (Composer's instruments, Jazz's active traits).
-  `team_trait = False` opts one out (Hitmaker, Beach Pop).
+  `team_trait = False` opts one out (Hitmaker, Beach Pop). The panel works like the buff bar (owner, 2026-11-19):
+  empty until "+ Add" picks a trait (`teamTraitChoices`), each added one a row (`teamTraitRow`: level where `scales`,
+  its option / count / tick boxes underneath, × removes it); `state.teamBuffs` holds exactly the added rows.
+  Heartsteel, nothing ticked, is always there to start (`ensureDefaultTeamTraits`, unless it is the champion's own).
+  The page names the panel's traits in cfg["team"]: the Trait slice sweeps the buff bar only, the "Team Traits"
+  slice (`team_sweep_buffs`) the panel's, and only what changes a non-member: Heartsteel one row per member flipped
+  ("Heartsteel (+Kayn)"), a level-scaling trait its other levels, a flat one its other state ("Swiftstriker 0").
+  A trait can name its own sweep (`sweep_rows(level, params, member, champ_key)`, used by both slices): Heartsteel's
+  member rows are levels 0 / 3 / 7 only ((1)-(5) differ only by the Bias; (7) adds 150%), the Bias flipped, and
+  each other member fielded or not ("Heartsteel 3 (+Kayn)"; never the unit's own box) (owner, 2026-11-19).
+  A team trait's hover card there (panel rows, its + Add picker, the Team Traits tab's rows) shows only the
+  team-wide half: `BuildTrait.team_card(build)` (text + rows of [value, stat tag] per breakpoint, from the build;
+  Heartsteel's four damage members), sent as the card's "team" by `sim_entry.get_cards`.
   Stats are `stats.Attribute`s in game units, changed only with modifiers: `champion.aspd.modify("MultiplyAdditive",
   1.1)`, `champion.ap.modify("+", 0.2)`, keyed when the effect is later removed or re-sized. AD and AP are
   multipliers from 1.0, AS is attacks per second, crit / crit damage / omnivamp / amp are fractions; ops and

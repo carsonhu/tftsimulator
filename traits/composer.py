@@ -1,6 +1,6 @@
 """The Composer trait (Malzahar's unique trait)."""
 from registry import register
-from traits.base import BuildTrait
+from traits.base import BuildTrait, pct
 
 
 @register("trait")
@@ -33,6 +33,12 @@ class Composer(BuildTrait):
             team += champion.trait_value(self.KEY, "UniqueTrait_MalzaharBonusAPPercent") * team
         if team:
             champion.ap.modify("+", team)
+
+    @classmethod
+    def team_card(cls, build):
+        ap = build.trait(cls.KEY).row("UniqueTrait_APPerInstrument", col=1)
+        return {"text": "For each Mystical Instrument you hold, your team gains Ability Power.",
+                "rows": [{"stats": [[pct(ap), "AP"]], "text": "per instrument"}]}
 
 
 Composer.levels = [0] + Composer.breakpoints()

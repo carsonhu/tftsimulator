@@ -1,6 +1,6 @@
 """The Choreographer trait."""
 from registry import register
-from traits.base import BuildTrait
+from traits.base import BuildTrait, pct
 
 
 @register("trait")
@@ -27,6 +27,12 @@ class Choreographer(BuildTrait):
         if self.KEY in (champion.data.d.get("trait_keys") or []):
             amp *= champion.trait_value(self.KEY, "ChoreographerPercentMult")
         champion.dmgMultiplier.modify("+", amp)
+
+    @classmethod
+    def team_card(cls, build):
+        t = build.trait(cls.KEY)
+        return {"text": "Allies who start in the back 2 rows gain Damage Amp (front-row allies a Shield instead).",
+                "rows": cls.team_tiers(build, lambda i: [[pct(t.row("DamageAmp", col=i)), "DamageAmp"]])}
 
 
 Choreographer.levels = [0] + Choreographer.breakpoints()

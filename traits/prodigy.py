@@ -1,6 +1,6 @@
 """The Prodigy trait."""
 from registry import register
-from traits.base import BuildTrait
+from traits.base import BuildTrait, pct
 
 
 @register("trait")
@@ -26,6 +26,11 @@ class Prodigy(BuildTrait):
         if self.KEY in (champion.data.d.get("trait_keys") or []):
             regen += champion.trait_value(self.KEY, "ProdigyBonusManaRegen")
         champion.manaRegen.modify("+", regen)
+
+    @classmethod
+    def team_card(cls, build):
+        regen = build.trait(cls.KEY).row("AllyBonusManaRegen", col=1)
+        return {"text": "Your team gains Mana Regen.", "rows": [{"stats": [[f"{regen:g}", "ManaRegen"]]}]}
 
 
 Prodigy.levels = [0] + Prodigy.breakpoints()

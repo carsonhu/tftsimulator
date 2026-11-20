@@ -158,6 +158,38 @@ button:focus-visible {
   color: #ff4b4b;
 }
 
+/* "+ Add" (Buffs, Team Traits): the panels' main action, a filled pill in the page's accent */
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px 3px 9px;
+  border: 1px solid #3a3f4f;
+  border-radius: 6px;
+  background: #22252f;
+  color: #e6e8ee;
+  font-size: 0.82em;
+  font-weight: 600;
+}
+
+.add-btn .plus {
+  color: #ff6b6b;
+  font-size: 1.15em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.add-btn:hover {
+  border-color: #ff4b4b;
+  background: #2a2230;
+  color: #fff;
+}
+
+.add-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 .col-label {
   font-size: 0.8em;
   color: #9aa0b0;
@@ -193,9 +225,12 @@ button:focus-visible {
 }
 
 #sidebar {
-  flex: 0 0 330px;
-  width: 330px;
+  flex: 0 0 340px;
+  width: 340px;
   overflow-y: auto;
+  /* the scrollbar's room is kept even while it isn't needed, so a tall column (many team traits) doesn't narrow
+     everything in it the moment it appears (owner, 2026-11-19) */
+  scrollbar-gutter: stable;
   padding: 10px;
   background: #14161d;
   border-right: 1px solid #262833;
@@ -564,12 +599,13 @@ button:focus-visible {
 }
 
 /* Buff rows: tile, level, remove; a parameter or tick boxes underneath. */
+/* Fixed columns for the level and the x, so every row's controls line up whatever the names. */
 .buff-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) 58px 20px;
   align-items: center;
-  gap: 4px 6px;
-  padding: 3px 0;
+  gap: 2px 6px;
+  padding: 2px 0;
   border-bottom: 1px solid #22242e;
 }
 
@@ -582,7 +618,7 @@ button:focus-visible {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  padding: 3px 6px 3px 3px;
+  padding: 2px 6px 2px 2px;
   border-color: transparent;
   background: none;
   text-align: left;
@@ -629,8 +665,11 @@ button:focus-visible {
 }
 
 .buff-level {
-  padding: 2px 4px;
+  width: 100%;
+  height: 26px;
+  padding: 0 4px 0 8px;
   font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
 }
 
 .row-remove {
@@ -691,14 +730,16 @@ button:focus-visible {
 /* Stats: two cells to a row; name, value, bonus box. */
 .stats-panel {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* minmax(0, ...): the columns share the panel's width and shrink with it, rather than holding their content's
+     width and spilling past the edge */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 2px 12px;
   font-size: 0.84em;
 }
 
 .stat-cell {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 6px;
   min-height: 25px;
@@ -743,62 +784,16 @@ button:focus-visible {
 
 /* Team traits: one trait to a line. */
 .team-traits {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 6px;
+  display: block;
 }
 
-/* Badge, name, then its control right after the name; the trailing 1fr only
-   soaks up spare width. */
-.team-trait {
-  display: grid;
-  grid-template-columns: 22px auto auto 1fr;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9em;
-  cursor: pointer;
+/* a team trait's name isn't a button (the trait is chosen with + Add) */
+.team-tile {
+  cursor: default;
 }
 
-.team-trait.with-option {
-  grid-template-columns: 22px auto auto auto 1fr;
-}
-
-.team-trait .trait-badge {
-  margin: 0;
-}
-
-.team-trait select {
-  width: auto;
-  min-width: 3.4em;
-  padding: 1px 2px;
-  font-size: 0.9em;
-}
-
-.team-trait input[type="checkbox"] {
-  justify-self: start;
-  margin: 0;
-}
-
-/* a count the team-wide half reads (Composer's instruments, Jazz's active traits) */
-.team-trait .team-number {
-  width: 3.6em;
-  padding: 1px 4px;
-  font-size: 0.9em;
-}
-
-.team-flags {
-  grid-column: 1 / -1;
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 2px 8px;
-  padding-left: 30px;
-  font-size: 0.85em;
-}
-
-.team-flags label {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
+.team-tile:hover {
+  border-color: transparent;
 }
 
 .caption {
@@ -922,14 +917,14 @@ table {
 
 /* trait badges in the table: as small as the item art */
 #resultsTable .trait-badge {
-  width: 20px;
-  height: 22px;
-  margin-right: 8px;
+  width: 25px;
+  height: 28px;
+  margin-right: 10px;
 }
 
 #resultsTable .trait-glyph {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
 }
 
 thead {
@@ -941,7 +936,7 @@ thead {
 
 td,
 th {
-  padding: 3px 12px;
+  padding: 2px 12px;
   border-bottom: 1px solid #22242e;
   text-align: right;
 }
@@ -962,28 +957,40 @@ thead th {
    table's own column sizing still applies. */
 #resultsTable .row-icon {
   display: inline-block;
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   vertical-align: middle;
-  margin-right: 8px;
-  border-radius: 3px;
+  margin-right: 10px;
+  border-radius: 4px;
 }
 
 /* "+": add the row's item, augment or trait (at the row's level) to the
-   setup. Shown on the row under the pointer or with focus. */
+   setup. Shown on the row under the pointer or with focus. It straddles the
+   border between the name and the first DPS column, in the name cell's
+   right padding and the empty left of the right-aligned numbers, so it takes
+   no width: floated after the name, it dropped to a second line beside a
+   long one (doubling the row), and reserved room overflowed the table. */
+#resultsTable tbody td:first-child {
+  position: relative;
+}
+
 .row-add {
-  float: right;
-  width: 22px;
-  height: 22px;
-  margin: 1px 0 0 10px;
+  position: absolute;
+  z-index: 1;
+  right: -11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  margin: 0;
   padding: 0;
   border: 1px solid #4a4d5a;
   border-radius: 5px;
   background: #1d212c;
   color: #c7cad6;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  line-height: 18px;
+  line-height: 16px;
   visibility: hidden;
 }
 
@@ -1356,8 +1363,8 @@ tbody tr:hover td {
 .legend-art {
   display: block;
   flex: none;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border-radius: 3px;
 }
 
@@ -2025,6 +2032,28 @@ tbody tr:hover td {
   color: #fafafa;
   font-weight: 600;
 }
+
+/* a Team Traits card's line: label, then each stat with its glyph */
+#hoverCard .card-team-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+}
+
+/* a stat tag inside a card line ("12%AP"), drawn as its glyph */
+#hoverCard .card-glyph {
+  width: 14px;
+  height: 14px;
+  margin: 0 2px 0 1px;
+  vertical-align: -2px;
+}
+
+#hoverCard .card-team-row.always {
+  color: #e6e8ee;
+}
+
+
 
 #hoverCard .card-hint {
   color: #8a8f9e;

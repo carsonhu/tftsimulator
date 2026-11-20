@@ -78,3 +78,19 @@ class BuildTrait(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         return input_
+
+    # ---- the card a Team Traits row shows (sim_entry.get_cards "team"): the team-wide half only, from the build
+    @classmethod
+    def team_tiers(cls, build, stats_at, text=""):
+        """[{threshold, label, stats, text}] for each distinct breakpoint: stats_at(tier) -> [[value, tag], ...]."""
+        out = []
+        for tier, threshold in enumerate(sorted(set(build.trait(cls.KEY).thresholds)), start=1):
+            stats = stats_at(tier)
+            if stats is not None:
+                out.append({"threshold": threshold, "label": f"({threshold})", "stats": stats, "text": text})
+        return out
+
+
+def pct(v):
+    """0.12 -> '12%', 0.015 -> '1.5%' (a card's stat value)."""
+    return f"{round(v * 100, 1):g}%"

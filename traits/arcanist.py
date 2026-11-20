@@ -1,6 +1,6 @@
 """The Arcanist trait."""
 from registry import register
-from traits.base import BuildTrait
+from traits.base import BuildTrait, pct
 
 
 @register("trait")
@@ -24,6 +24,12 @@ class Arcanist(BuildTrait):
             return
         member = self.KEY in (champion.data.d.get("trait_keys") or [])
         champion.ap.modify("+", champion.trait_value(self.KEY, "ArcanistAP" if member else "NonArcanistAP"))
+
+    @classmethod
+    def team_card(cls, build):
+        t = build.trait(cls.KEY)
+        return {"text": "Your team gains Ability Power.",
+                "rows": cls.team_tiers(build, lambda i: [[pct(t.row("NonArcanistAP", col=i)), "AP"]])}
 
 
 Arcanist.levels = [0] + Arcanist.breakpoints()

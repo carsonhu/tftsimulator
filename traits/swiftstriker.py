@@ -1,7 +1,7 @@
 """The Swiftstriker trait."""
 from registry import register
 from timing import ticks_up
-from traits.base import BuildTrait
+from traits.base import BuildTrait, pct
 
 
 @register("trait")
@@ -35,6 +35,11 @@ class Swiftstriker(BuildTrait):
         for k in range(1, int(champion.trait_value(self.KEY, "Stacks")) + 1):
             champion.schedule_tick(champion.tick + ticks_up(k * period), lambda: champion.aspd.modify("MultiplyAdditive", bonus))
         return input_
+
+    @classmethod
+    def team_card(cls, build):
+        return {"text": "Your team gains Attack Speed.",
+                "rows": [{"stats": [[pct(build.trait(cls.KEY).row("TeamAS", col=1)), "AS"]]}]}
 
 
 Swiftstriker.levels = [0] + Swiftstriker.breakpoints()

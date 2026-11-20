@@ -35,7 +35,7 @@ const puppeteer = require("puppeteer-core");
 
   // The champion's own traits are preselected in the buff bar (off); turning one up must change the results.
   // a row: the buff's hidden select, then its level select; the parameter (when it has one) on the line under them
-  const buffRows = () => page.evaluate(() => [...document.querySelectorAll(".buff-row")].map((r) => {
+  const buffRows = () => page.evaluate(() => [...document.querySelectorAll("#buffRows .buff-row")].map((r) => {
     const [buff, level] = r.querySelectorAll("select");
     const paramBox = r.querySelector(".buff-param");
     return { buff: buff.value, level: level.value, levels: [...level.options].map((o) => o.value),
@@ -52,7 +52,7 @@ const puppeteer = require("puppeteer-core");
   } else {
     const last = bar[idx].levels[bar[idx].levels.length - 1];
     await page.evaluate((i, v) => {
-      const sel = document.querySelectorAll(".buff-row")[i].querySelectorAll("select")[1];
+      const sel = document.querySelectorAll("#buffRows .buff-row")[i].querySelectorAll("select")[1];
       sel.value = v;
       sel.dispatchEvent(new Event("change"));
     }, idx, last);
@@ -73,7 +73,7 @@ const puppeteer = require("puppeteer-core");
     sel.dispatchEvent(new Event("change"));
   });
   try {
-    await page.waitForFunction(() => [...document.querySelectorAll(".buff-row select")].some((s) => s.value === "Hitmaker"),
+    await page.waitForFunction(() => [...document.querySelectorAll("#buffRows .buff-row select")].some((s) => s.value === "Hitmaker"),
                                { timeout: 30000 });
     const hm = (await buffRows()).find((b) => b.buff === "Hitmaker");
     console.log("Senna Hitmaker row:", JSON.stringify(hm));
@@ -88,10 +88,10 @@ const puppeteer = require("puppeteer-core");
     sel.dispatchEvent(new Event("change"));
   });
   try {
-    await page.waitForFunction(() => [...document.querySelectorAll(".buff-row select")].some((s) => s.value === "Heartsteel"),
+    await page.waitForFunction(() => [...document.querySelectorAll("#buffRows .buff-row select")].some((s) => s.value === "Heartsteel"),
                                { timeout: 30000 });
     const flags = () => page.evaluate(() => {
-      const row = [...document.querySelectorAll(".buff-row")].find((r) => r.querySelector("select").value === "Heartsteel");
+      const row = [...document.querySelectorAll("#buffRows .buff-row")].find((r) => r.querySelector("select").value === "Heartsteel");
       const box = row.querySelector(".param-flags");
       return { hidden: box.hidden, title: box.querySelector(".col-label").textContent,
                ticks: [...box.querySelectorAll("label")].map((l) => l.textContent + "=" + l.querySelector("input").checked) };
@@ -103,7 +103,7 @@ const puppeteer = require("puppeteer-core");
     }
     const before = (await read()).rows[1];
     await page.evaluate(() => {
-      const row = [...document.querySelectorAll(".buff-row")].find((r) => r.querySelector("select").value === "Heartsteel");
+      const row = [...document.querySelectorAll("#buffRows .buff-row")].find((r) => r.querySelector("select").value === "Heartsteel");
       const level = row.querySelectorAll("select")[1];
       level.value = "3";
       level.dispatchEvent(new Event("change"));

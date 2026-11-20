@@ -47,7 +47,18 @@ _PROBE_STATS = (
 )
 
 
+_TEAM_LEVEL_MATTERS = {}
+
+
 def _team_level_matters(cls):
+    """Does this trait's team-wide half change with its level? (Probed once per class: the catalog and the Team
+    Traits slice both ask.)"""
+    if cls.__name__ not in _TEAM_LEVEL_MATTERS:
+        _TEAM_LEVEL_MATTERS[cls.__name__] = _probe_team_level(cls)
+    return _TEAM_LEVEL_MATTERS[cls.__name__]
+
+
+def _probe_team_level(cls):
     """Does this trait's team-wide half change with its level?
 
     For most traits it does not: only the members' own bonus scales, and a
@@ -275,6 +286,7 @@ def get_catalog():
             "Radiant",
             "Emblem",
             "Trait",
+            "Team Traits",
             "Augment/Buff",
         ],
         # Client builds the numbers can come from (builds/index.json, newest first); the page sends the chosen
@@ -441,11 +453,25 @@ def _champion_specific_flag(cls):
     return (extra.get("Min"), extra.get("Max")) == (0, 1)
 
 
-def trait_sweep_buffs(buff_specs):
-    """The buff rows the Trait slice runs, for a bar of (name, level, params)."""
+def _labelled(cls, rows):
+    """Buff objects for a trait's own sweep_rows [(level, params, label)]."""
+    out = []
+    for lvl, params, label in rows:
+        buff = cls(lvl, params)
+        buff.row_label = label
+        out.append(buff)
+    return out
+
+
+def trait_sweep_buffs(buff_specs, champ_key=None):
+    """The buff rows the Trait slice runs, for a bar of (name, level, params). A trait that knows which of its rows
+    matter (`sweep_rows`: Heartsteel) gives them itself."""
     extra = []
     for name, level, params in buff_specs:
         cls = getattr(set19buffs, name)
+        if hasattr(cls, "sweep_rows"):
+            extra += _labelled(cls, cls.sweep_rows(level, params, member=True, champ_key=champ_key))
+            continue
         # Every *other* level of the buff, at the flag it is already on.
         for lvl in cls.levels:
             if lvl != level:
@@ -466,6 +492,43 @@ def trait_sweep_buffs(buff_specs):
     return extra
 
 
+def team_sweep_buffs(team_specs):
+    """The rows the Team Traits slice runs, for the panel's (name, level, params): only what changes a non-member.
+
+    * Heartsteel (tick boxes): each member fielded or not, one row per tick box flipped ("Heartsteel (+Kayn)"); the
+      level itself changes nothing for a non-member.
+    * a trait whose team-wide half steps per breakpoint (Arcanist, Illbeats; `_team_level_matters`): its other levels.
+    * one whose team-wide half is the same at every breakpoint (Swiftstriker, Prodigy, Composer): only the other
+      state, "Swiftstriker 0" when it is on, "Swiftstriker" when it is off.
+    """
+    rows = []
+    for name, level, params in team_specs:
+        cls = getattr(set19buffs, name)
+        extra = cls.extraParameters() or {}
+        on_level = next((lvl for lvl in cls.levels if lvl), 0)
+        title = getattr(cls, "display_name", name)
+        flags = extra.get("Flags")
+        if hasattr(cls, "sweep_rows"):
+            rows += _labelled(cls, cls.sweep_rows(level, params, member=False))
+        elif flags:
+            for bit, flag in enumerate(flags[: extra.get("TeamFlags", len(flags))]):
+                flipped = int(params or 0) ^ (1 << bit)
+                row = cls(level or on_level, flipped)
+                row.row_label = f"{title} ({'+' if (flipped >> bit) & 1 else '-'}{flag})"
+                rows.append(row)
+        elif extra.get("Options") or _team_level_matters(cls):
+            rows += [cls(lvl, params) for lvl in cls.levels if lvl != level]
+        elif level:
+            row = cls(0, params)
+            row.row_label = f"{title} 0"
+            rows.append(row)
+        else:
+            row = cls(on_level, params)
+            row.row_label = title
+            rows.append(row)
+    return rows
+
+
 def _slice_inputs(slice_name, cfg):
     """(item objects, buff objects) for one radio option.
 
@@ -478,8 +541,16 @@ def _slice_inputs(slice_name, cfg):
         classes = list(_ITEM_SLICES[slice_name]())
         return [getattr(set19items, c)() for c in classes] + no_item, []
 
+    # The page sends its Team Traits panel's traits merged into "buffs" and names them in "team": the Trait slice
+    # sweeps the champion's own buff bar, the Team Traits slice those (owner, 2026-11-19).
+    team = set(cfg.get("team") or [])
     if slice_name == "Trait":
-        return no_item, trait_sweep_buffs(cfg.get("buffs", []))
+        champ_cls = getattr(set19champs, cfg.get("champ") or "", None)
+        return no_item, trait_sweep_buffs([b for b in cfg.get("buffs", []) if b[0] not in team],
+                                          champ_key=getattr(champ_cls, "KEY", None))
+
+    if slice_name == "Team Traits":
+        return no_item, team_sweep_buffs([b for b in cfg.get("buffs", []) if b[0] in team])
 
     if slice_name == "Augment/Buff":
         classes = sorted(set19buffs.augments)
@@ -491,6 +562,8 @@ def _slice_inputs(slice_name, cfg):
 def _row_label(extra):
     """The row's name: an item's or augment's own; a trait's with its level ("Trickshot 3"), and with its 0/1 flag
     when the Trait slice runs it both ways (Hitmaker's Big Shot: "Hitmaker 2 (Is Big Shot: no)")."""
+    if getattr(extra, "row_label", None):  # a Team Traits row names itself ("Heartsteel (+Kayn)", "Swiftstriker 0")
+        return extra.row_label
     cls = type(extra)
     levels = [lvl for lvl in getattr(cls, "levels", []) if lvl]
     if not isinstance(extra, set19buffs.Buff) or len(levels) < 2:
@@ -688,6 +761,15 @@ def _stat_part(token):
     return [m.group(1), m.group(2)] if m else [token, None]
 
 
+def _tag_tier(text, cls):
+    """A tier line whose numbers carry no stat tag in the build ("(2) 1.5% , 1%"): the class's TIER_TAGS appended to
+    them in order ("1.5%Health , 1%DamageAmp"), so the card draws their glyphs as it does "12%AP"."""
+    tags = list(getattr(cls, "TIER_TAGS", ()) or ())
+    if not tags:
+        return text
+    return re.sub(r"(?<=\d%)(?![A-Za-z])", lambda m: tags.pop(0) if tags else "", text, count=len(tags))
+
+
 def get_cards(cfg):
     """{class name: card} for every item and buff class with a build key: the build's name, kind (item kind, augment
     tier or trait kind), stat line, text and (traits) breakpoints, all from the selected build. The page shows one
@@ -707,9 +789,15 @@ def get_cards(cfg):
                 "kind": entry.get("kind") or entry.get("tier") or "",
                 "stats": [_stat_part(s) for s in (entry.get("stat_text") or "").split()],
                 "text": entry.get("text") or "",
-                "tiers": [{"threshold": t.get("threshold"), "text": t.get("text") or ""}
+                "tiers": [{"threshold": t.get("threshold"), "text": _tag_tier(t.get("text") or "", cls)}
                           for t in entry.get("tiers") or []],
             }
+            # a team trait's card in Team Traits: only what reaches a non-member (BuildTrait.team_card)
+            if group == "traits" and hasattr(cls, "team_card"):
+                try:
+                    cards[name]["team"] = cls.team_card(build)
+                except Exception:  # a build without one of its rows: the full card still shows
+                    pass
     return cards
 
 

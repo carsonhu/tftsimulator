@@ -141,14 +141,17 @@ function cfgForSlice(sliceName) {
   const cfg = Object.assign(JSON.parse(JSON.stringify(state.cfg)), {
     slice: sliceName,
   });
+  // which of them came from Team Traits: the Trait slice sweeps the others, the Team Traits slice these
+  cfg.team = [];
   for (const [cls, pick] of state.teamBuffs) {
-    if (!pick || pick.level <= 0) continue;
     // renderTeamTraits drops any trait that is in the buff bar, so this can
     // only collide in the instant between the two updates. The buff bar's
     // entry wins; a second entry for one class would also give the Trait
     // slice two rows per breakpoint.
-    if (cfg.buffs.some(([c]) => c === cls)) continue;
-    cfg.buffs.push([cls, pick.level, pick.params]);
+    if (!pick || cfg.buffs.some(([c]) => c === cls)) continue;
+    cfg.team.push(cls);
+    // at 0 it adds nothing to the fight, but is still sent so its Team Traits row ("Swiftstriker") runs
+    cfg.buffs.push([cls, Math.max(0, pick.level), pick.params]);
   }
   return cfg;
 }
@@ -253,10 +256,12 @@ function cardElement() {
 }
 
 // Fills the card for a class; false when the build has none (NoItem, a debuff row), so nothing is shown.
-// level: a trait row's breakpoint, whose tier line is marked.
-function fillCard(cls, level, hint) {
+// level: a trait row's breakpoint, whose tier line is marked. team: a Team Traits trait, shown as only its team-wide
+// half (the card's "team", BuildTrait.team_card) when the build has one.
+function fillCard(cls, level, hint, team = false) {
   const card = state.cards.get(cls);
   if (!card) return false;
+  const teamCard = team ? card.team : null;
   const el = cardElement();
   el.innerHTML = "";
   const head = document.createElement("div");
@@ -277,10 +282,10 @@ function fillCard(cls, level, hint) {
   name.className = "card-name";
   name.textContent = card.name;
   title.appendChild(name);
-  if (card.kind) {
+  if (card.kind || teamCard) {
     const kind = document.createElement("div");
     kind.className = "card-kind";
-    kind.textContent = card.kind;
+    kind.textContent = teamCard ? "Team-wide bonus" : card.kind;
     title.appendChild(kind);
   }
   head.appendChild(title);
@@ -293,9 +298,8 @@ function fillCard(cls, level, hint) {
     return div;
   };
   // The stat line as the game draws it: each value followed by its stat's glyph, in the glyph's colour.
-  if (card.stats.length) {
-    const line = add("card-stats", "");
-    for (const [value, tag] of card.stats) {
+  const statParts = (line, stats) => {
+    for (const [value, tag] of stats) {
       const part = document.createElement("span");
       part.className = "card-stat";
       part.appendChild(document.createTextNode(value));
@@ -311,12 +315,47 @@ function fillCard(cls, level, hint) {
       }
       line.appendChild(part);
     }
+  };
+  if (teamCard) {
+    // the team-wide half: its sentence, then a line per breakpoint (or per Heartsteel member), the board's marked
+    add("card-text", teamCard.text);
+    const reached = teamCard.rows.filter((r) => r.threshold != null && level != null && r.threshold <= level).pop();
+    for (const row of teamCard.rows) {
+      // a breakpoint line is dim until the board reaches it; a line that always applies (a Heartsteel member) isn't
+      const line = add("card-tier card-team-row" + (row.threshold == null ? " always" : row === reached ? " active" : ""), "");
+      if (row.label) line.appendChild(Object.assign(document.createElement("span"), { className: "card-team-label", textContent: row.label }));
+      statParts(line, row.stats);
+      if (row.text) line.appendChild(document.createTextNode(row.text));
+    }
+    if (hint) add("card-hint", hint);
+    return true;
   }
+  if (card.stats.length) statParts(add("card-stats", ""), card.stats);
   if (card.text) add("card-text", card.text);
   const active = card.tiers.filter((t) => level != null && t.threshold <= level).pop();
-  for (const t of card.tiers) add("card-tier" + (t === active ? " active" : ""), t.text);
+  for (const t of card.tiers) richText(add("card-tier" + (t === active ? " active" : ""), ""), t.text);
   if (hint) add("card-hint", hint);
   return true;
+}
+
+// A card line with the game's stat tags drawn as their glyphs: "12%AP, 25%AP for Arcanists" -> 12% [AP icon], ...
+// A word not in the icon set ("1 Big Shot", "150 Shield") stays text.
+function richText(el, text) {
+  const re = /(\d+(?:\.\d+)?%?)([A-Za-z]+)/g;
+  let last = 0;
+  for (const m of text.matchAll(re)) {
+    const glyph = m[2].toLowerCase();
+    if (!state.statIcons.has(glyph)) continue;
+    el.appendChild(document.createTextNode(text.slice(last, m.index) + m[1]));
+    const img = document.createElement("img");
+    img.className = "card-glyph";
+    img.src = `icons/stats/${glyph}.png`;
+    img.alt = m[2];
+    img.title = m[2];
+    el.appendChild(img);
+    last = m.index + m[0].length;
+  }
+  el.appendChild(document.createTextNode(text.slice(last)));
 }
 
 function placeCard(event) {
@@ -335,11 +374,11 @@ function placeCard(event) {
 // Shows cls's card while the pointer is over target. getLevel/hint are read at each entry, so a re-rendered row
 // needs no rebinding. Returns whether the build has a card for cls. cls may be a function, read at each entry
 // (an item slot or buff row whose choice changes): then it always binds, and shows a card only when there is one.
-function attachCard(target, cls, getLevel = () => null, hint = null) {
+function attachCard(target, cls, getLevel = () => null, hint = null, team = false) {
   const which = typeof cls === "function" ? cls : () => cls;
   if (typeof cls !== "function" && !state.cards.has(cls)) return false;
   target.addEventListener("mouseenter", (event) => {
-    if (!fillCard(which(), getLevel(), typeof hint === "function" ? hint() : hint)) return;
+    if (!fillCard(which(), getLevel(), typeof hint === "function" ? hint() : hint, typeof team === "function" ? team() : team)) return;
     cardElement().hidden = false;
     placeCard(event);
   });
@@ -579,6 +618,26 @@ function buildStaticControls() {
         state.cfg.buffs.push(defaultBuffTuple(value));
         renderBuffRows();
         onConfigChanged();
+      },
+    });
+  };
+
+  $("addTeamTrait").onclick = () => {
+    const choices = teamTraitChoices();
+    if (!choices.length) return;
+    Picker.open($("addTeamTrait"), {
+      title: "Add a team trait",
+      cards: "team",
+      groups: [{
+        label: "Team traits",
+        entries: choices.map((t) => ({
+          value: t.cls, label: t.name, icon: state.icons.get(t.cls), badge: () => traitBadge(t.cls, t.onLevel),
+        })),
+      }],
+      selected: null,
+      onPick: (value) => {
+        const trait = choices.find((t) => t.cls === value);
+        if (trait) addTeamTrait(trait);
       },
     });
   };
@@ -926,7 +985,8 @@ const Picker = (() => {
             active = index;
             tiles.forEach((t, i) => t.el.classList.toggle("active", i === active));
           };
-          if (!(opts.cards && attachCard(tile, entry.value))) tile.title = entry.label;
+          // cards: "team" shows a team trait's team-wide half (the Team Traits + Add picker)
+          if (!(opts.cards && attachCard(tile, entry.value, () => null, null, opts.cards === "team"))) tile.title = entry.label;
           tiles.push({ el: tile, value: entry.value });
           grid.appendChild(tile);
         }
@@ -1147,6 +1207,7 @@ async function selectChampion(name, { keepLevel, keepConfig = false }) {
     const defaults = info.defaultTraits.classNames.filter((c) => state.buffMeta.has(c));
     state.cfg.buffs = defaults.map(defaultBuffTuple);
     renderBuffRows();
+    ensureDefaultTeamTraits();
   }
 
   onConfigChanged();
@@ -1436,159 +1497,145 @@ function renderBuffRows() {
 // ---------------------------------------------------------------------------
 
 function renderTeamTraits() {
+  // Team traits (owner, 2026-11-19: like the buff bar): only the ones added are rows; + Add picks another. A trait
+  // in the buff bar is configured there with its own level and flag, so it is neither a row nor offered here.
   const container = $("teamTraits");
-  const traits = state.catalog.teamBuffs || [];
-  if (!traits.length) {
-    $("teamTraitsPanel").hidden = true;
+  const all = state.catalog.teamBuffs || [];
+  for (const cls of [...state.teamBuffs.keys()]) {
+    if (state.cfg.buffs.some(([c]) => c === cls)) state.teamBuffs.delete(cls);
+  }
+  const available = teamTraitChoices();
+  $("addTeamTrait").hidden = !available.length;
+  $("teamTraitsPanel").hidden = !all.length || (!available.length && !state.teamBuffs.size);
+  container.innerHTML = "";
+  if (!state.teamBuffs.size) {
+    const note = document.createElement("p");
+    note.className = "empty-note";
+    note.textContent = "Traits your board runs that this champion isn't in. + Add picks one.";
+    container.appendChild(note);
     return;
   }
-  container.innerHTML = "";
-  let shown = 0;
+  for (const [cls, picked] of state.teamBuffs) {
+    const trait = all.find((t) => t.cls === cls);
+    if (trait) container.appendChild(teamTraitRow(trait, picked));
+  }
+}
 
-  for (const trait of traits) {
-    // A trait picked in Global Buffs is configured there, with its own level
-    // and Is-X flag, so it is not offered here at all -- two controls for
-    // one trait invites setting it twice.
-    if (state.cfg.buffs.some(([cls]) => cls === trait.cls)) {
-      state.teamBuffs.delete(trait.cls);
-      continue;
+// Team Traits always starts with Heartsteel, nothing ticked (owner, 2026-11-19): the tick boxes are the panel's
+// idea at its plainest. Put back on every champion change unless it is the champion's own trait.
+const DEFAULT_TEAM_TRAITS = ["Heartsteel"];
+
+function ensureDefaultTeamTraits() {
+  for (const cls of DEFAULT_TEAM_TRAITS) {
+    const trait = (state.catalog.teamBuffs || []).find((t) => t.cls === cls);
+    if (trait && !state.teamBuffs.has(cls) && !state.cfg.buffs.some(([c]) => c === cls)) {
+      state.teamBuffs.set(cls, { level: trait.onLevel, params: 0 });
     }
-    shown++;
+  }
+}
 
-    const picked = state.teamBuffs.get(trait.cls);
-    const current = picked ? picked.level : 0;
-    // 0 for an "Is X" flag is the whole point of this panel -- not a member.
-    // Only a trait that asks a real question starts on its own default.
-    const params = picked
-      ? picked.params
-      : trait.options || trait.flags || trait.number
-        ? trait.paramDefault
-        : 0;
-    // Tick-box facts (Heartsteel's fielded members), stored as bits.
-    let flagBits = trait.flags ? params : 0;
-    // A div when it holds tick boxes: each has its own label, and labels must
-    // not nest (a click on one would also toggle the trait's own control).
-    const label = document.createElement(trait.flags ? "div" : "label");
-    label.className = trait.scales ? "team-trait" : "team-trait flat";
-    if (trait.options || trait.flags || trait.number) label.classList.add("with-option");
-    label.title = trait.options
-      ? trait.name + " on the board"
-      : trait.flags
-        ? "Team-wide " + trait.name + ": the bonuses of the ticked units"
-        : trait.paramTitle && !trait.number
-          ? "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)"
-          : "Team-wide " + trait.name + " (this champion is not one)";
+// The team traits + Add can still offer: every one not added and not in the buff bar.
+function teamTraitChoices() {
+  return (state.catalog.teamBuffs || []).filter(
+    (t) => !state.teamBuffs.has(t.cls) && !state.cfg.buffs.some(([c]) => c === t.cls)
+  );
+}
 
-    // A count the team-wide half reads (Composer's instruments, Jazz's active
-    // traits): a number box beside the trait's own control.
-    let numberBox = null;
-    if (trait.number) {
-      numberBox = document.createElement("input");
-      numberBox.type = "number";
-      numberBox.className = "team-number";
-      numberBox.min = trait.number.min;
-      if (trait.number.max != null) numberBox.max = trait.number.max;
-      numberBox.value = params;
-      numberBox.title = trait.paramTitle;
-      numberBox.onchange = () => {
-        const now = state.teamBuffs.get(trait.cls);
-        store(now ? now.level : 0, clampInput(numberBox));
-      };
-    }
-    // the parameter the trait's control passes along with its level
-    const paramNow = (optionSel) =>
-      optionSel ? Number(optionSel.value) : trait.flags ? flagBits : numberBox ? Number(numberBox.value) : 0;
+// A team trait added with + Add: on at its first breakpoint, its question at the default.
+function addTeamTrait(trait) {
+  // tick boxes start empty (Heartsteel: no member fielded yet); a choice or a count at its default
+  const params = trait.options || trait.number ? trait.paramDefault : 0;
+  state.teamBuffs.set(trait.cls, { level: trait.onLevel, params });
+  onConfigChanged();
+}
 
+// One team trait's row: badge and name, its level where the team-wide half steps per breakpoint (Arcanist), x;
+// under it whatever it asks: a named choice (Illbeats' mix), a count (Composer's instruments) or tick boxes
+// (Heartsteel's fielded members).
+function teamTraitRow(trait, picked) {
+  const row = document.createElement("div");
+  row.className = "buff-row team-row";
+  const store = (level, params) => {
+    state.teamBuffs.set(trait.cls, { level, params });
+    onConfigChanged();
+  };
+  let { level, params } = picked;
+
+  const tile = document.createElement("span");
+  tile.className = "buff-tile team-tile";
+  tile.appendChild(tileArt("buff-art", {
+    icon: state.icons.get(trait.cls),
+    badge: () => traitBadge(trait.cls, level || trait.onLevel),
+    label: trait.name,
+  }));
+  const name = document.createElement("span");
+  name.className = "buff-name";
+  name.textContent = trait.name;
+  tile.appendChild(name);
+  attachCard(tile, () => trait.cls, () => level || trait.onLevel, null, true);
+
+  // A non-member gets the same bonus at every breakpoint unless `scales`: then there is no level to ask.
+  const levelSel = document.createElement("select");
+  levelSel.className = "buff-level";
+  levelSel.title = "Level (units of the trait on the board)";
+  for (const l of trait.levels) levelSel.add(new Option(String(l), String(l)));
+  levelSel.value = String(level);
+  levelSel.style.visibility = trait.scales ? "visible" : "hidden";
+  levelSel.onchange = () => store(Number(levelSel.value), params);
+
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "row-remove";
+  remove.innerHTML = "&times;";
+  remove.title = "Remove";
+  remove.setAttribute("aria-label", "Remove " + trait.name);
+  remove.onclick = () => {
+    state.teamBuffs.delete(trait.cls);
+    onConfigChanged();
+  };
+  row.append(tile, levelSel, remove);
+
+  if (trait.options || trait.number) {
+    const line = document.createElement("label");
+    line.className = "buff-param";
     const caption = document.createElement("span");
     caption.className = "col-label";
-    caption.textContent = trait.name;
-
-    // Coloured by the level actually selected, so the badge tracks the picker
-    // beside it; an unselected trait shows its first breakpoint's tier rather
-    // than going colourless, which would read as "no icon" instead of "off".
-    // Without its icon (no icons/ folder yet) an empty cell keeps the badge
-    // column, or the name would fall into it and the switch would cover it.
-    const badge =
-      traitBadge(trait.cls, current || trait.onLevel) || document.createElement("span");
-
-    // Level 0 is kept rather than deleted so that choosing the Hex before
-    // switching the trait on doesn't throw the choice away: cfgForSlice skips
-    // anything at level 0, so an off entry costs nothing but its memory.
-    const store = (level, param) => {
-      state.teamBuffs.set(trait.cls, { level, params: param });
-      onConfigChanged();
-    };
-
-    if (trait.scales) {
-      // The team-wide half itself steps per breakpoint, or the trait asks a
-      // named choice and its level is simply a real question too. Either way
-      // it gets a picker.
+    caption.textContent = trait.paramTitle;
+    line.appendChild(caption);
+    if (trait.options) {
       const sel = document.createElement("select");
-      for (const level of trait.levels) {
-        sel.add(new Option(String(level), String(level)));
-      }
-      sel.value = String(current);
-      if (badge) label.appendChild(badge);
-      label.appendChild(caption);
-      label.appendChild(sel);
-
-      // A trait whose parameter is a real choice rather than a flag to zero
-      // asks it here, since nowhere else in this panel can.
-      let optionSel = null;
-      if (trait.options) {
-        optionSel = document.createElement("select");
-        optionSel.className = "team-option";
-        trait.options.forEach((name, index) => {
-          optionSel.add(new Option(name, String(index)));
-        });
-        optionSel.value = String(params);
-        optionSel.title = trait.paramTitle;
-        label.appendChild(optionSel);
-        optionSel.onchange = () => store(Number(sel.value), Number(optionSel.value));
-      }
-      sel.onchange = () => store(Number(sel.value), paramNow(optionSel));
-      if (numberBox) label.appendChild(numberBox);
+      trait.options.forEach((option, index) => sel.add(new Option(option, String(index))));
+      sel.value = String(params);
+      sel.onchange = () => store(level, Number(sel.value));
+      line.appendChild(sel);
     } else {
-      // A non-member gets the same bonus at every breakpoint, so asking for
-      // one would be asking a question with no answer: on/off is the whole
-      // decision. onLevel is simply the first active breakpoint.
-      const check = document.createElement("input");
-      check.type = "checkbox";
-      check.checked = current > 0;
-      check.onchange = () => store(check.checked ? trait.onLevel : 0, paramNow(null));
-      if (badge) label.appendChild(badge);
-      label.appendChild(caption);
-      label.appendChild(check);
-      if (numberBox) label.appendChild(numberBox);
+      const box = document.createElement("input");
+      box.type = "number";
+      box.min = trait.number.min;
+      if (trait.number.max != null) box.max = trait.number.max;
+      box.value = params;
+      selectZeroOnFocus(box);
+      box.onchange = () => store(level, clampInput(box));
+      line.appendChild(box);
     }
-
-    if (trait.flags) {
-      const box = document.createElement("span");
-      box.className = "team-flags";
-      box.title = trait.paramTitle;
-      trait.flags.forEach((name, bit) => {
-        const item = document.createElement("label");
-        const tick = document.createElement("input");
-        tick.type = "checkbox";
-        tick.checked = Boolean((flagBits >> bit) & 1);
-        tick.onchange = () => {
-          flagBits ^= 1 << bit;
-          const now = state.teamBuffs.get(trait.cls);
-          store(now ? now.level : 0, flagBits);
-        };
-        item.appendChild(tick);
-        item.appendChild(document.createTextNode(name));
-        box.appendChild(item);
-      });
-      label.appendChild(box);
-    }
-
-    container.appendChild(label);
+    row.appendChild(line);
   }
-
-  // Every team trait is already in the buff bar: an empty panel would just
-  // be a labelled box with nothing in it.
-  $("teamTraitsPanel").hidden = shown === 0;
+  if (trait.flags) {
+    const box = document.createElement("div");
+    box.className = "param-flags";
+    box.title = trait.paramTitle;
+    trait.flags.forEach((flag, bit) => {
+      const item = document.createElement("label");
+      const tick = document.createElement("input");
+      tick.type = "checkbox";
+      tick.checked = Boolean((params >> bit) & 1);
+      tick.onchange = () => store(level, params ^ (1 << bit));
+      item.append(tick, document.createTextNode(flag));
+      box.appendChild(item);
+    });
+    row.appendChild(box);
+  }
+  return row;
 }
 
 // ---------------------------------------------------------------------------
@@ -1596,10 +1643,10 @@ function renderTeamTraits() {
 // ---------------------------------------------------------------------------
 
 function sliceOptions() {
-  // With a full item bar only the non-item slices remain.
+  // With a full item bar only the non-item slices remain; with nothing in Team Traits, no Team Traits slice.
   const itemCount = state.cfg.items.filter((i) => i !== "NoItem").length;
-  if (itemCount >= 3) return ["Trait", "Augment/Buff"];
-  return state.catalog.slices.slice();
+  const options = itemCount >= 3 ? ["Trait", "Team Traits", "Augment/Buff"] : state.catalog.slices.slice();
+  return state.teamBuffs.size ? options : options.filter((o) => o !== "Team Traits");
 }
 
 function onConfigChanged() {
@@ -1817,8 +1864,13 @@ function plottedSlots() {
   const selection = currentSelection();
   if (selection.size || !state.current) return selection;
   const base = state.current.rows.find((r) => r.extraCls === "NoItem");
-  return base ? new Map([[base.idx, 0]]) : selection;
+  return base ? new Map([[base.idx, BASE_SLOT]]) : selection;
 }
+
+// NoItem's line has its own colour, outside the palette (owner, 2026-11-19): the first row plotted over the default
+// NoItem line must not take on the colour NoItem just had, so the swap reads as a different line.
+const BASE_SLOT = -1;
+const BASE_COLOR = "#c3c7d4";
 
 // A plotted row owns its colour slot until it is unplotted. Assigning by
 // position instead would repaint every line whenever the table is re-sorted
@@ -1830,6 +1882,11 @@ function togglePlotted(idx) {
     selection.delete(idx);
     return;
   }
+  const row = state.current && state.current.rows.find((r) => r.idx === idx);
+  if (row && row.extraCls === "NoItem") {
+    selection.set(idx, BASE_SLOT);
+    return;
+  }
   const taken = new Set(selection.values());
   let slot = 0;
   while (taken.has(slot)) slot++;
@@ -1837,7 +1894,7 @@ function togglePlotted(idx) {
 }
 
 function seriesColor(slot) {
-  return COLORS[slot % COLORS.length];
+  return slot === BASE_SLOT ? BASE_COLOR : COLORS[slot % COLORS.length];
 }
 
 function renderResults() {
@@ -1936,7 +1993,7 @@ function renderResults() {
     tr.setAttribute("aria-pressed", slot !== undefined ? "true" : "false");
     const hint = slot !== undefined ? "Click to remove from the chart" : "Click to plot";
     // the card carries the hint where there is one (a native title would pop up over it)
-    if (!attachCard(tr, row.extraCls, () => row.extraLevel, hint)) tr.title = hint;
+    if (!attachCard(tr, row.extraCls, () => row.extraLevel, hint, state.slice === "Team Traits")) tr.title = hint;
     if (row === viewed) tr.classList.add("viewing");
     const toggle = () => {
       togglePlotted(row.idx);

@@ -69,3 +69,35 @@ def test_team_halves_reach_a_non_member(cls, stat, value):
 
     trait = getattr(set19buffs, cls)
     assert stat_with([trait(trait.levels[1])]) - stat_with([]) == pytest.approx(value)
+
+
+def test_team_traits_slice_only_what_changes_a_non_member():
+    rows = {sim_entry._row_label(b): (b.level, b.params) for b in sim_entry.team_sweep_buffs(
+        [('Heartsteel', 1, 0), ('Swiftstriker', 2, 0), ('Arcanist', 2, 0), ('Composer', 0, 0)])}
+    # Heartsteel: each member fielded, the level unchanged; Swiftstriker: only off; Arcanist: its other levels;
+    # Composer (off): on
+    assert rows == {'Heartsteel (+Kayn)': (1, 1), 'Heartsteel (+Alune)': (1, 2), 'Heartsteel (+Aphelios)': (1, 4),
+                    'Heartsteel (+Ezreal)': (1, 8), 'Swiftstriker 0': (0, 0), 'Arcanist 0': (0, 0),
+                    'Arcanist 4': (4, 0), 'Arcanist 6': (6, 0), 'Composer': (1, 0)}
+    # a ticked member's row unticks it
+    assert sim_entry._row_label(sim_entry.team_sweep_buffs([('Heartsteel', 1, 8)])[3]) == 'Heartsteel (-Ezreal)'
+
+
+def test_trait_slice_leaves_team_traits_to_their_own():
+    cfg = {'buffs': [['Classical', 0, 0], ['Arcanist', 2, 0]], 'team': ['Arcanist']}
+    _, trait = sim_entry._slice_inputs('Trait', cfg)
+    _, team = sim_entry._slice_inputs('Team Traits', cfg)
+    assert {type(b).__name__ for b in trait} == {'Classical'}
+    assert {type(b).__name__ for b in team} == {'Arcanist'}
+
+
+def test_heartsteel_member_rows():
+    # Ezreal (a member) at Heartsteel 3 with Ezreal + Bias ticked: the other levels that differ (0, 7), the Bias
+    # unticked, and each other member fielded; never his own tick box, never (1) or (5)
+    rows = [(sim_entry._row_label(b), b.level, b.params) for b in
+            sim_entry.trait_sweep_buffs([('Heartsteel', 3, 24)], champ_key='DA_Ezreal19')]
+    assert rows == [('Heartsteel 0', 0, 24), ('Heartsteel 7', 7, 24), ('Heartsteel 3 (No Bias)', 3, 8),
+                    ('Heartsteel 3 (+Kayn)', 3, 25), ('Heartsteel 3 (+Alune)', 3, 26), ('Heartsteel 3 (+Aphelios)', 3, 28)]
+    # below (3) the Bias row is at (3)
+    assert ('Heartsteel 3 (No Bias)', 3, 8) in [(sim_entry._row_label(b), b.level, b.params) for b in
+                                                sim_entry.trait_sweep_buffs([('Heartsteel', 0, 24)], 'DA_Ezreal19')]
