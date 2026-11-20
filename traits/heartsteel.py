@@ -36,12 +36,21 @@ class Heartsteel(BuildTrait):
     @staticmethod
     def extraParameters():
         names = [m[0] for m in Heartsteel.MEMBERS] + ["Bias"]
-        # default: Ezreal fielded and a Bias (the one Heartsteel champion implemented)
+        # default: nothing ticked: the unit fields itself (its own box, locked on the page) and no other member, and
+        # no Bias (owner, 2026-11-19; it was Ezreal + Bias while he was the one member implemented)
         # FlagKeys: the unit each box stands for, so the page can lock a member's own box (it always counts itself as
         # fielded; owner, 2026-11-19)
-        return {"Title": "Fielded", "Min": 0, "Max": 2 ** len(names) - 1, "Default": (1 << 3) | (1 << Heartsteel.BIAS),
+        return {"Title": "Fielded", "Min": 0, "Max": 2 ** len(names) - 1, "Default": 0,
                 "Flags": names, "TeamFlags": len(Heartsteel.MEMBERS),
                 "FlagKeys": [m[1] for m in Heartsteel.MEMBERS] + [None]}
+
+    def active_for(self, champion):
+        """Does it do anything for this unit? A member always counts itself; anyone else needs a member ticked (the
+        fight viewer leaves an idle one off its card, owner 2026-11-19)."""
+        if not self.level:
+            return False
+        member = self.KEY in (champion.data.d.get("trait_keys") or [])
+        return member or bool(int(self.params or 0) & ((1 << len(self.MEMBERS)) - 1))
 
     def applyStats(self, champion):
         if getattr(champion, "trait_tiers", None) is None:

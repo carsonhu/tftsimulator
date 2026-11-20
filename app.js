@@ -1279,7 +1279,15 @@ async function selectChampion(name, { keepLevel, keepConfig = false }) {
 function defaultBuffTuple(cls) {
   const meta = state.buffMeta.get(cls);
   const params = meta.extra ? meta.extra.Default : 0;
-  return [cls, alwaysOn(cls) ? onLevel(meta) : meta.levels[0], params];
+  return [cls, barStart(cls), params];
+}
+
+// The level a buff row starts at: an own unique trait's one level; the first of a narrowed box (Heartsteel: 3, no 0:
+// owner, 2026-11-19); else the lowest (0, off).
+function barStart(cls) {
+  const meta = state.buffMeta.get(cls);
+  if (alwaysOn(cls)) return onLevel(meta);
+  return meta.barLevels ? meta.barLevels[0] : meta.levels[0];
 }
 
 // The champion's own unique trait (Composer for Malzahar) is always active: its one level, never 0 (owner,
@@ -1408,12 +1416,17 @@ function renderBuffRows() {
       return Number(meta.extra.Options ? paramSelect.value : paramInput.value);
     };
 
+    // Heartsteel's boxes (owner, 2026-11-19): no caption (its title is the tooltip); the members (the first
+    // TeamFlags) on one line when they fit, else 2 x 2, never 3 + 1; each other box (Bias) on its own line.
+    const fitFlags = () => fitFlagMembers(flagBox);
+    new ResizeObserver(fitFlags).observe(flagBox);
     const drawFlags = (meta) => {
       flagBox.innerHTML = "";
-      const caption = document.createElement("span");
-      caption.className = "col-label";
-      caption.textContent = meta.extra.Title;
-      flagBox.appendChild(caption);
+      flagBox.title = meta.extra.Title;
+      const members = document.createElement("div");
+      members.className = "flag-members";
+      flagBox.appendChild(members);
+      const nMembers = meta.extra.TeamFlags ?? meta.extra.Flags.length;
       const champKey = (champMeta() || {}).key;
       meta.extra.Flags.forEach((name, bit) => {
         const label = document.createElement("label");
@@ -1433,8 +1446,10 @@ function renderBuffRows() {
         };
         label.appendChild(check);
         label.appendChild(document.createTextNode(name));
-        flagBox.appendChild(label);
+        if (bit < nMembers) members.appendChild(label);
+        else flagBox.appendChild(Object.assign(document.createElement("div"), { className: "flag-line" })).appendChild(label);
       });
+      requestAnimationFrame(fitFlags);
     };
 
     const syncParamColumn = (meta) => {
@@ -1457,15 +1472,11 @@ function renderBuffRows() {
       }
     };
 
-    const fillLevels = (meta, current = null) => {
+    const fillLevels = (meta) => {
       levelSel.innerHTML = "";
       // the champion's own unique trait: only its active level (alwaysOn); a trait that narrows the box (barLevels,
-      // Heartsteel: 3 and 7, owner 2026-11-19) offers those, plus the level it is at if that is another (0: off)
-      let levels = alwaysOn(buffSel.value) ? [onLevel(meta)] : meta.barLevels || meta.levels;
-      const at = current === null || current === "" ? null : Number(current);
-      if (meta.barLevels && at !== null && !levels.includes(at) && meta.levels.includes(at)) {
-        levels = [...levels, at].sort((a, b) => a - b);
-      }
+      // Heartsteel: 3 and 7, never 0, owner 2026-11-19) offers only those
+      const levels = alwaysOn(buffSel.value) ? [onLevel(meta)] : meta.barLevels || meta.levels;
       for (const l of levels) levelSel.add(new Option(String(l), String(l)));
       // a buff with one level (most augments, an own unique trait) has nothing to choose
       levelSel.style.visibility = levels.length > 1 ? "visible" : "hidden";
@@ -1477,9 +1488,9 @@ function renderBuffRows() {
       // it -- otherwise changing the *level* snaps back to the first entry
       // before the config reads it.
       const previousLevel = levelSel.value;
-      fillLevels(meta, resetToDefaults ? (alwaysOn(buffSel.value) ? onLevel(meta) : meta.levels[0]) : previousLevel);
+      fillLevels(meta);
       if (resetToDefaults) {
-        levelSel.value = alwaysOn(buffSel.value) ? onLevel(meta) : meta.levels[0];
+        levelSel.value = barStart(buffSel.value);
         paramInput.value = meta.extra ? meta.extra.Default : 0;
         paramSelect.value = String(meta.extra ? meta.extra.Default : 0);
         flagBits = meta.extra ? meta.extra.Default : 0;
@@ -1538,17 +1549,18 @@ function renderBuffRows() {
       });
     // The champion's own traits stay in the bar: x turns one to 0 (and hides once it is), as removing it would only
     // hide a trait the champion has (owner, 2026-11-19). Anything else is removed.
-    const ownTrait = () => state.ownTraits.has(buffSel.value) && state.buffMeta.get(buffSel.value).levels.includes(0);
+    // an own trait whose box has a 0 (× sets it there); one without (Heartsteel) can neither go to 0 nor leave
+    const ownTrait = () => state.ownTraits.has(buffSel.value) && [...levelSel.options].some((o) => o.value === "0");
+    const pinned = () => state.ownTraits.has(buffSel.value) && !ownTrait();
     const drawRemove = () => {
       const own = ownTrait();
       // an own unique trait has neither a 0 to go to nor a way out of the bar
-      remove.style.visibility = (own && levelSel.value === "0") || alwaysOn(buffSel.value) ? "hidden" : "";
+      remove.style.visibility = (own && levelSel.value === "0") || alwaysOn(buffSel.value) || pinned() ? "hidden" : "";
       remove.title = own ? "Set to 0" : "Remove";
       remove.setAttribute("aria-label", own ? "Set this trait to 0" : "Remove buff");
     };
     remove.onclick = () => {
       if (ownTrait()) {
-        fillLevels(state.buffMeta.get(buffSel.value), 0); // a narrowed box (Heartsteel) gets its 0 back
         levelSel.value = "0";
         syncRow(false);
         drawRemove();
@@ -1562,8 +1574,12 @@ function renderBuffRows() {
 
     // Initial fill from the stored tuple.
     const meta = state.buffMeta.get(tuple[0]);
-    fillLevels(meta, tuple[1]);
+    fillLevels(meta);
     levelSel.value = String(tuple[1]);
+    if (levelSel.value === "") {  // a level the box no longer offers (Heartsteel at 0): its starting level instead
+      tuple[1] = barStart(tuple[0]);
+      levelSel.value = String(tuple[1]);
+    }
     paramInput.value = tuple[2];
     flagBits = tuple[2];
     if (meta.extra) {
@@ -1711,9 +1727,13 @@ function teamTraitRow(trait, picked) {
     row.appendChild(line);
   }
   if (trait.flags) {
+    // the members, laid out as in the buff bar: one line, or 2 x 2 (fitFlagMembers)
     const box = document.createElement("div");
     box.className = "param-flags";
     box.title = trait.paramTitle;
+    const members = document.createElement("div");
+    members.className = "flag-members";
+    box.appendChild(members);
     trait.flags.forEach((flag, bit) => {
       const item = document.createElement("label");
       const tick = document.createElement("input");
@@ -1721,11 +1741,23 @@ function teamTraitRow(trait, picked) {
       tick.checked = Boolean((params >> bit) & 1);
       tick.onchange = () => store(level, params ^ (1 << bit));
       item.append(tick, document.createTextNode(flag));
-      box.appendChild(item);
+      members.appendChild(item);
     });
     row.appendChild(box);
+    new ResizeObserver(() => fitFlagMembers(box)).observe(box);
   }
   return row;
+}
+
+// Heartsteel's member boxes (buff bar and Team Traits): one line when they fit, else 2 x 2, never 3 + 1 (owner,
+// 2026-11-19).
+function fitFlagMembers(box) {
+  const members = box.querySelector(".flag-members");
+  if (!members || !members.clientWidth) return;
+  const boxes = [...members.children];
+  const gap = parseFloat(getComputedStyle(members).columnGap) || 0;
+  const need = boxes.reduce((w, b) => w + b.offsetWidth, 0) + gap * (boxes.length - 1);
+  members.classList.toggle("two-col", need > members.clientWidth + 0.5);
 }
 
 // ---------------------------------------------------------------------------
@@ -2279,6 +2311,8 @@ function rowAddPlan(row) {
   const meta = state.buffMeta.get(cls);
   if (!meta) return null;
   const level = row.extraLevel ?? meta.levels.find((l) => l > 0) ?? meta.levels[0];
+  // a level the buff bar doesn't offer (Heartsteel 0: the box has only 3 and 7) can't be added
+  if (meta.barLevels && !meta.barLevels.includes(level) && !(state.catalog.teamBuffs || []).some((t) => t.cls === cls && !state.cfg.buffs.some(([c]) => c === cls))) return null;
   const params = row.extraParams ?? (meta.extra ? meta.extra.Default : 0);
   const name = meta.name;
   const inBar = state.cfg.buffs.findIndex(([c]) => c === cls);
@@ -2547,6 +2581,16 @@ const BONUS_GLYPHS = {
 // The chart's and the viewer's headings: the setup every row shares, in pictures. The champion's portrait with its
 // stars on it, its items, each active trait's badge with its level, augments, and the stat bonuses typed in. Drawn
 // from the config that produced the table, so it never runs ahead of the lines under it.
+// A Team Traits trait whose tick boxes name the members fielded (Heartsteel) does nothing with none ticked, so the
+// headings don't picture it (owner, 2026-11-19). In the buff bar the champion is a member and counts itself.
+function idleTeamFlags(cfg, cls, params) {
+  const meta = state.buffMeta.get(cls);
+  const extra = meta && meta.extra;
+  if (!extra || !extra.Flags || !(cfg.team || []).includes(cls)) return false;
+  const members = (1 << (extra.TeamFlags ?? extra.Flags.length)) - 1;
+  return ((params || 0) & members) === 0;
+}
+
 function renderPlotSummary() {
   renderSetupSummary($("plotSummary"));
   renderSetupSummary($("vizSetup"));
@@ -2594,7 +2638,7 @@ function renderSetupSummary(box) {
     }
   }
 
-  const buffs = cfg.buffs.filter(([, level]) => level > 0);
+  const buffs = cfg.buffs.filter(([cls, level, params]) => level > 0 && !idleTeamFlags(cfg, cls, params));
   if (buffs.length) {
     const group = add(Object.assign(document.createElement("span"), { className: "ps-group" }));
     for (const [cls, level] of buffs) {

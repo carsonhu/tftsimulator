@@ -691,9 +691,10 @@ button:focus-visible {
 /* Fixed columns for the level and the x, so every row's controls line up whatever the names. */
 .buff-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 58px 20px;
+  /* the × column only as wide as its glyph, so the level box sits near the edge (owner, 2026-11-19) */
+  grid-template-columns: minmax(0, 1fr) 58px 14px;
   align-items: center;
-  gap: 2px 6px;
+  gap: 2px 4px;
   padding: 2px 0;
   border-bottom: 1px solid #22242e;
 }
@@ -762,7 +763,7 @@ button:focus-visible {
 }
 
 .row-remove {
-  width: 22px;
+  width: 14px;
   height: 22px;
   padding: 0;
   border: none;
@@ -793,11 +794,27 @@ button:focus-visible {
 .param-flags {
   grid-column: 1 / -1;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   padding-left: 37px;
   font-size: 0.85em;
+}
+
+.param-flags[hidden] {
+  display: none;
+}
+
+/* the members on one line, or 2 x 2 when they don't fit (fitFlags); never 3 + 1 */
+.flag-members {
+  display: grid;
+  grid-template-columns: repeat(4, max-content);
+  gap: 2px 10px;
+  width: 100%;
+}
+
+.flag-members.two-col {
+  grid-template-columns: repeat(2, max-content);
 }
 
 .param-flags label {
@@ -1003,6 +1020,9 @@ button:focus-visible {
   display: flex;
   flex-direction: column;
   align-self: flex-start;
+  /* as wide as the table (its rows don't wrap), not the controls: the bar wraps onto a second line instead of
+     leaving blank space beside the table (owner, 2026-11-19) */
+  width: min-content;
   max-width: 100%;
   margin-top: 10px;
   padding: 10px 12px 12px;

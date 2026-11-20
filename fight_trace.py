@@ -146,10 +146,11 @@ class Tracer:
                           "inPlay": bool(getattr(d, "in_play", True)), "hp": d.hp.stat})
         return {
             "tps": TPS, "ticks": ticks, "units": units, "range": c.attack_range,
-            # what the champion carries: items, and the traits and augments that are on (a trait at level 0 is off)
+            # what the champion carries: items, and the traits and augments that are on (a trait at level 0 is off;
+            # one that says itself, active_for: Heartsteel with no member ticked on a non-member)
             "items": [getattr(it, "name", type(it).__name__) for it in c.items
                       if getattr(it, "name", "NoItem") not in ("NoItem", "NoBuff", "Role")
-                      and getattr(it, "level", 1) != 0],
+                      and (it.active_for(c) if hasattr(it, "active_for") else getattr(it, "level", 1) != 0)],
             "damage": self.damage_events, "projectiles": self.projectiles, "marks": self.marks,
             "snapshots": self.snapshots,
         }

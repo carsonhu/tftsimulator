@@ -63,3 +63,16 @@ def test_catalog_offers_fight_lengths():
     assert sim_entry.get_catalog()["defaults"]["traceSeconds"] == list(sim_entry.TRACE_SECONDS)
     trace = sim_entry.run_trace(_cfg("Neeko", seconds=60))
     assert trace["ticks"] == 1800
+
+
+def test_idle_heartsteel_is_off_the_viewer_card():
+    # owner, 2026-11-19: Heartsteel in Team Traits with no member ticked does nothing, so the card doesn't name it;
+    # on a member it always counts (the unit fields itself)
+    import sim_entry
+    cfg = {"champ": "Gnar", "level": 1, "items": ["Deathblade", "NoItem", "NoItem"], "buffs": [["Heartsteel", 1, 0]],
+           "team": ["Heartsteel"], "slice": "Craftable", "enemy": {"hp": 1800, "armor": 100, "mr": 100}, "row": 0}
+    assert "Heartsteel" not in sim_entry.run_trace(cfg)["items"]
+    cfg["buffs"] = [["Heartsteel", 1, 1]]  # Kayn ticked
+    assert "Heartsteel" in sim_entry.run_trace(cfg)["items"]
+    cfg.update(champ="Ezreal", buffs=[["Heartsteel", 3, 0]], team=[])
+    assert "Heartsteel" in sim_entry.run_trace(cfg)["items"]
