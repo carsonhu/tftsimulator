@@ -1260,7 +1260,18 @@ async function selectChampion(name, { keepLevel, keepConfig = false }) {
 function defaultBuffTuple(cls) {
   const meta = state.buffMeta.get(cls);
   const params = meta.extra ? meta.extra.Default : 0;
-  return [cls, meta.levels[0], params];
+  return [cls, alwaysOn(cls) ? onLevel(meta) : meta.levels[0], params];
+}
+
+// The champion's own unique trait (Composer for Malzahar) is always active: its one level, never 0 (owner,
+// 2026-11-19). Anywhere else (Team Traits, another champion's bar) it can still be off.
+function alwaysOn(cls) {
+  const meta = state.buffMeta.get(cls);
+  return Boolean(meta && meta.unique && state.ownTraits.has(cls));
+}
+
+function onLevel(meta) {
+  return meta.levels.find((l) => l > 0) ?? meta.levels[0];
 }
 
 // An emblem makes its holder a member of the trait, so picking one puts the
@@ -1422,9 +1433,11 @@ function renderBuffRows() {
 
     const fillLevels = (meta) => {
       levelSel.innerHTML = "";
-      for (const l of meta.levels) levelSel.add(new Option(String(l), String(l)));
-      // a buff with one level (most augments) has nothing to choose
-      levelSel.style.visibility = meta.levels.length > 1 ? "visible" : "hidden";
+      // the champion's own unique trait: only its active level (alwaysOn)
+      const levels = alwaysOn(buffSel.value) ? [onLevel(meta)] : meta.levels;
+      for (const l of levels) levelSel.add(new Option(String(l), String(l)));
+      // a buff with one level (most augments, an own unique trait) has nothing to choose
+      levelSel.style.visibility = levels.length > 1 ? "visible" : "hidden";
     };
 
     const syncRow = (resetToDefaults) => {
@@ -1435,7 +1448,7 @@ function renderBuffRows() {
       const previousLevel = levelSel.value;
       fillLevels(meta);
       if (resetToDefaults) {
-        levelSel.value = meta.levels[0];
+        levelSel.value = alwaysOn(buffSel.value) ? onLevel(meta) : meta.levels[0];
         paramInput.value = meta.extra ? meta.extra.Default : 0;
         paramSelect.value = String(meta.extra ? meta.extra.Default : 0);
         flagBits = meta.extra ? meta.extra.Default : 0;
@@ -1497,7 +1510,8 @@ function renderBuffRows() {
     const ownTrait = () => state.ownTraits.has(buffSel.value) && [...levelSel.options].some((o) => o.value === "0");
     const drawRemove = () => {
       const own = ownTrait();
-      remove.style.visibility = own && levelSel.value === "0" ? "hidden" : "";
+      // an own unique trait has neither a 0 to go to nor a way out of the bar
+      remove.style.visibility = (own && levelSel.value === "0") || alwaysOn(buffSel.value) ? "hidden" : "";
       remove.title = own ? "Set to 0" : "Remove";
       remove.setAttribute("aria-label", own ? "Set this trait to 0" : "Remove buff");
     };

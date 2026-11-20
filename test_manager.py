@@ -101,3 +101,13 @@ def test_heartsteel_member_rows():
     # below (3) the Bias row is at (3)
     assert ('Heartsteel 3 (No Bias)', 3, 8) in [(sim_entry._row_label(b), b.level, b.params) for b in
                                                 sim_entry.trait_sweep_buffs([('Heartsteel', 0, 24)], 'DA_Ezreal19')]
+
+
+def test_own_unique_trait_is_always_on():
+    # Composer is unique (the build's kind): Malzahar, its member, always has it, so his Trait slice has no
+    # Composer 0 row; for anyone else it can be off, and that row says so (owner, 2026-11-19)
+    assert next(b for b in sim_entry.get_catalog()["buffs"] if b["cls"] == "Composer")["unique"]
+    rows = [sim_entry._row_label(b) for b in sim_entry.trait_sweep_buffs([("Composer", 1, 5)], "DA_Malzahar19")]
+    assert rows == []
+    rows = [sim_entry._row_label(b) for b in sim_entry.trait_sweep_buffs([("Composer", 1, 5)], "DA_Draven19")]
+    assert rows == ["Composer 0"]

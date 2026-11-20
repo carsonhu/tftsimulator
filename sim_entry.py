@@ -205,6 +205,10 @@ def get_catalog():
                 # the picker's section: Trait, Augment, or None (NoBuff)
                 "kind": "Trait" if cls_name in set19buffs.class_buffs
                 else "Augment" if cls_name in set19buffs.augments else None,
+                # a unique trait (the build's kind, e.g. Composer): its one champion always has it active, so in that
+                # champion's buff bar it sits at its level with no 0 to pick (owner, 2026-11-19)
+                "unique": cls_name in set19buffs.class_buffs
+                and (build.data["traits"].get(getattr(cls, "KEY", None)) or {}).get("kind") == "Unique",
             }
         )
 
@@ -469,6 +473,16 @@ def _labelled(cls, rows):
     return out
 
 
+def _own_unique(cls, champ_key):
+    """Whether `cls` is a unique trait (the build's kind) of the champion `champ_key`: always active for it."""
+    if not champ_key:
+        return False
+    build = load_build()
+    trait = build.data["traits"].get(getattr(cls, "KEY", None)) or {}
+    champ = build.data["champions"].get(champ_key) or {}
+    return trait.get("kind") == "Unique" and cls.KEY in (champ.get("trait_keys") or [])
+
+
 def trait_sweep_buffs(buff_specs, champ_key=None):
     """The buff rows the Trait slice runs, for a bar of (name, level, params). A trait that knows which of its rows
     matter (`sweep_rows`: Heartsteel) gives them itself."""
@@ -478,9 +492,11 @@ def trait_sweep_buffs(buff_specs, champ_key=None):
         if hasattr(cls, "sweep_rows"):
             extra += _labelled(cls, cls.sweep_rows(level, params, member=True, champ_key=champ_key))
             continue
-        # Every *other* level of the buff, at the flag it is already on.
+        # Every *other* level of the buff, at the flag it is already on; never 0 for the champion's own unique trait,
+        # which it always has (Composer for Malzahar, owner 2026-11-19)
+        always_on = _own_unique(cls, champ_key)
         for lvl in cls.levels:
-            if lvl != level:
+            if lvl != level and not (always_on and lvl == 0):
                 extra.append(cls(lvl, params))
         # And for a champion-specific flag like Hitmaker's Big Shot, the
         # same levels with the flag flipped, so what the flag is worth is a
@@ -612,6 +628,8 @@ def _row_label(extra):
         return f"{extra.name} ({typed['template'].format(typed['value'])})"
     cls = type(extra)
     levels = [lvl for lvl in getattr(cls, "levels", []) if lvl]
+    if isinstance(extra, set19buffs.Buff) and len(levels) == 1 and 0 in getattr(cls, "levels", []) and not extra.level:
+        return f"{extra.name} 0"  # a one-level trait switched off (a unique trait: "Composer 0")
     if not isinstance(extra, set19buffs.Buff) or len(levels) < 2:
         return extra.name
     label = f"{extra.name} {extra.level}"
