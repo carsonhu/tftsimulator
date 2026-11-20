@@ -11,6 +11,11 @@ from set19champs import Malzahar, Varus
 from simulator import Simulator
 from test_timing import dummy
 
+# the layout these numbers were taken on: the target and 2 enemies behind it, in a line (the old default, before
+# the page's targets became every enemy in play, owner 2026-11-19)
+OLD_LINE = Layout(3, "line")
+
+
 V = 'rls-19.1.0.5973071.Set19.Shipping.pbe'
 
 
@@ -30,7 +35,8 @@ class LoggedMalzahar(Malzahar):
 
 
 def fight(c, items=(), buffs=(), seconds=10, mr=0, layout=None):
-    ds = [dummy() for _ in range((layout or Layout()).count)]
+    layout = layout or OLD_LINE
+    ds = [dummy() for _ in range(layout.count)]
     for d in ds:
         d.armor.base, d.mr.base = 0, mr
     Simulator().simulate(list(items), list(buffs), c, ds, seconds, layout=layout)
@@ -75,7 +81,7 @@ def test_beam_and_bursts():
     # the shred: 30% for 4 s on everyone a burst hits (MR x 0.7): with 2 targets, the target and its neighbour, not
     # the one 2 hexes behind
     m = LoggedMalzahar(1)
-    ds, rows = fight(m, seconds=7.5, mr=100, layout=Layout(2))
+    ds, rows = fight(m, seconds=7.5, mr=100, layout=OLD_LINE)
     assert [d.mr.stat for d in ds] == [70, 70, 100]
 
 

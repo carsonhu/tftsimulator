@@ -9,12 +9,18 @@ from simulator import Simulator
 from test_timing import dummy
 from timing import TPS
 
+# the layout these numbers were taken on: the target and 2 enemies behind it, in a line (the old default, before
+# the page's targets became every enemy in play, owner 2026-11-19)
+OLD_LINE = Layout(3, "line")
+
+
 V = 'rls-19.1.0.5973071.Set19.Shipping.pbe'
 
 
 def fight(layout=None, seconds=10):
     b = Bard(1, build=load_build(V))
-    ds = [dummy() for _ in range((layout or Layout()).count)]
+    layout = layout or OLD_LINE
+    ds = [dummy() for _ in range(layout.count)]
     for d in ds:
         d.mr.base = 0  # the wave's magic damage as dealt
     Simulator().simulate([], [], b, ds, seconds, layout=layout)
@@ -31,19 +37,18 @@ def test_cast_locks_follow_the_wave_cast():
 def test_wave_falloff_and_timing():
     # 20 mana + 10 per attack (MagicMarksman): releases 6, 46, ..., 206 -> 80 -> cast at 207. FireMeeps 0.4381 s ->
     # 221. The wave starts half a hex behind Bard at 1000 units/s: the target (4 hexes) after (107.5 + 860) / 1000 s
-    # = 29 ticks (250); the default 2 targets and the enemy 2 hexes behind stand in a line (layout.py), each a hex
-    # further along (257, 263). Each hit 210 x AP x falloff (1, 0.7, 0.49) in two halves 3 ticks apart.
+    # = 29 ticks (250); the 3 dummies stand in a line (OLD_LINE), each a hex further along (257, 263). Each hit 210 x AP x falloff (1, 0.7, 0.49) in two halves 3 ticks apart.
     b, ds, spells = fight()
     assert sorted(spells[:6]) == [(250, 105.0), (253, 105.0), (257, 73.5), (260, 73.5), (263, 51.45), (266, 51.45)]
 
 
 def test_wave_meets_the_number_of_targets():
-    # a line meets every enemy on it: the default 2 targets and the one 2 hexes behind, 6 halves from the first cast
+    # a line meets every enemy on it: 3 in a line, 6 halves from the first cast
     b, ds, spells = fight()
     assert len([s for s in spells if s[0] < 300]) == 6
-    # one target: the target and the one 2 hexes behind, in the line (the spare dummy is out of play)
+    # one target: the target alone (owner, 2026-11-19; the spare dummy is out of play)
     b, ds, spells = fight(Layout(1))
-    assert spells == [(250, 105.0), (253, 105.0), (263, 73.5), (266, 73.5)]  # one cast in 10 s
+    assert spells == [(250, 105.0), (253, 105.0)]  # one cast in 10 s
 
 
 def test_falloff_floor():

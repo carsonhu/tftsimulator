@@ -5,10 +5,10 @@ Hexes are axial coordinates (q, r). The champion stands at (0, 0) and its target
 attack range (G4: the target is at attack range). The page sets one number, the targets (owner, 2026-11-18): the
 target and `targets` - 1 enemies on the hexes next to it, filled starting behind the target (away from the champion)
 and going round, so each is next to the one before (ricochets fly 1 hex, B12). Every splash, line or nearby-enemies
-rule of 1 hex or more meets all of them. One more enemy always stands 2 hexes behind the target, in line with the
-champion and the target (`far`): a 2-hex area meets it, a 1-hex one doesn't. The default is 2 targets (owner,
-2026-11-18): the target, one enemy behind it and one 2 hexes behind it, in a line, the layout before the slider.
-A champion whose damage does not depend on the targets gets no slider and the default.
+rule of 1 hex or more meets all of them. The targets are every enemy in play (owner, 2026-11-19: "Jhin with 1 target
+should only hit 1 target"): there used to be one more, always 2 hexes behind the target, which a 1-target fight's
+piercing shots still hit. The default is 2 targets: the target and one enemy behind it. A champion whose damage
+does not depend on the targets gets no slider and the default.
 
 A fight with one target also holds a spare dummy far away, out of play: no area, line or ricochet sees it; only
 Titanic Hydra's assumed neighbour (owner: always one enemy next to the target) uses it (`neighbour`).
@@ -20,7 +20,7 @@ import math
 
 DIRECTIONS = ((1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1))
 HEX_UNITS = 215.0  # world units between hex centres (timing.HEX_UNITS, G4)
-TARGETS = 2  # the page's default (owner, 2026-11-18: the target and 1 enemy next to it, plus the one 2 hexes away)
+TARGETS = 2  # the page's default: the target and 1 enemy next to it
 MAX_TARGETS = 7  # the target and its 6 neighbours
 
 
@@ -41,34 +41,42 @@ def ring(center, radius):
     return out
 
 
-class Layout:
-    """The page's layout setting: the number of targets (the target and the enemies next to it)."""
+SHAPES = ("cluster", "line")
 
-    def __init__(self, targets=TARGETS):
+
+class Layout:
+    """The page's layout setting: the number of targets, and how they stand (the champion's `TARGETS_SHAPE`):
+    "cluster" (default), the target and the enemies on the hexes next to it; "line", the target and the enemies
+    behind it, each 1 hex further, in line with the champion (owner, 2026-11-19: Jhin's piercing shots, at most 3)."""
+
+    def __init__(self, targets=TARGETS, shape="cluster"):
         if not 1 <= targets <= MAX_TARGETS:
             raise ValueError(f'layout: {targets} targets (1-{MAX_TARGETS})')
+        if shape not in SHAPES:
+            raise ValueError(f'layout: shape {shape!r} (one of {SHAPES})')
         self.targets = targets
+        self.shape = shape
 
     @property
     def count(self):
-        """Dummies a fight needs: the targets, the one 2 hexes behind, and a spare when there is only one target
-        (`neighbour`)."""
-        return self.targets + 1 + (self.targets == 1)
+        """Dummies a fight needs: the targets, and a spare out of play when there is only one (`neighbour`)."""
+        return self.targets + (self.targets == 1)
 
     def place(self, champion, dummies):
         """Put the champion and `dummies` (the target first) on their hexes; any beyond the targets are out of play."""
         target = (max(1, champion.attack_range or 1), 0)
-        far = (target[0] + 2, 0)  # 2 hexes behind the target, in line with the champion
-        # a melee unit stands on one of the target's neighbouring hexes: skip it (a 7th target then stands 2 away)
-        free = [h for h in ring(target, 1) + ring(target, 2) if h not in ((0, 0), far)]
-        spots = [target] + free[:self.targets - 1] + [far]
+        if self.shape == "line":  # behind the target, away from the champion
+            free = [(target[0] + k, 0) for k in range(1, self.targets)]
+        else:  # a melee unit stands on one of the target's neighbouring hexes: skip it (a 7th then stands 2 away)
+            free = [h for h in ring(target, 1) + ring(target, 2) if h != (0, 0)]
+        spots = [target] + free[:self.targets - 1]
         champion.hex = (0, 0)
         for i, dummy in enumerate(dummies):
             dummy.in_play = i < len(spots)
             dummy.hex = spots[i] if dummy.in_play else (target[0] + 10 + i, 0)
 
     def __repr__(self):
-        return f'Layout(targets={self.targets})'
+        return f'Layout(targets={self.targets}, shape={self.shape!r})'
 
 
 def in_play(dummies):

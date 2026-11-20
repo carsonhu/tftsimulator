@@ -162,6 +162,25 @@ def test_heartsteel_augments():
     assert crit([hs(), set19buffs.SmallSquad()]) == pytest.approx(base * 2)
 
 
+def test_small_squad_reaches_non_members():
+    # Lucian (not Heartsteel) with Alune, Aphelios and Ezreal fielded: Small Squad doubles each team-wide bonus
+    # (GE_Heartsteel19_<Member>_SelflessBonus = row x TrueDamageCalc3); a 4th member fielded switches it off;
+    # Big Solo is a Bias's, so nothing
+    def stats(buffs):
+        c = lucian()
+        c.fullMana.base = 10 ** 6
+        run(c, buffs, seconds=0.1)
+        return c.ap.stat, c.crit.stat, c.aspd.stat
+    three = (1 << 1) | (1 << 2) | (1 << 3)
+    ap, crit, aspd = stats([set19buffs.Heartsteel(1, three)])
+    ap2, crit2, aspd2 = stats([set19buffs.Heartsteel(1, three), set19buffs.SmallSquad()])
+    assert (ap2 - 1, crit2 - 0.25) == (pytest.approx(2 * (ap - 1)), pytest.approx(2 * (crit - 0.25)))
+    assert aspd2 / 0.75 == pytest.approx(1 + 2 * (aspd / 0.75 - 1))
+    four = three | 1
+    assert stats([set19buffs.Heartsteel(1, four), set19buffs.SmallSquad()]) == stats([set19buffs.Heartsteel(1, four)])
+    assert stats([set19buffs.Heartsteel(1, three), set19buffs.BigSolo()]) == (ap, crit, aspd)
+
+
 def test_sunder_and_shred():
     c = lucian()
     ds = run(c, [set19buffs.Sunder30(), set19buffs.Shred30()])

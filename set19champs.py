@@ -1718,6 +1718,9 @@ class Kayn(BuildChampion):
     """
     KEY = 'DA_Kayn19'
     AREA = True  # the rectangle can hold enemies behind the target (layout.py)
+    # his targets stand in a line behind the target, at most 2, 1 by default (owner, 2026-11-19); Bard's wave stays a
+    # cluster
+    TARGETS_SHAPE, TARGETS_MAX, TARGETS_DEFAULT = "line", 2, 1
     CAST = 'CD_Kayn19_Spell'
     SHADOW_ASSASSIN_AT = 5.0  # seconds into combat the Bias transforms (owner, 2026-11-18, Q17)
 
@@ -1736,12 +1739,18 @@ class Kayn(BuildChampion):
 
     def swipe_targets(self, target):
         """The dummies in the SpellLength x SpellWidth rectangle from him toward `target`
-        (TR_Add_UnitsWithinRectanglePointProjection), nearest first; the target if none."""
+        (TR_Add_UnitsWithinRectanglePointProjection), nearest first; the target if none.
+
+        The length reaches a unit 2 hexes away (owner, 2026-11-19: "it should hit 2"): SpellLength 429 is a unit short
+        of 2 hexes here (2 x HEX_UNITS 215 = 430), while the data's own SpellHexLength (2), the tooltip's "2-hex line"
+        and MakeDashDecision's 2-hex line through the target all mean the target and the enemy behind it. So the
+        longer of the two."""
         sx, sy = layout.world(self.hex)
         tx, ty = layout.world(target.hex)
         n = math.hypot(tx - sx, ty - sy) or 1
         ux, uy = (tx - sx) / n, (ty - sy) / n
-        length, width = self.row('SpellLength'), self.row('SpellWidth')
+        length = max(self.row('SpellLength'), self.row('SpellHexLength') * HEX_UNITS)
+        width = self.row('SpellWidth')
         hit = []
         for d in layout.in_play(self.opponents):
             x, y = layout.world(d.hex)
@@ -2511,6 +2520,8 @@ class Jhin(BuildChampion):
     """
     KEY = 'DA_Jhin19'
     AREA = True  # piercing shots after ascension hit the dummies behind the target (layout.py)
+    # his targets stand in a line behind the target, at most 3 (owner, 2026-11-19): what the piercing shots meet
+    TARGETS_SHAPE, TARGETS_MAX = "line", 3
     ATTACK = 'CD_Jhin19_Attack_new'
     VIOLIN = 'CD_Jhin19_ViolinAttack'
     VIOLIN_PIERCE = 'CD_Jhin19_ViolinAttack_Piercing'

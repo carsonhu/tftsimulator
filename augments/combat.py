@@ -333,6 +333,8 @@ class ComebackStory(BuildAugment):
     the replays predate patch 18.7 (Attack Speed Per Missing HP 0.3% -> 0.4%), and multiplying implied exactly 0.30%
     in every band, where adding drifted from 0.31% to 0.45%."""
     KEY, display_name = "DA_ComebackStory", "Comeback Story"
+    CARD_NOTE = ("Multiplicative", "The attack speed multiplies the unit's total attack speed, on top of its other "
+                                   "bonuses, rather than adding to them.")
 
     @staticmethod
     def extraParameters():
@@ -436,12 +438,17 @@ class BigSolo(_HeartsteelAugment):
 @register("augment")
 class SmallSquad(_HeartsteelAugment):
     """Small Squad (DA_Augment19_Heartsteel_SmallSquad): with MaxHeartsteelChamps (3) or fewer Heartsteel champions
-    fielded, their bonuses increase by BonusPercentIncrease (100%) (the Heartsteel trait counts its tick boxes)."""
+    fielded, their bonuses increase by BonusPercentIncrease (100%) (the Heartsteel trait counts its tick boxes).
+
+    For the whole team, members or not (owner caught it on Xayah, 2026-11-19; 19.1 PBE export): while the army's
+    Heartsteel count is <= MaxTraitCount, GA_Augment19_Heartsteel_SmallSquad puts GE_..._SmallSquad_BonusIncrease
+    (TrueDamageCalc3 + 1) on the Heartsteel trait actor, and each member's team-wide bonus,
+    GE_Heartsteel19_<Member>_SelflessBonus on every ally, is its row x TrueDamageCalc3 (1 from the trait, 2 with this):
+    Kayn AD PhysicalDamageCalc1 x it, Alune AP, Ezreal crit, Aphelios AS 1 + AttackSpeedCalc1 x it."""
     KEY, display_name = "DA_Augment19_Heartsteel_SmallSquad", "Small Squad"
 
     def heartsteel_extra(self, champion, bias, fielded):
-        member = "DA_Heartsteel19" in (champion.data.d.get("trait_keys") or [])
-        ok = member and fielded <= self.value(champion, "MaxHeartsteelChamps")
+        ok = fielded <= self.value(champion, "MaxHeartsteelChamps")
         return self.value(champion, "BonusPercentIncrease") if ok else 0
 
 

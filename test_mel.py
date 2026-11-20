@@ -6,6 +6,12 @@ from buildstore import load_build
 from set19champs import Mel
 from simulator import Simulator
 from test_timing import dummy
+from layout import Layout
+
+# the layout these numbers were taken on: the target and 2 enemies behind it, in a line (the old default, before
+# the page's targets became every enemy in play, owner 2026-11-19)
+OLD_LINE = Layout(3, "line")
+
 
 V = 'rls-19.1.0.5986094.Set19.Shipping.pbe'
 
@@ -30,7 +36,7 @@ def test_missiles_and_blues():
     ds = [dummy() for _ in range(3)]
     for d in ds:
         d.armor.base = d.mr.base = 0
-    Simulator().simulate([], [], m, ds, 15)
+    Simulator().simulate([], [], m, ds, 15, layout=OLD_LINE)
     assert len(casts) >= 2
     # 3 of every 5 missiles on the target, the rest split over the other two: 18 / 6 / 6 per cast
     stacks = sorted(m.blues.get(id(d), 0) for d in ds)

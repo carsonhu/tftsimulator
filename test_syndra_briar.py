@@ -12,9 +12,14 @@ from timing import TPS
 V = 'rls-19.1.0.5973071.Set19.Shipping.pbe'
 
 
-def fight(cls, targets=2, seconds=8, ad=None, layout=None):
+# the layout the timelines were taken on: the target and 2 enemies behind it, in a line (the old default, before the
+# page's targets became every enemy in play, owner 2026-11-19)
+OLD_LINE = Layout(3, "line")
+
+
+def fight(cls, targets=None, seconds=8, ad=None, layout=None):
     c = cls(1, build=load_build(V))
-    lay = layout or Layout(targets)
+    lay = layout or (Layout(targets) if targets else OLD_LINE)
     ds = [dummy() for _ in range(lay.count)]
     for d in ds:
         d.armor.base = d.mr.base = 0
@@ -67,8 +72,9 @@ def test_syndra_bounces_in_place_alone():
 
 
 def test_syndra_bounce_goes_behind():
-    # the cone points away from Syndra: the farthest-back enemy, the one 2 hexes straight behind the target
-    c, casts, rows, mana = fight(Syndra, targets=7, seconds=1)
+    # the cone points away from Syndra: the farthest-back enemy, the one 2 hexes straight behind the target (not the
+    # one between)
+    c, casts, rows, mana = fight(Syndra, seconds=1)
     target = c.opponents[0]
     other = c.bounce_target(target)
     assert other.hex == (target.hex[0] + 2, target.hex[1])
@@ -91,6 +97,8 @@ def test_briar_cast_timeline_and_frenzy():
 
 
 def test_briar_aoe_reads_the_targets():
+    # the landing hits every target; which dash she takes (and so when it lands) depends on how far the farthest is
     for targets in (1, 3, 5):
         c, casts, rows, mana = fight(Briar, targets=targets, seconds=4)
-        assert len([t for t, d, typ in rows if t == casts[0] + 27]) == targets  # the Long dash (+6 + 21)
+        land = min(t for t, d, typ in rows if t > casts[0])
+        assert len([t for t, d, typ in rows if t == land]) == targets

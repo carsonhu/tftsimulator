@@ -89,7 +89,6 @@ const state = {
     rowInputs: {},
     bonus: { ad: 0, ap: 0, as: 0, dmgamp: 0, crit: 0, critdmg: 0, manaregen: 0, mpa: 0 },
     stage: "4-1",
-    tactician_level: 4,
     items: ["NoItem", "NoItem", "NoItem"],
     buffs: [], // [cls, level, params]
     enemy: { hp: 1800, armor: 100, mr: 100 },
@@ -335,6 +334,12 @@ function fillCard(cls, level, hint, team = false) {
   }
   if (card.stats.length) statParts(add("card-stats", ""), card.stats);
   if (card.text) add("card-text", card.text);
+  // the simulator's own note on how it works (sim_entry CARD_NOTE): "[Multiplicative] The attack speed multiplies ..."
+  if (card.note) {
+    const note = add("card-note", "");
+    note.append(Object.assign(document.createElement("span"), { className: "card-note-tag", textContent: card.note.tag }),
+      card.note.text);
+  }
   const active = card.tiers.filter((t) => level != null && t.threshold <= level).pop();
   for (const t of card.tiers) richText(add("card-tier" + (t === active ? " active" : ""), ""), t.text);
   if (hint) add("card-hint", hint);
@@ -530,10 +535,6 @@ function buildStaticControls() {
     onConfigChanged();
   };
 
-  bindSlider("tactician", "tacticianValue", (v) => {
-    state.cfg.tactician_level = v;
-    onConfigChanged();
-  });
 
   // Takedowns this game: Cappa Juice's Hats.
   $("takedowns").onchange = () => {
@@ -600,8 +601,10 @@ function buildStaticControls() {
   $("layoutTargetsValue").textContent = state.cfg.layout.targets;
   bindSlider("layoutTargets", "layoutTargetsValue", (v) => {
     state.cfg.layout.targets = v;
+    renderTargetsSeg();
     onConfigChanged();
   });
+  renderTargetsSeg();
 
   // A buff row is added by picking its buff, so the bar never holds an empty
   // row that runs the whole table again for nothing.
@@ -1177,12 +1180,49 @@ function buildPills(container, values, selected, onPick) {
 // Champion selection & buff bar
 // ---------------------------------------------------------------------------
 
+// The Targets buttons (1 .. max) over the hidden range input, which stays the value: a click sets it and fires its
+// change, so everything else (bindSlider, the browser checks) sees one control.
+function renderTargetsSeg() {
+  const range = $("layoutTargets");
+  const seg = $("targetsSeg");
+  const max = Number(range.max);
+  if (seg.children.length !== max) {
+    seg.innerHTML = "";
+    for (let n = 1; n <= max; n++) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("role", "radio");
+      b.textContent = n;
+      b.onclick = () => {
+        if (range.value === String(n)) return;
+        range.value = n;
+        range.dispatchEvent(new Event("change"));
+      };
+      seg.appendChild(b);
+    }
+  }
+  [...seg.children].forEach((b, i) => b.setAttribute("aria-checked", String(i + 1 === Number(range.value))));
+}
+
 async function selectChampion(name, { keepLevel, keepConfig = false }) {
   const meta = champMeta(name);
   state.cfg.champ = name;
   if ($("champ").value !== name) $("champ").value = name;  // the bar shows what runs (boot picks a default)
   renderChampPick();
   $("targetsRow").hidden = !meta.area;
+  // its own cap, shape and default (Jhin: a line of 3 behind the target; Kayn: a line of 2, 1 by default): a newly
+  // picked champion starts at its default, and a value over the cap comes down to it
+  const range = $("layoutTargets");
+  range.max = meta.targetsMax || state.catalog.defaults.layout.max;
+  if (!keepConfig) state.cfg.layout.targets = meta.targetsDefault || state.catalog.defaults.layout.targets;
+  if (state.cfg.layout.targets > Number(range.max)) state.cfg.layout.targets = Number(range.max);
+  range.value = state.cfg.layout.targets;
+  $("layoutTargetsValue").textContent = range.value;
+  $("targetsRow").title =
+    meta.targetsShape === "line"
+      ? "The target and the enemies standing in a line behind it, which the champion's piercing shots pass through."
+      : "The target and the enemies next to it, which the champion's area damage hits.";
+  renderTargetsSeg();
 
   const levelSel = $("level");
   levelSel.innerHTML = "";

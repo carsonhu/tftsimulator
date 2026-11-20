@@ -10,6 +10,12 @@ from buildstore import load_build
 from set19champs import Jhin
 from simulator import Simulator
 from test_timing import dummy
+from layout import Layout
+
+# the layout these numbers were taken on: the target and 2 enemies behind it, in a line (the old default, before
+# the page's targets became every enemy in play, owner 2026-11-19)
+OLD_LINE = Layout(3, "line")
+
 
 V = 'rls-19.1.0.5986094.Set19.Shipping.pbe'
 
@@ -29,7 +35,7 @@ def fight(seconds=22, buffs=()):
     ds = [dummy() for _ in range(3)]  # in a line behind the target (test_timing)
     for d in ds:
         d.armor.base = d.mr.base = 0
-    Simulator().simulate([], list(buffs), j, ds, seconds)
+    Simulator().simulate([], list(buffs), j, ds, seconds, layout=OLD_LINE)
     hits = collections.defaultdict(list)
     for t, d, *_ in j.dmgVector:
         hits[round(t * 30)].append(round(d[0], 2))

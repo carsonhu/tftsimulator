@@ -8,6 +8,12 @@ from set19champs import Ezreal
 from simulator import Simulator
 from test_timing import dummy
 from timing import projectile_ticks, ticks_up
+from layout import Layout
+
+# the layout these numbers were taken on: the target and 2 enemies behind it, in a line (the old default, before
+# the page's targets became every enemy in play, owner 2026-11-19)
+OLD_LINE = Layout(3, "line")
+
 
 V = 'rls-19.1.0.5973071.Set19.Shipping.pbe'
 
@@ -31,7 +37,7 @@ def fight(c, items=(), buffs=(), seconds=12, n=3):
     for d in ds:
         d.armor.base = 0
         d.mr.base = 0
-    Simulator().simulate(list(items), list(buffs), c, ds, seconds)
+    Simulator().simulate(list(items), list(buffs), c, ds, seconds, layout=OLD_LINE)
     return [(round(t * 30), round(d[0], 4)) for t, d, *_ in c.dmgVector]
 
 

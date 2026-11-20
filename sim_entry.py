@@ -138,6 +138,10 @@ def get_catalog():
         parent = next((b.__name__ for b in cls.__mro__[1:] if b.__name__ in set19champs.champ_list), None)
         champions.append({"name": name, "label": getattr(cls, "display_name", name), "levels": levels,
                           "area": bool(getattr(cls, "AREA", False)), "cost": _cost(cls, build),
+                          # the Targets buttons it gets (layout.py): its cap, and how its enemies stand
+                          "targetsMax": getattr(cls, "TARGETS_MAX", MAX_TARGETS),
+                          "targetsDefault": getattr(cls, "TARGETS_DEFAULT", TARGETS),
+                          "targetsShape": getattr(cls, "TARGETS_SHAPE", "cluster"),
                           "variantOf": parent, "mode": getattr(cls, "MODE", None)})
     # the menu's order (owner, 2026-11-18): by cost, then name; the page opens on the first by name, as before
     default_champion = champions[0]["name"] if champions else None
@@ -296,7 +300,6 @@ def get_catalog():
             "enemy": {"hp": 1800, "armor": 100, "mr": 100},
             "stages": ["2-1", "3-1", "4-1", "5-1", "6-1"],
             "stageDefault": "4-1",
-            "tactician": {"min": 3, "max": 10, "default": 4},
             "frameRates": [30],  # the game runs at 30 Hz (T1)
             "duration": 30,
             "numItems": 3,
@@ -321,7 +324,7 @@ def _build_champion(cfg):
       "layout": {"targets": 3},                    # the target and the enemies next to it (layout.py; AREA champions)
       "takedowns": 0,
       "bonus": {"ad","ap","as","manaregen","mpa","dmgamp","crit","critdmg"},
-      "stage": "4-1", "tactician_level": 4,
+      "stage": "4-1",
       "build": "<version>"|null,                   # client build (default: newest)
       "items": ["NoItem","NoItem","NoItem"],       # class names
       "buffs": [["Encore", 2, 0], ...],            # (class, level, params)
@@ -347,7 +350,6 @@ def _build_champion(cfg):
 
     stage = cfg.get("stage", "4-1")
     champ.stage = int(str(stage).split("-")[0])
-    champ.tactician_level = int(cfg.get("tactician_level", 4))
 
     for item_cls in cfg.get("items", []):
         if item_cls and item_cls != "NoItem":
@@ -389,9 +391,13 @@ def _champion_class(cfg):
 def _layout(cfg):
     """Where the dummies stand: the page's 'Number of targets' (layout.py), for a champion whose damage depends on it
     (AREA); any other gets the default, as the page shows it no slider."""
-    if not getattr(_champion_class(cfg), "AREA", False):
+    cls = _champion_class(cfg)
+    if not getattr(cls, "AREA", False):
         return Layout()
-    return Layout(int((cfg.get("layout") or {}).get("targets", TARGETS)))
+    # the champion's own cap and shape (TARGETS_MAX, TARGETS_SHAPE: Jhin's line of 3, owner 2026-11-19)
+    asked = (cfg.get("layout") or {}).get("targets", getattr(cls, "TARGETS_DEFAULT", TARGETS))
+    targets = min(int(asked), getattr(cls, "TARGETS_MAX", MAX_TARGETS))
+    return Layout(targets, getattr(cls, "TARGETS_SHAPE", "cluster"))
 
 
 def _build_enemy(cfg):
@@ -812,6 +818,25 @@ def _tag_tier(text, cls):
     return re.sub(r"(?<=\d%)(?![A-Za-z])", lambda m: tags.pop(0) if tags else "", text, count=len(tags))
 
 
+# A tooltip's placeholders the game fills in live (counters, its own calc slots, localisation keys): a card shows
+# none of them (owner, 2026-11-19: "Current Hats: (live)").
+_PLACEHOLDER = r"(?:⟨[^⟩]*⟩|\{[^}]*\}|<[^>]*>|\[[^\]]*\?\])"
+# a line that is only a label and a placeholder ("Current Hats: <live>", "Gold collected: <live>Coin"): dropped
+_PLACEHOLDER_LINE = re.compile(r"^[^\n:]*:[ \t]*" + _PLACEHOLDER + r"\w*[ \t]*$", re.M)
+# a parenthesis around one ("(Total: <live>)"): dropped
+_PLACEHOLDER_PAREN = re.compile(r"\s*\([^()]*" + _PLACEHOLDER + r"[^()]*\)")
+
+
+def _clean_card_text(text):
+    """A tooltip without the placeholders only the game can fill in: label-and-placeholder lines and parentheses
+    around one go, any other placeholder is cut out, and the blank lines left behind collapse."""
+    text = _PLACEHOLDER_LINE.sub("", text)
+    text = _PLACEHOLDER_PAREN.sub("", text)
+    text = re.sub(_PLACEHOLDER, "", text)
+    text = re.sub(r"[ \t]+\n", "\n", re.sub(r"[ \t]{2,}", " ", text))
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
 def get_cards(cfg):
     """{class name: card} for every item and buff class with a build key: the build's name, kind (item kind, augment
     tier or trait kind), stat line, text and (traits) breakpoints, all from the selected build. The page shows one
@@ -830,10 +855,15 @@ def get_cards(cfg):
                 "name": entry.get("name") or key,
                 "kind": entry.get("kind") or entry.get("tier") or "",
                 "stats": [_stat_part(s) for s in (entry.get("stat_text") or "").split()],
-                "text": entry.get("text") or "",
-                "tiers": [{"threshold": t.get("threshold"), "text": _tag_tier(t.get("text") or "", cls)}
+                "text": _clean_card_text(entry.get("text") or ""),
+                "tiers": [{"threshold": t.get("threshold"), "text": _tag_tier(_clean_card_text(t.get("text") or ""), cls)}
                           for t in entry.get("tiers") or []],
             }
+            # what the simulator knows that the tooltip doesn't say: CARD_NOTE = (tag, text), e.g. Comeback Story's
+            # [Multiplicative]
+            note = getattr(cls, "CARD_NOTE", None)
+            if note:
+                cards[name]["note"] = {"tag": note[0], "text": note[1]}
             # a team trait's card in Team Traits: only what reaches a non-member (BuildTrait.team_card)
             if group == "traits" and hasattr(cls, "team_card"):
                 try:

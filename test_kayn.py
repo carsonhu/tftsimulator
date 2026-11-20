@@ -4,6 +4,7 @@ import pytest
 
 import set19buffs
 from buildstore import load_build
+from layout import Layout
 from set19champs import Kayn
 from simulator import Simulator
 from test_timing import dummy
@@ -22,11 +23,13 @@ class LoggedKayn(Kayn):
         super().performAbility(opponents, items, time)
 
 
-def fight(c, buffs=(), seconds=5, n=3):
-    ds = [dummy() for _ in range(n)]
+def fight(c, buffs=(), seconds=5, targets=1):
+    # 1 target, his default (owner, 2026-11-19); test_swipe_line puts one behind it
+    lay = Layout(targets, "line")
+    ds = [dummy() for _ in range(lay.count)]
     for d in ds:
         d.armor.base = d.mr.base = 0
-    Simulator().simulate([], list(buffs), c, ds, seconds)
+    Simulator().simulate([], list(buffs), c, ds, seconds, layout=lay)
     return [(round(t * 30), round(d[0], 4), d[1]) for t, d, *_ in c.dmgVector]
 
 
@@ -50,12 +53,11 @@ def test_swipe_and_rhythm():
 
 
 def test_swipe_line():
-    # the rectangle from him toward the target holds the dummies straight behind it within 429 units
+    # the rectangle from him toward the target holds the enemy straight behind it, 2 hexes from him (owner,
+    # 2026-11-19; SpellHexLength 2), nearest first
     k = LoggedKayn(1)
-    fight(k, seconds=0.04)
-    t = k.opponents[0]
-    hit = k.swipe_targets(t)
-    assert hit[0] is t and all(d in k.opponents for d in hit)
+    fight(k, seconds=0.04, targets=2)
+    assert k.swipe_targets(k.opponents[0]) == k.opponents[:2]
 
 
 def test_shadow_assassin():

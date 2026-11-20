@@ -74,34 +74,37 @@
           >
         </div>
 
+        <!-- How many enemies the champion's area damage reaches: the input that moves an area champion's numbers most,
+             so it sits with the enemy and stands out (owner, 2026-11-19). The range input stays the value
+             (bindSlider, the browser checks); #targetsSeg's buttons are its face. Shown for area champions only. -->
+        <div
+          id="targetsRow"
+          class="targets"
+          title="The target and the enemies next to it, which the champion's area damage hits."
+          hidden
+        >
+          <span class="targets-label">Targets</span>
+          <div id="targetsSeg" class="targets-seg" role="radiogroup" aria-label="Targets"></div>
+          <input type="range" id="layoutTargets" min="1" max="7" step="1" hidden />
+          <span id="layoutTargetsValue" class="sr-only"></span>
+        </div>
+
         <div class="top-fields">
-          <label class="top-field"
-            >Build
-            <select id="build"></select>
-          </label>
           <label class="top-field"
             >Stage
             <select id="stage"></select>
-          </label>
-          <label class="top-field slider-field" title="Tactician level"
-            >Level
-            <input type="range" id="tactician" min="3" max="10" step="1" value="4" />
-            <span class="slider-value" id="tacticianValue">4</span>
-          </label>
-          <label
-            id="targetsRow"
-            class="top-field slider-field"
-            title="The target and the enemies next to it, which the champion's area damage hits. One more enemy always stands 2 hexes behind the target, in a line."
-            hidden
-            >Targets
-            <input type="range" id="layoutTargets" min="1" max="7" step="1" />
-            <span class="slider-value" id="layoutTargetsValue"></span>
           </label>
           <label class="top-field" title="Takedowns this game (Cappa Juice's Hats)"
             >Takedowns
             <input type="number" id="takedowns" class="small-num" min="0" max="100" value="0" />
           </label>
         </div>
+
+        <!-- the client build the numbers come from: rarely changed, so small and out of the way (owner) -->
+        <label class="build-field" title="The game build every number comes from"
+          >Patch
+          <select id="build"></select>
+        </label>
 
         <button
           type="button"
