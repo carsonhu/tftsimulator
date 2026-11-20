@@ -123,11 +123,13 @@ _ITEM_SLICES = {
 }
 
 
-def _emblem_trait(item, cfg, typed):
+def _emblem_trait(item, cfg, typed, champ=None):
     """An Emblem row's trait (owner, 2026-11-20): the emblem makes its holder a member, so the row runs the trait at a
     level, "Beach Pop Emblem (2)", a dropdown in the row. By default the level the page's + puts in the buff bar
     (app.js addEmblemTrait): the bar's own when the trait is on there, else its lowest active level. None for an
-    emblem whose trait isn't simulated (Rock)."""
+    emblem whose trait isn't simulated (Rock). A trait with a parameter (Jazz's active traits, Illbeats' mix, Ionic
+    Spark's gift) takes it from cfg["rowParams"] (the row's own control, owner 2026-11-20), else the bar's, else
+    _emblem_param_default."""
     cls = getattr(set19buffs, getattr(item, "trait", None) or "", None)
     if cls is None:
         return None
@@ -140,10 +142,44 @@ def _emblem_trait(item, cfg, typed):
     level = typed.get(type(item).__name__)
     if level not in options:
         level = bar[0] if bar and bar[0] in options else options[0]
-    params = bar[1] if bar else extra.get("Default", 0)
+    params = bar[1] if bar else _emblem_param_default(cls, extra, champ)
     if not extra.get("Options") and extra.get("Min") == 0 and extra.get("Max") == 1:
         params = 1  # an "Is X" flag: the emblem is the membership
+    elif extra and not extra.get("Flags"):
+        own = (cfg.get("rowParams") or {}).get(type(item).__name__)
+        if isinstance(own, (int, float)) and extra.get("Min", 0) <= own <= extra.get("Max", own):
+            params = int(own)
     return cls(int(level), params)
+
+
+def _emblem_param_default(cls, extra, champ):
+    """An Emblem row's parameter when neither the row nor the bar sets it: the parameter's default, except Illbeats'
+    mix, all AP for a Magic champion and all AD otherwise (owner, 2026-11-20; single_hit.uses_ap's split)."""
+    if cls.__name__ == "Illbeats" and champ is not None:
+        import single_hit
+        return cls.MIXES.index("All AP" if single_hit.uses_ap(champ) else "All AD")
+    return extra.get("Default", 0)
+
+
+def _emblem_param_input(trait):
+    """The row's control for its trait's parameter: {value, options, title} for a named choice, {value, min, max,
+    title} for a number; None for a trait without one (or a 0/1 flag the emblem sets)."""
+    extra = trait.extraParameters() if hasattr(trait, "extraParameters") else None
+    if not isinstance(extra, dict) or extra.get("Flags"):
+        return None
+    if not extra.get("Options") and extra.get("Min") == 0 and extra.get("Max") == 1:
+        return None
+    if extra.get("Options"):
+        return {"value": int(trait.params or 0), "options": list(extra["Options"]), "title": extra.get("Title", "")}
+    return {"value": int(trait.params or 0), "min": extra.get("Min", 0), "max": extra.get("Max", 99),
+            "title": extra.get("Title", "")}
+
+
+def _emblem_param_text(param):
+    """"Mix: All AD", "5 active traits": the parameter as the row's name says it (the chart's legend)."""
+    if param.get("options"):
+        return f"{param['title']}: {param['options'][param['value']]}"
+    return f"{param['value']} {param['title'].lower()}"
 
 
 def _trait_level_options(cls):
@@ -635,7 +671,8 @@ def _slice_inputs(slice_name, cfg):
     if slice_name in _ITEM_SLICES:
         items = []
         champ_cls = getattr(set19champs, cfg.get("champ") or "", None)
-        own_traits = set(_build_champion(cfg).data.d.get("trait_keys") or []) if champ_cls else None
+        champ = _build_champion(cfg) if champ_cls else None
+        own_traits = set(champ.data.d.get("trait_keys") or []) if champ is not None else None
         for c in _ITEM_SLICES[slice_name]():
             item = getattr(set19items, c)()
             if _row_input_spec(item):
@@ -643,7 +680,7 @@ def _slice_inputs(slice_name, cfg):
             if slice_name == "Emblem" and c in TACTICIAN_ITEMS and not _reads_tactician_items(cfg):
                 continue
             if slice_name == "Emblem":
-                item.row_trait = _emblem_trait(item, cfg, typed)
+                item.row_trait = _emblem_trait(item, cfg, typed, champ)
                 if item.row_trait is not None and own_traits is not None and item.row_trait.KEY in own_traits:
                     continue  # the game won't give a unit its own trait's emblem
             items.append(item)
@@ -694,8 +731,12 @@ def _row_input(extra):
     trait level is a dropdown: {value, options, template}."""
     trait = getattr(extra, "row_trait", None)
     if trait is not None:
-        return {"value": int(trait.level), "options": _trait_level_options(type(trait)), "template": "{}",
-                "title": f"{trait.name} level"}
+        out = {"value": int(trait.level), "options": _trait_level_options(type(trait)), "template": "{}",
+               "title": f"{trait.name} level", "name": extra.name}
+        param = _emblem_param_input(trait)
+        if param:
+            out["param"] = param
+        return out
     spec = _row_input_spec(extra)
     if not spec:
         return None
@@ -704,14 +745,22 @@ def _row_input(extra):
             "template": spec["Row"], "title": spec.get("Title", "")}
 
 
+BASE_LABEL = "Base"  # the NoItem row's name on the page (owner, 2026-11-20: "Base", not "NoItem"); its class stays NoItem
+
+
 def _row_label(extra):
     """The row's name: an item's or augment's own; a trait's with its level ("Trickshot 3"), and with its 0/1 flag
     when the Trait slice runs it both ways (Hitmaker's Big Shot: "Hitmaker 2 (Is Big Shot: no)")."""
+    if isinstance(extra, set19items.NoItem):
+        return BASE_LABEL
     if getattr(extra, "row_label", None):  # a Team Traits row names itself ("Heartsteel (+Kayn)", "Swiftstriker 0")
         return extra.row_label
     typed = _row_input(extra)
     if typed:  # "Hold the Line (7 units)": the page draws the number as a box
-        return f"{extra.name} ({typed['template'].format(typed['value'])})"
+        inside = typed['template'].format(typed['value'])
+        if typed.get("param"):  # an Emblem row: "Jazz Emblem (2, 5 active traits)"
+            inside += ", " + _emblem_param_text(typed["param"])
+        return f"{extra.name} ({inside})"
     cls = type(extra)
     levels = [lvl for lvl in getattr(cls, "levels", []) if lvl]
     if isinstance(extra, set19buffs.Buff) and len(levels) == 1 and 0 in getattr(cls, "levels", []) and not extra.level:
@@ -753,7 +802,7 @@ def _table_entries(sim_list):
         entries.append(entry)
 
     for entry in entries:
-        base = next((e["dps"] for e in entries if (e["name"], e["level"], e["extra"])
+        base = next((e["dps"] for e in entries if (e["name"], e["level"], e["extraCls"])
                      == (entry["name"], entry["level"], "NoItem")), None)
         own = entry["dps"]
         entry["ratio"] = {}
@@ -867,7 +916,7 @@ def run_hits(cfg):
         return {"cls": classes[0], "label": label or getattr(item, "display_name", classes[0]), "icons": classes,
                 "damage": round(dmg, 1), "ratio": round(dmg / base, 2) if base else 0, "math": math}
 
-    rows = [{"cls": "NoItem", "label": "NoItem", "icons": [], "damage": round(base, 1), "ratio": 1.0,
+    rows = [{"cls": "NoItem", "label": BASE_LABEL, "icons": [], "damage": round(base, 1), "ratio": 1.0,
              "math": base_math}]
     for label, classes in _hit_items(which):
         if not radiant:

@@ -42,7 +42,7 @@ const path = require("path");
 
   // the second row: the viewer follows it
   await page.evaluate(() => document.querySelectorAll("#resultsTable tbody tr")[0].click());
-  await page.waitForFunction(() => !document.querySelector("#vizWhat").textContent.endsWith("NoItem"), { timeout: 60000 });
+  await page.waitForFunction(() => !document.querySelector("#vizWhat").textContent.endsWith("Base"), { timeout: 60000 });
   await page.waitForFunction(() => document.querySelector("#vizStatus").hidden, { timeout: 60000 });
   // scrub to 9.5 s on the strip, then step a tick
   await page.evaluate(() => {

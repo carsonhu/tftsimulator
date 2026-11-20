@@ -87,6 +87,9 @@ const state = {
     // a table row's own number by class (Hold the Line's units, Comeback Story's Health, Cappa Juice's takedowns):
     // typed into the row's box (rowNameWithInput); a class not here runs at its default
     rowInputs: {},
+    // an Emblem row's trait parameter (Jazz's active traits, Illbeats' mix, Ionic Spark's gift) by class, set in the
+    // row (owner, 2026-11-20); a class not here runs at the bar's, else the default (sim_entry._emblem_trait)
+    rowParams: {},
     bonus: { ad: 0, ap: 0, as: 0, dmgamp: 0, crit: 0, critdmg: 0, manaregen: 0, mpa: 0 },
     stage: "4-1",
     items: ["NoItem", "NoItem", "NoItem"],
@@ -691,6 +694,7 @@ function buildStaticControls() {
   // The Hit panel's controls: its hits (drawn by renderHits), Radiants, and Archangel's time (AP list only).
   $("hitRadiant").onchange = () => {
     state.hit.radiant = $("hitRadiant").checked;
+    state.hit.explained = null; // other rows: the math box opens on the top one
     runHits(state.gen);
   };
   const hitSeconds = $("hitSeconds");
@@ -1261,7 +1265,8 @@ async function selectChampion(name, { keepLevel, keepConfig = false }) {
   const range = $("layoutTargets");
   range.max = meta.targetsMax || state.catalog.defaults.layout.max;
   if (!keepConfig) state.cfg.layout.targets = meta.targetsDefault || state.catalog.defaults.layout.targets;
-  if (!keepConfig) state.hit.mode = null; // the Hit panel opens on the champion's default (a Caster's cast)
+  if (!keepConfig) state.hit.mode = state.hit.explained = null; // the Hit panel opens on the champion's default (a Caster's cast)
+  if (!keepConfig) state.cfg.rowParams = {}; // Illbeats' mix follows the champion (AD or AP) until set again
   if (state.cfg.layout.targets > Number(range.max)) state.cfg.layout.targets = Number(range.max);
   range.value = state.cfg.layout.targets;
   $("layoutTargetsValue").textContent = range.value;
@@ -1364,11 +1369,12 @@ function addEmblemTrait(itemCls) {
 }
 
 // An Emblem row's "+": the trait goes in the buff bar at the row's level (addEmblemTrait put it at its lowest).
-function setEmblemTraitLevel(itemCls, level) {
+function setEmblemTraitLevel(itemCls, level, param = null) {
   const item = state.catalog.sidebarItems.find((i) => i.cls === itemCls);
   const entry = item && state.cfg.buffs.find(([cls]) => cls === item.trait);
-  if (!entry || entry[1] === level) return;
+  if (!entry || (entry[1] === level && (param == null || entry[2] === param))) return;
   entry[1] = level;
+  if (param != null) entry[2] = param;
   renderBuffRows();
   onConfigChanged();
 }
@@ -1485,7 +1491,13 @@ function renderBuffRows() {
         label.appendChild(check);
         label.appendChild(document.createTextNode(name));
         if (bit < nMembers) members.appendChild(label);
-        else flagBox.appendChild(Object.assign(document.createElement("div"), { className: "flag-line" })).appendChild(label);
+        else {
+          // a box past the members (Heartsteel's Bias) is this unit's own choice, not who is fielded: a pill on its
+          // own line, emphasised (owner, 2026-11-20)
+          label.classList.add("flag-extra");
+          if (!label.title && name === "Bias") label.title = "This unit is a Heartsteel Bias: its spell upgrade at Heartsteel (3) and (5)";
+          flagBox.appendChild(Object.assign(document.createElement("div"), { className: "flag-line" })).appendChild(label);
+        }
       });
       requestAnimationFrame(fitFlags);
     };
@@ -1796,6 +1808,14 @@ function fitFlagMembers(box) {
   const gap = parseFloat(getComputedStyle(members).columnGap) || 0;
   const need = boxes.reduce((w, b) => w + b.offsetWidth, 0) + gap * (boxes.length - 1);
   members.classList.toggle("two-col", need > members.clientWidth + 0.5);
+  // the Bias pill's checkbox sits under the last member's (Ezreal's) checkbox (owner, 2026-11-20)
+  const last = boxes[boxes.length - 1];
+  for (const pill of box.querySelectorAll(".flag-line label.flag-extra")) {
+    const tick = (el) => (el.querySelector("input") || el).getBoundingClientRect().left;
+    const line = pill.parentElement;
+    line.style.paddingLeft = "0px";
+    if (last) line.style.paddingLeft = Math.max(0, tick(last) - tick(pill)) + "px";
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1946,6 +1966,7 @@ function renderHits(payload) {
     btn.setAttribute("aria-checked", String(on));
     btn.onclick = () => {
       state.hit.mode = mode;
+      state.hit.explained = null; // a new tab: the math box opens on its top row (owner, 2026-11-20)
       runHits(state.gen);
     };
     seg.appendChild(btn);
@@ -2435,7 +2456,7 @@ function rowAddPlan(row) {
       ? { disabled: true, title: "The item slots are full" }
       : { title: `Add ${row.extra} to item slot ${slot + 1}`, run: () => {
           pickInto(document.querySelectorAll(".item-slot select")[slot], cls);
-          if (row.input && row.input.options) setEmblemTraitLevel(cls, row.input.value);
+          if (row.input && row.input.options) setEmblemTraitLevel(cls, row.input.value, row.input.param ? row.input.param.value : null);
         } };
   }
   const meta = state.buffMeta.get(cls);
@@ -2484,11 +2505,51 @@ function rowAddPlan(row) {
 
 // A row whose result hangs on a number of its own reads "Hold the Line ([7] units)", the number a box: typing in it
 // reruns the slice with that number for that row (cfg.rowInputs; sim_entry._row_input) (owner, 2026-11-19).
+// An Emblem row's trait parameter beside its level (owner, 2026-11-20): a dropdown for a named choice ("Mix: All AD",
+// "Gift: 1st"), a number box for a count ("[5] active traits"). Changing it reruns the slice (cfg.rowParams).
+function emblemParamControl(row) {
+  const p = row.input.param;
+  const keep = (el) => {
+    for (const type of ["click", "pointerdown", "keydown"]) el.addEventListener(type, (event) => event.stopPropagation());
+    return el;
+  };
+  const set = (v) => {
+    if (v === p.value) return;
+    state.cfg.rowParams[row.extraCls] = v;
+    refresh();
+  };
+  if (p.options) {
+    const pick = keep(document.createElement("select"));
+    pick.className = "row-input row-select";
+    pick.title = p.title;
+    pick.setAttribute("aria-label", `${row.input.name}: ${p.title}`);
+    p.options.forEach((label, i) => pick.add(new Option(`${p.title}: ${label}`, String(i), false, i === p.value)));
+    pick.onchange = () => set(Number(pick.value));
+    return pick;
+  }
+  const wrap = document.createElement("span");
+  const box = keep(document.createElement("input"));
+  box.type = "number";
+  box.className = "row-input";
+  box.min = p.min;
+  box.max = p.max;
+  box.value = p.value;
+  box.title = p.title;
+  box.setAttribute("aria-label", `${row.input.name}: ${p.title}`);
+  sizeInlineNumber(box);
+  box.oninput = () => sizeInlineNumber(box);
+  box.onchange = () => set(clampInput(box));
+  box.addEventListener("keydown", (event) => { if (event.key === "Enter") box.blur(); });
+  box.addEventListener("focus", () => box.select());
+  wrap.append(box, " " + p.title.toLowerCase());
+  return wrap;
+}
+
 function rowNameWithInput(cell, row) {
   const { value, min, max, template, title, options } = row.input;
   const [before, after] = template.split("{}");
   const suffix = " (" + before + value + after + ")";
-  const name = row.extra.endsWith(suffix) ? row.extra.slice(0, -suffix.length) : row.extra;
+  const name = row.input.name || (row.extra.endsWith(suffix) ? row.extra.slice(0, -suffix.length) : row.extra);
   if (options) {
     // an Emblem row's trait level, "Beach Pop Emblem ([3])": the trait's levels as a dropdown (owner, 2026-11-20)
     const pick = document.createElement("select");
@@ -2502,6 +2563,7 @@ function rowNameWithInput(cell, row) {
       refresh();
     };
     cell.append(name + " ", pick); // no parentheses around the dropdown (owner, 2026-11-20)
+    if (row.input.param) cell.append(" ", emblemParamControl(row));
     return;
   }
   const box = document.createElement("input");

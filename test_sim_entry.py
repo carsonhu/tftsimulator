@@ -41,7 +41,7 @@ def test_catalog_info_and_run(registered):
     out = json.loads(sim_entry.run_json(json.dumps(cfg())))
     import set19items
     listed = {getattr(set19items, c).display_name for c in set19items.offensive_craftables}
-    assert {r['extra'] for r in out['rows']} == listed | {'NoItem'}
+    assert {r['extra'] for r in out['rows']} == listed | {'Base'}
     assert out['rows'][0]['dps']['10-20'] > 0
 
 
@@ -106,8 +106,8 @@ def test_the_number_of_targets_reaches_an_area_champion_only():
         out = json.loads(sim_entry.run_json(json.dumps(cfg(champ=champ, level=1, slice=slice_, layout=layout))))
         return next(r['dps']['20-30'] for r in out['rows'] if r['extra'] == extra)
 
-    assert dps('Varus', 'Craftable', 'NoItem', {'targets': 5}) > dps('Varus', 'Craftable', 'NoItem', None) \
-        == dps('Varus', 'Craftable', 'NoItem', {'targets': 2}) > dps('Varus', 'Craftable', 'NoItem', {'targets': 1})
+    assert dps('Varus', 'Craftable', 'Base', {'targets': 5}) > dps('Varus', 'Craftable', 'Base', None) \
+        == dps('Varus', 'Craftable', 'Base', {'targets': 2}) > dps('Varus', 'Craftable', 'Base', {'targets': 1})
     assert dps('Draven', 'Artifact', 'Titanic Hydra (1 adjacent)', {'targets': 7}) == dps('Draven', 'Artifact', 'Titanic Hydra (1 adjacent)', None)
 
 
@@ -117,8 +117,8 @@ def test_trait_rows_name_their_level_and_use_their_own_numbers():
     out = json.loads(sim_entry.run_json(json.dumps(cfg(champ='Gnar', level=1, slice='Trait', t=30,
                                                        buffs=[['Pentakill', 0, 0], ['Trickshot', 0, 0]]))))
     rows = {r['extra']: r for r in out['rows']}
-    assert {'Pentakill 3', 'Pentakill 5', 'Pentakill 7', 'Trickshot 2', 'Trickshot 3', 'Trickshot 4', 'NoItem'} == set(rows)
-    base = rows['NoItem']['dps']['20-30']
+    assert {'Pentakill 3', 'Pentakill 5', 'Pentakill 7', 'Trickshot 2', 'Trickshot 3', 'Trickshot 4', 'Base'} == set(rows)
+    base = rows['Base']['dps']['20-30']
     for r in rows.values():
         assert r['ratio']['20-30'] == round(r['dps']['20-30'] / base, 2)
     assert len({rows[f'Pentakill {n}']['ratio']['20-30'] for n in (3, 5, 7)}) == 3
@@ -172,7 +172,7 @@ def test_takedowns_slice_compares_counts_against_the_pages():
     cfg = {"champ": "Viego", "level": 1, "items": ["NoItem"] * 3, "buffs": [], "slice": "Takedowns",
            "takedowns": 24, "enemy": {"hp": 1800, "armor": 100, "mr": 100}}
     rows = {r["extra"]: r for r in sim_entry.run_slice(cfg)["rows"]}
-    assert set(rows) == {"NoItem", "0 takedowns", "48 takedowns", "96 takedowns"}
+    assert set(rows) == {"Base", "0 takedowns", "48 takedowns", "96 takedowns"}
     assert rows["0 takedowns"]["ratio"]["20-30"] < 1 < rows["48 takedowns"]["ratio"]["20-30"]
     assert rows["96 takedowns"]["extraParams"] == 96
     viego = next(c for c in sim_entry.get_catalog()["champions"] if c["name"] == "Viego")
@@ -201,7 +201,9 @@ def test_emblem_slice():
     assert rows["BeachPopEmblem"]["extra"] == "Beach Pop Emblem (7)"
     assert rows["BeachPopEmblem"]["input"]["options"] == [3, 5, 7]
     assert rows["PentakillEmblem"]["extra"] == "Pentakill Emblem (5)"  # the bar's level
-    assert rows["JazzEmblem"]["extra"] == "Jazz Emblem (2)"
+    assert rows["JazzEmblem"]["extra"] == "Jazz Emblem (2, 5 active traits)"  # its parameter in the name (owner, 2026-11-20)
+    assert rows["IllbeatsEmblem"]["extra"] == "IllBeats Emblem (2, Mix: All AP)"  # Ahri is a Magic champion: all AP
+    assert rows["IllbeatsEmblem"]["input"]["param"]["options"][0] == "All AD"
     assert rows["RockEmblem"]["input"] is None  # no simulated trait
     assert "TacticiansCrown" not in rows  # only with an augment that reads them (owner): U.R.F.
     cfg["buffs"].append(["URF", 1, 0])

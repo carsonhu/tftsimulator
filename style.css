@@ -827,6 +827,37 @@ button:focus-visible {
   margin: 0;
 }
 
+/* Heartsteel's Bias (a box past the members): this unit's own choice, so a pill that lights up when on (owner,
+   2026-11-20) */
+.param-flags .flag-line {
+  align-self: stretch;
+  display: flex;
+  /* its checkbox under the last member's (fitFlagMembers sets the padding; owner, 2026-11-20) */
+  margin-top: 4px;
+}
+
+.param-flags label.flag-extra {
+  padding: 2px 10px 2px 7px;
+  border: 1px solid #5c3a4c;
+  border-radius: 999px;
+  background: #1c1620;
+  color: #e6b8cf;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.param-flags label.flag-extra:has(input:checked) {
+  border-color: #ff5c9d;
+  background: rgba(255, 92, 157, 0.2);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 92, 157, 0.25), 0 0 10px rgba(255, 92, 157, 0.25);
+}
+
+.param-flags label.flag-extra input[type="checkbox"] {
+  accent-color: #ff5c9d;
+}
+
 /* the champion's own Heartsteel box: always ticked, not a choice */
 .param-flags label:has(input:disabled) {
   color: #7a7f8f;

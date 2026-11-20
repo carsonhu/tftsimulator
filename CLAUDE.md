@@ -128,7 +128,11 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   and traits that have an emblem (`buffGroups`; owner). The Emblem slice leaves out Spatula and Frying Pan, the
   unit's own traits' emblems, and Tactician's items unless a buff reads them (`READS_TACTICIAN_ITEMS`: U.R.F.); each emblem row runs its trait too, at a level the row's dropdown sets ("Beach Pop
   Emblem ([3])": `_emblem_trait`, the item's `row_trait`, run by `sim_core.run_one` in place of the bar's copy;
-  default the bar's level, else the lowest; the row's "+" sets the bar to it). Beach Pop members are always
+  default the bar's level, else the lowest; the row's "+" sets the bar to it). A trait with a parameter gets a second
+  control beside the level (`cfg.rowParams`, `_emblem_param_input`; owner, 2026-11-20): Jazz's active traits (a number),
+  Illbeats' mix and Ionic Spark's gift (dropdowns); Illbeats defaults to all AP for a Magic champion, all AD otherwise
+  (`_emblem_param_default`), and `rowParams` resets with the champion. The NoItem row reads "Base" on the page
+  (`BASE_LABEL`; its class stays NoItem, which is what the code matches on). Beach Pop members are always
   empowered and Manager's unit always in the Spotlight Hex: neither has a toggle (owner, 2026-11-20).
   A debuff a spell applies uses the shared helpers in `items/debuffs.py`
   (`apply_shred`, `apply_sunder`). A new trait is
