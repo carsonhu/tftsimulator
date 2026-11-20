@@ -1935,7 +1935,7 @@ function renderHits(payload) {
     head.appendChild(th);
   }
   const ratios = payload.rows.map((r) => r.ratio);
-  const scale = { min: Math.min(...ratios), max: Math.max(...ratios), rank: (v) => [...ratios].sort((a, z) => z - a).indexOf(v) + 1, count: ratios.length };
+  const scale = { min: Math.min(...ratios), max: Math.max(...ratios) };
   const body = table.createTBody();
   for (const row of payload.rows) {
     const tr = body.insertRow();
@@ -1948,7 +1948,7 @@ function renderHits(payload) {
     tr.insertCell().textContent = row.damage.toFixed(1);
     const ratio = tr.insertCell();
     ratio.textContent = row.ratio.toFixed(2);
-    if (state.colorScale) shadeCell(ratio, row.ratio, scale, "÷ Base");
+    if (state.colorScale) shadeCell(ratio, row.ratio, scale);
   }
 }
 
@@ -2204,13 +2204,7 @@ function renderResults() {
     const values = payload.rows
       .map((row) => Number(col.get(row)))
       .filter((v) => Number.isFinite(v));
-    const sorted = [...values].sort((a, z) => z - a);
-    scales.set(col.label, {
-      min: Math.min(...values),
-      max: Math.max(...values),
-      rank: (v) => sorted.indexOf(v) + 1,
-      count: values.length,
-    });
+    scales.set(col.label, { min: Math.min(...values), max: Math.max(...values) });
   });
 
   // Sorting is a view concern: the payload is left alone so that clearing the
@@ -2275,7 +2269,7 @@ function renderResults() {
       if (col.render) col.render(cell, row);
       else cell.textContent = col.text ? value : formatNumber(value);
       if (col.shade && state.colorScale) {
-        shadeCell(cell, Number(value), scales.get(col.label), col.label);
+        shadeCell(cell, Number(value), scales.get(col.label));
       }
     }
   }
@@ -2514,15 +2508,14 @@ function sortableHeader(col) {
 // #256abf -- which keeps the steps monotone by construction.
 const SCALE_RGB = "37, 106, 191";
 
-function shadeCell(cell, value, scale, label) {
+function shadeCell(cell, value, scale) {
   if (!Number.isFinite(value)) return;
   const span = scale.max - scale.min;
   // A column with no spread carries no information to encode; leave it bare
   // rather than painting every cell the same shade.
   const t = span > 0 ? (value - scale.min) / span : 0;
   cell.style.backgroundColor = "rgba(" + SCALE_RGB + ", " + t.toFixed(3) + ")";
-  // The number is already printed, so hover adds the standing it can't show.
-  cell.title = label + ": rank " + scale.rank(value) + " of " + scale.count;
+  // no rank tooltip (owner, 2026-11-19): it popped up over the row's own hover card
 }
 
 function formatNumber(v) {
