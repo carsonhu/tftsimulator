@@ -17,6 +17,7 @@ class Swiftstriker(BuildTrait):
     """
     KEY = "DA_Swiftstriker19"
     display_name = "Swiftstriker"
+    team_trait = True  # its team-wide half reaches non-members: offered in Team Traits (owner, 2026-11-19)
 
     def __init__(self, level=0, params=0):
         super().__init__(level, params, phases=["preCombat"])

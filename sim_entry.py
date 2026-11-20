@@ -203,27 +203,37 @@ def get_catalog():
     #   * a named choice (Illbeats' mix): a real question rather than a flag
     #     to zero, so the panel has to ask it.
     #   * tick boxes (Heartsteel's fielded members), below.
+    #
+    # And any trait that says team_trait = True: its effects reach units outside
+    # it by membership alone (Arcanist's team AP, Swiftstriker's team AS), with
+    # no question to ask, or a count to give (Composer's instruments, Jazz's
+    # active traits) (owner, 2026-11-19).
     team_buffs = []
     for cls_name in set19buffs.class_buffs:
         cls = getattr(set19buffs, cls_name)
         # team_trait = False opts a trait out even though its parameter shape
         # would qualify: Hitmaker's "Is Big Shot" is a champion-specific
         # question, not team membership.
-        if not getattr(cls, "team_trait", True):
+        declared = getattr(cls, "team_trait", None)
+        if declared is False:
             continue
         try:
-            extra = cls.extraParameters()
+            extra = cls.extraParameters() or {}
         except Exception:
             continue
-        if not extra:
+        if not extra and declared is not True:
             continue
         options = extra.get("Options")
         # Tick boxes (Heartsteel's fielded members): the team-wide half is what
         # the ticked facts give, so the panel asks them. TeamFlags limits the
         # panel to the leading flags that matter to a non-member (not "Bias").
         flags = extra.get("Flags")
-        if not options and not flags and (extra.get("Min"), extra.get("Max")) != (0, 1):
+        is_flag = (extra.get("Min"), extra.get("Max")) == (0, 1)
+        if declared is not True and not options and not flags and not is_flag:
             continue
+        # a count the team-wide half reads (Composer's instruments): the panel asks it in a number box
+        number = ({"min": extra.get("Min", 0), "max": extra.get("Max"), "default": extra.get("Default", 0)}
+                  if extra and not options and not flags and not is_flag else None)
         levels = list(cls.levels)
         # A trait that asks which variant is on always needs its level asked
         # too -- the probe below answers "does the team-wide half differ per
@@ -237,12 +247,14 @@ def get_catalog():
                 # 0 is "trait not active" and is the off position, so it is
                 # offered as a level like any other.
                 "levels": levels,
-                "paramTitle": extra["Title"],
+                "paramTitle": extra.get("Title"),
                 # None -> the param is the 0/1 flag and the panel passes 0.
                 # A list -> the panel offers these and passes the index.
                 "options": list(options) if options else None,
                 # A list -> the panel shows these tick boxes and passes the bits.
                 "flags": list(flags[: extra.get("TeamFlags", len(flags))]) if flags else None,
+                # {min, max, default} -> the panel shows a number box and passes its value.
+                "number": number,
                 "paramDefault": extra.get("Default", 0),
                 # False -> the UI shows a checkbox and uses onLevel; True ->
                 # it shows a level picker.

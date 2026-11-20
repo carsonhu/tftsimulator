@@ -1461,7 +1461,7 @@ function renderTeamTraits() {
     // Only a trait that asks a real question starts on its own default.
     const params = picked
       ? picked.params
-      : trait.options || trait.flags
+      : trait.options || trait.flags || trait.number
         ? trait.paramDefault
         : 0;
     // Tick-box facts (Heartsteel's fielded members), stored as bits.
@@ -1470,12 +1470,34 @@ function renderTeamTraits() {
     // not nest (a click on one would also toggle the trait's own control).
     const label = document.createElement(trait.flags ? "div" : "label");
     label.className = trait.scales ? "team-trait" : "team-trait flat";
-    if (trait.options || trait.flags) label.classList.add("with-option");
+    if (trait.options || trait.flags || trait.number) label.classList.add("with-option");
     label.title = trait.options
       ? trait.name + " on the board"
       : trait.flags
         ? "Team-wide " + trait.name + ": the bonuses of the ticked units"
-        : "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)";
+        : trait.paramTitle && !trait.number
+          ? "Team-wide " + trait.name + " only (" + trait.paramTitle + " = 0)"
+          : "Team-wide " + trait.name + " (this champion is not one)";
+
+    // A count the team-wide half reads (Composer's instruments, Jazz's active
+    // traits): a number box beside the trait's own control.
+    let numberBox = null;
+    if (trait.number) {
+      numberBox = document.createElement("input");
+      numberBox.type = "number";
+      numberBox.className = "team-number";
+      numberBox.min = trait.number.min;
+      if (trait.number.max != null) numberBox.max = trait.number.max;
+      numberBox.value = params;
+      numberBox.title = trait.paramTitle;
+      numberBox.onchange = () => {
+        const now = state.teamBuffs.get(trait.cls);
+        store(now ? now.level : 0, clampInput(numberBox));
+      };
+    }
+    // the parameter the trait's control passes along with its level
+    const paramNow = (optionSel) =>
+      optionSel ? Number(optionSel.value) : trait.flags ? flagBits : numberBox ? Number(numberBox.value) : 0;
 
     const caption = document.createElement("span");
     caption.className = "col-label";
@@ -1524,11 +1546,8 @@ function renderTeamTraits() {
         label.appendChild(optionSel);
         optionSel.onchange = () => store(Number(sel.value), Number(optionSel.value));
       }
-      sel.onchange = () =>
-        store(
-          Number(sel.value),
-          optionSel ? Number(optionSel.value) : trait.flags ? flagBits : 0
-        );
+      sel.onchange = () => store(Number(sel.value), paramNow(optionSel));
+      if (numberBox) label.appendChild(numberBox);
     } else {
       // A non-member gets the same bonus at every breakpoint, so asking for
       // one would be asking a question with no answer: on/off is the whole
@@ -1536,11 +1555,11 @@ function renderTeamTraits() {
       const check = document.createElement("input");
       check.type = "checkbox";
       check.checked = current > 0;
-      check.onchange = () =>
-        store(check.checked ? trait.onLevel : 0, trait.flags ? flagBits : 0);
+      check.onchange = () => store(check.checked ? trait.onLevel : 0, paramNow(null));
       if (badge) label.appendChild(badge);
       label.appendChild(caption);
       label.appendChild(check);
+      if (numberBox) label.appendChild(numberBox);
     }
 
     if (trait.flags) {

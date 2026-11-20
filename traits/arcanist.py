@@ -16,6 +16,7 @@ class Arcanist(BuildTrait):
     """
     KEY = "DA_Arcanist19"
     display_name = "Arcanist"
+    team_trait = True  # its team-wide half reaches non-members: offered in Team Traits (owner, 2026-11-19)
 
     def applyStats(self, champion):
         super().applyStats(champion)

@@ -138,6 +138,10 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   target, amount, type, tags) as `input_`. Damage an item or debuff deals itself is tagged `Damage.Source.Item`.
   Timed effects on a unit are `effects.ActiveEffect`s (`apply_effect`, whole-tick ends, T14). A trait's parameter (`extraParameters`) is a number, a named choice (`Options`) or tick
   boxes (`Flags`: bit i is Flags[i]; `TeamFlags` limits the Team Traits panel to the leading ones; Heartsteel).
+  Team Traits lists a trait with an "Is X" flag, `Options` or `Flags`, or one that says `team_trait = True` (its
+  team-wide half reaches non-members: Arcanist, Choreographer, Swiftstriker, Composer, Prodigy, Jazz, Manager; owner,
+  2026-11-19); a plain number parameter there is a number box (Composer's instruments, Jazz's active traits).
+  `team_trait = False` opts one out (Hitmaker, Beach Pop).
   Stats are `stats.Attribute`s in game units, changed only with modifiers: `champion.aspd.modify("MultiplyAdditive",
   1.1)`, `champion.ap.modify("+", 0.2)`, keyed when the effect is later removed or re-sized. AD and AP are
   multipliers from 1.0, AS is attacks per second, crit / crit damage / omnivamp / amp are fractions; ops and

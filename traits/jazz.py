@@ -14,6 +14,7 @@ class Jazz(BuildTrait):
     """
     KEY = "DA_Jazz19"
     display_name = "Jazz"
+    team_trait = True  # its team-wide half reaches non-members: offered in Team Traits (owner, 2026-11-19)
 
     @staticmethod
     def extraParameters():

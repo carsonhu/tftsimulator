@@ -779,6 +779,13 @@ button:focus-visible {
   margin: 0;
 }
 
+/* a count the team-wide half reads (Composer's instruments, Jazz's active traits) */
+.team-trait .team-number {
+  width: 3.6em;
+  padding: 1px 4px;
+  font-size: 0.9em;
+}
+
 .team-flags {
   grid-column: 1 / -1;
   display: inline-flex;
