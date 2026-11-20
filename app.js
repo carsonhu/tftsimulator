@@ -100,6 +100,7 @@ const state = {
   // real entries in cfg.buffs from there on means the Trait slice sweeps
   // their other breakpoints too, same as any hand-picked buff.
   teamBuffs: new Map(),
+  ownTraits: new Set(), // the champion's own traits (selectChampion): never removed from the buff bar, only set to 0
   slice: "Craftable",
   displayDps: false,
   colorScale: true,
@@ -1140,6 +1141,8 @@ async function selectChampion(name, { keepLevel, keepConfig = false }) {
   // Buff bar: the champion's own traits at their first listed level. No empty
   // rows: + Add opens the picker. Skipped when only the star level moved --
   // see the level handler.
+  // the champion's own traits: x in the buff bar sets one to 0 rather than removing it
+  state.ownTraits = new Set(info.defaultTraits.classNames);
   if (!keepConfig) {
     const defaults = info.defaultTraits.classNames.filter((c) => state.buffMeta.has(c));
     state.cfg.buffs = defaults.map(defaultBuffTuple);
@@ -1352,10 +1355,12 @@ function renderBuffRows() {
 
     buffSel.onchange = () => {
       syncRow(true);
+      drawRemove();
       onConfigChanged();
     };
     levelSel.onchange = () => {
       syncRow(false);
+      drawRemove();
       onConfigChanged();
     };
     paramInput.onchange = () => {
@@ -1382,9 +1387,24 @@ function renderBuffRows() {
         cards: true,
         onPick: (value) => pickInto(buffSel, value),
       });
+    // The champion's own traits stay in the bar: x turns one to 0 (and hides once it is), as removing it would only
+    // hide a trait the champion has (owner, 2026-11-19). Anything else is removed.
+    const ownTrait = () => state.ownTraits.has(buffSel.value) && [...levelSel.options].some((o) => o.value === "0");
+    const drawRemove = () => {
+      const own = ownTrait();
+      remove.style.visibility = own && levelSel.value === "0" ? "hidden" : "";
+      remove.title = own ? "Set to 0" : "Remove";
+      remove.setAttribute("aria-label", own ? "Set this trait to 0" : "Remove buff");
+    };
     remove.onclick = () => {
-      state.cfg.buffs.splice(i, 1);
-      renderBuffRows();
+      if (ownTrait()) {
+        levelSel.value = "0";
+        syncRow(false);
+        drawRemove();
+      } else {
+        state.cfg.buffs.splice(i, 1);
+        renderBuffRows();
+      }
       onConfigChanged();
     };
     attachCard(tile, () => buffSel.value, () => Number(levelSel.value), "Click to change");
@@ -1404,6 +1424,7 @@ function renderBuffRows() {
     syncParamColumn(meta);
     paramSelect.value = String(tuple[2]);
     drawTile();
+    drawRemove();
 
     row.append(buffSel, tile, levelSel, remove, paramCol, flagBox);
     container.appendChild(row);
