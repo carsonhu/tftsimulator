@@ -6,6 +6,13 @@ name: Deploy the static site to GitHub Pages
 # under bare Pyodide; stlite.html is the previous Streamlit-in-the-browser
 # build, kept for the pages the new one does not cover yet.
 #
+# A repo has one Pages site and each deploy replaces all of it, so this one
+# build publishes both sites: main (set 18, live) at the root and branch
+# set19 under /beta (tftsimulator.app/beta). Every path set19's page loads is
+# relative, so it runs from the subfolder unchanged. A push to set19 runs
+# set19's beta-deploy.yml, which dispatches this workflow on main, so the
+# deploy always runs from main.
+#
 # This is the only deployment target. The droplet and Ploomber Cloud
 # workflows that used to sit beside it are gone; git history has them if a
 # server is ever wanted again.
@@ -28,8 +35,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout main (the live site, served at /)
         uses: actions/checkout@v4
+        with:
+          ref: main
+          path: site
+
+      - name: Checkout set19 (the beta, served at /beta)
+        uses: actions/checkout@v4
+        with:
+          ref: set19
+          path: site/beta
+
+      - name: Drop the beta's repo files
+        run: rm -rf site/beta/.git site/beta/.github
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -37,7 +56,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: site
 
   deploy:
     needs: build
