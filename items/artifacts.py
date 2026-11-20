@@ -370,9 +370,13 @@ class CappaJuice(BuildItem):
     STATS = ("GE_Artifact_CappaJuice_Stats",)
     SKIP = (("AttackDamage", "+", "Stack"), ("AbilityPower", "+", "Stack"))
     display_name = item_name(KEY)
+    # The table's row takes its own count, defaulting to the page's takedowns (owner, 2026-11-19): sim_entry sets
+    # row_value from the page's rowInputs; None (an item slot) reads the champion's takedowns.
+    ROW_INPUT = {"Title": "Takedowns", "Min": 0, "Max": 999, "Row": "{} takedowns"}
+    row_value = None
 
     def applyStats(self, champion):
         super().applyStats(champion)
-        hats = getattr(champion, "takedowns", 0)
+        hats = getattr(champion, "takedowns", 0) if self.row_value is None else self.row_value
         champion.bonus_ad.modify("+", self.row(champion, "ADPerStack") * hats)
         champion.ap.modify("+", self.row(champion, "APPerStack") * hats)

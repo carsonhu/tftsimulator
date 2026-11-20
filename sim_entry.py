@@ -537,9 +537,18 @@ def _slice_inputs(slice_name, cfg):
     """
     no_item = [set19items.NoItem()]
 
+    # A row's own number, typed into the table (Hold the Line's units, Comeback Story's Health, Cappa Juice's
+    # takedowns): cfg["rowInputs"] by class, else the parameter's default (Cappa Juice: the page's takedowns).
+    typed = cfg.get("rowInputs") or {}
+
     if slice_name in _ITEM_SLICES:
-        classes = list(_ITEM_SLICES[slice_name]())
-        return [getattr(set19items, c)() for c in classes] + no_item, []
+        items = []
+        for c in _ITEM_SLICES[slice_name]():
+            item = getattr(set19items, c)()
+            if _row_input_spec(item):
+                item.row_value = int(typed.get(c, cfg.get("takedowns", 0)))
+            items.append(item)
+        return items + no_item, []
 
     # The page sends its Team Traits panel's traits merged into "buffs" and names them in "team": the Trait slice
     # sweeps the champion's own buff bar, the Team Traits slice those (owner, 2026-11-19).
@@ -553,10 +562,38 @@ def _slice_inputs(slice_name, cfg):
         return no_item, team_sweep_buffs([b for b in cfg.get("buffs", []) if b[0] in team])
 
     if slice_name == "Augment/Buff":
-        classes = sorted(set19buffs.augments)
-        return no_item, [getattr(set19buffs, c)() for c in classes]
+        buffs = []
+        for c in sorted(set19buffs.augments):
+            cls = getattr(set19buffs, c)
+            spec = _row_input_spec(cls)
+            buffs.append(cls(1, int(typed.get(c, spec["Default"]))) if spec else cls())
+        return no_item, buffs
 
     return no_item, []
+
+
+def _row_input_spec(extra):
+    """The number a row takes in the table, if any: a buff's parameter that says how its row reads ("Row": "{} units")
+    or an item's ROW_INPUT. Accepts a class or an instance."""
+    cls = extra if isinstance(extra, type) else type(extra)
+    spec = getattr(cls, "ROW_INPUT", None)
+    if spec:
+        return spec
+    try:
+        extra_params = cls.extraParameters() if issubclass(cls, set19buffs.Buff) else None
+    except Exception:
+        return None
+    return extra_params if isinstance(extra_params, dict) and extra_params.get("Row") else None
+
+
+def _row_input(extra):
+    """{value, min, max, template} for the table's inline box ("Hold the Line ([7] units)"), or None."""
+    spec = _row_input_spec(extra)
+    if not spec:
+        return None
+    value = extra.params if isinstance(extra, set19buffs.Buff) else extra.row_value
+    return {"value": int(value or 0), "min": spec.get("Min", 0), "max": spec.get("Max", 999),
+            "template": spec["Row"], "title": spec.get("Title", "")}
 
 
 def _row_label(extra):
@@ -564,6 +601,9 @@ def _row_label(extra):
     when the Trait slice runs it both ways (Hitmaker's Big Shot: "Hitmaker 2 (Is Big Shot: no)")."""
     if getattr(extra, "row_label", None):  # a Team Traits row names itself ("Heartsteel (+Kayn)", "Swiftstriker 0")
         return extra.row_label
+    typed = _row_input(extra)
+    if typed:  # "Hold the Line (7 units)": the page draws the number as a box
+        return f"{extra.name} ({typed['template'].format(typed['value'])})"
     cls = type(extra)
     levels = [lvl for lvl in getattr(cls, "levels", []) if lvl]
     if not isinstance(extra, set19buffs.Buff) or len(levels) < 2:
@@ -596,6 +636,8 @@ def _table_entries(sim_list):
             # a buff row's parameter (Hitmaker's Is Big Shot, Heartsteel's ticked units), so the page can add the
             # row to the setup exactly as it ran; None for items
             "extraParams": _row_params(sim["Extra"]),
+            # the row's own number, which the page draws as a box in the name (_row_input); None for most rows
+            "input": _row_input(sim["Extra"]),
         }
         entry["dps"] = {_window_key(w): _dps_window(sim["Results"], *w) for w in DPS_WINDOWS}
         entries.append(entry)

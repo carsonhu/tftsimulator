@@ -84,6 +84,9 @@ const state = {
     level: 1,
     layout: { targets: 2 }, // the number of targets (layout.py); boot reads the default
     takedowns: 0,
+    // a table row's own number by class (Hold the Line's units, Comeback Story's Health, Cappa Juice's takedowns):
+    // typed into the row's box (rowNameWithInput); a class not here runs at its default
+    rowInputs: {},
     bonus: { ad: 0, ap: 0, as: 0, dmgamp: 0, crit: 0, critdmg: 0, manaregen: 0, mpa: 0 },
     stage: "4-1",
     tactician_level: 4,
@@ -535,6 +538,7 @@ function buildStaticControls() {
   // Takedowns this game: Cappa Juice's Hats.
   $("takedowns").onchange = () => {
     state.cfg.takedowns = clampInput($("takedowns"));
+    delete state.cfg.rowInputs.CappaJuice; // its row follows the takedowns again until it is typed over
     onConfigChanged();
   };
   selectZeroOnFocus($("takedowns"));
@@ -1932,7 +1936,8 @@ function renderResults() {
         // reader announcing the file too would only repeat.
         const art = rowArt(row);
         if (art) cell.appendChild(art);
-        cell.appendChild(document.createTextNode(row.extra));
+        if (row.input) rowNameWithInput(cell, row);
+        else cell.appendChild(document.createTextNode(row.extra));
         const add = rowAddButton(row);
         if (add) cell.appendChild(add);
       },
@@ -2082,6 +2087,59 @@ function rowAddPlan(row) {
       onConfigChanged();
     },
   };
+}
+
+// A row whose result hangs on a number of its own reads "Hold the Line ([7] units)", the number a box: typing in it
+// reruns the slice with that number for that row (cfg.rowInputs; sim_entry._row_input) (owner, 2026-11-19).
+function rowNameWithInput(cell, row) {
+  const { value, min, max, template, title } = row.input;
+  const [before, after] = template.split("{}");
+  const suffix = " (" + before + value + after + ")";
+  const name = row.extra.endsWith(suffix) ? row.extra.slice(0, -suffix.length) : row.extra;
+  const box = document.createElement("input");
+  box.type = "number";
+  box.className = "row-input";
+  box.min = min;
+  box.max = max;
+  box.value = value;
+  box.title = title;
+  box.setAttribute("aria-label", `${name}: ${title}`);
+  sizeInlineNumber(box);
+  const commit = () => {
+    const v = clampInput(box);
+    sizeInlineNumber(box);
+    if (v === value) return;
+    state.cfg.rowInputs[row.extraCls] = v;
+    refresh(); // the rows keep their places (idx), so what is plotted stays plotted
+  };
+  // never above the max as typed: 150 Health shows 100 (owner, 2026-11-19: "65 units")
+  box.oninput = () => {
+    if (box.value !== "" && Number(box.value) > max) box.value = max;
+    sizeInlineNumber(box);
+  };
+  // the row toggles its plot on click and on Enter / Space: typing in the box must do neither
+  for (const type of ["click", "pointerdown", "keydown"]) box.addEventListener(type, (event) => event.stopPropagation());
+  box.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") box.blur();
+    // a one-digit box (Hold the Line's 0-7): each digit is the new value, at once
+    else if (max < 10 && /^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+      box.value = event.key;
+      commit();
+    }
+  });
+  box.onchange = commit;
+  // the whole number is selected on focus, so typing replaces it rather than appending to it
+  let picked = false;
+  box.addEventListener("focus", () => {
+    box.select();
+    picked = true;
+  });
+  box.addEventListener("mouseup", (event) => {
+    if (picked) event.preventDefault(); // Chromium collapses the selection on the click's mouseup
+    picked = false;
+  });
+  cell.append(name + " (" + before, box, after + ")");
 }
 
 // The "+" at the end of a row's name: adds the row's extra to the setup (rowAddPlan); its click doesn't plot the row.

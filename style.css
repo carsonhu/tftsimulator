@@ -964,6 +964,35 @@ thead th {
   border-radius: 4px;
 }
 
+/* A row's own number, typed in its name ("Hold the Line ([7] units)"):
+   rowNameWithInput. Sized to its digits, as the enemy boxes are. */
+#resultsTable .row-input {
+  height: 24px;
+  margin: 0 2px;
+  padding: 0 3px;
+  border: 1px solid #4a4d5a;
+  border-radius: 4px;
+  background: #0e1117;
+  color: #fff;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  vertical-align: middle;
+  -moz-appearance: textfield;
+}
+
+#resultsTable .row-input::-webkit-inner-spin-button,
+#resultsTable .row-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#resultsTable .row-input:hover,
+#resultsTable .row-input:focus {
+  border-color: #ff4b4b;
+  outline: none;
+}
+
 /* "+": add the row's item, augment or trait (at the row's level) to the
    setup. Shown on the row under the pointer or with focus. It straddles the
    border between the name and the first DPS column, in the name cell's

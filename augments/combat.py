@@ -123,25 +123,24 @@ class DoubleTrouble(_ADAP):
     KEY, display_name, ROWS = "DA_DoubleTrouble", "Double Trouble", (("DamageStatAdd", 1),)
 
 
-class _HoldTheLine(BuildAugment):
+@register("augment")
+class HoldTheLine(BuildAugment):
     """Hold the Line (DA_HoldTheLine): back-2-row allies gain AttackDamagePcntPerFrontLiner and
-    AbilityPowerPcntPerFrontLiner (11%) per ally starting in the front row; the holder in the back rows."""
-    KEY = "DA_HoldTheLine"
-    FRONT = 0
+    AbilityPowerPcntPerFrontLiner (11%) per ally starting in the front row; the holder in the back rows. The parameter
+    is how many allies start in the front row (default 7, a full row), typed into the table's row (owner, 2026-11-19)."""
+    KEY, display_name = "DA_HoldTheLine", "Hold the Line"
+
+    @staticmethod
+    def extraParameters():
+        return {"Title": "Front-row allies", "Min": 0, "Max": 7, "Default": 7, "Row": "{} units"}
+
+    def __init__(self, level=1, params=7):  # unset: a full front row; 0 is a real answer (no bonus)
+        super().__init__(level, params)
 
     def stats(self, champion):
-        champion.bonus_ad.modify("+", self.value(champion, "AttackDamagePcntPerFrontLiner") * self.FRONT)
-        champion.ap.modify("+", self.value(champion, "AbilityPowerPcntPerFrontLiner") * self.FRONT)
-
-
-@register("augment")
-class HoldTheLine7(_HoldTheLine):
-    display_name, FRONT = "Hold the Line (7 units)", 7
-
-
-@register("augment")
-class HoldTheLine5(_HoldTheLine):
-    display_name, FRONT = "Hold the Line (5 units)", 5
+        front = int(self.params)
+        champion.bonus_ad.modify("+", self.value(champion, "AttackDamagePcntPerFrontLiner") * front)
+        champion.ap.modify("+", self.value(champion, "AbilityPowerPcntPerFrontLiner") * front)
 
 
 class _StagedADAP(BuildAugment):
@@ -323,16 +322,25 @@ class Espresso(BuildAugment):
 @register("augment")
 class ComebackStory(BuildAugment):
     """Comeback Story (DA_ComebackStory, GA_ComebackStory): the team gains ASMultiplyPerMissingHP (0.4%) attack speed per
-    missing player Health (and Health). The player's Health is the parameter (default 50)."""
+    missing player Health (and Health). The player's Health is the parameter (default 50), typed into the table's row
+    too ("Row": the row reads "Comeback Story ([50] Health)").
+    A separate multiplier on the unit's whole attack speed, as the Set 18 replays measured it (tftFightSim
+    decision-log 2026-11-15: multiplying fit every band of the units' other attack speed, adding fell behind by up to
+    6%), although the files say otherwise: GE_ComebackStory_Buff applies AttackSpeed MultiplyAdditive 1 + 0.004 x
+    missing Health on Channel1, the op and channel items use, which would make it additive. Set 18 live's
+    GA_ComebackStory, GE_ComebackStory_Calc / _Buff and CT_ComebackStory (owner's FModel export, 2026-11-19) are
+    identical to 19.1 PBE's, so the replays' answer carries over (owner: replays over game data). The rate confirms it:
+    the replays predate patch 18.7 (Attack Speed Per Missing HP 0.3% -> 0.4%), and multiplying implied exactly 0.30%
+    in every band, where adding drifted from 0.31% to 0.45%."""
     KEY, display_name = "DA_ComebackStory", "Comeback Story"
 
     @staticmethod
     def extraParameters():
-        return {"Title": "Player Health", "Min": 1, "Max": 100, "Default": 50}
+        return {"Title": "Player Health", "Min": 1, "Max": 100, "Default": 50, "Row": "{} Health"}
 
     def stats(self, champion):
         hp = int(self.params or 50)
-        champion.aspd.modify("MultiplyAdditive", 1 + self.value(champion, "ASMultiplyPerMissingHP") * (100 - hp))
+        champion.aspd.modify("MultiplyCompound", 1 + self.value(champion, "ASMultiplyPerMissingHP") * (100 - hp))
 
 
 @register("augment")

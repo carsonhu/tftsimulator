@@ -47,7 +47,8 @@ def test_ascension(cls, amp):
 
 
 @pytest.mark.parametrize("cls, params, adap", [
-    ("BattleOfTheBands", 0, 0.18), ("DoubleTrouble", 0, 0.25), ("HoldTheLine7", 0, 0.77), ("HoldTheLine5", 0, 0.55),
+    ("BattleOfTheBands", 0, 0.18), ("DoubleTrouble", 0, 0.25), ("HoldTheLine", 7, 0.77), ("HoldTheLine", 5, 0.55),
+    ("HoldTheLine", 1, 0.11), ("HoldTheLine", 0, 0),
     ("EarlyLearnings", 0, 0.03), ("EarlyLearnings", 2, 0.13), ("EarlyLearnings", 4, 0.23),
     ("NoScoutNoPivot", 0, 0), ("NoScoutNoPivot", 3, 0.15), ("TonsOfStatsI", 0, 0.04), ("TonsOfStatsII", 0, 0.08)])
 def test_ad_ap(cls, params, adap):
@@ -113,6 +114,10 @@ def test_attack_speed_and_mana():
     c = lucian()
     run(c, [set19buffs.ComebackStory(1, 40)])
     assert c.aspd.stat == pytest.approx(0.75 * (1 + 0.004 * 60))
+    # it multiplies the other bonus attack speed rather than adding to it (Set 18 replays; ComebackStory's docstring)
+    c = lucian()
+    run(c, [set19buffs.ComebackStory(1, 40), set19buffs.ZekesHerald()])
+    assert c.aspd.stat == pytest.approx(0.75 * 1.3 * (1 + 0.004 * 60))
     c = lucian()
     run(c, [set19buffs.ZekesHerald()])
     assert c.aspd.stat == pytest.approx(0.75 * 1.3)
