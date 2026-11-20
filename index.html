@@ -189,6 +189,31 @@
               <table id="resultsTable"></table>
             </div>
             <p class="table-hint">Click rows to plot them and watch their fight.</p>
+
+            <!-- One attack or one cast at fixed stats, per item (single_hit.py; owner, 2026-11-19). -->
+            <section id="hitPanel" class="hit-panel" aria-label="One hit">
+              <div class="hit-bar">
+                <h2 class="hit-title">One <span id="hitWhat">cast</span><span id="hitPer" class="hit-per"></span></h2>
+                <!-- the champion's hits (sim_entry.run_hits "modes": attack, cast, or its own, e.g. Gnar's rock) -->
+                <div id="hitMode" class="seg" role="radiogroup" aria-label="Hit"></div>
+                <label class="checkbox-row hit-radiant" title="Each item's Radiant version instead">
+                  <input type="checkbox" id="hitRadiant" />
+                  Radiant
+                </label>
+                <label id="hitTimeField" class="hit-time" title="Archangel's Staff's stacks: +20 AP every 5 s of combat">
+                  Archangel's at
+                  <!-- notches at Archangel's stacks: one every 5 s (owner, 2026-11-19) -->
+                  <span class="notched">
+                    <input type="range" id="hitSeconds" min="0" max="30" step="5" value="10" />
+                    <span class="notches" aria-hidden="true"></span>
+                  </span>
+                  <span id="hitSecondsValue">10 s</span>
+                </label>
+              </div>
+              <div class="table-wrap hit-wrap">
+                <table id="hitTable"></table>
+              </div>
+            </section>
           </section>
 
           <!-- One row up close: its fight, tick by tick, or the plotted rows'

@@ -51,6 +51,13 @@ class RevalidatingHandler(http.server.SimpleHTTPRequestHandler):
             self.close_connection = True
 
 
+class Server(http.server.ThreadingHTTPServer):
+    # The listen backlog: socketserver's default is 5 waiting connections. The worker fetches ~60 Python sources at
+    # once, and on Windows connections past the backlog are refused, which the page shows as "TypeError: Failed to
+    # fetch" at boot (2026-11-19: seen while a headless browser check loaded the same server).
+    request_queue_size = 128
+
+
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else PORT
     root = os.path.dirname(os.path.abspath(__file__))
@@ -58,7 +65,7 @@ def main():
     # Threading is not optional: the page opens several connections at once
     # and the Web Worker fetches every Python source in parallel on top of
     # them. A single-threaded server serialises that into a stall.
-    with http.server.ThreadingHTTPServer(("127.0.0.1", port), handler) as httpd:
+    with Server(("127.0.0.1", port), handler) as httpd:
         print(f"serving http://127.0.0.1:{port}/  (ctrl-c to stop)")
         try:
             httpd.serve_forever()

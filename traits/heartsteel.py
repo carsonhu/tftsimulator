@@ -37,8 +37,11 @@ class Heartsteel(BuildTrait):
     def extraParameters():
         names = [m[0] for m in Heartsteel.MEMBERS] + ["Bias"]
         # default: Ezreal fielded and a Bias (the one Heartsteel champion implemented)
+        # FlagKeys: the unit each box stands for, so the page can lock a member's own box (it always counts itself as
+        # fielded; owner, 2026-11-19)
         return {"Title": "Fielded", "Min": 0, "Max": 2 ** len(names) - 1, "Default": (1 << 3) | (1 << Heartsteel.BIAS),
-                "Flags": names, "TeamFlags": len(Heartsteel.MEMBERS)}
+                "Flags": names, "TeamFlags": len(Heartsteel.MEMBERS),
+                "FlagKeys": [m[1] for m in Heartsteel.MEMBERS] + [None]}
 
     def applyStats(self, champion):
         if getattr(champion, "trait_tiers", None) is None:
@@ -66,6 +69,9 @@ class Heartsteel(BuildTrait):
     # 2nd Bias is another unit), (7) adds StanPercentIncrease. So 0, 3 (a Bias, no 150%) and 7 cover them.
     SWEEP_LEVELS = (0, 3, 7)
     BIAS_LEVEL = 3
+    # the buff bar's level box offers only these (owner, 2026-11-19): the toggles say the rest (0 shows only while the
+    # trait is off)
+    BAR_LEVELS = (3, 7)
 
     @classmethod
     def sweep_rows(cls, level, params, member, champ_key=None):

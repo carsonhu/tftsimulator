@@ -157,7 +157,7 @@ def get_catalog():
         # (Seraphine) is listed once in the menu: each form names the class it is a form of (variantOf, a parent class
         # in champ_list) and its mode, which the page offers as a switch once she's chosen (owner, 2026-11-19).
         parent = next((b.__name__ for b in cls.__mro__[1:] if b.__name__ in set19champs.champ_list), None)
-        champions.append({"name": name, "label": getattr(cls, "display_name", name), "levels": levels,
+        champions.append({"name": name, "key": cls.KEY, "label": getattr(cls, "display_name", name), "levels": levels,
                           "area": bool(getattr(cls, "AREA", False)), "cost": _cost(cls, build),
                           # its damage depends on the page's Takedowns (Viego's swords): the box is highlighted
                           "takedowns": bool(getattr(cls, "TAKEDOWNS", False)),
@@ -224,6 +224,8 @@ def get_catalog():
                 "cls": cls_name,
                 "name": disp,
                 "levels": list(cls.levels),
+                # the levels the buff bar's box offers when a trait narrows them (Heartsteel: 3, 7), else None
+                "barLevels": list(getattr(cls, "BAR_LEVELS", ())) or None,
                 # 0 means "no extra parameter"; otherwise
                 # {"Title", "Min", "Max", "Default"} straight from the class.
                 "extra": extra if extra else None,
@@ -711,8 +713,20 @@ def _table_entries(sim_list):
     return entries
 
 
+def _chart_timeline(results):
+    """What the page's damage chart draws for one trial (owner, 2026-11-19 performance check): each hit's time and the
+    damage dealt by then, rounded to what a chart can show. The full series (_timeline) were 98% of a slice's payload
+    and only these two were read since the Index Log went."""
+    t, cum, total = [], [], 0.0
+    for inst in results:
+        total += inst[1][0]
+        t.append(round(inst[0], 4))
+        cum.append(round(total, 1))
+    return {"t": t, "cum": cum}
+
+
 def _timeline(results):
-    """Raw per-event series for one trial: the chart and index log data."""
+    """Raw per-event series for one trial (tools/table_dump.py compares them across refactors)."""
     t, dmg, typ, aspd, mana_cur, mana_full, cum = [], [], [], [], [], [], []
     total = 0.0
     for inst in results:
@@ -735,7 +749,8 @@ def _timeline(results):
     }
 
 
-def run_slice(cfg):
+def run_slice(cfg, full=False):
+    """The slice's rows and, per row, the chart's series (_chart_timeline), or every series with `full` (tools)."""
     champ = _build_champion(cfg)
     enemy = _build_enemy(cfg)
     slice_name = cfg.get("slice", "Craftable")
@@ -748,9 +763,82 @@ def run_slice(cfg):
     rows = _table_entries(sim_list)
 
     timelines = {
-        str(e["idx"]): _timeline(sim_list[e["idx"]]["Results"]) for e in rows
+        str(e["idx"]): (_timeline if full else _chart_timeline)(sim_list[e["idx"]]["Results"]) for e in rows
     }
     return {"slice": slice_name, "rows": rows, "timelines": timelines}
+
+
+# ---------------------------------------------------------------------------
+# The Hit table: one attack or one cast at fixed stats (single_hit.py)
+# ---------------------------------------------------------------------------
+
+# The items each list compares (owner, 2026-11-19): Kraken's Fury is left out (its stacks need a fight). A row is
+# (label or None for the item's own, classes whose icons it shows; the first is the one computed). Spear of Shojin
+# and Blue Buff give the same offensive stats, so they share a row.
+HIT_ITEMS_AD = [(None, ["Deathblade"]), (None, ["InfinityEdge"]), (None, ["LastWhisper"]), (None, ["GiantSlayer"]),
+                (None, ["GiantSlayerNoTank"]), (None, ["SteraksGage"]), (None, ["HandOfJustice"]),
+                (None, ["JeweledGauntlet"]), (None, ["StrikersFlail"])]
+HIT_ITEMS_AP = [(None, ["ArchangelsStaff"]), (None, ["RabadonsDeathcap"]), (None, ["InfinityEdge"]),
+                (None, ["JeweledGauntlet"]), (None, ["StrikersFlail"]), (None, ["GiantSlayer"]),
+                (None, ["GiantSlayerNoTank"]), (None, ["HandOfJustice"]), (None, ["VoidStaff"]),
+                (None, ["NashorsTooth"]), ("Spear of Shojin / Blue Buff", ["SpearOfShojin", "BlueBuff"])]
+HIT_SECONDS = 10  # the Archangel's slider's default (AP list only; owner, 2026-11-19: 10 s)
+
+
+def run_hits(cfg):
+    """The Hit table: for each item of the champion's list (AD or AP by role), the damage of one attack or one cast
+    with it, against NoItem. cfg: a run config plus "hitMode" ("attack" / "cast"; the champion's first offered when
+    absent or not offered), "hitSeconds" (Archangel's stacks; AP list only) and "hitRadiant" (each item's Radiant
+    instead, owner 2026-11-19: items/radiants.py, <Class>Radiant; a shared row splits when its Radiants differ, as
+    Spear of Shojin's and Blue Buff's do)."""
+    import single_hit
+    champ = _build_champion(cfg)
+    enemy = _build_enemy(cfg)
+    layout = _layout(cfg)
+    modes = single_hit.modes(champ)
+    mode = cfg.get("hitMode") if cfg.get("hitMode") in modes else single_hit.default_mode(champ)
+    which = single_hit.item_lists(champ)
+    ap = which in ("ap", "both")  # Archangel's is listed: the slider shows
+    seconds = float(cfg.get("hitSeconds", HIT_SECONDS)) if ap else 0.0
+
+    def hit(item):
+        return single_hit.damage(champ, enemy, item, False, mode, layout, seconds)
+
+    radiant = bool(cfg.get("hitRadiant"))
+    base = hit(set19items.NoItem())
+
+    def row(label, classes, dmg):
+        item = getattr(set19items, classes[0])
+        return {"cls": classes[0], "label": label or getattr(item, "display_name", classes[0]), "icons": classes,
+                "damage": round(dmg, 1), "ratio": round(dmg / base, 2) if base else 0}
+
+    rows = [{"cls": "NoItem", "label": "NoItem", "icons": [], "damage": round(base, 1), "ratio": 1.0}]
+    for label, classes in _hit_items(which):
+        if not radiant:
+            rows.append(row(label, classes, hit(getattr(set19items, classes[0])())))
+            continue
+        shared = [(c + "Radiant", hit(getattr(set19items, c + "Radiant")())) for c in classes]
+        if len({round(d, 6) for _, d in shared}) == 1:  # the Radiants still match: one row
+            names = [getattr(set19items, c).display_name for c, _ in shared]
+            rows.append(row(" / ".join(names) if len(names) > 1 else None, [c for c, _ in shared], shared[0][1]))
+        else:
+            rows += [row(None, [c], d) for c, d in shared]
+    rows.sort(key=lambda r: r["damage"], reverse=True)
+    return {"modes": list(modes), "mode": mode, "ap": ap, "seconds": seconds if ap else None, "radiant": radiant,
+            "per": _hit_unit(champ, mode), "rows": rows}
+
+
+def _hit_items(which):
+    """The rows for "ad", "ap" or "both" (each item once: the AD list, then the AP list's others)."""
+    if which != "both":
+        return HIT_ITEMS_AP if which == "ap" else HIT_ITEMS_AD
+    seen = {classes[0] for _, classes in HIT_ITEMS_AD}
+    return HIT_ITEMS_AD + [row for row in HIT_ITEMS_AP if row[1][0] not in seen]
+
+
+def _hit_unit(champ, mode):
+    """What one number counts, for the table's heading ("per rocket"), from the champion's hooks."""
+    return getattr(champ, "HIT_UNIT", None) if mode == "cast" else None
 
 
 # ---------------------------------------------------------------------------
@@ -935,6 +1023,10 @@ def champ_info_json(config_json):
 
 def run_json(config_json):
     return json.dumps(run_slice(json.loads(config_json)))
+
+
+def hits_json(config_json):
+    return json.dumps(run_hits(json.loads(config_json)))
 
 
 def cards_json(config_json):

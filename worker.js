@@ -40,6 +40,7 @@ const PY_FILES = [
   "sim_core.py",
   "sim_entry.py",
   "simulator.py",
+  "single_hit.py",
   "stats.py",
   "timing.py",
   "fight_trace.py",
@@ -173,6 +174,9 @@ onmessage = async (event) => {
     } else if (cmd === "cards") {
       await ensureBuild(pyodide, arg);
       result = entry.cards_json(arg);
+    } else if (cmd === "hits") {
+      await ensureBuild(pyodide, arg);
+      result = entry.hits_json(arg);
     } else if (cmd === "trace") {
       await ensureBuild(pyodide, arg);
       result = entry.trace_json(arg);

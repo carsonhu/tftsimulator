@@ -104,6 +104,9 @@ const state = {
   teamBuffs: new Map(),
   ownTraits: new Set(), // the champion's own traits (selectChampion): never removed from the buff bar, only set to 0
   slice: "Craftable",
+  // The Hit panel (sim_entry.run_hits): attack or cast (null: the champion's first), Archangel's seconds (AP list)
+  hit: { mode: null, seconds: 10, radiant: false }, // Archangel's at 10 s by default (owner)
+  hitCache: new Map(),
   displayDps: false,
   colorScale: true,
   // Class name -> icon URL, from the per-group index.json files. A row draws
@@ -668,6 +671,20 @@ function buildStaticControls() {
     selectZeroOnFocus(input);
   }
 
+  // The Hit panel's controls: its hits (drawn by renderHits), Radiants, and Archangel's time (AP list only).
+  $("hitRadiant").onchange = () => {
+    state.hit.radiant = $("hitRadiant").checked;
+    runHits(state.gen);
+  };
+  const hitSeconds = $("hitSeconds");
+  hitSeconds.oninput = () => {
+    $("hitSecondsValue").textContent = hitSeconds.value + " s";
+  };
+  hitSeconds.onchange = () => {
+    state.hit.seconds = Number(hitSeconds.value);
+    runHits(state.gen);
+  };
+
   // No frame-rate control: cfg.frame_rate stays at the 30 the sim expects.
   // Show: DPS | Ratio vs Base (state.displayDps true = the ratio columns, the old checkbox's meaning).
   const modeButtons = [...document.querySelectorAll("#valueMode button")];
@@ -693,6 +710,7 @@ function buildStaticControls() {
     state.colorScale = colorScale.checked;
     $("scaleLegend").hidden = !state.colorScale;
     renderResults();
+    if (state.hitPayload) renderHits(state.hitPayload);
   };
 }
 
@@ -1215,6 +1233,7 @@ async function selectChampion(name, { keepLevel, keepConfig = false }) {
   const range = $("layoutTargets");
   range.max = meta.targetsMax || state.catalog.defaults.layout.max;
   if (!keepConfig) state.cfg.layout.targets = meta.targetsDefault || state.catalog.defaults.layout.targets;
+  if (!keepConfig) state.hit.mode = null; // the Hit panel opens on the champion's default (a Caster's cast)
   if (state.cfg.layout.targets > Number(range.max)) state.cfg.layout.targets = Number(range.max);
   range.value = state.cfg.layout.targets;
   $("layoutTargetsValue").textContent = range.value;
@@ -1395,11 +1414,18 @@ function renderBuffRows() {
       caption.className = "col-label";
       caption.textContent = meta.extra.Title;
       flagBox.appendChild(caption);
+      const champKey = (champMeta() || {}).key;
       meta.extra.Flags.forEach((name, bit) => {
         const label = document.createElement("label");
         const check = document.createElement("input");
         check.type = "checkbox";
         check.checked = Boolean((flagBits >> bit) & 1);
+        // the champion's own box (Ezreal's on Ezreal): always fielded, so ticked and locked (owner, 2026-11-19)
+        if (champKey && (meta.extra.FlagKeys || [])[bit] === champKey) {
+          check.checked = true;
+          check.disabled = true;
+          label.title = `${name} always counts itself as fielded`;
+        }
         check.onchange = () => {
           flagBits ^= 1 << bit;
           syncRow(false);
@@ -1431,10 +1457,15 @@ function renderBuffRows() {
       }
     };
 
-    const fillLevels = (meta) => {
+    const fillLevels = (meta, current = null) => {
       levelSel.innerHTML = "";
-      // the champion's own unique trait: only its active level (alwaysOn)
-      const levels = alwaysOn(buffSel.value) ? [onLevel(meta)] : meta.levels;
+      // the champion's own unique trait: only its active level (alwaysOn); a trait that narrows the box (barLevels,
+      // Heartsteel: 3 and 7, owner 2026-11-19) offers those, plus the level it is at if that is another (0: off)
+      let levels = alwaysOn(buffSel.value) ? [onLevel(meta)] : meta.barLevels || meta.levels;
+      const at = current === null || current === "" ? null : Number(current);
+      if (meta.barLevels && at !== null && !levels.includes(at) && meta.levels.includes(at)) {
+        levels = [...levels, at].sort((a, b) => a - b);
+      }
       for (const l of levels) levelSel.add(new Option(String(l), String(l)));
       // a buff with one level (most augments, an own unique trait) has nothing to choose
       levelSel.style.visibility = levels.length > 1 ? "visible" : "hidden";
@@ -1446,7 +1477,7 @@ function renderBuffRows() {
       // it -- otherwise changing the *level* snaps back to the first entry
       // before the config reads it.
       const previousLevel = levelSel.value;
-      fillLevels(meta);
+      fillLevels(meta, resetToDefaults ? (alwaysOn(buffSel.value) ? onLevel(meta) : meta.levels[0]) : previousLevel);
       if (resetToDefaults) {
         levelSel.value = alwaysOn(buffSel.value) ? onLevel(meta) : meta.levels[0];
         paramInput.value = meta.extra ? meta.extra.Default : 0;
@@ -1507,7 +1538,7 @@ function renderBuffRows() {
       });
     // The champion's own traits stay in the bar: x turns one to 0 (and hides once it is), as removing it would only
     // hide a trait the champion has (owner, 2026-11-19). Anything else is removed.
-    const ownTrait = () => state.ownTraits.has(buffSel.value) && [...levelSel.options].some((o) => o.value === "0");
+    const ownTrait = () => state.ownTraits.has(buffSel.value) && state.buffMeta.get(buffSel.value).levels.includes(0);
     const drawRemove = () => {
       const own = ownTrait();
       // an own unique trait has neither a 0 to go to nor a way out of the bar
@@ -1517,6 +1548,7 @@ function renderBuffRows() {
     };
     remove.onclick = () => {
       if (ownTrait()) {
+        fillLevels(state.buffMeta.get(buffSel.value), 0); // a narrowed box (Heartsteel) gets its 0 back
         levelSel.value = "0";
         syncRow(false);
         drawRemove();
@@ -1530,7 +1562,7 @@ function renderBuffRows() {
 
     // Initial fill from the stored tuple.
     const meta = state.buffMeta.get(tuple[0]);
-    fillLevels(meta);
+    fillLevels(meta, tuple[1]);
     levelSel.value = String(tuple[1]);
     paramInput.value = tuple[2];
     flagBits = tuple[2];
@@ -1752,6 +1784,7 @@ async function refresh() {
   state.current = payload;
   state.currentCfg = ranCfg;
   renderResults();
+  await runHits(gen);
 
   // Warm the other slices so radio clicks are cache hits; abandoned as soon
   // as the config changes again.
@@ -1789,6 +1822,101 @@ async function runSlice(sliceName, gen, showStatus) {
       setRunStatus("Simulation failed: " + (lines[lines.length - 1] || "unknown error"));
     }
     return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The Hit panel: one attack or one cast at fixed stats, per item (sim_entry.run_hits, single_hit.py)
+// ---------------------------------------------------------------------------
+
+async function runHits(gen) {
+  const cfg = Object.assign(cfgForSlice("Craftable"),
+    { hitMode: state.hit.mode, hitSeconds: state.hit.seconds, hitRadiant: state.hit.radiant });
+  delete cfg.slice;
+  const key = JSON.stringify(cfg);
+  let payload = state.hitCache.get(key);
+  if (!payload) {
+    try {
+      payload = await rpc("hits", key);
+    } catch (err) {
+      console.error("Hit table failed:\n" + err.message);
+      return;
+    }
+    if (state.hitCache.size > 60) state.hitCache.clear();
+    state.hitCache.set(key, payload);
+  }
+  if (gen !== state.gen) return;
+  renderHits(payload);
+}
+
+function hitIcon(classes) {
+  const srcs = classes.map((c) => state.icons.get(c)).filter(Boolean);
+  if (!srcs.length) return null;
+  if (srcs.length === 1) return itemIcon(srcs[0], classes[0], "row-icon");
+  // two items with the same offensive stats (Spear of Shojin / Blue Buff): one icon split on its diagonal
+  const wrap = document.createElement("span");
+  wrap.className = "row-icon split-icon";
+  for (const src of srcs.slice(0, 2)) wrap.appendChild(Object.assign(document.createElement("img"), { src, alt: "" }));
+  return wrap;
+}
+
+function renderHits(payload) {
+  state.hitPayload = payload;
+  const modes = payload.modes;
+  const seg = $("hitMode");
+  seg.hidden = modes.length < 2;
+  seg.innerHTML = "";
+  for (const mode of modes) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.setAttribute("role", "radio");
+    btn.textContent = mode[0].toUpperCase() + mode.slice(1);
+    const on = mode === payload.mode;
+    btn.classList.toggle("active", on);
+    btn.setAttribute("aria-checked", String(on));
+    btn.onclick = () => {
+      state.hit.mode = mode;
+      runHits(state.gen);
+    };
+    seg.appendChild(btn);
+  }
+  $("hitWhat").textContent = payload.mode;
+  $("hitPer").textContent = payload.per ? `per ${payload.per}` : "";
+  $("hitTimeField").hidden = !payload.ap;
+  if (payload.ap) {
+    $("hitSeconds").value = payload.seconds;
+    $("hitSecondsValue").textContent = payload.seconds + " s";
+  }
+
+  const table = $("hitTable");
+  table.innerHTML = "";
+  const head = table.createTHead().insertRow();
+  const what = payload.per ? `a ${payload.per}` : `${payload.mode === "attack" ? "an" : "a"} ${payload.mode}`;
+  for (const [label, title] of [
+    ["Item", null],
+    ["Damage", `Damage of ${what} on every target, after armor/MR, crits averaged`],
+    ["÷ Base", "Damage divided by the NoItem row's"],
+  ]) {
+    const th = document.createElement("th");
+    th.textContent = label;
+    if (title) th.title = title;
+    head.appendChild(th);
+  }
+  const ratios = payload.rows.map((r) => r.ratio);
+  const scale = { min: Math.min(...ratios), max: Math.max(...ratios), rank: (v) => [...ratios].sort((a, z) => z - a).indexOf(v) + 1, count: ratios.length };
+  const body = table.createTBody();
+  for (const row of payload.rows) {
+    const tr = body.insertRow();
+    if (row.cls === "NoItem") tr.classList.add("base");
+    const name = tr.insertCell();
+    const art = hitIcon(row.icons);
+    if (art) name.appendChild(art);
+    name.appendChild(document.createTextNode(row.label));
+    attachCard(tr, row.cls);
+    tr.insertCell().textContent = row.damage.toFixed(1);
+    const ratio = tr.insertCell();
+    ratio.textContent = row.ratio.toFixed(2);
+    if (state.colorScale) shadeCell(ratio, row.ratio, scale, "÷ Base");
   }
 }
 

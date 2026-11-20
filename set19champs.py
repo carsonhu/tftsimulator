@@ -194,6 +194,13 @@ class Kaisa(BuildChampion):
     Her attacks cycle 4 animations whose windups differ (B13).
     """
     KEY = 'DA_Kaisa19'
+    # the page's Hit table (single_hit.py, owner 2026-11-19): her spell is attack speed only; an attack is the average over
+    # her missile cycle (the volley every NumAttacksForMissiles-th launch)
+    HIT_MODES = ('attack',)
+
+    def hit_attack_cycle(self):
+        return self.every
+
     MISSILE = 'CD_Kaisa19_SpellMissile'
     BOUNCE = 'CD_Kaisa19_SpellMissileTrickshot'
 
@@ -254,6 +261,17 @@ class Yunara(BuildChampion):
     Stack x Calc1 per attack. Physical spell damage, crits only with Precision.
     """
     KEY = 'DA_Yunara19'
+    # the page's Hit table (single_hit.py, owner 2026-11-19): a cast is per orb: the orbs one attack fires after her first
+    # cast (owner)
+    def hit_cast(self, opponents, items):
+        self.performAbility(opponents, items, 0)
+        self.onLaunch(opponents, items)
+
+    HIT_UNIT = 'orb'
+
+    def hit_per(self):
+        return int(self.stacks)
+
     ORBS = 'CD_Yunara19_OrbMis'
     MAX_VISUAL_ORBS = 11  # GA_Yunara19_Passive default (script literal)
     PLAYRATE = 0.5  # DeterminePlayrate: the orb chrono lasts 0.5 / AttackSpeed s (script literal)
@@ -536,6 +554,13 @@ class Gnar(BuildChampion):
     (B12). Assumed: the attack rhythm of units with several attack animations (B13: starts a period apart).
     """
     KEY = 'DA_Gnar19'
+    # the page's Hit table (single_hit.py, owner 2026-11-19): no spell; a plain attack, or the rock (its own tab,
+    # owner): the next launch is the empowered one
+    HIT_MODES = ('attack', 'rock')
+
+    def hit_rock(self):
+        self.launches = self.EVERY - 1
+
     ATTACK = 'CD_Gnar19__Attack'
     ROCK = 'CD_Gnar19_Projectile'
     BOUNCE = 'CD_Gnar19_Projectile_TrickshotBounce'
@@ -763,6 +788,8 @@ class OlafHeroAugment(BuildChampion):
     The base Olaf's heal passive is not on this unit.
     """
     KEY = 'DA_Olaf19_HeroAugment_Override'
+    # the page's Hit table (single_hit.py, owner 2026-11-19): a cast is the axes it empowers (2 on the first)
+    HIT_EMPOWERED = 'empowered_left'
     ATTACK = 'CD_Olaf19_Attack'
     AXE = 'CD_Olaf19_Spell_HeroAugment'
     EMPOWERED = 3  # the selector this class gives the empowered animation
@@ -847,6 +874,8 @@ class Ashe(BuildChampion):
     Precision, with on-hit effects at OnHitEffectivenessPerFlurryArrow (0.6, I11).
     """
     KEY = 'DA_Ashe19'
+    # the page's Hit table (single_hit.py, owner 2026-11-19): a cast is the 6 flurries it empowers
+    HIT_EMPOWERED = 'empowered_left'
     ATTACK = 'CD_Ashe19_Attack_new'
     FLURRY = 'CD_Ashe19_EmpoweredMis'
     CAST_TIME = ('CT_Ashe19_ASToCastSpeed', 'ASToCastTime')
@@ -964,6 +993,11 @@ class Viego(BuildChampion):
     def total_swords(self):
         return self.num_swords + self.bonus_swords()
 
+    HIT_UNIT = 'sword'
+
+    def hit_per(self):  # the page's Hit table (single_hit.py): a cast is per sword (owner, 2026-11-19)
+        return self.total_swords()
+
     def sword_damage(self, level, AD, AP):
         # PhysicalDamageCalc1: the AD row x AD, the AP row x AP (owner, 2026-11-18; the client's CalcComponent
         # captures AbilityPower for both, D1)
@@ -1051,6 +1085,18 @@ class Kayle(BuildChampion):
     def _speed(self, clamp, root):
         r = self.aspd.stat / (self.base_aspd * (1 + self.row('BonusAttackSpeed')))
         return min(max(r ** 0.5 if root else r, 1), clamp)
+
+    def hit_cast(self, opponents, items):
+        """The page's Hit table (single_hit.py, owner 2026-11-19): the cast with the swords of the attacks her buffed
+        attack speed fits into the buff (no attacks are run: duration x attack speed, whole attacks)."""
+        s = self._speed(self.START_CLAMP, root=False)
+        duration = self.row('Duration') + self.DURATION_SHARE * self.begin_len / s
+        self.curMana = self.fullMana.stat
+        self._cast(opponents, items, 0)
+        while self.events and not self.counting:  # up to the buff
+            self.tick = self.events[0][0]
+            self._run_events()
+        self.swords = int(duration * self.aspd.stat)
 
     def onLaunch(self, opponents, items):
         if self.counting:
@@ -1317,6 +1363,15 @@ class Briar(BuildChampion):
     neighbours.
     """
     KEY = 'DA_Briar19'
+    # the page's Hit table (single_hit.py, owner 2026-11-19): a cast is per slash: the frenzy attacks it empowers, without the
+    # dash (owner)
+    HIT_EMPOWERED, HIT_EMPOWERED_ONLY = 'frenzy_left', True
+
+    HIT_UNIT = 'slash'
+
+    def hit_per(self):
+        return int(self.row('NumFrenzyAttacks'))
+
     AREA = True  # its damage depends on the page's number of targets (layout.py)
     ATTACK, WINDUP = 'CD_Briar19_Attack', 'CD_Briar19_Windup'
     SHORT, LONG = 'CD_Briar19_CastAnim_Short', 'CD_Briar19_CastAnim_Long'
@@ -2028,6 +2083,8 @@ class Yone(BuildChampion):
     four groups isn't decoded); the timer on whole ticks from the exact times; the form at each attack and cast.
     """
     KEY = 'DA_Yone19'
+    # the page's Hit table (single_hit.py): truly hybrid (his AP form), so both item lists (owner, 2026-11-19)
+    HIT_ITEMS = 'both'
     AREA = True  # odd strikes go to the enemies near the target
     # the non-Alt timelines: VOD6's casts fit them, not the Alt ones the script's defaults name (E3)
     CAST, PART2, MISSILE = 'CD_Yone19_CastAnim', 'CD_Yone19_CastAnim_Part2', 'CD_Yone19_SpellMissile'
@@ -2270,6 +2327,13 @@ class Jinx(BuildChampion):
     of the target (the target if none), Other over the rest (the NHexRange enemies, then the target, if none).
     """
     KEY = 'DA_Jinx19'
+    # the page's Hit table (single_hit.py, owner 2026-11-19): a cast is per rocket, as their number follows attack speed
+    # (owner)
+    HIT_UNIT = 'rocket'
+
+    def hit_per(self):
+        return self.num_missiles()
+
     AREA = True  # a quarter of her missiles go to the other enemies
     CAST, MISSILE = 'CD_Jinx19_Spell_FixedTime', 'CD_Jinx19_Missile_new'
     FIRE_OVER_TIME = 1.2  # GA_Jinx19_Spell default (script literal)
@@ -2464,6 +2528,13 @@ class Jhin(BuildChampion):
     150 units of it (G22 layout); on-hit effects of pierced enemies are not scaled by their x0.4.
     """
     KEY = 'DA_Jhin19'
+    # the page's Hit table (single_hit.py, owner 2026-11-19): no spell; an attack is the average over his 4-shot cycle (before
+    # he ascends)
+    HIT_MODES = ('attack',)
+
+    def hit_attack_cycle(self):
+        return 4
+
     AREA = True  # piercing shots after ascension hit the dummies behind the target (layout.py)
     # his targets stand in a line behind the target, at most 3 (owner, 2026-11-19): what the piercing shots meet
     TARGETS_SHAPE, TARGETS_MAX = "line", 3

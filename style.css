@@ -810,6 +810,12 @@ button:focus-visible {
   margin: 0;
 }
 
+/* the champion's own Heartsteel box: always ticked, not a choice */
+.param-flags label:has(input:disabled) {
+  color: #7a7f8f;
+  cursor: help;
+}
+
 .empty-note {
   margin: 2px 0;
   color: #7a7f8f;
@@ -982,6 +988,153 @@ button:focus-visible {
   border: 1px solid #31333f;
   /* The same surface->step-500 ramp the cells paint with. */
   background: linear-gradient(90deg, rgba(37, 106, 191, 0) 0%, rgba(37, 106, 191, 1) 100%);
+}
+
+/* The Hit panel: the bottom third of the column (owner, 2026-11-19); the DPS table above it shrinks to fit and
+   scrolls. */
+.table-hint {
+  flex: none;
+}
+
+/* Its own box (owner, 2026-11-19): set apart from the DPS table, as wide as its rows need, with larger rows. */
+.hit-panel {
+  flex: 0 0 33%;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px 12px;
+  border: 1px solid #3a3d4a;
+  border-radius: 10px;
+  background: #161a23;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.hit-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-bottom: 6px;
+  font-size: 0.85em;
+}
+
+.hit-title {
+  margin: 0;
+  color: #fafafa;
+  font-size: 0.92em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hit-per {
+  margin-left: 6px;
+  color: #8a90a2;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.hit-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #9aa0b0;
+}
+
+.hit-time[hidden],
+#hitMode[hidden] {
+  display: none;
+}
+
+.hit-time input[type="range"] {
+  width: 120px;
+  margin: 0;
+}
+
+/* a tick under the track at each stop (step 5 s: 0-30, 7 ticks); inset by half the thumb so they line up with it */
+.notched {
+  position: relative;
+  display: inline-flex;
+  padding-bottom: 7px;
+}
+
+.notches {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: 5px;
+  background: repeating-linear-gradient(90deg, #8a90a2 0 1px, transparent 1px calc((100% - 1px) / 6));
+}
+
+#hitSecondsValue {
+  min-width: 2.6em;
+  color: #fafafa;
+  font-variant-numeric: tabular-nums;
+}
+
+.hit-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #0e1117;
+}
+
+#hitTable {
+  font-size: 1.1em;
+}
+
+#hitTable td {
+  padding: 5px 12px;
+}
+
+#hitTable th {
+  padding: 4px 12px;
+}
+
+#hitTable td:first-child {
+  padding-right: 20px;
+}
+
+#hitTable td:first-child,
+#hitTable thead :first-child {
+  text-align: left;
+}
+
+#hitTable .row-icon {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  vertical-align: middle;
+  margin-right: 9px;
+  border-radius: 4px;
+}
+
+/* Spear of Shojin / Blue Buff: one icon split along its diagonal. */
+#hitTable .split-icon {
+  position: relative;
+  overflow: hidden;
+}
+
+#hitTable .split-icon img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#hitTable .split-icon img:first-child {
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+#hitTable .split-icon img:last-child {
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+#hitTable tr.base td {
+  color: #9aa0b0;
 }
 
 .run-status {

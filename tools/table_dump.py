@@ -45,7 +45,7 @@ def dump(build):
             info = sim_entry.get_champ_info(config(champ, level, build, "Craftable"))
             out[f"{champ}/{level}/stats"] = info["stats"]
             for slice_name in catalog["slices"]:
-                res = sim_entry.run_slice(config(champ, level, build, slice_name))
+                res = sim_entry.run_slice(config(champ, level, build, slice_name), full=True)
                 rows = {}
                 for r in res["rows"]:
                     tl = res["timelines"][str(r["idx"])]

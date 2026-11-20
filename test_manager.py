@@ -111,3 +111,17 @@ def test_own_unique_trait_is_always_on():
     assert rows == []
     rows = [sim_entry._row_label(b) for b in sim_entry.trait_sweep_buffs([("Composer", 1, 5)], "DA_Draven19")]
     assert rows == ["Composer 0"]
+
+
+def test_heartsteel_bar_levels_are_3_and_7():
+    # owner, 2026-11-19: (1)-(5) differ only by the Bias, which the toggles set, so the bar's box offers 3 and 7
+    import sim_entry
+    hs = next(b for b in sim_entry.get_catalog()["buffs"] if b["cls"] == "Heartsteel")
+    assert hs["barLevels"] == [3, 7] and 0 in hs["levels"]
+    # each box names its unit, so the page locks the champion's own (owner: Ezreal always has his Heartsteel bonus)
+    ezreal = next(c for c in sim_entry.get_catalog()["champions"] if c["name"] == "Ezreal")
+    assert hs["extra"]["FlagKeys"][hs["extra"]["Flags"].index("Ezreal")] == ezreal["key"]
+    # and the Trait tab never flips it
+    cfg = {"champ": "Ezreal", "level": 1, "items": ["NoItem"] * 3, "buffs": [["Heartsteel", 3, 0]], "slice": "Trait",
+           "enemy": {"hp": 1800, "armor": 100, "mr": 100}}
+    assert not any("Ezreal" in r["extra"] for r in sim_entry.run_slice(cfg)["rows"])
