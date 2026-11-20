@@ -9,7 +9,7 @@ from simulator import Simulator
 from test_timing import dummy
 
 
-def pulses(level, place=0, seconds=11):
+def pulses(level, seconds=11):
     """(tick, bonus AD %, AP %) whenever they change, and the mana grants (tick, amount), for Varus (not a Manager)."""
     v = Varus(1)
     log, mana, orig_update, orig_add = [], [], v.update, v.addMana
@@ -27,7 +27,7 @@ def pulses(level, place=0, seconds=11):
 
     v.update, v.addMana = upd, add
     start = (round(v.bonus_ad.total('+') * 100, 6), round(v.ap.total('+') * 100, 6))
-    Simulator().simulate([], [set19buffs.Manager(level, place)], v, [dummy()], seconds)
+    Simulator().simulate([], [set19buffs.Manager(level)], v, [dummy()], seconds)
     return start, log, mana
 
 
@@ -43,9 +43,9 @@ def test_mana_from_three():
     assert mana == [(0, 8), (150, 8), (300, 8)]
 
 
-def test_outside_the_hex_nothing():
-    start, log, mana = pulses(4, place=1)
-    assert log == [] and mana == []
+def test_always_in_the_hex():
+    # owner, 2026-11-20: outside the hex gives nothing, so the unit is taken to be in it, with no toggle
+    assert set19buffs.Manager.extraParameters() == 0
 
 
 def test_offered_as_team_traits():
@@ -54,7 +54,7 @@ def test_offered_as_team_traits():
         assert cls in team
     assert team['Composer']['number'] == {'min': 0, 'max': 5, 'default': 0}
     assert team['Jazz']['number']['default'] == 5
-    assert team['Manager']['options'] == ['Yes', 'No']
+    assert not team['Manager']['options'] and not team['Manager']['flags']
     assert team['Arcanist']['scales'] and not team['Swiftstriker']['scales']
 
 

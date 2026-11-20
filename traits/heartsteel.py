@@ -49,7 +49,7 @@ class Heartsteel(BuildTrait):
         fight viewer leaves an idle one off its card, owner 2026-11-19)."""
         if not self.level:
             return False
-        member = self.KEY in (champion.data.d.get("trait_keys") or [])
+        member = champion.has_trait(self.KEY)
         return member or bool(int(self.params or 0) & ((1 << len(self.MEMBERS)) - 1))
 
     def applyStats(self, champion):
@@ -61,7 +61,7 @@ class Heartsteel(BuildTrait):
         champion.heartsteel_bias = False
         if tier == 0:
             return
-        member = self.KEY in (champion.data.d.get("trait_keys") or [])
+        member = champion.has_trait(self.KEY)
         stan = champion.trait_value(self.KEY, "StanPercentIncrease") if member else 0
         fielded = [m for bit, m in enumerate(self.MEMBERS)
                    if (self.params >> bit) & 1 or getattr(champion, "KEY", None) == m[1]]

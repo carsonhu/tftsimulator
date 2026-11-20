@@ -1166,7 +1166,7 @@ class Lucian(BuildChampion):
         return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
 
     def encore(self):
-        return self.trait_tier('DA_Encore19') > 0 and 'DA_Encore19' in (self.data.d.get('trait_keys') or [])
+        return self.trait_tier('DA_Encore19') > 0 and self.has_trait('DA_Encore19')
 
     def set_locks(self, chrono):
         """The cast's locks: the dash, then the cast chrono's Unlock (mana lock); the next attack the tick after."""

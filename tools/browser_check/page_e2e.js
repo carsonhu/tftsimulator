@@ -93,12 +93,12 @@ const puppeteer = require("puppeteer-core");
     const flags = () => page.evaluate(() => {
       const row = [...document.querySelectorAll("#buffRows .buff-row")].find((r) => r.querySelector("select").value === "Heartsteel");
       const box = row.querySelector(".param-flags");
-      return { hidden: box.hidden, title: box.querySelector(".col-label").textContent,
+      return { hidden: box.hidden,
                ticks: [...box.querySelectorAll("label")].map((l) => l.textContent + "=" + l.querySelector("input").checked) };
     });
     const hs = await flags();
     console.log("Ezreal Heartsteel flags:", JSON.stringify(hs));
-    if (hs.hidden || hs.ticks.join() !== "Kayn=false,Alune=false,Aphelios=false,Ezreal=true,Bias=true") {
+    if (hs.hidden || hs.ticks.join() !== "Kayn=false,Alune=false,Aphelios=false,Ezreal=true,Bias=false") {
       console.log("FAIL Heartsteel tick boxes");
     }
     const before = (await read()).rows[1];

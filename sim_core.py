@@ -30,6 +30,25 @@ class ChampLabel:
         return f"ChampLabel({self.name!r}, {self.level!r})"
 
 
+def _drop_same_buff(champ, extra):
+    """Remove the champion's copies of the trait or buff `extra` (the row's replaces them)."""
+    equal_buffs = [
+        champ_buff
+        for champ_buff in champ.items
+        if (
+            champ_buff.name.rsplit(" ", 1)[0] == extra.name.rsplit(" ", 1)[0]
+            or type(champ_buff) == type(extra)
+        )
+        and (
+            champ_buff.name.rsplit(" ", 1)[0].replace(" ", "") in class_buffs
+            or type(champ_buff).__name__ in class_buffs
+            or (champ_buff.name == extra.name)
+        )
+    ]
+    for equal_buff in equal_buffs:
+        champ.items.remove(equal_buff)
+
+
 def run_one(champion, opponent, extra, is_buff, duration, frame_rate=30, layout=None, setup=None):
     """One fight: a fresh copy of the configured champion with `extra` (an item, or a buff that replaces any copy of
     the same trait the champion already carries) against copies of the opponent placed by `layout`. `setup(champ,
@@ -37,28 +56,17 @@ def run_one(champion, opponent, extra, is_buff, duration, frame_rate=30, layout=
     simulator = Simulator()
     layout = layout or Layout()
     champ = copy.deepcopy(champion)
-    if is_buff:
-        equal_buffs = [
-            champ_buff
-            for champ_buff in champ.items
-            if (
-                champ_buff.name.rsplit(" ", 1)[0] == extra.name.rsplit(" ", 1)[0]
-                or type(champ_buff) == type(extra)
-            )
-            and (
-                champ_buff.name.rsplit(" ", 1)[0].replace(" ", "") in class_buffs
-                or type(champ_buff).__name__ in class_buffs
-                or (champ_buff.name == extra.name)
-            )
-        ]
-        for equal_buff in equal_buffs:
-            champ.items.remove(equal_buff)
+    # An Emblem slice row brings its trait at the row's level (row_trait, sim_entry._slice_inputs): it replaces the
+    # buff bar's copy as a buff extra would.
+    trait = None if is_buff else getattr(extra, "row_trait", None)
+    if is_buff or trait is not None:
+        _drop_same_buff(champ, extra if is_buff else trait)
     dummies = [copy.deepcopy(opponent) for _ in range(layout.count)]
     if setup is not None:
         setup(champ, dummies)
     results = simulator.simulate(
         [] if is_buff else [copy.deepcopy(extra)],
-        [copy.deepcopy(extra)] if is_buff else [],
+        [copy.deepcopy(extra)] if is_buff else ([copy.deepcopy(trait)] if trait is not None else []),
         champ,
         dummies,
         duration,

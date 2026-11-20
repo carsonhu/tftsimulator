@@ -7,6 +7,7 @@ import pytest
 import set19champs
 import sim_entry
 from build_champion import BuildChampion
+from simulator import Simulator
 
 
 class AhriForTest(BuildChampion):
@@ -186,3 +187,34 @@ def test_neeko_asks_for_her_kill_ap():
     # owner, 2026-11-19: the page highlights the AP box (dummies never die, so her kill passive's AP is the user's)
     champs = {c["name"]: c for c in sim_entry.get_catalog()["champions"]}
     assert list(champs["Neeko"]["askBonus"]) == ["ap"] and champs["Ezreal"]["askBonus"] == {}
+
+
+def test_emblem_slice():
+    # owner, 2026-11-20: no Spatula or Frying Pan; an emblem row runs its trait at a level ("Beach Pop Emblem (3)"), a
+    # dropdown of the trait's levels, default the buff bar's level or else the lowest; an emblem of the unit's own trait
+    # is left out (the game won't give it one)
+    cfg = {"champ": "Ahri", "level": 2, "items": ["NoItem"] * 3, "buffs": [["Pentakill", 5, 0]],
+           "enemy": {"hp": 1800, "armor": 100, "mr": 100}, "slice": "Emblem", "rowInputs": {"BeachPopEmblem": 7}}
+    rows = {r["extraCls"]: r for r in sim_entry.run_slice(cfg)["rows"]}
+    assert "Spatula" not in rows and "FryingPan" not in rows
+    assert "KDAEmblem" not in rows  # Ahri is K/DA
+    assert rows["BeachPopEmblem"]["extra"] == "Beach Pop Emblem (7)"
+    assert rows["BeachPopEmblem"]["input"]["options"] == [3, 5, 7]
+    assert rows["PentakillEmblem"]["extra"] == "Pentakill Emblem (5)"  # the bar's level
+    assert rows["JazzEmblem"]["extra"] == "Jazz Emblem (2)"
+    assert rows["RockEmblem"]["input"] is None  # no simulated trait
+    assert "TacticiansCrown" not in rows  # only with an augment that reads them (owner): U.R.F.
+    cfg["buffs"].append(["URF", 1, 0])
+    rows = {r["extraCls"] for r in sim_entry.run_slice(cfg)["rows"]}
+    assert {"TacticiansCrown", "TacticiansCape", "TacticiansShield"} <= rows
+
+
+def test_an_emblem_makes_its_holder_a_member():
+    # owner, 2026-11-20: Ahri (not Beach Pop) holding a Beach Pop Emblem gets the members' attack speed
+    def member(items):
+        c = sim_entry._build_champion({"champ": "Ahri", "level": 2, "items": items, "buffs": [["BeachPop", 3, 0]]})
+        Simulator().itemStats(c.items, c)
+        return c.has_trait("DA_OceanSong19"), c.aspd.total("MultiplyAdditive")
+    assert member(["NoItem"] * 3)[0] is False
+    held, with_emblem = member(["BeachPopEmblem", "NoItem", "NoItem"])
+    assert held and with_emblem > member(["NoItem"] * 3)[1]

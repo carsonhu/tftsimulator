@@ -11,7 +11,7 @@ class Manager(BuildTrait):
     (0/0/1), HealthPercent (15/20/25%). Tooltip: (2) 6% AD AP, (3) AND 8 Mana, (4) AND they drop 1 Gold.
 
     Whoever stands in the hex gets it, member or not (Alune, the member, is not implemented), so it is a team trait;
-    the parameter is whether the simulated unit starts in the Spotlight Hex (default: yes).
+    the simulated unit is taken to start in the Spotlight Hex (owner, 2026-11-20: outside it gives nothing, so no toggle).
     GA_Manager19_StatGain (build ga_scripts.zip), triggered at combat start (Combat.Event.Passive): RepeatAction(
     Interval, 99), first action at once (A1), each action applying at the trait level GE_Manager19_ADAP (Infinite, no
     stacking rule: every pulse is another instance; AttackDamage and AbilityPower + PhysicalDamageCalc1 = ADAP x
@@ -22,18 +22,13 @@ class Manager(BuildTrait):
     KEY = "DA_Manager19"
     display_name = "Manager"
     team_trait = True
-    PLACES = ["Yes", "No"]  # starts combat in the Spotlight Hex
     REPEATS = 99
 
     def __init__(self, level=0, params=0):
         super().__init__(level, params, phases=["preCombat"])
 
-    @staticmethod
-    def extraParameters():
-        return {"Title": "In the Spotlight Hex", "Min": 0, "Max": 1, "Default": 0, "Options": Manager.PLACES}
-
     def performAbility(self, phase, time, champion, input_=0):
-        if champion.trait_tier(self.KEY) == 0 or self.PLACES[int(self.params or 0)] != "Yes":
+        if champion.trait_tier(self.KEY) == 0:
             return input_
         mult = champion.trait_value(self.KEY, "HexStatMultiplier")
         adap = champion.trait_value(self.KEY, "ADAP") * mult

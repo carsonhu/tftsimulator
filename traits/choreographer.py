@@ -24,7 +24,7 @@ class Choreographer(BuildTrait):
         if champion.trait_tier(self.KEY) == 0:
             return
         amp = champion.trait_value(self.KEY, "DamageAmp")
-        if self.KEY in (champion.data.d.get("trait_keys") or []):
+        if champion.has_trait(self.KEY):
             amp *= champion.trait_value(self.KEY, "ChoreographerPercentMult")
         champion.dmgMultiplier.modify("+", amp)
 

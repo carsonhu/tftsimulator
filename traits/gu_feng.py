@@ -27,7 +27,7 @@ class GuFeng(BuildTrait):
 
     def applyStats(self, champion):
         super().applyStats(champion)
-        if champion.trait_tier(self.KEY) == 0 or self.KEY not in (champion.data.d.get("trait_keys") or []):
+        if champion.trait_tier(self.KEY) == 0 or not champion.has_trait(self.KEY):
             return
         level = int(self.params or self.DEFAULT_LEVEL)  # 0 = not set: the default
         per_level = champion.trait_value(self.KEY, "HeavenscaleStats") * level  # GenericCalc1

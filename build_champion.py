@@ -249,6 +249,17 @@ class BuildChampion(Champion):
                                  f'in build {self.build.version} ({sorted(spawns)})')
         return spawns.pop()
 
+    def has_trait(self, trait_key):
+        """Whether this champion is a member of the trait: its own (the build's trait_keys) or through an emblem it
+        holds (items.emblems.BuildEmblem.TRAIT; owner, 2026-11-20: the emblem makes its holder a member)."""
+        if trait_key in (self.data.d.get('trait_keys') or []):
+            return True
+        for item in self.items:
+            trait = getattr(type(item), 'TRAIT', None)
+            if trait and getattr(getattr(set19buffs, trait, None), 'KEY', None) == trait_key:
+                return True
+        return False
+
     def trait_tier(self, trait_key):
         """The tier this champion's board reaches in a trait (0 = inactive), set at combat start (B11)."""
         return self.trait_tiers.get(trait_key, 0)

@@ -108,3 +108,17 @@ def test_archangels_defaults_to_10_seconds():
     out = sim_entry.run_hits(cfg("Ahri"))
     assert out["seconds"] == 10
     assert {r["cls"]: r for r in out["rows"]}["ArchangelsStaff"]["ratio"] == pytest.approx(1.7, abs=0.01)
+
+
+def test_the_math_multiplies_to_the_damage():
+    # owner, 2026-11-20: the panel beside the table explains a hit as before amp x amp x crit x resists, each measured
+    # on the hit itself, so the chain gives the table's number for every champion, hit and item
+    for name in set19champs.champ_list:
+        for mode in single_hit.modes(sim_entry._build_champion(cfg(name))):
+            for r in sim_entry.run_hits(cfg(name, hitMode=mode))["rows"]:
+                m = r["math"]
+                assert m["raw"] * m["amp"] * m["crit"] * m["resist"] == pytest.approx(r["damage"], rel=2e-3, abs=0.1), \
+                    (name, mode, r["cls"])
+    # Void Staff's shred shows in the resist the hit met
+    r = rows("Ahri")
+    assert (r["NoItem"]["math"]["resists"], r["VoidStaff"]["math"]["resists"]) == ({"mr": 100.0}, {"mr": 70.0})

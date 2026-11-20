@@ -105,7 +105,7 @@ const state = {
   ownTraits: new Set(), // the champion's own traits (selectChampion): never removed from the buff bar, only set to 0
   slice: "Craftable",
   // The Hit panel (sim_entry.run_hits): attack or cast (null: the champion's first), Archangel's seconds (AP list)
-  hit: { mode: null, seconds: 10, radiant: false }, // Archangel's at 10 s by default (owner)
+  hit: { mode: null, seconds: 10, radiant: false, explained: null }, // Archangel's at 10 s by default (owner)
   hitCache: new Map(),
   displayDps: false,
   colorScale: true,
@@ -188,6 +188,23 @@ async function init() {
   new ResizeObserver(() => {
     if (window.Plotly && $("chart").data && !$("chartWrap").hidden) Plotly.Plots.resize($("chart"));
   }).observe($("chartWrap"));
+  // Side by side, the chart ends where the DPS table ends (owner, 2026-11-20); the viewer under it takes the rest
+  // (style.css, min-width 1321px), keeping at least 240 px. Stacked, the stylesheet's heights stand.
+  const wide = window.matchMedia("(min-width: 1321px)");
+  const alignChart = () => {
+    const plot = $("plotArea");
+    if (!wide.matches) {
+      plot.style.height = "";
+      return;
+    }
+    const pane = plot.parentElement.getBoundingClientRect();
+    const bottom = document.querySelector(".results-wrap").getBoundingClientRect().bottom;
+    const height = Math.min(bottom - pane.top - 1, pane.height - 240);
+    plot.style.height = Math.max(200, Math.round(height)) + "px";
+  };
+  new ResizeObserver(alignChart).observe(document.querySelector(".results-wrap"));
+  new ResizeObserver(alignChart).observe(document.querySelector(".pane"));
+  wide.addEventListener("change", alignChart);
   $("vizRowSel").onchange = () => {
     state.vizRow = { slice: state.slice, extra: $("vizRowSel").value };
     renderResults();
@@ -684,6 +701,13 @@ function buildStaticControls() {
     state.hit.seconds = Number(hitSeconds.value);
     runHits(state.gen);
   };
+  // The math box takes the width the Hit panel leaves; below 210 px it would only be squeezed text, so it hides.
+  const fitHitMath = () => {
+    const row = document.querySelector(".hit-row");
+    row.classList.toggle("cramped", row.clientWidth - $("hitPanel").offsetWidth - 10 < 210);
+  };
+  new ResizeObserver(fitHitMath).observe(document.querySelector(".hit-row"));
+  new ResizeObserver(fitHitMath).observe($("hitPanel"));
 
   // No frame-rate control: cfg.frame_rate stays at the 30 the sim expects.
   // Show: DPS | Ratio vs Base (state.displayDps true = the ratio columns, the old checkbox's meaning).
@@ -829,9 +853,13 @@ function itemGroups() {
 
 function buffGroups() {
   const groups = { Trait: { label: "Traits", entries: [] }, Augment: { label: "Augments", entries: [] } };
+  // A trait is offered to the champion's own members, or to anyone through its emblem: a trait with no emblem
+  // does nothing for a non-member here (its team-wide half is the Team Traits panel's) (owner, 2026-11-20).
+  const emblemTraits = new Set(state.catalog.sidebarItems.map((i) => i.trait).filter(Boolean));
   for (const b of state.catalog.buffs) {
     const group = groups[b.kind];
     if (!group) continue;
+    if (b.kind === "Trait" && !state.ownTraits.has(b.cls) && !emblemTraits.has(b.cls)) continue;
     const onLevel = b.levels.find((l) => l > 0) ?? b.levels[0];
     group.entries.push({
       value: b.cls,
@@ -1333,6 +1361,16 @@ function addEmblemTrait(itemCls) {
     }
   }
   renderBuffRows();
+}
+
+// An Emblem row's "+": the trait goes in the buff bar at the row's level (addEmblemTrait put it at its lowest).
+function setEmblemTraitLevel(itemCls, level) {
+  const item = state.catalog.sidebarItems.find((i) => i.cls === itemCls);
+  const entry = item && state.cfg.buffs.find(([cls]) => cls === item.trait);
+  if (!entry || entry[1] === level) return;
+  entry[1] = level;
+  renderBuffRows();
+  onConfigChanged();
 }
 
 // One row per buff: its tile (opens the picker to swap it), its level, a
@@ -1939,17 +1977,108 @@ function renderHits(payload) {
   const body = table.createTBody();
   for (const row of payload.rows) {
     const tr = body.insertRow();
+    tr.dataset.cls = row.cls;
     if (row.cls === "NoItem") tr.classList.add("base");
     const name = tr.insertCell();
     const art = hitIcon(row.icons);
     if (art) name.appendChild(art);
-    name.appendChild(document.createTextNode(row.label));
-    attachCard(tr, row.cls);
+    // with Radiant ticked every row is one: the box and the frames say so, and the names stay short enough to leave
+    // the math box beside the table its room
+    name.appendChild(document.createTextNode(hitLabel(row, payload)));
+    // the item's card on its icon only: the row itself shows its math beside the table (owner, 2026-11-20)
+    if (art) attachCard(art, row.cls);
     tr.insertCell().textContent = row.damage.toFixed(1);
     const ratio = tr.insertCell();
     ratio.textContent = row.ratio.toFixed(2);
     if (state.colorScale) shadeCell(ratio, row.ratio, scale);
+    // the math beside the table follows the pointer, and stays on the last row pointed at (owner, 2026-11-20)
+    tr.addEventListener("mouseenter", () => {
+      state.hit.explained = row.cls;
+      renderHitMath(payload);
+    });
   }
+  renderHitMath(payload);
+}
+
+function hitLabel(row, payload) {
+  return payload.radiant ? row.label.replace(/^Radiant /, "").replace(/ \/ Radiant /g, " / ") : row.label;
+}
+
+// The math of one hit (sim_entry.run_hits "math", single_hit._Recorder.explain), the row under the pointer (by
+// default the top row) against Base: damage = before amp x amp x crit x resists, each factor measured on the hit
+// itself, so the chain multiplies to the table's ratio. Ratios only, no damage amounts (owner, 2026-11-20).
+function renderHitMath(payload) {
+  const box = $("hitMath");
+  const base = payload.rows.find((r) => r.cls === "NoItem");
+  const row = payload.rows.find((r) => r.cls === state.hit.explained)
+    || payload.rows.find((r) => r.cls !== "NoItem") || base;
+  for (const tr of document.querySelectorAll("#hitTable tbody tr")) tr.classList.toggle("explained", tr.dataset.cls === row.cls);
+  box.innerHTML = "";
+  if (!base || !base.math || !row.math) return;
+  const b = base.math, m = row.math;
+  const solo = row.cls === "NoItem";
+
+  // a title bar as tall as the Hit panel's, so the item's name sits level with the table's header (owner, 2026-11-20)
+  const bar = document.createElement("div");
+  bar.className = "hit-math-bar";
+  bar.style.minHeight = $("hitPanel").querySelector(".hit-bar").offsetHeight + "px";
+  bar.appendChild(Object.assign(document.createElement("h2"), { className: "hit-title", textContent: "The math" }));
+  box.appendChild(bar);
+
+  const h = document.createElement("h3");
+  const art = hitIcon(row.icons);
+  if (art) h.appendChild(art);
+  h.appendChild(Object.assign(document.createElement("span"), { textContent: solo ? "Base" : row.label }));
+  box.appendChild(h);
+
+  const pct = (v) => `${Math.round(v * 1000) / 10}%`;
+  const x = (v) => `×${v.toFixed(2)}`;
+  // "AP 100% → 115%", or "AP 100%" when the item leaves it
+  const pair = (label, bv, iv, fmt) => `${label} ${fmt(bv)}` + (!solo && fmt(bv) !== fmt(iv) ? ` → ${fmt(iv)}` : "");
+
+  const table = document.createElement("table");
+  const body = table.createTBody();
+  // a factor's name, what it comes from underneath, and the item's factor over Base's
+  const line = (cls, op, label, note, bv, iv) => {
+    const tr = body.insertRow();
+    if (cls) tr.className = cls;
+    const name = tr.insertCell();
+    name.appendChild(Object.assign(document.createElement("span"), { className: "op", textContent: op }));
+    name.append(label);
+    for (const text of [].concat(note || [])) name.appendChild(Object.assign(document.createElement("div"), { className: "why", textContent: text }));
+    const ratio = tr.insertCell();
+    const r = bv ? iv / bv : 1;
+    ratio.textContent = x(r);
+    ratio.className = Math.abs(r - 1) < 0.005 ? "same" : r > 1 ? "up" : "down";
+  };
+
+  // the stat the hit scales with: AP for an AP champion, AD otherwise, both for a hybrid (Yone)
+  const scaling = [];
+  if (!payload.ap || payload.both) scaling.push(pair("AD", b.stats.ad, m.stats.ad, (v) => v.toFixed(0)));
+  if (payload.ap) scaling.push(pair("AP", b.stats.ap, m.stats.ap, pct));
+  line("", "", "Before amp", scaling.join(", "), b.raw, m.raw);
+  const amp = (v) => `+${Math.round(v * 1000) / 10}%`;
+  line("", "×", "Amp", pair("", b.stats.amp, m.stats.amp, amp).trim(), b.amp, m.amp);
+  // the crit average as its formula, Base's and the item's: 1 + crit chance x the extra a crit deals (owner,
+  // 2026-11-20: "60% -> 95% for 140% -> 150%" read unclearly). The factor is the hit's own: a hit that can't crit
+  // (a spell without Precision among crits that can) pulls it under the formula, and the line says so.
+  const critLine = (who, math) => {
+    if (math.crit === 1) return `${who}can't crit`;
+    const c = math.stats.crit, extra = math.stats.critdmg - 1;
+    const formula = 1 + c * extra;
+    return `${who}1 + ${pct(c)} crit × ${pct(extra)} bonus = ×${math.crit.toFixed(2)}` + (Math.abs(formula - math.crit) > 0.005 ? " (some hits can't crit)" : "");
+  };
+  const critNotes = solo || (b.crit === m.crit && b.stats.crit === m.stats.crit && b.stats.critdmg === m.stats.critdmg)
+    ? [critLine("", m)] : [critLine("Base: ", b), critLine("Item: ", m)];
+  line("", "×", "Crit", critNotes, b.crit, m.crit);
+  const resist = (math) => Object.entries(math.resists).map(([k, v]) => `${k === "mr" ? "MR" : "Armor"} ${Math.round(v)}`).join(", ");
+  const types = m.types.filter((t) => t !== "true");
+  const label = types.length === 1 ? (types[0] === "magical" ? "MR" : "Armor") : "Resists";
+  const note = resist(b) === resist(m) || solo ? resist(m) : `${resist(b)} → ${resist(m)}`;
+  line("", "×", label, note + (m.types.includes("true") ? (note ? ", " : "") + "true damage ignores it" : ""), b.resist, m.resist);
+  line("total", "=", "Damage", "", base.damage, row.damage);
+  box.appendChild(table);
+
 }
 
 function setRunStatus(text) {
@@ -2186,6 +2315,12 @@ function renderResults() {
         // reader announcing the file too would only repeat.
         const art = rowArt(row);
         if (art) cell.appendChild(art);
+        // the extra's card on its icon only, as in the Hit table (owner, 2026-11-20); it carries the click's hint
+        if (art) {
+          const plotted = currentSelection().has(row.idx);
+          attachCard(art, row.extraCls, () => row.extraLevel, plotted ? "Click to remove from the chart" : "Click to plot",
+                     state.slice === "Team Traits");
+        }
         if (row.input) rowNameWithInput(cell, row);
         else cell.appendChild(document.createTextNode(row.extra));
         const add = rowAddButton(row);
@@ -2240,9 +2375,7 @@ function renderResults() {
     }
     tr.tabIndex = 0;
     tr.setAttribute("aria-pressed", slot !== undefined ? "true" : "false");
-    const hint = slot !== undefined ? "Click to remove from the chart" : "Click to plot";
-    // the card carries the hint where there is one (a native title would pop up over it)
-    if (!attachCard(tr, row.extraCls, () => row.extraLevel, hint, state.slice === "Team Traits")) tr.title = hint;
+    // no card or title on the row itself: the icon has the card (labelCols "Extra"), the hint is under the table
     if (row === viewed) tr.classList.add("viewing");
     const toggle = () => {
       togglePlotted(row.idx);
@@ -2300,7 +2433,10 @@ function rowAddPlan(row) {
     const slot = state.cfg.items.findIndex((i) => i === "NoItem");
     return slot < 0
       ? { disabled: true, title: "The item slots are full" }
-      : { title: `Add ${row.extra} to item slot ${slot + 1}`, run: () => pickInto(document.querySelectorAll(".item-slot select")[slot], cls) };
+      : { title: `Add ${row.extra} to item slot ${slot + 1}`, run: () => {
+          pickInto(document.querySelectorAll(".item-slot select")[slot], cls);
+          if (row.input && row.input.options) setEmblemTraitLevel(cls, row.input.value);
+        } };
   }
   const meta = state.buffMeta.get(cls);
   if (!meta) return null;
@@ -2349,10 +2485,25 @@ function rowAddPlan(row) {
 // A row whose result hangs on a number of its own reads "Hold the Line ([7] units)", the number a box: typing in it
 // reruns the slice with that number for that row (cfg.rowInputs; sim_entry._row_input) (owner, 2026-11-19).
 function rowNameWithInput(cell, row) {
-  const { value, min, max, template, title } = row.input;
+  const { value, min, max, template, title, options } = row.input;
   const [before, after] = template.split("{}");
   const suffix = " (" + before + value + after + ")";
   const name = row.extra.endsWith(suffix) ? row.extra.slice(0, -suffix.length) : row.extra;
+  if (options) {
+    // an Emblem row's trait level, "Beach Pop Emblem ([3])": the trait's levels as a dropdown (owner, 2026-11-20)
+    const pick = document.createElement("select");
+    pick.className = "row-input row-select";
+    pick.title = title;
+    pick.setAttribute("aria-label", `${name}: ${title}`);
+    for (const level of options) pick.add(new Option(String(level), String(level), false, level === value));
+    for (const type of ["click", "pointerdown", "keydown"]) pick.addEventListener(type, (event) => event.stopPropagation());
+    pick.onchange = () => {
+      state.cfg.rowInputs[row.extraCls] = Number(pick.value);
+      refresh();
+    };
+    cell.append(name + " ", pick); // no parentheses around the dropdown (owner, 2026-11-20)
+    return;
+  }
   const box = document.createElement("input");
   box.type = "number";
   box.className = "row-input";

@@ -28,7 +28,7 @@ class Swiftstriker(BuildTrait):
             champion.aspd.modify("MultiplyAdditive", 1 + champion.trait_value(self.KEY, "TeamAS"))
 
     def performAbility(self, phase, time, champion, input_=0):
-        if self.KEY not in (champion.data.d.get("trait_keys") or []) or champion.trait_tier(self.KEY) == 0:
+        if not champion.has_trait(self.KEY) or champion.trait_tier(self.KEY) == 0:
             return input_
         period = champion.trait_value(self.KEY, "Period")
         bonus = 1 + champion.trait_value(self.KEY, "SwiftieAS")  # one MultiplyAdditive instance per stack

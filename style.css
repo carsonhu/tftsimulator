@@ -1013,18 +1013,25 @@ button:focus-visible {
   flex: none;
 }
 
-/* Its own box (owner, 2026-11-19): set apart from the DPS table, as wide as its rows need, with larger rows. */
-.hit-panel {
-  flex: 0 0 33%;
+/* The Hit panel and, in the width it leaves, the math of the row under the pointer (owner, 2026-11-20). */
+.hit-row {
+  flex: 0 0 36%; /* the DPS table a little shorter (owner, 2026-11-20) */
   min-height: 150px;
   display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Its own box (owner, 2026-11-19): set apart from the DPS table, as wide as its rows need, with larger rows. */
+.hit-panel {
+  flex: none;
+  min-height: 0;
+  display: flex;
   flex-direction: column;
-  align-self: flex-start;
   /* as wide as the table (its rows don't wrap), not the controls: the bar wraps onto a second line instead of
      leaving blank space beside the table (owner, 2026-11-19) */
   width: min-content;
   max-width: 100%;
-  margin-top: 10px;
   padding: 10px 12px 12px;
   border: 1px solid #3a3d4a;
   border-radius: 10px;
@@ -1157,6 +1164,116 @@ button:focus-visible {
   color: #9aa0b0;
 }
 
+#hitTable tbody tr.explained td {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* The math beside the Hit table: one hit's damage as a chain of factors, Base against the item (owner,
+   2026-11-20). Hidden when the row leaves it too little width (.hit-row.cramped, fitHitMath). */
+.hit-math {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: auto;
+  padding: 10px 12px 12px; /* the Hit panel's, so the title bars line up */
+  border: 1px solid #2a2d38;
+  border-radius: 10px;
+  background: #12151d;
+  color: #c9cdd8;
+  font-size: 0.85em;
+}
+
+/* the Hit panel's bar (.hit-bar) has the same font size and bottom margin; renderHitMath matches its height */
+.hit-math-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.hit-row.cramped .hit-math {
+  display: none;
+}
+
+.hit-math h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  color: #fafafa;
+  font-size: 1.05em;
+  white-space: nowrap;
+}
+
+.hit-math h3 span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hit-math h3 .row-icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+}
+
+.hit-math table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.hit-math th,
+.hit-math td {
+  padding: 2px 5px;
+  text-align: right;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.hit-math th {
+  color: #6f7586;
+  font-weight: 500;
+  font-size: 0.85em;
+}
+
+.hit-math td:first-child,
+.hit-math th:first-child {
+  padding-left: 0;
+  text-align: left;
+}
+
+.hit-math .op {
+  display: inline-block;
+  width: 1.1em;
+  color: #8a90a2;
+}
+
+/* what the factor comes from, under its name: "AP 100% → 115%" */
+.hit-math .why {
+  padding-left: 1.1em;
+  color: #6f7586;
+  font-size: 0.85em;
+  white-space: normal;
+}
+
+.hit-math tr.total td {
+  border-top: 1px solid #3a3d4a;
+  padding-top: 4px;
+  color: #fafafa;
+  font-weight: 600;
+}
+
+.hit-math .up {
+  color: #7ee2a8;
+}
+
+.hit-math .down {
+  color: #ff8a8a;
+}
+
+.hit-math .same {
+  color: #6f7586;
+}
+
 .run-status {
   color: #ffd166;
   margin: 0 0 6px;
@@ -1265,6 +1382,12 @@ thead th {
 #resultsTable .row-input::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* An Emblem row's trait level: a dropdown of the trait's levels. */
+#resultsTable .row-select {
+  padding: 0 2px;
+  cursor: pointer;
 }
 
 #resultsTable .row-input:hover,
@@ -1465,8 +1588,8 @@ tbody tr:hover td {
   overflow: hidden;
 }
 
-/* Both halves are always on screen: the viewer at its natural height on top,
-   the chart taking the rest. */
+/* Both halves are always on screen: the chart on top beside the table, taking the
+   height the viewer under it leaves (owner, 2026-11-20). */
 .pane-title {
   margin: 0;
   color: #fafafa;
@@ -1601,6 +1724,7 @@ tbody tr:hover td {
 
 #viz {
   flex: none;
+  border-top: 1px solid #262a36;
 }
 
 #plotArea {
@@ -1608,7 +1732,6 @@ tbody tr:hover td {
   min-height: 260px;
   display: flex;
   flex-direction: column;
-  border-top: 1px solid #262a36;
 }
 
 #plotHint {
@@ -2396,6 +2519,24 @@ tbody tr:hover td {
 
 /* Not room for the table and the viewer side by side: the pane goes under
    the table and the page scrolls. */
+/* Side by side (wide screens): the chart ends where the DPS table does (alignChart sets its height; owner,
+   2026-11-20) and the viewer takes the rest, its board sized to fit (viz.js drawBoard) and its log the remainder. */
+@media (min-width: 1321px) {
+  #plotArea {
+    flex: none;
+  }
+  #viz {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .viz-log {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+  }
+}
+
 @media (max-width: 1320px) {
   #layout {
     height: auto;

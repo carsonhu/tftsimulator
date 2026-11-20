@@ -18,7 +18,7 @@ class Renegade(BuildTrait):
 
     def applyStats(self, champion):
         super().applyStats(champion)
-        if champion.trait_tier(self.KEY) == 0 or self.KEY not in (champion.data.d.get("trait_keys") or []):
+        if champion.trait_tier(self.KEY) == 0 or not champion.has_trait(self.KEY):
             return
         champion.crit.modify("+", champion.trait_value(self.KEY, "CritChance"))
         champion.critDmg.modify("+", champion.trait_value(self.KEY, "CritDamage"))

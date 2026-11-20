@@ -190,7 +190,9 @@
             </div>
             <p class="table-hint">Click rows to plot them and watch their fight.</p>
 
-            <!-- One attack or one cast at fixed stats, per item (single_hit.py; owner, 2026-11-19). -->
+            <!-- One attack or one cast at fixed stats, per item (single_hit.py; owner, 2026-11-19), and beside it the
+                 math of the row under the pointer (owner, 2026-11-20). -->
+            <div class="hit-row">
             <section id="hitPanel" class="hit-panel" aria-label="One hit">
               <div class="hit-bar">
                 <h2 class="hit-title">One <span id="hitWhat">cast</span><span id="hitPer" class="hit-per"></span></h2>
@@ -214,11 +216,30 @@
                 <table id="hitTable"></table>
               </div>
             </section>
+            <aside id="hitMath" class="hit-math" aria-live="polite"></aside>
+            </div>
           </section>
 
-          <!-- One row up close: its fight, tick by tick, or the plotted rows'
-               damage over time. -->
+          <!-- The plotted rows' damage over time, beside the table (owner, 2026-11-20: the chart on top, aligned with
+               the table), and one row's fight, tick by tick, under it. -->
           <section class="pane">
+            <section id="plotArea" class="pane-body">
+              <div class="plot-head">
+                <h2 class="pane-title">Damage chart</h2>
+                <!-- What every plotted line shares: the champion, items, traits and bonuses (renderPlotSummary). -->
+                <div id="plotSummary" class="plot-summary"></div>
+                <span id="plotHint">Click rows in the table to plot their damage over time.</span>
+              </div>
+              <!-- The viewer's playhead over the chart: a line and each plotted row's damage so far (placePlayhead). -->
+              <div id="chartWrap" class="chart-wrap">
+                <div id="chart"></div>
+                <!-- the legend with each row's art (Plotly's can't hold images): renderChartLegend -->
+                <div id="chartLegend" class="chart-legend" hidden></div>
+                <div id="playLine" class="play-line" hidden></div>
+                <div id="playLabel" class="play-label" hidden></div>
+              </div>
+            </section>
+
             <!-- Fight viewer (viz.js): replays one row's fight tick by tick. -->
             <section id="viz" class="viz pane-body" tabindex="0" aria-label="Fight viewer">
               <div class="viz-head">
@@ -259,23 +280,6 @@
                   <div id="vizLog" class="viz-log"></div>
                 </div>
                 <div id="vizCard" class="viz-card"></div>
-              </div>
-            </section>
-
-            <section id="plotArea" class="pane-body">
-              <div class="plot-head">
-                <h2 class="pane-title">Damage chart</h2>
-                <!-- What every plotted line shares: the champion, items, traits and bonuses (renderPlotSummary). -->
-                <div id="plotSummary" class="plot-summary"></div>
-                <span id="plotHint">Click rows in the table to plot their damage over time.</span>
-              </div>
-              <!-- The viewer's playhead over the chart: a line and each plotted row's damage so far (placePlayhead). -->
-              <div id="chartWrap" class="chart-wrap">
-                <div id="chart"></div>
-                <!-- the legend with each row's art (Plotly's can't hold images): renderChartLegend -->
-                <div id="chartLegend" class="chart-legend" hidden></div>
-                <div id="playLine" class="play-line" hidden></div>
-                <div id="playLabel" class="play-label" hidden></div>
               </div>
             </section>
           </section>

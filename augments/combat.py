@@ -372,6 +372,7 @@ class URF(BuildAugment):
     1 per Spatula, Frying Pan or emblem the unit holds, 2 per Tactician's item (items.emblems.spatula_count; A6).
     Nothing when it holds none."""
     KEY, display_name = "DA_URF", "U.R.F."
+    READS_TACTICIAN_ITEMS = True  # the Emblem slice lists Tactician's items only with such an augment (owner, 2026-11-20)
 
     def stats(self, champion):
         n = spatula_count(champion)
@@ -411,7 +412,7 @@ class DigOnThis(BuildAugment):
 
     def stats(self, champion):
         jazz = next((i for i in champion.items if type(i).__name__ == "Jazz" and i.level), None)
-        if jazz is None or self.JAZZ not in (champion.data.d.get("trait_keys") or []):
+        if jazz is None or not champion.has_trait(self.JAZZ):
             return
         trait = champion.build.trait(self.JAZZ)
         amp = trait.row("JazzDamageAmp", col=trait.tier_of(jazz.level)) * int(jazz.params or 5)

@@ -38,7 +38,7 @@ class Classical(BuildTrait):
         self.timers = {}  # id(enemy) -> exact time (s) of its next tick
 
     def member(self, champion):
-        return self.KEY in (champion.data.d.get("trait_keys") or [])
+        return champion.has_trait(self.KEY)
 
     def applyStats(self, champion):
         super().applyStats(champion)

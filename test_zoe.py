@@ -3,6 +3,7 @@ fights ended before her 90 mana filled)."""
 import pytest
 
 import set19buffs
+import sim_entry
 from buildstore import load_build
 from set19champs import Ashe, Zoe
 from simulator import Simulator
@@ -65,10 +66,11 @@ def test_beach_pop():
     z = LoggedZoe(1)
     fight(z, buffs=[set19buffs.BeachPop(7)], seconds=11)
     assert [t for t, a, before, after in z.mana_log if a == 40] == [300]
-    # not next to an instrument: nothing
-    z = LoggedZoe(1)
-    fight(z, buffs=[set19buffs.BeachPop(5, 1)], seconds=4)
-    assert z.aspd.stat == pytest.approx(0.7) and not [t for t, a, b, af in z.mana_log if a == 8]
+    # the card: the tooltip's breakpoints with the build's numbers, not the build's placeholder (owner, 2026-11-20)
+    card = sim_entry.get_cards({})["BeachPop"]
+    assert [t["threshold"] for t in card["tiers"]] == [3, 5, 7] and "Placeholder" not in str(card)
+    # every member is empowered (owner, 2026-11-20: no toggle)
+    assert set19buffs.BeachPop.extraParameters() == 0
     # a non-member gets nothing from it here (the Health regen changes no damage)
     a = Ashe(1, build=load_build(V))
     fight(a, buffs=[set19buffs.BeachPop(3)], seconds=1)

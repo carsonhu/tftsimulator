@@ -22,7 +22,7 @@ class Arcanist(BuildTrait):
         super().applyStats(champion)
         if champion.trait_tier(self.KEY) == 0:
             return
-        member = self.KEY in (champion.data.d.get("trait_keys") or [])
+        member = champion.has_trait(self.KEY)
         champion.ap.modify("+", champion.trait_value(self.KEY, "ArcanistAP" if member else "NonArcanistAP"))
 
     @classmethod

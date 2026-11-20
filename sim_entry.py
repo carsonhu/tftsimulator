@@ -104,12 +104,53 @@ def _probe_team_level(cls):
     return False
 
 
+# The Emblem slice leaves out the Spatula and the Frying Pan (owner, 2026-11-20): components, no trait. Tactician's
+# items give nothing on their own here, so they are listed only when a buff in the setup reads them
+# (READS_TACTICIAN_ITEMS: U.R.F.) (owner, 2026-11-20).
+EMBLEM_SLICE_SKIP = ("Spatula", "FryingPan")
+TACTICIAN_ITEMS = ("TacticiansCrown", "TacticiansCape", "TacticiansShield")
+
+
+def _reads_tactician_items(cfg):
+    return any(getattr(getattr(set19buffs, name, None), "READS_TACTICIAN_ITEMS", False)
+               for name, level, params in cfg.get("buffs", []))
+
 _ITEM_SLICES = {
     "Craftable": lambda: set19items.offensive_craftables,
     "Artifact": lambda: set19items.artifacts,
     "Radiant": lambda: set19items.radiants,
-    "Emblem": lambda: set19items.emblems,
+    "Emblem": lambda: [c for c in set19items.emblems if c not in EMBLEM_SLICE_SKIP],
 }
+
+
+def _emblem_trait(item, cfg, typed):
+    """An Emblem row's trait (owner, 2026-11-20): the emblem makes its holder a member, so the row runs the trait at a
+    level, "Beach Pop Emblem (2)", a dropdown in the row. By default the level the page's + puts in the buff bar
+    (app.js addEmblemTrait): the bar's own when the trait is on there, else its lowest active level. None for an
+    emblem whose trait isn't simulated (Rock)."""
+    cls = getattr(set19buffs, getattr(item, "trait", None) or "", None)
+    if cls is None:
+        return None
+    options = _trait_level_options(cls)
+    if not options:
+        return None
+    bar = next(((lvl, prm) for name, lvl, prm in cfg.get("buffs", []) if name == cls.__name__), None)
+    extra = cls.extraParameters() if hasattr(cls, "extraParameters") else None
+    extra = extra if isinstance(extra, dict) else {}
+    level = typed.get(type(item).__name__)
+    if level not in options:
+        level = bar[0] if bar and bar[0] in options else options[0]
+    params = bar[1] if bar else extra.get("Default", 0)
+    if not extra.get("Options") and extra.get("Min") == 0 and extra.get("Max") == 1:
+        params = 1  # an "Is X" flag: the emblem is the membership
+    return cls(int(level), params)
+
+
+def _trait_level_options(cls):
+    """The trait levels an Emblem row offers: its active levels, within the buff bar's (BAR_LEVELS) when it narrows them."""
+    levels = [lvl for lvl in getattr(cls, "levels", []) if lvl > 0]
+    bar = getattr(cls, "BAR_LEVELS", None)
+    return [lvl for lvl in levels if lvl in bar] if bar else levels
 
 
 # The Takedowns slice (owner, 2026-11-19): what the page's Takedowns do for a champion that scales with them (Viego's
@@ -593,10 +634,18 @@ def _slice_inputs(slice_name, cfg):
 
     if slice_name in _ITEM_SLICES:
         items = []
+        champ_cls = getattr(set19champs, cfg.get("champ") or "", None)
+        own_traits = set(_build_champion(cfg).data.d.get("trait_keys") or []) if champ_cls else None
         for c in _ITEM_SLICES[slice_name]():
             item = getattr(set19items, c)()
             if _row_input_spec(item):
                 item.row_value = int(typed.get(c, cfg.get("takedowns", 0)))
+            if slice_name == "Emblem" and c in TACTICIAN_ITEMS and not _reads_tactician_items(cfg):
+                continue
+            if slice_name == "Emblem":
+                item.row_trait = _emblem_trait(item, cfg, typed)
+                if item.row_trait is not None and own_traits is not None and item.row_trait.KEY in own_traits:
+                    continue  # the game won't give a unit its own trait's emblem
             items.append(item)
         return items + no_item, []
 
@@ -641,7 +690,12 @@ def _row_input_spec(extra):
 
 
 def _row_input(extra):
-    """{value, min, max, template} for the table's inline box ("Hold the Line ([7] units)"), or None."""
+    """{value, min, max, template} for the table's inline box ("Hold the Line ([7] units)"), or None. An Emblem row's
+    trait level is a dropdown: {value, options, template}."""
+    trait = getattr(extra, "row_trait", None)
+    if trait is not None:
+        return {"value": int(trait.level), "options": _trait_level_options(type(trait)), "template": "{}",
+                "title": f"{trait.name} level"}
     spec = _row_input_spec(extra)
     if not spec:
         return None
@@ -801,30 +855,33 @@ def run_hits(cfg):
     ap = which in ("ap", "both")  # Archangel's is listed: the slider shows
     seconds = float(cfg.get("hitSeconds", HIT_SECONDS)) if ap else 0.0
 
-    def hit(item):
-        return single_hit.damage(champ, enemy, item, False, mode, layout, seconds)
+    def hit(item):  # (damage, its math: single_hit._Recorder.explain, the panel beside the table)
+        return single_hit.damage(champ, enemy, item, False, mode, layout, seconds, explain=True)
 
     radiant = bool(cfg.get("hitRadiant"))
-    base = hit(set19items.NoItem())
+    base, base_math = hit(set19items.NoItem())
 
-    def row(label, classes, dmg):
+    def row(label, classes, result):
+        dmg, math = result
         item = getattr(set19items, classes[0])
         return {"cls": classes[0], "label": label or getattr(item, "display_name", classes[0]), "icons": classes,
-                "damage": round(dmg, 1), "ratio": round(dmg / base, 2) if base else 0}
+                "damage": round(dmg, 1), "ratio": round(dmg / base, 2) if base else 0, "math": math}
 
-    rows = [{"cls": "NoItem", "label": "NoItem", "icons": [], "damage": round(base, 1), "ratio": 1.0}]
+    rows = [{"cls": "NoItem", "label": "NoItem", "icons": [], "damage": round(base, 1), "ratio": 1.0,
+             "math": base_math}]
     for label, classes in _hit_items(which):
         if not radiant:
             rows.append(row(label, classes, hit(getattr(set19items, classes[0])())))
             continue
         shared = [(c + "Radiant", hit(getattr(set19items, c + "Radiant")())) for c in classes]
-        if len({round(d, 6) for _, d in shared}) == 1:  # the Radiants still match: one row
+        if len({round(r[0], 6) for _, r in shared}) == 1:  # the Radiants still match: one row
             names = [getattr(set19items, c).display_name for c, _ in shared]
             rows.append(row(" / ".join(names) if len(names) > 1 else None, [c for c, _ in shared], shared[0][1]))
         else:
-            rows += [row(None, [c], d) for c, d in shared]
+            rows += [row(None, [c], r) for c, r in shared]
     rows.sort(key=lambda r: r["damage"], reverse=True)
-    return {"modes": list(modes), "mode": mode, "ap": ap, "seconds": seconds if ap else None, "radiant": radiant,
+    return {"modes": list(modes), "mode": mode, "ap": ap, "both": which == "both",
+            "seconds": seconds if ap else None, "radiant": radiant,
             "per": _hit_unit(champ, mode), "rows": rows}
 
 
@@ -995,6 +1052,9 @@ def get_cards(cfg):
                 "tiers": [{"threshold": t.get("threshold"), "text": _tag_tier(_clean_card_text(t.get("text") or ""), cls)}
                           for t in entry.get("tiers") or []],
             }
+            # a build whose tier list is a placeholder (Beach Pop): the class's own, from the tooltip
+            if group == "traits" and hasattr(cls, "card_tiers"):
+                cards[name]["tiers"] = cls.card_tiers(build)
             # what the simulator knows that the tooltip doesn't say: CARD_NOTE = (tag, text), e.g. Comeback Story's
             # [Multiplicative]
             note = getattr(cls, "CARD_NOTE", None)

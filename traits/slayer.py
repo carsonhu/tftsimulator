@@ -19,7 +19,7 @@ class Slayer(BuildTrait):
 
     def applyStats(self, champion):
         super().applyStats(champion)
-        if champion.trait_tier(self.KEY) == 0 or self.KEY not in (champion.data.d.get("trait_keys") or []):
+        if champion.trait_tier(self.KEY) == 0 or not champion.has_trait(self.KEY):
             return
         champion.aspd.modify("MultiplyAdditive", 1 + champion.trait_value(self.KEY, "AttackSpeed"))
 

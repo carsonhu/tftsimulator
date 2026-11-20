@@ -25,7 +25,7 @@ class Trickshot(BuildTrait):
     LISTENS = {ONHIT_PRE: frozenset()}  # the attack's own hit (ricochets apply no on-hit effects)
 
     def performAbility(self, phase, time, champion, input_=0):
-        if self.KEY not in (champion.data.d.get("trait_keys") or []) or champion.trait_tier(self.KEY) == 0:
+        if not champion.has_trait(self.KEY) or champion.trait_tier(self.KEY) == 0:
             return input_
         if ON_SPELL in input_.tags:
             return input_  # an on-hit spell (Gnar's rock) is not a launched attack: its own script ricochets it

@@ -29,7 +29,7 @@ class TrueDamage(BuildTrait):
         champion.trait_tiers[self.KEY] = 2 if self.level >= 5 else 1 if self.level >= 3 else 0
 
     def performAbility(self, phase, time, champion, input_=0):
-        if (champion.trait_tier(self.KEY) == 0 or self.KEY not in (champion.data.d.get("trait_keys") or [])
+        if (champion.trait_tier(self.KEY) == 0 or not champion.has_trait(self.KEY)
                 or not input_.amount):
             return input_
         bonus = champion.trait_value(self.KEY, "SideB_BonusTDPercent") * input_.amount

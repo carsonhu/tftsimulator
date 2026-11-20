@@ -32,7 +32,7 @@ class KDA(BuildTrait):
         return champion.trait_value(self.KEY, name, tier=1)
 
     def _member(self, champion):
-        return self.KEY in (champion.data.d.get("trait_keys") or []) and champion.trait_tier(self.KEY) > 0
+        return champion.has_trait(self.KEY) and champion.trait_tier(self.KEY) > 0
 
     def _boost(self, champion):
         return self.row(champion, "PreviousTraitBoost") if champion.trait_tier(self.KEY) >= 4 else 1

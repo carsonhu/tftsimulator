@@ -170,9 +170,60 @@ def item_lists(champ):
     return own if own else ("ap" if uses_ap(champ) else "ad")
 
 
-def damage(champion, enemy, extra, is_buff, mode, layout=None, seconds=0.0):
-    """The hit's damage after mitigation, every dummy summed (per HIT_PER unit when the champion counts one)."""
+class _Recorder:
+    """Every damage call of the hit (Champion.doDamage), split into its factors: the damage before amp (the amped
+    damage over the champion's amp at that moment), the amp, the crit average and the armor/MR multiplier. The four
+    multiply back to the damage done, hit by hit."""
+
+    def __init__(self, champ, dummies):
+        self.hits = []
+        self.champ, self.dummies = champ, dummies
+        original = champ.doDamage
+
+        def do_damage(opponent, items, critChance, damageIfCrit, damage, dtype, time, *args, **kwargs):
+            at = len(champ.dmgVector)
+            amp = champ.dmgMultiplier.stat * champ.extraDmgMultiplier.stat
+            crit = min(1, critChance)
+            original(opponent, items, critChance, damageIfCrit, damage, dtype, time, *args, **kwargs)
+            done = sum(row[1][0] for row in champ.dmgVector[at:])
+            self.hits.append({"at": at, "target": next((i for i, d in enumerate(dummies) if d is opponent), -1),
+                              "dtype": dtype, "amped": damage, "raw": damage / amp if amp else damage,
+                              "avg": damage * (1 - crit) + damageIfCrit * crit, "done": done})
+
+        champ.doDamage = do_damage
+
+    def explain(self, before, divisor):
+        """The hit's math: its stats as it starts, then damage = before amp x amp x crit x resists (sums over every
+        hit from dmgVector index `before`, divided by `divisor` as the table divides: per rocket, per attack of a
+        cycle)."""
+        hits = [h for h in self.hits if h["at"] >= before]
+        raw, amped, avg, done = (sum(h[k] for h in hits) for k in ("raw", "amped", "avg", "done"))
+        resists = {}
+        for dtype, stat in (("physical", "armor"), ("magical", "mr")):
+            mine = [h for h in hits if h["dtype"] == dtype and h["avg"] > 0 and h["done"] > 0]
+            if mine:  # the resist the damage met: 100 / multiplier - 100, damage-weighted
+                mult = sum(h["done"] for h in mine) / sum(h["avg"] for h in mine)
+                resists[stat] = round(100 / mult - 100, 1)
+        c = self.champ
+        return {
+            "stats": {"ad": round(c.atk.stat * c.bonus_ad.stat, 1), "ap": round(c.ap.stat, 4),
+                      "amp": round(c.dmgMultiplier.stat * c.extraDmgMultiplier.stat - 1, 4),
+                      "crit": round(min(1, c.crit.stat), 4), "critdmg": round(c.critDamage(), 4),
+                      "spellcrit": bool(c.canSpellCrit)},
+            "hits": len(hits), "targets": len({h["target"] for h in hits}),
+            "types": sorted({h["dtype"] for h in hits}),
+            "raw": round(raw / divisor, 2),
+            "amp": round(amped / raw, 4) if raw else 1, "crit": round(avg / amped, 4) if amped else 1,
+            "resist": round(done / avg, 4) if avg else 1, "resists": resists,
+        }
+
+
+def damage(champion, enemy, extra, is_buff, mode, layout=None, seconds=0.0, explain=False):
+    """The hit's damage after mitigation, every dummy summed (per HIT_PER unit when the champion counts one). With
+    `explain`, (damage, its math: _Recorder.explain)."""
     champ, dummies = setup(champion, enemy, extra, is_buff, layout, seconds)
+    recorder = _Recorder(champ, dummies) if explain else None
+    stats = recorder and recorder.explain(len(champ.dmgVector), 1)["stats"]  # as the hit starts
     before = len(champ.dmgVector)
     if mode == "attack":
         attack(champ, dummies)
@@ -181,9 +232,16 @@ def damage(champion, enemy, extra, is_buff, mode, layout=None, seconds=0.0):
     else:
         special(champ, dummies, mode)
     total = sum(row[1][0] for row in champ.dmgVector[before:])
+    divisor = 1
     if mode == "attack":
-        total /= hit_attack_cycle(champ)
+        divisor = hit_attack_cycle(champ)
     per = getattr(champ, "hit_per", None)
     if mode == "cast" and per is not None:
-        total /= max(1, per())
-    return total
+        divisor = max(1, per())
+    total /= divisor
+    if recorder is None:
+        return total
+    math = recorder.explain(before, divisor)
+    math["stats"] = stats
+    math["divisor"] = divisor
+    return total, math

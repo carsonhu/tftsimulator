@@ -39,7 +39,7 @@ class IonicSpark(BuildTrait):
 
     def performAbility(self, phase, time, champion, input_=0):
         tier = champion.trait_tier(self.KEY)
-        if tier == 0 or self.KEY not in (champion.data.d.get("trait_keys") or []):
+        if tier == 0 or not champion.has_trait(self.KEY):
             return input_
         period = champion.trait_value(self.KEY, "LetterFrequency")
         letter = 1 + champion.trait_value(self.KEY, "LetterASGain")  # one MultiplyAdditive instance per letter

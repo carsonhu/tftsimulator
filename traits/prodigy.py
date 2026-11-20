@@ -23,7 +23,7 @@ class Prodigy(BuildTrait):
         if champion.trait_tier(self.KEY) == 0:
             return
         regen = champion.trait_value(self.KEY, "AllyBonusManaRegen")
-        if self.KEY in (champion.data.d.get("trait_keys") or []):
+        if champion.has_trait(self.KEY):
             regen += champion.trait_value(self.KEY, "ProdigyBonusManaRegen")
         champion.manaRegen.modify("+", regen)
 

@@ -29,7 +29,7 @@ class Composer(BuildTrait):
         if champion.trait_tier(self.KEY) == 0:
             return
         team = champion.trait_value(self.KEY, "UniqueTrait_APPerInstrument") * int(self.params or 0)
-        if self.KEY in (champion.data.d.get("trait_keys") or []):  # Malzahar: the teamwide AP and his own again
+        if champion.has_trait(self.KEY):  # Malzahar: the teamwide AP and his own again
             team += champion.trait_value(self.KEY, "UniqueTrait_MalzaharBonusAPPercent") * team
         if team:
             champion.ap.modify("+", team)

@@ -84,6 +84,7 @@ const FightViewer = (() => {
       if (row) seek(Number(row.dataset.tick));
     });
     new ResizeObserver(() => draw()).observe(el.vizStage);
+    new ResizeObserver(() => draw()).observe(el.viz); // its height is the pane's rest when the chart is aligned
   }
 
   function seekOnDrag(canvas) {
@@ -294,10 +295,20 @@ const FightViewer = (() => {
     const ymax = Math.max(...pts.map((p) => p[1])) + ROW * 0.7;
     const width = el.vizStage.clientWidth;
     const scale = width / (xmax - xmin);
-    // as tall as the board's shape asks, up to ~28% of the pane the viewer shares with the chart
-    const pane = el.viz.parentElement;
-    const tallest = Math.min(Math.max(190, (pane ? pane.clientHeight : 0) * 0.28), 300);
-    const height = Math.min(Math.max((ymax - ymin) * scale, 150), tallest);
+    // as tall as the board's shape asks, up to what the viewer has room for: side by side its height is fixed (the
+    // pane under the aligned chart), so the board fits it and leaves the log a few lines; stacked, ~28% of the pane
+    let tallest;
+    if (window.matchMedia("(min-width: 1321px)").matches) {
+      const left = el.vizStage.parentElement;
+      const others = [...left.children].filter((c) => c !== el.vizStage && !c.classList.contains("viz-log"))
+        .reduce((sum, c) => sum + c.offsetHeight, 0);
+      const room = el.viz.getBoundingClientRect().bottom - el.vizStage.getBoundingClientRect().top - others - 44;
+      tallest = Math.min(Math.max(room, 110), 300);
+    } else {
+      const pane = el.viz.parentElement;
+      tallest = Math.min(Math.max(190, (pane ? pane.clientHeight : 0) * 0.28), 300);
+    }
+    const height = Math.min(Math.max((ymax - ymin) * scale, Math.min(150, tallest)), tallest);
     const [ctx, W, H] = setupCanvas(el.vizCanvas, height);
     const s = Math.min(W / (xmax - xmin), H / (ymax - ymin));
     const ox = (W - (xmax - xmin) * s) / 2 - xmin * s;
