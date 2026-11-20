@@ -1,0 +1,25 @@
+name: Redeploy the beta (tftsimulator.app/beta)
+
+# A repo has one Pages site, built by stlite-pages.yml on main: main at the
+# root and this branch (set19) under /beta. A push here runs this branch's
+# copy of the workflows, not main's, so this one only asks main's deploy to
+# run again, which picks up the new set19. A dispatch made with GITHUB_TOKEN
+# is allowed to start a workflow, and the deploy runs on main, so the
+# github-pages environment's branch rules need no change.
+on:
+  push:
+    branches:
+      - set19
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run main's Pages deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run stlite-pages.yml --ref main --repo "${{ github.repository }}"

@@ -188,4 +188,7 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
 - The user wants the simplest control that works. When a mechanic is out of scope, say so in the worksheet and in
   `self.notes`, instead of half-modelling it.
 - Push `set19` (`git push origin set19`) after each restructure step and each champion lands (owner, 2026-11-17 / 18).
-  The Pages workflow publishes on a push to `main` only, which is set18's live site: never push to `main` from here.
+  Never push to `main` from here: it is set18's live site. Pushing `set19` publishes it as the beta,
+  tftsimulator.app/beta (owner, 2026-11-19): `.github/workflows/beta-deploy.yml` dispatches main's Pages workflow,
+  which publishes main at the root and `set19` under `beta/` in one site. Every path the page loads must stay
+  relative, or it breaks under `/beta/`.
