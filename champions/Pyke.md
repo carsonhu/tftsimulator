@@ -1,18 +1,18 @@
 # Pyke (5-cost AttackFighter) · `DA_Pyke19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Rock, Renegade
 - **HP** 1200 / 2160 / 3888 · **AD** 70 / 105 / 157.5 · **AS** 0.9 · **Range** 1 · **Armor** 65 · **MR** 65 · **Mana** 0 / 30
-- **Unlock**: Have 85 or more Gold at the end of combat.
+- **Unlock**: Have 85 or more gold at the end of combat.
 
 ### Ability: Execute Gon' Give it to Ya
 
 > Passive: Whenever an enemy drops below 0.08 + 0.02/0.02/0.85 × AP max Health, instantly cast on them, then dash back to the current target.
 > 
-> Active: Deal 320/515/4000 × AD physical damage to the target and 130/215/800 × AD to all other enemies in an X shape. Execute any enemies below 0.08 + 0.02/0.02/0.85 × AP Health.
+> Active: Deal 320/515/4000 × AD physical damage to the target and 100/150/800 × AD to all other enemies in an X shape. Execute any enemies below 0.08 + 0.02/0.02/0.85 × AP Health.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -21,14 +21,14 @@
 | ExecuteBase | 0.08 | 0.08 | 0.08 |
 | ExecutesForBigBoom | 5 | 5 | 1 |
 | BigBoomADDamage | 320 | 515 | 4000 |
-| DashADDamage | 130 | 215 | 800 |
+| DashADDamage | 100 | 150 | 800 |
 | ShadowADDamage | 320 | 480 | 1600 |
 | PercentDealtToOtherUnits | 0.3 | 0.3 | 0.3 |
 
 Formulas (as stored; AD and AP are multipliers):
 
 - `PhysicalDamageCalc1` = 320/515/4000 × AD
-- `PhysicalDamageCalc2` = 130/215/800 × AD
+- `PhysicalDamageCalc2` = 100/150/800 × AD
 - `PhysicalDamageCalc3` = 1 × AD
 - `GenericCalc1` = 0.08 + 0.02/0.02/0.85 × AP
 
@@ -59,9 +59,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Pyke19_SlamOnEnemy.txt, Abilities/GA_Pyke19_SpellNew.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Abilities/GA_Pyke19_SlamOnEnemy.txt, Abilities/GA_Pyke19_SpellNew.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- row BigBoomADDamage: 300 / 470 / 4000 -> 320 / 515 / 4000
+- row DashADDamage: 130 / 215 / 800 -> 100 / 150 / 800
 - ability text changed
 
 <!-- AUTO END -->

@@ -1,7 +1,7 @@
 # Aurora (4-cost MagicCaster) · `DA_Aurora19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Ionic Spark, Renegade
@@ -9,12 +9,12 @@
 
 ### Ability: Between Worlds Apart
 
-> Blink away and fire a blast through the best line. The blast deals 275/415/2000 × AP magic damage to the 2 highest Health enemies, and 90/135/1500 × AP magic damage to the rest. Then, blink back.
+> Blink away and fire a blast through the best line. The blast deals 300/450/2000 × AP magic damage to the 2 highest Health enemies, and 90/135/1500 × AP magic damage to the rest. Then, blink back.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 35 | 67.5 | 101.25 |
-| PrimaryDamageAP | 275 | 415 | 2000 |
+| PrimaryDamageAP | 300 | 450 | 2000 |
 | AOEDamageAP | 90 | 135 | 1500 |
 | MaximumHexMove | 10 | 10 | 10 |
 | MinimumHexMove | 0 | 0 | 0 |
@@ -22,7 +22,7 @@
 Formulas (as stored; AD and AP are multipliers):
 
 - `MagicDamageCalc1` = 90/135/1500 × AP
-- `MagicDamageCalc2` = 275/415/2000 × AP
+- `MagicDamageCalc2` = 300/450/2000 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -46,9 +46,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Aurora19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Aurora19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row PrimaryDamageAP: 275 / 415 / 2000 -> 300 / 450 / 2000
+- ability text changed
 
 <!-- AUTO END -->
 

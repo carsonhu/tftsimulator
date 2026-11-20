@@ -1,34 +1,34 @@
 # Evelynn (3-cost MagicFighter) · `DA_Evelynn19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: K/DA, Renegade
 - **HP** 850 / 1530 / 2754 · **AD** 30 / 45 / 67.5 · **AS** 0.8 · **Range** 1 · **Armor** 50 · **MR** 50 · **Mana** 0 / 40
-- **Unlock**: 3 unique K/DA or Renegade Champions.
+- **Unlock**: 3 unique K/DA or Renegade champions.
 
 ### Ability: Villainous
 
 > Passive: At combat start, teleport behind the current target, then become enshrouded for 15 seconds. While enshrouded, become untargetable to attacks and gain 50% Durability if at least 3 other allies are alive.
 > 
-> Active: Deal 280/420/700 × AP magic damage to the current target and 120/180/300 × AP magic damage to other enemies in a semicircle. Ignore 40% of enemy Magic Resist.
+> Active: Deal 230/345/550 × AP magic damage to the current target and 90/135/215 × AP magic damage to other enemies in a semicircle. Ignore 40% of enemy Magic Resist.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
-| DamageTarget | 280 | 420 | 700 |
+| DamageTarget | 230 | 345 | 550 |
 | PassiveDurability | 0.5 | 0.5 | 0.5 |
 | PassiveNumAllies | 3 | 3 | 3 |
-| DamageNonTarget | 120 | 180 | 300 |
+| DamageNonTarget | 90 | 135 | 215 |
 | SemiCircleHex | 1.5 | 1.5 | 1.5 |
 | MRPercentIgnore | 0.4 | 0.4 | 0.4 |
 | PassiveDuration | 15 | 15 | 15 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 280/420/700 × AP
-- `MagicDamageCalc2` = 120/180/300 × AP
+- `MagicDamageCalc1` = 230/345/550 × AP
+- `MagicDamageCalc2` = 90/135/215 × AP
 - `GenericCalc1` = 1 + -0.4
 
 ### Timing the client predicts (unverified for Set 19)
@@ -54,9 +54,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Evelynn19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Evelynn19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row DamageNonTarget: 120 / 180 / 300 -> 90 / 135 / 215
+- row DamageTarget: 280 / 420 / 700 -> 230 / 345 / 550
+- ability text changed
 
 <!-- AUTO END -->
 

@@ -1,7 +1,7 @@
 # Rakan (5-cost MagicAssassin) · `DA_Rakan19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicAssassin: "Attacks grant 10 Mana. Take 15% less damage from all enemies except the current target." (ManaPerAttack + 10; ManaMax at least 10; MovementSpeed + 200; Threat + -10)
 - **Cost** 5, pool 9; traits: Boy Band, Choreographer
@@ -10,7 +10,7 @@
 
 ### Ability: Fly like a Peacock
 
-> Dash to a nearby group of enemies, then fling 8/8/32 feathers split amongst enemies within 1 hex, each dealing 100/180/2400 × AP magic damage.
+> Dash to a nearby group of enemies, then fling 8/8/32 feathers split amongst enemies within 1 hex, each dealing 115/190/2400 × AP magic damage.
 > 
 > The main Rakan hits enemies within 2 hexes and briefly knocks up them up.
 
@@ -18,7 +18,7 @@
 |---|---|---|---|
 | AutoAttackDamage | 65 | 97.5 | 146.25 |
 | NumFeathers | 8 | 8 | 32 |
-| APDamage | 100 | 180 | 2400 |
+| APDamage | 115 | 190 | 2400 |
 | NumRepeatsBase | 0 | 0 | 99 |
 | NumRepeatsPerKill | 0 | 0 | 0 |
 | KnockupDuration | 0.5 | 0.5 | 0.5 |
@@ -28,7 +28,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 100/180/2400 × AP
+- `MagicDamageCalc1` = 115/190/2400 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -54,9 +54,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Rakan19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Rakan19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row APDamage: 100 / 180 / 2400 -> 115 / 190 / 2400
+- ability text changed
 
 <!-- AUTO END -->
 

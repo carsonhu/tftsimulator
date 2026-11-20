@@ -1,7 +1,7 @@
 # Camille (2-cost AttackFighter) · `DA_Camille19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Rock, Slayer
@@ -11,18 +11,18 @@
 
 > Passive: When the target dies, hookshot to the next one and deal 90/135/210 × AD physical damage to them.
 > 
-> Active: Do a sweeping kick, dealing 200/300/465 × AD + 60/90/135 × AP physical damage in a cone.
+> Active: Do a sweeping kick, dealing 180/270/450 × AD + 60/90/135 × AP physical damage in a cone.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 45 | 67.5 | 101.25 |
 | APDamage | 60 | 90 | 135 |
 | PassiveDamage | 90 | 135 | 210 |
-| ADDamage | 200 | 300 | 465 |
+| ADDamage | 180 | 270 | 450 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 200/300/465 × AD + 60/90/135 × AP
+- `PhysicalDamageCalc1` = 180/270/450 × AD + 60/90/135 × AP
 - `PhysicalDamageCalc2` = 90/135/210 × AD
 
 ### Timing the client predicts (unverified for Set 19)
@@ -52,9 +52,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Ability/GA_Camille19_PassiveNew.txt
 - `GE_ManaLock`: applies mana lock: Ability/GA_Camille19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row ADDamage: 200 / 300 / 465 -> 180 / 270 / 450
+- ability text changed
 
 <!-- AUTO END -->
 

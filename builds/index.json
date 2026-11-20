@@ -1,6 +1,12 @@
 {
  "builds": [
   {
+   "version": "rls-19.1.0.6005555.Set19.Shipping.pbe",
+   "install": "PBE",
+   "pak_mtime": "2026-11-20T14:37:06",
+   "file": "rls-19.1.0.6005555.Set19.Shipping.pbe.json"
+  },
+  {
    "version": "rls-19.1.0.5995286.Set19.Shipping.pbe",
    "install": "PBE",
    "pak_mtime": "2026-11-19T12:47:44",

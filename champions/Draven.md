@@ -1,7 +1,7 @@
 # Draven (3-cost AttackCaster) · `DA_Draven19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Illbeats, Trickshot
@@ -48,11 +48,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Draven19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Draven19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- row BladeDamage: 140 / 210 / 340 -> 155 / 235 / 370
-- row BladeRiftPerSecondAD: 100 / 150 / 250 -> 115 / 175 / 275
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

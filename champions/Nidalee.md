@@ -1,7 +1,7 @@
 # Nidalee (5-cost MagicFighter) · `DA_Nidalee19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Mariachi, Choreographer
@@ -82,11 +82,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Nidalee19_LaunchAttack_MeleeOrRanged.txt
 - `GE_ManaLock`: applies mana lock: GA_Nidalee19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- row PounceDamageAP: 135 / 200 / 1500 -> 125 / 185 / 1500
-- row SpearDamageAP: 380 / 570 / 3000 -> 360 / 540 / 3000
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

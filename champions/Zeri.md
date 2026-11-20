@@ -1,7 +1,7 @@
 # Zeri (5-cost AttackCaster) · `DA_Zeri19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Goth, Swiftstriker
@@ -9,13 +9,13 @@
 
 ### Ability: Lasers After Midnight
 
-> Quickly dash around the arena, aiming 6 lasers at the current target. Lasers fire in rapid succession, each dealing 30/45/500 × AP + 135/205/1000 × AD physical damage to enemies hit and ignoring 40% of their Armor.
+> Quickly dash around the arena, aiming 6 lasers at the current target. Lasers fire in rapid succession, each dealing 30/45/500 × AP + 145/215/1000 × AD physical damage to enemies hit and ignoring 40% of their Armor.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 60 | 90 | 135 |
 | LaserDamageAP | 30 | 45 | 500 |
-| LaserDamageAD | 135 | 205 | 1000 |
+| LaserDamageAD | 145 | 215 | 1000 |
 | NumLasers | 6 | 6 | 6 |
 | BonusTankDamage | 0 | 0 | 0 |
 | BonusFighterDamage | 0 | 0 | 0 |
@@ -26,7 +26,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 30/45/500 × AP + 135/205/1000 × AD
+- `PhysicalDamageCalc1` = 30/45/500 × AP + 145/215/1000 × AD
 - `GenericCalc1` = 1 + -0.4
 
 ### Timing the client predicts (unverified for Set 19)
@@ -57,9 +57,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_SimulateLaunchAttack`: applies the "simulate a launched attack" effect (may count as an attack for on-attack effects): GA_Zeri19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Zeri19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row LaserDamageAD: 135 / 205 / 1000 -> 145 / 215 / 1000
+- ability text changed
 
 <!-- AUTO END -->
 

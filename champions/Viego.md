@@ -1,30 +1,30 @@
 # Viego (3-cost AttackFighter) · `DA_Viego19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Pentakill, Choreographer, Slayer
-- **HP** 850 / 1530 / 2754 · **AD** 60 / 90 / 135 · **AS** 0.8 · **Range** 1 · **Armor** 55 · **MR** 55 · **Mana** 0 / 40
+- **HP** 850 / 1530 / 2754 · **AD** 55 / 82.5 / 123.75 · **AS** 0.8 · **Range** 1 · **Armor** 55 · **MR** 55 · **Mana** 0 / 40
 
 ### Ability: Singled Out
 
-> Summon 10 + 1 × GenericCalc2 swords around the target. After a brief delay, impale them, dealing 34/51/82 × AP + 3/5/7 × AP physical damage per sword.
+> Summon 10 + 1 × GenericCalc2 swords around the target. After a brief delay, impale them, dealing 28/42/67 × AD + 3/5/7 × AP physical damage per sword.
 > 
 > Every 8 takedowns, gain a permanent sword. (Current Takedowns: ⟨live⟩)
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
-| AutoAttackDamage | 60 | 90 | 135 |
+| AutoAttackDamage | 55 | 82.5 | 123.75 |
 | KillsToGainSword | 8 | 8 | 8 |
 | SwordPerStack | 1 | 1 | 1 |
 | NumBaseSwords | 10 | 10 | 10 |
-| DamagePerSwordAD | 34 | 51 | 82 |
+| DamagePerSwordAD | 28 | 42 | 67 |
 | DamagePerSwordAP | 3 | 5 | 7 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 34/51/82 × AP + 3/5/7 × AP
+- `PhysicalDamageCalc1` = 28/42/67 × AD + 3/5/7 × AP
 - `GenericCalc1` = 10 + 1 × GenericCalc2
 
 ### Timing the client predicts (unverified for Set 19)
@@ -52,9 +52,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: Abilities/GA_Viego19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Viego19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row AutoAttackDamage: 60 / 90 / 135 -> 55 / 82.5 / 123.75
+- row DamagePerSwordAD: 34 / 51 / 82 -> 28 / 42 / 67
+- ability text changed
 
 <!-- AUTO END -->
 

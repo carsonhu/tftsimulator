@@ -1,17 +1,17 @@
 # Bard (3-cost MagicMarksman) · `DA_Bard19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Jazz, Swiftstriker
 - **HP** 650 / 1170 / 2106 · **AD** 30 / 45 / 67.5 · **AS** 0.75 · **Range** 4 · **Armor** 35 · **MR** 35 · **Mana** 20 / 80
 
-### Ability: Come Chime with Me
+### Ability: Come Chime With Me
 
 > Passive: Gain the Horn of the Traveler. While equipped, casts generate XP and attacks grant bonus Mana.
 > 
-> Active: Summon a wave of meeps that deal 210/315/505 × AP magic damage to enemies hit, reduced by 30% for each one it passes through.
+> Active: Summon a wave of meeps that deal 210/315/505 × AP magic damage to enemies hit, reduced by 30% for each one it passes through (minimum 30%).
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -21,7 +21,7 @@
 | MaxMeeps | 9999 | 9999 | 9999 |
 | FalloffPerUnit | 0.3 | 0.3 | 0.3 |
 | MeepXP | 1 | 1 | 1 |
-| MinimumDamagePercent | 0.2 | 0.2 | 0.2 |
+| MinimumDamagePercent | 0.3 | 0.3 | 0.3 |
 
 Formulas (as stored; AD and AP are multipliers):
 
@@ -30,7 +30,7 @@ Formulas (as stored; AD and AP are multipliers):
 
 ### Timing the client predicts (unverified for Set 19)
 
-- Attack chrono `CD_Bard19_Attack`: launch 0.2 s (6 ticks), variants 0.2, 0.35; animation length 2.0351 s (61.05 ticks); release at base AS 0.2 s (6 ticks)
+- Attack chrono `CD_Bard19_Attack`: launch 0.29 s (8.7 ticks), variants 0.29, 0.35; animation length 2.0351 s (61.05 ticks); release at base AS 0.29 s (8.7 ticks)
 - Attack projectile: DA_Bard19_AutoAttackProjectile, speed 2000 units/s
 - Spell `GA_Bard19_Spell` (chrono `CD_Bard19_CastAnim`): cast ends 1.0667 s (32 ticks), next attack can start 1.1 s (33 ticks), mana lock removed 1.0667 s (32 ticks); ended by `FinishCasting via OnEventBegin:CD_Bard19_CastAnim:Unlock`
   - notes: projectile (hit time depends on travel) ×3
@@ -39,7 +39,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 
 | chrono | folder | length | events (s) |
 |---|---|---|---|
-| `CD_Bard19_Attack` | Chronos | 2.0351 | LaunchAttack 0.2, LaunchAttack 0.35, Unlock 0.7708, Unlock 0.8141 |
+| `CD_Bard19_Attack` | Chronos | 2.0351 | LaunchAttack 0.29, LaunchAttack 0.35, Unlock 0.7708, Unlock 0.8141 |
 | `CD_Bard19_CastAnim` | Chronos | 1.0963 | Unlock 1.0552 |
 | `CD_Bard19_CastAnimMeeps` | Chronos | 0.8497 | FireMeeps 0.4381, Unlock 0.8402 |
 
@@ -52,9 +52,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Bard19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Bard19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row MinimumDamagePercent: 0.2 -> 0.3
+- timing attack_launch: 0.2 -> 0.29
+- ability text changed
 
 <!-- AUTO END -->
 

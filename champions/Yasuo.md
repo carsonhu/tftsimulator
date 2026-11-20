@@ -1,16 +1,16 @@
 # Yasuo (4-cost AttackFighter) · `DA_Yasuo19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: True Damage, Slayer
 - **HP** 1100 / 1980 / 3564 · **AD** 60 / 90 / 135 · **AS** 0.85 · **Range** 1 · **Armor** 65 · **MR** 65 · **Mana** 0 / 30
-- **Unlock**: 6 unique star levels of True Damage or Slayer Champions.
+- **Unlock**: 6 unique star levels of True Damage or Slayer champions.
 
 ### Ability: Last Breath
 
-> Dash and thrust forward, dealing 165/250/1400 × AD physical damage to enemies in a line.
+> Dash and thrust forward, dealing 180/270/1400 × AD physical damage to enemies in a line.
 > 
 > Every 3rd cast, knock up the target and deal 400/600/2500 × AD physical damage. Then slam them down, dealing 1 × GenericCalc1 + 1 × GenericCalc2 physical damage to enemies within 1/1/2 Hex.
 
@@ -18,7 +18,7 @@
 |---|---|---|---|
 | AutoAttackDamage | 60 | 90 | 135 |
 | UltDamageAD | 400 | 600 | 2500 |
-| SlashDamageAD | 165 | 250 | 1400 |
+| SlashDamageAD | 180 | 270 | 1400 |
 | SlashHexLength | 2 | 2 | 2 |
 | UltDamageAOEAD | 180 | 270 | 1500 |
 | AOEHexRadius | 1 | 1 | 2 |
@@ -29,7 +29,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 165/250/1400 × AD
+- `PhysicalDamageCalc1` = 180/270/1400 × AD
 - `PhysicalDamageCalc2` = 400/600/2500 × AD
 - `GenericCalc1` = 180/270/1500 × AD
 - `GenericCalc2` = 30/45/200 × AP
@@ -64,9 +64,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: Abilities/GA_Yasuo19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Yasuo19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row SlashDamageAD: 165 / 250 / 1400 -> 180 / 270 / 1400
+- ability text changed
 
 <!-- AUTO END -->
 

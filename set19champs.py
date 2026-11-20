@@ -967,8 +967,9 @@ class Viego(BuildChampion):
     CD_Viego19_SwordCollapse_Mis from its place to the target; the 'ViegoSwordCollapse' projectile is a
     TFTFixedTimeMovement with no time of its own, assumed to arrive at the module's end, the chrono's length 0.25 s
     (G21); on arrival GE_Viego19_SwordDamage = PhysicalDamageCalc1, physical, AppliesOnSpell, crit only with Precision.
-    The CalcComponent builds PhysicalDamageCalc1 from DamagePerSwordAD x AbilityPower + DamagePerSwordAP x AbilityPower
-    (both terms capture AbilityPower), but the owner ruled the AD row scales with AD (2026-11-18, D1):
+    Until build 6005555 the CalcComponent built PhysicalDamageCalc1 from DamagePerSwordAD x AbilityPower +
+    DamagePerSwordAP x AbilityPower (both terms captured AbilityPower); the owner ruled the AD row scales with AD
+    (2026-11-18, D1), and the 2026-11-20 patch fixed it so ("Viego's sword AD scalar now correctly scales off AD"):
     DamagePerSwordAD x AD + DamagePerSwordAP x AP. After starting the
     swords (0xede) one GE_SimulateLaunchAttack. 'Unlock' (1.832 s) removes the mana lock and finishes the cast (the
     build: 55 / 56 ticks).

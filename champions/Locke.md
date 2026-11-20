@@ -1,7 +1,7 @@
 # Locke (4-cost MagicAssassin) · `DA_Locke19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicAssassin: "Attacks grant 10 Mana. Take 15% less damage from all enemies except the current target." (ManaPerAttack + 10; ManaMax at least 10; MovementSpeed + 200; Threat + -10)
 - **Cost** 4, pool 10; traits: Rock, Swiftstriker
@@ -56,11 +56,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Locke19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Locke19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- row BonusPercentPerNail: 0.1 -> 0.15
-- row FinalAPDamage: 150 / 225 / 2000 -> 135 / 205 / 2000
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

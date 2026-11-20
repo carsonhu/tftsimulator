@@ -1,12 +1,12 @@
 # Vladimir (5-cost MagicFighter) · `DA_Vladimir19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Classical, Arcanist
 - **HP** 1150 / 2070 / 3726 · **AD** 40 / 60 / 90 · **AS** 0.75 · **Range** 2 · **Armor** 60 · **MR** 60 · **Mana** 0 / 40
-- **Unlock**: Only 1 Champion in the two front rows of the battlefield.
+- **Unlock**: Only 1 champion in the 2 front rows of the battlefield.
 
 ### Ability: The Opera Phantom
 
@@ -64,10 +64,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Vladimir19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Vladimir19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- row APDamage: 100 / 150 / 999 -> 120 / 180 / 999
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

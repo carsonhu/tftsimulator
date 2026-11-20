@@ -1,12 +1,12 @@
 # Mordekaiser (5-cost MagicFighter) · `DA_Mordekaiser19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Pentakill
 - **HP** 1200 / 2160 / 3888 · **AD** 75 / 112.5 / 168.75 · **AS** 0.5 · **Range** 1 · **Armor** 65 · **MR** 65 · **Mana** 0 / 60
-- **Unlock**: 10 unique star levels of Pentakill
+- **Unlock**: 10 unique star levels of Pentakill.
 
 ### Ability: Hand of Doom
 
@@ -64,7 +64,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Mordekaiser19_Spell.txt, GA_Mordekaiser19_Whack.txt
 - `GE_ManaLock`: applies mana lock: GA_Mordekaiser19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

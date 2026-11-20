@@ -20,14 +20,14 @@ class IonicSpark(BuildTrait):
     DetermineNextIonicSparkMemberToBuff (members, Tanks last (TR_Sort_ByRoleWeighted TankWeight 0), then by items
     equipped, without Set19.Trait.IonicSpark.GiftRecieved) and throws a gift: Role.Attack gets GE_IonicSpark19_Gift_
     Attack (AttackDamage + PersonalGiftAD 25%), Role.Magic or Role.Hybrid GE_IonicSpark19_Gift_Magic (AbilityPower +
-    PersonalGiftAP 25%), once per combat. Which gift this unit gets is the 'Gift' option (1st at 0 s, 2nd at 4 s, 3rd
-    at 8 s, or none); the throw and flight are not modelled. Bonus Health, (7)'s economy and (10)'s waves of fans
+    PersonalGiftAP 25%), once per combat. Which gift this unit gets is the 'Gift' option ("1st (0 s)", "2nd (4 s)", "3rd
+    (8 s)", or None); the throw and flight are not modelled. Bonus Health, (7)'s economy and (10)'s waves of fans
     (damage to enemies, not modelled) aside.
     """
     KEY = "DA_IonicSpark19"
     display_name = "Ionic Spark"
     team_trait = False  # members only: the gift order is about this unit
-    GIFTS = ["1st", "2nd", "3rd", "None"]
+    GIFTS = ["1st (0 s)", "2nd (4 s)", "3rd (8 s)", "None"]
     ACTIONS = 99  # RepeatAction's count (both fans)
 
     def __init__(self, level=0, params=0):

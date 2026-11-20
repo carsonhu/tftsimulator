@@ -1,12 +1,12 @@
 # Ashe (2-cost AttackMarksman) · `DA_Ashe19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Beach Pop, Swiftstriker
 - **HP** 550 / 990 / 1782 · **AD** 50 / 75 / 112.5 · **AS** 0.75 · **Range** 5 · **Armor** 30 · **MR** 30 · **Mana** 20 / 60
-- **Unlock**: A Beach Pop Champion with 2 items.
+- **Unlock**: A Beach Pop champion with 2 items.
 
 ### Ability: Feelin' Shot Shot Shot
 
@@ -51,10 +51,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: Abilities/GA_Ashe19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Ashe19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- row ArrowDamageAD: 33 / 50 / 75 -> 35 / 53 / 80
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

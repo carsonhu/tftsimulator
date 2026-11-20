@@ -1,7 +1,7 @@
 # Zoe (1-cost MagicCaster) · `DA_Zoe19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 1, pool 30; traits: Beach Pop, Arcanist
@@ -9,16 +9,16 @@
 
 ### Ability: Paddle Ball
 
-> Fire a paddle ball backwards and redirect it towards the farthest enemy, dealing 450/675/1000 × AP magic damage to the first enemy hit. If they die, the ball ricochets, dealing excess damage to the next enemy hit.
+> Fire a paddle ball backwards and redirect it towards the farthest enemy, dealing 450/675/1100 × AP magic damage to the first enemy hit. If they die, the ball ricochets, dealing excess damage to the next enemy hit.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
-| SpellDamageAP | 450 | 675 | 1000 |
+| SpellDamageAP | 450 | 675 | 1100 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 450/675/1000 × AP
+- `MagicDamageCalc1` = 450/675/1100 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -43,9 +43,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Zoe19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Zoe19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row SpellDamageAP: 450 / 675 / 1000 -> 450 / 675 / 1100
+- ability text changed
 
 <!-- AUTO END -->
 

@@ -1,12 +1,12 @@
 # Tristana (2-cost AttackCaster) · `DA_Tristana19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Hyperpop, Hitmaker
 - **HP** 550 / 990 / 1782 · **AD** 45 / 67.5 / 101.25 · **AS** 0.75 · **Range** 4 · **Armor** 30 · **MR** 30 · **Mana** 0 / 55
-- **Unlock**: Get 5 kills with Hyperpop Active
+- **Unlock**: Get 5 kills with Hyperpop active.
 
 ### Ability: Head Banger
 
@@ -52,7 +52,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Tristana19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Tristana19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

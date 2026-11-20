@@ -1,12 +1,12 @@
 # Smeech (5-cost AttackSpecialist_Time) · `DA_Smeech19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** AttackSpecialist_Time: "Specialists generate resources in a unique way." ()
 - **Cost** 5, pool 9; traits: Jazz, Slayer
 - **HP** 1300 / 2340 / 4212 · **AD** 70 / 105 / 157.5 · **AS** 0.9 · **Range** 1 · **Armor** 65 · **MR** 65 · **Mana** 0 / 4
-- **Unlock**: Have 8 or more non-unique traits active
+- **Unlock**: Activate 8 or more non-unique traits.
 
 ### Ability: Upswing
 
@@ -36,6 +36,7 @@
 | SpecialEnemyDamage | 7000 | 7000 | 7000 |
 | SpecialDamageDuration | 1000000 | 1000000 | 1000000 |
 | SpecialDamageInterval | 0.3 | 0.3 | 0.3 |
+| EmblemTailoringAmount | 2 | 2 | 2 |
 
 Formulas (as stored; AD and AP are multipliers):
 
@@ -79,9 +80,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: Abilities/GA_Smeech19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Smeech19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row EmblemTailoringAmount: – -> 2
 
 <!-- AUTO END -->
 

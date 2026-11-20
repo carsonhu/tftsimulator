@@ -1,7 +1,7 @@
 # Seraphine (2-cost MagicCaster) · `DA_SeraphineIndie19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Indie
@@ -70,11 +70,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Seraphine19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Seraphine19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- row DamageAP: 570 / 855 / 1280 -> 550 / 825 / 1240
-- row HighNoteDamageAP: 60 / 90 / 135 -> 45 / 68 / 100
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

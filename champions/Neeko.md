@@ -1,7 +1,7 @@
 # Neeko (1-cost MagicCaster) · `DA_Neeko19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 1, pool 30; traits: K/DA, Encore, Prodigy
@@ -9,7 +9,7 @@
 
 ### Ability: K/DA Fan Club
 
-> Convene the K/DA fan club, throwing 3 confetti streams at target that each deal 75/115/175 × AP magic damage. If they kill, permanently gain 1% Ability Power.
+> Convene the K/DA fan club, throwing 3 confetti streams at the target that each deal 70/105/155 × AP magic damage. If they kill, permanently gain 1% Ability Power.
 > 
 > Current Bonus: ⟨live⟩ Ability Power
 
@@ -17,13 +17,13 @@
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
 | APGain | 0.01 | 0.01 | 0.01 |
-| DamageAP | 75 | 115 | 175 |
+| DamageAP | 70 | 105 | 155 |
 | NumProjectiles | 3 | 3 | 3 |
 | KillBuffer | 0.2 | 0.2 | 0.2 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 75/115/175 × AP
+- `MagicDamageCalc1` = 70/105/155 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -48,9 +48,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Neeko19_SpellUsingVFX.txt
 - `GE_ManaLock`: applies mana lock: GA_Neeko19_SpellUsingVFX.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row DamageAP: 75 / 115 / 175 -> 70 / 105 / 155
+- ability text changed
 
 <!-- AUTO END -->
 

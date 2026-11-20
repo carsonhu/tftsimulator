@@ -1,7 +1,7 @@
 # Twisted Fate (5-cost MagicMarksman) · `DA_TwistedFate19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.5995286.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.5995286.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - **Role** MagicMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Tango, Trickshot
@@ -13,8 +13,8 @@
 > 
 > 1 or 2 of a Kind: 1/1/100 Gold
 > 3 of a Kind: Random champion
-> 4 of a Kind: Item Component
-> 5 of a Kind: Mystery Box!
+> 4 of a Kind: Mystery Box
+> 5 of a Kind: Royale Mystery Box!
 > 
 > Active: The next 5 attacks gain 100% Attack Speed and are replaced with cards that deal 100/150/2000 × AP magic damage to the target and 30/45/1000 × AP magic damage to 2 nearby enemies.
 
@@ -73,9 +73,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `OnHitEffectivenessMultiplier`: scales on-hit effects: GA_TwistedFate19_Spell.txt, GA_TwistedFate19_SpellTrickshot.txt
 - `LaunchAttack`: launches or listens for attacks: GA_TwistedFate19_Spell.txt
 
-### Changed since `rls-19.1.0.5986094.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- ability text changed
 
 <!-- AUTO END -->
 
