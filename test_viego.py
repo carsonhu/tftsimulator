@@ -103,3 +103,14 @@ def test_slayer_and_choreographer():
     a = Ashe(1, build=load_build(V))  # not a Choreographer: single amp
     fight(a, buffs=[set19buffs.Choreographer(2)], seconds=1)
     assert a.dmgMultiplier.stat == pytest.approx(1.06)
+
+
+def test_takedowns_add_a_sword_per_8():
+    # GA_Viego19_SwordStacking: Stack // KillsToGainSword (8) stacks, SwordPerStack (1) each, added to the 10 at the
+    # cast (owner, 2026-11-19: the page's Takedowns)
+    for takedowns, swords in ((0, 10), (7, 10), (8, 11), (24, 13), (96, 22)):
+        v = LoggedViego(1)
+        v.takedowns = takedowns
+        rows = fight(v, seconds=8)
+        assert v.total_swords() == swords
+        assert len([d for t, d in rows if t == v.casts[0] + 40]) == swords

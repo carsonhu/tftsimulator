@@ -164,3 +164,25 @@ def test_cards_come_from_the_build():
     assert [c for c in rows if c not in cards] == ['Sunder30', 'Shred30']
     old = json.loads(sim_entry.cards_json(json.dumps({'build': 'rls-19.1.0.5973071.Set19.Shipping.pbe'})))
     assert 'BlueBuff' in old
+
+
+def test_takedowns_slice_compares_counts_against_the_pages():
+    # owner, 2026-11-19: 0, 24, 48 and 96 takedowns, the page's own count as the NoItem row (so not twice)
+    cfg = {"champ": "Viego", "level": 1, "items": ["NoItem"] * 3, "buffs": [], "slice": "Takedowns",
+           "takedowns": 24, "enemy": {"hp": 1800, "armor": 100, "mr": 100}}
+    rows = {r["extra"]: r for r in sim_entry.run_slice(cfg)["rows"]}
+    assert set(rows) == {"NoItem", "0 takedowns", "48 takedowns", "96 takedowns"}
+    assert rows["0 takedowns"]["ratio"]["20-30"] < 1 < rows["48 takedowns"]["ratio"]["20-30"]
+    assert rows["96 takedowns"]["extraParams"] == 96
+    viego = next(c for c in sim_entry.get_catalog()["champions"] if c["name"] == "Viego")
+    assert viego["takedowns"] and "Takedowns" in sim_entry.get_catalog()["slices"]
+    # a Cappa Juice in a slot reads the row's count too (its stats are applied after the row's)
+    cfg.update(champ="Ezreal", items=["CappaJuice", "NoItem", "NoItem"])
+    rows = {r["extra"]: r for r in sim_entry.run_slice(cfg)["rows"]}
+    assert rows["0 takedowns"]["ratio"]["20-30"] < 1 < rows["96 takedowns"]["ratio"]["20-30"]
+
+
+def test_neeko_asks_for_her_kill_ap():
+    # owner, 2026-11-19: the page highlights the AP box (dummies never die, so her kill passive's AP is the user's)
+    champs = {c["name"]: c for c in sim_entry.get_catalog()["champions"]}
+    assert list(champs["Neeko"]["askBonus"]) == ["ap"] and champs["Ezreal"]["askBonus"] == {}

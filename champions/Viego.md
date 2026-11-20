@@ -84,7 +84,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | predicted: one GE_SimulateLaunchAttack per cast, at FireSwords | D1 |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted (script read, D1): both coefficients scale **AP** in the client data; no damage number read yet | D1 |
-| Q14 | Passives and other mechanics that need modelling | see ability text | takedown swords: not modelled (dummies never die); Pentakill (B25), Slayer (B29), Choreographer (B30) implemented | D1 |
+| Q14 | Passives and other mechanics that need modelling | see ability text | takedown swords: from the page's Takedowns, +SwordPerStack per KillsToGainSword (2026-11-19, below); none gained in a fight (dummies never die); Pentakill (B25), Slayer (B29), Choreographer (B30) implemented | D1 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-18 | D1 |
 
 ## Evidence log
@@ -114,3 +114,9 @@ Buff's +10). Ticks count from combat start.
     row scales with AD**, so each sword deals DamagePerSwordAD x AD + DamagePerSwordAP x AP. Physical, on-spell, crit
     only with Precision.
 - 2026-11-18, Day 1 PBE patch notes, confirmed in the client build rls-19.1.0.5986094 (read from an FModel raw export, B34; it replaced the patch-notes stand-in, B33): DamagePerSwordAD 36/54/86 -> 34/51/82. Its timing is unchanged from rls-19.1.0.5973071.
+- 2026-11-19, takedown swords (owner: Viego must scale with the page's Takedowns). GA_Viego19_SwordStacking counts
+  each takedown in Stack (GE_Viego19_KillTracker) and applies GE_Viego19_SwordStacks at FMod(Stack, KillsToGainSword),
+  whose return in UE is the whole quotient: Stack // 8. GA_Viego19_Spell reads GenericCalc2 as the cast starts and
+  adds it to NumBaseSwords (NumTotalSwords). GenericCalc2's formula isn't in the build's calcs; the tooltip's
+  "10 + 1 x GenericCalc2" (1 = SwordPerStack) and the script's plain sum agree while SwordPerStack is 1, so the
+  simulator takes SwordPerStack x (takedowns // 8). Predicted from the scripts; no VOD check yet.

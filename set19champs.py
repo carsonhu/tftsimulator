@@ -28,6 +28,9 @@ class Neeko(BuildChampion):
     MagicDamageCalc1 (DamageAP x AP) x effectiveness, magic, spell damage, crits only if the spell can crit.
     """
     KEY = 'DA_Neeko19'
+    # the Stats boxes the user should fill in (owner, 2026-11-19): dummies never die, so her kill passive's AP is theirs
+    # to add; the page highlights the box (catalog `askBonus`), the reason as its tooltip
+    ASK_BONUS = {'ap': 'the AP her kill passive would have given her (+1% per kill)'}
     CAST = 'CD_Neeko19_CastAnimWithClone'
     THROWS = (  # (cast event, projectile chrono, projectile name, Encore missile?)
         ('Throw1', 'CD_Neeko19_Projectile1', 'Popper', False),
@@ -43,8 +46,7 @@ class Neeko(BuildChampion):
         # read every number now, so a build that lacks one fails at construction, not mid-fight
         self.throws = [(self.chrono_event(self.CAST, ev), self.chrono_projectile_speed(ch, name), encore)
                        for ev, ch, name, encore in self.THROWS]
-        self.notes = ('Kill passive (+1% AP per kill) not modelled: dummies never die. Spell missiles take the '
-                      'straight-line travel time at the attack range (arc height ignored, G4).')
+        self.notes = "Her kill passive's AP isn't added for you: put the AP she'd have gained in Stats (AP)."
 
     def missile_effectiveness(self, encore):
         if not encore:
@@ -91,8 +93,6 @@ class Varus(BuildChampion):
         self.missiles = [(self.chrono_projectile_spawn(self.CAST, name), self.chrono_projectile_speed(self.CAST, name),
                           encore) for name, encore in self.MISSILES]
         self.splash = self.row('AOEDamagePercent')
-        self.notes = ('Slow (20% AS for 4 s) not modelled: dummies never attack. The splash hits the enemies '
-                      'next to the target (the layout). Missiles take the straight-line travel time at the attack range (arc ignored, G4).')
 
     def abilityScaling(self, level, AD, AP):
         return self.row('DamageAP', star=level) * AP + self.row('DamageAD', star=level) * AD
@@ -144,9 +144,6 @@ class Draven(BuildChampion):
         super().__init__(level, build)
         self.throw_at = self.chrono_projectile_spawn(self.CAST, 'Blade')
         self.vortex_hits = int(self.row('Duration') / self.VORTEX_TICK)
-        self.notes = ("The vortex's damage is booked on the record's target: it splits among the enemies inside, which "
-                      "adds up to the same total on identical dummies. Ricochets go to the nearest dummy not yet "
-                      "hit (the layout).")
 
     def record_damage(self, level, AD, AP):
         return self.row('BladeDamage', star=level) * AD
@@ -206,9 +203,6 @@ class Kaisa(BuildChampion):
         self.num_missiles = int(self.row('NumMissiles'))
         self.missiles_fired = 0
         self.launch_count = 0
-        self.notes = ("Missiles alternate between the target and nearby enemies (identical dummies, same total); "
-                      "each missile flies its own target's distance on the dummy layout. Ricochets go to the nearest "
-                      "dummy not yet hit.")
 
     def missile_damage(self, level, AD, AP):
         return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
@@ -271,7 +265,6 @@ class Yunara(BuildChampion):
         self.orb_times = sorted(t for p in ch.get('projectiles') or [] if p['name'] == 'Yunara19_OrbMis'
                                 for t in p.get('spawn_at') or [])
         self.orb_chrono_len = ch['length']
-        self.notes = "Orbs fly to her target at her attack range (4 hexes); the i-th orb takes the chrono's i-th spawn time."
 
     def orb_damage(self, level, AD, AP):
         return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
@@ -319,9 +312,6 @@ class Ziggs(BuildChampion):
         self.timing.lock_speed_clamp = self.CAST_RATE_CLAMP
         self.timing.source['lock_speed_clamp'] = 'GA_Ziggs19_Spell 0x635 FClamp(AS / base AS, 1, 2)'
         self.bomb_spawn = self.chrono_projectile_spawn(self.CAST, self.BOMB)
-        self.notes = ('The bomb\'s simulated attack triggers on-attack items (Titan\'s Resolve); its role mana '
-                      'would fall inside the mana lock. The splash hits the enemies next to the target (the '
-                      'layout). The bomb flies his attack range.')
 
     def bomb_damage(self, level, AD, AP):
         return self.row('InitialDamage', star=level) * AP
@@ -382,10 +372,6 @@ class Senna(BuildChampion):
         if abs(self.locks[self.BLAST][0] - self.timing.cast_lock) > 1e-3:
             raise ValueError(f'Senna: CastAnim1 lock {self.locks[self.BLAST]} differs from the build timeline '
                              f'{self.timing.cast_lock}')
-        self.notes = ('True Damage and Hitmaker not modelled. The detonation buff (+8% damage amp, stacking) is '
-                      'applied at the detonation: nothing of hers lands before that cast ends, so its return flight '
-                      'time does not matter. Crits play a slower attack animation: the windup is weighted by crit '
-                      'chance (B17).')
 
     def _locks(self, chrono):
         unlock = ticks_up(self.chrono_event(chrono, 'Unlock')) / TPS
@@ -452,8 +438,6 @@ class Ezreal(BuildChampion):
             raise ValueError(f'Ezreal: expected the root and Encore SpellMis in {self.SHOT}, got {spawns}')
         self.shot_spawn, self.encore_spawn = spawns
         self.spell_stack = 0  # the combat-only spell Stack
-        self.notes = ('The splash hits the enemies next to the target (the layout); every 3rd cast of a Heartsteel '
-                      'Bias also those 2 hexes away. The detonating missile flies his attack range.')
 
     def detonation(self, level, AD, AP):
         return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
@@ -511,8 +495,6 @@ class Lux(BuildChampion):
         self.timing.cast_lock, self.timing.mana_lock = unlock + 1 / TPS, unlock
         self.timing.source['cast_lock'] = self.timing.source['mana_lock'] = f'{self.CAST} Unlock (GA_Lux19_Spell 0xc75)'
         self.num_secondaries = int(self.row('NumSecondaryTargets'))
-        self.notes = ('The secondary beam hits the enemy nearest Lux other than her target (the target again when '
-                      'there is none). Mana refund on kill not modelled: dummies never die.')
 
     def primary_damage(self, level, AD, AP):
         return self.row('PrimaryDamageAP', star=level) * AP
@@ -571,8 +553,7 @@ class Gnar(BuildChampion):
         t.animations = self.EVERY
         t.source['variants'] = f'{self.ATTACK} SequentialAttack x2 + SpecialAttack (GA_Gnar19_Passive Ammo, every 3rd)'
         self.rock_speed = self.chrono_projectile_speed(self.ROCK, 'SpellProjectile')
-        self.notes = ('Every 3rd attack is the rock (its own, slower windup); each rock gives +9% x AP attack speed '
-                      'for the rest of combat. Items that give mana add no Ammo.')
+        self.notes = 'Items that give mana (Blue Buff, Shojin) add no Ammo.'
 
     def canCast(self, time=None):
         return False  # no spell: the bar is Ammo, spent by the passive; mana from items adds no Ammo (owner, 2026-11-18)
@@ -643,8 +624,6 @@ class Malzahar(BuildChampion):
         self.beam_ticks = round(self.row('DamageOverSecondsDONTCHANGE') / self.tick_rate + 1)
         self.aoe = int(self.row('AOEHexRange'))
         self.shred_level, self.shred_duration = self.row('ShredPercent'), self.row('ShredDuration')
-        self.notes = ('Beam: 9 ticks over 2 s on the target. Bursts: 4, each shredding (30% MR, 4 s) then damaging the '
-                      'target and the enemies next to it (the layout).')
 
     def beam_damage(self, level, AD, AP):
         return self.row('DamageAP', star=level) * AP / self.beam_ticks
@@ -700,8 +679,6 @@ class Samira(BuildChampion):
         self.num_bullets = int(self.row('NumBullets'))
         self.bullet_gap = self.TIME_TO_SHOOT / self.num_bullets
         self.captivate_duration = self.row('CaptivateDuration')
-        self.notes = ('A barrage counts as one attack launch for on-attack items. Her crits Captivate (3 s) when '
-                      'Classical is active, which grows the Classical damage amp.')
 
     def bullet_damage(self, level, AD, AP):
         return self.row('DamageAP', star=level) * AP + self.row('DamageAD', star=level) * AD
@@ -752,7 +729,6 @@ class Karthus(BuildChampion):
         unlock = ticks_up(self.chrono_event(self.CAST, 'Unlock')) / TPS
         self.timing.cast_lock, self.timing.mana_lock = unlock + 1 / TPS, unlock
         self.timing.source['cast_lock'] = self.timing.source['mana_lock'] = f'{self.CAST} Unlock (GA_Karthus19_Spell 0x361)'
-        self.notes = 'The recast on a kill (70% of the previous hit) is not modelled: dummies never die.'
 
     def requiem(self, level, AD, AP):
         return self.row('APDamage', star=level) * AP
@@ -816,8 +792,6 @@ class OlafHeroAugment(BuildChampion):
         self.axe_stacks = 0  # his Stack attribute: + ExtraAttacksPerCast after each cast's throws
         self._planned = 1  # the animation of the attack starting next
         self._this_empowered = False
-        self.notes = ('Each cast empowers his next 2 attacks (+1 per earlier cast) into thrown axes; his mana is locked '
-                      'until the last axe is thrown.')
 
     def axe_damage(self, level, AD, AP):
         return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
@@ -905,8 +879,6 @@ class Ashe(BuildChampion):
         self.empowered_left = 0
         self._planned = 1
         self._this_empowered = False
-        self.notes = ('Her next 6 attacks after a cast have +30% + 20% x AP attack speed and are flurries of 3 arrows; '
-                      'her mana is locked until the 6th flurry.')
 
     def arrow_damage(self, level, AD, AP):
         return self.row('ArrowDamageAD', star=level) * AD
@@ -955,8 +927,13 @@ class Ashe(BuildChampion):
 class Viego(BuildChampion):
     """Singled Out (champions/Viego.md, D1). Script: GA_Viego19_Spell (build ga_scripts.zip).
 
-    The cast commits, applies the mana lock (0xf8c) and reads the swords: NumBaseSwords (10) + GenericCalc2 (bonus
-    swords from takedowns, GA_Viego19_SwordStacking: dummies never die, 0). It plays CD_Viego19_SpellCast and spawns the
+    The cast commits, applies the mana lock (0xf8c) and reads the swords: NumBaseSwords (10) + GenericCalc2, the bonus
+    swords from takedowns (bonus_swords: the page's Takedowns, owner 2026-11-19; dummies never die, so a fight adds
+    none). GA_Viego19_SwordStacking counts each takedown in Stack (GE_Viego19_KillTracker) and applies
+    GE_Viego19_SwordStacks at FMod(Stack, KillsToGainSword), whose return is the whole quotient: Stack // 8. The tooltip
+    reads "10 + 1 x GenericCalc2" (1 = SwordPerStack) while the cast adds GenericCalc2 itself, so the bonus is taken as
+    SwordPerStack x (takedowns // KillsToGainSword); the two readings agree while SwordPerStack is 1. It plays
+    CD_Viego19_SpellCast and spawns the
     swords around his target over 0.75 s (visual). At 'FireSwords' (1.0579 s, 0x19e3 -> 0x1917) every sword plays
     CD_Viego19_SwordCollapse_Mis from its place to the target; the 'ViegoSwordCollapse' projectile is a
     TFTFixedTimeMovement with no time of its own, assumed to arrive at the module's end, the chrono's length 0.25 s
@@ -970,14 +947,22 @@ class Viego(BuildChampion):
     KEY = 'DA_Viego19'
     CAST = 'CD_Viego19_SpellCast'
     COLLAPSE = 'CD_Viego19_SwordCollapse_Mis'
+    TAKEDOWNS = True  # his damage depends on the page's Takedowns (the box is highlighted; the Takedowns slice)
 
     def __init__(self, level, build=None):
         super().__init__(level, build)
         self.fire_at = self.chrono_event(self.CAST, 'FireSwords')
         self.collapse = self.chrono(self.COLLAPSE)['length']  # G21: a fixed-time projectile takes its module's time
         self.num_swords = int(self.row('NumBaseSwords'))
-        self.notes = ('10 swords hit the target 1.31 s into the cast (the takedown swords are not modelled: dummies '
-                      'never die). Each deals DamagePerSwordAD x AD + DamagePerSwordAP x AP (owner, 2026-11-18).')
+        self.notes = 'Set Takedowns in the top bar: +1 sword per 8.'
+
+    def bonus_swords(self):
+        # GenericCalc2: SwordPerStack per KillsToGainSword takedowns (GA_Viego19_SwordStacking: Stack // 8)
+        stacks = int(self.takedowns) // int(self.row('KillsToGainSword'))
+        return int(self.row('SwordPerStack')) * stacks
+
+    def total_swords(self):
+        return self.num_swords + self.bonus_swords()
 
     def sword_damage(self, level, AD, AP):
         # PhysicalDamageCalc1: the AD row x AD, the AP row x AP (owner, 2026-11-18; the client's CalcComponent
@@ -987,15 +972,16 @@ class Viego(BuildChampion):
     def performAbility(self, opponents, items, time):
         target = opponents[0]
         fire = self.tick + ticks_up(self.fire_at)
+        swords = self.total_swords()  # read as the cast starts (NumTotalSwords)
         self.schedule_tick(fire, lambda: self.simulateLaunch(self.items))  # 0xede, after the swords start (G11)
 
         def land():
-            for _ in range(self.num_swords):
+            for _ in range(swords):
                 self.multiTargetSpell([target], self.items, self.tick / TPS, 1, self.sword_damage, 'physical')
         if self.tracer is not None:  # the swords, from around the target (the fight viewer)
             tx, ty = layout.world(target.hex)
-            for k in range(self.num_swords):
-                a = 2 * math.pi * k / self.num_swords
+            for k in range(swords):
+                a = 2 * math.pi * k / swords
                 self.trace_projectile(fire, fire + ticks_up(self.collapse),
                                       (tx + 170 * math.cos(a), ty + 170 * math.sin(a)), target, 'sword')
         self.schedule_tick(fire + ticks_up(self.collapse), land)
@@ -1048,8 +1034,6 @@ class Kayle(BuildChampion):
         self.aoe = int(self.row('AOEHexRange'))
         self.counting = False
         self.swords = 0
-        self.notes = ('For 4 s after a cast: +80% attack speed and a sword per attack; then she stops for the finale: '
-                      'a 2-hex blast and the swords on her target. Her mana is locked from the cast to the end of the finale.')
 
     def passive_damage(self, level, AD, AP):
         return self.row('APDamage', star=level) * AP
@@ -1131,8 +1115,6 @@ class Lucian(BuildChampion):
         self.dash_hexes = self.row('MinDashDistance')
         self.dash = projectile_ticks(self.DASH_SPEED, self.dash_hexes)
         self.set_locks(self.CAST)  # the build has no cast lockout for him: the plain cast's, shown on the panel
-        self.notes = ('A cast: a 1-hex dash, then 2 shots (with Encore active, 2 more at the Encore recast strength); '
-                      'each shot counts as an attack for on-attack items.')
 
     def shot_damage(self, level, AD, AP):
         return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
@@ -1206,9 +1188,7 @@ class Bard(BuildChampion):
             raise BuildDataError(f'{self.KEY}: {self.WAVE} has no single MeepHitbox speed in build {self.build.version}')
         self.wave_speed = speeds.pop()
         self.halves = round(0.2 / 0.1)  # GE_Bard19_MeepWaveDamage: duration 0.2 s, period 0.1 s (client asset)
-        self.notes = ('A cast: a wave of meeps along the line through his target; each enemy it meets takes 210 x AP '
-                      'magic, 30% less for each one before it (at least 20%). The Horn of the Traveler is not '
-                      'simulated.')
+        self.notes = "The Horn of the Traveler isn't simulated."
 
     def wave_damage(self, level, AD, AP):
         return self.row('Meeps Damage', star=level) * AP
@@ -1260,8 +1240,6 @@ class Syndra(BuildChampion):
         self.timing.cast_lock = (unlock + 1) / TPS
         self.timing.source['cast_lock'] = self.timing.source['mana_lock'] = f'{self.CAST} Unlock (3 phases)'
         self.in_place = self.chrono(self.IN_PLACE)['length']
-        self.notes = ('A cast: a volleyball at her target, then a bounce to an enemy behind it for less (to the target '
-                      'itself when nobody is behind).')
 
     def primary_damage(self, level, AD, AP):
         return self.row('PrimaryDamageAP', star=level) * AP
@@ -1371,9 +1349,7 @@ class Briar(BuildChampion):
         self.frenzy_done = 0
         self._planned = 1
         self._this_frenzy = False
-        self.notes = ('A cast: a dash at the farthest enemy within 3 hexes, hitting it and the enemies next to it; then '
-                      'her next 3 attacks have +200% attack speed and are slashes (her mana is locked until the 3rd). '
-                      'Full health assumed.')
+        self.notes = 'Assumes she is at full Health.'
 
     def _set_cast_lock(self, dash):
         self.timing.cast_lock = (self.kick + self.dash[dash]['Unlock'] + 1) / TPS
@@ -1467,8 +1443,6 @@ class RenataGlasc(BuildChampion):
         self.period = self.row('TickRate')
         self.toxin_ticks = round(self.row('ToxinDuration') / self.period)
         self.toxin_until = {}  # id(dummy) -> the tick its last Toxin ends (unpoisoned first)
-        self.notes = ('Toxin: 2 stacks on the target and 1 on each of 2 nearby enemies, each 160 x AP over 15 s; every '
-                      'application Captivates (Classical).')
 
     def toxin_tick(self, level, AD, AP):
         # assumed: the DOT's total is spread over its ticks (D1)
@@ -1529,8 +1503,6 @@ class Zoe(BuildChampion):
         super().__init__(level, build)
         self.redirect_at = self.chrono_event(self.CAST, 'RedirectProjectile')
         self.ball_spawn = self.chrono_projectile_spawn(self.REDIRECT, 'Ball')
-        self.notes = ('The ball is fired backwards, then redirected through her to her target (the first enemy on its '
-                      'path on the dummy line). The overkill ricochet is not modelled: dummies never die.')
 
     def ball_damage(self, level, AD, AP):
         return self.row('SpellDamageAP', star=level) * AP
@@ -1582,9 +1554,7 @@ class Xayah(BuildChampion):
         self.feather_speed = self.chrono_projectile_speed_fixed(self.MISSILE, 'FeatherMis')
         # CD_Xayah19_SpellMis 'MissileWithDelay - Wave 1' (no tag) / 'MissileWithLessDelay - Wave 2'
         self.wave_delay = tuple(self.chrono_projectile_delay(self.MISSILE, 'FeatherMis', tags) for tags in self.WAVE_TAGS)
-        self.notes = ('A cast: 30 feathers (60 at 3 stars) gather behind her and fly at her target, each '
-                      'FeatherDamage x AD + FeatherDamageAP x AP physical; they land 1.1-1.6 s into the cast. Their '
-                      '-1 Armor per feather is not modelled (flat armor reduction).')
+        self.notes = "Her feathers' armor reduction isn't simulated."
 
     def chrono_projectile_speed_fixed(self, chrono, projectile):
         """The speed of the chrono's fixed-speed `projectile` (CD_Xayah19_SpellMis also has the old retracting
@@ -1660,9 +1630,7 @@ class Katarina(BuildChampion):
         self.spin_at = self.chrono_event(self.CAST, 'Spin')
         self.eviscerate_at = self.chrono_event(self.CAST, 'Eviscerate')  # the first: the NoMovement group's
         self.captivate_duration = self.row('CaptivateDuration')
-        self.notes = ('A cast: a spin hitting her target and the enemies next to it, then a strike on her target. '
-                      'Everyone hit is Captivated (5 s) when Classical is active. Her target is assumed in range '
-                      '(no dash).')
+        self.notes = 'Assumes her target is in range: no dash.'
 
     def spin_damage(self, level, AD, AP):
         return self.row('AoEDamageAp', star=level) * AP
@@ -1727,9 +1695,7 @@ class Kayn(BuildChampion):
     def __init__(self, level, build=None):
         super().__init__(level, build)
         self.deal_damage_at = self.chrono_event(self.CAST, 'DealDamage')
-        self.notes = ('A cast: a swipe in a 2-hex line toward his target. As the Heartsteel Bias he becomes the '
-                      'Shadow Assassin 5 s into combat (in game: at 70% Health), adding 35% of his damage as magic '
-                      'damage from then.')
+        self.notes = 'As the Heartsteel Bias, he becomes the Shadow Assassin 5 s into combat (in game: at 70% Health).'
 
     def spell_damage(self, level, AD, AP):
         return self.row('SpellPhysicalDamage', star=level) * AD + self.row('SpellMagicDamage', star=level) * AP
@@ -1824,10 +1790,7 @@ class Qiyana(BuildChampion):
         t.source['mana_lock'] = f'{ch} ManaUnlock'
         t.source['cast_lock'] = f'{ch} Unlock'
         self.ring_ticks = round(self.row('TimeRingChange') * TPS)
-        self.notes = ('A cast: a wave through her target hitting the enemies along and beside it (others take half). '
-                      'Her ring cycles Red (+20% damage), Green (a heal), Blue (10 mana back), changing every 1.5 s '
-                      'from Red at combat start (in game: a random pick of the other two). She is assumed to cast '
-                      'without dashing.')
+        self.notes = 'Her ring starts Red and changes every 1.5 s (in game: random); she casts without dashing.'
 
     def ring_colour(self, tick):
         """The ring's colour at `tick`: RING in turn, one every TimeRingChange from combat start."""
@@ -1917,11 +1880,6 @@ class Seraphine(BuildChampion):
         self.note_divisor = self.num_fires * 2  # the two DivideAdditive SetByCallers as a product (owner, Q16)
         extra = round(self.row('RisingStarExtraNotes'))
         self.bonus_volleys = (extra - round(extra / 2), round(extra / 2))  # 'SecondFire', 'ThirdFire'
-        forms = {1: 'a stream of 30 notes at her target', 2: 'a stream of 30 notes at her target and 2 x 4 bonus '
-                 'notes at the nearest enemies', 3: 'a high note at every enemy, a stream of 30 notes at her target '
-                 'and 2 x 4 bonus notes at the nearest enemies'}
-        self.notes = (f'A cast: {forms[self.FORM]}. Each stream note deals DamageAP x AP / 30, the 30 notes the '
-                      f'tooltip\'s total.')
 
     def note_damage(self, level, AD, AP):
         return self.row('DamageAP', star=level) * AP / self.note_divisor
@@ -1999,9 +1957,7 @@ class Yuumi(BuildChampion):
         t.source['mana_lock'] = t.source['cast_lock'] = f'{self.CAST} Unlock'
         self.self_bounce = ticks_up(self.chrono(self.SELF_BOUNCE)['length'])
         self.stacks = {}  # id(enemy) -> [disc proportions]
-        self.notes = ('A cast: a disc at her target (and an Encore disc with Encore). The 5th disc on an enemy topples '
-                      'the stack: 40% of the discs\' damage to it, 40% split over the 4 nearest others. MR shred not '
-                      'modelled.')
+        self.notes = "Her MR shred isn't simulated."
 
     def disc_damage(self, level, AD, AP):
         return self.row('DoTDamageAP', star=level) * AP
@@ -2086,9 +2042,6 @@ class Yone(BuildChampion):
         self.timing.lock_scales_with_as = False  # the script's own rule (GetTimeBetweenSlashes), set per cast
         self.timing.source['lock_scales_with_as'] = 'GA_Yone19_Spell GetTimeBetweenSlashes (per cast)'
         self._set_locks()
-        self.notes = ('A cast: 10 strikes alternating between his target and up to 2 enemies near it, then a final '
-                      'slash on the target; AP form (AP above AD) makes everything magic. As the Heartsteel Bias: 2 more '
-                      'strikes in the same time and 25% armor (MR) ignored.')
 
     def ap_form(self):
         return self.ap.stat > self.bonus_ad.stat
@@ -2201,8 +2154,6 @@ class Tristana(BuildChampion):
         t = self.timing
         t.mana_lock, t.cast_lock = end / TPS, (end + 1) / TPS
         t.source['mana_lock'] = t.source['cast_lock'] = f'{self.PART1} + 3 x {self.SHOT} (rates {self.SHOT_RATES})'
-        self.notes = ('A cast: bombs on her target and the 2 enemies nearest her, then she shoots each one; the last '
-                      '(her target\'s) deals double.')
 
     def bomb_damage(self, level, AD, AP):
         return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
@@ -2271,8 +2222,6 @@ class Mel(BuildChampion):
         self.missile_speed = speeds.pop()
         self.per_stack = self.row('NegativeDRForRadianceBundle') / self.row('RadianceStacksForNegativeDR')
         self.blues = {}  # id(enemy) -> stacks
-        self.notes = ('A cast: 30 missiles, 3 of every 5 at her target, the rest at the nearest others. Each adds a Blues '
-                      'stack for the rest of combat; her ability deals +5% per 3 stacks to that enemy.')
 
     def missile_damage(self, level, AD, AP):
         return self.row('APDamage', star=level) * AP
@@ -2332,8 +2281,6 @@ class Jinx(BuildChampion):
         if len(speeds) != 1:
             raise BuildDataError(f'{self.KEY}: {self.MISSILE} Rocket speeds {speeds}')
         self.rocket_speed = speeds.pop()
-        self.notes = ('A cast: 16 missiles + 1 per 35% bonus attack speed over 1.2 s, 75% at her target, 15% at enemies '
-                      'within 2 hexes of it, 10% at the others.')
 
     def num_missiles(self):
         bonus = max(0.0, self.aspd.stat / self.base_aspd - 1)
@@ -2432,8 +2379,6 @@ class Ahri(BuildChampion):
         self.split_wait = waits.pop()
         self.spread_speed = self.chrono_projectile_speed(self.SPREAD, 'SpellMis')
         self.fox = int(self.row('BaseFoxFires'))
-        self.notes = ('Casts throw her fox-fires (6, +2 a cast, up to 14) at her target; at 14 she enters the flow: a '
-                      'heart at her target and the fox-fires split between it and enemies within 2 hexes.')
 
     def fox_damage(self, level, AD, AP):
         return self.row('APDamage', star=level) * AP
@@ -2547,9 +2492,6 @@ class Jhin(BuildChampion):
         self.ascend_at = self.row('Num4thShotsToAscend', star=level)
         self.pierce_launch = self.chrono_event(self.ATTACK, 'CustomLaunchAttack2')
         self.violin_encore_at = self.chrono_event(self.VIOLIN, 'Encore')
-        self.notes = ('No spell: every attack summons a violin; the violins out fire with each attack, the 4th is '
-                      'empowered. After the 3rd empowered shot (1st at 3 stars) he ascends: 4 violins, faster '
-                      'launches, everything pierces (later enemies take 40%). Bonus attack speed becomes AD (x0.8).')
 
     def canCast(self, time=None):
         return False  # no spell: the bar is Ammo (GE_Jhin19_AmmoTracker / _Reload)

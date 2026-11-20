@@ -467,6 +467,25 @@ button:focus-visible {
   width: 80px;
 }
 
+/* Takedowns, when the setup's damage depends on them (Viego, Cappa Juice): marked like Targets (owner, 2026-11-19). */
+.top-field.hot {
+  padding: 3px 4px 3px 10px;
+  border: 1px solid #ff4b4b;
+  border-radius: 8px;
+  background: rgba(255, 75, 75, 0.08);
+  color: #ffb3b3;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.78em;
+}
+
+.top-field.hot input {
+  font-size: 1.15em;
+  font-weight: 700;
+  letter-spacing: normal;
+}
+
 .small-num {
   width: 4.5em;
   text-align: right;
@@ -843,6 +862,24 @@ button:focus-visible {
 
 .stats-panel input[type="number"]:hover {
   border-color: #4a4d5a;
+}
+
+/* A box the champion asks the user to fill in (Neeko's AP from kills): marked like Targets and Takedowns. */
+.stat-cell.ask {
+  margin: 0 -4px;
+  padding: 0 3px;
+  border: 1px solid #ff4b4b;
+  border-radius: 6px;
+  background: rgba(255, 75, 75, 0.08);
+}
+
+.stat-cell.ask .stat-label {
+  color: #ffb3b3;
+  font-weight: 700;
+}
+
+.stat-cell.ask input[type="number"] {
+  border-color: #ff4b4b;
 }
 
 .notes {

@@ -112,6 +112,27 @@ _ITEM_SLICES = {
 }
 
 
+# The Takedowns slice (owner, 2026-11-19): what the page's Takedowns do for a champion that scales with them (Viego's
+# swords) or a held Cappa Juice. One row per count; the NoItem row is the page's own count, so a count equal to it is
+# left out.
+TAKEDOWN_ROWS = (0, 24, 48, 96)
+
+
+class TakedownCount(set19buffs.Buff):
+    """A Takedowns slice row: the fight with `params` takedowns in place of the page's. Set in applyStats, which runs
+    for the slice's extra before the champion's own items (Simulator.itemStats), so a Cappa Juice in a slot sees it."""
+    levels = [1]
+
+    def __init__(self, level=1, params=0):
+        super().__init__(f"{params} takedowns", level, params, phases=None)
+
+    def applyStats(self, champion):
+        champion.takedowns = int(self.params)
+
+    def performAbility(self, phase, time, champion, input_=0):
+        return input_
+
+
 # ---------------------------------------------------------------------------
 # Catalog
 # ---------------------------------------------------------------------------
@@ -138,6 +159,10 @@ def get_catalog():
         parent = next((b.__name__ for b in cls.__mro__[1:] if b.__name__ in set19champs.champ_list), None)
         champions.append({"name": name, "label": getattr(cls, "display_name", name), "levels": levels,
                           "area": bool(getattr(cls, "AREA", False)), "cost": _cost(cls, build),
+                          # its damage depends on the page's Takedowns (Viego's swords): the box is highlighted
+                          "takedowns": bool(getattr(cls, "TAKEDOWNS", False)),
+                          # Stats boxes the user should fill in, with why (Neeko's AP from kills)
+                          "askBonus": dict(getattr(cls, "ASK_BONUS", {})),
                           # the Targets buttons it gets (layout.py): its cap, and how its enemies stand
                           "targetsMax": getattr(cls, "TARGETS_MAX", MAX_TARGETS),
                           "targetsDefault": getattr(cls, "TARGETS_DEFAULT", TARGETS),
@@ -296,6 +321,7 @@ def get_catalog():
             "Trait",
             "Team Traits",
             "Augment/Buff",
+            "Takedowns",
         ],
         # Client builds the numbers can come from (builds/index.json, newest first); the page sends the chosen
         # version as cfg["build"] and the worker loads that file into Pyodide before the run (B9).
@@ -590,6 +616,10 @@ def _slice_inputs(slice_name, cfg):
             spec = _row_input_spec(cls)
             buffs.append(cls(1, int(typed.get(c, spec["Default"]))) if spec else cls())
         return no_item, buffs
+
+    if slice_name == "Takedowns":
+        own = int(cfg.get("takedowns", 0))
+        return no_item, [TakedownCount(1, n) for n in TAKEDOWN_ROWS if n != own]
 
     return no_item, []
 

@@ -1700,11 +1700,28 @@ function teamTraitRow(trait, picked) {
 // Slice options & the run loop
 // ---------------------------------------------------------------------------
 
+// Does the setup's damage depend on the top bar's Takedowns? A champion that scales with them (catalog `takedowns`:
+// Viego's swords) or a Cappa Juice in a slot (owner, 2026-11-19): the box is highlighted and the Takedowns slice shown.
+function usesTakedowns() {
+  const meta = champMeta(state.cfg.champ);
+  return Boolean((meta && meta.takedowns) || state.cfg.items.includes("CappaJuice"));
+}
+
+function renderTakedownsField() {
+  const on = usesTakedowns();
+  $("takedownsField").classList.toggle("hot", on);
+  $("takedownsField").title = on
+    ? "Takedowns this game: this setup's damage depends on them (Viego: +1 sword per 8; Cappa Juice: a Hat each). " +
+      "The Takedowns tab compares other counts."
+    : "Takedowns this game (Cappa Juice's Hats)";
+}
+
 function sliceOptions() {
-  // With a full item bar only the non-item slices remain; with nothing in Team Traits, no Team Traits slice.
+  // With a full item bar only the non-item slices remain; with nothing in Team Traits, no Team Traits slice; the
+  // Takedowns slice only when the setup reads them.
   const itemCount = state.cfg.items.filter((i) => i !== "NoItem").length;
-  const options = itemCount >= 3 ? ["Trait", "Team Traits", "Augment/Buff"] : state.catalog.slices.slice();
-  return state.teamBuffs.size ? options : options.filter((o) => o !== "Team Traits");
+  const options = itemCount >= 3 ? ["Trait", "Team Traits", "Augment/Buff", "Takedowns"] : state.catalog.slices.slice();
+  return options.filter((o) => (o !== "Team Traits" || state.teamBuffs.size) && (o !== "Takedowns" || usesTakedowns()));
 }
 
 function onConfigChanged() {
@@ -1725,6 +1742,8 @@ async function refresh() {
   });
 
   renderHeader();
+  renderTakedownsField();
+  renderAskBonus();
   updateStatsPanel(gen);
 
   const ranCfg = cfgForSlice(state.slice);
@@ -1817,6 +1836,7 @@ function buildStatsPanel() {
   for (const cell of STAT_CELLS) {
     const el = document.createElement("div");
     el.className = "stat-cell";
+    if (cell.bonus) el.dataset.bonus = cell.bonus;
     const label = document.createElement("span");
     label.className = "stat-label";
     label.textContent = cell.label;
@@ -1846,6 +1866,19 @@ function buildStatsPanel() {
   }
 }
 
+// A champion's Stats boxes the user should fill in (catalog askBonus: Neeko's AP from kills) are highlighted, the
+// reason on hover (owner, 2026-11-19).
+function renderAskBonus() {
+  const meta = champMeta(state.cfg.champ);
+  const ask = (meta && meta.askBonus) || {};
+  for (const el of document.querySelectorAll("#statsPanel .stat-cell[data-bonus]")) {
+    const why = ask[el.dataset.bonus];
+    el.classList.toggle("ask", Boolean(why));
+    const input = el.querySelector("input");
+    input.title = why ? `Add ${why}` : BONUS_FIELDS[el.dataset.bonus].label;
+  }
+}
+
 async function updateStatsPanel(gen) {
   let info;
   try {
@@ -1859,6 +1892,7 @@ async function updateStatsPanel(gen) {
   const r3 = (v) => Math.round(v * 1000) / 1000;
   const r4 = (v) => Math.round(v * 10000) / 10000;
   const P = (v) => `${Math.round(v * 1000) / 10}%`; // 0.25 -> 25%, 1.633 -> 163.3%
+  const Pts = (v) => `${Math.round(v * 10) / 10}%`; // already in points: 20 -> 20%
 
   // [value, how it is made] per cell; the formula is the hover text.
   const ad = r2(s.atk.stat * s.bonusAd.stat);
@@ -1871,12 +1905,13 @@ async function updateStatsPanel(gen) {
       : `AD ${ad} = ${s.atk.base} × (1 + ${s.bonusAd.addMultiplier} × ${r4(s.bonusAd.add / 100)} AD)`],
     // AP, crit, crit damage and amp read as percentages, the way the game shows them (owner, 2026-11-19); amp is
     // the bonus over 1 (a multiplier of 1.1 is 10%)
+    // the total is a fraction (1.2), base and bonus already points of 100 (sim_entry._panel "multiplier": 100, 20)
     ap: [P(s.ap.stat), s.ap.addMultiplier === 1
-      ? `AP ${P(s.ap.stat)} = ${P(s.ap.base)} + ${P(s.ap.add)}`
-      : `AP ${P(s.ap.stat)} = ${P(s.ap.base)} + ${s.ap.addMultiplier} × ${P(s.ap.add)}`],
+      ? `AP ${P(s.ap.stat)} = ${Pts(s.ap.base)} + ${Pts(s.ap.add)}`
+      : `AP ${P(s.ap.stat)} = ${Pts(s.ap.base)} + ${s.ap.addMultiplier} × ${Pts(s.ap.add)}`],
     dmgamp: [P(s.dmgAmp.stat - 1), `Damage amp ${P(s.dmgAmp.stat - 1)} = ${P(s.dmgAmp.base - 1)} + ${P(s.dmgAmp.add)}`],
     manaregen: [r2(s.manaRegen.stat), `Mana regen ${r2(s.manaRegen.stat)} = ${s.manaRegen.base} + ${r2(s.manaRegen.add)}`],
-    as: [r3(s.aspd.stat), `AS ${r3(s.aspd.stat)} = ${s.aspd.base} × (1 + ${r4(s.aspd.add)})`],
+    as: [r3(s.aspd.stat), `AS ${r3(s.aspd.stat)} = ${s.aspd.base} × (1 + ${Pts(s.aspd.add)})`], // add: percent (_panel "aspd")
     // Crit chance stops at 1; the excess is crit damage instead, at the build's ratio (champion.critDamage), so the
     // panel shows what a hit uses rather than the raw sum.
     crit: [P(Math.min(1, s.crit.stat)), s.crit.stat > 1
@@ -1893,6 +1928,7 @@ async function updateStatsPanel(gen) {
   };
 
   buildStatsPanel();
+  renderAskBonus();
   // Only the values are rewritten on refresh: the inputs are long-lived, and
   // replacing them would drop whatever is being typed (and the caret).
   for (const el of document.querySelectorAll("#statsPanel .stat-val")) {
@@ -2095,6 +2131,17 @@ function renderResults() {
 function rowAddPlan(row) {
   const cls = row.extraCls;
   if (!cls || cls === "NoItem") return null;
+  if (cls === "TakedownCount") {  // a Takedowns row: set the top bar's Takedowns to its count
+    const n = row.extraParams;
+    if (state.cfg.takedowns === n) return { disabled: true, title: `Takedowns is already ${n}` };
+    return {
+      title: `Set Takedowns to ${n}`,
+      run: () => {
+        $("takedowns").value = n;
+        $("takedowns").onchange();
+      },
+    };
+  }
   if (state.itemKinds.has(cls)) {
     const slot = state.cfg.items.findIndex((i) => i === "NoItem");
     return slot < 0
