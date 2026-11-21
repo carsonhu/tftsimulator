@@ -42,21 +42,27 @@ def ring(center, radius):
     return out
 
 
-SHAPES = ("cluster", "line")
+SHAPES = ("cluster", "line", "rings")
 
 
 class Layout:
     """The page's layout setting: the number of targets, and how they stand (the champion's `TARGETS_SHAPE`):
     "cluster" (default), the target and the enemies on the hexes next to it; "line", the target and the enemies
-    behind it, each 1 hex further, in line with the champion (owner, 2026-11-19: Jhin's piercing shots, at most 3)."""
+    behind it, each 1 hex further, in line with the champion (owner, 2026-11-19: Jhin's piercing shots, at most 3);
+    "rings", the i-th enemy `rings[i]` hexes from the target (the last value for the rest), each ring filled in pairs
+    mirrored about the champion-target line, furthest from the champion first (owner, 2026-11-20: Vladimir's
+    chandelier, the target at its centre, 2 adjacent, 2 at 2 hexes, 2 at 3, the rest at 4; not clumped)."""
 
-    def __init__(self, targets=TARGETS, shape="cluster"):
+    def __init__(self, targets=TARGETS, shape="cluster", rings=None):
         if not 1 <= targets <= LIMIT_TARGETS:
             raise ValueError(f'layout: {targets} targets (1-{LIMIT_TARGETS})')
         if shape not in SHAPES:
             raise ValueError(f'layout: shape {shape!r} (one of {SHAPES})')
+        if shape == "rings" and not rings:
+            raise ValueError('layout: shape "rings" needs its rings')
         self.targets = targets
         self.shape = shape
+        self.rings = tuple(rings) if rings else None
 
     @property
     def count(self):
@@ -68,6 +74,8 @@ class Layout:
         target = (max(1, champion.attack_range or 1), 0)
         if self.shape == "line":  # behind the target, away from the champion
             free = [(target[0] + k, 0) for k in range(1, self.targets)]
+        elif self.shape == "rings":
+            free = self._ring_spots(target)
         else:  # a melee unit stands on one of the target's neighbouring hexes: skip it (a 7th then stands 2 away)
             free = [h for h in ring(target, 1) + ring(target, 2) if h != (0, 0)]
         spots = [target] + free[:self.targets - 1]
@@ -76,8 +84,34 @@ class Layout:
             dummy.in_play = i < len(spots)
             dummy.hex = spots[i] if dummy.in_play else (target[0] + 10 + i, 0)
 
+    def _ring_spots(self, target):
+        """The hexes of targets 2.. for the "rings" shape: target i at `rings[i]` hexes from the target (the last value
+        for any beyond), each ring's hexes in mirrored pairs (the reflection about the champion-target line), the pairs
+        furthest from the champion first."""
+        def mirror(h):  # reflection about the line r = 0 through the champion and the target (axial q, r)
+            return (h[0] + h[1], -h[1])
+
+        queues, spots = {}, []
+        for i in range(1, self.targets):
+            r = self.rings[i] if i < len(self.rings) else self.rings[-1]
+            if r not in queues:
+                cands = [h for h in ring(target, r) if h != (0, 0)]
+                cands.sort(key=lambda h: (-hex_distance(h, (0, 0)), mirror(h) == h, h[1] < 0))
+                order = []
+                for h in cands:
+                    if h in order:
+                        continue
+                    order.append(h)
+                    m = mirror(h)
+                    if m != h and m in cands and m not in order:
+                        order.append(m)
+                queues[r] = order
+            spots.append(queues[r].pop(0))
+        return spots
+
     def __repr__(self):
-        return f'Layout(targets={self.targets}, shape={self.shape!r})'
+        rings = f', rings={self.rings}' if self.rings else ''
+        return f'Layout(targets={self.targets}, shape={self.shape!r}{rings})'
 
 
 def in_play(dummies):

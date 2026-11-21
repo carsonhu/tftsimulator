@@ -32,7 +32,7 @@ class LoggedVladimir(Vladimir):
 
 
 def fight(v, items=(), buffs=(), seconds=25, targets=3):
-    lay = Layout(targets)
+    lay = Layout(targets, Vladimir.TARGETS_SHAPE, Vladimir.TARGETS_RINGS)
     ds = [dummy() for _ in range(lay.count)]
     for d in ds:
         d.armor.base, d.mr.base = 0, 0
@@ -100,3 +100,14 @@ def test_page_targets_default_seven_at_least_three():
     assert (meta['targetsDefault'], meta['targetsMin'], meta['targetsMax']) == (7, 3, 10)
     for asked, got in ((1, 3), (7, 7), (10, 10), (12, 10)):
         assert sim_entry._layout(cfg(champ='Vladimir', layout={'targets': asked})).targets == got
+
+
+def test_targets_stand_on_the_rings():
+    # owner, 2026-11-20: not clumped round the target: 2 adjacent, 2 at 2 hexes, 2 at 3, the rest at 4, the chandelier
+    # centred on the target; his main cast's 2 others are the adjacent pair (nearest him)
+    from layout import distance
+    v = LoggedVladimir(1)
+    ds, rows = fight(v, seconds=1, targets=10)
+    assert [distance(ds[0], d) for d in ds] == [0, 1, 1, 2, 2, 3, 3, 4, 4, 4]
+    assert len({d.hex for d in ds}) == 10 and (0, 0) not in {d.hex for d in ds}
+    assert v.main_targets(ds[0]) == ds[:3]

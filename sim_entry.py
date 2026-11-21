@@ -508,7 +508,7 @@ def _layout(cfg):
     asked = (cfg.get("layout") or {}).get("targets", getattr(cls, "TARGETS_DEFAULT", TARGETS))
     # and its floor (TARGETS_MIN: Vladimir always Captivates 3, owner 2026-11-20)
     targets = max(min(int(asked), getattr(cls, "TARGETS_MAX", MAX_TARGETS)), getattr(cls, "TARGETS_MIN", 1))
-    return Layout(targets, getattr(cls, "TARGETS_SHAPE", "cluster"))
+    return Layout(targets, getattr(cls, "TARGETS_SHAPE", "cluster"), getattr(cls, "TARGETS_RINGS", None))
 
 
 def _build_enemy(cfg):
