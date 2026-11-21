@@ -9,6 +9,7 @@ video's own (at its own fps; 60 fps = 2 frames per game tick).
 Fields, measured on a 1280x720 recording (Outplayed, PBE 2026-11-17):
     as    the attack-speed number under the sword icon in the stats grid
     ap    the ability power % in the stats grid (top row, third; Titan's Resolve stacks move it 2% at a time)
+    ad    the bonus attack damage % in the stats grid (top row, second; Kraken's Fury moves it 3.5% per launch)
     mana  the "current / max" text on the mana bar (the bar itself animates over several frames; the text
           changes on the frame the mana does)
 """
@@ -24,6 +25,7 @@ FIELDS = {  # x, y, w, h of the number; crop shown for reading (x, y, w, h); tex
     'as': ((1122, 572, 36, 16), (1080, 525, 200, 60), 120),
     'mana': ((1150, 262, 80, 14), (1110, 250, 170, 40), 120),  # text over the bar is dimmer than white: keep 120
     'ap': ((1186, 532, 34, 16), (1080, 505, 200, 60), 120),  # the AP % in the stats grid (top row, third)
+    'ad': ((1158, 532, 28, 12), (1080, 505, 200, 60), 150),  # the bonus AD % (top row, second; yellow: 150)
 }
 
 

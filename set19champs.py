@@ -2980,11 +2980,132 @@ class Yasuo(BuildChampion):
         self.schedule_tick(self.tick + ticks_up(self.slam_at), slam)
 
 
+class Vayne(BuildChampion):
+    """Darkest Hour (champions/Vayne.md, D1). Scripts: GA_Vayne19_Spell, GA_Vayne19_TrickshotHandler,
+    GA_Vayne19_Passive, GA_Vayne19_Tumble (build ga_scripts.zip).
+
+    The cast (K2_ActivateAbility 0x2866 -> 0x1757) commits, reads CastSpeed = clamp(AttackSpeed / base, 1, 2) and
+    applies the mana lock (0x1b0a). Unless she still holds DoTumbleAttack and TumbleLockout (a passive tumble she
+    hasn't attacked out of: CD_Vayne19_CastAnim in place, 0x1bfd), she tumbles (0x1f5a): GE_Vayne19_UltActiveDemon,
+    AttacksInUlt = 0, GE_Vayne19_UltActiveTag (InUlt), then CD_Vayne19_TumbleMove at speed 1 to the safest hex within
+    MaxTumbleHexDistance in range of her target (her own hex when none), its 'MovementComplete' starting
+    CD_Vayne19_TumbleUnlock at CastSpeed, whose 'Unlock' calls UnlockForAttacking (0x16c6 -> 0x29c9): FinishCasting.
+    The cast lock is the two events on the tick grid + 1 tick (the build's rule, as Yasuo's). The tumble also applies
+    GE_Vayne19_TumbleAttackTag (DoTumbleAttack, removed at her next Combat.Event.LaunchAttack).
+    Her attack chrono (CD_Vayne19_Attack, first active group): InUlt + DoTumbleAttack plays UltTumbleAttack
+    (CustomLaunchAttack1 0.2323 s of 1.3 s), InUlt alone UltAttack (CustomLaunchAttack1 0.3677 s of 1.6667 s,
+    PlayRateScalingThreshold 0.72), otherwise SequentialAttack (LaunchAttack 0.3007 s). Each
+    Combat.Event.LaunchAttack.Custom.1 (0x832) adds to AttacksInUlt and plays CD_Vayne19_EmpoweredMis at her target:
+    'Bolt' (3100 units/s); its arrival (0xf40) applies GE_Vayne19_UltBoltDamage: PhysicalDamageCalc1 (DamageAD x AD,
+    AppliesOnSpell, AppliesOnHit.IsAttack) and the target's HealthMax x PercentMaxHealthDamage true damage
+    (AppliesOnSpell), both crit only with Precision (RollIfCanSpellCrit); the custom launch fires no attack
+    projectile. At NumAttacks (3), one tick later (DelayUntilNextTick -> 0xf), the mana lock and InUlt are removed:
+    her mana is locked until the tick after the 3rd bolt's launch, whose own mana is lost (VOD8 E2).
+    Trickshot (TrickshotHandler): the bolt's arrival sends the bounce event; ricochet k flies
+    CD_Vayne19_EmpoweredMisTrickshot's 'Bolt' (1900 units/s) to the next enemy and applies
+    GE_Vayne19_UltBoltDamage_Trickshot (both parts x RichochetDamage^k, on-hit at that effectiveness, not IsAttack),
+    up to NumRichochets, as Draven's record.
+    Not simulated: the passive tumble when hit (GA_Vayne19_Passive: dummies never attack) and the Durability.
+    """
+    KEY = 'DA_Vayne19'
+    HIT_EMPOWERED = 'empowered_left'  # the page's Hit table: a cast is the 3 bolts it empowers
+    ATTACK = 'CD_Vayne19_Attack'
+    BOLT, BOUNCE = 'CD_Vayne19_EmpoweredMis', 'CD_Vayne19_EmpoweredMisTrickshot'
+    MOVE, UNLOCK = 'CD_Vayne19_TumbleMove', 'CD_Vayne19_TumbleUnlock'
+    NORMAL, ULT_TUMBLE, ULT = 1, 2, 3  # the animation selectors this class gives her attack groups
+    # AS_AttackUlt's PlayRateScalingThreshold (CD_Vayne19_Attack TFTChronoModuleAnimation_52, FModel export of
+    # 6011486): the snapshot drops it (two CustomLaunchAttack1 modules, one without a threshold; ledger P14)
+    ULT_RATE_THRESHOLD = 0.72
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        t, ch = self.timing, self.chrono(self.ATTACK)
+        seq = next(v for v in self.data.timing['attack_variants'] if v['group'] == 'SequentialAttack')
+        tumble_launch, ult_launch = sorted(s for e, s in ch['events'] if e == 'CustomLaunchAttack1')
+        t.variants = [
+            {'selector': self.NORMAL, 'min_as': None, 'launch': seq['launch'], 'length': seq['length'],
+             'rate_threshold': None},
+            # UltTumbleAttack ends at the chrono's length (1.3 s), UltAttack at its anim_end (1.6667 s)
+            {'selector': self.ULT_TUMBLE, 'min_as': None, 'launch': tumble_launch, 'length': ch['length'],
+             'rate_threshold': None},
+            {'selector': self.ULT, 'min_as': None, 'launch': ult_launch, 'length': ch['anim_end'],
+             'rate_threshold': self.ULT_RATE_THRESHOLD}]
+        t.animations = 1
+        t.launch, t.attack_len = seq['launch'], seq['length']
+        t.source['variants'] = (f'{self.ATTACK}: SequentialAttack (its first module), UltTumbleAttack, UltAttack '
+                                '(CustomAttack.1)')
+        t.lock_scales_with_as = False  # performAbility times the tumble at CastSpeed itself
+        t.source['lock_scales_with_as'] = 'GA_Vayne19_Spell: only CD_Vayne19_TumbleUnlock plays at CastSpeed'
+        t.mana_lock = 10 ** 6  # lifted the tick after the last bolt's launch (onLaunch)
+        t.source['mana_lock'] = 'GA_Vayne19_Spell: removed the tick after the NumAttacks-th custom launch (0xce2, 0xf)'
+        t.source['cast_lock'] = f"{self.MOVE} 'MovementComplete' + {self.UNLOCK} 'Unlock' at CastSpeed, + 1 tick"
+        self.move_at = self.chrono_event(self.MOVE, 'MovementComplete')
+        self.unlock_at = self.chrono_event(self.UNLOCK, 'Unlock')
+        self.empowered_left = 0  # bolts still to fire this cast
+        self._planned = self.NORMAL
+        self._this_empowered = False
+
+    def bolt_damage(self, level, AD, AP):
+        return self.row('DamageAD', star=level) * AD
+
+    def cast_speed(self):
+        """GA_Vayne19_Spell 0x191f-0x1aef: FMax(FMin(AttackSpeed / base AttackSpeed, 2), 1)."""
+        return min(max(self.aspd.stat / self.base_aspd, 1.0), 2.0)
+
+    def _next_animation(self):
+        if self.empowered_left <= 0:
+            self._planned = self.NORMAL
+        elif self.empowered_left == self.row('NumAttacks'):
+            self._planned = self.ULT_TUMBLE  # the first after the tumble still holds DoTumbleAttack
+        else:
+            self._planned = self.ULT
+        return self._planned, self.aspd.stat
+
+    def performAbility(self, opponents, items, time):
+        lock = ticks_up(self.move_at) + ticks_up(self.unlock_at / self.cast_speed()) + 1
+        self.timing.cast_lock = lock / TPS  # Champion._cast reads it after this call
+        self.empowered_left = int(self.row('NumAttacks'))
+
+    def onLaunch(self, opponents, items):
+        self._this_empowered = self._planned != self.NORMAL
+        if self._this_empowered:
+            self.empowered_left -= 1
+            if self.empowered_left == 0:
+                self.mana_locked_until = self.tick + 1
+
+    def fire_attack(self, opponents, items, moment, paid):
+        if not self._this_empowered:
+            return super().fire_attack(opponents, items, moment, paid)
+        target = opponents[0]
+        self.fly(self.tick, self.chrono_projectile_ticks(self.BOLT, 'Bolt', self.target_hexes(target)), target,
+                 lambda: self._bolt_lands(target, [target], 0), name='bolt')
+
+    def _bolt_lands(self, target, hit, k):
+        """The bolt (k = 0) or its k-th Trickshot ricochet arrives at `target`; `hit` = the enemies hit so far."""
+        items, now = self.items, self.tick / TPS
+        eff = self.trait_value('DA_Trickshot19', 'RichochetDamage') ** k if k else 1.0
+        amp = self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        crit = self.crit.stat if self.canSpellCrit else 0
+        crit_mult = self.critDamage() if self.canSpellCrit else 1
+        tags = damage_tags('physical', UNIT, ON_HIT, ON_SPELL, *((IS_ATTACK,) if k == 0 else ()))
+        phys = self.bolt_damage(self.level, self.bonus_ad.stat, self.ap.stat) * eff
+        self.emit(ONHIT_PRE, CombatEvent(self, target, dtype='physical', tags=tags, time=now, effectiveness=eff), items)
+        self.doDamage(target, items, crit, phys * crit_mult * amp, phys * amp, 'physical', now, tags=tags)
+        true = target.hp.stat * self.row('PercentMaxHealthDamage') * eff
+        self.doDamage(target, items, crit, true * crit_mult * amp, true * amp, 'true', now,
+                      tags=damage_tags('true', UNIT, ON_SPELL))
+        self.emit(ONHIT_AFTER, CombatEvent(self, target, tags=tags, time=now, effectiveness=eff), items)
+        if self.trait_tier('DA_Trickshot19') and k < self.trait_value('DA_Trickshot19', 'NumRichochets'):
+            nxt, hexes = self.ricochet(target, hit)
+            self.fly(self.tick, self.chrono_projectile_ticks(self.BOUNCE, 'Bolt', hexes), nxt,
+                     lambda: self._bolt_lands(nxt, hit + [nxt], k + 1), source=target, name='ricochet')
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
               'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin', 'Vladimir', 'Alune',
-              'Yasuo']
+              'Yasuo', 'Vayne']
 
 
 class TrainingDummy(Champion):

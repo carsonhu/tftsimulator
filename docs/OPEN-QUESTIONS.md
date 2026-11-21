@@ -229,6 +229,15 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Bonus AD on his panel | items give +101% (IE 35, Infinity Force 30, Hand of Justice 36) | VOD8 4-1 / 4-3: 108%; the extra +7% source (augment?) for the owner to name | champions/Yasuo.md E1 |
 | Ult and stab damage numbers | stab SlashDamageAD x AD on the 2-hex line; ult 2 x 0.5 x UltDamageAD x AD on the target; slam UltDamageAOEAD x AD + UltDamageAOEAP x AP within AOEHexRadius | damage numbers on targets of known armor | champions/Yasuo.md Q13 |
 
+### 7aa. Vayne (VOD8 has her at 4-2)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Her passive tumble when hit | not simulated (dummies never attack): no attack is cancelled, no extra tumble | VOD8 4-2: a hit ~2 s after her cast (when the cast's 2 s tumble cooldown ended) tumbled her and delayed her 2nd bolt by ~27 ticks; how often this costs a front-line Vayne attacks in real fights | champions/Vayne.md E2 |
+| UltAttack's PlayRateScalingThreshold 0.72 | applied (G20; typed from the client asset, P14) | VOD8 4-2 at AS 0.88: the 3rd bolt fits 0.72 and G2 alike (both 38 ticks after the 2nd); a Vayne at AS 1.3+ would tell | champions/Vayne.md D1 |
+| Normal attack animations | all three SequentialAttack modules played as the first (0.3007 s of 1.6333 s): the others differ by 0.003 s and by their lengths (1.6667, 1.3 s), which matter only below AS 0.77 | a slowed Vayne's attack gaps | champions/Vayne.md D1 |
+| Bolt damage numbers | 165 x AD physical + 1.5% of the target's max Health true, crit only with Precision | damage numbers on a target of known armor and Health | champions/Vayne.md Q13 |
+
 ### 7n. Augments
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
