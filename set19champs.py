@@ -2803,10 +2803,74 @@ class Vladimir(BuildChampion):
             self.schedule_tick(self.tick + ticks_up(self.cast_at), strike)
 
 
+class Alune(BuildChampion):
+    """Spotlight (champions/Alune.md, D1). Script: GA_Alune19_Spell (build ga_scripts.zip).
+
+    The cast applies the mana lock (0x2c29) and plays CD_Alune19_CastAnim at her attack target. 'Damage' (1.0606 s,
+    0xb8): the enemies within HexRadius (2) of the target, the target left out (N of them), DamageSplitMultiplier =
+    1 / (N + 1); each of them takes GE_Alune19_AOESecondaryTargetDamage = MagicDamageCalc3 (AOESplitDamage x AP) x
+    split, the target GE_Alune19_TargetDamage = MagicDamageCalc3 x split + MagicDamageCalc1 (Damage x AP): a damage
+    component's terms in order (I5), the tooltip's "315 x AP, and all within 2 hexes split 340 x AP". Magic, on-spell,
+    crit only with Precision. MinimumDamage is read (InitVariables) but used nowhere. 'Unlock' (1.2952 s) lifts the
+    lock and ends the cast (the build's 39 / 40 ticks; VOD7 E2).
+    Heartsteel Bias (SpellUpgradeTierIsActive + Selected, `heartsteel_bias`): 'FireHeartsteelMissiles' (0.9616 s)
+    starts RepeatAction(0.04 s, HeartsteelStan_NumMissiles), first at once (A1), each a CD_Alune19_Heartsteel_SpellMissile
+    'SpellMis' (1900 units/s) at her attack target: GE_Alune19_Heartsteel_MissileDamage = MagicDamageCalc2 on arrival.
+    Not simulated: the overkill (excess damage on a target the spotlight kills goes to the 2 nearest; dummies never
+    die).
+    """
+    KEY = 'DA_Alune19'
+    AREA = True  # the split reaches every enemy within 2 hexes of the target
+    CAST, MISSILE = 'CD_Alune19_CastAnim', 'CD_Alune19_Heartsteel_SpellMissile'
+    TIME_BETWEEN_MISSILES = 0.04  # GA_Alune19_Spell literal (RepeatAction at 0x7e5)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.damage_at = self.chrono_event(self.CAST, 'Damage')
+        self.missiles_at = self.chrono_event(self.CAST, 'FireHeartsteelMissiles')
+        speeds = {p['speed'] for p in self.chrono(self.MISSILE).get('projectiles') or [] if p['name'] == 'SpellMis'}
+        if len(speeds) != 1:
+            raise BuildDataError(f'{self.KEY}: {self.MISSILE} SpellMis speeds {speeds}')
+        self.missile_speed = speeds.pop()
+
+    def split_damage(self, level, AD, AP):
+        return self.row('AOESplitDamage', star=level) * AP
+
+    def target_damage(self, level, AD, AP):
+        return self.row('Damage', star=level) * AP
+
+    def missile_damage(self, level, AD, AP):
+        return self.row('HeartsteelStan_APDamage', star=level) * AP
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        cast = self.tick
+
+        def spotlight():
+            others = self.nearby(target, self.row('HexRadius'))
+            split = 1 / (len(others) + 1)
+            self.trace('area', at=target, hit=[target] + others)
+            for d in others:
+                self.multiTargetSpell([d], self.items, self.tick / TPS, 1,
+                                      lambda level, AD, AP: self.split_damage(level, AD, AP) * split, 'magical')
+            self.multiTargetSpell([target], self.items, self.tick / TPS, 1,
+                                  lambda level, AD, AP: self.split_damage(level, AD, AP) * split
+                                  + self.target_damage(level, AD, AP), 'magical')
+        self.schedule_tick(cast + ticks_up(self.damage_at), spotlight)
+
+        if getattr(self, 'heartsteel_bias', False):
+            for n in range(int(self.row('HeartsteelStan_NumMissiles'))):
+                def fire():
+                    flight = projectile_ticks(self.missile_speed, self.target_hexes(target))
+                    self.fly(self.tick, flight, target, lambda: self.multiTargetSpell(
+                        [target], self.items, self.tick / TPS, 1, self.missile_damage, 'magical'), name='blast')
+                self.schedule_tick(cast + ticks_up(self.missiles_at + n * self.TIME_BETWEEN_MISSILES), fire)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
-              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin', 'Vladimir']
+              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin', 'Vladimir', 'Alune']
 
 
 class TrainingDummy(Champion):

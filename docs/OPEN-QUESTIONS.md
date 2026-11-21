@@ -214,6 +214,13 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | The bar shown full for 3 ticks before his 7th cast at 4-2 (f73626-73631) | casts start the tick after the fill (T4) | a clip of him moving when the bar fills (ActivationBlockedTags: Combat.Moving) | champions/Vladimir.md E2 |
 | 3-star cast | the chandelier every cast on the 1-2-star timeline; CD_Vladimir19_3StarCast (Clap shred, repeated drops) not modelled | a 3-star Vladimir | champions/Vladimir.md D1 |
 
+### 7y. Alune (VOD7 has her at 3-3 and ~3-6)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Her first attack at combat start | the first release one windup in (G3): 3 ticks after the first regen step (T7) | VOD7: 6-7.5 ticks after the first regen step in both fights; the exact combat start would say which is off (regen phase or first attack) | champions/Alune.md Q3, G3, G17 |
+| Spotlight damage | target Calc3 / (N + 1) + Calc1, the others within 2 hexes Calc3 / (N + 1) | damage numbers of a cast on targets of known MR, with 1 and with 2+ enemies near the target | champions/Alune.md D1 |
+
 ### 7n. Augments
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

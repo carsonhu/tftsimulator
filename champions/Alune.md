@@ -61,8 +61,8 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 ## Status
 
-- Worksheet status: **not started**
-- Keep in the simulator: **undecided** (remove if it can't be simulated realistically; give the reason)
+- Worksheet status: **implemented** (2026-11-20, `set19champs.Alune`, D1); mana, mana lock and cast lock checked on VOD7
+- Keep in the simulator: **yes** (owner, 2026-11-20: her panel shows up a lot in VOD7)
 
 ## Questions
 
@@ -71,29 +71,46 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | predicted | |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster | predicted | |
-| Q3 | First attack at combat start: when does it land? | G3 | open | |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed: 800 HP, 20 / 65 mana, AS 0.75, armor/MR 63 (Bodyguard 2) | E1 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster | confirmed: +7 per attack every 40 ticks; regen 8/s at Prodigy (4) (2 + 5 + 1), 9/s at (5) (2 + 6 + 1) | E1, E2, E3 |
+| Q3 | First attack at combat start: when does it land? | G3 | open: both VOD7 fights put the first attack's mana 6-7.5 ticks after the first regen step (39 frames after the HUD's combat bar starts); the engine 3 ticks (regen phase T7 / G17) | E2, E3 |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.3667 s (11 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 1750 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 1.3333 s (40 ticks) | predicted | |
+| Q7 | Cast time: cast start to the next attack starting | 1.3333 s (40 ticks) | confirmed: the next attack's mana 104-105 frames (52 ticks) after every fill, attack- or regen-filled (engine 52: cast at fill + 1, lock 40, windup 11) | E2, E3 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.3 s (39 ticks) | predicted | |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.3 s (39 ticks) | confirmed: banked overflow (1, 3, 6) shown 80-81 frames after the filling mana = 39 + T4 | E2, E3 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted | |
-| Q14 | Passives and other mechanics that need modelling | see ability text | open | |
-| Q15 | Can this unit be simulated realistically? | | open | |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted (script + GEs, D1): target Calc3 / (N + 1) + Calc1, each other enemy within 2 hexes Calc3 / (N + 1) | D1 |
+| Q14 | Passives and other mechanics that need modelling | see ability text | Heartsteel Bias blasts modelled; overkill not (dummies never die) | D1 |
+| Q15 | Can this unit be simulated realistically? | | yes | D1 |
 
 ## Evidence log
 
 One row per measurement. VOD times are the video's own timestamps; frames at the stated fps. Cite the build the
 VOD was played on (check the patch shown in game or the date against builds/index.json).
 
-| Date | Build | Source (VOD URL @ time) | fps | Measured | Frames / values | Result | Question |
-|---|---|---|---|---|---|---|---|
+VOD7 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-20-2026_21-47-56-118/`
+`…PBE_11-20-2026_22-23-46-350.mp4` (owner's full PBE game, 1280x720, 60 fps, client rls-19.1.0.6011486). Alune 1★,
+no items. Mana from `tools/vod_text_changes.py --field mana` (crops read by eye); HUD phases from
+tftVision/runs/s19_vod7/phases.json.
+
+| # | Date | Build | Source (VOD time / frames) | fps | Measured | Frames / values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 13:31 (f48700, round 3-3) | 60 | inspection panel | 800/800, 52/65, 8/s; AD 30, AP 10%, armor/MR 63, AS 0.75; Heartsteel 3, Prodigy 4, Bodyguard 2 on the board | as built (AP 10% from the board, not identified) | Q1, Q2 |
+| E2 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 f48572-50598 (3-3; HUD combat bar from f48545) | 60 | mana text | regen +2 every 15 frames; attacks +7 at f48584, 48664, 48744, 48848, 48929, 49009, 49089, 49201, ... (80 frames apart); casts f48744 (58 + 7, exact), f49097 (64 + 2: overflow 1 shown f49177, +80), f49442 (56 + 7 + 2, exact), f49802 (overflow 1 at f49883, +81), f50147, f50508 (overflow 1 at f50588, +80); next attack's mana after each fill +104 / +104 / +104 / +105 / +104 frames | mana lock 39 + T4 = 40 ticks after the fill; next attack 52 ticks after the fill (lock 40 + windup 11 + 1) | Q2, Q3, Q7, Q9 |
+| E3 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 f55226-56442 (~3-6, 9/s; HUD combat bar from f55266) | 60 | mana text | panel 20/65 before combat; first regen f55290, first attack f55305; casts f55466 (61 + 7: overflow 3 at f55546, +80), f55810 (64 + 7: overflow 6 at f55891, +81), f56133 (regen fill); next attack's mana after each fill +104, +105, +104 | as E2 at 9/s | Q2, Q3, Q7, Q9 |
 
 ## Decisions and notes
+
+- **D1 (2026-11-20, `set19champs.Alune`):** from GA_Alune19_Spell and its GEs (FModel export of 6011486). The cast
+  applies the mana lock and plays CD_Alune19_CastAnim at her attack target. 'Damage' (1.0606 s): the enemies within
+  HexRadius (2) of the target, the target left out (N), split = 1 / (N + 1); GE_Alune19_AOESecondaryTargetDamage =
+  MagicDamageCalc3 x split on each of them, GE_Alune19_TargetDamage = MagicDamageCalc3 x split + MagicDamageCalc1 on
+  the target (terms in order, I5; the tooltip's reading). MinimumDamage is read but unused. 'Unlock' (1.2952 s) ends
+  the cast. Heartsteel Bias: 'FireHeartsteelMissiles' (0.9616 s) fires HeartsteelStan_NumMissiles blasts 0.04 s
+  apart at her target (MagicDamageCalc2 each). Overkill (excess damage to the 2 nearest when the target dies) is not
+  simulated: dummies never die.
 
