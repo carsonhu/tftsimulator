@@ -130,9 +130,9 @@ once (E3), so a regen-filled cast's lock end (overflow 0) shows only at the next
   timeline (CD_Vladimir19_3StarCast: Clap shreds all enemies, repeated drops); a 3-star casts the chandelier every
   time (NumCastsForChandelier 1) on the CastSpecial timeline.
 - **D2 (owner, 2026-11-20): targets.** He hits far more units than usual: default 7 targets, at least 3 (he
-  Captivates 3), up to 10 (a full board). The dummies stand on rings round the target, which is the chandelier's
-  centre: 2 adjacent, 2 at 2 hexes, 2 at 3, the rest at 4 (layout shape "rings", `Vladimir.TARGETS_RINGS`; owner: not
-  clumped round him), each ring a pair mirrored about the line from him to the target; fewer targets drop the
-  furthest. The chandelier's falloff reads each dummy's hex distance from the target; his main cast's other 2 are
-  the adjacent pair (nearest him). The page's Targets buttons run 3-10 (`TARGETS_MIN` / `TARGETS_MAX`, catalog `targetsMin`).
+  Captivates 3), at most 9. The dummies stand on two arms from the target, which is the chandelier's
+  centre, 60 degrees apart and both away from him: a pair at 1, 2, 3 and 4 hexes (layout shape "rings",
+  `Vladimir.TARGETS_RINGS`). Owner: compact, as on a tactics.tools board the front row from the corner unit plus the
+  diagonal back from it; fewer targets drop the furthest. The chandelier's falloff reads each dummy's hex distance from the target; his main cast's other 2 are
+  the adjacent pair (nearest him). The page's Targets buttons run 3-9 (`TARGETS_MIN` / `TARGETS_MAX`, catalog `targetsMin`).
 - **Note (owner, 2026-11-20):** the page says his passive's Captivate on debuffed enemies isn't simulated (`self.notes`).

@@ -22,7 +22,7 @@ DIRECTIONS = ((1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1))
 HEX_UNITS = 215.0  # world units between hex centres (timing.HEX_UNITS, G4)
 TARGETS = 2  # the page's default: the target and 1 enemy next to it
 MAX_TARGETS = 7  # the target and its 6 neighbours: the page's cap unless a champion sets its own (TARGETS_MAX)
-LIMIT_TARGETS = 10  # a full enemy board (level 10): Vladimir's chandelier hits all of them (owner, 2026-11-20)
+LIMIT_TARGETS = 9  # a champion's own cap may reach this (Vladimir's chandelier: 9, owner 2026-11-20)
 
 
 def hex_distance(a, b):
@@ -49,9 +49,10 @@ class Layout:
     """The page's layout setting: the number of targets, and how they stand (the champion's `TARGETS_SHAPE`):
     "cluster" (default), the target and the enemies on the hexes next to it; "line", the target and the enemies
     behind it, each 1 hex further, in line with the champion (owner, 2026-11-19: Jhin's piercing shots, at most 3);
-    "rings", the i-th enemy `rings[i]` hexes from the target (the last value for the rest), each ring filled in pairs
-    mirrored about the champion-target line, furthest from the champion first (owner, 2026-11-20: Vladimir's
-    chandelier, the target at its centre, 2 adjacent, 2 at 2 hexes, 2 at 3, the rest at 4; not clumped)."""
+    "rings", the i-th enemy `rings[i]` hexes from the target, on two arms from it, 60 degrees apart and both away from
+    the champion: one straight on, one turned (owner, 2026-11-20, Vladimir's chandelier: the target at its centre,
+    then a pair at 1, 2, 3 and 4 hexes; drawn on a tactics.tools board as the front row from the corner unit plus the
+    diagonal back from it)."""
 
     def __init__(self, targets=TARGETS, shape="cluster", rings=None):
         if not 1 <= targets <= LIMIT_TARGETS:
@@ -84,29 +85,19 @@ class Layout:
             dummy.in_play = i < len(spots)
             dummy.hex = spots[i] if dummy.in_play else (target[0] + 10 + i, 0)
 
-    def _ring_spots(self, target):
-        """The hexes of targets 2.. for the "rings" shape: target i at `rings[i]` hexes from the target (the last value
-        for any beyond), each ring's hexes in mirrored pairs (the reflection about the champion-target line), the pairs
-        furthest from the champion first."""
-        def mirror(h):  # reflection about the line r = 0 through the champion and the target (axial q, r)
-            return (h[0] + h[1], -h[1])
+    ARMS = ((1, 0), (1, -1))  # straight on from the champion through the target, and 60 degrees round
 
-        queues, spots = {}, []
+    def _ring_spots(self, target):
+        """The hexes of targets 2.. for the "rings" shape: the i-th at `rings[i]` hexes from the target, the first at a
+        distance on the first arm, the second on the other; a third at the same distance (not in any champion's
+        rings) takes the next free hex of that ring."""
+        used, spots = set(), []
         for i in range(1, self.targets):
             r = self.rings[i] if i < len(self.rings) else self.rings[-1]
-            if r not in queues:
-                cands = [h for h in ring(target, r) if h != (0, 0)]
-                cands.sort(key=lambda h: (-hex_distance(h, (0, 0)), mirror(h) == h, h[1] < 0))
-                order = []
-                for h in cands:
-                    if h in order:
-                        continue
-                    order.append(h)
-                    m = mirror(h)
-                    if m != h and m in cands and m not in order:
-                        order.append(m)
-                queues[r] = order
-            spots.append(queues[r].pop(0))
+            arm = [(target[0] + r * dq, target[1] + r * dr) for dq, dr in self.ARMS]
+            pick = next((h for h in arm + ring(target, r) if h not in used and h != (0, 0)), None)
+            used.add(pick)
+            spots.append(pick)
         return spots
 
     def __repr__(self):

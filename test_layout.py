@@ -44,11 +44,11 @@ def test_targets_stand_next_to_the_target():
     # a melee unit takes one of the hexes next to the target: the 7th target stands 2 away
     c, ds = placed(Layout(7), attack_range=1)
     assert len(around(ds[0], 1, ds)) == 5 and distance(ds[0], ds[-1]) == 2
-    for bad in (0, 11):  # up to a full board of 10 (Vladimir's TARGETS_MAX; the page's cap is otherwise 7)
+    for bad in (0, 10):  # up to 9 (Vladimir's TARGETS_MAX; the page's cap is otherwise 7)
         with pytest.raises(ValueError):
             Layout(bad)
-    c, ds = placed(Layout(10))  # 10 fit on the 2 rings round the target
-    assert len({d.hex for d in ds}) == 10 and all(d.in_play for d in ds)
+    c, ds = placed(Layout(9))  # 9 fit on the 2 rings round the target
+    assert len({d.hex for d in ds}) == 9 and all(d.in_play for d in ds)
 
 
 def test_one_target_is_the_only_enemy_in_play():

@@ -149,7 +149,7 @@ const puppeteer = require("puppeteer-core");
     const draven = await layout();
     console.log("Draven targets slider:", JSON.stringify(draven));
     if (!draven.hidden) console.log("FAIL targets slider shown for Draven");
-    // Vladimir (owner, 2026-11-20): buttons 3-10, default 7
+    // Vladimir (owner, 2026-11-20): buttons 3-9, default 7
     await page.evaluate(() => {
       const sel = document.querySelector("#champ");
       sel.value = "Vladimir";
@@ -161,7 +161,7 @@ const puppeteer = require("puppeteer-core");
       buttons: [...document.querySelectorAll("#targetsSeg button")].map((b) => b.textContent + (b.getAttribute("aria-checked") === "true" ? "*" : "")),
     }));
     console.log("Vladimir targets:", JSON.stringify(vlad));
-    if (vlad.value !== "7" || vlad.buttons.join(",") !== "3,4,5,6,7*,8,9,10") console.log("FAIL Vladimir targets (3-10, default 7)");
+    if (vlad.value !== "7" || vlad.buttons.join(",") !== "3,4,5,6,7*,8,9") console.log("FAIL Vladimir targets (3-9, default 7)");
   } catch (e) {
     console.log("FAIL targets slider: " + e.message);
   }

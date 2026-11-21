@@ -2743,8 +2743,8 @@ class Vladimir(BuildChampion):
       n = the enemy's hex ring from the grid centre (CT_BoardAOERange). The special chrono's 'Unlock' (1.8 s) ends the spell: 54 / 55 ticks.
     VOD7 (2026-11-20, 22-23-46-350) shows both locks: the 5th cast of a fight 47.5-55 ticks, the others 30.
     Simulated (owner, 2026-11-20): the chandelier's centre is the target's hex, and the enemies stand on the rings
-    TARGETS_RINGS round it (layout "rings": 2 adjacent, 2 at 2 hexes, 2 at 3, the rest at 4, spread out); fewer
-    targets drop the furthest. Default 7 targets, at least 3 (he Captivates 3), up to a full board of 10. Not simulated: the omnivamp and heal (no damage), the passive
+    TARGETS_RINGS round it (layout "rings": two arms from the target, a pair at 1, 2, 3 and 4 hexes); fewer
+    targets drop the furthest. Default 7 targets, at least 3 (he Captivates 3), at most 9. Not simulated: the omnivamp and heal (no damage), the passive
     (shredded enemies are Captivated: no shred source here), and the 3-star cast's own timeline
     (CD_Vladimir19_3StarCast: Clap shreds, repeated drops); a 3-star casts the chandelier every time on the 2-star
     timeline.
@@ -2752,10 +2752,10 @@ class Vladimir(BuildChampion):
     KEY = 'DA_Vladimir19'
     AREA = True  # the main cast hits 3 enemies, the chandelier all of them
     # owner, 2026-11-20: he hits far more units than anyone else
-    TARGETS_DEFAULT, TARGETS_MIN, TARGETS_MAX = 7, 3, 10
-    # where they stand (layout "rings"): the target at the chandelier's centre, 2 adjacent, 2 at 2 hexes, 2 at 3, the
-    # rest at 4, spread round it (owner, 2026-11-20)
-    TARGETS_SHAPE, TARGETS_RINGS = "rings", (0, 1, 1, 2, 2, 3, 3, 4)
+    TARGETS_DEFAULT, TARGETS_MIN, TARGETS_MAX = 7, 3, 9
+    # where they stand (layout "rings", two arms from the target): the target at the chandelier's centre, then a pair
+    # at 1, 2, 3 and 4 hexes (owner, 2026-11-20)
+    TARGETS_SHAPE, TARGETS_RINGS = "rings", (0, 1, 1, 2, 2, 3, 3, 4, 4)
     NORMAL, SPECIAL, CHANDELIER = 'CD_Vladimir19_CastNormal', 'CD_Vladimir19_CastSpecial', 'CD_Vladimir19_Chandelier'
 
     def __init__(self, level, build=None):

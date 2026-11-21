@@ -83,7 +83,7 @@ def test_chandelier_falls_off_by_ring():
     # every enemy: ChandelierDamage x AP x max(1%, 1 - 10% x ring), linear (the script's FMax(min, 1 - 0.1 x n)); rings
     # by the owner's table (2026-11-20): the target at 0, then 1, 1, 2, 2, 3, 3, the rest 4; fewer drop the furthest
     for targets, shares in ((3, [1, 0.9, 0.9]), (7, [1, 0.9, 0.9, 0.8, 0.8, 0.7, 0.7]),
-                            (10, [1, 0.9, 0.9, 0.8, 0.8, 0.7, 0.7, 0.6, 0.6, 0.6])):
+                            (9, [1, 0.9, 0.9, 0.8, 0.8, 0.7, 0.7, 0.6, 0.6])):
         v = LoggedVladimir(1)
         ds, rows = fight(v, items=[set19items.ProdigyEmblem()], buffs=[set19buffs.Prodigy(5)], targets=targets)
         cast = next(t for t, big in v.cast_log if big)
@@ -92,22 +92,24 @@ def test_chandelier_falls_off_by_ring():
 
 
 def test_page_targets_default_seven_at_least_three():
-    # owner, 2026-11-20: default 7, minimum 3 (he Captivates 3), up to a full board
+    # owner, 2026-11-20: default 7, minimum 3 (he Captivates 3), at most 9
     import json
     import sim_entry
     from test_sim_entry import cfg
     meta = next(c for c in json.loads(sim_entry.catalog_json())['champions'] if c['name'] == 'Vladimir')
-    assert (meta['targetsDefault'], meta['targetsMin'], meta['targetsMax']) == (7, 3, 10)
-    for asked, got in ((1, 3), (7, 7), (10, 10), (12, 10)):
+    assert (meta['targetsDefault'], meta['targetsMin'], meta['targetsMax']) == (7, 3, 9)
+    for asked, got in ((1, 3), (7, 7), (9, 9), (12, 9)):
         assert sim_entry._layout(cfg(champ='Vladimir', layout={'targets': asked})).targets == got
 
 
 def test_targets_stand_on_the_rings():
-    # owner, 2026-11-20: not clumped round the target: 2 adjacent, 2 at 2 hexes, 2 at 3, the rest at 4, the chandelier
-    # centred on the target; his main cast's 2 others are the adjacent pair (nearest him)
+    # owner, 2026-11-20: the target at the chandelier's centre, then a pair at 1, 2, 3 and 4 hexes on two arms from it
+    # (compact: the front row from the corner unit and the diagonal back); his main cast's others = the adjacent pair
     from layout import distance
     v = LoggedVladimir(1)
-    ds, rows = fight(v, seconds=1, targets=10)
-    assert [distance(ds[0], d) for d in ds] == [0, 1, 1, 2, 2, 3, 3, 4, 4, 4]
-    assert len({d.hex for d in ds}) == 10 and (0, 0) not in {d.hex for d in ds}
+    ds, rows = fight(v, seconds=1, targets=9)
+    assert [distance(ds[0], d) for d in ds] == [0, 1, 1, 2, 2, 3, 3, 4, 4]
+    assert len({d.hex for d in ds}) == 9 and (0, 0) not in {d.hex for d in ds}
+    arms = [d.hex for d in ds[1:]]  # two straight lines from the target, 60 degrees apart
+    assert arms[0::2] == [(3, 0), (4, 0), (5, 0), (6, 0)] and arms[1::2] == [(3, -1), (4, -2), (5, -3), (6, -4)]
     assert v.main_targets(ds[0]) == ds[:3]
