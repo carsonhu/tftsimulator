@@ -4,7 +4,7 @@ its trait in the buff bar (`trait`).
 
 Emblems with more than stats are not listed until their mechanic is written (docs/ITEMS.md): Arcanist (execute),
 Bodyguard (resist conversion), Choreographer (back-row AS), Frontman, Swiftstriker (on-hit scripts), Heartsteel and
-Hitmaker (tags their traits read), Juggernaut (amp per health), Manager (max-mana row), Prodigy (granted ability),
+Hitmaker (tags their traits read), Juggernaut (amp per health), Manager (max-mana row),
 Renegade (empowered crits), Slayer (execute-style amp)."""
 from buildstore import BuildDataError
 from items.base import BuildItem, item_name
@@ -114,6 +114,8 @@ for _row in [
     ("TrueDamageEmblem", "DA_TrueDamage19_Emblem", "GE_TrueDamage19_Emblem", "TrueDamage"),
     ("ClassicalEmblem", "DA_Virtuosos19_Emblem", "GE_Virtuosos19_Emblem", "Classical"),
     ("HyperpopEmblem", "DA_GlitterBomb19_Emblem", "GE_GlitterBomb19_Emblem", "Hyperpop"),
+    # 150 Health, 1 Mana Regen; its on-cast max Health (1% per 10 Mana spent; owner, VOD7) deals no damage
+    ("ProdigyEmblem", "DA_Prodigy19_Emblem", "GE_Prodigy19_Emblem", "Prodigy"),
 ]:
     _emblem(*_row)
 del _row

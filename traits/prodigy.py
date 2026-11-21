@@ -6,13 +6,13 @@ from traits.base import BuildTrait, pct
 @register("trait")
 class Prodigy(BuildTrait):
     """Prodigy (DA_Prodigy19): "Your team gains 1 Mana Regen. Prodigies gain more." CT_Prodigy19 at the tier:
-    AllyBonusManaRegen (1), ProdigyBonusManaRegen (2/3/6/7), PercentDamageAllyHeal (12% at (5)).
+    AllyBonusManaRegen (1), ProdigyBonusManaRegen (2/3/5/6 since 5995286), PercentDamageAllyHeal (12% at (5)).
 
     DA_Prodigy19's tier effects: GE_19_Prodigy_NonTrait (ManaPerSecond + AllyBonusManaRegen) on allies without the
     trait (TFTAddAlliesWithoutTraitRule), GE_19_Prodigy_Trait (ManaPerSecond + ProdigyBonusManaRegen +
-    AllyBonusManaRegen) on members: a member gets 2/3/6/7 + 1. Both infinite, Channel1, applied with the item stats
+    AllyBonusManaRegen) on members: a member gets 2/3/5/6 + 1. Both infinite, Channel1, applied with the item stats
     (I1). The (5) heal (GA_19_Prodigy_AllyHeal: the lowest-Health ally heals for a share of Prodigies' spell damage)
-    changes no damage and is not modelled; nor is the emblem.
+    changes no damage and is not modelled. The emblem (items/emblems.py) makes its holder a member.
     """
     KEY = "DA_Prodigy19"
     display_name = "Prodigy"

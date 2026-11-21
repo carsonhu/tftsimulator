@@ -82,8 +82,8 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | mana 40, AS 0.90 at stage 4 (0.75 x 1.2), AD 46 (40 + 15% Bloodthirster) confirmed; HP 1300 in planning and max HP +~50 per cast in combat unexplained | E1, E2 |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicFighter: 10 per attack | confirmed: +10 per attack, 33-34 ticks apart at AS 0.90; regen 8/s with Prodigy (5) and its emblem (build 6005555 gives 7: see E1) | E1, E2 |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | mana 40, AS 0.90 at stage 4 (0.75 x 1.2), AD 46 (40 + 15% Bloodthirster) confirmed; HP 1300 = 1150 + 150 (Prodigy Emblem); max HP +52 per cast = the emblem's 1% per 10 Mana spent (owner) | E1, E2 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicFighter: 10 per attack | confirmed: +10 per attack, 33-34 ticks apart at AS 0.90; regen 8/s = Prodigy (5) member 6 + 1 + the emblem's 1 | E1, E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.38 s (11.4 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
@@ -105,14 +105,14 @@ VOD was played on (check the patch shown in game or the date against builds/inde
 
 VOD7 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-20-2026_21-47-56-118/`
 `…PBE_11-20-2026_22-23-46-350.mp4` (owner's full PBE game, 1280x720, 60 fps). Played on client rls-19.1.0.6011486
-(patched 20:35, game 22:00): not exported yet, so the sim runs on 6005555. Vladimir 1★ with Bloodthirster and a
+(patched 20:35, game 22:00), adopted 2ace527. Vladimir 1★ with Bloodthirster and a
 Prodigy Emblem (icon matched to T_Prodigy19_Emblem, 0.98), Prodigy (5), Classical (2), stage 4. Mana from
 `tools/vod_text_changes.py --field mana` (crops read by eye). The panel shows 0 during the lock and a full bar only
 once (E3), so a regen-filled cast's lock end (overflow 0) shows only at the next regen step: a bound, not a value.
 
 | # | Date | Build | Source (VOD time / frames) | fps | Measured | Frames / values | Result | Question |
 |---|---|---|---|---|---|---|---|---|
-| E1 | 2026-11-20 | rls-19.1.0.6011486 (client) | VOD7 20:24 (f73440), 21:01 (f76368, planning) | 60 | inspection panel | 1607/1612, 0/40, 8/s; AD 46 (15%), AP 28%, armor 83, MR 99, AS 0.90, crit 25%, omnivamp 55%; planning 1300/1300, 8/s | AS 0.75 x 1.2 (stage 4), omnivamp 30 + 25?; 8/s = Prodigy member 7 + 1 (builds <= 5986094; 6005555 has 6 + 1 = 7) | Q1, Q2 |
+| E1 | 2026-11-20 | rls-19.1.0.6011486 (client) | VOD7 20:24 (f73440), 21:01 (f76368, planning) | 60 | inspection panel | 1607/1612, 0/40, 8/s; AD 46 (15%), AP 28%, armor 83, MR 99, AS 0.90, crit 25%, omnivamp 55%; planning 1300/1300, 8/s | AS 0.75 x 1.2 (stage 4), omnivamp 30 + 25?; 8/s = Prodigy member 6 + 1 + Prodigy Emblem 1; HP 1300 = 1150 + 150 (emblem); max HP +52 a cast = 4% of 1300 (the emblem: 1% per 10 Mana spent) | Q1, Q2 |
 | E2 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 f73056-73853 (4-2, combat start ~f72400) | 60 | mana text | +2 every 15 frames; attacks +10 at f73068, 73135, 73312, 73380, 73520, 73586 (66-68 frames apart); casts at f73176 (38 + 2), f73432 (38 + 2), f73632 (38 + 2; 40/40 shown f73626-73631), f73836 (28 + 10 + 2). First mana after them: f73286 (+110), 73492 (+60), 73700 (+68) | f73176 = the 5th cast (Stack mod 5): lock in (95, 110] frames = 47.5-55 ticks (CastSpecial 54); the others in (45, 60] / (53, 68] frames (CastNormal 29). Next attack after f73176: +136 frames (engine 69 ticks from the fill), after f73432: +88 (engine 44) | Q2, Q7, Q9 |
 | E3 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 f77207-77955 (4-3) | 60 | mana text | cast f77440 filled by an attack (36 + 10: overflow 6), 6/40 shown f77500 (+60 frames); next attack's mana f77526 (+86); casts f77271 (38 + 2), f77805 (32 + 10, overflow 2 shown f77866, +61) | normal mana lock 29 ticks + T4 = 30 after the fill: exact; next attack 43 ticks after the fill (engine 44: the T10 tick) | Q7, Q9 |
 

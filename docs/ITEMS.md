@@ -108,7 +108,7 @@ is VOD-checked yet.
 |---|---|---|
 | Spatula, Frying Pan | implemented (stats) | No stats; U.R.F. counts each once. |
 | Tactician's Crown, Cape, Shield | implemented (stats) | Team size only; U.R.F. counts each twice. |
-| K/DA, Ill Beats, Ionic Spark, Rock, Beach Pop, Pentakill, Jazz, True Damage, Classical, Hyperpop | implemented (stats) | Stats effect only. K/DA's GE_KDA19_StarLevelContribution is the trait's side. Rock's trait isn't simulated. |
-| Arcanist, Bodyguard, Choreographer, Frontman, Heartsteel, Hitmaker, Juggernaut, Manager, Prodigy, Renegade, Slayer, Swiftstriker | not listed | More than stats: execute, resist conversion, back-row AS, on-hit scripts, trait tags, amp per health, a max-mana row, granted abilities, empowered crits. Added when their mechanic is written. |
+| K/DA, Ill Beats, Ionic Spark, Rock, Beach Pop, Pentakill, Jazz, True Damage, Classical, Hyperpop, Prodigy | implemented (stats) | Stats effect only. K/DA's GE_KDA19_StarLevelContribution is the trait's side. Rock's trait isn't simulated. Prodigy: 150 Health, 1 Mana Regen; on cast +1% max Health per 10 Mana spent (no damage, not simulated; VOD7 Vladimir 4-2: +52 = 4% of 1300 per cast, the panel's 8/s = 6 + 1 + 1). |
+| Arcanist, Bodyguard, Choreographer, Frontman, Heartsteel, Hitmaker, Juggernaut, Manager, Renegade, Slayer, Swiftstriker | not listed | More than stats: execute, resist conversion, back-row AS, on-hit scripts, trait tags, amp per health, a max-mana row, empowered crits. Added when their mechanic is written. |
 
 The rest are added when needed.
