@@ -210,7 +210,6 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
-| Where the chandelier lands relative to his targets | the grid centre is the target's hex: a dummy's ring = its hexes from the target (100%, 90%, ...) | a 5th cast's damage numbers on enemies at known rows; or owner: where his targets usually stand | champions/Vladimir.md D1 |
 | The bar shown full for 3 ticks before his 7th cast at 4-2 (f73626-73631) | casts start the tick after the fill (T4) | a clip of him moving when the bar fills (ActivationBlockedTags: Combat.Moving) | champions/Vladimir.md E2 |
 | 3-star cast | the chandelier every cast on the 1-2-star timeline; CD_Vladimir19_3StarCast (Clap shred, repeated drops) not modelled | a 3-star Vladimir | champions/Vladimir.md D1 |
 

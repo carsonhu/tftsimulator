@@ -80,10 +80,23 @@ def test_normal_cast_hits_three_and_wraps():
 
 
 def test_chandelier_falls_off_by_ring():
-    # every enemy: ChandelierDamage x AP x max(1%, 1 - 10% x ring), ring = hexes from the target (assumed centre)
-    v = LoggedVladimir(1)
-    ds, rows = fight(v, items=[set19items.ProdigyEmblem()], buffs=[set19buffs.Prodigy(5)], targets=3)
-    cast = next(t for t, big in v.cast_log if big)
-    hits = sorted(rows[cast + 54], reverse=True)
-    full = v.row('ChandelierDamage', star=1) * v.ap.stat
-    assert hits == [pytest.approx(full), pytest.approx(full * 0.9), pytest.approx(full * 0.9)]
+    # every enemy: ChandelierDamage x AP x max(1%, 1 - 10% x ring), linear (the script's FMax(min, 1 - 0.1 x n)); rings
+    # by the owner's table (2026-11-20): the target at 0, then 1, 1, 2, 2, 3, 3, the rest 4; fewer drop the furthest
+    for targets, shares in ((3, [1, 0.9, 0.9]), (7, [1, 0.9, 0.9, 0.8, 0.8, 0.7, 0.7]),
+                            (10, [1, 0.9, 0.9, 0.8, 0.8, 0.7, 0.7, 0.6, 0.6, 0.6])):
+        v = LoggedVladimir(1)
+        ds, rows = fight(v, items=[set19items.ProdigyEmblem()], buffs=[set19buffs.Prodigy(5)], targets=targets)
+        cast = next(t for t, big in v.cast_log if big)
+        full = v.row('ChandelierDamage', star=1) * v.ap.stat
+        assert sorted(rows[cast + 54], reverse=True) == pytest.approx([full * x for x in shares])
+
+
+def test_page_targets_default_seven_at_least_three():
+    # owner, 2026-11-20: default 7, minimum 3 (he Captivates 3), up to a full board
+    import json
+    import sim_entry
+    from test_sim_entry import cfg
+    meta = next(c for c in json.loads(sim_entry.catalog_json())['champions'] if c['name'] == 'Vladimir')
+    assert (meta['targetsDefault'], meta['targetsMin'], meta['targetsMax']) == (7, 3, 10)
+    for asked, got in ((1, 3), (7, 7), (10, 10), (12, 10)):
+        assert sim_entry._layout(cfg(champ='Vladimir', layout={'targets': asked})).targets == got

@@ -2738,18 +2738,27 @@ class Vladimir(BuildChampion):
       ends the spell (EndSpell: mana lock removed, FinishCasting): 29 / 30 ticks.
     - BigCast (0x20f0) plays CD_Vladimir19_CastSpecial at the board's grid centre and spawns the chandelier there with
       CD_Vladimir19_Chandelier (speed ChandelierDropSpeed = 1 below 3 stars). Its 'Damage' event (1.7963 s, 0x389):
-      every enemy takes GE_Vladimir19_MajorDamage = MagicDamageCalc2 (ChandelierDamage x AP) x max(DamageMinimumPercent,
-      1 - DamageReductionPerHexFromCenter x n), n = the enemy's hex ring from the grid centre (CT_BoardAOERange). The
-      special chrono's 'Unlock' (1.8 s) ends the spell: 54 / 55 ticks.
+      every enemy takes GE_Vladimir19_MajorDamage = MagicDamageCalc2 (ChandelierDamage x AP) x FMax(DamageMinimumPercent,
+      1 - DamageReductionPerHexFromCenter x n) (DetermineChandelierDamageBasedOnDistance: linear, not compounding),
+      n = the enemy's hex ring from the grid centre (CT_BoardAOERange). The special chrono's 'Unlock' (1.8 s) ends the spell: 54 / 55 ticks.
     VOD7 (2026-11-20, 22-23-46-350) shows both locks: the 5th cast of a fight 47.5-55 ticks, the others 30.
-    Simulated: the grid centre is taken to be the target's hex, so a dummy's ring is its hex distance from the
-    target (assumption, docs/OPEN-QUESTIONS.md). Not simulated: the omnivamp and heal (no damage), the passive
+    Simulated (owner, 2026-11-20): the enemies' rings from the centre are CHANDELIER_RINGS, in the page's targets
+    order (the target at the epicentre, then 2 at 1 hex, 2 at 2, 2 at 3, the rest at 4); fewer targets drop the
+    furthest. Default 7 targets, at least 3 (he Captivates 3), up to a full board of 10. Not simulated: the omnivamp and heal (no damage), the passive
     (shredded enemies are Captivated: no shred source here), and the 3-star cast's own timeline
     (CD_Vladimir19_3StarCast: Clap shreds, repeated drops); a 3-star casts the chandelier every time on the 2-star
     timeline.
     """
     KEY = 'DA_Vladimir19'
     AREA = True  # the main cast hits 3 enemies, the chandelier all of them
+    # owner, 2026-11-20: he hits far more units than anyone else
+    TARGETS_DEFAULT, TARGETS_MIN, TARGETS_MAX = 7, 3, 10
+    CHANDELIER_RINGS = (0, 1, 1, 2, 2, 3, 3)  # then 4 for the rest
+
+    @classmethod
+    def chandelier_ring(cls, i):
+        """Hexes from the chandelier's centre of the i-th enemy in play (the target first)."""
+        return cls.CHANDELIER_RINGS[i] if i < len(cls.CHANDELIER_RINGS) else 4
     NORMAL, SPECIAL, CHANDELIER = 'CD_Vladimir19_CastNormal', 'CD_Vladimir19_CastSpecial', 'CD_Vladimir19_Chandelier'
 
     def __init__(self, level, build=None):
@@ -2789,8 +2798,8 @@ class Vladimir(BuildChampion):
             def drop():
                 hit = layout.in_play(self.opponents)
                 self.trace('area', at=target, hit=hit)
-                for d in hit:
-                    ring = layout.distance(target, d)
+                for i, d in enumerate(hit):
+                    ring = self.chandelier_ring(i)
                     self.multiTargetSpell([d], self.items, self.tick / TPS, 1,
                                           lambda level, AD, AP, ring=ring: self.chandelier_damage(level, AD, AP, ring),
                                           'magical')

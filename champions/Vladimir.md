@@ -96,7 +96,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
 | Q13 | Ability damage: formula, targets, hit count match the text and variables | see above | predicted (script, D1); the chandelier replaces the 3-target hit on every 5th cast (the tooltip doesn't say) | D1 |
 | Q14 | Passives and other mechanics that need modelling | see ability text | not modelled: omnivamp/heal (no damage), passive Captivate on shredded enemies (no shred source), 3-star timeline | D1 |
-| Q15 | Can this unit be simulated realistically? | | yes; the chandelier's falloff needs where enemies stand (open: grid centre = the target's hex) | D1 |
+| Q15 | Can this unit be simulated realistically? | | yes; where enemies stand relative to the chandelier: the owner's ring table (D2) | D1, D2 |
 
 ## Evidence log
 
@@ -125,8 +125,11 @@ once (E3), so a regen-filled cast's lock end (overflow 0) shows only at the next
   them for CaptivateSpellDuration (Classical on the board); 'Unlock' 0.9503 s ends it. BigCast: CastSpecial at the
   grid centre ('Unlock' 1.8 s) and the chandelier (CD_Vladimir19_Chandelier at speed 1, 'Damage' 1.7963 s):
   MagicDamageCalc2 x max(DamageMinimumPercent, 1 - DamageReductionPerHexFromCenter x ring) on every enemy, ring =
-  the CT_BoardAOERange hex ring from the grid centre. The sim takes the grid centre to be the target's hex (open,
-  docs/OPEN-QUESTIONS.md). Not modelled: heal/omnivamp, the passive (Captivates shredded enemies), the 3-star
+  the CT_BoardAOERange hex ring from the grid centre. Linear, not compounding: the script computes
+  FMax(min, 1 - 0.1 x n) (DetermineChandelierDamageBasedOnDistance); no VOD damage numbers checked. Not modelled: heal/omnivamp, the passive (Captivates shredded enemies), the 3-star
   timeline (CD_Vladimir19_3StarCast: Clap shreds all enemies, repeated drops); a 3-star casts the chandelier every
   time (NumCastsForChandelier 1) on the CastSpecial timeline.
-
+- **D2 (owner, 2026-11-20): targets.** He hits far more units than usual: default 7 targets, at least 3 (he
+  Captivates 3), up to 10 (a full board). Their rings from the chandelier's centre, in targets order: the target at
+  the epicentre, 2 at 1 hex, 2 at 2, 2 at 3, the rest at 4 (`Vladimir.CHANDELIER_RINGS`); fewer targets drop the
+  furthest. The page's Targets buttons run 3-10 (`TARGETS_MIN` / `TARGETS_MAX`, catalog `targetsMin`).

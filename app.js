@@ -1236,9 +1236,11 @@ function renderTargetsSeg() {
   const range = $("layoutTargets");
   const seg = $("targetsSeg");
   const max = Number(range.max);
-  if (seg.children.length !== max) {
+  const min = Number(range.min) || 1; // the champion's floor (Vladimir: 3)
+  if (seg.children.length !== max - min + 1 || Number(seg.dataset.min) !== min) {
     seg.innerHTML = "";
-    for (let n = 1; n <= max; n++) {
+    seg.dataset.min = min;
+    for (let n = min; n <= max; n++) {
       const b = document.createElement("button");
       b.type = "button";
       b.setAttribute("role", "radio");
@@ -1251,7 +1253,7 @@ function renderTargetsSeg() {
       seg.appendChild(b);
     }
   }
-  [...seg.children].forEach((b, i) => b.setAttribute("aria-checked", String(i + 1 === Number(range.value))));
+  [...seg.children].forEach((b, i) => b.setAttribute("aria-checked", String(i + min === Number(range.value))));
 }
 
 async function selectChampion(name, { keepLevel, keepConfig = false }) {
@@ -1264,10 +1266,12 @@ async function selectChampion(name, { keepLevel, keepConfig = false }) {
   // picked champion starts at its default, and a value over the cap comes down to it
   const range = $("layoutTargets");
   range.max = meta.targetsMax || state.catalog.defaults.layout.max;
+  range.min = meta.targetsMin || 1;
   if (!keepConfig) state.cfg.layout.targets = meta.targetsDefault || state.catalog.defaults.layout.targets;
   if (!keepConfig) state.hit.mode = state.hit.explained = null; // the Hit panel opens on the champion's default (a Caster's cast)
   if (!keepConfig) state.cfg.rowParams = {}; // Illbeats' mix follows the champion (AD or AP) until set again
   if (state.cfg.layout.targets > Number(range.max)) state.cfg.layout.targets = Number(range.max);
+  if (state.cfg.layout.targets < Number(range.min)) state.cfg.layout.targets = Number(range.min);
   range.value = state.cfg.layout.targets;
   $("layoutTargetsValue").textContent = range.value;
   $("targetsRow").title =

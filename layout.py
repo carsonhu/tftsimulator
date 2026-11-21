@@ -21,7 +21,8 @@ import math
 DIRECTIONS = ((1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1))
 HEX_UNITS = 215.0  # world units between hex centres (timing.HEX_UNITS, G4)
 TARGETS = 2  # the page's default: the target and 1 enemy next to it
-MAX_TARGETS = 7  # the target and its 6 neighbours
+MAX_TARGETS = 7  # the target and its 6 neighbours: the page's cap unless a champion sets its own (TARGETS_MAX)
+LIMIT_TARGETS = 10  # a full enemy board (level 10): Vladimir's chandelier hits all of them (owner, 2026-11-20)
 
 
 def hex_distance(a, b):
@@ -50,8 +51,8 @@ class Layout:
     behind it, each 1 hex further, in line with the champion (owner, 2026-11-19: Jhin's piercing shots, at most 3)."""
 
     def __init__(self, targets=TARGETS, shape="cluster"):
-        if not 1 <= targets <= MAX_TARGETS:
-            raise ValueError(f'layout: {targets} targets (1-{MAX_TARGETS})')
+        if not 1 <= targets <= LIMIT_TARGETS:
+            raise ValueError(f'layout: {targets} targets (1-{LIMIT_TARGETS})')
         if shape not in SHAPES:
             raise ValueError(f'layout: shape {shape!r} (one of {SHAPES})')
         self.targets = targets

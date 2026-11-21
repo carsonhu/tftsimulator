@@ -243,6 +243,7 @@ def get_catalog():
                           # the Targets buttons it gets (layout.py): its cap, and how its enemies stand
                           "targetsMax": getattr(cls, "TARGETS_MAX", MAX_TARGETS),
                           "targetsDefault": getattr(cls, "TARGETS_DEFAULT", TARGETS),
+                          "targetsMin": getattr(cls, "TARGETS_MIN", 1),
                           "targetsShape": getattr(cls, "TARGETS_SHAPE", "cluster"),
                           "variantOf": parent, "mode": getattr(cls, "MODE", None)})
     # the menu's order (owner, 2026-11-18): by cost, then name; the page opens on the first by name, as before
@@ -505,7 +506,8 @@ def _layout(cfg):
         return Layout()
     # the champion's own cap and shape (TARGETS_MAX, TARGETS_SHAPE: Jhin's line of 3, owner 2026-11-19)
     asked = (cfg.get("layout") or {}).get("targets", getattr(cls, "TARGETS_DEFAULT", TARGETS))
-    targets = min(int(asked), getattr(cls, "TARGETS_MAX", MAX_TARGETS))
+    # and its floor (TARGETS_MIN: Vladimir always Captivates 3, owner 2026-11-20)
+    targets = max(min(int(asked), getattr(cls, "TARGETS_MAX", MAX_TARGETS)), getattr(cls, "TARGETS_MIN", 1))
     return Layout(targets, getattr(cls, "TARGETS_SHAPE", "cluster"))
 
 
