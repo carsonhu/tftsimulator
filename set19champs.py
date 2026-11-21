@@ -3530,7 +3530,8 @@ champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', '
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
               'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin', 'Vladimir', 'Alune',
-              'Yasuo', 'Vayne', 'Aphelios', 'Aurora', 'Graves']
+              'Yasuo', 'Vayne', 'Aphelios', 'Aurora']
+# Graves: implemented but held out of the simulator (owner, 2026-11-21: needs more information; champions/Graves.md)
 
 
 class TrainingDummy(Champion):

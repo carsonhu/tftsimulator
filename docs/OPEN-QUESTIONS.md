@@ -257,7 +257,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Every page target in the line | yes: LineWidth 440 holds the target and its 6 neighbours, and she can blink up to 10 hexes for the best line | a board with enemies spread wider than her line (not simulated: the page's targets stand together) | champions/Aurora.md D1 |
 | Damage numbers | Primary 300/450/2000 x AP, AOE 90/135/1500 x AP, magic, crit only with Precision (Renegade gives it) | damage numbers on targets of known MR; VOD8's omnivamp heals (+94, +63) fit the blast's moment but not one size | champions/Aurora.md Q13 |
 
-### 7ad. Graves (VOD8 has him at 5-7, PvE)
+### 7ad. Graves (VOD8 has him at 5-7, PvE; held out of the simulator until more information: owner, 2026-11-21)
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|

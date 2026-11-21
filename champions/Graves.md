@@ -65,7 +65,8 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 
 - Worksheet status: **implemented** (2026-11-21, `set19champs.Graves`, D1); stats, attack rhythm, the cast, the AS
   buff's end, the mana lock and the dash's delay checked on VOD8 at 5-7 (E1-E3)
-- Keep in the simulator: **yes** (owner, 2026-11-21: VOD8 recorded for him)
+- Keep in the simulator: **not yet** (owner, 2026-11-21: needs more information). The class and test_graves.py stay;
+  he is left out of `set19champs.champ_list` until the questions in docs/OPEN-QUESTIONS.md 7ad are answered
 
 ## Questions
 
