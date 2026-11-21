@@ -146,3 +146,14 @@ def test_three_star_barrage_in_expectation():
     a.curMana = a.fullMana.stat
     fight(a, seconds=4)
     assert a.busy_until > 10 ** 6 and [t for t, _, _ in a.launch_log if t > a.casts[0]] == []
+
+
+def test_page_targets_at_least_three():
+    # owner, 2026-11-21: Aphelios always has at least 3 enemies (default 3)
+    import json
+    import sim_entry
+    from test_sim_entry import cfg
+    meta = next(c for c in json.loads(sim_entry.catalog_json())['champions'] if c['name'] == 'Aphelios')
+    assert (meta['targetsDefault'], meta['targetsMin']) == (3, 3)
+    for asked, got in ((1, 3), (2, 3), (3, 3), (5, 5)):
+        assert sim_entry._layout(cfg(champ='Aphelios', layout={'targets': asked})).targets == got

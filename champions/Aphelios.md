@@ -151,4 +151,6 @@ up to 15 stacks; mana and AS from `--field mana` / `--field as`.
     all unoccupied hexes, PrimaryDamage at once and split bolts from there. Simulated in expectation (as crits): each
     enemy per shot Calc1 / 55 and Calc2 x (hexes within 540 units of it but his own) / 55, assuming no other units on
     the board.
+  - Page targets: at least 3, default 3 (owner, 2026-11-21: he always has at least 3 enemies), so the bolts never
+    repeat on the page (the repeat stays in `spell_targets` as the script has it).
   - Open questions: docs/OPEN-QUESTIONS.md 7ab.

@@ -3142,6 +3142,7 @@ class Aphelios(BuildChampion):
     """
     KEY = 'DA_Aphelios19'
     AREA = True  # the three bolts and their splits depend on the page's number of targets (layout.py)
+    TARGETS_DEFAULT, TARGETS_MIN = 3, 3  # owner, 2026-11-21: always at least 3 enemies (one per bolt)
     CAST, COUCH = 'CD_Aphelios19_CastAnim', 'CD_Aphelios19_CastSustained'
     MAIN, BOLT = 'CD_Aphelios19_CastMainProjectile', 'CD_Aphelios19_CastAOEProjectile'
     # class defaults of GA_Aphelios19_CombatPassive and GA_Aphelios19_Ability (build ga_scripts.zip); the snapshot keeps
