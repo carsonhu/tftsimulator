@@ -250,6 +250,15 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | 3-star barrage | in expectation: every 0.2 s, 1 / 55 of Calc1 plus Calc2 per nearby hex / 55, no other units on the board | a 3-star Aphelios (rare) | champions/Aphelios.md D1 |
 | Damage numbers | 280 x AD + 60 x AP per bolt, 15% per split, physical, crit only with Precision | damage numbers on targets of known armor | champions/Aphelios.md Q13 |
 
+### 7ac. Aurora (VOD8 has her at 5-6)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| One enemy in the line | PrimaryDamage twice on it (HighestHP falls back to PrimaryTarget, ComputeTargetsInLineAndUpdate 0x5ce): 2 x 300 x AP at 1 star | a cast with one enemy in her line (late fight): one damage number or two | champions/Aurora.md D1 |
+| Which enemies take the 300 | the 2 with the most Health in the line; a dummy's Health = its HP less her damage to it, ties in placement order | (the dummies' order only matters for per-target effects) | champions/Aurora.md D1 |
+| Every page target in the line | yes: LineWidth 440 holds the target and its 6 neighbours, and she can blink up to 10 hexes for the best line | a board with enemies spread wider than her line (not simulated: the page's targets stand together) | champions/Aurora.md D1 |
+| Damage numbers | Primary 300/450/2000 x AP, AOE 90/135/1500 x AP, magic, crit only with Precision (Renegade gives it) | damage numbers on targets of known MR; VOD8's omnivamp heals (+94, +63) fit the blast's moment but not one size | champions/Aurora.md Q13 |
+
 ### 7n. Augments
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

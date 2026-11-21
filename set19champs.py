@@ -3269,11 +3269,87 @@ class Aphelios(BuildChampion):
         self.schedule_tick(self.tick + ticks_up(self.REFIRE), self._couch_shot)
 
 
+class Aurora(BuildChampion):
+    """Between Worlds Apart (champions/Aurora.md, D1). Script: GA_Aurora19_Spell (build ga_scripts.zip).
+
+    The cast picks her blink hex (0x3f2): the safest hexes within MaximumHexMove (and at least MinimumHexMove) of her
+    (TR_Add_SafestHexesWithinHexRange), each scored by the enemies in her best line from it
+    (TR_Add_HexesWithMostEnemiesInLineFromSourceSorted, then a TFTRemoveIfNotInRectangleTargetRule rectangle
+    LineLength x LineWidth from that hex through the aim point); the first with the most wins. She plays
+    CD_Aurora19_CastAnim there and applies the mana lock (0xde8). 'Mark' (0.6919 s, 0x17cf ->
+    ComputeTargetsInLineAndUpdate(true, true)): the enemies in the line (her attack target when none), sorted by Health,
+    highest first (TFTSortByAttributeTargetRule); PrimaryTarget = the first, HighestHP = the next, or PrimaryTarget
+    again when there is no other (0x5ce-0x5f9). 'Damage' (1.0738 s, 0x22c7 -> 0xf): the same, the marks kept while
+    they stay in the line, then at once GE_Aurora19_PrimaryDamage on PrimaryTarget and on HighestHP (so one enemy in
+    the line takes it twice) and GE_Aurora19_AOEDamage on every other enemy in the line. PrimaryDamage =
+    MagicDamageCalc2 (PrimaryDamageAP x AP), AOEDamage = MagicDamageCalc1 (AOEDamageAP x AP); both magic,
+    AppliesOnSpell, AOE, crit only with Precision (RollIfCanSpellCrit; FModel export of 6011486). 'BackHome'
+    (1.7619 s) puts her back on her hex; 'Unlock' (2.0323 s, 0x244f) removes the mana lock and finishes the cast: the
+    mana lock is the Unlock tick, the cast lock one tick later (as Yasuo's and Lux's). No GE_SimulateLaunchAttack:
+    the cast counts as no attack.
+    Simulated: the line from her own hex. LineWidth 440 covers every page target (the target and its neighbours
+    stand within 186 units of a line through it along a hex axis), so no hex within her blink range does better and
+    every page target is in the line. Health = the dummy's HP less the damage she has dealt it (dummies never heal or
+    take other damage); ties in placement order, the target first.
+    """
+    KEY = 'DA_Aurora19'
+    AREA = True  # the blast's targets are the page's targets (layout.py)
+    CAST = 'CD_Aurora19_CastAnim'
+    LENGTH, WIDTH = 2600, 440  # GA_Aurora19_Spell defaults 'LineLength', 'LineWidth' (not in the snapshot: P15 b)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.mark_at = self.chrono_event(self.CAST, 'Mark')
+        self.damage_at = self.chrono_event(self.CAST, 'Damage')
+        unlock = ticks_up(self.chrono_event(self.CAST, 'Unlock')) / TPS
+        self.timing.cast_lock, self.timing.mana_lock = unlock + 1 / TPS, unlock
+        self.timing.source['cast_lock'] = self.timing.source['mana_lock'] = f'{self.CAST} Unlock (GA_Aurora19_Spell 0x244f)'
+        self.taken = {}  # id(dummy) -> damage she has dealt it: its lost Health
+        self.marks = None
+
+    def doDamage(self, opponent, *args, **kwargs):
+        before = self.dmgDealt
+        super().doDamage(opponent, *args, **kwargs)
+        self.taken[id(opponent)] = self.taken.get(id(opponent), 0) + self.dmgDealt - before
+
+    def primary_damage(self, level, AD, AP):
+        return self.row('PrimaryDamageAP', star=level) * AP
+
+    def aoe_damage(self, level, AD, AP):
+        return self.row('AOEDamageAP', star=level) * AP
+
+    def blast_targets(self, target):
+        """(PrimaryTarget, HighestHP, the rest): the enemies in her line by Health, highest first (ComputeTargetsInLine
+        AndUpdate); HighestHP is PrimaryTarget again when the line holds one enemy."""
+        in_line = [d for d, _ in self.line(target, self.LENGTH, self.WIDTH)] or [target]
+        order = sorted(in_line, key=lambda d: (-(d.hp.stat - self.taken.get(id(d), 0)), self.opponents.index(d)))
+        primary = order[0]
+        second = order[1] if len(order) > 1 else primary
+        return primary, second, order[2:]
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+
+        def mark():
+            self.marks = self.blast_targets(target)
+
+        def blast():
+            primary, second, rest = self.marks
+            now = self.tick / TPS
+            self.trace('beam', at=primary, hit=[primary] + ([second] if second is not primary else []) + rest)
+            self.multiTargetSpell([primary], items, now, 1, self.primary_damage, 'magical')
+            self.multiTargetSpell([second], items, now, 1, self.primary_damage, 'magical')
+            self.multiTargetSpell(rest, items, now, len(rest), self.aoe_damage, 'magical')
+
+        self.schedule_tick(self.tick + ticks_up(self.mark_at), mark)
+        self.schedule_tick(self.tick + ticks_up(self.damage_at), blast)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
               'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin', 'Vladimir', 'Alune',
-              'Yasuo', 'Vayne', 'Aphelios']
+              'Yasuo', 'Vayne', 'Aphelios', 'Aurora']
 
 
 class TrainingDummy(Champion):
