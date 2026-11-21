@@ -237,6 +237,19 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Normal attack animations | all three SequentialAttack modules played as the first (0.3007 s of 1.6333 s): the others differ by 0.003 s and by their lengths (1.6667, 1.3 s), which matter only below AS 0.77 | a slowed Vayne's attack gaps | champions/Vayne.md D1 |
 | Bolt damage numbers | 165 x AD physical + 1.5% of the target's max Health true, crit only with Precision | damage numbers on a target of known armor and Health | champions/Vayne.md Q13 |
 
+### 7ab. Aphelios (VOD8 has him at 5-5 and 6-1)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| The fresh attack after a cast at high AS | G2: Crescendum's 0.3342 s windup never shrinks, so the next launch comes 77 ticks after the filling one at any AS | VOD8 5-5 (AS 1.53): 77, as the engine; 6-1 (AS 2.34): 74, a windup of 7 ticks, as if it shrinks once the period is under ~0.6 s (Crescendum's Unlock 0.6 s; G20 with T x 1.5 s = 0.6); an Aphelios casting at AS 2+ again, or any attack start seen on screen at high AS | champions/Aphelios.md E3 |
+| First attack at combat start | released on tick 10 (0.3342 s) | VOD8: 12 ticks (timer flip) and 12.5 (Guinsoo's first stack), 1 tick later than T10's usual +1 | champions/Aphelios.md E2, E3; T10 |
+| AS buff and mana lock end | removed the tick after PostCaseASDuration (G1): 187 ticks after the filling launch | VOD8: the AS text drops at 186 and 185.5; mana +10 on the attack right after at 6-1 (the engine's attack there is 1 tick inside the lock) | champions/Aphelios.md E2, E3; T14 |
+| One or two enemies in reach of the cast | the three bolts repeat the nearest: [nearest, other, nearest]; one enemy takes all three (GetRepeatingListFromTargetData) | a cast on a lone enemy (HP drop ~3 x 280 x AD), or with two near: which one takes two (the game sorts them right to left) | champions/Aphelios.md D1 |
+| Split bolts per enemy | each enemy within BoltTravelDistance (540 units) of a primary victim is hit once by its 16 bolts | an adjacent enemy may sit in two bolts' paths (22.5 degrees apart): damage numbers beside a primary victim | champions/Aphelios.md D1 |
+| Chakrams | 0 at combat start without a Bias (5 with it), one per 4th launch, each 7 x AD at the tier's flight | Aphelios as the Heartsteel Bias: Chakram count at combat start; Chakram damage numbers | champions/Aphelios.md D1 |
+| 3-star barrage | in expectation: every 0.2 s, 1 / 55 of Calc1 plus Calc2 per nearby hex / 55, no other units on the board | a 3-star Aphelios (rare) | champions/Aphelios.md D1 |
+| Damage numbers | 280 x AD + 60 x AP per bolt, 15% per split, physical, crit only with Precision | damage numbers on targets of known armor | champions/Aphelios.md Q13 |
+
 ### 7n. Augments
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

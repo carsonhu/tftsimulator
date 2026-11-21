@@ -3101,11 +3101,179 @@ class Vayne(BuildChampion):
                      lambda: self._bolt_lands(nxt, hit + [nxt], k + 1), source=target, name='ricochet')
 
 
+class Aphelios(BuildChampion):
+    """BANG BANG BANGERS (champions/Aphelios.md, D1). Scripts: GA_Aphelios19_CombatPassive, GA_Aphelios19_Ability
+    (build ga_scripts.zip); GEs from the FModel export of 6011486.
+
+    Attack (CD_Aphelios19_AttackNew, ledger P15): its AttackGroup picks the first active of Crescendum (no filter: always
+    active) and Empowered (SharedSets.GenericUseEmpoweredAttack), so every attack plays Crescendum's
+    AC_Aphelios19_AttackE1_HEARTSTEEL2, LaunchAttack 0.3342 s; the build's attack_launch 0.3 is Empowered's. Neither
+    module sets a PlayRateScalingThreshold: G2.
+    Passive (GA_Aphelios19_CombatPassive): InitVars at combat start sets CurrentChakrams to
+    HeartsteelStan_CombatStartChakrams with the Heartsteel SpellUpgradeTierIsActive + Selected tags (a Bias,
+    `heartsteel_bias`), else 0. Each exact Combat.Event.LaunchAttack (not simulated or custom launches) runs TrackAttack
+    (every HeartsteelStan_NumAttacksForChakram-th launch adds a Chakram, up to HeartsteelStan_MaxChakrams), then
+    FireVolley: each Chakram flies CD_Aphelios19_ChakramMis (fixed time) at his attack target and on arrival applies
+    GE_Aphelios19_Heartsteel_ChakramDamage: PhysicalDamageCalc3 (HeartsteelStan_ADDamage x AD), physical, on-spell,
+    crit only with Precision. The flight is the variant tagged by GetChakramTimeTier: the largest ChakramVariantTimes
+    entry at or below the leg time clamp(attack interval x (1 - ChakramRingTimeFraction) / 2, MinChakramLegTime,
+    MaxChakramLegTime) (the first when none is). A volley returns within 2 legs, under the next launch, so none is
+    skipped below AS ~10 (bVolleyInProgress: not simulated). At HeartsteelStan_MaxChakrams, the next attack damage's
+    PreMitigation applies GE_Aphelios19_MaxChakramBuff once: AttackDamage + MaxChakramsExtraAD (and range).
+    HeartsteelStan_ExcessChakramArmorReduction is read by no script.
+    Cast below 3 stars (GA_Aphelios19_Ability, not IsSpecialCast): mana lock, CD_Aphelios19_CastAnim at speed 1.
+    'FireBlasts' (0.9834 s): UpdateSpellTargetsAsNeeded picks the NumEnemies nearest enemies, repeated to NumEnemies
+    when fewer (GetRepeatingListFromTargetData); each gets a CD_Aphelios19_CastMainProjectile 'SpellMis' (2600 units/s)
+    whose arrival applies GE_Aphelios19_PrimaryDamage (PhysicalDamageCalc1 = ADDamage x AD + APDamage x AP, physical,
+    on-spell, crit only with Precision) and launches NumBoltsToSplitTo CD_Aphelios19_CastAOEProjectile 'AOEMis'
+    (1600 units/s) from it, evenly round, BoltTravelDistance out; each enemy a bolt overlaps, other than that bolt's
+    primary victim, takes GE_Aphelios19_AOEDamage (PhysicalDamageCalc2 = PercentSecondaryDamage x Calc1, AOE).
+    'Unlock' (2.1371 s): GE_Aphelios19_AttackSpeedBuff (AttackSpeed x AttackSpeedCalc1 = 1 + PostCaseAS for
+    PostCaseASDuration, granting Mana.Locked), the cast's mana lock removed, FinishCasting: the cast lock is the Unlock
+    on the tick grid + 1 tick (as Yasuo's), and mana stays locked until the AS buff ends. PostCaseASPerEnemyHit (0)
+    must stay 0 (its per-enemy stacks are not simulated).
+    Cast at 3 stars (IsSpecialCast, DoSpecialCast): CD_Aphelios19_CastSustained; its 'LaunchAttack' (2.1 s) fires,
+    then again every ThreeStarRefireDelay until the round ends (no Unlock: no more attacks, mana locked). Each shot picks
+    at random one of all enemies and all unoccupied hexes, applies PrimaryDamage to it at once and splits bolts from it.
+    Simulated in expectation (as crits are averaged): per shot each enemy takes Calc1 / choices, and Calc2 for each
+    choice within BoltTravelDistance of it / choices; choices = the enemies + the board's other empty hexes, with no
+    units on the board but him and the dummies.
+    Simulated: each enemy within BoltTravelDistance of a primary victim (centre to centre) is hit once by its bolts.
+    """
+    KEY = 'DA_Aphelios19'
+    AREA = True  # the three bolts and their splits depend on the page's number of targets (layout.py)
+    CAST, COUCH = 'CD_Aphelios19_CastAnim', 'CD_Aphelios19_CastSustained'
+    MAIN, BOLT = 'CD_Aphelios19_CastMainProjectile', 'CD_Aphelios19_CastAOEProjectile'
+    # class defaults of GA_Aphelios19_CombatPassive and GA_Aphelios19_Ability (build ga_scripts.zip); the snapshot keeps
+    # no ability defaults (ledger P15)
+    CHAKRAM_RING_FRACTION = 0.65
+    CHAKRAM_LEG = (0.03, 0.4)  # MinChakramLegTime, MaxChakramLegTime
+    CHAKRAM_TIMES = (0.05, 0.085, 0.1, 0.13, 0.16, 0.2, 0.25, 0.3, 0.375, 0.45, 0.5)  # ChakramVariantTimes
+    BOLT_TRAVEL = 540.0  # BoltTravelDistance, world units
+    REFIRE = 0.2  # ThreeStarRefireDelay, s
+    BOARD_HEXES = 56  # 3 stars: TFTAddAllUnoccupiedHexesTargetRule over both halves of the board (7 x 4 each)
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        t = self.timing
+        ch = self.chrono(self.data.timing['attack_chrono'])
+        t.launch = max(s for e, s in ch['events'] if e == 'LaunchAttack')  # Crescendum's (0.3342 s; Empowered 0.3)
+        t.source['launch'] = 'CD_Aphelios19_AttackNew group Crescendum (first active, unfiltered), ledger P15'
+        self.blasts_at = self.chrono_event(self.CAST, 'FireBlasts')
+        self.unlock_at = self.chrono_event(self.CAST, 'Unlock')
+        self.couch_at = self.chrono_event(self.COUCH, 'LaunchAttack')
+        t.cast_lock = (ticks_up(self.unlock_at) + 1) / TPS
+        t.mana_lock = 10 ** 6  # lifted when the AS buff the Unlock applies ends (_unlock)
+        t.source['cast_lock'] = f"{self.CAST} 'Unlock' (FinishCasting) on the tick grid + 1 tick"
+        t.source['mana_lock'] = 'GE_Aphelios19_AttackSpeedBuff grants Mana.Locked for PostCaseASDuration after the Unlock'
+        if self.row('PostCaseASPerEnemyHit'):
+            raise BuildDataError(f'{self.KEY}: PostCaseASPerEnemyHit is not 0 in build {self.build.version}: '
+                                 'its per-enemy AS stacks are not simulated')
+        self.chakrams = None  # set at the first launch: the Bias is known once the traits have run
+        self.attacks_since = 0
+        self.max_buff = False
+
+    def chakram_damage(self, level, AD, AP):
+        return self.row('HeartsteelStan_ADDamage', star=level) * AD
+
+    def primary_damage(self, level, AD, AP):
+        return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
+
+    def secondary_damage(self, level, AD, AP):
+        return self.row('PercentSecondaryDamage', star=level) * self.primary_damage(level, AD, AP)
+
+    # ------------------------------------------------------------ the passive
+    def chakram_flight(self):
+        """Ticks a Chakram flies to the target: the ChakramVariantTimes tier for the leg time at the current AS."""
+        lo, hi = self.CHAKRAM_LEG
+        leg = min(max((1 / self.aspd.stat) * (1 - self.CHAKRAM_RING_FRACTION) / 2, lo), hi)
+        tier = max([i for i, s in enumerate(self.CHAKRAM_TIMES) if s <= leg], default=0)
+        return ticks_up(self.CHAKRAM_TIMES[tier])
+
+    def onLaunch(self, opponents, items):
+        if self.chakrams is None:
+            bias = bool(getattr(self, 'heartsteel_bias', False))
+            self.chakrams = int(self.row('HeartsteelStan_CombatStartChakrams')) if bias else 0
+        self.attacks_since += 1  # TrackAttack
+        if self.attacks_since >= self.row('HeartsteelStan_NumAttacksForChakram'):
+            self.attacks_since = 0
+            self.chakrams = min(self.chakrams + 1, int(self.row('HeartsteelStan_MaxChakrams')))
+        if not opponents or not self.chakrams:
+            return
+        target, flight = opponents[0], self.chakram_flight()
+        for _ in range(self.chakrams):  # FireVolley: one GE application per Chakram
+            self.fly(self.tick, flight, target, lambda: self.multiTargetSpell(
+                [target], self.items, self.tick / TPS, 1, self.chakram_damage, 'physical'), name='chakram')
+
+    def performAttack(self, opponents, items, time, multiplier=None, generateMana=True):
+        super().performAttack(opponents, items, time, multiplier, generateMana)
+        if not self.max_buff and self.chakrams is not None and self.chakrams >= self.row('HeartsteelStan_MaxChakrams'):
+            self.max_buff = True  # GE_Aphelios19_MaxChakramBuff (Infinite, applied once)
+            self.attribute('AttackDamage').modify('+', self.row('MaxChakramsExtraAD'), key='aphelios_max_chakrams')
+
+    # ------------------------------------------------------------ the cast
+    def spell_targets(self):
+        """UpdateSpellTargetsAsNeeded: the NumEnemies nearest enemies (nearest first), repeated when fewer."""
+        n = int(self.row('NumEnemies'))
+        near = self.nearest(n)
+        return [near[i % len(near)] for i in range(n)] if near else []
+
+    def bolt_victims(self, primary):
+        """The enemies a primary victim's split bolts reach: within BoltTravelDistance of it, centre to centre."""
+        px, py = layout.world(primary.hex)
+        return [d for d in layout.in_play(self.opponents) if d is not primary
+                and math.hypot(layout.world(d.hex)[0] - px, layout.world(d.hex)[1] - py) <= self.BOLT_TRAVEL + 1e-6]
+
+    def _explode(self, primary):
+        self.multiTargetSpell([primary], self.items, self.tick / TPS, 1, self.primary_damage, 'physical')
+        for enemy in self.bolt_victims(primary):
+            self.fly(self.tick, self.chrono_projectile_ticks(self.BOLT, 'AOEMis', layout.distance(primary, enemy)),
+                     enemy, lambda e=enemy: self.multiTargetSpell([e], self.items, self.tick / TPS, 1,
+                                                                  self.secondary_damage, 'physical'),
+                     source=primary, name='bolt')
+
+    def _blasts(self, targets):
+        for p in targets:
+            self.fly(self.tick, self.chrono_projectile_ticks(self.MAIN, 'SpellMis', self.target_hexes(p)), p,
+                     lambda p=p: self._explode(p), name='bolt')
+
+    def _unlock(self):
+        last = self.tick + ticks_up(self.row('PostCaseASDuration'))  # the buff's last tick (G1)
+        self.aspd.modify('MultiplyAdditive', 1 + self.row('PostCaseAS'), key='aphelios_cast_as')
+        self.mana_locked_until = last + 1
+        self.schedule_tick(last + 1, lambda: self.aspd.remove('aphelios_cast_as'))
+
+    def performAbility(self, opponents, items, time):
+        if self.level >= 3:
+            self.timing.cast_lock = self.timing.mana_lock = 10 ** 6  # the sustained cast never ends
+            self.schedule_tick(self.tick + ticks_up(self.couch_at), self._couch_shot)
+            return
+        targets = self.spell_targets()
+        self.schedule_tick(self.tick + ticks_up(self.blasts_at), lambda: self._blasts(targets))
+        self.schedule_tick(self.tick + ticks_up(self.unlock_at), self._unlock)
+
+    def _couch_shot(self):
+        """One 3-star shot in expectation (class docstring), then the next ThreeStarRefireDelay later."""
+        enemies = layout.in_play(self.opponents)
+        choices = self.BOARD_HEXES - 1  # every hex but his own: an enemy or an empty hex
+        now = self.tick / TPS
+        reach = [h for h in ((q, r) for q in range(-3, 4) for r in range(-3, 4)) if h != (0, 0)
+                 and math.hypot(*layout.world(h)) <= self.BOLT_TRAVEL + 1e-6]
+        for e in enemies:
+            near = sum(1 for dq, dr in reach if (e.hex[0] + dq, e.hex[1] + dr) != self.hex)
+            self.multiTargetSpell([e], self.items, now, 1,
+                                  lambda lv, AD, AP: self.primary_damage(lv, AD, AP) / choices, 'physical')
+            self.multiTargetSpell([e], self.items, now, 1,
+                                  lambda lv, AD, AP, n=near: self.secondary_damage(lv, AD, AP) * n / choices,
+                                  'physical')
+        self.schedule_tick(self.tick + ticks_up(self.REFIRE), self._couch_shot)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
               'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin', 'Vladimir', 'Alune',
-              'Yasuo', 'Vayne']
+              'Yasuo', 'Vayne', 'Aphelios']
 
 
 class TrainingDummy(Champion):
