@@ -1,7 +1,7 @@
 # Smeech (5-cost AttackSpecialist_Time) · `DA_Smeech19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
 - **Role** AttackSpecialist_Time: "Specialists generate resources in a unique way." ()
 - **Cost** 5, pool 9; traits: Jazz, Slayer
@@ -80,9 +80,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: Abilities/GA_Smeech19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Smeech19_Spell.txt
 
-### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
-- row EmblemTailoringAmount: – -> 2
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

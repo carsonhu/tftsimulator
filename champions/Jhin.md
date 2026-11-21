@@ -1,7 +1,7 @@
 # Jhin (4-cost AttackSpecialist_Ammo) · `DA_Jhin19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
 - **Role** AttackSpecialist_Ammo: "Specialists generate resources in a unique way." ()
 - **Cost** 4, pool 10; traits: Classical, Encore
@@ -62,7 +62,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: GA_Jhin19_Passive.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: GA_Jhin19_Passive.txt
 
-### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

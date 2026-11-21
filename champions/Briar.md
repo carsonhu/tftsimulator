@@ -1,7 +1,7 @@
 # Briar (3-cost AttackAssassin) · `DA_Briar19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
 - **Role** AttackAssassin: "Attacks grant 10 Mana. Take 15% less damage from all enemies except the current target." (ManaPerAttack + 10; ManaMax at least 10; MovementSpeed + 200; Threat + -10)
 - **Cost** 3, pool 18; traits: Ionic Spark, Slayer
@@ -55,11 +55,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Briar19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Briar19_Spell.txt
 
-### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
-- row DamageAOE_AD: 100 / 150 / 240 -> 95 / 145 / 230
-- row DamageFrenzyAD: 100 / 150 / 240 -> 80 / 120 / 190
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

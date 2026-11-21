@@ -1,7 +1,7 @@
 # Sona (5-cost MagicSpecialist) · `DA_Sona19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
 - **Role** MagicSpecialist: "Specialists generate resources in a unique way." ()
 - **Cost** 5, pool 9; traits: Producer, Collab
@@ -79,7 +79,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_SimulateLaunchAttack`: applies the "simulate a launched attack" effect (may count as an attack for on-attack effects): Champion/Abilities/GA_Sona19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Champion/Abilities/GA_Sona19_Spell.txt
 
-### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

@@ -1,7 +1,7 @@
 # Ezreal (2-cost AttackCaster) · `DA_Ezreal19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Heartsteel, Encore
@@ -52,7 +52,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Ezreal19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Ezreal19_Spell.txt
 
-### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

@@ -1,7 +1,7 @@
 # Malzahar (3-cost MagicCaster) · `DA_Malzahar19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6005555.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6005555.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Composer, Prodigy
@@ -56,11 +56,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Malzahar19_SpellNew.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Malzahar19_SpellNew.txt
 
-### Changed since `rls-19.1.0.5995286.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
 
-- row DamageAP: 325 / 485 / 815 -> 260 / 390 / 625
-- row SecondaryDamageAP: 40 / 60 / 110 -> 36 / 54 / 86
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 
