@@ -72,14 +72,14 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
 | Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed: 800 HP, 20 / 65 mana, AS 0.75, armor/MR 63 (Bodyguard 2) | E1 |
-| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster | confirmed: +7 per attack every 40 ticks; regen 8/s at Prodigy (4) (2 + 5 + 1), 9/s at (5) (2 + 6 + 1) | E1, E2, E3 |
+| Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | MagicCaster | confirmed: +7 per attack every 40 ticks; regen 8/s at Prodigy (4) (2 + 5 + 1), 9/s at (5) (2 + 6 + 1); Nashor's +2 per attack and +2 per critical attack on landing | E1-E5 |
 | Q3 | First attack at combat start: when does it land? | G3 | open: both VOD7 fights put the first attack's mana 6-7.5 ticks after the first regen step (39 frames after the HUD's combat bar starts); the engine 3 ticks (regen phase T7 / G17) | E2, E3 |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.3667 s (11 ticks) | predicted | |
-| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
+| Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | consistent at AS 0.83: the cast-to-attack gap stays 52 ticks (engine 52) | E5 |
 | Q6 | Projectile travel time (ranged only) | speed 1750 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 1.3333 s (40 ticks) | confirmed: the next attack's mana 104-105 frames (52 ticks) after every fill, attack- or regen-filled (engine 52: cast at fill + 1, lock 40, windup 11) | E2, E3 |
+| Q7 | Cast time: cast start to the next attack starting | 1.3333 s (40 ticks) | confirmed: the next attack's mana 104-105 frames (52 ticks) after every fill, attack- or regen-filled (engine 52: cast at fill + 1, lock 40, windup 11) | E2-E5 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.3 s (39 ticks) | confirmed: banked overflow (1, 3, 6) shown 80-81 frames after the filling mana = 39 + T4 | E2, E3 |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 1.3 s (39 ticks) | confirmed: banked overflow (1, 3, 6) shown 80-81 frames after the filling mana = 39 + T4 | E2-E5 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | open | |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
@@ -101,7 +101,9 @@ tftVision/runs/s19_vod7/phases.json.
 |---|---|---|---|---|---|---|---|---|
 | E1 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 13:31 (f48700, round 3-3) | 60 | inspection panel | 800/800, 52/65, 8/s; AD 30, AP 10%, armor/MR 63, AS 0.75; Heartsteel 3, Prodigy 4, Bodyguard 2 on the board | as built (AP 10% from the board, not identified) | Q1, Q2 |
 | E2 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 f48572-50598 (3-3; HUD combat bar from f48545) | 60 | mana text | regen +2 every 15 frames; attacks +7 at f48584, 48664, 48744, 48848, 48929, 49009, 49089, 49201, ... (80 frames apart); casts f48744 (58 + 7, exact), f49097 (64 + 2: overflow 1 shown f49177, +80), f49442 (56 + 7 + 2, exact), f49802 (overflow 1 at f49883, +81), f50147, f50508 (overflow 1 at f50588, +80); next attack's mana after each fill +104 / +104 / +104 / +105 / +104 frames | mana lock 39 + T4 = 40 ticks after the fill; next attack 52 ticks after the fill (lock 40 + windup 11 + 1) | Q2, Q3, Q7, Q9 |
-| E3 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 f55226-56442 (~3-6, 9/s; HUD combat bar from f55266) | 60 | mana text | panel 20/65 before combat; first regen f55290, first attack f55305; casts f55466 (61 + 7: overflow 3 at f55546, +80), f55810 (64 + 7: overflow 6 at f55891, +81), f56133 (regen fill); next attack's mana after each fill +104, +105, +104 | as E2 at 9/s | Q2, Q3, Q7, Q9 |
+| E3 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 f55226-56442 (3-5, 9/s; HUD combat bar from f55266) | 60 | mana text | panel 20/65 before combat; first regen f55290, first attack f55305; casts f55466 (61 + 7: overflow 3 at f55546, +80), f55810 (64 + 7: overflow 6 at f55891, +81), f56133 (regen fill); next attack's mana after each fill +104, +105, +104 | as E2 at 9/s | Q2, Q3, Q7, Q9 |
+| E4 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 f59982-61202 (3-6, 9/s; HUD combat bar from f59953) | 60 | mana text | casts f60162 (overflow 5 at f60242, +80), f60506 (64 + 7: overflow 6 at f60587, +81), f60827 (regen fill), f61202; next attack's mana +104, +104, +104 frames after the fill; one gap of 138 frames between attacks (f60931-61069: a new target) | as E2 | Q2, Q7, Q9 |
+| E5 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 f66849-68600 (4-1; panel at f66900) | 60 | panel, mana and AS text | items Nashor's Tooth + 2 Jeweled Gauntlet (icons matched 0.88 / 0.97 / 0.92); 950 HP, AP 95%, crit 100%, AS 0.83 all fight (no AS change on cast), 9/s. Attacks +9 every 72-76 frames; +2 off the regen grid after an attack (f67021 release -> f67054, 16.5 ticks); a cycle (f67357 -> 67431, 67431 -> 67503) gains 22-23 mana = 9 + 2 + 10.8 regen. Next attack's mana after the fill +104 (f66917), +104 (f67253), +105 (f67532). At f67202-67253 the bar stood full (65/65) 25 ticks before the cast (she had just taken a hit: 950 -> 817) | AS 0.75 x 1.1, Nashor's ManaPerAttack 2 with the role mana at release and +2 when a critical attack lands (I6; engine: 15 ticks for 4 hexes); 52 ticks after the fill at AS 0.83 as at 0.75 (engine 52). The 25-tick wait: open | Q2, Q5, Q7, Q12 |
 
 ## Decisions and notes
 
