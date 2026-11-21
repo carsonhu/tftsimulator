@@ -58,7 +58,8 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 ## Status
 
 - Worksheet status: **implemented** (2026-11-18, `set19champs.Katarina`, D1); stats, mana and attack rhythm checked
-  on VOD6 (E1-E2); the one VOD cast took the dash branch (E3)
+  on VOD6 (E1-E2); the one VOD cast took the dash branch (E3); 2 stars at 3-2 on VOD8 (E4-E5): stats, attack
+  rhythm and the no-dash cast lock match to the tick
 - Keep in the simulator: **yes** (owner, 2026-11-18: VOD6 has her at 1-2)
 
 ## Questions
@@ -74,7 +75,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.2918 s (8.75 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | none | not applicable | |
-| Q7 | Cast time: cast start to the next attack starting | 1.3333 s (40 ticks) without the dash | predicted (the VOD cast dashed) | E3 |
+| Q7 | Cast time: cast start to the next attack starting | 1.3333 s (40 ticks) without the dash | confirmed without the dash (VOD8: 4th attack to the next 50 ticks, engine 50) | E3, E5 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
 | Q9 | Mana lock: from cast start, when can mana be gained again? | 1.3 s (39 ticks) without the dash | predicted | |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
@@ -102,6 +103,17 @@ star, no items, Classical 1/2 and Slayer 1/2 (inactive), Heartsteel (1) with Set
 | E3 | 2026-11-18 | rls-19.1.0.5986652 (client) | VOD6 1:12.05-1:14.2 (board every 0.1 s), f4323-4449 | 60 | the cast | spin at 1:12.1; she dashes; 218 magic on the target ~1:13.35-1:13.4; next +10 at f4449 (+126 fr = 63 ticks) | the dash branch: 'Eviscerate' at 1.285 s (the Movement group; 1:13.34) matches. The next attack came 63 ticks after the cast (Movement 'Unlock' 43 + windup ~9 = ~52; she walked to a new target) | Q7, Q13 |
 
 Not used: the second cast at ~f4678 (the panel was on other units; the round ended at 1:18.7).
+
+VOD8 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-21-2026_12-18-17-802/` `…PBE_11-21-2026_13-2-9-650.mp4`
+(owner's game, 2026-11-21, 60 fps). Client rls-19.1.0.6013636 (patched 11:32 that day, not exported; owner: only a
+Graves crash fix), so the simulator's 6011486 is assumed. Round 3-2 (PvP): Katarina 2 stars, no items; Slayer 2
+active (3 Slayers on the board), Classical 1/2 inactive, Rock 3. Mana from `tools/vod_text_changes.py --field mana`
+f42540-45000 (crops read by eye; changes that are only the HP text left out).
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E4 | 2026-11-21 | rls-19.1.0.6013636 (client) | VOD8 11:52 (round 3-2) | 60 | inspection panel | 1,170/1,170, 0/40, 1 hex, Front, Magic Fighter; AD 45, AP 0%, armor 35, MR 35, AS 0.98, crit 25%, omnivamp 8% | engine (2 stars, stage 3, Slayer 2): HP 1170, AD 45, AS 0.975 (0.75 x (1 + Fighter stage 3 + Slayer 20%)), 0/40. Matches | Q1 |
+| E5 | 2026-11-21 | rls-19.1.0.6013636 (client) | VOD8 f42847-44168 | 60 | mana text | 10/20/30 at f42847, 42909, 42972, cast (0) f43034; 10/20/30 f43134, 43196, 43260, cast f43320; 10 f43421, 20 f43481, 30 f43541, cast f43599; 10 f43699, (walk) 20 f43852, 30 f43912, cast f43970; 10 f44078; died f44168 | attacks 60-64 frames apart = 30-32 ticks (engine 31, 31, 30); 4th attack to the next attack after the cast 100, 101, 100 frames = 50 ticks (engine 50: the NoMovement 'Unlock' 40-tick lock + windup), the 4th 108 (she changed target); +10 per attack, no regen; casts on the 4th attack | Q2, Q7 |
 
 ## Decisions and notes
 

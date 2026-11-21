@@ -61,3 +61,14 @@ def test_captivate_with_classical():
     ds, _ = fight(k, seconds=5)
     assert not any(CAPTIVATED in d.effects for d in ds)
     assert k.row('TargetDamageAP') == pytest.approx(360)
+
+
+def test_vod8_round_3_2():
+    # VOD8 E4-E5 (round 3-2): 2 stars, Slayer 2, stage 3 Fighter: AS 0.975 (panel 0.98); attacks 30-32 ticks apart
+    # (f42847-42972); the 4th attack to the next one across a cast 50 ticks (f43034 -> f43134, 100 frames)
+    k = LoggedKatarina(2, build='rls-19.1.0.6011486.Set19.Shipping.pbe')
+    k.stage = 3
+    _, rows = fight(k, buffs=[set19buffs.Slayer(2)], seconds=12)
+    assert round(k.aspd.stat, 3) == 0.975 and (k.hp.stat, k.atk.stat) == (1170, 45)
+    attacks = [t for t, d, kind in rows if kind == 'physical']
+    assert [b - a for a, b in zip(attacks, attacks[1:])][:4] == [31, 31, 30, 50]
