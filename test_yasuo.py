@@ -53,6 +53,14 @@ def test_build_numbers():
     assert y.casts_to_ult == 3
 
 
+def test_vod8_panel_bonus_ad():
+    # VOD8 4-1 / 4-3 panel: bonus AD 108% = the items' 101% + Heartsteel (1)'s fielded Kayn 7% (KaynAD; owner,
+    # 2026-11-21: Kayn was on the board)
+    y, items, buffs = vod8_yasuo()
+    fight(y, items, buffs + [set19buffs.Heartsteel(1, 1)], seconds=0.1)
+    assert y.numAttacks == 0 and round(y.bonus_ad.stat, 3) == 2.08
+
+
 def test_vod8_4_1_rhythm():
     # VOD8 4-1 (f65152-66266): AS 1.62, 1,400 HP, crit 80%; attacks 36-38 frames apart; casts 136 / 137 frames apart;
     # the banked overflow 21 ticks after the filling attack (NoDash), 44 ticks for every 3rd cast (the ult); the next

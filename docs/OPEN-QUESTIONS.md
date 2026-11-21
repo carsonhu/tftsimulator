@@ -226,7 +226,6 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|---|
 | Dash or not | every base cast the NoDash one: the page's second target stands straight behind the target, so his own hex lines up the most | VOD8: both kinds (dash locks 6 ticks longer); a clip of the dash hex chosen with the targets known would check the sort (board centre, then enemies in the line) | champions/Yasuo.md D1 |
 | On-hit effects of the stab and the slam | each enemy hit gets the on-hit events (AppliesOnHit.IsAttack, as Gnar's rock) | an on-hit item (Wit's End, a Hydra) on Yasuo: its procs per stab on 2 enemies | champions/Yasuo.md D1 |
-| Bonus AD on his panel | items give +101% (IE 35, Infinity Force 30, Hand of Justice 36) | VOD8 4-1 / 4-3: 108%; the extra +7% source (augment?) for the owner to name | champions/Yasuo.md E1 |
 | Ult and stab damage numbers | stab SlashDamageAD x AD on the 2-hex line; ult 2 x 0.5 x UltDamageAD x AD on the target; slam UltDamageAOEAD x AD + UltDamageAOEAP x AP within AOEHexRadius | damage numbers on targets of known armor | champions/Yasuo.md Q13 |
 
 ### 7aa. Vayne (VOD8 has her at 4-2)

@@ -83,7 +83,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 
 | # | Question | Client prediction | Status | Evidence |
 |---|---|---|---|---|
-| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed (with items: HP 1,400, AS 1.62, crit 80%, armor / MR 95, 0/30); bonus AD 108% vs the items' 101%: open | E1 |
+| Q1 | Base stats in game match the build (HP, AD, AS, range, armor, MR, mana) | see above | confirmed (with items: HP 1,400, AS 1.62, crit 80%, armor / MR 95, 0/30; bonus AD 108% = items 101% + Heartsteel's fielded Kayn 7%) | E1 |
 | Q2 | Mana per attack and per second follow the role; when is an attack's mana paid (attack start, release or hit, T3)? | AttackFighter: 10 per attack | confirmed (+10 per attack, +1/s from Hand of Justice) | E2 |
 | Q3 | First attack at combat start: when does it land? | G3 | open (VOD8 4-1: ~17 frames after the HP shield appears; combat start not exact) | |
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.26 s (7.8 ticks) | predicted | |
@@ -107,13 +107,13 @@ VOD was played on (check the patch shown in game or the date against builds/inde
 VOD8 = `F:/Outplayed/Teamfight Tactics PBE/Teamfight Tactics PBE_11-21-2026_12-18-17-802/` `…PBE_11-21-2026_13-2-9-650.mp4`
 (owner's game, 2026-11-21, 60 fps). Client rls-19.1.0.6013636 (patched 11:32 that day, not exported; owner: only a
 Graves crash fix), so 6011486 is assumed. Yasuo 1 star with Hand of Justice, Infinity Edge and Infinity Force (icons
-matched to the client textures), Slayer (4), True Damage inactive, stage 4. Mana from `tools/vod_text_changes.py
+matched to the client textures), Slayer (4), Heartsteel (1, Kayn fielded), True Damage inactive, stage 4. Mana from `tools/vod_text_changes.py
 --field mana` (crops read by eye; changes that are only the HP text left out). "Filling attack" = the frame the bar
 drops to 0 (the panel never shows a full bar); the cast is one tick later (T4).
 
 | # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
 |---|---|---|---|---|---|---|---|---|
-| E1 | 2026-11-21 | rls-19.1.0.6013636 (client) | VOD8 18:06 (round 4-1) | 60 | inspection panel | 1,568 / 1,400 (shield), 0/30, 1/s, 1 hex, Front, Attack Fighter; AD 125, bonus AD 108%, AP 66%, armor 95, MR 95, AS 1.62, crit 80%, omnivamp 22% | engine: HP 1400, AS 1.615, crit 0.8, AP 0.66, armor / MR 95, regen 1. Bonus AD: engine 101% (IE 35 + Infinity Force 30 + Hand of Justice 36), panel 108% (unexplained, same at 4-3) | Q1 |
+| E1 | 2026-11-21 | rls-19.1.0.6013636 (client) | VOD8 18:06 (round 4-1) | 60 | inspection panel | 1,568 / 1,400 (shield), 0/30, 1/s, 1 hex, Front, Attack Fighter; AD 125, bonus AD 108%, AP 66%, armor 95, MR 95, AS 1.62, crit 80%, omnivamp 22% | engine: HP 1400, AS 1.615, crit 0.8, AP 0.66, armor / MR 95, regen 1. Bonus AD: items 101% (IE 35 + Infinity Force 30 + Hand of Justice 36) + Heartsteel (1)'s fielded Kayn 7% (KaynAD; owner, 2026-11-21: Kayn on the board) = 108%, as the panel (same at 4-3; `test_vod8_panel_bonus_ad`) | Q1 |
 | E2 | 2026-11-21 | rls-19.1.0.6013636 (client) | VOD8 f65152-66266 (4-1) | 60 | mana text | attacks +10 36-38 frames apart; fills at f65243, 65379, 65606, 65827, 65964, 66178; first change after each: +1 at f65285 (42 fr), +3 at 65433 (54), +5 at 65694 (88), +8 at 65869 (42), +9 at 66018 (54), +2 at 66266 (88); the next attack 20 frames after each of the first five | casts 3 and 6 are ults (44 ticks = 'Unlock' 43 + T4); the others alternate NoDash (21 = 20 + 1) and dash (27 = 26 + 1); casts 136-137 frames apart (engine 68 ticks, NoDash); next attack 10 ticks after the lock (engine 10) | Q2, Q5, Q7, Q9, Q14 |
 | E3 | 2026-11-21 | rls-19.1.0.6013636 (client) | VOD8 f75101-76400 (4-3) | 60 | mana text | panel closed f75113-75193 and f75325-75387; fills (first change after) f75465 (+4, 88 fr), 75647 (+6, 42), 75804 (+8, 43), 75940 (+9, 88), 76104 (+1, 43), 76305 (+3, 41) | the first two casts fall where the panel is closed (f75193: three attacks after combat start, its overflow +1 at f75235 = 21 ticks; ~f75327); then ult, base, base, ult, base, base: the Stack resets each combat (GE_IncSpellStackBy1_CombatOnly unapplied after CombatDeparture) | Q9, Q14 |
 
