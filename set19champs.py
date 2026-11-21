@@ -2764,6 +2764,7 @@ class Vladimir(BuildChampion):
     def __init__(self, level, build=None):
         super().__init__(level, build)
         self.casts = 0  # GE_IncSpellStackBy1_CombatOnly
+        self.notes = "His passive's Captivate on debuffed enemies isn't simulated."  # owner, 2026-11-20
         self.cast_at = self.chrono_event(self.NORMAL, 'Cast')
         self.drop_at = self.chrono_event(self.CHANDELIER, 'Damage')
         self.locks = {name: self._locks(name) for name in (self.NORMAL, self.SPECIAL)}

@@ -133,3 +133,4 @@ once (E3), so a regen-filled cast's lock end (overflow 0) shows only at the next
   Captivates 3), up to 10 (a full board). Their rings from the chandelier's centre, in targets order: the target at
   the epicentre, 2 at 1 hex, 2 at 2, 2 at 3, the rest at 4 (`Vladimir.CHANDELIER_RINGS`); fewer targets drop the
   furthest. The page's Targets buttons run 3-10 (`TARGETS_MIN` / `TARGETS_MAX`, catalog `targetsMin`).
+- **Note (owner, 2026-11-20):** the page says his passive's Captivate on debuffed enemies isn't simulated (`self.notes`).
