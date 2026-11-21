@@ -296,13 +296,15 @@ const FightViewer = (() => {
     const width = el.vizStage.clientWidth;
     const scale = width / (xmax - xmin);
     // as tall as the board's shape asks, up to what the viewer has room for: side by side its height is fixed (the
-    // pane under the aligned chart), so the board fits it and leaves the log a few lines; stacked, ~28% of the pane
+    // pane under the aligned chart), so the board fits it and leaves the log LOG_ROOM (about 5 lines: owner,
+    // 2026-11-21, one line was too few); stacked, ~28% of the pane
     let tallest;
     if (window.matchMedia("(min-width: 1321px)").matches) {
       const left = el.vizStage.parentElement;
       const others = [...left.children].filter((c) => c !== el.vizStage && !c.classList.contains("viz-log"))
         .reduce((sum, c) => sum + c.offsetHeight, 0);
-      const room = el.viz.getBoundingClientRect().bottom - el.vizStage.getBoundingClientRect().top - others - 44;
+      const LOG_ROOM = 120;
+      const room = el.viz.getBoundingClientRect().bottom - el.vizStage.getBoundingClientRect().top - others - LOG_ROOM;
       tallest = Math.min(Math.max(room, 110), 300);
     } else {
       const pane = el.viz.parentElement;
