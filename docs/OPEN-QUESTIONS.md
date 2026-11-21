@@ -75,7 +75,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|---|
 | Beam damage and its moment | 330/500/800 x AP on the target and 170/255/425 x AP on the enemy nearest Lux, both 32 ticks after the cast starts (DamageAndBeam 1.0416 s) | damage numbers of a Lux cast on targets of known MR | champions/Lux.md D1 |
 | Which enemy the secondary beam hits | the enemy nearest Lux other than her target (not the one nearest the target) | a Lux cast with an enemy beside her and one beside her target | champions/Lux.md D1 |
-| Prodigy | members +2/3/6/7 + 1 mana regen, everyone else +1 | the regen shown in the panel with Prodigy (2)+ active | B24 |
+| Prodigy (5) | members + ProdigyBonusManaRegen + 1: build 6005555 gives 6 + 1 at (5) (5973071-5986094 gave 7 + 1). VOD7 (2026-11-20, client 6011486): Malzahar at (3) 6/s = 2 + 3 + 1, as built; Vladimir with the emblem at (5) 8/s, one more than 6005555 | an FModel export of 6011486 (does its (5) row read 7?); no clip needed | B24 |
 
 ### 7c. Gnar again
 
@@ -206,6 +206,15 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 |---|---|---|---|
 | The pause when he ascends | 53 ticks from the ascending 4th shot to the next launch (UltDelay 18 + CastAnim 27 + the piercing windup 8); VOD6 1-10: 54 | another ascension: the Ammo text's frames around it | champions/Jhin.md E2 |
 | Encore copies (Jhin with Encore active) | the damage terms multiply: a violin copy Calc1 x 0.25 x violins, a piercing copy x 0.25 x 0.4 on later enemies | a fight with Encore (2): the copy's damage numbers on a target with known armor | champions/Jhin.md Q16 |
+
+### 7x. Vladimir (VOD7 has him at 4-2 and 4-3)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Where the chandelier lands relative to his targets | the grid centre is the target's hex: a dummy's ring = its hexes from the target (100%, 90%, ...) | a 5th cast's damage numbers on enemies at known rows; or owner: where his targets usually stand | champions/Vladimir.md D1 |
+| His max Health rising ~50 per cast in combat (1508 -> 1560 -> 1612 -> 1664 at 4-2) | not simulated (no damage) | owner: which effect (Bloodthirster? Heartsteel?) | champions/Vladimir.md E1 |
+| The bar shown full for 3 ticks before his 7th cast at 4-2 (f73626-73631) | casts start the tick after the fill (T4) | a clip of him moving when the bar fills (ActivationBlockedTags: Combat.Moving) | champions/Vladimir.md E2 |
+| 3-star cast | the chandelier every cast on the 1-2-star timeline; CD_Vladimir19_3StarCast (Clap shred, repeated drops) not modelled | a 3-star Vladimir | champions/Vladimir.md D1 |
 
 ### 7n. Augments
 

@@ -120,7 +120,7 @@ index.html + app.js  --postMessage-->  worker.js (Pyodide)  -->  sim_entry.py
   radiant, artifact, emblem, trait, augment), which fills `set19items.offensive_craftables` / `radiants` /
   `artifacts` / `emblems` and `set19buffs.class_buffs` / `augments`; champions are live when listed in
   `set19champs.champ_list` (Neeko, Varus, Draven, Kai'Sa, Yunara, Ziggs, Senna, Ezreal, Lux, Gnar, Malzahar, Samira,
-  Karthus, Ashe, Viego, Kayle, Lucian, RenataGlasc, Zoe, Bard, Syndra, Briar, Xayah, Katarina, Kayn, Qiyana, Seraphine (+ SeraphineRisingStar, SeraphineSuperstar), Yuumi, Yone, Tristana, Mel, Jinx, Ahri, Jhin, OlafHeroAugment (hero augment units are separate champions: `roster.json` `hero_augments`);
+  Karthus, Ashe, Viego, Kayle, Lucian, RenataGlasc, Zoe, Bard, Syndra, Briar, Xayah, Katarina, Kayn, Qiyana, Seraphine (+ SeraphineRisingStar, SeraphineSuperstar), Yuumi, Yone, Tristana, Mel, Jinx, Ahri, Jhin, Vladimir, OlafHeroAugment (hero augment units are separate champions: `roster.json` `hero_augments`);
   traits: Encore, Trickshot, K/DA, Swiftstriker, Arcanist, Hitmaker, True Damage, Illbeats, Heartsteel, Hyperpop, Ionic
   Spark, Prodigy, Pentakill, Composer, Renegade, Classical, Slayer, Choreographer, Jazz, Beach Pop, Gu Feng).
   Trait membership is `champion.has_trait(KEY)`: the unit's own traits or an emblem it holds (`BuildEmblem.TRAIT`;

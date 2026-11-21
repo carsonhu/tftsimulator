@@ -82,9 +82,9 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q4 | Attack windup at base AS (attack start to hit / release) | 0.445 s (13.35 ticks) | predicted | |
 | Q5 | Windup at higher AS: shortened, unchanged, or stretched at low AS? | G2 | open | |
 | Q6 | Projectile travel time (ranged only) | speed 2000 | predicted | |
-| Q7 | Cast time: cast start to the next attack starting | 2.5333 s (76 ticks) | confirmed: VOD5's next attack paid 90.5 ticks after the filling attack, engine 91 (1 + 76 + windup) | E3, E5 |
+| Q7 | Cast time: cast start to the next attack starting | 2.5333 s (76 ticks) | confirmed: VOD5's next attack paid 90.5 ticks after the filling attack, engine 91 (1 + 76 + windup) | E3, E5, E6 |
 | Q8 | Does the cast time scale with attack speed? | script does not read AS | predicted | |
-| Q9 | Mana lock: from cast start, when can mana be gained again? | 2.5 s (75 ticks) | consistent: overflow shown 75.5 ticks after the filling attack (VOD3, VOD5), mana again 75 ticks after a regen-filled cast (VOD5) | E3, E5 |
+| Q9 | Mana lock: from cast start, when can mana be gained again? | 2.5 s (75 ticks) | consistent: overflow shown 75.5 ticks after the filling attack (VOD3, VOD5), mana again 75 ticks after a regen-filled cast (VOD5) | E3, E5, E6 |
 | Q10 | Does the mana lock scale with attack speed? | script does not read AS | predicted | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 unless the script says otherwise (G11) | predicted: 0 (no GE_SimulateLaunchAttack in GA_Malzahar19_SpellNew) | D1 |
 | Q12 | Does the cast cancel or reset an attack in progress? | see script hints | predicted | |
@@ -114,6 +114,13 @@ f21000-22000. Ticks below count from combat start, f21295 (Quicksilver's first +
 |---|---|---|---|---|---|---|---|---|
 | E4 | 2026-11-18 | rls-19.1.0.5973071 | VOD5 5:53 | 60 | inspection panel | 800/800, 0/50, 8/s; AD 40, AS 0.92, crit 45%, armor 50, MR 70; Blue Buff, Quicksilver; Composer 1/1, Bodyguard (2) from the board | 0.8 x 1.15 AS, 25 + 20 crit, 2 + 6 regen: as built | Q1 |
 | E5 | 2026-11-18 | rls-19.1.0.5973071 | VOD5 f21316-21998 (`tools/vod_text_changes.py`, mana and as) | 60 | mana text, AS | 12 (tick 10.5), 14, 21, 23, 25, 27, 29, 36, 38, 40, 42, 44, cast (tick 80); 1 (155.5), 3, 5, 12 (170.5), ... 48, cast (253.5, filled by regen); 2 (328.5), 4, 11 (342.5). Regen +2 every 7.5 ticks at 14, 21.5, 29, ...; attacks +7 at 16, 48, 80, 170.5, 199.5, 226.5, 342.5; AS +0.024 every 60 frames from f21355 | engine (Blue Buff, Quicksilver): attacks 15, 48, 79, 170, 199, 227; mana lock and cast lock as built. The engine pays a regen step at tick 0 (T7) that the clip doesn't show (first step ~6.5 ticks after the start, G17), so it has 2 mana more at each fill and its regen-filled second cast comes at 249, the clip's at 253.5 | Q2, Q7, Q9 |
+
+VOD7 rows: `…PBE_11-20-2026_22-23-46-350.mp4` (session folder 21-47-56-118), 60 fps, the owner's full PBE game on client
+rls-19.1.0.6011486 (not exported; Malzahar's data unchanged 5973071-6005555); Malzahar 1★, round 2-1, no items, Prodigy (3).
+
+| # | Date | Build | VOD time / frames | fps | Measured | Values | Result | Question |
+|---|---|---|---|---|---|---|---|---|
+| E6 | 2026-11-20 | rls-19.1.0.6011486 | VOD7 f11796-12509 (3:16-3:28; panel at f11900) | 60 | mana text, panel | 800/800, 0/50, 6/s (2 + Prodigy 3 + 1), AS 0.80; cast f11797 filled by an attack (46 + 7: overflow 3 shown f11948, +151 frames); attacks +7 at f11984, 12060, 12134, 12407, 12483 (74-76 frames apart); second cast f12194 filled by regen (first mana f12358) | mana lock: +151 frames = 75.5 ticks, as VOD3 and VOD5. Engine (Prodigy (3), no items): attacks 37-38 ticks apart (clip 38), next attack 94 ticks after the filling attack (clip 93.5); regen-filled lock end bounded (12344, 12358], engine 75 | Q2, Q7, Q9 |
 
 ## Decisions and notes
 

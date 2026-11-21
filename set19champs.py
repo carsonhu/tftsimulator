@@ -2723,10 +2723,90 @@ class SeraphineSuperstar(Seraphine):
     display_name = 'Seraphine (Superstar)'
 
 
+class Vladimir(BuildChampion):
+    """The Opera Phantom (champions/Vladimir.md, D1). Scripts: GA_Vladimir19_Spell, GA_Vladimir19_Passive (build
+    ga_scripts.zip).
+
+    Activation (0x1b01): commit, GE_IncSpellStackBy1_CombatOnly (the unit's Stack attribute, from 0 each combat), the
+    mana lock (0x1b56). Stack mod NumCastsForChandelier (5 / 5 / 1) == 0 (0x1f76) -> BigCast, else NormalCast; one or
+    the other, never both:
+    - NormalCast (0x2620) plays CD_Vladimir19_CastNormal; its 'Cast' event (0.1425 s, 0x30ab -> 0x2757) takes
+      GetMainSpellTargets: the attack target, then the NumEnemiesMainCast nearest enemies by row distance, the first
+      3, as a repeating list of 3 (fewer enemies: the list wraps, so 1 enemy takes all 3). Each gets
+      GE_Vladimir19_NormalDamage (MagicDamageCalc1 = APDamage x AP, magic, on-spell) and, with Classical on the
+      board, a Captivate for CaptivateSpellDuration (3 s), plus a healing missile back to him. 'Unlock' (0.9503 s)
+      ends the spell (EndSpell: mana lock removed, FinishCasting): 29 / 30 ticks.
+    - BigCast (0x20f0) plays CD_Vladimir19_CastSpecial at the board's grid centre and spawns the chandelier there with
+      CD_Vladimir19_Chandelier (speed ChandelierDropSpeed = 1 below 3 stars). Its 'Damage' event (1.7963 s, 0x389):
+      every enemy takes GE_Vladimir19_MajorDamage = MagicDamageCalc2 (ChandelierDamage x AP) x max(DamageMinimumPercent,
+      1 - DamageReductionPerHexFromCenter x n), n = the enemy's hex ring from the grid centre (CT_BoardAOERange). The
+      special chrono's 'Unlock' (1.8 s) ends the spell: 54 / 55 ticks.
+    VOD7 (2026-11-20, 22-23-46-350) shows both locks: the 5th cast of a fight 47.5-55 ticks, the others 30.
+    Simulated: the grid centre is taken to be the target's hex, so a dummy's ring is its hex distance from the
+    target (assumption, docs/OPEN-QUESTIONS.md). Not simulated: the omnivamp and heal (no damage), the passive
+    (shredded enemies are Captivated: no shred source here), and the 3-star cast's own timeline
+    (CD_Vladimir19_3StarCast: Clap shreds, repeated drops); a 3-star casts the chandelier every time on the 2-star
+    timeline.
+    """
+    KEY = 'DA_Vladimir19'
+    AREA = True  # the main cast hits 3 enemies, the chandelier all of them
+    NORMAL, SPECIAL, CHANDELIER = 'CD_Vladimir19_CastNormal', 'CD_Vladimir19_CastSpecial', 'CD_Vladimir19_Chandelier'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.casts = 0  # GE_IncSpellStackBy1_CombatOnly
+        self.cast_at = self.chrono_event(self.NORMAL, 'Cast')
+        self.drop_at = self.chrono_event(self.CHANDELIER, 'Damage')
+        self.locks = {name: self._locks(name) for name in (self.NORMAL, self.SPECIAL)}
+
+    def _locks(self, chrono):
+        unlock = ticks_up(self.chrono_event(chrono, 'Unlock')) / TPS
+        return unlock + 1 / TPS, unlock
+
+    def big_cast(self):
+        """Is the next cast the chandelier (the Stack after this cast's +1, mod NumCastsForChandelier)?"""
+        return (self.casts + 1) % int(self.row('NumCastsForChandelier')) == 0
+
+    def normal_damage(self, level, AD, AP):
+        return self.row('APDamage', star=level) * AP
+
+    def chandelier_damage(self, level, AD, AP, ring=0):
+        share = max(self.row('DamageMinimumPercent'), 1 - self.row('DamageReductionPerHexFromCenter') * ring)
+        return self.row('ChandelierDamage', star=level) * AP * share
+
+    def main_targets(self, target):
+        n = int(self.row('NumEnemiesMainCast'))
+        picked = ([target] + self.nearest(n, exclude=(target,)))[:n]
+        return [picked[i % len(picked)] for i in range(n)]  # GetRepeatingListFromTargetData
+
+    def performAbility(self, opponents, items, time):
+        big = self.big_cast()
+        self.casts += 1
+        # this cast's own timeline sets its locks; Champion._cast reads them after this call
+        self.timing.cast_lock, self.timing.mana_lock = self.locks[self.SPECIAL if big else self.NORMAL]
+        target = opponents[0]
+        if big:
+            def drop():
+                hit = layout.in_play(self.opponents)
+                self.trace('area', at=target, hit=hit)
+                for d in hit:
+                    ring = layout.distance(target, d)
+                    self.multiTargetSpell([d], self.items, self.tick / TPS, 1,
+                                          lambda level, AD, AP, ring=ring: self.chandelier_damage(level, AD, AP, ring),
+                                          'magical')
+            self.schedule_tick(self.tick + ticks_up(self.drop_at), drop)
+        else:
+            def strike():
+                for d in self.main_targets(target):
+                    self.multiTargetSpell([d], self.items, self.tick / TPS, 1, self.normal_damage, 'magical')
+                    captivate(self, d, self.row('CaptivateSpellDuration'))
+            self.schedule_tick(self.tick + ticks_up(self.cast_at), strike)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
-              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin']
+              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin', 'Vladimir']
 
 
 class TrainingDummy(Champion):

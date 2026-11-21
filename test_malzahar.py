@@ -113,3 +113,15 @@ def test_vod5_cast_lock():
     fill = next(t for t, a, before, after in m.mana_log if a == 7 and after >= 50)
     assert m.casts[0] == fill + 1
     assert next(t for t in attacks if t > fill) - fill == 91
+
+
+def test_vod7_prodigy_three_no_items():
+    # VOD7 (22-23-46-350, 2-1, f11796-12509): no items, Prodigy (3): 6/s, AS 0.80; attacks 74-76 frames apart, the
+    # attack after an attack-filled cast 187 frames (93.5 ticks) after the filling attack: engine 94
+    m = LoggedMalzahar(1)
+    fight(m, buffs=[set19buffs.Prodigy(3)], seconds=10)
+    assert m.manaRegen.stat == 6 and m.aspd.stat == 0.8
+    attacks = [t for t, a, before, after in m.mana_log if a == 7]
+    assert {b - a for a, b in zip(attacks, attacks[1:4])} <= {37, 38}
+    fill = next(t for t, a, before, after in m.mana_log if a == 7 and after >= 50)
+    assert next(t for t in attacks if t > fill) - fill == 94
