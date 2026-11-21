@@ -218,8 +218,7 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
-| Her first attack at combat start | the first release one windup in (G3): 3 ticks after the first regen step (T7) | VOD7: 6-7.5 ticks after the first regen step in both fights; the exact combat start would say which is off (regen phase or first attack) | champions/Alune.md Q3, G3, G17 |
-| A full bar held 25 ticks before the cast (VOD7 4-1 f67202-67253, just after a hit 950 -> 817) | the cast the tick after the fill | owner: was she stunned, or her target untargetable (K2_CanActivateAbility needs a targetable attack target)? | champions/Alune.md E5 |
+| Her first attack at combat start | the first release one windup in (G3): 3 ticks after the first regen step (T7) | VOD7 with combat start from the board's motion: the first attack ~2 ticks later than the engine (T10) and the first regen ~2 earlier (G17); a clip with an exact combat start marker (Blue Buff) would confirm | champions/Alune.md Q3, G3, G17 |
 | Spotlight damage | target Calc3 / (N + 1) + Calc1, the others within 2 hexes Calc3 / (N + 1) | damage numbers of a cast on targets of known MR, with 1 and with 2+ enemies near the target | champions/Alune.md D1 |
 
 ### 7n. Augments
