@@ -254,8 +254,6 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
 |---|---|---|---|
-| One enemy in the line | PrimaryDamage twice on it (HighestHP falls back to PrimaryTarget, ComputeTargetsInLineAndUpdate 0x5ce): 2 x 300 x AP at 1 star | a cast with one enemy in her line (late fight): one damage number or two | champions/Aurora.md D1 |
-| Which enemies take the 300 | the 2 with the most Health in the line; a dummy's Health = its HP less her damage to it, ties in placement order | (the dummies' order only matters for per-target effects) | champions/Aurora.md D1 |
 | Every page target in the line | yes: LineWidth 440 holds the target and its 6 neighbours, and she can blink up to 10 hexes for the best line | a board with enemies spread wider than her line (not simulated: the page's targets stand together) | champions/Aurora.md D1 |
 | Damage numbers | Primary 300/450/2000 x AP, AOE 90/135/1500 x AP, magic, crit only with Precision (Renegade gives it) | damage numbers on targets of known MR; VOD8's omnivamp heals (+94, +63) fit the blast's moment but not one size | champions/Aurora.md Q13 |
 

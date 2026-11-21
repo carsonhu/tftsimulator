@@ -3289,11 +3289,13 @@ class Aurora(BuildChampion):
     the cast counts as no attack.
     Simulated: the line from her own hex. LineWidth 440 covers every page target (the target and its neighbours
     stand within 186 units of a line through it along a hex axis), so no hex within her blink range does better and
-    every page target is in the line. Health = the dummy's HP less the damage she has dealt it (dummies never heal or
-    take other damage); ties in placement order, the target first.
+    every page target is in the line. Owner's ruling (2026-11-21), over the script's Health sort and lone-enemy
+    fallback: the first 2 page targets take PrimaryDamage, the rest AOEDamage, and a lone enemy takes PrimaryDamage
+    once (the dummies track no Health).
     """
     KEY = 'DA_Aurora19'
     AREA = True  # the blast's targets are the page's targets (layout.py)
+    TARGETS_DEFAULT = 4  # owner, 2026-11-21
     CAST = 'CD_Aurora19_CastAnim'
     LENGTH, WIDTH = 2600, 440  # GA_Aurora19_Spell defaults 'LineLength', 'LineWidth' (not in the snapshot: P15 b)
 
@@ -3304,13 +3306,7 @@ class Aurora(BuildChampion):
         unlock = ticks_up(self.chrono_event(self.CAST, 'Unlock')) / TPS
         self.timing.cast_lock, self.timing.mana_lock = unlock + 1 / TPS, unlock
         self.timing.source['cast_lock'] = self.timing.source['mana_lock'] = f'{self.CAST} Unlock (GA_Aurora19_Spell 0x244f)'
-        self.taken = {}  # id(dummy) -> damage she has dealt it: its lost Health
         self.marks = None
-
-    def doDamage(self, opponent, *args, **kwargs):
-        before = self.dmgDealt
-        super().doDamage(opponent, *args, **kwargs)
-        self.taken[id(opponent)] = self.taken.get(id(opponent), 0) + self.dmgDealt - before
 
     def primary_damage(self, level, AD, AP):
         return self.row('PrimaryDamageAP', star=level) * AP
@@ -3319,13 +3315,11 @@ class Aurora(BuildChampion):
         return self.row('AOEDamageAP', star=level) * AP
 
     def blast_targets(self, target):
-        """(PrimaryTarget, HighestHP, the rest): the enemies in her line by Health, highest first (ComputeTargetsInLine
-        AndUpdate); HighestHP is PrimaryTarget again when the line holds one enemy."""
+        """(the primaries, the rest): the first 2 enemies in her line in placement order take PrimaryDamage, the others
+        AOEDamage (owner, 2026-11-21: no Health sort, a lone enemy takes it once)."""
         in_line = [d for d, _ in self.line(target, self.LENGTH, self.WIDTH)] or [target]
-        order = sorted(in_line, key=lambda d: (-(d.hp.stat - self.taken.get(id(d), 0)), self.opponents.index(d)))
-        primary = order[0]
-        second = order[1] if len(order) > 1 else primary
-        return primary, second, order[2:]
+        order = sorted(in_line, key=self.opponents.index)
+        return order[:2], order[2:]
 
     def performAbility(self, opponents, items, time):
         target = opponents[0]
@@ -3334,11 +3328,10 @@ class Aurora(BuildChampion):
             self.marks = self.blast_targets(target)
 
         def blast():
-            primary, second, rest = self.marks
+            primaries, rest = self.marks
             now = self.tick / TPS
-            self.trace('beam', at=primary, hit=[primary] + ([second] if second is not primary else []) + rest)
-            self.multiTargetSpell([primary], items, now, 1, self.primary_damage, 'magical')
-            self.multiTargetSpell([second], items, now, 1, self.primary_damage, 'magical')
+            self.trace('beam', at=primaries[0], hit=primaries + rest)
+            self.multiTargetSpell(primaries, items, now, len(primaries), self.primary_damage, 'magical')
             self.multiTargetSpell(rest, items, now, len(rest), self.aoe_damage, 'magical')
 
         self.schedule_tick(self.tick + ticks_up(self.mark_at), mark)

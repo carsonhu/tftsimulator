@@ -82,24 +82,24 @@ def test_blast_lands_at_damage():
     assert rows[a.casts[0] + 33] == [300.0, 300.0]
 
 
-def test_one_target_takes_the_primary_twice():
-    # one enemy in the line: HighestHP falls back to PrimaryTarget (ComputeTargetsInLineAndUpdate 0x5ce-0x5f9)
+def test_one_target_takes_the_primary_once():
+    # owner, 2026-11-21: a lone enemy takes PrimaryDamage once (not the script's HighestHP fallback to it)
     a = LoggedAurora(1)
     _, rows = fight(a, seconds=10, targets=1)
-    assert rows[a.casts[0] + 33] == [300.0, 300.0]
+    assert rows[a.casts[0] + 33] == [300.0]
 
 
-def test_two_highest_health_take_the_primary():
-    # 4 targets, all in the line: her attacks have hit the target, so the 2 others with the most Health take
-    # PrimaryDamageAP x AP and the target and the last take AOEDamageAP x AP; at the next cast the one that took only
-    # the AOE leads (90 lost), then a first-cast primary (300), the target last (its attacks and the AOE)
+def test_first_two_targets_take_the_primary():
+    # owner, 2026-11-21: the first 2 page targets take PrimaryDamageAP x AP, the rest AOEDamageAP x AP, every cast
     a = LoggedAurora(1)
     ds, rows = fight(a, seconds=20, targets=4)
     assert sorted(rows[a.casts[0] + 33]) == [90.0, 90.0, 300.0, 300.0]
-    (p1, s1, rest1), (p2, s2, rest2) = a.blasts[:2]
-    assert ds[0] not in (p1, s1) and ds[0] in rest1
-    aoe_only = next(d for d in rest1 if d is not ds[0])
-    assert p2 is aoe_only and s2 in (p1, s1) and ds[0] in rest2
+    for primaries, rest in a.blasts[:2]:
+        assert primaries == ds[:2] and rest == ds[2:]
+
+
+def test_default_targets():
+    assert Aurora.TARGETS_DEFAULT == 4  # owner, 2026-11-21
 
 
 def test_line_holds_every_page_target():
@@ -107,4 +107,4 @@ def test_line_holds_every_page_target():
     for n in range(1, 8):
         a = LoggedAurora(2)
         _, rows = fight(a, seconds=10, targets=n)
-        assert len(rows[a.casts[0] + 33]) == max(n, 2)
+        assert len(rows[a.casts[0] + 33]) == n

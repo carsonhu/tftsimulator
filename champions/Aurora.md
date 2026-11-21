@@ -77,7 +77,7 @@ Each answer needs evidence (an entry in the evidence log) or a reference to a gl
 | Q10 | Does the mana lock scale with attack speed? | no | predicted | |
 | Q11 | How many attacks does a cast count as (on-attack effects, attack counters, role mana)? | 0 (no GE_SimulateLaunchAttack) | predicted | D1 |
 | Q12 | Does the cast cancel or reset an attack in progress? | cancels (CancelAbilitiesWithTag Combat.Attacking) | predicted | |
-| Q13 | Ability damage: formula, targets, hit count match the text and variables | PrimaryDamage (MagicDamageCalc2) on the 2 highest-Health enemies in the line, twice on a lone one; AOEDamage (MagicDamageCalc1) on the rest; at 'Damage' 1.0738 s | timing consistent (omnivamp heals at the predicted tick, E3); amounts predicted | D1, E3 |
+| Q13 | Ability damage: formula, targets, hit count match the text and variables | PrimaryDamage (MagicDamageCalc2) on the first 2 targets, once on a lone one (owner, 2026-11-21); AOEDamage (MagicDamageCalc1) on the rest; at 'Damage' 1.0738 s | timing consistent (omnivamp heals at the predicted tick, E3); amounts predicted | D1, E3 |
 | Q14 | Passives and other mechanics that need modelling | blink (untargetable, deprioritised): nothing against dummies | not applicable | D1 |
 | Q15 | Can this unit be simulated realistically? | | **yes**, implemented 2026-11-21 | D1 |
 
@@ -112,9 +112,10 @@ and Renegade inactive (1 member each). Mana and AS from `tools/vod_text_changes.
     magic, AppliesOnSpell, AOE, crit only with Precision (FModel export). 'Unlock' 2.0323 s: mana lock removed,
     FinishCasting; cast lock = the Unlock tick + 1 (as Yasuo, Lux).
   - **Simulated:** the line from her own hex; LineWidth 440 holds every page target (the target's neighbours stand
-    186 units off a hex axis through it), so no blink hex does better. Health = the dummy's HP less her damage to it
-    (dummies never heal; nothing else hits them); ties in placement order, the target first. Her attacks lower the
-    target, so with 3+ targets the first blast's 300s go to the others.
+    186 units off a hex axis through it), so no blink hex does better.
+  - **Owner's ruling (2026-11-21), over the script reading above:** the first 2 targets (placement order, the target
+    first) take PrimaryDamage and the rest AOEDamage; a lone enemy takes PrimaryDamage once, not twice. No Health sort:
+    the dummies track no Health. Targets default to 4 (`TARGETS_DEFAULT`).
   - **Not simulated:** the blink's untargetability and Combat.Status.DeprioritizedForAttacks (dummies never attack).
   - Renegade (her trait) gives Precision, so her blast crits with it (traits/renegade.py); Ionic Spark's letters and
     gift as the trait already does.
