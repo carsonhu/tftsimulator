@@ -2874,10 +2874,117 @@ class Alune(BuildChampion):
                 self.schedule_tick(cast + ticks_up(self.missiles_at + n * self.TIME_BETWEEN_MISSILES), fire)
 
 
+class Yasuo(BuildChampion):
+    """Last Breath (champions/Yasuo.md, D1). Script: GA_Yasuo19_Spell (build ga_scripts.zip).
+
+    Each cast commits, adds 1 to his spell Stack (GE_IncSpellStackBy1_CombatOnly) and applies the mana lock (0x2db9);
+    a Stack that is a multiple of NumCastsToUlt (3) plays the ultimate and resets the Stack (0x2b59-0x2d16), any other
+    the base spell (0x1f6b). Both end at their chrono's 'Unlock' (End Spell 0x1e99: mana lock removed, FinishCasting),
+    the cast lock that + 1 tick (the build's rule, as Katarina's and Senna's).
+    Base spell (GetSpellTargetsAndPositions(false)): the hexes within TargetSearchRadius (1) of his target and his own
+    hex, sorted by distance to the board's centre, then by the enemies in a SlashHexLength (2)-hex line through the
+    target from there (TR_Sort_ByNumEnemiesInNHexLineThroughTarget, width 150); the first is his dash hex. His own hex:
+    CD_Yasuo19_BaseSpell_NoDash ('Damage' 0.194 s, 'Unlock' 0.6409 s); another: he moves there and plays
+    CD_Yasuo19_BaseSpell ('Damage' 0.4115 s, 'Unlock' 0.8568 s). 'Damage' (Handle Base Damage, 0x5ea): the enemies
+    in a rectangle from him towards the target, SlashHexLength x 214.5 long and 150 wide, else his target, take
+    GE_Yasuo19_StabDamage = PhysicalDamageCalc1 (SlashDamageAD x AD), physical, AOE, AppliesOnSpell and
+    AppliesOnHit.IsAttack (on-hit effects, as Gnar's rock), crit only with Precision.
+    Ultimate (target within 1 hex: no whirlwind, 0x19e3): CD_Yasuo19_UltKnockup at his target. 'Knockup' 0.1273 s
+    (GE_Yasuo19_UltKnockup on it); 'Damage1' 0.1888 s and 'Damage2' 0.5278 s: GE_Yasuo19_UltDamageTarget each, 0.5 x
+    PhysicalDamageCalc2 (UltDamageAD x AD), physical, on-spell, crit only with Precision; 'Slam' 1.1514 s:
+    GE_SimulateLaunchAttack (G11) and GE_Yasuo19_UltDamageAOE on the enemies within AOEHexRadius of the target
+    (PhysicalDamageCalc3 = UltDamageAOEAD x AD + UltDamageAOEAP x AP, physical, AOE, on-spell, AppliesOnHit.IsAttack);
+    'Unlock' 1.4317 s. A target more than 1 hex away gets the whirlwind first (CD_Yasuo19_UltWhirlwind, its own
+    GE_SimulateLaunchAttack): not simulated, his target stands next to him.
+    Simulated: the page's targets stand next to the target, the second straight behind it (layout.py), so his own hex
+    already lines up the most and every base cast is the NoDash one; the line hits the target and the enemy behind
+    it. VOD8 4-1 also shows dash casts (enemies moving): their lock is 6 ticks longer.
+    """
+    KEY = 'DA_Yasuo19'
+    AREA = True  # the stab's line and the slam depend on the page's number of targets (layout.py)
+    BASE, ULT = 'CD_Yasuo19_BaseSpell_NoDash', 'CD_Yasuo19_UltKnockup'
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        self.stab_at = self.chrono_event(self.BASE, 'Damage')
+        self.knockup_hits = [self.chrono_event(self.ULT, e) for e in ('Damage1', 'Damage2')]
+        self.slam_at = self.chrono_event(self.ULT, 'Slam')
+        # cast lock = the Unlock event rounded up to a tick, + 1 tick; mana lock = the Unlock tick (End Spell lifts both)
+        self.locks = {name: self._locks(name) for name in (self.BASE, self.ULT)}
+        self.timing.cast_lock, self.timing.mana_lock = self.locks[self.BASE]
+        self.timing.source['cast_lock'] = f'GA_Yasuo19_Spell End Spell at the Unlock of {self.BASE} / {self.ULT}'
+        self.casts_to_ult = int(self.row('NumCastsToUlt'))
+        self.stacks = 0  # GE_IncSpellStackBy1_CombatOnly: a new combat starts at 0
+        self.notes = 'Assumes his target stands next to him: no dash, no whirlwind.'
+
+    def _locks(self, chrono):
+        unlock = ticks_up(self.chrono_event(chrono, 'Unlock')) / TPS
+        return unlock + 1 / TPS, unlock
+
+    def stab_damage(self, level, AD, AP):
+        return self.row('SlashDamageAD', star=level) * AD
+
+    def knockup_damage(self, level, AD, AP):
+        return 0.5 * self.row('UltDamageAD', star=level) * AD  # GE_Yasuo19_UltDamageTarget: coefficient 0.5, twice
+
+    def slam_damage(self, level, AD, AP):
+        return self.row('UltDamageAOEAD', star=level) * AD + self.row('UltDamageAOEAP', star=level) * AP
+
+    def stab_line(self, target):
+        """The enemies in his SlashHexLength-hex line towards `target` (target first): the stab's rectangle from his
+        hex, in hexes; SlashHexLength x 214.5 reaches the enemy 2 hexes away (as Kayn's 429-unit swipe, owner)."""
+        dq, dr = target.hex[0] - self.hex[0], target.hex[1] - self.hex[1]
+        spots = [(self.hex[0] + k * dq, self.hex[1] + k * dr) for k in range(1, int(self.row('SlashHexLength')) + 1)]
+        return [d for h in spots for d in layout.in_play(self.opponents) if d.hex == h]
+
+    def _on_hit_spell(self, enemies, scaling):
+        """Physical spell damage tagged AppliesOnHit.IsAttack (the stab, the slam): on-hit effects on each enemy hit,
+        crit only with Precision (as Gnar's rock)."""
+        items, now = self.items, self.tick / TPS
+        dmg = scaling(self.level, self.bonus_ad.stat, self.ap.stat)
+        crit_dmg = dmg * self.critDamage() if self.canSpellCrit else dmg
+        amp = self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        tags = damage_tags('physical', UNIT, ON_HIT, IS_ATTACK, ON_SPELL)
+        for enemy in enemies:
+            self.emit(ONHIT_PRE, CombatEvent(self, enemy, dtype='physical', tags=tags, time=now), items)
+            self.doDamage(enemy, items, self.crit.stat if self.canSpellCrit else 0, crit_dmg * amp, dmg * amp,
+                          'physical', now, tags=tags)
+            self.emit(ONHIT_AFTER, CombatEvent(self, enemy, tags=tags, time=now), items)
+
+    def performAbility(self, opponents, items, time):
+        target = opponents[0]
+        self.stacks += 1
+        ult = self.stacks % self.casts_to_ult == 0
+        # the spell's own timeline sets this cast's locks; Champion._cast reads them after this call
+        self.timing.cast_lock, self.timing.mana_lock = self.locks[self.ULT if ult else self.BASE]
+        if not ult:
+            def stab():
+                hit = self.stab_line(target)
+                self.trace('area', at=target, hit=hit)
+                self._on_hit_spell(hit, self.stab_damage)
+            self.schedule_tick(self.tick + ticks_up(self.stab_at), stab)
+            return
+        self.stacks = 0  # Clear Spell Stacks (GE_ResetSpellStack_CombatOnly)
+
+        def knockup():
+            self.multiTargetSpell([target], self.items, self.tick / TPS, 1, self.knockup_damage, 'physical')
+
+        def slam():
+            self.simulateLaunch(self.items)
+            hit = [target] + self.nearby(target, self.row('AOEHexRadius'))
+            self.trace('area', at=target, hit=hit)
+            self._on_hit_spell(hit, self.slam_damage)
+
+        for at in self.knockup_hits:
+            self.schedule_tick(self.tick + ticks_up(at), knockup)
+        self.schedule_tick(self.tick + ticks_up(self.slam_at), slam)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
-              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin', 'Vladimir', 'Alune']
+              'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin', 'Vladimir', 'Alune',
+              'Yasuo']
 
 
 class TrainingDummy(Champion):

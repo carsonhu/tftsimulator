@@ -220,6 +220,15 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Her first attack at combat start | the first release one windup in (G3): 3 ticks after the first regen step (T7) | VOD7 with combat start from the board's motion: the first attack ~2 ticks later than the engine (T10) and the first regen ~2 earlier (G17); a clip with an exact combat start marker (Blue Buff) would confirm | champions/Alune.md Q3, G3, G17 |
 | Spotlight damage | target Calc3 / (N + 1) + Calc1, the others within 2 hexes Calc3 / (N + 1) | damage numbers of a cast on targets of known MR, with 1 and with 2+ enemies near the target | champions/Alune.md D1 |
 
+### 7z. Yasuo (VOD8 has him at 4-1 and 4-3)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| Dash or not | every base cast the NoDash one: the page's second target stands straight behind the target, so his own hex lines up the most | VOD8: both kinds (dash locks 6 ticks longer); a clip of the dash hex chosen with the targets known would check the sort (board centre, then enemies in the line) | champions/Yasuo.md D1 |
+| On-hit effects of the stab and the slam | each enemy hit gets the on-hit events (AppliesOnHit.IsAttack, as Gnar's rock) | an on-hit item (Wit's End, a Hydra) on Yasuo: its procs per stab on 2 enemies | champions/Yasuo.md D1 |
+| Bonus AD on his panel | items give +101% (IE 35, Infinity Force 30, Hand of Justice 36) | VOD8 4-1 / 4-3: 108%; the extra +7% source (augment?) for the owner to name | champions/Yasuo.md E1 |
+| Ult and stab damage numbers | stab SlashDamageAD x AD on the 2-hex line; ult 2 x 0.5 x UltDamageAD x AD on the target; slam UltDamageAOEAD x AD + UltDamageAOEAP x AP within AOEHexRadius | damage numbers on targets of known armor | champions/Yasuo.md Q13 |
+
 ### 7n. Augments
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |
