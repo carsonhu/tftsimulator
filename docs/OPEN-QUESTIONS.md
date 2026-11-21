@@ -259,6 +259,16 @@ Best: the Blue Buff holder's own panel, a ranged caster that casts at least twic
 | Every page target in the line | yes: LineWidth 440 holds the target and its 6 neighbours, and she can blink up to 10 hexes for the best line | a board with enemies spread wider than her line (not simulated: the page's targets stand together) | champions/Aurora.md D1 |
 | Damage numbers | Primary 300/450/2000 x AP, AOE 90/135/1500 x AP, magic, crit only with Precision (Renegade gives it) | damage numbers on targets of known MR; VOD8's omnivamp heals (+94, +63) fit the blast's moment but not one size | champions/Aurora.md Q13 |
 
+### 7ad. Graves (VOD8 has him at 5-7, PvE)
+
+| Question | What the simulator assumes now | What the clip shows | Ledger |
+|---|---|---|---|
+| A bullet's hit width | a dummy whose centre is within 125 of its path (the dash sort's ProjectileWidth 250; the bullet's box is 110 wide, units' size not in the data): from 2 hexes 3 of 5 bullets hit a lone target, from 1 hex all 5 | damage numbers of one volley on a lone target 2 hexes off (with the dash blocked) | champions/Graves.md D1 |
+| The first empowered attack after a dash starts on the 'Arrive' tick | yes (VOD8 E3: 44 vs 33 ticks to the buff's end; one sighting, the dash itself not visible) | a dash seen on screen, with the AS text | champions/Graves.md E3 |
+| Dash hexes at the same distance | the first in the simulator's hex order wins (3-4 targets: beside the target, (0, 1) before (1, 0)); the game's sort doesn't fix the order | (the same damage either way on the page) | champions/Graves.md D1 |
+| Very high attack speed | always 2 empowered attacks; at AS 1.92+ under the buff the next attack starts before the 2nd's CustomEventOnAttack1, which may cut it and give a 3rd | a Graves with +95% AS or more casting | champions/Graves.md D1 |
+| Damage numbers | per bullet 40/60/325 x AD + 5/7/35 x AP physical, crit only with Precision, on-hit at 0.8 | damage numbers on a target of known armor | champions/Graves.md Q13 |
+
 ### 7n. Augments
 
 | Question | What the simulator assumes now | What the clip shows | Ledger |

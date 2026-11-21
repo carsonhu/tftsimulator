@@ -3345,11 +3345,199 @@ class Aurora(BuildChampion):
         self.schedule_tick(self.tick + ticks_up(self.damage_at), blast)
 
 
+class Graves(BuildChampion):
+    """Left Hand Free (champions/Graves.md, D1). Scripts: GA_Graves19_Spell, GA_Graves19_Passive (build ga_scripts.zip);
+    GEs, chronos and TR_Sort_SlotForGravesStyleShotgun from the FModel export of 6011486.
+
+    The cast (GA_Graves19_Spell, instant: FinishCasting on activation, cancels an attack under way) applies the mana
+    lock, GE_GenericGetEmpoweredAutoAttackTag (SharedSets.GenericUseEmpoweredAttack) and GE_Graves19_AttackSpeedBuff
+    (AttackSpeed MultiplyAdditive AttackSpeedCalc1 = 1 + AttackSpeed row, Channel1: +125%). Each
+    Combat.Event.LaunchAttack.Custom.1 counts an attack (0xf); each Combat.Event.CustomEventOnAttack.1 (0x5b5) with
+    NumAttacksDone >= NumAttacks removes the AS buff, the empower and the mana lock: they end at the last empowered
+    attack's CustomEventOnAttack1 (0.52 s into its animation; VOD8 E3: AS 1.84 -> 1.09 33 ticks after the cast), so
+    the empowered attacks' own mana is lost. A kill adds ExtraAttackPerKill (0x8f): dummies never die.
+    With the tag, CD_Graves19_Attack plays EmpoweredAttack (CustomLaunchAttack1 0.12 s, CustomEventOnAttack1 0.52 s,
+    of 1.4333 s), else SequentialAttack (LaunchAttack 0.12 s of 1.4667 s); both G2. The empowered module's length is
+    not in the build (ledger P14); it would matter only below AS 0.70, and the empowered attacks run at +125% AS.
+    The custom launch (GA_Graves19_Passive 0x1826) fires no attack projectile: NumMissiles CD_Graves19_ConeProjectile
+    'SpellMis' (2500 units/s), bullet i to the point TotalRange = min(AttackRange x 214.5 + 200, 2300) along the line
+    to the target, offset (i / (NumMissiles - 1) - 0.5) x ConeWidth across it (DetermineBulletTargetLocation). A
+    bullet's first overlap with an enemy (0xeb5) applies GE_Graves19_Damage to it if it is the first bullet to hit
+    anything (IsAttack), else GE_Graves19_DamageNoIsAttack, and destroys the bullet: PhysicalDamageCalc1 = ADDamage x
+    AD + APDamage x AP, physical, AppliesOnSpell + AppliesOnHit at OnHitEffectivenessPerBullet, crit only with
+    Precision. Simulated: a bullet hits the first dummy whose centre is within ProjectileWidth / 2 (the script's 250,
+    the width the dash's sort counts hits with; the bullet's own box is 2 x 55 wide, units' size unknown) of its path.
+    The dash (passive 0x891, when the cast's Combat.Casting tag is added): DetermineHexToDashTo takes the unoccupied
+    hexes (his own included) within AttackRange of his target, sorted by distance from him, then by
+    TR_Sort_SlotForGravesStyleShotgun (more bullets whose ProjectileWidth-wide rectangle from that hex holds a unit;
+    0 unless one holds the target); with a range bonus the first sort is by safety instead (not simulated: dummies
+    threaten nothing). Another hex: GE_BlockAttacking and CD_Graves19_Dash there; 'Arrive' (the movement module's end,
+    0.3964 s: a fixed time, as Vayne's 'MovementComplete') unblocks attacks, and the first empowered attack starts on
+    that tick (VOD8 E3: AS buff off 44 ticks after the dash cast, 33 after the other). Not simulated: the dash on a
+    target change while empowered (dummies never move or die).
+    """
+    KEY = 'DA_Graves19'
+    AREA = True  # the bullets reach the dummies next to the target (layout.py)
+    HIT_EMPOWERED = 'empowered_left'  # the page's Hit table: a cast is the empowered attacks
+    ATTACK, CONE, DASH = 'CD_Graves19_Attack', 'CD_Graves19_ConeProjectile', 'CD_Graves19_Dash'
+    NORMAL, EMPOWERED = 1, 2  # the animation selectors this class gives his attack groups
+    # literals in GA_Graves19_Passive / TR_Sort_SlotForGravesStyleShotgun (build ga_scripts.zip, FModel export):
+    # DetermineBulletTargetLocation / GetBulletOffset's TotalRange, and the dash sort's ProjectileWidth (ledger P15 b)
+    RANGE_UNITS, RANGE_EXTRA, RANGE_MAX = 214.5, 200.0, 2300.0
+    PROJECTILE_WIDTH = 250.0
+
+    def __init__(self, level, build=None):
+        super().__init__(level, build)
+        t, ch = self.timing, self.chrono(self.ATTACK)
+        launch = self.chrono_event(self.ATTACK, 'LaunchAttack')
+        custom = self.chrono_event(self.ATTACK, 'CustomLaunchAttack1')
+        t.variants = [{'selector': self.NORMAL, 'min_as': None, 'launch': launch, 'length': ch['anim_end']},
+                      {'selector': self.EMPOWERED, 'min_as': None, 'launch': custom, 'length': ch['anim_end']}]
+        t.animations = 1
+        t.source['variants'] = f'{self.ATTACK}: SequentialAttack, EmpoweredAttack (CustomAttack.1; its length P14)'
+        self.on_attack_at = self.chrono_event(self.ATTACK, 'CustomEventOnAttack1')
+        self.arrive_at = self.chrono_event(self.DASH, 'Arrive')
+        self.instant_lock = t.cast_lock  # the build's lockout: FinishCasting on activation + 1 tick
+        t.mana_lock = 10 ** 6  # lifted at the last empowered attack's CustomEventOnAttack1 (onLaunch)
+        t.source['mana_lock'] = 'GA_Graves19_Spell: removed at CustomEventOnAttack.1 once NumAttacks are done (0x5b5)'
+        t.source['cast_lock'] = (f"the build's lockout; after a dash, {self.DASH} 'Arrive' on the tick grid "
+                                 '(VOD8 E3)')
+        if self.row('NumMissiles') < 2:
+            raise BuildDataError(f'{self.KEY}: NumMissiles {self.row("NumMissiles")} in build {self.build.version}: '
+                                 'the cone needs 2 or more bullets')
+        self.empowered_left = 0
+        self._planned = self.NORMAL
+        self._this_empowered = False
+
+    def bullet_damage(self, level, AD, AP):
+        return self.row('ADDamage', star=level) * AD + self.row('APDamage', star=level) * AP
+
+    # ------------------------------------------------------------ the cone
+    def _total_range(self):
+        return min(self.attack_range * self.RANGE_UNITS + self.RANGE_EXTRA, self.RANGE_MAX)
+
+    def _bullet_paths(self, origin, target_pt):
+        """(unit direction, length) of each bullet from `origin` (world units) aimed past `target_pt`."""
+        dx, dy = target_pt[0] - origin[0], target_pt[1] - origin[1]
+        norm = math.hypot(dx, dy) or 1.0
+        ux, uy = dx / norm, dy / norm
+        px, py = uy, -ux  # Cross(direction, up)
+        n, width, reach = int(self.row('NumMissiles')), self.row('ConeWidth'), self._total_range()
+        paths = []
+        for i in range(n):
+            off = (i / (n - 1) - 0.5) * width
+            ex, ey = ux * reach + px * off, uy * reach + py * off
+            length = math.hypot(ex, ey)
+            paths.append(((ex / length, ey / length), length))
+        return paths
+
+    def _in_path(self, origin, path, dummies):
+        """[(dummy, distance along)] for the dummies whose centre is within ProjectileWidth / 2 of the path, nearest
+        first."""
+        (ux, uy), length = path
+        out = []
+        for d in dummies:
+            x, y = layout.world(d.hex)
+            x, y = x - origin[0], y - origin[1]
+            along, off = x * ux + y * uy, abs(x * uy - y * ux)
+            if -1e-9 <= along <= length + 1e-9 and off <= self.PROJECTILE_WIDTH / 2 + 1e-9:
+                out.append((d, along))
+        return sorted(out, key=lambda h: h[1])
+
+    def _first_hit(self, origin, path, dummies):
+        """The dummy a bullet meets first (it is destroyed on its first overlap) and how far along, or None."""
+        hits = self._in_path(origin, path, dummies)
+        return hits[0] if hits else None
+
+    def _bullets_hitting(self, hex_, target, dummies):
+        """TR_Sort_SlotForGravesStyleShotgun's score of `hex_`: the bullets whose rectangle (TR_Add_UnitsWithinRectangle)
+        holds a unit, 0 unless one holds the target. It counts every unit in a rectangle, not the first one."""
+        origin = layout.world(hex_)
+        rects = [self._in_path(origin, p, dummies) for p in self._bullet_paths(origin, layout.world(target.hex))]
+        if not any(d is target for r in rects for d, _ in r):
+            return 0
+        return sum(1 for r in rects if r)
+
+    def dash_hex(self, target, dummies):
+        """DetermineHexToDashTo: the unoccupied hexes within AttackRange of the target (his own included), nearest him
+        first, then most bullets hitting (a stable sort: ties keep the nearer)."""
+        reach = int(self.attack_range)
+        taken = {d.hex for d in dummies}
+        tq, tr = target.hex
+        cands = [(tq + dq, tr + dr) for dq in range(-reach, reach + 1) for dr in range(-reach, reach + 1)
+                 if layout.hex_distance((tq + dq, tr + dr), target.hex) <= reach]
+        cands = [h for h in cands if h not in taken]
+        me = layout.world(self.hex)
+
+        def dist(h):
+            x, y = layout.world(h)
+            return math.hypot(x - me[0], y - me[1])
+        cands.sort(key=dist)
+        cands.sort(key=lambda h: -self._bullets_hitting(h, target, dummies))
+        return cands[0] if cands else self.hex
+
+    # ------------------------------------------------------------ the cast and the empowered attacks
+    def _next_animation(self):
+        self._planned = self.EMPOWERED if self.empowered_left > 0 else self.NORMAL
+        return self._planned, self.aspd.stat
+
+    def performAbility(self, opponents, items, time):
+        dummies = layout.in_play(opponents)
+        lock = self.instant_lock
+        if opponents and self.hex is not None and opponents[0].hex is not None:
+            to = self.dash_hex(opponents[0], dummies)
+            if to != self.hex:
+                moved = layout.hex_distance(self.hex, to)
+                self.hex = to
+                lock = ticks_up(self.arrive_at) / TPS  # attacks blocked until 'Arrive' (VOD8 E3)
+                self.trace('dash', ticks=ticks_up(self.arrive_at), hexes=moved)
+        self.timing.cast_lock = lock  # Champion._cast reads it after this call
+        self.aspd.modify('MultiplyAdditive', 1 + self.row('AttackSpeed'), key='graves_empowered')
+        self.empowered_left = int(self.row('NumAttacks'))
+
+    def onLaunch(self, opponents, items):
+        self._this_empowered = self._planned == self.EMPOWERED
+        if self._this_empowered:
+            self.empowered_left -= 1
+            if self.empowered_left == 0:
+                # CustomEventOnAttack1 of this attack: its animation from the attack's start, at the attack period
+                ev = self.timing._stretched(self.on_attack_at, self.timing.attack_len, self.period_ticks())
+                self.schedule_tick(self.attack_start_tick + ticks_up(ev), self._empower_ends)
+
+    def _empower_ends(self):
+        self.aspd.remove('graves_empowered')
+        self.mana_locked_until = self.tick
+
+    def fire_attack(self, opponents, items, moment, paid):
+        if not self._this_empowered:
+            return super().fire_attack(opponents, items, moment, paid)
+        dummies = layout.in_play(opponents)
+        origin = layout.world(self.hex)
+        hits = [self._first_hit(origin, p, dummies) for p in self._bullet_paths(origin, layout.world(opponents[0].hex))]
+        landed = [(self.chrono_projectile_ticks(self.CONE, 'SpellMis', h[1] / HEX_UNITS), i, h[0])
+                  for i, h in enumerate(hits) if h]
+        first = min(landed)[1] if landed else None  # the first bullet to hit anything is the attack (IsAttack)
+        for flight, i, d in landed:
+            self.fly(self.tick, flight, d, lambda d=d, f=(i == first): self._bullet_lands(d, f), name='bullet')
+
+    def _bullet_lands(self, target, first):
+        items, now = self.items, self.tick / TPS
+        dmg = self.bullet_damage(self.level, self.bonus_ad.stat, self.ap.stat)
+        crit_dmg = dmg * self.critDamage() if self.canSpellCrit else dmg
+        amp = self.dmgMultiplier.stat * self.extraDmgMultiplier.stat
+        eff = self.row('OnHitEffectivenessPerBullet')
+        tags = damage_tags('physical', UNIT, ON_HIT, ON_SPELL, *((IS_ATTACK,) if first else ()))
+        self.emit(ONHIT_PRE, CombatEvent(self, target, dtype='physical', tags=tags, time=now, effectiveness=eff), items)
+        self.doDamage(target, items, self.crit.stat if self.canSpellCrit else 0, crit_dmg * amp, dmg * amp,
+                      'physical', now, tags=tags)
+        self.emit(ONHIT_AFTER, CombatEvent(self, target, tags=tags, time=now, effectiveness=eff), items)
+
+
 champ_list = ['Neeko', 'Varus', 'Draven', 'Kaisa', 'Yunara', 'Ziggs', 'Senna', 'Ezreal', 'Lux', 'Gnar', 'Malzahar', 'Samira', 'Karthus',
               'OlafHeroAugment', 'Ashe', 'Viego', 'Kayle', 'Lucian', 'RenataGlasc', 'Zoe', 'Bard',
               'Syndra', 'Briar', 'Xayah', 'Katarina', 'Kayn', 'Qiyana', 'Seraphine', 'SeraphineRisingStar',
               'SeraphineSuperstar', 'Yuumi', 'Yone', 'Tristana', 'Mel', 'Jinx', 'Ahri', 'Jhin', 'Vladimir', 'Alune',
-              'Yasuo', 'Vayne', 'Aphelios', 'Aurora']
+              'Yasuo', 'Vayne', 'Aphelios', 'Aurora', 'Graves']
 
 
 class TrainingDummy(Champion):
