@@ -162,6 +162,22 @@ const puppeteer = require("puppeteer-core");
     }));
     console.log("Vladimir targets:", JSON.stringify(vlad));
     if (vlad.value !== "7" || vlad.buttons.join(",") !== "3,4,5,6,7*,8,9") console.log("FAIL Vladimir targets (3-9, default 7)");
+    // Seraphine (owner, 2026-11-22): Indie has no Targets; the Superstar switch shows them at 8 (the whole board)
+    await page.evaluate(() => {
+      const sel = document.querySelector("#champ");
+      sel.value = "Seraphine";
+      sel.dispatchEvent(new Event("change"));
+    });
+    await page.waitForFunction(() => document.querySelector("#targetsRow").hidden, { timeout: 30000 });
+    await page.evaluate(() => [...document.querySelectorAll("#champModes button")].find((b) => b.textContent === "Superstar").click());
+    await page.waitForFunction(() => !document.querySelector("#targetsRow").hidden, { timeout: 30000 });
+    const sera = await page.evaluate(() => ({
+      champ: document.querySelector("#champ").value, value: document.querySelector("#layoutTargets").value,
+      buttons: [...document.querySelectorAll("#targetsSeg button")].map((b) => b.textContent + (b.getAttribute("aria-checked") === "true" ? "*" : "")),
+    }));
+    console.log("Seraphine Superstar targets:", JSON.stringify(sera));
+    if (sera.champ !== "SeraphineSuperstar" || sera.value !== "8" || sera.buttons.join(",") !== "1,2,3,4,5,6,7,8*,9")
+      console.log("FAIL Seraphine Superstar targets (1-9, default 8)");
   } catch (e) {
     console.log("FAIL targets slider: " + e.message);
   }

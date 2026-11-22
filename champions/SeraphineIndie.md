@@ -139,7 +139,9 @@ Seraphine 1 star, Indie, two items; Heartsteel (3) on the board (Sett fielded). 
     SortByRowDistance; her target if none; GetRepeatingListFromTargetData), CD_Seraphine19_SplinesBonus (1900),
     GE_Seraphine19_DamageBonusNote = MagicDamageCalc2 (ExtraNoteDamageAP x AP).
   - **Superstar:** 'HighNote' (0.269 s): CD_Seraphine19_HighNoteMis ('HighNote', 1800, arc 500) at every enemy,
-    GE_Seraphine19_DamageHighNote = MagicDamageCalc3 (HighNoteDamageAP x AP).
+    GE_Seraphine19_DamageHighNote = MagicDamageCalc3 (HighNoteDamageAP x AP). The page's Targets default to 8 for
+    Superstar, a full board (owner, 2026-11-22: the latest outplayed VOD, Superstar from 4-3 in the bottom-right
+    corner, hits every enemy), up to 9.
   - **End:** 'Unlock' (2.6974 s) ends the cast (81 / 82 ticks).
   - **Simulated:** flights over the target's distance (G4; the speakers' places and the splines' curves not
     modelled); the Indie trait itself (rerolls, popularity, loot) gives no combat power.

@@ -2716,9 +2716,13 @@ class SeraphineRisingStar(Seraphine):
 
 
 class SeraphineSuperstar(Seraphine):
-    """Seraphine's Superstar form (DA_SeraphineSuperstar19): high notes, the stream and the bonus notes."""
+    """Seraphine's Superstar form (DA_SeraphineSuperstar19): high notes, the stream and the bonus notes.
+    Targets: the high notes hit every enemy on the board, so the default is a full board of 8 (owner, 2026-11-22:
+    the latest outplayed VOD, Superstar from 4-3 in the bottom-right corner, hitting every enemy), up to 9."""
     KEY = 'DA_SeraphineSuperstar19'
     FORM = 3
+    AREA = True  # a high note at every enemy, the bonus notes over the nearest
+    TARGETS_DEFAULT, TARGETS_MAX = 8, 9
     MODE = 'Superstar'
     display_name = 'Seraphine (Superstar)'
 

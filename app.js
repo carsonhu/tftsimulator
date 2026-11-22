@@ -1183,6 +1183,8 @@ function renderChampModes(meta, forms) {
     btn.onclick = () => {
       if (on) return;
       $("champ").value = form.name;
+      // a form with its own Targets default starts there (Seraphine's Superstar: the whole board, 8)
+      if (form.area && form.targetsDefault) state.cfg.layout.targets = form.targetsDefault;
       selectChampion(form.name, { keepLevel: true, keepConfig: true });
     };
     box.appendChild(btn);

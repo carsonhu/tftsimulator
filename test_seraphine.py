@@ -64,3 +64,20 @@ def test_rising_star_and_superstar():
     c = collections.Counter(round(d, 2) for _, d in hits)
     assert c[60] == 3 and c[20] == 8  # a high note at each of the 3 dummies
     assert SeraphineSuperstar.display_name == 'Seraphine (Superstar)'
+
+
+def test_superstar_targets_the_whole_board():
+    # owner, 2026-11-22: Superstar's high notes hit every enemy, so the page starts her at a full board of 8
+    from sim_entry import get_catalog
+    forms = {c["name"]: c for c in get_catalog()["champions"] if c["name"].startswith("Seraphine")}
+    star = forms["SeraphineSuperstar"]
+    assert (star["area"], star["targetsDefault"], star["targetsMax"]) == (True, 8, 9)
+    assert not forms["Seraphine"]["area"] and not forms["SeraphineRisingStar"]["area"]
+    c = logged(SeraphineSuperstar)
+    ds = [dummy() for _ in range(8)]
+    for d in ds:
+        d.armor.base = d.mr.base = 0
+    Simulator().simulate([], [], c, ds, 14, layout=Layout(8))
+    cast = c.casts[0]
+    high = [d for t, d, *_ in c.dmgVector if cast <= round(t * 30) < cast + 120 and round(d[0], 2) == 60]
+    assert len(high) == 8  # a high note at each of the 8
