@@ -1,7 +1,7 @@
 # Gwen (5-cost MagicFighter) · `DA_Gwen19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Ionic Spark, Melodic Heart
@@ -50,7 +50,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 | `CD_Gwen19_Attack` | Chronos | 3.0666 | LaunchAttack 0.3377, Unlock 1.2267 |
 | `CD_Gwen19_CastAnim_3Star` | Chronos | 2.4703 | BigSnipSpawn 0, SNIP 1.4838, RecastCheck 2.4513 |
 | `CD_Gwen19_CastAnim_new` | Chronos | 1.9539 | BigSnipSpawn 0, SNIP 1.4838, RecastCheck 1.9361 |
-| `CD_Gwen19_DashMove` | Chronos | 0.2714 | Arrived 0.2667 |
+| `CD_Gwen19_DashMove` | Chronos | 0.2706 | Arrived 0.2667 |
 | `CD_Gwen19_ScissorsAnimation` | Chronos | 2.6445 | BigSnipSpawn 0, SNIP 1.4846, ByeScissors 2.5279 |
 | `CD_Gwen19_Scissors_3Star_SmallVersion` | Chronos | 3.63 | BigSnipSpawn 0, SNIP 1.4846, ByeScissors 2.7085 |
 
@@ -66,7 +66,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: GA_Gwen19_Spell.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: GA_Gwen19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

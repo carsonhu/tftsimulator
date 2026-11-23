@@ -1,7 +1,7 @@
 # Karthus (2-cost MagicCaster) · `DA_Karthus19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Pentakill, Arcanist
@@ -9,17 +9,17 @@
 
 ### Ability: Requiem
 
-> After a brief delay, deal 440/660/930 × AP magic damage to the current target. If they die, recast this ability at 70% effectiveness.
+> After a brief delay, deal 440/660/1000 × AP magic damage to the current target. If they die, recast this ability at 70% effectiveness.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
-| APDamage | 440 | 660 | 930 |
+| APDamage | 440 | 660 | 1000 |
 | PercentDamageOfPreviousCast | 0.7 | 0.7 | 0.7 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 440/660/930 × AP
+- `MagicDamageCalc1` = 440/660/1000 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -43,9 +43,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Karthus19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Karthus19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row APDamage: 440 / 660 / 930 -> 440 / 660 / 1000
+- ability text changed
 
 <!-- AUTO END -->
 

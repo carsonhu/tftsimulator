@@ -1,7 +1,7 @@
 # Taliyah (5-cost MagicCaster) · `DA_Taliyah19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Beach Pop, Encore
@@ -12,14 +12,14 @@
 
 > Throw 3 rocks at the target, each dealing 200/300/2000 × AP magic damage.
 > 
-> Every 3/3/1rd cast, quickly reposition and surf in a line instead. Enemies hit take 160/240/2000 × AP + 0.02/0.03/0.5 × AP max Health magic damage and are briefly knocked up.
+> Every 3/3/1rd cast, quickly reposition and surf in a line instead. Enemies hit take 160/240/2000 × AP + 0.03/0.04/0.5 × AP max Health magic damage and are briefly knocked up.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
 | KnockupDuration | 0.5 | 0.5 | 10 |
 | SpellDamageAP | 160 | 240 | 2000 |
-| PercentMaxHPDamageAP | 0.02 | 0.03 | 0.5 |
+| PercentMaxHPDamageAP | 0.03 | 0.04 | 0.5 |
 | ChanceChest | 0 | 0 | 1 |
 | MaxGoldChest | 3 | 3 | 3 |
 | MinGoldChest | 2 | 2 | 2 |
@@ -35,7 +35,7 @@
 Formulas (as stored; AD and AP are multipliers):
 
 - `MagicDamageCalc1` = 160/240/2000 × AP
-- `GenericCalc1` = 0.02/0.03/0.5 × AP
+- `GenericCalc1` = 0.03/0.04/0.5 × AP
 - `MagicDamageCalc2` = 200/300/2000 × AP
 
 ### Timing the client predicts (unverified for Set 19)
@@ -67,9 +67,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Taliyah19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Taliyah19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row PercentMaxHPDamageAP: 0.02 / 0.03 / 0.5 -> 0.03 / 0.04 / 0.5
+- ability text changed
 
 <!-- AUTO END -->
 

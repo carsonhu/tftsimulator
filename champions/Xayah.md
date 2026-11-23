@@ -1,11 +1,11 @@
 # Xayah (4-cost AttackCaster) · `DA_Xayah19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Gu Feng, Hitmaker
-- **HP** 850 / 1530 / 2754 · **AD** 55 / 82.5 / 123.75 · **AS** 0.75 · **Range** 4 · **Armor** 40 · **MR** 40 · **Mana** 0 / 60
+- **HP** 850 / 1530 / 2754 · **AD** 55 / 82.5 / 123.75 · **AS** 0.8 · **Range** 4 · **Armor** 40 · **MR** 40 · **Mana** 0 / 60
 
 ### Ability: Feathers Flying Like Leaves on the Wind
 
@@ -53,9 +53,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: Abilities/GA_Xayah19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Xayah19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- stat AttackSpeed: 0.75 -> 0.8
 
 <!-- AUTO END -->
 

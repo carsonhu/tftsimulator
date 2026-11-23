@@ -1,7 +1,7 @@
 # Mel (4-cost MagicCaster) · `DA_Mel19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: R&B, Arcanist
@@ -9,14 +9,14 @@
 
 ### Ability: Chain of Blues
 
-> Fire 30/30/60 missiles split between the 3 closest enemies that each deal 18/28/200 × AP magic damage and apply a stack of Blues. For every 3 stacks of Blues, enemies take 5% more damage from this Ability.
+> Fire 30/30/60 missiles split between the 3 closest enemies that each deal 19/29/200 × AP magic damage and apply a stack of Blues. For every 3 stacks of Blues, enemies take 5% more damage from this Ability.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
 | NumEnemies | 3 | 3 | 3 |
 | NumMissiles | 30 | 30 | 60 |
-| APDamage | 18 | 28 | 200 |
+| APDamage | 19 | 29 | 200 |
 | PercentDamageOnCurrentTarget | 0.6 | 0.6 | 0.6 |
 | RadianceStacksForNegativeDR | 3 | 3 | 3 |
 | NegativeDRForRadianceBundle | 0.05 | 0.05 | 0.05 |
@@ -24,7 +24,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 18/28/200 × AP
+- `MagicDamageCalc1` = 19/29/200 × AP
 - `GenericCalc1` = 0.05 ÷ 3
 
 ### Timing the client predicts (unverified for Set 19)
@@ -50,9 +50,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Mel19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Mel19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row APDamage: 18 / 28 / 200 -> 19 / 29 / 200
+- ability text changed
 
 <!-- AUTO END -->
 

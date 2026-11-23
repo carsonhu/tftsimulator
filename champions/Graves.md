@@ -1,7 +1,7 @@
 # Graves (4-cost AttackFighter) · `DA_Graves19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Beach Pop, Renegade
@@ -9,12 +9,12 @@
 
 ### Ability: Left Hand Free
 
-> For the next 2 attacks, gain 125% Attack Speed, dash to targets, and replace attacks with a cone of 5 bullets that deal 40/60/325 × AD + 5/7/35 × AP physical damage each. On kill, empower an additional attack.
+> For the next 2 attacks, gain 125% Attack Speed, dash to targets, and replace attacks with a cone of 5 bullets that deal 42/63/325 × AD + 5/7/35 × AP physical damage each. On kill, empower an additional attack.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 85 | 127.5 | 191.25 |
-| ADDamage | 40 | 60 | 325 |
+| ADDamage | 42 | 63 | 325 |
 | NumAttacks | 2 | 2 | 2 |
 | APDamage | 5 | 7 | 35 |
 | AttackSpeed | 1.25 | 1.25 | 1.25 |
@@ -25,7 +25,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 40/60/325 × AD + 5/7/35 × AP
+- `PhysicalDamageCalc1` = 42/63/325 × AD + 5/7/35 × AP
 - `AttackSpeedCalc1` = 1.25 + 1
 - `PhysicalDamageCalc2` = ? × PhysicalDamageCalc1
 
@@ -55,9 +55,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: GA_Graves19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Graves19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row ADDamage: 40 / 60 / 325 -> 42 / 63 / 325
+- ability text changed
 
 <!-- AUTO END -->
 

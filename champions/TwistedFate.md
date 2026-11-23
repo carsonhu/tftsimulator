@@ -1,7 +1,7 @@
 # Twisted Fate (5-cost MagicMarksman) · `DA_TwistedFate19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Tango, Trickshot
@@ -73,7 +73,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `OnHitEffectivenessMultiplier`: scales on-hit effects: GA_TwistedFate19_Spell.txt, GA_TwistedFate19_SpellTrickshot.txt
 - `LaunchAttack`: launches or listens for attacks: GA_TwistedFate19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

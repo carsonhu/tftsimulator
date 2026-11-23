@@ -1,7 +1,7 @@
 # Smeech (5-cost AttackSpecialist_Time) · `DA_Smeech19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** AttackSpecialist_Time: "Specialists generate resources in a unique way." ()
 - **Cost** 5, pool 9; traits: Jazz, Slayer
@@ -12,7 +12,7 @@
 
 > Passive: Gain between 1/1/4 and 4/4/10 Beats per attack. Every 4 seconds, cast.
 > 
-> Active: Gain 250/375/40000 × AP Shield for 3/3/10 seconds and deal 100/150/4000 × AD physical damage to all enemies within 2 hexes. Then strike the current target 4 times, each dealing 240/360/2600 × AD physical damage + 12/18/350 × AD per Beat.
+> Active: Gain 250/375/40000 × AP Shield for 3/3/10 seconds and deal 100/150/4000 × AD physical damage to all enemies within 2 hexes. Then strike the current target 4 times, each dealing 215/325/2600 × AD physical damage + 12/18/350 × AD per Beat.
 > 
 > After unleashing 15 Beats, gain an emblem of a trait you don't have active and increase the number of Beats required.
 > 
@@ -28,7 +28,7 @@
 | DamagePerBeat | 12 | 18 | 350 |
 | PassiveDuration | 4 | 4 | 4 |
 | MaxStrikes | 4 | 4 | 4 |
-| BaseDamagePerStrike | 240 | 360 | 2600 |
+| BaseDamagePerStrike | 215 | 325 | 2600 |
 | MinStrikes | 4 | 4 | 4 |
 | ShieldDuration | 3 | 3 | 10 |
 | ShieldAP | 250 | 375 | 40000 |
@@ -40,7 +40,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc3` = 240/360/2600 × AD
+- `PhysicalDamageCalc3` = 215/325/2600 × AD
 - `PhysicalDamageCalc2` = 12/18/350 × AD
 - `GenericCalc1` = 15
 - `GenericCalc3` = 1
@@ -80,9 +80,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: Abilities/GA_Smeech19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Smeech19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row BaseDamagePerStrike: 240 / 360 / 2600 -> 215 / 325 / 2600
+- ability text changed
 
 <!-- AUTO END -->
 

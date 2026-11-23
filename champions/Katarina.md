@@ -1,7 +1,7 @@
 # Katarina (1-cost MagicFighter) · `DA_Katarina19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 1, pool 30; traits: Classical, Slayer
@@ -9,7 +9,7 @@
 
 ### Ability: Blade Sonata
 
-> Twirl, slashing adjacent enemies for 120/180/285 × AP magic damage. Then, eviscerate the current target, dealing 240/360/575 × AP magic damage to them. Enemies hit are Captivated for 5 seconds. 
+> Twirl, slashing adjacent enemies for 120/180/285 × AP magic damage. Then, eviscerate the current target, dealing 240/360/610 × AP magic damage to them. Enemies hit are Captivated for 8 seconds. 
 > 
 > Captivated enemies grant bonuses to Classical champions.
 
@@ -17,14 +17,14 @@
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
 | AoEDamageAp | 120 | 180 | 285 |
-| CaptivateDuration | 5 | 5 | 5 |
+| CaptivateDuration | 8 | 8 | 8 |
 | AoERadius | 1 | 1 | 1 |
-| TargetDamageAP | 240 | 360 | 575 |
+| TargetDamageAP | 240 | 360 | 610 |
 
 Formulas (as stored; AD and AP are multipliers):
 
 - `MagicDamageCalc1` = 120/180/285 × AP
-- `MagicDamageCalc2` = 240/360/575 × AP
+- `MagicDamageCalc2` = 240/360/610 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -49,9 +49,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Katarina19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Katarina19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row CaptivateDuration: 5 -> 8
+- row TargetDamageAP: 240 / 360 / 575 -> 240 / 360 / 610
+- ability text changed
 
 <!-- AUTO END -->
 

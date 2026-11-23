@@ -1,7 +1,7 @@
 # Teemo (5-cost MagicCaster) · `DA_Teemo19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Hyperpop, Hype Man
@@ -10,9 +10,9 @@
 
 ### Ability: Going Viral
 
-> Passive: Attacks apply Viral, dealing 90/135/1337 × AP magic damage over 15 seconds. Infected enemies become zombies on death, seeking out unaffected enemies and exploding, dealing 70/105/800 × AP damage to adjacent enemies and applying Viral.
+> Passive: Attacks apply Viral, dealing 85/130/1337 × AP magic damage over 15 seconds. Infected enemies become zombies on death, seeking out unaffected enemies and exploding, dealing 70/105/800 × AP damage to adjacent enemies and applying Viral.
 > 
-> Active: Launch a mushroom that applies Viral to enemies in a 3 hex radius and deals 530/800/13337 × AP magic damage, reduced by 20% per hex away from the center.
+> Active: Launch a mushroom that applies Viral to enemies in a 3 hex radius and deals 460/725/13337 × AP magic damage, reduced by 20% per hex away from the center.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -20,16 +20,16 @@
 | ViralDuration | 15 | 15 | 15 |
 | ZombieExplosionDamage | 70 | 105 | 800 |
 | PercentReductionFromCenter | 0.2 | 0.2 | 0.2 |
-| CastDamage | 530 | 800 | 13337 |
-| ViralDamage | 90 | 135 | 1337 |
+| CastDamage | 460 | 725 | 13337 |
+| ViralDamage | 85 | 130 | 1337 |
 | DOTTickRate | 0.5 | 0.5 | 0.5 |
 | AbilityCenterHexRange | 4 | 4 | 4 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 90/135/1337 × AP
+- `MagicDamageCalc1` = 85/130/1337 × AP
 - `MagicDamageCalc2` = 70/105/800 × AP
-- `MagicDamageCalc3` = 530/800/13337 × AP
+- `MagicDamageCalc3` = 460/725/13337 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -61,9 +61,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Champion/Abilities/GA_Teemo19_SpellNew.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Champion/Abilities/GA_Teemo19_ViralOnDeath.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row CastDamage: 530 / 800 / 13337 -> 460 / 725 / 13337
+- row ViralDamage: 90 / 135 / 1337 -> 85 / 130 / 1337
+- ability text changed
 
 <!-- AUTO END -->
 

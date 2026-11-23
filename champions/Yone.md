@@ -1,7 +1,7 @@
 # Yone (4-cost AttackFighter) · `DA_Yone19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Heartsteel, Slayer
@@ -11,7 +11,7 @@
 
 > Passive: This ability scales Attack Damage or Ability Power, whichever is higher. Attacks deal 55/82/123 × AD physical damage.
 > 
-> Active: Rapidly strike the target and up to 2 nearby enemies 10/10/30 times, each dealing 35/55/400 × AD physical damage. After the assault, unleash a massive slash that deals 175/265/1500 × AD physical damage to target.
+> Active: Rapidly strike the target and up to 2 nearby enemies 10/10/30 times, each dealing 38/57/350 × AD physical damage. After the assault, unleash a massive slash that deals 185/280/1500 × AD physical damage to target.
 > 
 > Heartsteel Upgrade: Casts strike 2 more times and ignore 25%25% of Armor.
 
@@ -19,22 +19,22 @@
 |---|---|---|---|
 | AutoAttackDamage | 55 | 82 | 123 |
 | NumSpirits | 10 | 10 | 30 |
-| PrimaryDamage | 35 | 55 | 400 |
+| PrimaryDamage | 38 | 57 | 350 |
 | TanksBonusDamage | 0 | 0 | 0 |
 | NumBonusEnemies | 2 | 2 | 2 |
 | AOERangeAroundCurrentTarget | 2 | 2 | 4 |
 | PercentStrikesOnTarget | 0.5 | 0.5 | 0.5 |
-| SecondaryDamage | 175 | 265 | 1500 |
+| SecondaryDamage | 185 | 280 | 1500 |
 | HeartsteelStan_ExtraClones | 2 | 2 | 2 |
 | HeartsteelStan_ArmorIgnore | 0.25 | 0.25 | 0.25 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 35/55/400 × AD
-- `PhysicalDamageCalc2` = 175/265/1500 × AD
+- `PhysicalDamageCalc1` = 38/57/350 × AD
+- `PhysicalDamageCalc2` = 185/280/1500 × AD
 - `PhysicalDamageCalc3` = 55/82/123 × AD
-- `MagicDamageCalc1` = 35/55/400 × AP
-- `MagicDamageCalc2` = 175/265/1500 × AP
+- `MagicDamageCalc1` = 38/57/350 × AP
+- `MagicDamageCalc2` = 185/280/1500 × AP
 - `MagicDamageCalc3` = 55/82/123 × AP
 - `GenericCalc1` = 1 + -0.25
 
@@ -69,9 +69,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: GA_Yone19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Yone19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row PrimaryDamage: 35 / 55 / 400 -> 38 / 57 / 350
+- row SecondaryDamage: 175 / 265 / 1500 -> 185 / 280 / 1500
+- ability text changed
 
 <!-- AUTO END -->
 

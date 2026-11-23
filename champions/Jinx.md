@@ -1,7 +1,7 @@
 # Jinx (4-cost AttackMarksman) · `DA_Jinx19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Ionic Spark, Hitmaker
@@ -10,14 +10,14 @@
 
 ### Ability: Boom Boom POW POW
 
-> Rapidly fire ⟨computed in game: MMC_Jinx19_AttackSpeedScaling⟩ missiles at nearby enemies, each dealing 43/65/300 × AD + 6/9/30 × AP physical damage.
+> Rapidly fire ⟨computed in game: MMC_Jinx19_AttackSpeedScaling⟩ missiles at nearby enemies, each dealing 43/65/350 × AD + 6/9/30 × AP physical damage.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 55 | 83.25 | 124.875 |
 | BaseMissiles | 16 | 16 | 16 |
 | DamagePerMissileAP | 6 | 9 | 30 |
-| DamagePerMissileAD | 43 | 65 | 300 |
+| DamagePerMissileAD | 43 | 65 | 350 |
 | PercentMissilesOnCurrentTarget | 0.75 | 0.75 | 0.75 |
 | NumMissilesPerSimulatedAuto | 5 | 5 | 5 |
 | BonusASPerBonusMissile | 0.35 | 0.35 | 0.35 |
@@ -27,7 +27,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 43/65/300 × AD + 6/9/30 × AP
+- `PhysicalDamageCalc1` = 43/65/350 × AD + 6/9/30 × AP
 - `GenericCalc2` = 1 × AS
 - `AttackSpeedCalc1` = ⟨computed in game: MMC_Jinx19_AttackSpeedScaling⟩
 
@@ -56,9 +56,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: Abilities/GA_Jinx19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Jinx19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row DamagePerMissileAD: 43 / 65 / 300 -> 43 / 65 / 350
+- ability text changed
 
 <!-- AUTO END -->
 

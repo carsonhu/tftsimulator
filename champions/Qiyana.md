@@ -1,7 +1,7 @@
 # Qiyana (2-cost AttackFighter) · `DA_Qiyana19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: True Damage, Renegade
@@ -11,7 +11,7 @@
 
 > Passive: Qiyana's ring changes color periodically, giving her Ability bonus effects.
 > 
-> Active: Dash to strike enemies in a line, dealing 30/45/70 × AP + 195/290/440 × AD physical damage to the target and 0.5 × PhysicalDamageCalc1 to other enemies hit.
+> Active: Dash to strike enemies in a line, dealing 30/45/70 × AP + 210/315/475 × AD physical damage to the target and 0.5 × PhysicalDamageCalc1 to other enemies hit.
 > 
 > Red: Deal 20% bonus damage.
 > Green: Heal for 20% of damage dealt.
@@ -25,7 +25,7 @@
 | BlueManaRefund | 10 | 10 | 10 |
 | GoldAmount | 1 | 1 | 1 |
 | RedBonusDamagePercent | 0.2 | 0.2 | 0.2 |
-| DamageAD | 195 | 290 | 440 |
+| DamageAD | 210 | 315 | 475 |
 | DamageAP | 30 | 45 | 70 |
 | SecondaryDamagePercent | 0.5 | 0.5 | 0.5 |
 | RedWeight | 1 | 1 | 1 |
@@ -37,7 +37,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 30/45/70 × AP + 195/290/440 × AD
+- `PhysicalDamageCalc1` = 30/45/70 × AP + 210/315/475 × AD
 - `PhysicalDamageCalc2` = 0.5 × PhysicalDamageCalc1
 
 ### Timing the client predicts (unverified for Set 19)
@@ -66,9 +66,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: Abilities/GA_Qiyana19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Qiyana19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row DamageAD: 195 / 290 / 440 -> 210 / 315 / 475
+- ability text changed
 
 <!-- AUTO END -->
 

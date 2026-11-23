@@ -1,7 +1,7 @@
 # Nunu & Willump (5-cost MagicSpecialist) · `DA_Nunu19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicSpecialist: "Specialists generate resources in a unique way." ()
 - **Cost** 5, pool 9; traits: Disco, Frontman
@@ -24,14 +24,14 @@
 | DamageCooldown | 1 | 1 | 1 |
 | MaxMovementSpeed | 900 | 900 | 1200 |
 | MinMovementSpeed | 250 | 250 | 250 |
-| BeamDamage | 1000 | 1000 | 1000 |
+| BeamDamage | 2000 | 2000 | 2000 |
 | SilvermereDawnMSPercentReduction | 0.6 | 0.6 | 0.6 |
 
 Formulas (as stored; AD and AP are multipliers):
 
 - `MagicDamageCalc1` = 120/180/1500 × AP × 1 × MagicDamageCalc2
 - `MagicDamageCalc2` = 0.3/0.3/2 × Stack + 1
-- `MagicDamageCalc3` = 1000 × AP
+- `MagicDamageCalc3` = 2000 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -58,9 +58,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Nunu19_Spell.txt
 - `AttackSpeed`: reads or changes attack speed: UniqueTrait/Abilities/GA_Nunu19_UniqueTrait_TakedownManager.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row BeamDamage: 1000 -> 2000
 
 <!-- AUTO END -->
 

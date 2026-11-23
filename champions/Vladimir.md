@@ -1,7 +1,7 @@
 # Vladimir (5-cost MagicFighter) · `DA_Vladimir19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Classical, Arcanist
@@ -14,7 +14,7 @@
 > 
 > Active: Deal 120/180/999 × AP magic damage to the 3 nearest enemies and Captivate them for 3 seconds. 
 > 
-> Every 5/5/1th cast, drop a chandelier on the board. It deals 380/600/9999 × AP magic damage to all enemies, reduced by 10% per hex they are away from the epicenter.
+> Every 5/5/1th cast, drop a chandelier on the board. It deals 400/640/9999 × AP magic damage to all enemies, reduced by 10% per hex they are away from the epicenter.
 > 
 > Debuffs: Burn, Wound, Shred, Sunder, Mana Reave, Weaken, Slow, Vunerable
 
@@ -25,7 +25,7 @@
 | APDamage | 120 | 180 | 999 |
 | NumCastsForChandelier | 5 | 5 | 1 |
 | ShredPercent | 0.2 | 0.2 | 0.2 |
-| ChandelierDamage | 380 | 600 | 9999 |
+| ChandelierDamage | 400 | 640 | 9999 |
 | DamageReductionPerHexFromCenter | 0.1 | 0.1 | 0.1 |
 | DamageMinimumPercent | 0.01 | 0.01 | 0.01 |
 | NumEnemiesMainCast | 3 | 3 | 3 |
@@ -36,7 +36,7 @@
 Formulas (as stored; AD and AP are multipliers):
 
 - `MagicDamageCalc1` = 120/180/999 × AP
-- `MagicDamageCalc2` = 380/600/9999 × AP
+- `MagicDamageCalc2` = 400/640/9999 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -64,9 +64,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Vladimir19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Vladimir19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row ChandelierDamage: 380 / 600 / 9999 -> 400 / 640 / 9999
+- ability text changed
 
 <!-- AUTO END -->
 

@@ -1,7 +1,7 @@
 # Alune (4-cost MagicCaster) · `DA_Alune19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Heartsteel, Manager, Prodigy
@@ -10,7 +10,7 @@
 
 ### Ability: Spotlight
 
-> Call down a spotlight on the target, dealing 315/475/2250 × AP magic damage. All enemies within 2 hexes of them split 340/510/2500 × AP magic damage. If the target dies, split excess damage between the 2 nearest enemies.
+> Call down a spotlight on the target, dealing 315/475/2250 × AP magic damage. All enemies within 2 hexes of them split 340/510/2750 × AP magic damage. If the target dies, split excess damage between the 2 nearest enemies.
 > 
 > Heartsteel Upgrade: Fire 5 blasts at target that deal 30/45/72 × AP30/45/72 × AP magic damage.
 
@@ -22,14 +22,14 @@
 | MinimumDamage | 0.2 | 0.2 | 0.2 |
 | HeartsteelStan_NumMissiles | 5 | 5 | 5 |
 | HeartsteelStan_APDamage | 30 | 45 | 72 |
-| AOESplitDamage | 340 | 510 | 2500 |
+| AOESplitDamage | 340 | 510 | 2750 |
 | OverkillNumTargets | 2 | 2 | 2 |
 
 Formulas (as stored; AD and AP are multipliers):
 
 - `MagicDamageCalc1` = 315/475/2250 × AP
 - `MagicDamageCalc2` = 30/45/72 × AP
-- `MagicDamageCalc3` = 340/510/2500 × AP
+- `MagicDamageCalc3` = 340/510/2750 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -53,9 +53,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Alune19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Alune19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row AOESplitDamage: 340 / 510 / 2500 -> 340 / 510 / 2750
+- ability text changed
 
 <!-- AUTO END -->
 

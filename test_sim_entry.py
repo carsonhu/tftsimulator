@@ -54,7 +54,8 @@ def test_catalog_lists_the_builds_for_the_picker():
     # B9: the page offers every imported build, newest first; the value is the version cfg["build"] names. A build
     # made from patch notes (B33) would say so and sort by the notes' date
     cat = json.loads(sim_entry.catalog_json())
-    assert cat['builds'][:3] == [
+    assert cat['builds'][:4] == [
+        {'version': 'rls-19.1.0.6018196.Set19.Shipping.pbe', 'label': 'PBE 19.1 #6018196 (Nov 23 11:46)'},
         {'version': 'rls-19.1.0.6011486.Set19.Shipping.pbe', 'label': 'PBE 19.1 #6011486 (Nov 20 20:35)'},
         {'version': 'rls-19.1.0.6005555.Set19.Shipping.pbe', 'label': 'PBE 19.1 #6005555 (Nov 20 14:37)'},
         {'version': 'rls-19.1.0.5995286.Set19.Shipping.pbe', 'label': 'PBE 19.1 #5995286 (Nov 19 12:47)'}]

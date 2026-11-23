@@ -1,25 +1,25 @@
 # Akali (5-cost MagicFighter) · `DA_Akali_TrueDamage19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: True Damage, Freestyle
 - **HP** 1200 / 2160 / 3888 · **AD** 50 / 75 / 112.5 · **AS** 0.9 · **Range** 1 · **Armor** 65 · **MR** 65 · **Mana** 0 / 50
-- **Unlock**: Earn 350 True Damage Bling without K/DA Akali unlocked.
+- **Unlock**: Earn 320 True Damage Bling without K/DA Akali unlocked.
 
 ### Ability: Killin' Like Domino
 
 > B-Side Passive: After every 4 takedowns, gain 1/1/10 Player Health. (⟨live⟩/4)
 > 
-> Active: Rapidly slash through the current target, dealing 550/825/9999 × AP magic damage, increased by 50% against Tanks. While casting, gain 25% Durability and become untargetable by attacks. 
+> Active: Rapidly slash through the current target, dealing 520/780/9999 × AP magic damage, increased by 50% against Tanks. While casting, gain 25% Durability and become untargetable by attacks. 
 > 
 > Afterwards, blink over the target and throw a bomb that deals 620/930/9999 × AP magic damage split amongst all enemies within 2/2/8 hexes.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 50 | 75 | 112.5 |
-| SlashTotalDamage | 550 | 825 | 9999 |
+| SlashTotalDamage | 520 | 780 | 9999 |
 | NumSlashes | 6 | 6 | 6 |
 | TankDamageIncrease | 1.5 | 1.5 | 1.5 |
 | ShroudDuration | 2 | 2 | 2 |
@@ -39,7 +39,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 550/825/9999 × AP
+- `MagicDamageCalc1` = 520/780/9999 × AP
 - `MagicDamageCalc2` = 1 × MagicDamageCalc1 ÷ 6
 - `DurabilityCalc1` = 1 + -0.25
 - `MagicDamageCalc3` = 620/930/9999 × AP
@@ -73,9 +73,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Akali_TrueDamage19_Spell.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Abilities/GA_Akali_TrueDamage19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row SlashTotalDamage: 550 / 825 / 9999 -> 520 / 780 / 9999
+- ability text changed
 
 <!-- AUTO END -->
 

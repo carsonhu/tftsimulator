@@ -1,7 +1,7 @@
 # Yasuo (4-cost AttackFighter) · `DA_Yasuo19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: True Damage, Slayer
@@ -20,7 +20,7 @@
 | UltDamageAD | 400 | 600 | 2500 |
 | SlashDamageAD | 180 | 270 | 1400 |
 | SlashHexLength | 2 | 2 | 2 |
-| UltDamageAOEAD | 180 | 270 | 1500 |
+| UltDamageAOEAD | 180 | 270 | 2000 |
 | AOEHexRadius | 1 | 1 | 2 |
 | UltDamageAOEAP | 30 | 45 | 200 |
 | TargetSearchRadius | 1 | 1 | 1 |
@@ -31,7 +31,7 @@ Formulas (as stored; AD and AP are multipliers):
 
 - `PhysicalDamageCalc1` = 180/270/1400 × AD
 - `PhysicalDamageCalc2` = 400/600/2500 × AD
-- `GenericCalc1` = 180/270/1500 × AD
+- `GenericCalc1` = 180/270/2000 × AD
 - `GenericCalc2` = 30/45/200 × AP
 - `PhysicalDamageCalc3` = 1 × GenericCalc1 + 1 × GenericCalc2
 
@@ -64,9 +64,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: Abilities/GA_Yasuo19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Yasuo19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row UltDamageAOEAD: 180 / 270 / 1500 -> 180 / 270 / 2000
 
 <!-- AUTO END -->
 

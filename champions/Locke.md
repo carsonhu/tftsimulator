@@ -1,17 +1,17 @@
 # Locke (4-cost MagicAssassin) · `DA_Locke19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicAssassin: "Attacks grant 10 Mana. Take 15% less damage from all enemies except the current target." (ManaPerAttack + 10; ManaMax at least 10; MovementSpeed + 200; Threat + -10)
 - **Cost** 4, pool 10; traits: Rock, Swiftstriker
-- **HP** – · **AD** 10 / 15 / 22.5 · **AS** 0.9 · **Range** 1 · **Armor** 65 · **MR** 65 · **Mana** 0 / 30
+- **HP** – · **AD** 10 / 15 / 22.5 · **AS** 0.9 · **Range** 1 · **Armor** 65 · **MR** 65 · **Mana** 0 / 25
 
 ### Ability: Pursue Sin (The Soul Nail Song)
 
 > Passive: Attacks deal 45/68/500 × AP bonus magic damage. All damage Locke deals to enemies is increased by 15% for each mark he has applied to them.
 > 
-> Active: Hurl 3 Soul Nails at the furthest enemy within 4 hexes, each dealing 15/22/400 × AP magic damage and marking all enemies hit. Then, teleport to the enemy and deal 135/205/2000 × AP magic damage.
+> Active: Hurl 3 Soul Nails at the furthest enemy within 4 hexes, each dealing 15/22/400 × AP magic damage and marking all enemies hit. Then, teleport to the enemy and deal 125/185/2500 × AP magic damage.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -20,13 +20,13 @@
 | SearchHexRange | 4 | 4 | 4 |
 | APDamage | 15 | 22 | 400 |
 | AP_DamageOnAttack | 45 | 68 | 500 |
-| FinalAPDamage | 135 | 205 | 2000 |
+| FinalAPDamage | 125 | 185 | 2500 |
 
 Formulas (as stored; AD and AP are multipliers):
 
 - `MagicDamageCalc1` = 15/22/400 × AP
 - `MagicDamageCalc2` = 45/68/500 × AP
-- `MagicDamageCalc3` = 135/205/2000 × AP
+- `MagicDamageCalc3` = 125/185/2500 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -56,9 +56,11 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Locke19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Locke19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- stat ManaMax: 30 -> 25
+- row FinalAPDamage: 135 / 205 / 2000 -> 125 / 185 / 2500
+- ability text changed
 
 <!-- AUTO END -->
 

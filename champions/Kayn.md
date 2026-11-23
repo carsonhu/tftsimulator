@@ -1,7 +1,7 @@
 # Kayn (1-cost AttackFighter) · `DA_Kayn19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 1, pool 30; traits: Heartsteel, Slayer
@@ -9,7 +9,7 @@
 
 ### Ability: Shadow of the Night
 
-> Dash and swipe, dealing 115/175/270 × AD + 15/25/45 × AP physical damage to enemies in a 2 hex line.
+> Dash and swipe, dealing 105/160/240 × AD + 15/25/45 × AP physical damage to enemies in a 2 hex line.
 > 
 > Heartsteel Upgrade: At 70% Health, turn into the Shadow Assassin, briefly becoming untargetable and dealing 35% bonus magic damage for the rest of combat.
 
@@ -17,7 +17,7 @@
 |---|---|---|---|
 | AutoAttackDamage | 42 | 63 | 94.5 |
 | SpellMagicDamage | 15 | 25 | 45 |
-| SpellPhysicalDamage | 115 | 175 | 270 |
+| SpellPhysicalDamage | 105 | 160 | 240 |
 | SpellWidth | 100 | 100 | 100 |
 | SpellLength | 429 | 429 | 429 |
 | SpellHexLength | 2 | 2 | 2 |
@@ -27,8 +27,8 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 115/175/270 × AD + 15/25/45 × AP
-- `GenericCalc1` = 115/175/270 × AD
+- `PhysicalDamageCalc1` = 105/160/240 × AD + 15/25/45 × AP
+- `GenericCalc1` = 105/160/240 × AD
 - `GenericCalc2` = 15/25/45 × AP
 
 ### Timing the client predicts (unverified for Set 19)
@@ -55,9 +55,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Kayn19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Kayn19_Spell.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row SpellPhysicalDamage: 115 / 175 / 270 -> 105 / 160 / 240
+- ability text changed
 
 <!-- AUTO END -->
 

@@ -1,32 +1,31 @@
 # Olaf with the hero augment Axe Crescendo (AttackMarksman) · `DA_Olaf19_HeroAugment_Override`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 0, pool –; traits: Pentakill, Juggernaut
-- **HP** 500 / 900 / 1620 · **AD** 45 / 67.5 / 101.25 · **AS** 0.7 · **Range** 4 · **Armor** 25 · **MR** 25 · **Mana** 0 / 50
-- Other stats: CritChance 0
+- **HP** 500 / 900 / 1620 · **AD** 45 / 67.5 / 101.25 · **AS** 0.75 · **Range** 4 · **Armor** 25 · **MR** 25 · **Mana** 0 / 50
 
 ### Ability: Axe Crescendo
 
-> For the next 3 attacks, throw flaming axes that deal 140/210/335 × AD + 15/20/30 × AP physical damage. Each time this is cast, increase the number of flaming axe throws by 1 for the rest of combat.
+> For the next 3 attacks, throw flaming axes that deal 155/235/375 × AD + 15/20/30 × AP physical damage. Each time this is cast, increase the number of flaming axe throws by 1 for the rest of combat.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | NumAttacks | 3 | 3 | 3 |
 | AutoAttackDamage | 45 | 67.5 | 101.25 |
 | ExtraAttacksPerCast | 1 | 1 | 1 |
-| ADDamage | 140 | 210 | 335 |
+| ADDamage | 155 | 235 | 375 |
 | APDamage | 15 | 20 | 30 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 140/210/335 × AD + 15/20/30 × AP
+- `PhysicalDamageCalc1` = 155/235/375 × AD + 15/20/30 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
-- Attack chrono `CD_Olaf19_Attack`: launch 0.32 s (9.6 ticks), variants 0.32, 0.4; animation length 1.1667 s (35 ticks); release at base AS 0.3918 s (11.75 ticks)
+- Attack chrono `CD_Olaf19_Attack`: launch 0.32 s (9.6 ticks), variants 0.32, 0.4; animation length 1.1667 s (35 ticks); release at base AS 0.3657 s (10.97 ticks)
 - Attack projectile: DA_Olaf19_AutoAttackProjectileL_HeroAugment, speed 2000 units/s
 - Spell `GA_Olaf19_HeroAugment` (chrono `CD_Olaf19_Empower_HeroAugment`): cast ends 0 s (0 ticks), next attack can start 0.0333 s (1 ticks), mana lock removed –; ended by `FinishCasting via OnEventBegin:CD_Olaf19_Empower_HeroAugment:Empower`
 
@@ -49,9 +48,12 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Olaf19_HeroAugment.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Abilities/GA_Olaf19_Passive.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- stat AttackSpeed: 0.7 -> 0.75
+- stat CritChance: 0 -> –
+- row ADDamage: 140 / 210 / 335 -> 155 / 235 / 375
+- ability text changed
 
 <!-- AUTO END -->
 

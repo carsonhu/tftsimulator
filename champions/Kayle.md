@@ -1,7 +1,7 @@
 # Kayle (4-cost MagicMarksman) · `DA_Kayle19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6011486.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6011486.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
 
 - **Role** MagicMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Pentakill, Swiftstriker
@@ -12,14 +12,14 @@
 
 > Passive: Attacks deal 40/60/500 × AP bonus magic damage.
 > 
-> Active: For 4 seconds, gain 80% Attack Speed, infinite range, and summon a sword with each attack. Afterwards, rain swords on the target, dealing 180/270/2000 × AP to all enemies within 2 hexes, plus 37/55/400 × AP magic damage to the target for each sword.
+> Active: For 4 seconds, gain 80% Attack Speed, infinite range, and summon a sword with each attack. Afterwards, rain swords on the target, dealing 180/270/2000 × AP to all enemies within 2 hexes, plus 42/63/480 × AP magic damage to the target for each sword.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 10 | 15 | 22.5 |
 | APDamage | 40 | 60 | 500 |
 | AscensionTwoWavePercent | 0 | 0 | 0 |
-| SwordAPDamage | 37 | 55 | 400 |
+| SwordAPDamage | 42 | 63 | 480 |
 | FirstAscensionEveryXAttacks | 999 | 999 | 999 |
 | SecondAscensionEveryXAttacks | 999 | 999 | 999 |
 | ThirdAscensionEveryXAttacks | 999 | 999 | 999 |
@@ -33,7 +33,7 @@ Formulas (as stored; AD and AP are multipliers):
 
 - `MagicDamageCalc1` = 40/60/500 × AP
 - `MagicDamageCalc2` = 180/270/2000 × AP
-- `MagicDamageCalc3` = 37/55/400 × AP
+- `MagicDamageCalc3` = 42/63/480 × AP
 - `AttackSpeedCalc1` = 0.8 + 1
 
 ### Timing the client predicts (unverified for Set 19)
@@ -63,9 +63,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: GA_Kayle19_Spell_new.txt
 - `GE_ManaLock`: applies mana lock: GA_Kayle19_Spell_new.txt
 
-### Changed since `rls-19.1.0.6005555.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row SwordAPDamage: 37 / 55 / 400 -> 42 / 63 / 480
+- ability text changed
 
 <!-- AUTO END -->
 
