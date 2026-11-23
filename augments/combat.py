@@ -324,17 +324,11 @@ class ComebackStory(BuildAugment):
     """Comeback Story (DA_ComebackStory, GA_ComebackStory): the team gains ASMultiplyPerMissingHP (0.4%) attack speed per
     missing player Health (and Health). The player's Health is the parameter (default 50), typed into the table's row
     too ("Row": the row reads "Comeback Story ([50] Health)").
-    A separate multiplier on the unit's whole attack speed, as the Set 18 replays measured it (tftFightSim
-    decision-log 2026-11-15: multiplying fit every band of the units' other attack speed, adding fell behind by up to
-    6%), although the files say otherwise: GE_ComebackStory_Buff applies AttackSpeed MultiplyAdditive 1 + 0.004 x
-    missing Health on Channel1, the op and channel items use, which would make it additive. Set 18 live's
-    GA_ComebackStory, GE_ComebackStory_Calc / _Buff and CT_ComebackStory (owner's FModel export, 2026-11-19) are
-    identical to 19.1 PBE's, so the replays' answer carries over (owner: replays over game data). The rate confirms it:
-    the replays predate patch 18.7 (Attack Speed Per Missing HP 0.3% -> 0.4%), and multiplying implied exactly 0.30%
-    in every band, where adding drifted from 0.31% to 0.45%."""
+    Additive with the unit's other bonus attack speed, as the files say: GE_ComebackStory_Buff applies AttackSpeed
+    MultiplyAdditive 1 + 0.004 x missing Health on Channel1, the op and channel items use (owner, 2026-11-22: back to
+    additive). It was a separate multiplier from 2026-11-19, after the Set 18 replays (tftFightSim decision-log
+    2026-11-15), where multiplying fit every band of the units' other attack speed and adding fell behind by up to 6%."""
     KEY, display_name = "DA_ComebackStory", "Comeback Story"
-    CARD_NOTE = ("Multiplicative", "The attack speed multiplies the unit's total attack speed, on top of its other "
-                                   "bonuses, rather than adding to them.")
 
     @staticmethod
     def extraParameters():
@@ -342,7 +336,7 @@ class ComebackStory(BuildAugment):
 
     def stats(self, champion):
         hp = int(self.params or 50)
-        champion.aspd.modify("MultiplyCompound", 1 + self.value(champion, "ASMultiplyPerMissingHP") * (100 - hp))
+        champion.aspd.modify("MultiplyAdditive", 1 + self.value(champion, "ASMultiplyPerMissingHP") * (100 - hp))
 
 
 @register("augment")

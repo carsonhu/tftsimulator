@@ -357,7 +357,7 @@ function fillCard(cls, level, hint, team = false) {
   }
   if (card.stats.length) statParts(add("card-stats", ""), card.stats);
   if (card.text) add("card-text", card.text);
-  // the simulator's own note on how it works (sim_entry CARD_NOTE): "[Multiplicative] The attack speed multiplies ..."
+  // the simulator's own note on how it works (sim_entry CARD_NOTE): "[Tag] text"
   if (card.note) {
     const note = add("card-note", "");
     note.append(Object.assign(document.createElement("span"), { className: "card-note-tag", textContent: card.note.tag }),

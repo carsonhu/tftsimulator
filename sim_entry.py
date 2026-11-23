@@ -1106,8 +1106,7 @@ def get_cards(cfg):
             # a build whose tier list is a placeholder (Beach Pop): the class's own, from the tooltip
             if group == "traits" and hasattr(cls, "card_tiers"):
                 cards[name]["tiers"] = cls.card_tiers(build)
-            # what the simulator knows that the tooltip doesn't say: CARD_NOTE = (tag, text), e.g. Comeback Story's
-            # [Multiplicative]
+            # what the simulator knows that the tooltip doesn't say: CARD_NOTE = (tag, text)
             note = getattr(cls, "CARD_NOTE", None)
             if note:
                 cards[name]["note"] = {"tag": note[0], "text": note[1]}

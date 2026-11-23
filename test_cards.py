@@ -26,6 +26,3 @@ def test_no_card_shows_a_placeholder():
         for text in [card["text"]] + [t["text"] for t in card["tiers"]]:
             assert not PLACEHOLDER.search(text), (name, text)
 
-
-def test_comeback_story_says_it_multiplies():
-    assert sim_entry.get_cards({})["ComebackStory"]["note"]["tag"] == "Multiplicative"
