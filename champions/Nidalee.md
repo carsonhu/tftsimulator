@@ -1,7 +1,7 @@
 # Nidalee (5-cost MagicFighter) · `DA_Nidalee19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Mariachi, Choreographer
@@ -9,7 +9,7 @@
 
 ### Ability: Pounce Party/Dance of Life
 
-> Pounce Party: Pounce 4/4/99 times on enemies, dealing 125/185/2000 × AP magic damage, increased by 40%/40%/75% each pounce.
+> Pounce Party: Pounce 4/4/99 times on enemies, dealing 140/210/2000 × AP magic damage, increased by 40%/40%/75% each pounce.
 > 
 > Dance of Life: Heal 325/500/2000 × AP. Hurl a javelin at the target, dealing 360/540/3000 × AP magic damage and scattering 3 flowers around them. Flowers deal 80/120/500 × AP magic damage to enemies in a 1 Hex radius after a brief delay.
 > 
@@ -20,7 +20,7 @@
 | AutoAttackDamage | 50 | 75 | 112.5 |
 | ExtraDamagePercentPerPounce | 0.4 | 0.4 | 0.75 |
 | SpearDamageAP | 360 | 540 | 3000 |
-| PounceDamageAP | 125 | 185 | 2000 |
+| PounceDamageAP | 140 | 210 | 2000 |
 | FlowerDamageAP | 80 | 120 | 500 |
 | AOEHexRange | 1 | 1 | 1 |
 | HealAP | 325 | 500 | 2000 |
@@ -40,7 +40,7 @@
 Formulas (as stored; AD and AP are multipliers):
 
 - `MagicDamageCalc1` = 360/540/3000 × AP
-- `MagicDamageCalc2` = 125/185/2000 × AP
+- `MagicDamageCalc2` = 140/210/2000 × AP
 - `MagicDamageCalc3` = 80/120/500 × AP
 - `DurabilityCalc1` = 1 + 0
 - `HealthCalc1` = 325/500/2000 × AP
@@ -82,10 +82,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Nidalee19_LaunchAttack_MeleeOrRanged.txt
 - `GE_ManaLock`: applies mana lock: GA_Nidalee19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- row ExtraDamagePercentPerPounce: 0.4 -> 0.4 / 0.4 / 0.75
-- row PounceDamageAP: 125 / 185 / 1500 -> 125 / 185 / 2000
+- row PounceDamageAP: 125 / 185 / 2000 -> 140 / 210 / 2000
 - ability text changed
 
 <!-- AUTO END -->

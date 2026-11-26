@@ -1,12 +1,12 @@
 # Smeech (5-cost AttackSpecialist_Time) · `DA_Smeech19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** AttackSpecialist_Time: "Specialists generate resources in a unique way." ()
 - **Cost** 5, pool 9; traits: Jazz, Slayer
 - **HP** 1300 / 2340 / 4212 · **AD** 70 / 105 / 157.5 · **AS** 0.9 · **Range** 1 · **Armor** 65 · **MR** 65 · **Mana** 0 / 4
-- **Unlock**: Activate 8 or more non-unique traits.
+- **Unlock**: Activate 9 or more non-unique traits.
 
 ### Ability: Upswing
 
@@ -36,7 +36,7 @@
 | SpecialEnemyDamage | 7000 | 7000 | 7000 |
 | SpecialDamageDuration | 1000000 | 1000000 | 1000000 |
 | SpecialDamageInterval | 0.3 | 0.3 | 0.3 |
-| EmblemTailoringAmount | 2 | 2 | 2 |
+| EmblemTailoringAmount | 3 | 3 | 3 |
 
 Formulas (as stored; AD and AP are multipliers):
 
@@ -53,7 +53,7 @@ Formulas (as stored; AD and AP are multipliers):
 - Attack chrono `CD_Smeech19_Attack`: launch 0.1602 s (4.81 ticks), variants 0.1602, 0.325, 0.35; animation length 2.0333 s (61 ticks); release at base AS 0.1602 s (4.81 ticks)
 - Attack projectile: none (melee or not a fixed projectile)
 - Spell `GA_Smeech19_Spell` (chrono `CD_Smeech19_Leap`): cast ends –, next attack can start –, mana lock removed –; **script reads attack speed**; **no cast end found**
-  - notes: chrono not found switch(Temp_bool_Variable_2){false: Temp_object_Variable_18; true: Temp_object_Variable_17; default: K2Node_Select_Default_2} ×1
+  - notes: chrono not found switch(Temp_bool_Variable_2){false: Temp_object_Variable_15; true: Temp_object_Variable_14; default: K2Node_Select_Default_2} ×1
 
 Every timeline in the champion folder that has events (the spell prediction above follows one path through the script; a unit with several cast versions has a timeline for each):
 
@@ -80,10 +80,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: Abilities/GA_Smeech19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Smeech19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- row BaseDamagePerStrike: 240 / 360 / 2600 -> 215 / 325 / 2600
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

@@ -1,7 +1,7 @@
 # Bard (3-cost MagicMarksman) · `DA_Bard19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** MagicMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Jazz, Swiftstriker
@@ -11,12 +11,12 @@
 
 > Passive: Gain the Horn of the Traveler. While equipped, casts generate XP and attacks grant bonus Mana.
 > 
-> Active: Summon a wave of meeps that deal 245/365/590 × AP magic damage to enemies hit, reduced by 30% for each one it passes through (minimum 30%).
+> Active: Summon a wave of meeps that deal 265/400/650 × AP magic damage to enemies hit, reduced by 30% for each one it passes through (minimum 30%).
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
-| Meeps Damage | 245 | 365 | 590 |
+| Meeps Damage | 265 | 400 | 650 |
 | ManaPerAttack | 2 | 7 | 20 |
 | MaxMeeps | 9999 | 9999 | 9999 |
 | FalloffPerUnit | 0.3 | 0.3 | 0.3 |
@@ -26,7 +26,7 @@
 Formulas (as stored; AD and AP are multipliers):
 
 - `ManaCalc1` = 2/7/20 × AP
-- `MagicDamageCalc1` = 245/365/590 × AP
+- `MagicDamageCalc1` = 265/400/650 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -52,9 +52,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Bard19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Bard19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- row Meeps Damage: 210 / 315 / 505 -> 245 / 365 / 590
+- row Meeps Damage: 245 / 365 / 590 -> 265 / 400 / 650
 - ability text changed
 
 <!-- AUTO END -->

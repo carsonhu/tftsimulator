@@ -1,7 +1,7 @@
 # Janna (5-cost MagicCaster) · `DA_Janna19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Windblessed, Gu Feng, Prodigy
@@ -12,12 +12,12 @@
 
 > Fire celestial dragons at up to 3 nearby enemies, each dealing 155/250/9999 × AP magic damage.
 > 
-> After 4/4/1 casts, the arena is enveloped by the Heaven's Gale, dealing 1800/2700/9000 × AP magic damage to every enemy over 45 seconds.
+> After 4/4/1 casts, the arena is enveloped by the Heaven's Gale, dealing 1950/3000/9000 × AP magic damage to every enemy over 45 seconds.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 35 | 52.5 | 78.75 |
-| StormDamageAP | 1800 | 2700 | 9000 |
+| StormDamageAP | 1950 | 3000 | 9000 |
 | NumCastsForStorm | 4 | 4 | 1 |
 | StormDuration | 45 | 45 | 45 |
 | StormTickRate | 0.5 | 0.5 | 0.5 |
@@ -29,7 +29,7 @@
 Formulas (as stored; AD and AP are multipliers):
 
 - `MagicDamageCalc2` = 155/250/9999 × AP
-- `MagicDamageCalc1` = 1800/2700/9000 × AP
+- `MagicDamageCalc1` = 1950/3000/9000 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -57,9 +57,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Janna19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Janna19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row StormDamageAP: 1800 / 2700 / 9000 -> 1950 / 3000 / 9000
+- ability text changed
 
 <!-- AUTO END -->
 

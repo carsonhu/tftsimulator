@@ -1,7 +1,7 @@
 # Teemo (5-cost MagicCaster) · `DA_Teemo19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Hyperpop, Hype Man
@@ -61,11 +61,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Champion/Abilities/GA_Teemo19_SpellNew.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Champion/Abilities/GA_Teemo19_ViralOnDeath.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- row CastDamage: 530 / 800 / 13337 -> 460 / 725 / 13337
-- row ViralDamage: 90 / 135 / 1337 -> 85 / 130 / 1337
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

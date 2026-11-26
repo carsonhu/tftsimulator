@@ -1,11 +1,11 @@
 # Mel (4-cost MagicCaster) · `DA_Mel19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: R&B, Arcanist
-- **HP** 850 / 1530 / 2754 · **AD** 30 / 45 / 67.5 · **AS** 0.75 · **Range** 4 · **Armor** 40 · **MR** 40 · **Mana** 0 / 40
+- **HP** 850 / 1530 / 2754 · **AD** 30 / 45 / 67.5 · **AS** 0.8 · **Range** 4 · **Armor** 40 · **MR** 40 · **Mana** 0 / 40
 
 ### Ability: Chain of Blues
 
@@ -17,7 +17,7 @@
 | NumEnemies | 3 | 3 | 3 |
 | NumMissiles | 30 | 30 | 60 |
 | APDamage | 19 | 29 | 200 |
-| PercentDamageOnCurrentTarget | 0.6 | 0.6 | 0.6 |
+| PercentDamageOnCurrentTarget | 0.7 | 0.7 | 0.7 |
 | RadianceStacksForNegativeDR | 3 | 3 | 3 |
 | NegativeDRForRadianceBundle | 0.05 | 0.05 | 0.05 |
 | AoeRangeAroundTarget | 10 | 10 | 10 |
@@ -50,10 +50,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Mel19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Mel19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- row APDamage: 18 / 28 / 200 -> 19 / 29 / 200
-- ability text changed
+- stat AttackSpeed: 0.75 -> 0.8
+- row PercentDamageOnCurrentTarget: 0.6 -> 0.7
 
 <!-- AUTO END -->
 

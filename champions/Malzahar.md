@@ -1,11 +1,11 @@
 # Malzahar (3-cost MagicCaster) · `DA_Malzahar19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Composer, Prodigy
-- **HP** 800 / 1440 / 2592 · **AD** 35 / 52.5 / 78.75 · **AS** 0.8 · **Range** 4 · **Armor** 35 · **MR** 35 · **Mana** 0 / 50
+- **HP** 800 / 1440 / 2592 · **AD** 35 / 52.5 / 78.75 · **AS** 0.8 · **Range** 4 · **Armor** 35 · **MR** 35 · **Mana** 0 / 55
 
 ### Ability: Forbidden Cacophony
 
@@ -56,7 +56,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Malzahar19_SpellNew.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Malzahar19_SpellNew.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

@@ -37,8 +37,9 @@ def test_every_champion_hits_with_every_listed_item():
 
 
 def test_viego_per_sword_by_hand():
-    # one sword: DamagePerSwordAD 28 x AD 1 + DamagePerSwordAP 3 x AP 1 = 31 physical, 100 armor halves it
-    assert hit("Viego") == pytest.approx(15.5)
+    # one sword: DamagePerSwordAD 26 (build 6037882; 28 before) x AD 1 + DamagePerSwordAP 3 x AP 1 = 29 physical,
+    # 100 armor halves it
+    assert hit("Viego") == pytest.approx(14.5)
     assert sim_entry.run_hits(cfg("Viego", hitMode="cast"))["per"] == "sword"
 
 

@@ -1,7 +1,7 @@
 # Aphelios (5-cost AttackMarksman) · `DA_Aphelios19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Heartsteel
@@ -12,7 +12,7 @@
 
 > Passive: Gain a Chakram every 4 attacks, up to 15. Attacks deal 7/10/200 × AD bonus physical damage for every Chakram equipped. After collecting 15, gain 30%/30%/500% Attack Damage and infinite range.
 > 
-> Active: Fire bolts at the 3 nearest enemies that deal 280/420/3000 × AD + 60/90/300 × AP physical damage, then split into 16 bolts that deal 0.15/0.15/1 × PhysicalDamageCalc1 physical damage to enemies they pass through. Gain 75% Attack Speed for 4 seconds.
+> Active: Fire bolts at the 3 nearest enemies that deal 315/475/3000 × AD + 60/90/300 × AP physical damage, then split into 16 bolts that deal 0.15/0.15/1 × PhysicalDamageCalc1 physical damage to enemies they pass through. Gain 75% Attack Speed for 4 seconds.
 > 
 > Heartsteel Upgrade: Start combat with 5 Chakrams equipped.
 
@@ -23,7 +23,7 @@
 | NumEnemies | 3 | 3 | 3 |
 | PostCaseAS | 0.75 | 0.75 | 0.75 |
 | PercentSecondaryDamage | 0.15 | 0.15 | 1 |
-| ADDamage | 280 | 420 | 3000 |
+| ADDamage | 315 | 475 | 3000 |
 | HeartsteelStan_ExcessChakramArmorReduction | 10 | 10 | 10 |
 | HeartsteelStan_MaxChakrams | 15 | 15 | 15 |
 | HeartsteelStan_ADDamage | 7 | 10 | 200 |
@@ -37,7 +37,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 280/420/3000 × AD + 60/90/300 × AP
+- `PhysicalDamageCalc1` = 315/475/3000 × AD + 60/90/300 × AP
 - `PhysicalDamageCalc2` = 0.15/0.15/1 × PhysicalDamageCalc1
 - `PhysicalDamageCalc3` = 7/10/200 × AD
 - `AttackSpeedCalc1` = 1 + 0.75
@@ -71,9 +71,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AppliesOnHit`: something in the script is flagged as applying on-hit effects: Abilities/GA_Aphelios19_CombatPassive.txt
 - `IsAttack`: damage flagged as an attack (or checked for it): Abilities/GA_Aphelios19_CombatPassive.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row ADDamage: 280 / 420 / 3000 -> 315 / 475 / 3000
+- ability text changed
 
 <!-- AUTO END -->
 

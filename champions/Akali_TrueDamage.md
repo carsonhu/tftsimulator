@@ -1,7 +1,7 @@
 # Akali (5-cost MagicFighter) · `DA_Akali_TrueDamage19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** MagicFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: True Damage, Freestyle
@@ -14,7 +14,7 @@
 > 
 > Active: Rapidly slash through the current target, dealing 520/780/9999 × AP magic damage, increased by 50% against Tanks. While casting, gain 25% Durability and become untargetable by attacks. 
 > 
-> Afterwards, blink over the target and throw a bomb that deals 620/930/9999 × AP magic damage split amongst all enemies within 2/2/8 hexes.
+> Afterwards, blink over the target and throw a bomb that deals 560/875/9999 × AP magic damage split amongst all enemies within 2/2/8 hexes.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -24,7 +24,7 @@
 | TankDamageIncrease | 1.5 | 1.5 | 1.5 |
 | ShroudDuration | 2 | 2 | 2 |
 | StrikeDuration | 1 | 1 | 1 |
-| ExplosionDamage | 620 | 930 | 9999 |
+| ExplosionDamage | 560 | 875 | 9999 |
 | ShroudHexRadius | 2 | 2 | 8 |
 | ShroudDurability | 0.25 | 0.25 | 0.25 |
 | ASidePassiveKillReq | 5 | 5 | 5 |
@@ -42,7 +42,7 @@ Formulas (as stored; AD and AP are multipliers):
 - `MagicDamageCalc1` = 520/780/9999 × AP
 - `MagicDamageCalc2` = 1 × MagicDamageCalc1 ÷ 6
 - `DurabilityCalc1` = 1 + -0.25
-- `MagicDamageCalc3` = 620/930/9999 × AP
+- `MagicDamageCalc3` = 560/875/9999 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -73,9 +73,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Akali_TrueDamage19_Spell.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Abilities/GA_Akali_TrueDamage19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- row SlashTotalDamage: 550 / 825 / 9999 -> 520 / 780 / 9999
+- row ExplosionDamage: 620 / 930 / 9999 -> 560 / 875 / 9999
 - ability text changed
 
 <!-- AUTO END -->

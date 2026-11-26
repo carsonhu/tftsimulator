@@ -1,7 +1,7 @@
 # Twisted Fate (5-cost MagicMarksman) · `DA_TwistedFate19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** MagicMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Tango, Trickshot
@@ -16,7 +16,7 @@
 > 4 of a Kind: Mystery Box
 > 5 of a Kind: Royale Mystery Box!
 > 
-> Active: The next 5 attacks gain 100% Attack Speed and are replaced with cards that deal 100/150/2000 × AP magic damage to the target and 30/45/1000 × AP magic damage to 2 nearby enemies.
+> Active: The next 5 attacks gain 100% Attack Speed and are replaced with cards that deal 110/165/2000 × AP magic damage to the target and 30/45/1000 × AP magic damage to 2 nearby enemies.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
@@ -30,7 +30,7 @@
 | LootChance | 0.1 | 0.2 | 1 |
 | ManaGrant | 8 | 8 | 8 |
 | PercentDamagePerCost | 0.18 | 0.18 | 0.18 |
-| PrimaryTargetDamage | 100 | 150 | 2000 |
+| PrimaryTargetDamage | 110 | 165 | 2000 |
 | SecondaryOnHitEffectiveness | 0.3 | 0.3 | 0.3 |
 | TraitAttackSpeed | 0.15 | 0.15 | 0.15 |
 | UniqueTrait_MaxHealthDamage | 0.2 | 0.2 | 0.2 |
@@ -42,7 +42,7 @@ Formulas (as stored; AD and AP are multipliers):
 - `MagicDamageCalc1` = 30/45/1000 × AP
 - `GenericCalc1` = 1 × AP × 1 × Stack
 - `AttackSpeedCalc1` = 1
-- `MagicDamageCalc2` = 100/150/2000 × AP
+- `MagicDamageCalc2` = 110/165/2000 × AP
 - `MagicDamageCalc3` = 100/150/2000 × AP
 
 ### Timing the client predicts (unverified for Set 19)
@@ -73,9 +73,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `OnHitEffectivenessMultiplier`: scales on-hit effects: GA_TwistedFate19_Spell.txt, GA_TwistedFate19_SpellTrickshot.txt
 - `LaunchAttack`: launches or listens for attacks: GA_TwistedFate19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row PrimaryTargetDamage: 100 / 150 / 2000 -> 110 / 165 / 2000
+- ability text changed
 
 <!-- AUTO END -->
 

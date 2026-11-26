@@ -1,7 +1,7 @@
 # Syndra (3-cost MagicCaster) · `DA_Syndra19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Beach Pop, Choreographer
@@ -9,21 +9,21 @@
 
 ### Ability: Serve's Up
 
-> Spike a volleyball at target, dealing 330/495/790 × AP magic damage. It bounces to an enemy behind them with the least items, dealing 110/165/265 × AP magic damage.
+> Spike a volleyball at target, dealing 350/525/850 × AP magic damage. It bounces to an enemy behind them with the least items, dealing 110/165/265 × AP magic damage.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
 | SecondaryDamageAP | 110 | 165 | 265 |
 | ShredPercent | 20 | 20 | 20 |
-| PrimaryDamageAP | 330 | 495 | 790 |
+| PrimaryDamageAP | 350 | 525 | 850 |
 | ShredDuration | 0 | 0 | 0 |
 | StartingBounceAngle | 120 | 120 | 120 |
 | SearchAngleIncreasePerCheck | 30 | 30 | 30 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `MagicDamageCalc1` = 330/495/790 × AP
+- `MagicDamageCalc1` = 350/525/850 × AP
 - `MagicDamageCalc2` = 110/165/265 × AP
 
 ### Timing the client predicts (unverified for Set 19)
@@ -49,9 +49,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_Syndra19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Syndra19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row PrimaryDamageAP: 330 / 495 / 790 -> 350 / 525 / 850
+- ability text changed
 
 <!-- AUTO END -->
 

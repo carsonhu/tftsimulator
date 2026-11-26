@@ -1,7 +1,7 @@
 # Jinx (4-cost AttackMarksman) · `DA_Jinx19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Ionic Spark, Hitmaker
@@ -56,10 +56,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: Abilities/GA_Jinx19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Jinx19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- row DamagePerMissileAD: 43 / 65 / 300 -> 43 / 65 / 350
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

@@ -1,7 +1,7 @@
 # Draven (3-cost AttackCaster) · `DA_Draven19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 3, pool 18; traits: Illbeats, Trickshot
@@ -15,14 +15,14 @@
 |---|---|---|---|
 | AutoAttackDamage | 45 | 67.5 | 101.25 |
 | BladeDamage | 155 | 235 | 370 |
-| BladeRiftPerSecondAD | 115 | 175 | 275 |
+| BladeRiftPerSecondAD | 125 | 190 | 300 |
 | BladeRiftPerSecondAP | 15 | 25 | 35 |
 | Duration | 3 | 3 | 3 |
 
 Formulas (as stored; AD and AP are multipliers):
 
 - `PhysicalDamageCalc1` = 155/235/370 × AD
-- `GenericCalc1` = 115/175/275 × AD
+- `GenericCalc1` = 125/190/300 × AD
 - `GenericCalc2` = 15/25/35 × AP
 - `PhysicalDamageCalc2` = 1 × GenericCalc2 + 1 × GenericCalc1
 
@@ -48,9 +48,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): Abilities/GA_Draven19_Spell.txt
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Draven19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row BladeRiftPerSecondAD: 115 / 175 / 275 -> 125 / 190 / 300
 
 <!-- AUTO END -->
 

@@ -1,25 +1,25 @@
 # Yone (4-cost AttackFighter) · `DA_Yone19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 4, pool 10; traits: Heartsteel, Slayer
-- **HP** 1150 / 2070 / 3726 · **AD** 55 / 82 / 123 · **AS** 0.85 · **Range** 1 · **Armor** 70 · **MR** 70 · **Mana** 0 / 50
+- **HP** 1150 / 2070 / 3726 · **AD** 58 / 87 / 130.5 · **AS** 0.85 · **Range** 1 · **Armor** 70 · **MR** 70 · **Mana** 0 / 50
 
 ### Ability: Two Sides
 
-> Passive: This ability scales Attack Damage or Ability Power, whichever is higher. Attacks deal 55/82/123 × AD physical damage.
+> Passive: This ability scales Attack Damage or Ability Power, whichever is higher. Attacks deal 58/87/130.5 × AD physical damage.
 > 
-> Active: Rapidly strike the target and up to 2 nearby enemies 10/10/30 times, each dealing 38/57/350 × AD physical damage. After the assault, unleash a massive slash that deals 185/280/1500 × AD physical damage to target.
+> Active: Rapidly strike the target and up to 2 nearby enemies 10/10/30 times, each dealing 40/60/350 × AD physical damage. After the assault, unleash a massive slash that deals 185/280/1500 × AD physical damage to target.
 > 
 > Heartsteel Upgrade: Casts strike 2 more times and ignore 25%25% of Armor.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
-| AutoAttackDamage | 55 | 82 | 123 |
+| AutoAttackDamage | 58 | 87 | 130.5 |
 | NumSpirits | 10 | 10 | 30 |
-| PrimaryDamage | 38 | 57 | 350 |
+| PrimaryDamage | 40 | 60 | 350 |
 | TanksBonusDamage | 0 | 0 | 0 |
 | NumBonusEnemies | 2 | 2 | 2 |
 | AOERangeAroundCurrentTarget | 2 | 2 | 4 |
@@ -30,12 +30,12 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 38/57/350 × AD
+- `PhysicalDamageCalc1` = 40/60/350 × AD
 - `PhysicalDamageCalc2` = 185/280/1500 × AD
-- `PhysicalDamageCalc3` = 55/82/123 × AD
-- `MagicDamageCalc1` = 38/57/350 × AP
+- `PhysicalDamageCalc3` = 58/87/130.5 × AD
+- `MagicDamageCalc1` = 40/60/350 × AP
 - `MagicDamageCalc2` = 185/280/1500 × AP
-- `MagicDamageCalc3` = 55/82/123 × AP
+- `MagicDamageCalc3` = 58/87/130.5 × AP
 - `GenericCalc1` = 1 + -0.25
 
 ### Timing the client predicts (unverified for Set 19)
@@ -51,7 +51,7 @@ Every timeline in the champion folder that has events (the spell prediction abov
 |---|---|---|---|
 | `CD_Yone19_AttackNew` | Chrono | 2.5 | LaunchAttack 0.26, LaunchAttack 0.323, LaunchAttack 0.353, LaunchAttack 0.3542, Unlock 0.9864, Unlock 1 |
 | `CD_Yone19_CastAnim` | Chrono | 9.9446 | Default 0, Loop 0.2966, StartStrikes 0.4992 |
-| `CD_Yone19_CastAnim_Part2` | Chrono | 0.7915 | DealDamage 0.3453, Unlock 0.6589 |
+| `CD_Yone19_CastAnim_Part2` | Chrono | 0.8 | DealDamage 0.3814, Unlock 0.6661 |
 | `CD_Yone19_Celebration` | Chrono | 12.2141 | Default 0, Loop 3.0894 |
 | `CD_Yone19_SpellMissile` | Chrono | 0.3999 | Damage 0.0576, Damage 0.0793, Damage 0.0831, Damage 0.1619 |
 | `CD_Yone19_CastAnimAlt` | Chrono/OLD | 9.9957 | Default 0, Loop 0.3478, StartStrikes 0.5504 |
@@ -69,10 +69,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: GA_Yone19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Yone19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- row PrimaryDamage: 35 / 55 / 400 -> 38 / 57 / 350
-- row SecondaryDamage: 175 / 265 / 1500 -> 185 / 280 / 1500
+- row AutoAttackDamage: 55 / 82 / 123 -> 58 / 87 / 130.5
+- row PrimaryDamage: 38 / 57 / 350 -> 40 / 60 / 350
 - ability text changed
 
 <!-- AUTO END -->

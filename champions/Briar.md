@@ -1,15 +1,15 @@
 # Briar (3-cost AttackAssassin) · `DA_Briar19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** AttackAssassin: "Attacks grant 10 Mana. Take 15% less damage from all enemies except the current target." (ManaPerAttack + 10; ManaMax at least 10; MovementSpeed + 200; Threat + -10)
 - **Cost** 3, pool 18; traits: Ionic Spark, Slayer
-- **HP** 850 / 1530 / 2754 · **AD** 50 / 75 / 112.5 · **AS** 0.8 · **Range** 1 · **Armor** 50 · **MR** 50 · **Mana** 0 / 30
+- **HP** 850 / 1530 / 2754 · **AD** 50 / 75 / 112.5 · **AS** 0.8 · **Range** 1 · **Armor** 45 · **MR** 45 · **Mana** 0 / 30
 
 ### Ability: Snack Attack
 
-> Heal 100/150/200 × AP and kick a snack at the furthest enemy within 3 hexes. Dash toward it, dealing 95/145/230 × AD physical damage in a 1 hex area.
+> Heal 80/120/160 × AP and kick a snack at the furthest enemy within 3 hexes. Dash toward it, dealing 95/145/230 × AD physical damage in a 1 hex area.
 > 
 > Then chow down, gaining 200% Attack Speed for the next 3 attacks and replacing them with slashes that deal 80/120/190 × AD physical damage.
 
@@ -20,7 +20,7 @@
 | HexRangeAOE | 1 | 1 | 1 |
 | NumFrenzyAttacks | 3 | 3 | 3 |
 | DamageFrenzyAD | 80 | 120 | 190 |
-| HealFrenzyAP | 100 | 150 | 200 |
+| HealFrenzyAP | 80 | 120 | 160 |
 | HexRangeSnack | 3 | 3 | 3 |
 | FrenzyAS | 2 | 2 | 2 |
 
@@ -28,7 +28,7 @@ Formulas (as stored; AD and AP are multipliers):
 
 - `PhysicalDamageCalc1` = 95/145/230 × AD
 - `PhysicalDamageCalc2` = 80/120/190 × AD
-- `HealthCalc1` = 100/150/200 × AP
+- `HealthCalc1` = 80/120/160 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -55,9 +55,12 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Briar19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Briar19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- stat Armor: 50 -> 45
+- stat MagicResist: 50 -> 45
+- row HealFrenzyAP: 100 / 150 / 200 -> 80 / 120 / 160
+- ability text changed
 
 <!-- AUTO END -->
 

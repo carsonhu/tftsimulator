@@ -1,7 +1,7 @@
 # Renata Glasc (2-cost MagicCaster) · `DA_RenataGlasc19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** MagicCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Classical, Choreographer
@@ -11,7 +11,7 @@
 
 > Fire a musical bar at the target, applying 2 stacks of Toxin. Toxin stacks deal 160/240/580 × AP magic damage over 15 seconds. Additionally, apply 1 stack of Toxin to 2 nearby enemies, prioritizing unpoisoned enemies. 
 > 
-> Enemies are Captivated for 3 seconds upon Toxin application, increased to 9 seconds if their star level is less than Renata's.
+> Enemies are Captivated for 3 seconds upon Toxin application, increased to 6 seconds if their star level is less than Renata's.
 > 
 > Captivated enemies grant bonuses to Classical champions.
 
@@ -28,7 +28,7 @@
 | TickRate | 0.25 | 0.25 | 0.25 |
 | ToxinDuration | 15 | 15 | 15 |
 | CaptivateDurationShort | 3 | 3 | 3 |
-| CaptivateDurationLong | 9 | 9 | 9 |
+| CaptivateDurationLong | 6 | 6 | 6 |
 
 Formulas (as stored; AD and AP are multipliers):
 
@@ -60,7 +60,7 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - spell cancels an attack in progress (`CancelAbilitiesWithTag` has `Combat.Attacking`): GA_RenataGlasc19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_RenataGlasc19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
 - nothing in this unit's data
 

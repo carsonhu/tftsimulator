@@ -1,11 +1,11 @@
 # Pyke (5-cost AttackFighter) · `DA_Pyke19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** AttackFighter: "Attacks grant 10 Mana. Gain 5-30% Attack Speed (based on Stage)." (ManaPerAttack + 10; AttackSpeed MultiplyAdditive 1.05/1.1/1.2/1.3 (stage 1-2/3/4/5+); MovementSpeed + 200; ManaMax at least 10)
 - **Cost** 5, pool 9; traits: Rock, Renegade
-- **HP** 1200 / 2160 / 3888 · **AD** 70 / 105 / 157.5 · **AS** 0.9 · **Range** 1 · **Armor** 65 · **MR** 65 · **Mana** 0 / 30
+- **HP** 1200 / 2160 / 3888 · **AD** 70 / 105 / 157.5 · **AS** 0.85 · **Range** 1 · **Armor** 65 · **MR** 65 · **Mana** 0 / 30
 - **Unlock**: Have 85 or more gold at the end of combat.
 
 ### Ability: Execute Gon' Give it to Ya
@@ -59,9 +59,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Pyke19_SlamOnEnemy.txt, Abilities/GA_Pyke19_SpellNew.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Abilities/GA_Pyke19_SlamOnEnemy.txt, Abilities/GA_Pyke19_SpellNew.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- stat AttackSpeed: 0.9 -> 0.85
 
 <!-- AUTO END -->
 

@@ -1,7 +1,7 @@
 # Samira (2-cost AttackCaster) · `DA_Samira19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Classical, Renegade, Trickshot
@@ -12,7 +12,7 @@
 
 > Passive: When Samira critically strikes an enemy, they become Captivated for 7 seconds.
 > 
-> Active: Fire 10 bullets at the current target, each dealing 4/6/9 × AP + 38/57/86 × AD damage.
+> Active: Fire 10 bullets at the current target, each dealing 4/6/9 × AP + 31/47/70 × AD damage.
 > 
 > Captivated enemies grant bonuses to Classical champions.
 
@@ -21,12 +21,12 @@
 | AutoAttackDamage | 42 | 63 | 94.5 |
 | NumBullets | 10 | 10 | 10 |
 | DamageAP | 4 | 6 | 9 |
-| DamageAD | 38 | 57 | 86 |
+| DamageAD | 31 | 47 | 70 |
 | CaptivateDuration | 7 | 7 | 7 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 4/6/9 × AP + 38/57/86 × AD
+- `PhysicalDamageCalc1` = 4/6/9 × AP + 31/47/70 × AD
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -54,10 +54,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Samira19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Samira19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- row CaptivateDuration: 3 -> 7
-- row DamageAD: 38 / 42 / 86 -> 38 / 57 / 86
+- row DamageAD: 38 / 57 / 86 -> 31 / 47 / 70
 - ability text changed
 
 <!-- AUTO END -->

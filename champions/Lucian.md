@@ -1,7 +1,7 @@
 # Lucian (2-cost AttackCaster) · `DA_Lucian19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** AttackCaster: "Attacks grant 7 Mana. Gain 2 Mana Regen." (ManaPerAttack + 7; ManaPerSecond + 2; ManaMax at least 10)
 - **Cost** 2, pool 25; traits: Jazz, Hitmaker, Encore
@@ -9,18 +9,18 @@
 
 ### Ability: Relentless Pursuit
 
-> Dash to a nearby hex, then fire 2 shots at target that each deal 85/130/200 × AD + 8/12/18 × AP physical damage.
+> Dash to a nearby hex, then fire 2 shots at target that each deal 90/135/205 × AD + 8/12/18 × AP physical damage.
 
 | variable | 1★ | 2★ | 3★ |
 |---|---|---|---|
 | AutoAttackDamage | 30 | 45 | 67.5 |
-| ADDamage | 85 | 130 | 200 |
+| ADDamage | 90 | 135 | 205 |
 | APDamage | 8 | 12 | 18 |
 | MinDashDistance | 1 | 1 | 1 |
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 85/130/200 × AD + 8/12/18 × AP
+- `PhysicalDamageCalc1` = 90/135/205 × AD + 8/12/18 × AP
 
 ### Timing the client predicts (unverified for Set 19)
 
@@ -49,9 +49,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `LaunchAttack`: launches or listens for attacks: GA_Lucian19_Spell.txt
 - `GE_ManaLock`: applies mana lock: GA_Lucian19_Spell.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- row ADDamage: 80 / 120 / 180 -> 85 / 130 / 200
+- row ADDamage: 85 / 130 / 200 -> 90 / 135 / 205
 - ability text changed
 
 <!-- AUTO END -->

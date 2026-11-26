@@ -1,7 +1,7 @@
 # Olaf with the hero augment Axe Crescendo (AttackMarksman) · `DA_Olaf19_HeroAugment_Override`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** AttackMarksman: "Attacks grant 10 Mana." (ManaPerAttack + 10; ManaMax at least 10)
 - **Cost** 0, pool –; traits: Pentakill, Juggernaut
@@ -48,12 +48,9 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `GE_ManaLock`: applies mana lock: Abilities/GA_Olaf19_HeroAugment.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: Abilities/GA_Olaf19_Passive.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- stat AttackSpeed: 0.7 -> 0.75
-- stat CritChance: 0 -> –
-- row ADDamage: 140 / 210 / 335 -> 155 / 235 / 375
-- ability text changed
+- nothing in this unit's data
 
 <!-- AUTO END -->
 

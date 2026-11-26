@@ -1,7 +1,7 @@
 # Jhin (4-cost AttackSpecialist_Ammo) · `DA_Jhin19`
 
-<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6018196.Set19.Shipping.pbe; edits here are overwritten -->
-## Client data: build `rls-19.1.0.6018196.Set19.Shipping.pbe`
+<!-- AUTO BEGIN: written by tools/worksheets.py from build rls-19.1.0.6037882.Set19.Shipping.pbe; edits here are overwritten -->
+## Client data: build `rls-19.1.0.6037882.Set19.Shipping.pbe`
 
 - **Role** AttackSpecialist_Ammo: "Specialists generate resources in a unique way." ()
 - **Cost** 4, pool 10; traits: Classical, Encore
@@ -11,7 +11,7 @@
 
 > Passive: Convert 1% bonus Attack Speed into 0.8% Attack Damage.
 > 
-> Attacks summon violins that attack in unison, dealing 27/41/124 × AD physical damage and Captivating the target for 4 seconds. Every 4th attack is empowered, dealing 80/120/744 × AD + 14/21/104 × AP physical damage and resetting the violins.
+> Attacks summon violins that attack in unison, dealing 25/38/124 × AD physical damage and Captivating the target for 4 seconds. Every 4th attack is empowered, dealing 80/120/744 × AD + 14/21/104 × AP physical damage and resetting the violins.
 > 
 > On the 4th sequence onwards, all violins remain out, Jhin gains infinite range, and attacks pierce, dealing 60% reduced damage for each target hit.
 
@@ -22,7 +22,7 @@
 | DamageReductionPerHit | 0.6 | 0.6 | 0.6 |
 | BaseAttackSpeed | 0.84 | 0.84 | 1.04 |
 | CaptivateDuration | 4 | 4 | 4 |
-| ViolinDamageAD | 27 | 41 | 124 |
+| ViolinDamageAD | 25 | 38 | 124 |
 | MinDamagePercent | 0.4 | 0.4 | 0.4 |
 | ASToADRatio | 0.8 | 0.8 | 0.8 |
 | 4thShotDamageAD | 80 | 120 | 744 |
@@ -30,7 +30,7 @@
 
 Formulas (as stored; AD and AP are multipliers):
 
-- `PhysicalDamageCalc1` = 27/41/124 × AD
+- `PhysicalDamageCalc1` = 25/38/124 × AD
 - `PhysicalDamageCalc2` = 80/120/744 × AD + 14/21/104 × AP
 
 ### Timing the client predicts (unverified for Set 19)
@@ -62,9 +62,10 @@ Script hints (identifiers present in this champion's decoded scripts; leads, not
 - `AttackSpeed`: reads or changes attack speed: GA_Jhin19_Passive.txt
 - `GE_UnitStopAttackingMovingCasting`: stops the unit attacking/moving/casting: GA_Jhin19_Passive.txt
 
-### Changed since `rls-19.1.0.6011486.Set19.Shipping.pbe`
+### Changed since `rls-19.1.0.6028987.Set19.Shipping.pbe`
 
-- nothing in this unit's data
+- row ViolinDamageAD: 27 / 41 / 124 -> 25 / 38 / 124
+- ability text changed
 
 <!-- AUTO END -->
 
